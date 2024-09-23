@@ -1,4 +1,4 @@
-const Itinerary = require('../models/itinerary'); // Adjust the path as necessary
+const Itinerary = require('../models/touristItinerary'); 
 
 // GET all itineraries
 const getAllItineraries = async (req, res) => {

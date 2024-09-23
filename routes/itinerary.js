@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const itineraryController = require('../controllers/itineraryController'); // Adjust the path as necessary
+const itineraryController = require('../controllers/itineraryController.js');
 
 // GET all itineraries
 router.get('/', itineraryController.getAllItineraries);

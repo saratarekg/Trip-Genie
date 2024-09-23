@@ -7,6 +7,7 @@ const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
 const iteneraryRouter = require('./routes/itinerary')
+const touristIteneraryRouter = require('./routes/touristItinerary')
 
 const PORT = process.env.PORT;
 
@@ -27,6 +28,7 @@ app.use('/sign-up', signUpRoutes);
 app.use('/admin', adminRoutes);
 app.use('/admin', tourismGovernorRoutes);
 app.use('/itinerary',iteneraryRouter)
+app.use('/touristItinerary',touristIteneraryRouter)
 
 
 
