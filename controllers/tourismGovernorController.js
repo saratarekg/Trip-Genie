@@ -13,4 +13,37 @@ const addTourismGovernor = (req, res) => {
         });
 }
 
-module.exports = {addTourismGovernor};
+const adminDeleteTourismGovAccount = async (req, res) => {
+    try {
+        const tourismGov = await TourismGovernor.findByIdAndDelete(req.params.id);
+        if (!tourismGov) {
+            return res.status(404).json({ message: 'Tourism Governor not found' });
+        }
+        res.status(201).json({ message: 'Tourism Governor deleted' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const AdminGetAllTourismGov = async (req, res) => {
+    try {
+        const tourismGov = await TourismGovernor.find();
+        res.status(200).json(tourismGov);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const AdminGetTourismGovByID = async (req, res) => {
+    try {
+        const tourismGov = await TourismGovernor.findById(req.params.id);
+        if (!tourismGov) {
+            return res.status(404).json({ message: 'Tourism Governor not found' });
+        }
+        res.status(200).json(tourismGov);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = {addTourismGovernor, AdminGetTourismGovByID, AdminGetAllTourismGov, adminDeleteTourismGovAccount};

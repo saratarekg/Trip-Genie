@@ -13,4 +13,39 @@ const addAdmin = (req, res) => {
         });
 }
 
-module.exports = {addAdmin};
+
+const adminDeleteAdminAccount = async (req, res) => {
+    try {
+        const admin = await Admin.findByIdAndDelete(req.params.id);
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+        res.status(201).json({ message: 'Admin deleted' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const AdminGetAllAdmins = async (req, res) => {
+    try {
+        const admin = await Admin.find();
+        res.status(200).json(admin);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const AdminGetAdminByID = async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.params.id);
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+        res.status(200).json(admin);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+module.exports = {addAdmin,AdminGetAdminByID,AdminGetAllAdmins,adminDeleteAdminAccount};
