@@ -20,7 +20,15 @@ const sellerSignup = (req, res) => {
 // Update
 const updateSeller = async (req, res) => {
     try {
+        const seller1 = await Seller.findById(req.params.id);
+        if(!seller1.accepted){
+            return res.status(400).json({ error: 'Seller is not accepted yet, Can not update profile' });
+        }
+        
         const seller = await Seller.findByIdAndUpdate(req.params.id, req.body, { new: true });
+
+
+
         if (!seller) {
             return res.status(404).json({ error: 'Seller not found' });
         }
@@ -42,6 +50,7 @@ const deleteSellerAccount = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 
 const getAllSellers = async (req, res) => {

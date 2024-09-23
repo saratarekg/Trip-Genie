@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const sellerController = require('../controllers/sellerController');
 
+router.get('/', sellerController.getAllSellers);
+
 // Get a seller profile by ID
 router.get('/:id', sellerController.getSellerByID);
 
