@@ -18,6 +18,5 @@
     "nodemon": "^3.1.7",
     "trip_genie": "file:"
   },
-  "devDependencies": {},
   "keywords": []
 }

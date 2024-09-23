@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const museumSchema = new Schema({
-    description: { type: String, required: true },
+    description: { 
+        type: String, required: true },
+
     location: {
         address: String,
         city: String,
@@ -22,5 +24,5 @@ const museumSchema = new Schema({
 });
 
 
-const Blog = mongoose.model('Blog', blogSchema);
-module.exports = Blog;
+const Museum = mongoose.model('Museum', museumSchema);
+module.exports = Museum;
