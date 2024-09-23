@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const signUpRoutes = require('./routes/signUpRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
+const iteneraryRouter = require('./routes/itinerary')
 
 require('dotenv').config();
 const PORT = 3000;
@@ -24,5 +26,8 @@ app.get('/', (req, res) => {
 
 app.use('/sign-up', signUpRoutes);
 app.use('/admin', adminRoutes);
+app.use('/admin', tourismGovernorRoutes);
+app.use('/itenerary',iteneraryRouter)
+
 
 

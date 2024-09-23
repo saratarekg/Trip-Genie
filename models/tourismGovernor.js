@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const adminSchema = new Schema({
+const tourismGovernorSchema = new Schema({
     username: {
         type: String,
         required: true,
@@ -28,5 +28,5 @@ const adminSchema = new Schema({
 
 }, { timestamps: true });
 
-const Admin = mongoose.model('Admin', adminSchema);
-module.exports = Admin;
+const TourismGovernor = mongoose.model('TourismGovernor', tourismGovernorSchema);
+module.exports = TourismGovernor;
