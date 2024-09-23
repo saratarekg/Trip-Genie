@@ -1,20 +1,19 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const signUpRoutes = require('./routes/signUpRoutes');
+const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
 const iteneraryRouter = require('./routes/itinerary')
 
-require('dotenv').config();
-const PORT = 3000;
-
+const PORT = process.env.PORT;
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
-
 
 mongoose.connect(process.env.URI)
   .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
@@ -27,7 +26,7 @@ app.get('/', (req, res) => {
 app.use('/sign-up', signUpRoutes);
 app.use('/admin', adminRoutes);
 app.use('/admin', tourismGovernorRoutes);
-app.use('/itenerary',iteneraryRouter)
+app.use('/itinerary',iteneraryRouter)
 
 
 
