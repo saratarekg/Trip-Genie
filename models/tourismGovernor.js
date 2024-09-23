@@ -7,7 +7,11 @@ const tourismGovernorSchema = new Schema({
         required: true,
         trim: true,
         unique: true,
-        minlength: 3
+        minlength: 3,
+        match: [
+            /^\S+$/, 
+            'Username should not contain spaces.'
+        ]
     },
     password: {
         type: String,
