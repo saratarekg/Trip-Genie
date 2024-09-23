@@ -7,7 +7,7 @@ const touristSchema = new Schema({
         required: true,
         unique: true,
         trim: true,
-        minlength: 3
+        match: [/.+@.+\..+/, 'Please enter a valid email address']
     },
     password: {
         type: String,
