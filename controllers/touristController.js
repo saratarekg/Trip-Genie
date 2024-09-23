@@ -8,6 +8,7 @@ const touristSignup = (req, res) => {
             res.status(201).json({ tourist: result });
         })
         .catch((err) => {
+            res.status(400).json({ message: err.message });
             console.log(err);
         });
 }

@@ -23,7 +23,7 @@ const touristSchema = new Schema({
         type: String,
         required: true,
         trim: true,
-        minlength: 3
+        minlength: [3, 'Username must be at least 3 characters long']
     },
     mobile: {
         type: String,
