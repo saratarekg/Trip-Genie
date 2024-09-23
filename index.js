@@ -8,6 +8,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
 const iteneraryRouter = require('./routes/itinerary')
 const touristIteneraryRouter = require('./routes/touristItinerary')
+const sellerRoutes = require("./routes/sellerRoutes"); 
 
 const PORT = process.env.PORT;
 
@@ -15,6 +16,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
+
 
 mongoose.connect(process.env.URI)
   .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
@@ -29,6 +31,6 @@ app.use('/admin', adminRoutes);
 app.use('/admin', tourismGovernorRoutes);
 app.use('/itinerary',iteneraryRouter)
 app.use('/touristItinerary',touristIteneraryRouter)
-
+app.use('/seller', sellerRoutes)
 
 
