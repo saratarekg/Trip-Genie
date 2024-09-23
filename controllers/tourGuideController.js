@@ -25,7 +25,7 @@ const adminDeleteTourGuideAccount = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-const AdminGetAllTourGuides = async (req, res) => {
+const adminGetAllTourGuides = async (req, res) => {
     try {
         const tourGuide = await TourGuide.find();
         res.status(200).json(tourGuide);
@@ -34,7 +34,7 @@ const AdminGetAllTourGuides = async (req, res) => {
     }
 };
 
-const AdminGetTourGuideByID = async (req, res) => {
+const adminGetTourGuideByID = async (req, res) => {
     try {
         const tourGuide = await TourGuide.findById(req.params.id);
         if (!tourGuide) {
@@ -45,4 +45,4 @@ const AdminGetTourGuideByID = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-module.exports = {tourGuideSignup, adminDeleteTourGuideAccount, AdminGetAllTourGuides, AdminGetTourGuideByID};
+module.exports = {tourGuideSignup, adminDeleteTourGuideAccount, adminGetAllTourGuides, adminGetTourGuideByID};

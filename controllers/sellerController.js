@@ -1,7 +1,7 @@
 const Seller = require('../models/seller');
 
 // Create
-exports.sellerSignup = (req, res) => {
+const sellerSignup = (req, res) => {
     const { username, email, password } = req.body;
     const seller = new Seller({ username, email, password });
 
@@ -16,7 +16,7 @@ exports.sellerSignup = (req, res) => {
 };
 
 // Read
-exports.getSeller = async (req, res) => {
+const getSeller = async (req, res) => {
     try {
         const seller = await Seller.findById(req.params.id);
         if (!seller) {
@@ -30,7 +30,7 @@ exports.getSeller = async (req, res) => {
 };
 
 // Update
-exports.updateSeller = async (req, res) => {
+const updateSeller = async (req, res) => {
     try {
         const seller = await Seller.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!seller) {
@@ -43,7 +43,7 @@ exports.updateSeller = async (req, res) => {
     }
 };
 
-exports.adminDeleteSellerAccount = async (req, res) => {
+const adminDeleteSellerAccount = async (req, res) => {
     try {
         const seller = await Seller.findByIdAndDelete(req.params.id);
         if (!seller) {
@@ -56,7 +56,7 @@ exports.adminDeleteSellerAccount = async (req, res) => {
 };
 
 
-exports.AdminGetAllSellers = async (req, res) => {
+const adminGetAllSellers = async (req, res) => {
     try {
         const seller = await Seller.find();
         res.status(200).json(seller);
@@ -65,7 +65,7 @@ exports.AdminGetAllSellers = async (req, res) => {
     }
 };
 
-exports.AdminGetSellerByID = async (req, res) => {
+const adminGetSellerByID = async (req, res) => {
     try {
         const seller = await Seller.findById(req.params.id);
         if (!seller) {
@@ -77,3 +77,4 @@ exports.AdminGetSellerByID = async (req, res) => {
     }
 };
 
+module.exports = { sellerSignup, adminDeleteSellerAccount, adminGetAllSellers, adminGetSellerByID, getSeller, updateSeller };

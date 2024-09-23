@@ -31,39 +31,39 @@ router.delete('/delete-admin/:id', adminController.adminDeleteAdminAccount);
 router.delete('/delete-gov/:id', tourismGovernorController.adminDeleteTourismGovAccount);
 
 
-router.get('/governor/:id', tourismGovernorController.AdminGetTourismGovByID);
+router.get('/governor/:id', tourismGovernorController.adminGetTourismGovByID);
 
-router.get('/governors', tourismGovernorController.AdminGetAllTourismGov);
-
-
-
-router.get('/admin/:id', adminController.AdminGetAdminByID);
-
-router.get('/admins', adminController.AdminGetAllAdmins);
+router.get('/governors', tourismGovernorController.adminGetAllTourismGov);
 
 
 
-router.get('/tourist/:id', touristController.AdminGetTouristByID);
+router.get('/admin/:id', adminController.adminGetAdminByID);
 
-router.get('/tourists', touristController.AdminGetAllTourists);
-
-
-
-router.get('/seller/:id', sellerController.AdminGetSellerByID);
-
-router.get('/sellers', sellerController.AdminGetAllSellers);
+router.get('/admins', adminController.adminGetAllAdmins);
 
 
 
-router.get('/tour-guide/:id', tourGuideController.AdminGetTourGuideByID);
+router.get('/tourist/:id', touristController.adminGetTouristByID);
 
-router.get('/tour-guides', tourGuideController.AdminGetAllTourGuides);
+router.get('/tourists', touristController.adminGetAllTourists);
 
 
 
-router.get('/advertiser/:id', advertiserController.AdminGetAdvertiserByID);
+router.get('/seller/:id', sellerController.getSeller);
 
-router.get('/advertisers', advertiserController.AdminGetAllAdvertisers);
+router.get('/sellers', sellerController.adminGetAllSellers);
+
+
+
+router.get('/tour-guide/:id', tourGuideController.adminGetTourGuideByID);
+
+router.get('/tour-guides', tourGuideController.adminGetAllTourGuides);
+
+
+
+router.get('/advertiser/:id', advertiserController.adminGetAdvertiserByID);
+
+router.get('/advertisers', advertiserController.adminGetAllAdvertisers);
 
 
 

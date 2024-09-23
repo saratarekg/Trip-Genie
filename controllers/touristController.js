@@ -25,7 +25,7 @@ const adminDeleteTouristAccount = async (req, res) => {
     }
 };
 
-const AdminGetAllTourists = async (req, res) => {
+const adminGetAllTourists = async (req, res) => {
     try {
         const tourist = await Tourist.find();
         res.status(200).json(tourist);
@@ -34,7 +34,7 @@ const AdminGetAllTourists = async (req, res) => {
     }
 };
 
-const AdminGetTouristByID = async (req, res) => {
+const adminGetTouristByID = async (req, res) => {
     try {
         const tourist = await Tourist.findById(req.params.id);
         if (!tourist) {
@@ -45,4 +45,4 @@ const AdminGetTouristByID = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-module.exports = {touristSignup, adminDeleteTouristAccount,AdminGetAllTourists,AdminGetTouristByID};
+module.exports = {touristSignup, adminDeleteTouristAccount,adminGetAllTourists,adminGetTouristByID};
