@@ -14,7 +14,7 @@ const advertiserSignup = (req, res) => {
         });
 }
 
-const adminDeleteAdvertiserAccount = async (req, res) => {
+const deleteAdvertiserAccount = async (req, res) => {
     try {
         const advertiser = await Advertiser.findByIdAndDelete(req.params.id);
         if (!advertiser) {
@@ -26,7 +26,7 @@ const adminDeleteAdvertiserAccount = async (req, res) => {
     }
 };
 
-const adminGetAllAdvertisers = async (req, res) => {
+const getAllAdvertisers = async (req, res) => {
     try {
         const advertiser = await Advertiser.find();
         res.status(200).json(advertiser);
@@ -35,7 +35,7 @@ const adminGetAllAdvertisers = async (req, res) => {
     }
 };
 
-const adminGetAdvertiserByID = async (req, res) => {
+const getAdvertiserByID = async (req, res) => {
     try {
         const advertiser = await Advertiser.findById(req.params.id);
         if (!advertiser) {
@@ -47,4 +47,4 @@ const adminGetAdvertiserByID = async (req, res) => {
     }
 };
 
-module.exports = {advertiserSignup, adminDeleteAdvertiserAccount,adminGetAllAdvertisers,adminGetAdvertiserByID};
+module.exports = {advertiserSignup, deleteAdvertiserAccount,getAllAdvertisers,getAdvertiserByID};

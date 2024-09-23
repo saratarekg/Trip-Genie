@@ -13,7 +13,7 @@ const addTourismGovernor = (req, res) => {
         });
 }
 
-const adminDeleteTourismGovAccount = async (req, res) => {
+const deleteTourismGovAccount = async (req, res) => {
     try {
         const tourismGov = await TourismGovernor.findByIdAndDelete(req.params.id);
         if (!tourismGov) {
@@ -25,7 +25,7 @@ const adminDeleteTourismGovAccount = async (req, res) => {
     }
 };
 
-const adminGetAllTourismGov = async (req, res) => {
+const getAllTourismGov = async (req, res) => {
     try {
         const tourismGov = await TourismGovernor.find();
         res.status(200).json(tourismGov);
@@ -34,7 +34,7 @@ const adminGetAllTourismGov = async (req, res) => {
     }
 };
 
-const adminGetTourismGovByID = async (req, res) => {
+const getTourismGovByID = async (req, res) => {
     try {
         const tourismGov = await TourismGovernor.findById(req.params.id);
         if (!tourismGov) {
@@ -46,4 +46,4 @@ const adminGetTourismGovByID = async (req, res) => {
     }
 };
 
-module.exports = {addTourismGovernor, adminGetTourismGovByID, adminGetAllTourismGov, adminDeleteTourismGovAccount};
+module.exports = {addTourismGovernor, getTourismGovByID, getAllTourismGov, deleteTourismGovAccount};

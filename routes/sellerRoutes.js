@@ -3,7 +3,7 @@ const router = express.Router();
 const sellerController = require('../controllers/sellerController');
 
 // Get a seller profile by ID
-router.get('/:id', sellerController.getSeller);
+router.get('/:id', sellerController.getSellerByID);
 
 // Update seller profile
 router.put('/:id', sellerController.updateSeller);

@@ -15,19 +15,7 @@ const sellerSignup = (req, res) => {
         });
 };
 
-// Read
-const getSeller = async (req, res) => {
-    try {
-        const seller = await Seller.findById(req.params.id);
-        if (!seller) {
-            return res.status(404).json({ error: 'Seller not found' });
-        }
-        res.status(200).json(seller);
-    } catch (error) {
-        console.log(error);
-        res.status(400).json({ error: 'Error fetching seller profile' });
-    }
-};
+
 
 // Update
 const updateSeller = async (req, res) => {
@@ -43,7 +31,7 @@ const updateSeller = async (req, res) => {
     }
 };
 
-const adminDeleteSellerAccount = async (req, res) => {
+const deleteSellerAccount = async (req, res) => {
     try {
         const seller = await Seller.findByIdAndDelete(req.params.id);
         if (!seller) {
@@ -56,7 +44,7 @@ const adminDeleteSellerAccount = async (req, res) => {
 };
 
 
-const adminGetAllSellers = async (req, res) => {
+const getAllSellers = async (req, res) => {
     try {
         const seller = await Seller.find();
         res.status(200).json(seller);
@@ -65,7 +53,7 @@ const adminGetAllSellers = async (req, res) => {
     }
 };
 
-const adminGetSellerByID = async (req, res) => {
+const getSellerByID = async (req, res) => {
     try {
         const seller = await Seller.findById(req.params.id);
         if (!seller) {
@@ -77,4 +65,4 @@ const adminGetSellerByID = async (req, res) => {
     }
 };
 
-module.exports = { sellerSignup, adminDeleteSellerAccount, adminGetAllSellers, adminGetSellerByID, getSeller, updateSeller };
+module.exports = { sellerSignup, deleteSellerAccount, getAllSellers, getSellerByID, updateSeller };

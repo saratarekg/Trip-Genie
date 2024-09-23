@@ -14,7 +14,7 @@ const addAdmin = (req, res) => {
 }
 
 
-const adminDeleteAdminAccount = async (req, res) => {
+const deleteAdminAccount = async (req, res) => {
     try {
         const admin = await Admin.findByIdAndDelete(req.params.id);
         if (!admin) {
@@ -26,7 +26,7 @@ const adminDeleteAdminAccount = async (req, res) => {
     }
 };
 
-const adminGetAllAdmins = async (req, res) => {
+const getAllAdmins = async (req, res) => {
     try {
         const admin = await Admin.find();
         res.status(200).json(admin);
@@ -35,7 +35,7 @@ const adminGetAllAdmins = async (req, res) => {
     }
 };
 
-const adminGetAdminByID = async (req, res) => {
+const getAdminByID = async (req, res) => {
     try {
         const admin = await Admin.findById(req.params.id);
         if (!admin) {
@@ -48,4 +48,4 @@ const adminGetAdminByID = async (req, res) => {
 };
 
 
-module.exports = {addAdmin,adminGetAdminByID,adminGetAllAdmins,adminDeleteAdminAccount};
+module.exports = {addAdmin,getAdminByID,getAllAdmins,deleteAdminAccount};
