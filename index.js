@@ -4,6 +4,7 @@ const cors = require('cors');
 const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
+const iteneraryRouter = require('./routes/itinerary')
 
 require('dotenv').config();
 const PORT = 3000;
@@ -26,6 +27,7 @@ app.get('/', (req, res) => {
 app.use('/tourists', touristRoutes);
 app.use('/admin', adminRoutes);
 app.use('/admin', tourismGovernorRoutes);
+app.use('/itenerary',iteneraryRouter)
 
 
 
