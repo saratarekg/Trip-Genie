@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const sellerSchema = new mongoose.Schema({
+const tourGuideSchema = new Schema({
     email: {
         type: String,
         required: true,
@@ -23,20 +24,8 @@ const sellerSchema = new mongoose.Schema({
         required: true,
         trim: true,
         minlength: [3, 'Username must be at least 3 characters long']
-    },
-    name: {
-        type: String,
-        required: false
-    },
-    description: {
-        type: String,
-        required: false
-    },
-    accepted: {
-        type: Boolean,
-        default: false 
-    },
-});
+    }
+}, { timestamps: true });
 
-const Seller = mongoose.model('Seller', sellerSchema);
-module.exports = Seller;
+const TourGuide = mongoose.model('TourGuide', tourGuideSchema);
+module.exports = TourGuide;

@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const touristRoutes = require('./routes/touristRoutes');
+const signUpRoutes = require('./routes/signUpRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
 require('dotenv').config();
@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
   res.send('Hello From Sam');
 });
 
-app.use('/tourists', touristRoutes);
+app.use('/sign-up', signUpRoutes);
 app.use('/admin', adminRoutes);
 
 
