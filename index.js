@@ -14,6 +14,7 @@ const touristItineraryRoutes = require('./routes/touristItineraryRoutes');
 const sellerRoutes = require("./routes/sellerRoutes"); 
 const activityRoutes = require("./routes/activityRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
+const companyRoutes = require("./routes/companyRoutes");
 const cookieParser = require('cookie-parser');
 const {requireAuth} = require('./middlewares/authMiddleware');
 
@@ -42,6 +43,7 @@ app.use('/activity',requireAuth, activityRoutes);
 app.use('/category', requireAuth, museumRoutes);
 app.use('/museums',requireAuth, categoryRoutes);
 app.use('/tourGuide',requireAuth, tourGuideRoutes);
+app.use('/company',requireAuth, companyRoutes);
 
 app.get('/sam', requireAuth, (req, res) => {
   res.send('Hello From Sam');
