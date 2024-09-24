@@ -8,8 +8,8 @@ const TourGuide = require('../models/tourGuide');
 
 
 
-const createToken = (id) => {
-    return jwt.sign({ id }, process.env.SECRET, {
+const createToken = (id,role) => {
+    return jwt.sign({ id ,role}, process.env.SECRET, {
         expiresIn: process.env.EXPIRES_IN
     });
 }
@@ -32,7 +32,7 @@ const touristLogin = async (req, res) => {
 
     try {
         const tourist = await Tourist.login(email, password);
-        const token = createToken(tourist._id);
+        const token = createToken(tourist._id,'tourist');
         res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.MAX_AGE*1000});
         res.status(200).json({ message: 'Login succesful' });
     } catch (error) {
@@ -58,7 +58,7 @@ const advertiserLogin = async (req, res) => {
 
     try {
         const advertiser = await Advertiser.login(email, password);
-        const token = createToken(advertiser._id);
+        const token = createToken(advertiser._id, 'advertiser');
         res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.MAX_AGE*1000});
         res.status(200).json({ message: 'Login succesful' });
     } catch (error) {
@@ -84,7 +84,7 @@ const tourGuideLogin = async (req, res) => {
 
     try {
         const tourGuide = await TourGuide.login(email, password);
-        const token = createToken(tourGuide._id);
+        const token = createToken(tourGuide._id, 'tourGuide');
         res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.MAX_AGE*1000});
         res.status(200).json({ message: 'Login succesful' });
     } catch (error) {
@@ -110,7 +110,7 @@ const sellerLogin = async (req, res) => {
 
     try {
         const seller = await Seller.login(email, password);
-        const token = createToken(seller._id);
+        const token = createToken(seller._id, 'seller');
         res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.MAX_AGE*1000});
         res.status(200).json({ message: 'Login succesful' });
     } catch (error) {
@@ -123,7 +123,7 @@ const adminLogin = async (req, res) => {
 
     try {
         const admin = await Admin.login(email, password);
-        const token = createToken(admin._id);
+        const token = createToken(admin._id, 'admin');
         res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.MAX_AGE*1000});
         res.status(200).json({ message: 'Login succesful' });
     } catch (error) {
@@ -136,7 +136,7 @@ const tourismGovernorLogin = async (req, res) => {
 
     try {
         const tourismGovernor = await TourismGovernor.login(email, password);
-        const token = createToken(tourismGovernor._id);
+        const token = createToken(tourismGovernor._id, 'tourismGovernor');
         res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.MAX_AGE*1000});
         res.status(200).json({ message: 'Login succesful' });
     } catch (error) {

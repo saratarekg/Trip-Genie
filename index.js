@@ -33,19 +33,19 @@ mongoose.connect(process.env.URI)
   .catch(err => console.log(err));
 
 app.use('/auth',authRoutes);
-app.use('/admin', requireAuth, adminRoutes);
-app.use('/tourismGovernor', requireAuth, tourismGovernorRoutes);
-app.use('/tourist', requireAuth, touristRoutes);
-app.use('/itinerary', requireAuth, itineraryRoutes);
+app.use('/admin', requireAuth('admin'), adminRoutes);
+app.use('/tourismGovernor', requireAuth('tourismGoverner'), tourismGovernorRoutes);
+app.use('/tourist', requireAuth('tourist'), touristRoutes);
+app.use('/itinerary', requireAuth(''), itineraryRoutes);
 app.use('/touristItinerary', requireAuth, touristItineraryRoutes);
-app.use('/seller', requireAuth, sellerRoutes);
-app.use('/activity',requireAuth, activityRoutes);
-app.use('/category', requireAuth, museumRoutes);
-app.use('/museums',requireAuth, categoryRoutes);
-app.use('/tourGuide',requireAuth, tourGuideRoutes);
-app.use('/company',requireAuth, companyRoutes);
+app.use('/seller', requireAuth('seller'), sellerRoutes);
+app.use('/activity',requireAuth(''), activityRoutes);
+app.use('/category', requireAuth(''), museumRoutes);
+app.use('/museums',requireAuth(''), categoryRoutes);
+app.use('/tourGuide',requireAuth('tourGuide'), tourGuideRoutes);
+app.use('/company',requireAuth(''), companyRoutes);
 
-app.get('/sam', requireAuth, (req, res) => {
+app.get('/sam', requireAuth(''), (req, res) => {
   res.send('Hello From Sam');
 });
 

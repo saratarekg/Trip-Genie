@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const sellerController = require('../controllers/sellerController');
+const {checkSeller} = require('../middlewares/authMiddleware');
 
+router.get('*', checkSeller);
 router.get('/', sellerController.getAllSellers);
 
 // Get a seller profile by ID
