@@ -7,8 +7,8 @@ const signUpRoutes = require('./routes/signUpRoutes');
 // const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
-const iteneraryRouter = require('./routes/itinerary');
-const touristIteneraryRouter = require('./routes/touristItinerary');
+const iteneraryRouter = require('./routes/itineraryRoutes');
+const touristIteneraryRouter = require('./routes/touristItineraryRoutes');
 const sellerRoutes = require("./routes/sellerRoutes"); 
 const activityRoutes = require("./routes/activityRoutes");
 
@@ -32,8 +32,8 @@ app.get('/', (req, res) => {
 app.use('/sign-up', signUpRoutes);
 app.use('/admin', adminRoutes);
 app.use('/admin', tourismGovernorRoutes);
-app.use('/itinerary',iteneraryRouter);
-app.use('/touristItinerary',touristIteneraryRouter);
+app.use('/itinerary',itineraryRoutes);
+app.use('/touristItinerary',touristIteneraryRoutes);
 app.use('/seller', sellerRoutes);
 app.use('/activity',activityRoutes);
 
