@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const {
-    tourGuideSignup,
     deleteTourGuideAccount,
     getAllTourGuides,
     getTourGuideByID,
@@ -9,7 +8,7 @@ const {
 } = require('../controllers/tourGuideController'); // Import the controller functions
 
 // Route for signing up a new tour guide
-router.post('/signup', tourGuideSignup);
+// router.post('/signup', tourGuideSignup);
 
 // Route for deleting a tour guide by ID
 router.delete('/:id', deleteTourGuideAccount);
