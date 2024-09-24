@@ -35,5 +35,17 @@ tourismGovernorSchema.pre('save', async function(next) {
     next();
 });
 
+tourismGovernorSchema.statics.login = async function(email,password){
+    const tourismGovernor = await this.findOne({email});
+    if(tourismGovernor){
+        const auth = await bcrypt.compare(password, tourismGovernor.password )
+        if(auth){
+            return tourismGovernor;
+        }
+        throw Error('Incorrect password');
+    }
+    throw Error("Email is not registered");
+}
+
 const TourismGovernor = mongoose.model('TourismGovernor', tourismGovernorSchema);
 module.exports = TourismGovernor;

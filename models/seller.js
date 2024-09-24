@@ -46,5 +46,17 @@ sellerSchema.pre('save', async function(next) {
     next();
 });
 
+sellerSchema.statics.login = async function(email,password){
+    const seller = await this.findOne({email});
+    if(seller){
+        const auth = await bcrypt.compare(password, seller.password )
+        if(auth){
+            return seller;
+        }
+        throw Error('Incorrect password');
+    }
+    throw Error("Email is not registered");
+}
+
 const Seller = mongoose.model('Seller', sellerSchema);
 module.exports = Seller;

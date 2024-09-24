@@ -35,5 +35,17 @@ tourGuideSchema.pre('save', async function(next) {
     next();
 });
 
+tourGuideSchema.statics.login = async function(email,password){
+    const tourGuide = await this.findOne({email});
+    if(tourGuide){
+        const auth = await bcrypt.compare(password, tourGuide.password )
+        if(auth){
+            return tourGuide;
+        }
+        throw Error('Incorrect password');
+    }
+    throw Error("Email is not registered");
+}
+
 const TourGuide = mongoose.model('TourGuide', tourGuideSchema);
 module.exports = TourGuide;

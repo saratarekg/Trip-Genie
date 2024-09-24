@@ -35,5 +35,17 @@ advertiserSchema.pre('save', async function(next) {
     next();
 });
 
+advertiserSchema.statics.login = async function(email,password){
+    const advertiser = await this.findOne({email});
+    if(advertiser){
+        const auth = await bcrypt.compare(password, advertiser.password )
+        if(auth){
+            return advertiser;
+        }
+        throw Error('Incorrect password');
+    }
+    throw Error("Email is not registered");
+}
+
 const Advertiser = mongoose.model('Advertiser', advertiserSchema);
 module.exports = Advertiser;

@@ -30,11 +30,7 @@ mongoose.connect(process.env.URI)
   .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
   .catch(err => console.log(err));
 
-app.get('/', requireAuth, (req, res) => {
-  res.send('Hello From Sam');
-});
-
-app.use(authRoutes);
+app.use('/auth',authRoutes);
 app.use('/admin', requireAuth, adminRoutes);
 app.use('/admin', requireAuth, tourismGovernorRoutes);
 app.use('/tourist', requireAuth, touristRoutes);
@@ -44,5 +40,9 @@ app.use('/seller', requireAuth, sellerRoutes);
 app.use('/activity',requireAuth, activityRoutes);
 app.use('/category', requireAuth, museumRoutes);
 app.use('/museums',requireAuth, categoryRoutes);
+
+app.get('/sam', requireAuth, (req, res) => {
+  res.send('Hello From Sam');
+});
 
 
