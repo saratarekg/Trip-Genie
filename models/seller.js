@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const sellerSchema = new mongoose.Schema({
     email: {
@@ -6,6 +7,7 @@ const sellerSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true,
+        lowercase: true,
         match: [/.+@.+\..+/, 'Please enter a valid email address']
     },
     password: {
@@ -36,6 +38,12 @@ const sellerSchema = new mongoose.Schema({
         type: Boolean,
         default: false 
     },
+});
+
+sellerSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
 });
 
 const Seller = mongoose.model('Seller', sellerSchema);

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
 const tourismGovernorSchema = new Schema({
@@ -27,6 +28,12 @@ const tourismGovernorSchema = new Schema({
   
 
 }, { timestamps: true });
+
+tourismGovernorSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
 
 const TourismGovernor = mongoose.model('TourismGovernor', tourismGovernorSchema);
 module.exports = TourismGovernor;

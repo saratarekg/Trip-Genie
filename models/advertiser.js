@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
 const advertiserSchema = new Schema({
@@ -7,6 +8,7 @@ const advertiserSchema = new Schema({
         required: true,
         unique: true,
         trim: true,
+        lowercase: true,
         match: [/.+@.+\..+/, 'Please enter a valid email address']
     },
     password: {
@@ -26,6 +28,12 @@ const advertiserSchema = new Schema({
         minlength: [3, 'Username must be at least 3 characters long']
     }
 }, { timestamps: true });
+
+advertiserSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
 
 const Advertiser = mongoose.model('Advertiser', advertiserSchema);
 module.exports = Advertiser;

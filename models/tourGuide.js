@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
 const tourGuideSchema = new Schema({
@@ -7,6 +8,7 @@ const tourGuideSchema = new Schema({
         required: true,
         unique: true,
         trim: true,
+        lowercase: true,
         match: [/.+@.+\..+/, 'Please enter a valid email address']
     },
     password: {
@@ -26,6 +28,12 @@ const tourGuideSchema = new Schema({
         minlength: [3, 'Username must be at least 3 characters long']
     }
 }, { timestamps: true });
+
+tourGuideSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
 
 const TourGuide = mongoose.model('TourGuide', tourGuideSchema);
 module.exports = TourGuide;

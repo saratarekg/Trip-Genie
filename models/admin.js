@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
 const adminSchema = new Schema({
@@ -27,6 +28,12 @@ const adminSchema = new Schema({
   
 
 }, { timestamps: true });
+
+adminSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
 
 const Admin = mongoose.model('Admin', adminSchema);
 module.exports = Admin;
