@@ -1,21 +1,5 @@
 const Seller = require('../models/seller');
 
-// Create
-const sellerSignup = (req, res) => {
-    const { username, email, password } = req.body;
-    const seller = new Seller({ username, email, password });
-
-    seller.save()
-        .then((result) => {
-            res.status(201).json({ seller: result });
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(400).json({ message: err.message });
-        });
-};
-
-
 
 // Update
 const updateSeller = async (req, res) => {
@@ -74,4 +58,4 @@ const getSellerByID = async (req, res) => {
     }
 };
 
-module.exports = { sellerSignup, deleteSellerAccount, getAllSellers, getSellerByID, updateSeller };
+module.exports = { deleteSellerAccount, getAllSellers, getSellerByID, updateSeller };
