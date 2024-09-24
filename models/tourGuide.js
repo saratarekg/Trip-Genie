@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
 const tourGuideSchema = new Schema({
@@ -7,6 +8,7 @@ const tourGuideSchema = new Schema({
         required: true,
         unique: true,
         trim: true,
+        lowercase: true,
         match: [/.+@.+\..+/, 'Please enter a valid email address']
     },
     password: {
@@ -93,6 +95,24 @@ const tourGuideSchema = new Schema({
 
 
 }, { timestamps: true });
+
+tourGuideSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
+
+tourGuideSchema.statics.login = async function(email,password){
+    const tourGuide = await this.findOne({email});
+    if(tourGuide){
+        const auth = await bcrypt.compare(password, tourGuide.password )
+        if(auth){
+            return tourGuide;
+        }
+        throw Error('Incorrect password');
+    }
+    throw Error("Email is not registered");
+}
 
 const TourGuide = mongoose.model('TourGuide', tourGuideSchema);
 module.exports = TourGuide;

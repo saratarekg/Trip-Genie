@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const sellerSchema = new mongoose.Schema({
     email: {
@@ -6,6 +7,7 @@ const sellerSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true,
+        lowercase: true,
         match: [/.+@.+\..+/, 'Please enter a valid email address']
     },
     password: {
@@ -37,6 +39,24 @@ const sellerSchema = new mongoose.Schema({
         default: false 
     },
 });
+
+sellerSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
+
+sellerSchema.statics.login = async function(email,password){
+    const seller = await this.findOne({email});
+    if(seller){
+        const auth = await bcrypt.compare(password, seller.password )
+        if(auth){
+            return seller;
+        }
+        throw Error('Incorrect password');
+    }
+    throw Error("Email is not registered");
+}
 
 const Seller = mongoose.model('Seller', sellerSchema);
 module.exports = Seller;
