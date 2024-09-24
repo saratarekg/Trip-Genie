@@ -14,6 +14,7 @@ const itineraryRoutes = require('./routes/itineraryRoutes');
 const touristItineraryRoutes = require('./routes/touristItineraryRoutes');
 const sellerRoutes = require("./routes/sellerRoutes"); 
 const activityRoutes = require("./routes/activityRoutes");
+const tourGuideRoutes = require("./routes/tourGuideRoutes");
 
 const PORT = process.env.PORT;
 
@@ -41,3 +42,4 @@ app.use('/seller', sellerRoutes);
 app.use('/activity',activityRoutes);
 app.use('/museums',museumRoutes);
 app.use('/category',categoryRoutes);
+app.use('/tourGuide',tourGuideRoutes);
