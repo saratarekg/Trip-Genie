@@ -10,6 +10,7 @@ const tourismGovernorController = require('../controllers/tourismGovernorControl
 const router = express.Router();
 
 router.post('/add-admin', adminController.addAdmin);
+router.post('/add-tourism-governor', tourismGovernorController.addTourismGovernor);
 
 // Route to delete an Advertiser
 router.delete('/advertiser/:id',advertiserController.deleteAdvertiserAccount);

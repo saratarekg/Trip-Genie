@@ -1,8 +1,8 @@
 const express = require('express');
-const tourismGovernorController = require('../controllers/tourismGovernorController');
+const historicalTagController = require('../controllers/historicalTagController');
 
 const router = express.Router();
 
-router.post('/add-tourism-governor', tourismGovernorController.addTourismGovernor);
+router.post('/add-historical-tag', historicalTagController.addHistoricalTag);
 
 module.exports = router;

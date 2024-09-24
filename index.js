@@ -33,7 +33,7 @@ mongoose.connect(process.env.URI)
 
 app.use('/auth',authRoutes);
 app.use('/admin', requireAuth, adminRoutes);
-app.use('/admin', requireAuth, tourismGovernorRoutes);
+app.use('/tourismGovernor', requireAuth, tourismGovernorRoutes);
 app.use('/tourist', requireAuth, touristRoutes);
 app.use('/itinerary', requireAuth, itineraryRoutes);
 app.use('/touristItinerary', requireAuth, touristItineraryRoutes);
