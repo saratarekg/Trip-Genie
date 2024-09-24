@@ -3,13 +3,13 @@ const Schema = mongoose.Schema;
 
 const museumSchema = new Schema({
     description: { 
-        type: String, required: true },
+        type: String, required: [true,'Please enter a description'] },
 
     location: {
-        address: String,
-        city: String,
-        country: String,
-        coordinates: { type: [Number], index: '2dsphere' }, // For latitude and longitude
+        address:{type: String, required: [true,'Please enter an address']} ,
+        city: {type: String, required: [true,'Please enter a city']},
+        country: {type: String, required: [true,'Please enter a country']},
+        
     },
     openingHours: {
         weekdays: String,
