@@ -13,7 +13,7 @@ const createMuseum = (req, res) => {
         });
 }
 
-const getmuseum = async (req, res) => {
+const getMuseum = async (req, res) => {
     try {
         const museum = await Museum1.findById(req.params.id);
         if (!museum) {
@@ -90,7 +90,7 @@ const updatePrice = async (req, res) => {
 
 
 
-const deletemuseum= async (req, res) => {
+const deleteMuseum= async (req, res) => {
     try {
         const museum = await Museum1.findByIdAndDelete(req.params.id);
         if (!museum) {
@@ -103,5 +103,5 @@ const deletemuseum= async (req, res) => {
 };
 
 
-module.exports = { createMuseum,getmuseum,updateDescription,updatePicture, updateLocation, updateHours,
-updatePrice, deletemuseum };
+module.exports = { createMuseum,getMuseum,updateDescription,updatePicture, updateLocation, updateHours,
+updatePrice, deleteMuseum };
