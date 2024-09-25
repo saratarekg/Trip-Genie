@@ -1,4 +1,5 @@
 const TourismGovernor = require('../models/tourismGovernor');
+const Admin = require('../models/admin');
 
 const addTourismGovernor = async (req, res) => {
     try{
