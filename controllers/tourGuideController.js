@@ -23,6 +23,25 @@ const getAllTourGuides = async (req, res) => {
     }
 };
 
+const getTourGuideProfile = async (req, res) => {
+    try {
+        // Assuming the logged-in tour guide's ID is stored in req.user._id
+        const tourGuideId = req.user._id;
+
+        // Find the tour guide by their ID
+        const tourGuide = await TourGuide.findById(tourGuideId);
+
+        if (!tourGuide) {
+            return res.status(404).json({ message: 'Tour Guide not found' });
+        }
+
+        // Respond with the tour guide's profile
+        res.status(200).json(tourGuide);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 const getTourGuideByID = async (req, res) => {
     try {
         const tourGuide = await TourGuide.findById(req.params.id);
@@ -57,5 +76,6 @@ module.exports = {
     deleteTourGuideAccount, 
     getAllTourGuides, 
     getTourGuideByID, 
-    updateTourGuide 
+    updateTourGuide,
+    getTourGuideProfile 
 };

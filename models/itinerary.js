@@ -62,6 +62,11 @@ const itinerarySchema = new Schema({
         required: true,
         default: false,
     },
+    tourGuide: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'TourGuide',
+        required: true
+      },
 }, {
     timestamps: true, 
 });

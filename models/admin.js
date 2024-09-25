@@ -44,7 +44,7 @@ adminSchema.statics.login = async function(username,password){
         }
         throw Error('Incorrect password');
     }
-    throw Error("Email is not registered");
+    throw Error("Username is not registered");
 }
 
 const Admin = mongoose.model('Admin', adminSchema);
