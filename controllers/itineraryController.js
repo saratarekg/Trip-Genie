@@ -61,6 +61,46 @@ const updateItinerary = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+const filterItineraries = async (req, res) => {
+    try {
+        const { budget, date, preferences, language } = req.body;
+
+        // Build the query object
+        let query = {};
+
+        if (budget) {
+            query.price = { $lte: budget }; // Less than or equal to the specified budget
+        }
+
+        if (date) {
+            query.availableDates = { 
+                $elemMatch: { date: new Date(date) }
+            };
+        }
+
+        // Filter by preferences (assumed to be an array of activity types)
+        if (preferences) {
+            const preferenceArray = preferences.split(','); // Example: preferences=beach,shopping
+            query.activities = { $in: preferenceArray }; // Match any of the provided preferences
+        }
+
+        if (language) {
+            query.language = language;
+        }
+
+        // Execute the query
+        const itineraries = await Itinerary.find(query).populate('activities').populate('tourGuide');
+       
+        if (!itineraries) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        
+        res.json(itineraries);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports = {
     getAllItineraries,
@@ -68,4 +108,5 @@ module.exports = {
     createItinerary,
     deleteItinerary,
     updateItinerary,
+    filterItineraries,
 };
