@@ -55,11 +55,11 @@ const deleteItinerary = async (req, res) => {
 
 const updateTourGuide = async (req, res) => {
     try {
-        const updatedData = req.body; // Data to update
+        const { email, username, nationality, mobile, yearsOfExperience, previousWorks} = req.body; // Data to update
         const { id } = req.params;
 
         // Find the TourGuide by ID and update it with the provided data
-        const tourGuide = await TourGuide.findByIdAndUpdate(id, updatedData, { new: true, runValidators: true });
+        const tourGuide = await TourGuide.findByIdAndUpdate(id, { email, username, nationality, mobile, yearsOfExperience, previousWorks}, { new: true, runValidators: true });
 
         if (!tourGuide) {
             return res.status(404).json({ message: 'Tour Guide not found' });
