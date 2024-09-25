@@ -18,7 +18,7 @@ const getHistoricalPlace = async (req, res) => {
         const museum = await Museum.findById(req.params.id);
         res.status(200).json(museum);
     } catch (error) {
-         res.status(404).json({ message: 'Museum not found' });
+         res.status(404).json({ message: 'Place not found' });
         
     }
 };
@@ -47,9 +47,9 @@ const updateHistoricalPlace = async (req, res) => {
 const deleteHistoricalPlace= async (req, res) => {
     try {
         const museum = await Museum.findByIdAndDelete(req.params.id);
-        res.status(201).json({ message: 'Museum deleted' });
+        res.status(201).json({ message: 'Place deleted' });
     } catch (error) {
-         res.status(404).json({ message: 'Museum not found' });
+         res.status(404).json({ message: 'Place not found' });
     }
 };
 
