@@ -25,10 +25,10 @@ const getTourGuideProfile = async (req, res) => {
 const deleteItinerary = async (req, res) => {
     try {
         const tourGuideId = res.locals.user_id;  // Get the current tour guide's ID
-        const { itineraryId } = req.params;  // Get the itinerary ID from the request parameters
 
         // Find the itinerary by ID
-        const itinerary = await Itinerary.findById(itineraryId);
+        const itinerary = await Itinerary.findById(req.params.id);
+        console.log(tourGuideId)
 
         if (!itinerary) {
             return res.status(404).json({ message: 'Itinerary not found' });
@@ -45,7 +45,7 @@ const deleteItinerary = async (req, res) => {
         }
 
         // If all checks pass, delete the itinerary
-        await Itinerary.findByIdAndDelete(itineraryId);
+        await Itinerary.findByIdAndDelete(req.params.id);
 
         res.status(200).json({ message: 'Itinerary deleted successfully' });
     } catch (error) {

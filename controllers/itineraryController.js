@@ -25,7 +25,9 @@ const getItineraryById = async (req, res) => {
 
 // POST a new itinerary
 const createItinerary = async (req, res) => {
-    const itinerary = new Itinerary(req.body);
+    const {title, description, activities, language, price, availableDates, accessibility, pickUpLocation, dropOffLocation} = req.body;
+    const itinerary = new Itinerary({title, description, activities, language, price, availableDates, accessibility, pickUpLocation, dropOffLocation, tourGuide:res.locals.user_id});
+
     try {
         await itinerary.save();
         res.status(201).json(itinerary);
