@@ -4,8 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
-const museumRoutes=require('./routes/museumRoutes');
-const categoryRoutes=require('./routes/categoryRoutes');
+
 const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
@@ -40,8 +39,7 @@ app.use('/itinerary', requireAuth(''), itineraryRoutes);
 app.use('/touristItinerary', requireAuth, touristItineraryRoutes);
 app.use('/seller', requireAuth('seller'), sellerRoutes);
 app.use('/activity',requireAuth(''), activityRoutes);
-app.use('/category', requireAuth(''), museumRoutes);
-app.use('/museums',requireAuth(''), categoryRoutes);
+
 app.use('/tourGuide',requireAuth('tourGuide'), tourGuideRoutes);
 app.use('/company',requireAuth(''), companyRoutes);
 
