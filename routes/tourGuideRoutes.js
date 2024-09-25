@@ -13,7 +13,7 @@ const itineraryController = require('../controllers/itineraryController.js');
 router.get('/myProfile', getTourGuideProfile);
 
 // Route for updating a tour guide by ID
-router.put('/updateMyProfile', updateTourGuide);
+router.put('/updateMyProfile', updateTourGuideProfile);
 
 // Get tour guides specific itinerary list
 router.get('/allIteneraries,',getItinerariesByTourGuide);

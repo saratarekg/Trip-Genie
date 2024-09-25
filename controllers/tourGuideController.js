@@ -110,5 +110,6 @@ module.exports = {
     updateTourGuide,
     getTourGuideProfile,
     updateTourGuideProfile,
-    deleteItinerary
+    deleteItinerary,
+    getItinerariesByTourGuide
 };
