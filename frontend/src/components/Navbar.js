@@ -6,7 +6,7 @@ const Navbar = () => {
     return (
        <div className="frame13">
         <div className='frame14'>
-        <img src="logo.svg" alt="logo" className="logo" />
+        <Link to={"/"}><img src="text-logo.png" alt="logo" className="logo" /></Link>
 
         </div>
 

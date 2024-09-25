@@ -2,7 +2,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: black;
 }
 
 .frame14 {
@@ -17,7 +16,6 @@
 
 .logo {
   width: 97px;
-  height: 80px;
 }
 
 .frame10 {
@@ -33,8 +31,7 @@
 }
 
 .text {
-  color: #fff;
-  font-family: Urbanist;
+  color: black;
   font-size: 24px;
   font-style: normal;
   font-weight: 800;
