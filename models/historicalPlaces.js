@@ -31,5 +31,5 @@ const historicalPlacesSchema = new Schema({
 });
 
 
-const historicalPlaces = mongoose.model('Museum', historicalPlacesSchema);
+const historicalPlaces = mongoose.model('HistoricalPlace', historicalPlacesSchema);
 module.exports = historicalPlaces;
