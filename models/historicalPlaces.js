@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const museumSchema = new Schema({
+const historicalPlacesSchema = new Schema({
     description: { 
         type: String, required: [true,'Please enter a description'] },
 
@@ -11,6 +11,13 @@ const museumSchema = new Schema({
         country: {type: String, required: [true,'Please enter a country']},
         
     },
+    historicalTag: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'HistoricalTag',
+            required: [true,'Please enter a tag']
+        },
+    ],
     openingHours: {
         weekdays: String,
         weekends: String,
@@ -24,5 +31,5 @@ const museumSchema = new Schema({
 });
 
 
-const Museum = mongoose.model('Museum', museumSchema);
-module.exports = Museum;
+const historicalPlaces = mongoose.model('Museum', historicalPlacesSchema);
+module.exports = historicalPlaces;

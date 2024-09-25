@@ -1,6 +1,6 @@
-const Museum = require('../models/museums');
+const Museum = require('../models/historicalPlaces');
 
-const createMuseum = (req, res) => {
+const createHistoricalPlace = (req, res) => {
     const museum = new Museum(req.body);
 
     museum.save()
@@ -13,7 +13,7 @@ const createMuseum = (req, res) => {
         });
 }
 
-const getMuseum = async (req, res) => {
+const getHistoricalPlace = async (req, res) => {
     try {
         const museum = await Museum.findById(req.params.id);
         res.status(200).json(museum);
@@ -23,7 +23,7 @@ const getMuseum = async (req, res) => {
     }
 };
 
-const getAllMuseums = async (req, res) => {
+const getAllHistoricalPlaces = async (req, res) => {
     try {
         const museum = await Museum.find();
         res.status(200).json(museum);
@@ -33,7 +33,7 @@ const getAllMuseums = async (req, res) => {
 };
 
 
-const updateMuseum = async (req, res) => {
+const updateHistoricalPlace = async (req, res) => {
     try {
         const museum= await Museum.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         res.status(200).json(museum);
@@ -44,7 +44,7 @@ const updateMuseum = async (req, res) => {
 
 
 
-const deleteMuseum= async (req, res) => {
+const deleteHistoricalPlace= async (req, res) => {
     try {
         const museum = await Museum.findByIdAndDelete(req.params.id);
         res.status(201).json({ message: 'Museum deleted' });
@@ -54,4 +54,4 @@ const deleteMuseum= async (req, res) => {
 };
 
 
-module.exports = { createMuseum,getMuseum,getAllMuseums,updateMuseum, deleteMuseum };
+module.exports = { createHistoricalPlace,getHistoricalPlace,getAllHistoricalPlaces,updateHistoricalPlace, deleteHistoricalPlace };
