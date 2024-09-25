@@ -19,3 +19,4 @@ const historicalTagSchema = new Schema({
 
 const HistoricalTag = mongoose.model('HistoricalTag', historicalTagSchema);
 module.exports = HistoricalTag;
+

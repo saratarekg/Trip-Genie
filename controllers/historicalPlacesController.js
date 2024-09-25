@@ -53,5 +53,49 @@ const deleteHistoricalPlace= async (req, res) => {
     }
 };
 
+const filterHistoricalPlaces = async (req, res) => {
+    try {
+        const historicalTag = req.body.historicalTag;
+        //const { historicalTag } = req.body;
 
-module.exports = { createHistoricalPlace,getHistoricalPlace,getAllHistoricalPlaces,updateHistoricalPlace, deleteHistoricalPlace };
+        // Build the query object
+        let query = {};
+
+        // Filter by historical tags
+        if (historicalTag) {
+            const historicalTagsArray = JSON.parse(historicalTag); // Assuming historicalTag is a JSON string
+            const types = historicalTagsArray.map(historicalTag => historicalTag.type); // Extracting types
+            const periods = historicalTagsArray.map(historicalTag => historicalTag.period); // Extracting periods
+            console.log('big if');
+
+            // Use both types and periods for filtering
+            if (types.length > 0) {
+                query.type = { $in: types }; // Match any of the provided types
+                console.log('types if');
+            }
+
+            if (periods.length > 0) {
+                // Assuming you have a period field in your Museum model
+                query.period = { $in: periods }; // Match any of the provided periods
+                console.log('period if');
+            }
+        }
+        
+
+        // Execute the query
+        const historicalPlaces = await Museum.find(query)
+            .populate('governor')
+            .populate('historicalTag');
+
+        if (!historicalPlaces || historicalPlaces.length === 0) {
+            return res.status(404).json({ message: 'Historical place not found' });
+        }
+
+        res.json(historicalPlaces);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+module.exports = { createHistoricalPlace,getHistoricalPlace,getAllHistoricalPlaces,updateHistoricalPlace, deleteHistoricalPlace,filterHistoricalPlaces };
