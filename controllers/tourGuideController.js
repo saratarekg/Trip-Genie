@@ -21,18 +21,36 @@ const getTourGuideProfile = async (req, res) => {
     }
 };
 
+const deleteItinerary = async (req, res) => {
+    try {
+        const tourGuideId = res.locals.user_id;  // Get the current tour guide's ID
+        const { itineraryId } = req.params;  // Get the itinerary ID from the request parameters
 
-// const getTourGuideByID = async (req, res) => {
-//     try {
-//         const tourGuide = await TourGuide.findById(req.params.id);
-//         if (!tourGuide) {
-//             return res.status(404).json({ message: 'Tour Guide not found' });
-//         }
-//         res.status(200).json(tourGuide);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
+        // Find the itinerary by ID
+        const itinerary = await Itinerary.findById(itineraryId);
+
+        if (!itinerary) {
+            return res.status(404).json({ message: 'Itinerary not found' });
+        }
+
+        // Check if the itinerary belongs to the current tour guide
+        if (itinerary.tourGuide.toString() !== tourGuideId) {
+            return res.status(403).json({ message: 'Unauthorized: You can only delete your own itineraries' });
+        }
+
+        // Check if the itinerary is booked
+        if (itinerary.isBooked) {
+            return res.status(400).json({ message: 'Itinerary cannot be deleted as it is already booked' });
+        }
+
+        // If all checks pass, delete the itinerary
+        await Itinerary.findByIdAndDelete(itineraryId);
+
+        res.status(200).json({ message: 'Itinerary deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 const updateTourGuide = async (req, res) => {
     try {
@@ -74,5 +92,6 @@ const updateTourGuideProfile = async (req, res) => {
 module.exports = {  
     updateTourGuide,
     getTourGuideProfile,
-    updateTourGuideProfile
+    updateTourGuideProfile,
+    deleteItinerary
 };
