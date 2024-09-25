@@ -10,7 +10,7 @@ const {
 router.get('/myProfile', getTourGuideProfile);
 
 // Route for updating a tour guide by ID
-router.put('/updateMyProfile', updateTourGuideProfile);
+router.put('/updateMyProfile', updateTourGuide);
 
 router.get('/allIteneraries,',getItinerariesByTourGuide);
 

@@ -1,6 +1,5 @@
 const express = require('express');
 const touristController = require('../controllers/touristController');
-const touristController = require('../controllers/touristController');
 const productController = require('../controllers/productController');
 const itineraryController = require('../controllers/itineraryController.js');
 
