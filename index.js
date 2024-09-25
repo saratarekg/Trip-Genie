@@ -9,13 +9,14 @@ const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
 const itineraryRoutes = require('./routes/itineraryRoutes');
-const touristItineraryRoutes = require('./routes/touristItineraryRoutes');
+// const touristItineraryRoutes = require('./routes/touristItineraryRoutes');
 const sellerRoutes = require("./routes/sellerRoutes"); 
 const activityRoutes = require("./routes/activityRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 const cookieParser = require('cookie-parser');
 const {requireAuth} = require('./middlewares/authMiddleware');
+const productRoutes = require("./routes/productRoutes");
 
 const PORT = process.env.PORT;
 
@@ -36,12 +37,13 @@ app.use('/admin', requireAuth('admin'), adminRoutes);
 app.use('/tourismGovernor', requireAuth('tourismGoverner'), tourismGovernorRoutes);
 app.use('/tourist', requireAuth('tourist'), touristRoutes);
 app.use('/itinerary', requireAuth(''), itineraryRoutes);
-app.use('/touristItinerary', requireAuth, touristItineraryRoutes);
+// app.use('/touristItinerary', requireAuth, touristItineraryRoutes);
 app.use('/seller', requireAuth('seller'), sellerRoutes);
 app.use('/activity',requireAuth(''), activityRoutes);
 
 app.use('/tourGuide',requireAuth('tourGuide'), tourGuideRoutes);
 app.use('/company',requireAuth(''), companyRoutes);
+app.use('/product',requireAuth,productRoutes);
 
 app.get('/sam', requireAuth(''), (req, res) => {
   res.send('Hello From Sam');
