@@ -7,11 +7,7 @@ const addTourismGovernor = async (req, res) => {
             throw new Error('Username already exists');
         }
 
-        console.log('hereeeee');
-
         const tourismGovernor = new TourismGovernor(req.body);
-
-        console.log('hereeeee1');
 
         tourismGovernor.save()
             .then((result) => {
@@ -23,7 +19,6 @@ const addTourismGovernor = async (req, res) => {
             });
     }
     catch(err){
-        console.log("here");
         res.status(400).json({message: err.message});
     }
 }
