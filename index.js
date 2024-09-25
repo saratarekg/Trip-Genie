@@ -9,7 +9,7 @@ const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
 const itineraryRoutes = require('./routes/itineraryRoutes');
-const touristItineraryRoutes = require('./routes/touristItineraryRoutes');
+// const touristItineraryRoutes = require('./routes/touristItineraryRoutes');
 const sellerRoutes = require("./routes/sellerRoutes"); 
 const activityRoutes = require("./routes/activityRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
@@ -36,7 +36,7 @@ app.use('/admin', requireAuth('admin'), adminRoutes);
 app.use('/tourismGovernor', requireAuth('tourismGoverner'), tourismGovernorRoutes);
 app.use('/tourist', requireAuth('tourist'), touristRoutes);
 app.use('/itinerary', requireAuth(''), itineraryRoutes);
-app.use('/touristItinerary', requireAuth, touristItineraryRoutes);
+// app.use('/touristItinerary', requireAuth, touristItineraryRoutes);
 app.use('/seller', requireAuth('seller'), sellerRoutes);
 app.use('/activity',requireAuth(''), activityRoutes);
 
