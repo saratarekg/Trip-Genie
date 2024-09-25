@@ -10,7 +10,7 @@ router.put('/historicalPlaces/:id', historicalPlacesController.updateHistoricalP
 
 router.post('/add-historical-tag', historicalTagController.addHistoricalTag);
 
-router.get('/getHistoricalPlacesByGovernor', historicalPlacesController.getHistoricalPlacesByGovernor);
+//router.get('/getHistoricalPlacesByGovernor', historicalPlacesController.getHistoricalPlacesByGovernor);
 
 
 module.exports = router;

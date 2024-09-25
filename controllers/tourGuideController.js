@@ -3,6 +3,7 @@ const TourGuide = require('../models/tourGuide');
 const Itinerary = require('../models/itinerary'); // Adjust the path as needed
 
 
+
 const getTourGuideProfile = async (req, res) => {
     try {
         const tourGuideId = res.locals.user_id;
@@ -88,6 +89,22 @@ const updateTourGuideProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
+// Function to get all itineraries for a specific tour guide
+const getItinerariesByTourGuide = async (req, res) => {
+    try {
+        const { tourGuideId } = req.params; // Assuming tourGuideId is passed in the request params
+        const itineraries = await Itinerary.findByTourGuide(tourGuideId);
+        if (!itineraries || itineraries.length === 0) {
+            return res.status(404).json({ message: 'No itineraries found for this tour guide.' });
+        }
+        res.status(200).json(itineraries);
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred', error });
+    }
+};
+
 
 module.exports = {  
     updateTourGuide,
