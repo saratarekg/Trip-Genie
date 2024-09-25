@@ -1,5 +1,43 @@
 const Tourist = require('../models/tourist');
+const activity = require('../models/activity');
 
+
+const filterActivities = async (req, res) => {
+    try {
+        const { budget, startDate, endDate, category, minRating } = req.query;
+
+        // Build the query object
+        let query = {
+            'timeline.start': { $gte: new Date() } // Only upcoming activities
+        };
+
+        if (budget) {
+            query.price = { $lte: budget };
+        }
+
+        if (startDate) {
+            query['timeline.start'] = { ...query['timeline.start'], $gte: new Date(startDate) };
+        }
+
+        if (endDate) {
+            query['timeline.end'] = { ...query['timeline.end'], $lte: new Date(endDate) };
+        }
+
+        if (category) {
+            query.category = category;
+        }
+
+        if (minRating) {
+            query.rating = { $gte: minRating }; // Assuming you have a rating field
+        }
+
+        const activities = await activity.find(query).populate('category tags');
+
+        res.status(200).json(activities);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 const deleteTouristAccount = async (req, res) => {
     try {
@@ -58,4 +96,4 @@ const updateTourist = async (req, res) => {
     }
 };
 
-module.exports = {deleteTouristAccount,getAllTourists,getTouristByID,getTourist,updateTourist};
+module.exports = {deleteTouristAccount,getAllTourists,getTouristByID,getTourist,updateTourist,filterActivities};
