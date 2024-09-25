@@ -34,9 +34,32 @@ const getProductbyName = async (req, res) => {
     }
   };
   
+  
+const sortProductsByRating = async (req, res) => {
+  try {
+    // Use Mongoose's aggregation pipeline to calculate the average rating and sort products by it
+    const products = await Product.aggregate([
+      // Add a field for the average rating based on the reviews array
+      {
+        $addFields: {
+          averageRating: { $avg: "$reviews.rating" }
+        }
+      },
+      // Sort the products by the averageRating field in descending order (highest rating first)
+      {
+        $sort: { averageRating: -1 }
+      }
+    ]);
+
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
   
 
 module.exports = {
-  getAllProducts, addProduct , getProductbyName
+  getAllProducts, addProduct , getProductbyName,sortProductsByRating
 };

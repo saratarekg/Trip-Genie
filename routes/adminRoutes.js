@@ -7,6 +7,8 @@ const advertiserController = require('../controllers/advertiserController');
 const tourismGovernorController = require('../controllers/tourismGovernorController');
 const tagController = require('../controllers/tagController');
 const categoryController = require('../controllers/categoryController');
+const productController = require('../controllers/productController');
+
 
 const router = express.Router();
 
@@ -80,6 +82,8 @@ router.get('/Category/:id', categoryController.getCategory);
 router.get('/Category', categoryController.getAllCategories);
 router.delete('/Category/:id', categoryController.deleteCategory);
 router.put('/Category/:id', categoryController.updateCategory);
+
+router.get('/sort-products-rating', productController.sortProductsByRating);
 
 
 module.exports = router;
