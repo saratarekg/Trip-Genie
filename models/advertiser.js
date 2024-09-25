@@ -26,6 +26,28 @@ const advertiserSchema = new Schema({
         required: true,
         trim: true,
         minlength: [3, 'Username must be at least 3 characters long']
+    },
+    name: {
+        type: String,
+        required: true,
+      },
+      description: {
+        type: String,
+        required: true,
+      },
+      website: {
+        type: String,
+        required: true,
+      },
+      hotline: {
+        type: String,
+      },
+      logoUrl: {
+        type: String,
+      },
+      accepted: {
+        type: Boolean,
+        default: false 
     }
 }, { timestamps: true });
 
