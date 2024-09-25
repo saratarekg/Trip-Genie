@@ -49,6 +49,9 @@ const activitySchema = new Schema({
         type: Boolean,
         default: true,
     },
+    rating: {
+        type: Number
+        }, 
     advertiser: {  // New field for the maker's ID
         type: mongoose.Schema.Types.ObjectId,
         ref: 'advertiser', // Replace 'User' with the appropriate model name for makers
