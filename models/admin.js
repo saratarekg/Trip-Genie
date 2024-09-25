@@ -35,8 +35,8 @@ adminSchema.pre('save', async function(next) {
     next();
 });
 
-adminSchema.statics.login = async function(email,password){
-    const admin = await this.findOne({email});
+adminSchema.statics.login = async function(username,password){
+    const admin = await this.findOne({username});
     if(admin){
         const auth = await bcrypt.compare(password, admin.password )
         if(auth){

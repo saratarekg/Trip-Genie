@@ -1,16 +1,23 @@
 const Admin = require('../models/admin');
 
-const addAdmin = (req, res) => {
-    const admin = new Admin(req.body);
+const addAdmin = async (req, res) => {
+    try{
+        if(await usernameExists(req.body.username)){
+            throw new Error('Username already exists');
+        }
+        const admin = new Admin(req.body);
 
-    admin.save()
-        .then((result) => {
-            res.status(201).json({ admin: result });
-        })
-        .catch((err) => {
-            res.status(400).json({message: err.message})
-            console.log(err);
-        });
+        admin.save()
+            .then((result) => {
+                res.status(201).json({ admin: result });
+            })
+            .catch((err) => {
+                res.status(400).json({message: err.message})
+                console.log(err);
+            });
+    }catch(err){
+        res.status(400).json({message: err.message});
+    }
 }
 
 
@@ -46,6 +53,18 @@ const getAdminByID = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+const usernameExists = async (username) => {
+    if(await Admin.findOne({username})){
+        return true;
+    }
+    else if(await TourismGovernor.findOne({username})){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 
 
 module.exports = {addAdmin,getAdminByID,getAllAdmins,deleteAdminAccount};

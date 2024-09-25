@@ -1,16 +1,25 @@
 const TourismGovernor = require('../models/tourismGovernor');
 
-const addTourismGovernor = (req, res) => {
-    const tourismGovernor = new TourismGovernor(req.body);
+const addTourismGovernor = async (req, res) => {
+    try{
+        if(await usernameExists(req.body.username)){
+            throw new Error('Username already exists');
+        }
 
-    tourismGovernor.save()
-        .then((result) => {
-            res.status(201).json({ tourismGovernor: result });
-        })
-        .catch((err) => {
-            res.status(400).json({message: err.message})
-            console.log(err);
-        });
+        const tourismGovernor = new TourismGovernor(req.body);
+
+        tourismGovernor.save()
+            .then((result) => {
+                res.status(201).json({ tourismGovernor: result });
+            })
+            .catch((err) => {
+                res.status(400).json({message: err.message})
+                console.log(err);
+            });
+    }
+    catch(err){
+        res.status(400).json({message: err.message});
+    }
 }
 
 const deleteTourismGovAccount = async (req, res) => {
@@ -45,5 +54,17 @@ const getTourismGovByID = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+const usernameExists = async (username) => {
+    if(await Admin.findOne({username})){
+        return true;
+    }
+    else if(await TourismGovernor.findOne({username})){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 
 module.exports = {addTourismGovernor, getTourismGovByID, getAllTourismGov, deleteTourismGovAccount};

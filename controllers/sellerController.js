@@ -58,4 +58,16 @@ const getSellerByID = async (req, res) => {
     }
 };
 
-module.exports = { deleteSellerAccount, getAllSellers, getSellerByID, updateSeller };
+const getSeller = async (req, res) => {
+    try {
+        const seller = await Seller.findById(res.locals.user_id);
+        if (!seller) {
+            return res.status(404).json({ message: 'Seller not found' });
+        }
+        res.status(200).json(seller);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { deleteSellerAccount, getAllSellers, getSellerByID, updateSeller, getSeller };
