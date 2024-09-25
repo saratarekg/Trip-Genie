@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-    updateTourGuide,
+    updateTourGuideProfile,
     getTourGuideProfile
 } = require('../controllers/tourGuideController'); // Import the controller functions
 
@@ -9,7 +9,7 @@ const {
 router.get('/myProfile', getTourGuideProfile);
 
 // Route for updating a tour guide by ID
-router.put('/:id', updateTourGuide);
+router.put('/updateMyProfile', updateTourGuideProfile);
 
 module.exports = router;
 
