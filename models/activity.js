@@ -49,6 +49,11 @@ const activitySchema = new Schema({
         type: Boolean,
         default: true,
     },
+    advertiser: {  // New field for the maker's ID
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'advertiser', // Replace 'User' with the appropriate model name for makers
+        required: true, // Assuming it's required, you can set this to false if it's optional
+    },
 }, {
     timestamps: true,
 });

@@ -28,6 +28,12 @@ const historicalPlacesSchema = new Schema({
         
     },
     pictures: [String], // Array of GridFS filenames
+
+    governor: {  // New field for the maker's ID
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'governor', // Replace 'User' with the appropriate model name for makers
+        required: true, // Assuming it's required, you can set this to false if it's optional
+    },
 });
 
 

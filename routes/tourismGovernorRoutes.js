@@ -1,6 +1,7 @@
 const express = require('express');
 const historicalTagController = require('../controllers/historicalTagController');
 const historicalPlacesController = require('../controllers/historicalPlacesController');
+const tourismGovernorController = require('../controllers/tourismGovernorController');
 const router = express.Router();
 router.post('/historicalPlaces/create', historicalPlacesController.createHistoricalPlace);
 router.get('/historicalPlaces/:id', historicalPlacesController.getHistoricalPlace);
@@ -10,7 +11,7 @@ router.put('/historicalPlaces/:id', historicalPlacesController.updateHistoricalP
 
 router.post('/add-historical-tag', historicalTagController.addHistoricalTag);
 
-//router.get('/getHistoricalPlacesByGovernor', historicalPlacesController.getHistoricalPlacesByGovernor);
+router.get('/getHistoricalPlacesByGovernor', tourismGovernorController.getHistoricalPlacesByGovernor);
 
 
 module.exports = router;
