@@ -1,8 +1,10 @@
 const express = require('express');
-const tourismGovernorController = require('../controllers/tourismGovernorController');
+const touristConroller = require('../controllers/touristController');
 
 const router = express.Router();
 
-router.post('/add-tourism-governor', tourismGovernorController.addTourismGovernor);
+router.get('/', touristConroller.getTourist);
+
+router.put('/', touristConroller.updateTourist);
 
 module.exports = router;

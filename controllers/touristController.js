@@ -33,4 +33,29 @@ const getTouristByID = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-module.exports = {deleteTouristAccount,getAllTourists,getTouristByID};
+
+const getTourist = async (req, res) => {
+    try {
+        const tourist = await Tourist.findById(res.locals.user_id);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+        res.status(200).json(tourist);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const updateTourist = async (req, res) => {
+    try {
+        const tourist = await Tourist.findByIdAndUpdate(res.locals.user_id);
+        if (!tourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+        res.status(200).json(tourist);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = {deleteTouristAccount,getAllTourists,getTouristByID,getTourist,updateTourist};
