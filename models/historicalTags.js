@@ -5,7 +5,6 @@ const historicalTagSchema = new Schema({
     type: {
         type: String,
         required: true,
-        enum: ["Monuments", "Museums", "Religious Sites", "Palaces/Castles"]
 
     },
     period: {
