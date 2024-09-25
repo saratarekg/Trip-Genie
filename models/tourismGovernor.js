@@ -35,8 +35,8 @@ tourismGovernorSchema.pre('save', async function(next) {
     next();
 });
 
-tourismGovernorSchema.statics.login = async function(email,password){
-    const tourismGovernor = await this.findOne({email});
+tourismGovernorSchema.statics.login = async function(username,password){
+    const tourismGovernor = await this.findOne({username});
     if(tourismGovernor){
         const auth = await bcrypt.compare(password, tourismGovernor.password )
         if(auth){
@@ -44,7 +44,7 @@ tourismGovernorSchema.statics.login = async function(email,password){
         }
         throw Error('Incorrect password');
     }
-    throw Error("Email is not registered");
+    throw Error("Username is not registered");
 }
 
 const TourismGovernor = mongoose.model('TourismGovernor', tourismGovernorSchema);
