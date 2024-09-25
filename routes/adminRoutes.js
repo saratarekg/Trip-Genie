@@ -22,7 +22,7 @@ router.delete('/advertiser/:id',advertiserController.deleteAdvertiserAccount);
 router.delete('/seller/:id', sellerController.deleteSellerAccount);
 
 // Route to delete a Tour Guide
-router.delete('/tourguide/:id', tourGuideController.deleteTourGuideAccount);
+//router.delete('/tourguide/:id', tourGuideController.deleteTourGuideAccount);
 
 
 // Route to delete a Tourist
@@ -59,9 +59,9 @@ router.get('/sellers', sellerController.getAllSellers);
 
 
 
-router.get('/tour-guide/:id', tourGuideController.getTourGuideByID);
+//router.get('/tour-guide/:id', tourGuideController.getTourGuideByID);
 
-router.get('/tour-guides', tourGuideController.getAllTourGuides);
+//router.get('/tour-guides', tourGuideController.getAllTourGuides);
 
 
 
