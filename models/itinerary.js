@@ -71,4 +71,8 @@ const itinerarySchema = new Schema({
     timestamps: true, 
 });
 
+itinerarySchema.statics.findByTourGuide = function(tourGuideId) {
+    return this.find({ tourGuide: tourGuideId }).populate('tourGuide').exec();
+};
+
 module.exports = mongoose.model('Itinerary', itinerarySchema);

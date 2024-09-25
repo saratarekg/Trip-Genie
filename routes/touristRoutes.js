@@ -12,4 +12,5 @@ router.get('/sort-products-rating', productController.sortProductsByRating);
 router.get('/itineraries', itineraryController.getAllItineraries);
 
 router.get('/filterActivitiess',touristController.filterActivities);
+router.get('/getMyActivities',touristController.getActivitiesByTourist);
 module.exports = router;

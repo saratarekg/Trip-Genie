@@ -1,7 +1,6 @@
 const Tourist = require('../models/tourist');
 const activity = require('../models/activity');
 
-
 const filterActivities = async (req, res) => {
     try {
         const { budget, startDate, endDate, category, minRating } = req.query;
@@ -96,4 +95,12 @@ const updateTourist = async (req, res) => {
     }
 };
 
-module.exports = {deleteTouristAccount,getAllTourists,getTouristByID,getTourist,updateTourist,filterActivities};
+
+
+
+module.exports = {
+    deleteTouristAccount,
+    getAllTourists,
+    getTouristByID,getTourist,
+    updateTourist,
+    filterActivities};
