@@ -1,5 +1,6 @@
 const express = require('express');
 const touristConroller = require('../controllers/touristController');
+const productController = require('../controllers/productController');
 const itineraryController = require('../controllers/itineraryController.js');
 
 const router = express.Router();
@@ -7,7 +8,7 @@ const router = express.Router();
 router.get('/', touristConroller.getTourist);
 
 router.put('/', touristConroller.updateTourist);
-
+router.get('/sort-products-rating', productController.sortProductsByRating);
 router.get('/itineraries', itineraryController.getAllItineraries);
 
 module.exports = router;

@@ -123,7 +123,7 @@ const sellerSignup = async (req, res) => {
         if(await emailExists(req.body.email)){
             throw new Error('Email already exists');
         }
-        const seller = new TourGuide(req.body);
+        const seller = new Seller(req.body);
 
         seller.save()
             .then((result) => {

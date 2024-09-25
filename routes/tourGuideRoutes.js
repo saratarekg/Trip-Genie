@@ -12,3 +12,4 @@ router.get('/myProfile', getTourGuideProfile);
 router.put('/:id', updateTourGuide);
 
 module.exports = router;
+

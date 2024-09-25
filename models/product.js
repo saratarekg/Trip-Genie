@@ -20,7 +20,11 @@ const productSchema = new mongoose.Schema({
     seller: {
          type: String,
           required: true
-         },     
+         }, 
+     rating: {
+            type: Number,
+             required: true
+            },     
     reviews: [
       {
         user: { type: String, required: true },
