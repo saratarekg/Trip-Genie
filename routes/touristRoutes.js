@@ -1,10 +1,11 @@
 const express = require('express');
-const touristConroller = require('../controllers/touristController');
+const touristController = require('../controllers/touristController');
 
 const router = express.Router();
 
-router.get('/', touristConroller.getTourist);
+router.get('/', touristController.getTourist);
 
-router.put('/', touristConroller.updateTourist);
+router.put('/', touristController.updateTourist);
 
+router.get('/filterActivitiess',touristController.filterActivities);
 module.exports = router;

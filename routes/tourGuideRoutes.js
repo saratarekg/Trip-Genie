@@ -21,5 +21,7 @@ router.get('/getTourGuideByID/:id', getTourGuideByID);
 // Route for updating a tour guide by ID
 router.patch('/updateTourGuide/:id', updateTourGuide);
 
+
+
 module.exports = router;
 

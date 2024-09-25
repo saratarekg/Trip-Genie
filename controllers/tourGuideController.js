@@ -1,6 +1,7 @@
 const TourGuide = require('../models/tourGuide');
 
 
+
 const deleteTourGuideAccount = async (req, res) => {
     try {
         const tourGuide = await TourGuide.findByIdAndDelete(req.params.id);
@@ -33,6 +34,7 @@ const getTourGuideByID = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
 const updateTourGuide = async (req, res) => {
     try {
         const updatedData = req.body; // Data to update
