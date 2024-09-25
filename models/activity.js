@@ -53,4 +53,8 @@ const activitySchema = new Schema({
     timestamps: true,
 });
 
+activitySchema.statics.findByTourist = function(touristId) {
+    return this.find({ 'tourists': touristId }).populate('tourists').exec();
+};
+
 module.exports = mongoose.model('Activity', activitySchema);
