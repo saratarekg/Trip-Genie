@@ -35,5 +35,5 @@ historicalPlacesSchema.statics.findByGovernor = function(governorId) {
     return this.find({ governor: governorId }).populate('governor').exec();
 };
 
-const historicalPlaces = mongoose.model('Museum', historicalPlacesSchema);
+const historicalPlaces = mongoose.model('Historical Places', historicalPlacesSchema);
 module.exports = historicalPlaces;
