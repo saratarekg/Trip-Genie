@@ -18,7 +18,7 @@ const getCategory = async (req, res) => {
     try {
       
         const category = await Category.findById(req.params.id);
-        if(!cat){
+        if(!category){
             res.status(404).json({ message: 'Category not found'});
         }
         res.status(200).json(category);
