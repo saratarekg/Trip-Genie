@@ -11,15 +11,15 @@ const {
 // router.post('/signup', tourGuideSignup);
 
 // Route for deleting a tour guide by ID
-router.delete('/:id', deleteTourGuideAccount);
+router.delete('/deleteTGAccount/:id', deleteTourGuideAccount);
 
-// Route for getting all tour guides
-router.get('/', getAllTourGuides);
+router.get('/getAllTourGuides', getAllTourGuides);
 
 // Route for getting a single tour guide by ID
-router.get('/:id', getTourGuideByID);
+router.get('/getTourGuideByID/:id', getTourGuideByID);
 
 // Route for updating a tour guide by ID
-router.patch('/:id', updateTourGuide);
+router.patch('/updateTourGuide/:id', updateTourGuide);
 
 module.exports = router;
+
