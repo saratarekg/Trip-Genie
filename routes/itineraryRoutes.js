@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const itineraryController = require('../controllers/itineraryController.js');
 
-// GET all itineraries
+// GET all itineraries (added to tourist)
 router.get('/', itineraryController.getAllItineraries);
 
 // GET a single itinerary
