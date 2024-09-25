@@ -8,7 +8,9 @@ router.get('/historicalPlaces', historicalPlacesController.getAllHistoricalPlace
 router.delete('/historicalPlaces/:id', historicalPlacesController.deleteHistoricalPlace);
 router.put('/historicalPlaces/:id', historicalPlacesController.updateHistoricalPlace);
 
-
 router.post('/add-historical-tag', historicalTagController.addHistoricalTag);
+
+router.get('/getHistoricalPlacesByGovernor', historicalPlacesController.getHistoricalPlacesByGovernor);
+
 
 module.exports = router;

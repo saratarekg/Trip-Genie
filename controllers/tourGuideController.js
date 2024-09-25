@@ -1,26 +1,7 @@
 const TourGuide = require('../models/tourGuide');
 
+const Itinerary = require('../models/itinerary'); // Adjust the path as needed
 
-const deleteTourGuideAccount = async (req, res) => {
-    try {
-        const tourGuide = await TourGuide.findByIdAndDelete(req.params.id);
-        if (!tourGuide) {
-            return res.status(404).json({ message: 'TourGuide not found' });
-        }
-        res.status(201).json({ message: 'TourGuide deleted' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
-
-const getAllTourGuides = async (req, res) => {
-    try {
-        const tourGuide = await TourGuide.find();
-        res.status(200).json(tourGuide);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
 
 const getTourGuideProfile = async (req, res) => {
     try {
@@ -40,6 +21,7 @@ const getTourGuideProfile = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 const getTourGuideByID = async (req, res) => {
     try {
         const tourGuide = await TourGuide.findById(req.params.id);
@@ -51,6 +33,19 @@ const getTourGuideByID = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+=======
+// const getTourGuideByID = async (req, res) => {
+//     try {
+//         const tourGuide = await TourGuide.findById(req.params.id);
+//         if (!tourGuide) {
+//             return res.status(404).json({ message: 'Tour Guide not found' });
+//         }
+//         res.status(200).json(tourGuide);
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// };
+>>>>>>> f2421607ef30e65151801f7dc965a19db940a464
 
 const updateTourGuide = async (req, res) => {
     try {
@@ -70,6 +65,7 @@ const updateTourGuide = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 const updateTourGuideProfile = async (req, res) => {
     try {
         const tourGuideId = res.locals.user_id;  // Get the current user's ID
@@ -96,4 +92,26 @@ module.exports = {
     updateTourGuide,
     getTourGuideProfile,
     updateTourGuideProfile
+=======
+
+// Function to get all itineraries for a specific tour guide
+const getItinerariesByTourGuide = async (req, res) => {
+    try {
+        const { tourGuideId } = req.params; // Assuming tourGuideId is passed in the request params
+        const itineraries = await Itinerary.findByTourGuide(tourGuideId);
+        if (!itineraries || itineraries.length === 0) {
+            return res.status(404).json({ message: 'No itineraries found for this tour guide.' });
+        }
+        res.status(200).json(itineraries);
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred', error });
+    }
+};
+
+
+module.exports = {  
+    updateTourGuide,
+    getTourGuideProfile,
+    getItinerariesByTourGuide
+>>>>>>> f2421607ef30e65151801f7dc965a19db940a464
 };
