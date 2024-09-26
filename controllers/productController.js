@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const Seller = require('../models/seller');
 
 
 const getAllProducts = async (req, res) => {
@@ -10,16 +11,37 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+// const addProduct = async (req, res) => {
+//     const product = new Product(req.body);
+//     try {
+//         await product.save();
+//         res.status(201).json(product);
+//         res.send('Product added successfully!');
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// };
+
 const addProduct = async (req, res) => {
-    const product = new Product(req.body);
+    const { name, picture , price,description, rating , reviews , quantity } = req.body; // Extract the data from request
+  
     try {
-        await product.save();
-        res.status(201).json(product);
-        res.send('Product added successfully!');
+  
+      // Use the sellerType from the Seller document
+    //   const sellerType = seller.seller;
+  
+      // Create the product with the fetched sellerType
+      const product = new Product({
+        name, picture , price,description, seller:res.locals.user_id, rating , reviews , quantity
+      });
+  
+      // Save the product to the database
+      await product.save();
+      res.status(201).json(product);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+      res.status(400).json({ error: error.message });
     }
-};
+  };
 
 
 const getProductbyName = async (req, res) => {
