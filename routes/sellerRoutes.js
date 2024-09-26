@@ -8,8 +8,8 @@ router.put('/', sellerController.updateSeller);
 router.get('/', sellerController.getSeller);
 router.get('/sort-products-rating', productController.sortProductsByRating);
 
-router.get('/all-products', productController.getAllProducts);
-router.get('/:name', productController.getProductbyName);
-router.post('/add-product', productController.addProduct);
+router.get('/products', productController.getAllProducts);
+router.get('/products/:name', productController.getProductbyName);
+router.post('/products', productController.addProduct);
 
 module.exports = router;

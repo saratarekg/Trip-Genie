@@ -35,12 +35,7 @@ app.use('/admin', requireAuth('admin'), adminRoutes);
 app.use('/tourism-governor', requireAuth('tourismGovernor'), tourismGovernorRoutes);
 app.use('/tourist', requireAuth('tourist'), touristRoutes);
 app.use('/seller', requireAuth('seller'), sellerRoutes);
-
 app.use('/tour-guide',requireAuth('tourGuide'), tourGuideRoutes);
-//app.use('/product',requireAuth(''), productRoutes);
 app.use('/advertiser',requireAuth('advertiser'), advertiserRoutes);
-app.get('/sam', requireAuth(''), (req, res) => {
-  res.send('Hello From Sam');
-});
 
 
