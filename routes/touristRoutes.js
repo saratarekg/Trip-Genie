@@ -13,12 +13,12 @@ router.put('/', touristController.updateTourist);
 router.get('/sort-products-rating', productController.sortProductsByRating);
 router.get('/itineraries', itineraryController.getAllItineraries);
 
-router.post('/filterActivities',activityController.filterActivities);
+router.post('/filter-activities',activityController.filterActivities);
 
-router.get('/getAllProducts', productController.getAllProducts);
+router.get('/all-products', productController.getAllProducts);
 router.get('/:name', productController.getProductbyName);
 
-router.get('/filterItinerary',itineraryController.filterItineraries);
-router.get('/filterHistoricalPlaces',historicalPlacesController.filterHistoricalPlaces);
+router.get('/filter-itinerary',itineraryController.filterItineraries);
+router.get('/filter-historical-places',historicalPlacesController.filterHistoricalPlaces);
 
 module.exports = router;

@@ -18,7 +18,7 @@ router.put('/', updateTourGuideProfile);
 router.get('/itinerary',itineraryController.getItinerariesByTourGuide);
 
 // Delete itinerary with certain id
-router.delete('/itinerary/:id', deleteItinerary)
+router.delete('/itinerary/:id', itineraryController.deleteItinerary)
 
 // POST a new itinerary
 router.post('/itinerary', itineraryController.createItinerary);
