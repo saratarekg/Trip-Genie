@@ -3,7 +3,7 @@ const Activity = require('../models/activity');
 
 const getAllActivities = async (req, res) => {
     try {
-        const activities = await Activity.find();
+        const activities = await Activity.find().populate('category').populate('tags').populate("advertiser").exec();
         res.status(200).json(activities);
     } catch (error) {
         res.status(500).json({ error: error.message });
