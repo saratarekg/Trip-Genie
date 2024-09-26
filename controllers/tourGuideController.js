@@ -60,8 +60,6 @@ const updateTourGuideProfile = async (req, res) => {
 };
 
 
-
-
 module.exports = {  
     updateTourGuide,
     getTourGuideProfile,

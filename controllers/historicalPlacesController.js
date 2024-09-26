@@ -1,17 +1,30 @@
 const Museum = require('../models/historicalPlaces');
 
-const createHistoricalPlace = (req, res) => {
-    const museum = new Museum(req.body);
+// const createHistoricalPlace = (req, res) => {
+//     const museum = new Museum(req.body);
 
-    museum.save()
-        .then((result) => {
-            res.status(201).json({ museum: result });
-        })
-        .catch((err) => {
-            res.status(400).json({message: err.message})
-            console.log(err);
-        });
-}
+//     museum.save()
+//         .then((result) => {
+//             res.status(201).json({ museum: result });
+//         })
+//         .catch((err) => {
+//             res.status(400).json({message: err.message})
+//             console.log(err);
+//         });
+// }
+
+const createHistoricalPlace = async (req, res) => {
+    const { description, location,  historicalTag, openingHours, ticketPrices, pictures} = req.body;
+    const historicalPlace = new Museum({description, location,  historicalTag, openingHours, ticketPrices, pictures, governor:res.locals.user_id});
+
+    try {
+        await historicalPlace.save();
+        res.status(201).json(historicalPlace);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 
 const getHistoricalPlace = async (req, res) => {
     try {
@@ -99,14 +112,14 @@ const filterHistoricalPlaces = async (req, res) => {
 
 const getHistoricalPlacesByGovernor = async (req, res) => {
     try {
-        const  governorId  = req.params; // Assuming governorId is passed in the request params
-        const historicalPlaces = await HistoricalPlace.findByGovernor(governorId);
+        const  governorId  = res.locals.user_id;; // Assuming governorId is passed in the request params
+        const historicalPlaces = await Museum.findByGovernor(governorId);
         if (!historicalPlaces || historicalPlaces.length === 0) {
             return res.status(404).json({ message: 'No historical places found for this governor.' });
         }
         res.status(200).json(historicalPlaces);
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred', error });
+        res.status(500).json({  error: error.message });
     }
 };
 

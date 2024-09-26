@@ -136,7 +136,7 @@ const deleteItinerary = async (req, res) => {
 // Function to get all itineraries for a specific tour guide
 const getItinerariesByTourGuide = async (req, res) => {
     try {
-        const { tourGuideId } = req.params; // Assuming tourGuideId is passed in the request params
+        const  tourGuideId  = res.locals.user_id; // Assuming tourGuideId is passed in the request params
         const itineraries = await Itinerary.findByTourGuide(tourGuideId);
         if (!itineraries || itineraries.length === 0) {
             return res.status(404).json({ message: 'No itineraries found for this tour guide.' });
