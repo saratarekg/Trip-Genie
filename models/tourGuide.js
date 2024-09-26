@@ -90,9 +90,11 @@ const tourGuideSchema = new Schema({
             type: String,
             trim: true
         }
-    }]
-    
-
+    }],
+    isAccepted: {
+        type: Boolean,
+        default: false 
+    }
 
 }, { timestamps: true });
 

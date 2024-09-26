@@ -34,11 +34,11 @@ const sellerSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    accepted: {
+    isAccepted: {
         type: Boolean,
         default: false 
     },
-    seller: {
+    sellerType: {
         type: String,
         enum: ['VTP', 'External Seller'], // Two types of sellers: VTP or External Seller
         required: true

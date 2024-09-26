@@ -45,7 +45,7 @@ const advertiserSchema = new Schema({
       logoUrl: {
         type: String,
       },
-      accepted: {
+      isAccepted: {
         type: Boolean,
         default: false 
     }
