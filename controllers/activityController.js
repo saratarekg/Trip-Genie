@@ -23,8 +23,20 @@ const getActivityById = async (req, res) => {
     }
 };
 
+// const createActivity = async (req, res) => {
+//     const activity = new Activity(req.body);
+//     try {
+//         await activity.save();
+//         res.status(201).json(activity);
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// };
+
 const createActivity = async (req, res) => {
-    const activity = new Activity(req.body);
+    const {name, location, duration, timeline, price, category, tags, specialDiscount, rating, isBookingOpen} = req.body;
+    const activity = new Activity({name, location, duration, timeline, price, category, tags, specialDiscount, rating, isBookingOpen, advertisor:res.locals.user_id});
+
     try {
         await activity.save();
         res.status(201).json(activity);
@@ -32,6 +44,7 @@ const createActivity = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 };
+
 
 const deleteActivity = async (req, res) => {
     try {
@@ -66,7 +79,7 @@ const getActivitiesByAdvertisor = async (req, res) => {
         }
         res.status(200).json(activities);
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred', error });
+        res.status(500).json({ error: error.message });
     }
 };
 
