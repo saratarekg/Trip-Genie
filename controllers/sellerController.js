@@ -9,7 +9,8 @@ const updateSeller = async (req, res) => {
             return res.status(400).json({ error: 'Seller is not accepted yet, Can not update profile' });
         }
         
-        const seller = await Seller.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { email, username, name, description} = req.body;
+        const seller = await Seller.findByIdAndUpdate(req.params.id, { email, username, name, description}, { new: true });
 
 
 

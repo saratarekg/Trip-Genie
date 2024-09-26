@@ -13,7 +13,7 @@ const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
 const sellerRoutes = require("./routes/sellerRoutes"); 
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
-const productRoutes = require("./routes/productRoutes");
+//const productRoutes = require("./routes/productRoutes");
 const cookieParser = require('cookie-parser');
 const {requireAuth} = require('./middlewares/authMiddleware');
 
@@ -41,8 +41,8 @@ app.use('/tourist', requireAuth('tourist'), touristRoutes);
 app.use('/seller', requireAuth('seller'), sellerRoutes);
 
 app.use('/tourGuide',requireAuth('tourGuide'), tourGuideRoutes);
-app.use('/product',requireAuth(''), productRoutes);
-app.use('/advertiser',requireAuth('advertiser'),advertiserRoutes);
+//app.use('/product',requireAuth(''), productRoutes);
+app.use('/advertiser',requireAuth('advertiser'), advertiserRoutes);
 app.get('/sam', requireAuth(''), (req, res) => {
   res.send('Hello From Sam');
 });

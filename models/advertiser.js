@@ -29,15 +29,15 @@ const advertiserSchema = new Schema({
     },
     name: {
         type: String,
-        required: true,
+        required: false,
       },
       description: {
         type: String,
-        required: true,
+        required: false,
       },
       website: {
         type: String,
-        required: true,
+        required: false,
       },
       hotline: {
         type: String,

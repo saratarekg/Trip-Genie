@@ -63,13 +63,13 @@ const updateItinerary = async (req, res) => {
 };
 const filterItineraries = async (req, res) => {
     try {
-        const { budget, date, preferences, language } = req.body;
+        const { price , date, preferences, language } = req.body;
 
         // Build the query object
         let query = {};
 
-        if (budget) {
-            query.price = { $lte: budget }; // Less than or equal to the specified budget
+        if (price) {
+            query.price = { $lte: price }; // Less than or equal to the specified budget
         }
 
         if (date) {

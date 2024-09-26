@@ -19,7 +19,8 @@ const touristSignup = async (req, res) => {
         if(await emailExists(req.body.email)){
             throw new Error('Email already exists');
         }
-        const tourist = new Tourist(req.body);
+        const { email, username, password, nationality, mobile, dateOfBirth, jobOrStudent} = req.body;
+        const tourist = new Tourist({ email, username, password, nationality, mobile, dateOfBirth, jobOrStudent});
 
         tourist.save()
             .then((result) => {
