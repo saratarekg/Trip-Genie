@@ -1,14 +1,9 @@
 const express = require('express');
 const touristController = require('../controllers/touristController');
 const productController = require('../controllers/productController');
-<<<<<<< HEAD
 const itineraryController = require('../controllers/itineraryController.js');
 const activityController = require('../controllers/activityController.js');
-=======
-const itineraryController = require('../controllers/itineraryController');
 const  historicalPlacesController= require('../controllers/historicalPlacesController');
-
->>>>>>> 29d782999b315a461f6434d163b0290e38fc90cd
 
 const router = express.Router();
 
