@@ -66,5 +66,4 @@ module.exports = {
     updateTourGuide,
     getTourGuideProfile,
     updateTourGuideProfile,
-    deleteItinerary
 };
