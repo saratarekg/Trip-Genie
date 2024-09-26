@@ -57,6 +57,19 @@ const updateActivity = async (req, res) => {
     }
 };
 
+const getActivitiesByAdvertisor = async (req, res) => {
+    try {
+        const  advertisorID  = res.locals.user_id; 
+        const activities = await Activity.findByAdvertisor(advertisorID);
+        if (!activities || activities.length === 0) {
+            return res.status(404).json({ message: 'No activities found for this advertisor.' });
+        }
+        res.status(200).json(activities);
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred', error });
+    }
+};
+
 const filterActivities = async (req, res) => {
     try {
         const { price, startDate, endDate, category, minRating } = req.query;
@@ -113,5 +126,6 @@ module.exports = {
     createActivity,
     deleteActivity,
     updateActivity,
-    filterActivities
+    filterActivities,
+    getActivitiesByAdvertisor
 };

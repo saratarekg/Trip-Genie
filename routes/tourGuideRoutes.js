@@ -3,7 +3,6 @@ const router = express.Router();
 const {
     updateTourGuideProfile,
     getTourGuideProfile,
-    getItinerariesByTourGuide,
     deleteItinerary
 } = require('../controllers/tourGuideController'); // Import the controller functions
 
@@ -16,7 +15,7 @@ router.get('/', getTourGuideProfile);
 router.put('/', updateTourGuideProfile);
 
 // Get tour guides specific itinerary list
-router.get('/itinerary,',getItinerariesByTourGuide);
+router.get('/itinerary',itineraryController.getItinerariesByTourGuide);
 
 // Delete itinerary with certain id
 router.delete('/itinerary/:id', deleteItinerary)

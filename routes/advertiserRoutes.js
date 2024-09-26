@@ -9,5 +9,7 @@ router.get('/activity', activityController.getAllActivities);
 router.get('/activity/:id', activityController.getActivityById);
 router.put('/activity/:id', activityController.updateActivity);
 router.delete('/activity/:id', activityController.deleteActivity);
+router.get('/myActivities', activityController.getActivitiesByAdvertisor);
+
 
 module.exports = router;

@@ -57,17 +57,6 @@ const updateAdvertiser = async (req, res) => {
 };
 
 
-const getActivitiesByAdvertisor = async (req, res) => {
-    try {
-        const { advertisorID } = req.params; // Assuming touristId is passed in the request params
-        const activities = await activity.findByAdvertisor(advertisorID);
-        if (!activities || activities.length === 0) {
-            return res.status(404).json({ message: 'No activities found for this advertisor.' });
-        }
-        res.status(200).json(activities);
-    } catch (error) {
-        res.status(500).json({ message: 'An error occurred', error });
-    }
-};
 
-module.exports = { deleteAdvertiserAccount,getAllAdvertisers,getAdvertiserByID,getActivitiesByAdvertisor,updateAdvertiser};
+
+module.exports = { deleteAdvertiserAccount,getAllAdvertisers,getAdvertiserByID,updateAdvertiser};

@@ -97,5 +97,17 @@ const filterHistoricalPlaces = async (req, res) => {
     }
 };
 
+const getHistoricalPlacesByGovernor = async (req, res) => {
+    try {
+        const  governorId  = req.params; // Assuming governorId is passed in the request params
+        const historicalPlaces = await HistoricalPlace.findByGovernor(governorId);
+        if (!historicalPlaces || historicalPlaces.length === 0) {
+            return res.status(404).json({ message: 'No historical places found for this governor.' });
+        }
+        res.status(200).json(historicalPlaces);
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred', error });
+    }
+};
 
-module.exports = { createHistoricalPlace,getHistoricalPlace,getAllHistoricalPlaces,updateHistoricalPlace, deleteHistoricalPlace,filterHistoricalPlaces };
+module.exports = { createHistoricalPlace,getHistoricalPlace,getAllHistoricalPlaces,updateHistoricalPlace, deleteHistoricalPlace,filterHistoricalPlaces,getHistoricalPlacesByGovernor };
