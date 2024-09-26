@@ -13,7 +13,7 @@ router.get('/', getTourGuideProfile);
 // Route for updating a tour guide by ID
 router.put('/', updateTourGuideProfile);
 
-// Get tour guides specific itinerary list
+// Get tour guide's specific itinerary list
 router.get('/itinerary,', itineraryController.getItinerariesByTourGuide);
 
 // Delete itinerary with certain id

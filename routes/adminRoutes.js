@@ -77,17 +77,17 @@ router.put('/tag/:id', tagController.updateTag);
 
 
 
-router.post('/Categorycreate',categoryController.createCategory);
-router.get('/Category/:id', categoryController.getCategory);
-router.get('/Category', categoryController.getAllCategories);
-router.delete('/Category/:id', categoryController.deleteCategory);
-router.put('/Category/:id', categoryController.updateCategory);
+router.post('/create-category',categoryController.createCategory);
+router.get('/category/:id', categoryController.getCategory);
+router.get('/category', categoryController.getAllCategories);
+router.delete('/category/:id', categoryController.deleteCategory);
+router.put('/category/:id', categoryController.updateCategory);
 
 router.get('/sort-products-rating', productController.sortProductsByRating);
 
-router.get('/getAllProducts', productController.getAllProducts);
+router.get('/all-products', productController.getAllProducts);
 router.get('/:name', productController.getProductbyName);
-router.post('/addProduct', productController.addProduct);
+router.post('/add-product', productController.addProduct);
 
 
 module.exports = router;
