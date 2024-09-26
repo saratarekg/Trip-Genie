@@ -2,9 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     updateTourGuideProfile,
-    getTourGuideProfile,
-    getItinerariesByTourGuide,
-    deleteItinerary
+    getTourGuideProfile
 } = require('../controllers/tourGuideController'); // Import the controller functions
 
 const itineraryController = require('../controllers/itineraryController.js');
@@ -16,10 +14,10 @@ router.get('/', getTourGuideProfile);
 router.put('/', updateTourGuideProfile);
 
 // Get tour guides specific itinerary list
-router.get('/itinerary,',getItinerariesByTourGuide);
+router.get('/itinerary,', itineraryController.getItinerariesByTourGuide);
 
 // Delete itinerary with certain id
-router.delete('/itinerary/:id', deleteItinerary)
+router.delete('/itinerary/:id', itineraryController.deleteItinerary)
 
 // POST a new itinerary
 router.post('/itinerary', itineraryController.createItinerary);
