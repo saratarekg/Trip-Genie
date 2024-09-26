@@ -147,6 +147,19 @@ const getItinerariesByTourGuide = async (req, res) => {
     }
 };
 
+const searchItineraries = async (req, res) => {
+    try {
+        const { searchBy } = req.body;
+        const itineraries = await Itinerary.findByFields(searchBy);
+        if (!itineraries || itineraries.length === 0) {
+            return res.status(404).json({ message: 'No itineraries found.' });
+        }
+        res.status(200).json(itineraries);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     getAllItineraries,
     getItineraryById,
@@ -154,5 +167,6 @@ module.exports = {
     deleteItinerary,
     updateItinerary,
     filterItineraries,
-    getItinerariesByTourGuide
+    getItinerariesByTourGuide,
+    searchItineraries
 };

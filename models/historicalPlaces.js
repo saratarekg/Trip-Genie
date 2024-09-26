@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
+const HistoricalTag = require('./historicalTags');
 const Schema = mongoose.Schema;
 
 const historicalPlacesSchema = new Schema({
+    title: { type: String, required: [true,'Please enter a name'] },
     description: { 
         type: String, required: [true,'Please enter a description'] },
 
@@ -41,5 +43,50 @@ historicalPlacesSchema.statics.findByGovernor = function(governorId) {
     return this.find({ governor: governorId }).populate('governor').exec();
 };
 
-const historicalPlaces = mongoose.model('Historical Places', historicalPlacesSchema);
+historicalPlacesSchema.statics.findByFields = async function(searchCriteria) {
+    if(searchCriteria === undefined || searchCriteria === null || searchCriteria === "") {
+        return this.find().populate('governor').populate('historicalTag').exec();
+    }
+    const query = [];
+    
+    const historicalTags = await HistoricalTag.searchByFields(searchCriteria);
+    const tagIds = historicalTags.map(tag => tag._id);
+
+    searchFields = ["title", "description", "location.address","location.city","location.country"];
+    searchFields.forEach(field => {
+        query.push({[field] : { $regex: new RegExp(searchCriteria, 'i') }});  // Case-insensitive
+    });
+    
+    const cursor = this.find().cursor();
+
+    for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+        for(const tagId of tagIds){
+            if(doc.historicalTag.includes(tagId)){
+                query.push({ _id: doc._id });
+                break;
+            }
+        }
+    }
+
+    return this.find({ $or: query }).populate('governor').populate('historicalTag').exec();  // Perform a search with the regex query
+};
+
+historicalPlacesSchema.statics.findByTag = async function(arraySearchFields) {
+    let array = [];
+    for (let key in arraySearchFields) {
+        const {type,period} = arraySearchFields[key];
+        const tags = await HistoricalTag.findByFields({type,period});
+        const tagIds = tags.map(tag => tag._id);
+        for(const tagId of tagIds){
+            if(!array.includes(tagId)){
+                array.push(tagId);
+            }
+        }
+    }
+    console.log(array);
+    return this.find({ historicalTag: { $in: array } }).populate('governor')
+    .populate('historicalTag').exec();
+};
+
+const historicalPlaces = mongoose.model('HistoricalPlace', historicalPlacesSchema);
 module.exports = historicalPlaces;
