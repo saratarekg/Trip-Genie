@@ -8,8 +8,6 @@ const authRoutes = require('./routes/authRoutes');
 const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
-//const itineraryRoutes = require('./routes/itineraryRoutes');
-// const touristItineraryRoutes = require('./routes/touristItineraryRoutes');
 const sellerRoutes = require("./routes/sellerRoutes"); 
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
@@ -34,13 +32,11 @@ mongoose.connect(process.env.URI)
 
 app.use('/auth',authRoutes);
 app.use('/admin', requireAuth('admin'), adminRoutes);
-app.use('/tourismGovernor', requireAuth('tourismGovernor'), tourismGovernorRoutes);
+app.use('/tourism-governor', requireAuth('tourismGovernor'), tourismGovernorRoutes);
 app.use('/tourist', requireAuth('tourist'), touristRoutes);
-//app.use('/itinerary', requireAuth(''), itineraryRoutes);
-// app.use('/touristItinerary', requireAuth, touristItineraryRoutes);
 app.use('/seller', requireAuth('seller'), sellerRoutes);
 
-app.use('/tourGuide',requireAuth('tourGuide'), tourGuideRoutes);
+app.use('/tour-guide',requireAuth('tourGuide'), tourGuideRoutes);
 //app.use('/product',requireAuth(''), productRoutes);
 app.use('/advertiser',requireAuth('advertiser'), advertiserRoutes);
 app.get('/sam', requireAuth(''), (req, res) => {
