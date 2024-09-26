@@ -38,6 +38,11 @@ const sellerSchema = new mongoose.Schema({
         type: Boolean,
         default: false 
     },
+    seller: {
+        type: String,
+        enum: ['VTP', 'External Seller'], // Two types of sellers: VTP or External Seller
+        required: true
+      },
 });
 
 sellerSchema.pre('save', async function(next) {

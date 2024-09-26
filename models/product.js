@@ -17,10 +17,11 @@ const productSchema = new mongoose.Schema({
          type: String, 
          required: true 
         },
-    seller: {
-         type: String,
+        seller: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Seller', // Reference to the Seller schema
           required: true
-         }, 
+        }, 
      rating: {
             type: Number
             },     
