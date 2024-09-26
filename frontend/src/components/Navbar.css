@@ -15,7 +15,7 @@
 }
 
 .logo {
-  width: 97px;
+  width: 150px;
 }
 
 .frame10 {
@@ -57,7 +57,7 @@ padding: 10px;
 justify-content: center;
 align-items: center;
 gap: 10px;
+color: #fff;
 border-radius: 40px;
-background: #FFF;
-color: black;
+background: #4169E1;
 }
