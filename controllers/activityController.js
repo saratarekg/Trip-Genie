@@ -35,7 +35,7 @@ const getActivityById = async (req, res) => {
 
 const createActivity = async (req, res) => {
     const {name, location, duration, timeline, price, category, tags, specialDiscount, rating, isBookingOpen} = req.body;
-    const activity = new Activity({name, location, duration, timeline, price, category, tags, specialDiscount, rating, isBookingOpen, advertisor:res.locals.user_id});
+    const activity = new Activity({name, location, duration, timeline, price, category, tags, specialDiscount, rating, isBookingOpen, advertiser:res.locals.user_id});
 
     try {
         await activity.save();
@@ -70,12 +70,12 @@ const updateActivity = async (req, res) => {
     }
 };
 
-const getActivitiesByAdvertisor = async (req, res) => {
+const getActivitiesByAdvertiser = async (req, res) => {
     try {
-        const  advertisorID  = res.locals.user_id; 
-        const activities = await Activity.findByAdvertisor(advertisorID);
+        const  advertiserID  = res.locals.user_id; 
+        const activities = await Activity.findByAdvertiser(advertiserID);
         if (!activities || activities.length === 0) {
-            return res.status(404).json({ message: 'No activities found for this advertisor.' });
+            return res.status(404).json({ message: 'No activities found for this advertiser.' });
         }
         res.status(200).json(activities);
     } catch (error) {
@@ -140,5 +140,5 @@ module.exports = {
     deleteActivity,
     updateActivity,
     filterActivities,
-    getActivitiesByAdvertisor
+    getActivitiesByAdvertiser
 };

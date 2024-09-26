@@ -52,17 +52,17 @@ const activitySchema = new Schema({
     rating: {
         type: Number
         }, 
-    advertisor: {  // New field for the maker's ID
+    advertiser: {  // New field for the maker's ID
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'advertisor', // Replace 'User' with the appropriate model name for makers
+        ref: 'Advertiser', // Replace 'User' with the appropriate model name for makers
         required: true, // Assuming it's required, you can set this to false if it's optional
     },
 }, {
     timestamps: true,
 });
 
-activitySchema.statics.findByAdvertisor = function(advertisorID) {
-    return this.find({ 'advertisor': advertisorID }).populate('advertisor').exec();
+activitySchema.statics.findByAdvertiser = function(advertiserID) {
+    return this.find({ 'advertiser': advertiserID }).populate('advertiser').exec();
 };
 
 module.exports = mongoose.model('Activity', activitySchema);
