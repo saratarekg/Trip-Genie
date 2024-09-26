@@ -37,8 +37,8 @@ const getAdvertiserByID = async (req, res) => {
 
 const updateAdvertiser = async (req, res) => {
     try {
-        const advertiser1 = await Advertiser.findById(req.params.id);
-        if(!advertiser1.accepted){
+        const advertiser1 = await Advertiser.findById(res.locals.user_id);
+        if(!advertiser1.isAccepted){
             return res.status(400).json({ error: 'Advertiser is not accepted yet, Can not update profile' });
         }
         
@@ -56,7 +56,22 @@ const updateAdvertiser = async (req, res) => {
     }
 };
 
+const getAdvertiser = async (req, res) => {
+    try {
+        const advertiser = await Advertiser.findById(res.locals.user_id);
+        if(!advertiser.isAccepted){
+            return res.status(400).json({ error: 'Advertiser is not accepted yet, Can not view profile' });
+        }
+        if (!advertiser) {
+            return res.status(404).json({ message: 'Advertiser not found' });
+        }
+        res.status(200).json(advertiser);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 
 
-module.exports = { deleteAdvertiserAccount,getAllAdvertisers,getAdvertiserByID,updateAdvertiser};
+
+module.exports = { deleteAdvertiserAccount,getAllAdvertisers,getAdvertiserByID,updateAdvertiser,getAdvertiser};

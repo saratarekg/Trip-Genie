@@ -11,5 +11,8 @@ router.put('/activity/:id', activityController.updateActivity);
 router.delete('/activity/:id', activityController.deleteActivity);
 router.get('/my-activities', activityController.getActivitiesByAdvertiser);
 
+router.get('/', advertiserController.getAdvertiser);
+router.put('/', advertiserController.updateAdvertiser);
+
 
 module.exports = router;

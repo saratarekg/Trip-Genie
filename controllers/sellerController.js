@@ -5,7 +5,7 @@ const Seller = require('../models/seller');
 const updateSeller = async (req, res) => {
     try {
         const seller1 = await Seller.findById(req.params.id);
-        if(!seller1.accepted){
+        if(!seller1.isAccepted){
             return res.status(400).json({ error: 'Seller is not accepted yet, Can not update profile' });
         }
         

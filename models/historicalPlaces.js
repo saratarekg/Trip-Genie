@@ -71,21 +71,33 @@ historicalPlacesSchema.statics.findByFields = async function(searchCriteria) {
     return this.find({ $or: query }).populate('governor').populate('historicalTag').exec();  // Perform a search with the regex query
 };
 
-historicalPlacesSchema.statics.findByTag = async function(arraySearchFields) {
-    let array = [];
-    for (let key in arraySearchFields) {
-        const {type,period} = arraySearchFields[key];
-        const tags = await HistoricalTag.findByFields({type,period});
-        const tagIds = tags.map(tag => tag._id);
+historicalPlacesSchema.statics.filterByTag = async function(types,periods) {
+    const query = [];
+    let historicalTags = null;
+    if((types === undefined || types === null || types === "") && (periods === undefined || periods === null || periods === ""))
+        return this.find().populate('governor').populate('historicalTag').exec();
+    else if(types === undefined || types === null || types === "")
+        historicalTags = await HistoricalTag.find({ period: { $in: periods } });
+    else if(periods === undefined || periods === null || periods === "")
+        historicalTags = await HistoricalTag.find({ type: { $in: types } });
+    else
+        historicalTags = await HistoricalTag.find({ type: { $in: types }, period: { $in: periods } });
+
+    if(historicalTags.length === 0)
+        return [];
+
+    const tagIds = historicalTags.map(tag => tag._id);
+    const cursor = this.find().cursor();
+
+    for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
         for(const tagId of tagIds){
-            if(!array.includes(tagId)){
-                array.push(tagId);
+            if(doc.historicalTag.includes(tagId)){
+                query.push({ _id: doc._id });
+                break;
             }
         }
     }
-    console.log(array);
-    return this.find({ historicalTag: { $in: array } }).populate('governor')
-    .populate('historicalTag').exec();
+    return this.find({ $or: query }).populate('governor').populate('historicalTag').exec();
 };
 
 const historicalPlaces = mongoose.model('HistoricalPlace', historicalPlacesSchema);

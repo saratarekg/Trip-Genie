@@ -68,50 +68,16 @@ const deleteHistoricalPlace= async (req, res) => {
 
 const filterHistoricalPlaces = async (req, res) => {
     try {
-        const historicalPlaces = await Museum.findByTag(req.body.historicalTags);
-        //const { historicalTag } = req.body;
-
-        // // Build the query object
-        // let query = {};
-
-        // // Filter by historical tags
-        // for(const historicalTag of historicalTagsArray) {
-        //     const query = await Museum.search({ historicalTag: { $in: historicalTag } });
-            // console.log('yarabbb2');
-
-            // // const historicalTagsArray = JSON.parse(historicalTag); 
-            // console.log('yarabbb0');
-            // // Assuming historicalTag is a JSON string
-            // const types = historicalTagsArray.map(historicalTag => historicalTag.type); // Extracting types
-            // const periods = historicalTagsArray.map(historicalTag => historicalTag.period); // Extracting periods
-            // console.log('big if');
-
-            // // Use both types and periods for filtering
-            // if (types.length > 0) {
-            //     query.type = { $in: types }; // Match any of the provided types
-            //     console.log('types if');
-            // }
-
-            // if (periods.length > 0) {
-            //     // Assuming you have a period field in your Museum model
-            //     query.period = { $in: periods }; // Match any of the provided periods
-            //     console.log('period if');
-            // }
-        // }
-        
-
-        // Execute the query
-        // const historicalPlaces = await Museum.find(query)
-        //     .populate('governor')
-        //     .populate('historicalTag');
+        const { types,periods } = req.body;
+        console.log(types,periods);
+        const historicalPlaces = await Museum.filterByTag(types,periods);
         console.log(historicalPlaces);
         if (!historicalPlaces || historicalPlaces.length === 0) {
-            return res.status(404).json({ message: 'Historical place not found' });
+            return res.status(404).json({ message: 'No historical places found.' });
         }
-
-        res.json(historicalPlaces);
+        res.status(200).json(historicalPlaces);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 

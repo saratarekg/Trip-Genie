@@ -48,7 +48,7 @@ const advertiserSchema = new Schema({
       isAccepted: {
         type: Boolean,
         default: false 
-    }
+      }
 }, { timestamps: true });
 
 advertiserSchema.pre('save', async function(next) {
