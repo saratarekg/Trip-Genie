@@ -17,8 +17,11 @@ router.get('/itineraries', itineraryController.getAllItineraries);
 router.get('/filter-activities',activityController.filterActivities);
 router.get('/activities', activityController.getAllActivities);
 
+router.get('/products/filterbyprice', productController.filterProductsByPrice);
 router.get('/products', productController.getAllProducts);
 router.get('/products/:name', productController.getProductbyName);
+
+
 
 router.get('/filter-itinerary',itineraryController.filterItineraries);
 router.get('/historical-places',historicalPlacesController.getAllHistoricalPlaces);
