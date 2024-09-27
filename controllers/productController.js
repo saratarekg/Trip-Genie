@@ -70,9 +70,31 @@ const sortProductsByRating = async (req, res) => {
   }
 };
 
+const editProduct = async (req, res) => {
+  const { id } = req.params; // Get product ID from URL parameters
+  const { name, picture, price, description, quantity } = req.body; // Get details from request body
 
+  try {
+    // Find the product by ID and update its details
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { name, picture, price, description, quantity },
+      { new: true, runValidators: true } // Options: return the updated document and run validation
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(updatedProduct);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
   
 
 module.exports = {
-  getAllProducts, addProduct , getProductbyName,sortProductsByRating
+  getAllProducts, addProduct , getProductbyName,sortProductsByRating,editProduct
 };
+
+
