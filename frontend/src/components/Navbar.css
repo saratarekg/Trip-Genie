@@ -1,0 +1,63 @@
+.frame13 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.frame14 {
+  display: flex;
+  width: 349px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.logo {
+  width: 150px;
+}
+
+.frame10 {
+  display: flex;
+  align-items: flex-start;
+  gap: 72px;
+}
+
+.frame12 {
+  display: flex;
+  align-items: center;
+  gap: 43px;
+}
+
+.text {
+  color: black;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: normal;
+}
+
+.frame11 {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.search {
+  width: 28px;
+  height: 28px;
+}
+
+.login-button {
+  display: flex;
+  width: 167px;
+  height: 61px;
+  padding: 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  border-radius: 40px;
+  background: #4169e1;
+}
