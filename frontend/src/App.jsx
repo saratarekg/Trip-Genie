@@ -4,6 +4,7 @@ import Navbar from './components/Navbar.jsx';
 import Home from './components/Home.jsx';
 import Login from './components/login.jsx';
 import SellerList from './components/SellerList.jsx';
+import ActivityList from './components/ActivityList.jsx';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path='/' element={<Home />} />
             <Route path='/login' element={<Login />} />
             <Route path='/seller' element={<SellerList />} />
+            <Route path = '/activity' element = {<ActivityList/>}/>
 
           </Routes>
         </div>

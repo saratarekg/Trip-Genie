@@ -8,11 +8,6 @@ function SellerList() {
     async function fetchSellers() {
       try {
         const token = Cookies.get('jwt'); // Replace with your actual cookie name
-
-        const allCookies = Cookies.get();
-        for (const [name, value] of Object.entries(allCookies)) {
-            console.log(`Cookie name: ${name}, Cookie value: ${value}`);
-          }
           
           const response = await fetch('http://localhost:4000/admin/sellers', {
           headers: {
