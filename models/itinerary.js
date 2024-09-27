@@ -100,6 +100,8 @@ itinerarySchema.statics.findByFields = async function(searchCriteria) {
 
     return this.find({ $or: query }).populate('tourGuide').populate('activities').exec();  // Perform a search with the regex query
 };
+
+
 itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, types,languages) {
     const query = [];
     let itineraries = null;

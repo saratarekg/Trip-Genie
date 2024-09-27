@@ -64,8 +64,8 @@ const updateItinerary = async (req, res) => {
 
 const filterItineraries = async (req, res) => {
     try {
-        const { lowerprice, upperprice ,upperdate, lowerdate, types,languages } = req.body;
-        const itinerary = await Itinerary.filter(lowerprice, upperprice ,upperdate, lowerdate, types,languages);
+        const { budget ,upperDate, lowerDate, types,languages } = req.body;
+        const itinerary = await Itinerary.filter(budget,upperDate, lowerDate, types,languages);
         if (!itinerary || itinerary.length === 0) {
             return res.status(404).json({ message: 'No itineraries found.' });
         }
