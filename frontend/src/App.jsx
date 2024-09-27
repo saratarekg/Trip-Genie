@@ -6,6 +6,7 @@ import Login from './components/login.jsx';
 import SellerList from './components/SellerList.jsx';
 import ActivityList from './components/ActivityList.jsx';
 import ItineraryList from './components/ItineraryList.jsx';
+import HistoricalPlaceList from './components/HistoricalPlaceList.jsx';
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
             <Route path='/seller' element={<SellerList />} />
             <Route path = '/activity' element = {<ActivityList/>}/>
             <Route path = '/iteneraries' element = {<ItineraryList/>}/>
-
+            <Route path = '/museums' element = {<HistoricalPlaceList/>}/>
           </Routes>
         </div>
       </Router>

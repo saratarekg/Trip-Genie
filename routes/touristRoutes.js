@@ -21,6 +21,8 @@ router.get('/products', productController.getAllProducts);
 router.get('/products/:name', productController.getProductbyName);
 
 router.get('/filter-itinerary',itineraryController.filterItineraries);
+router.get('/historical-places',historicalPlacesController.getAllHistoricalPlaces);
+router.get('/historical-places/:id',historicalPlacesController.getHistoricalPlace);
 router.get('/filter-historical-places',historicalPlacesController.filterHistoricalPlaces);
 router.get('/search-historical-places',historicalPlacesController.searchHistoricalPlaces);
 router.get('/search-activities',activityController.searchActivities);
