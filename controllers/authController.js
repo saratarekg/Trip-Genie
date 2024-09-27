@@ -71,7 +71,7 @@ const login = async (req, res) => {
         }
 
         const token = createToken(user._id,role);
-        res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.MAX_AGE*1000});
+        res.cookie('jwt', token, { httpOnly: true, maxAge: process.env.MAX_AGE*1000, sameSite: 'None'});
         res.status(200).json({ message: 'Login succesful', role });
     } catch (error) {
         res.status(400).json({ message: error.message });
