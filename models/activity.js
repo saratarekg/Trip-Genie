@@ -101,5 +101,22 @@ activitySchema.statics.findByFields = async function(searchCriteria) {
     return this.find({ $or: query }).populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
 };
 
+activitySchema.statics.findByTagTypes = async function(types) {
+    const cursor = this.find().cursor();
+    const tagIds = await Tag.find({ type: { $in: types } }).map(tag => tag._id);
+    const query = [];
+
+    for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+        for(const tagId of tagIds){
+            if(doc.tags.includes(tagId)){
+                query.push({ _id: doc._id });
+                break;
+            }
+        }
+    }
+
+    return this.find({ $or: query }).populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
+};
+
 
 module.exports = mongoose.model('Activity', activitySchema);

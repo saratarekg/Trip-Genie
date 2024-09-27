@@ -72,6 +72,7 @@ const login = async (req, res) => {
 
         const token = createToken(user._id,role);
         res.cookie('jwt', token, { httpOnly: false, maxAge: process.env.MAX_AGE*1000});
+        res.setHeader('Authorization', `Bearer ${token}`);
         res.status(200).json({ message: 'Login succesful', role });
     } catch (error) {
         res.cookie('jwt', '', { maxAge: 1 });

@@ -103,43 +103,38 @@ itinerarySchema.statics.findByFields = async function(searchCriteria) {
 itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, types,languages) {
     const query = [];
     let itineraries = null;
-    if(!(budget === undefined || budget === null || budget<0)){
-        query.push({})
-
+    
+    if(budget !== undefined && budget !== null && budget !== "") {
+        query.push({["price"] : { $lte: budget }});
     }
-
-
-
-
-
-
-
-
-    if((types === undefined || types === null || types.length===0) && (languages === undefined || 
-        languages === null || languages.length===0))   
-        return this.find().populate('tourGuide').populate('activities').exec();
-    else if(types === undefined || types === null || types.length===0)
-        itineraries = await HistoricalTag.find({ period: { $in: periods } });
-    else if(periods === undefined || periods === null || periods.length===0)
-        itineraries = await HistoricalTag.find({ type: { $in: types } });
-    else
-        itineraries = await HistoricalTag.find({ type: { $in: types }, period: { $in: periods } });
-
+    if(upperdate !== undefined && upperdate !== null && upperdate !== "") {
+        query.push({["availableDates.date"] : { $lte: upperdate }});
+    }
+    if(lowerdate !== undefined && lowerdate !== null && lowerdate !== "") {
+        query.push({["availableDates.date"] : { $gte: lowerdate }});
+    }
+    if(languages !== undefined && languages !== null && languages.length !== 0) {
+        query.push({ language: { $in: languages } });
+    }
+    
+    itineraries = await this.find({ $and: query }).exec();
     if(itineraries.length === 0)
         return [];
 
-    const tagIds = itineraries.map(tag => tag._id);
+    const itinerariesIds = itineraries.map(itinerary => itinerary._id);
     const cursor = this.find().cursor();
+    const activities = await Activity.findByTagTypes(types);
 
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
-        for(const tagId of tagIds){
-            if(doc.historicalTag.includes(tagId)){
+        for(const activity of activities){
+            if(doc.activities.includes(activity._id) && itinerariesIds.includes(doc._id)){
                 query.push({ _id: doc._id });
                 break;
             }
         }
     }
-    return this.find({ $or: query }).populate('governor').populate('historicalTag').exec();
+
+    return this.find({ $or: query }).populate('tourGuide').populate('activities').exec();
 };
 
 module.exports = mongoose.model('Itinerary', itinerarySchema);
