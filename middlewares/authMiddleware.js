@@ -2,9 +2,10 @@ const jwt = require('jsonwebtoken');
 
 const requireAuth = (allowedRole) => {
     return (req, res, next) => {
-        const token = req.cookies.jwt;
+        const authHeader = req.headers['authorization'];
 
-        if (token) {
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
             jwt.verify(token, process.env.SECRET, (err, decodedToken) => {
                 if (err) {
                     res.locals.user_id = null;

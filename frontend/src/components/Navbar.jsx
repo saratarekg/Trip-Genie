@@ -30,7 +30,8 @@ const Navbar = () => {
         <div className="frame11">
           <p className="text">Sign Up</p>
           <div className="frame1">
-            <p className="text login-button">Log In</p>
+            <Link to = "/login">
+            <p className="text login-button">Log In</p></Link>
           </div>
         </div>
       </div>
