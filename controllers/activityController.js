@@ -1,4 +1,5 @@
 const Activity = require('../models/activity');
+const Category = require('../models/category');
 
 
 const getAllActivities = async (req, res) => {
@@ -86,44 +87,31 @@ const getActivitiesByAdvertiser = async (req, res) => {
 const filterActivities = async (req, res) => {
     try {
         const { price, startDate, endDate, category, minRating } = req.body;
+        let query = [];
 
-        // Build the query object
-        let query = {};
-
-        if (price) {
-            query.price = { $lte: price }; // Less than or equal to the specified budget
-        }
-
-
-        if (startDate) {
-            const start = new Date(startDate);
-            if (!isNaN(start.getTime())) {
-                query['timeline.start'] = { ...query['timeline.start'], $gte: start };
-            }
-        }
-
-        if (endDate) {
-            const end = new Date(endDate);
-            if (!isNaN(end.getTime())) {
-                query['timeline.end'] = { ...query['timeline.end'], $lte: end };
-            }
-        }
-
+        if(price !== undefined && price !== null && price !== "") {
+        query.push({["price"] : { $lte: price }});
+    }
+    if(startDate !== undefined && startDate !== null && startDate !== "") {
+        query.push({["timeline.start"] : { $gte: startDate }});
+    }
+    if(endDate !== undefined && endDate !== null && endDate !== "") {
+        query.push({["timeline.end"] : { $lte: endDate }});
+    }
         if (category) {
-            const categoryIds = Array.isArray(category) ? 
-                category.map(id => mongoose.Types.ObjectId(id)) : 
-                [mongoose.Types.ObjectId(category)];
-            query.category = { $in: categoryIds };
+            // Find the category by name and get its ObjectId
+            const activityList = await Activity.findByCategoryNames(category);
+            const activityIds = activityList.map(activity => activity._id);
+            query.push({["_id"] : {$in : activityIds}});
         }
 
-        if (minRating) {
-            query.rating = { $gte: minRating }; // Filter by minimum rating
+        if(minRating !== undefined && minRating !== null && minRating !== "") {
+            query.push({["rating"] : { $gte: minRating }});
+
         }
-
-
         console.log('Query Object:', query); // Log the query object
 
-        const activities = await Activity.find(query).populate('category tags');
+        const activities = await Activity.find({ $and: query }).populate('category tags');
 
         res.status(200).json(activities);
     } catch (error) {
