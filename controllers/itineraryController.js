@@ -64,43 +64,14 @@ const updateItinerary = async (req, res) => {
 
 const filterItineraries = async (req, res) => {
     try {
-        
-        const { price , date, preferences, language } = req.body;
-
-        // Build the query object
-        let query = {};
-
-        if (price) {
-            query.price = { $lte: price }; // Less than or equal to the specified budget
+        const { lowerprice, upperprice ,upperdate, lowerdate, types,languages } = req.body;
+        const itinerary = await Itinerary.filter(lowerprice, upperprice ,upperdate, lowerdate, types,languages);
+        if (!itinerary || itinerary.length === 0) {
+            return res.status(404).json({ message: 'No itineraries found.' });
         }
-
-        if (date) {
-            query.availableDates = { 
-                $elemMatch: { date: new Date(date) }
-            };
-        }
-
-        // Filter by preferences (assumed to be an array of activity types)
-        if (preferences) {
-            const preferenceArray = preferences.split(','); // Example: preferences=beach,shopping
-            query.activities = { $in: preferenceArray }; // Match any of the provided preferences
-        }
-
-        if (language) {
-            query.language = language;
-        }
-
-        // Execute the query
-        const itineraries = await Itinerary.find(query).populate('activities').populate('tourGuide');
-       
-        if (!itineraries) {
-            return res.status(404).json({ message: 'Itinerary not found' });
-        }
-
-        
-        res.json(itineraries);
+        res.status(200).json(itinerary);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 

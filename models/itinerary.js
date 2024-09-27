@@ -100,5 +100,46 @@ itinerarySchema.statics.findByFields = async function(searchCriteria) {
 
     return this.find({ $or: query }).populate('tourGuide').populate('activities').exec();  // Perform a search with the regex query
 };
+itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, types,languages) {
+    const query = [];
+    let itineraries = null;
+    if(!(budget === undefined || budget === null || budget<0)){
+        query.push({})
+
+    }
+
+
+
+
+
+
+
+
+    if((types === undefined || types === null || types.length===0) && (languages === undefined || 
+        languages === null || languages.length===0))   
+        return this.find().populate('tourGuide').populate('activities').exec();
+    else if(types === undefined || types === null || types.length===0)
+        itineraries = await HistoricalTag.find({ period: { $in: periods } });
+    else if(periods === undefined || periods === null || periods.length===0)
+        itineraries = await HistoricalTag.find({ type: { $in: types } });
+    else
+        itineraries = await HistoricalTag.find({ type: { $in: types }, period: { $in: periods } });
+
+    if(itineraries.length === 0)
+        return [];
+
+    const tagIds = itineraries.map(tag => tag._id);
+    const cursor = this.find().cursor();
+
+    for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+        for(const tagId of tagIds){
+            if(doc.historicalTag.includes(tagId)){
+                query.push({ _id: doc._id });
+                break;
+            }
+        }
+    }
+    return this.find({ $or: query }).populate('governor').populate('historicalTag').exec();
+};
 
 module.exports = mongoose.model('Itinerary', itinerarySchema);
