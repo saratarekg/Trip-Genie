@@ -31,6 +31,10 @@ const activitySchema = new Schema({
         type: Number,
         required: true,
     },
+    range: {
+        type: Number,
+        required: false,
+    },
     category: [
         {
             type: mongoose.Schema.Types.ObjectId,
