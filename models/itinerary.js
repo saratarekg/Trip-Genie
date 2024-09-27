@@ -110,6 +110,7 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
         query.push({["price"] : { $lte: budget }});
     }
     if(upperdate !== undefined && upperdate !== null && upperdate !== "") {
+        console.log(upperdate);
         query.push({["availableDates.date"] : { $lte: upperdate }});
     }
     if(lowerdate !== undefined && lowerdate !== null && lowerdate !== "") {
@@ -119,27 +120,43 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
         query.push({ language: { $in: languages } });
     }
     
-    itineraries = await this.find({ $and: query }).exec();
+    if(query.length === 0)
+        itineraries = await this.find().exec();
+    else
+        itineraries = await this.find({ $and: query }).exec();
+
     if(itineraries.length === 0)
         return [];
 
-    const itinerariesIds = itineraries.map(itinerary => itinerary._id);
+    const itinerariesIds = itineraries.map(itinerary => itinerary._id.toString());
     const cursor = this.find().cursor();
     let activities=[];
-    if(types.length>0){
+    if(types!=undefined && types!=null && types.length!==0){
         activities = await Activity.findByTagTypes(types);
     }
+    else{
+        activities = await Activity.find();
+    }
 
+    if(activities.length === 0)
+        return [];
+
+    const activityIds = activities.map(activity => activity._id.toString());
+    const query2 = [];
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
-        for(const activity of activities){
-            if(doc.activities.includes(activity._id) && itinerariesIds.includes(doc._id)){
-                query.push({ _id: doc._id });
-                break;
-            }
+        if(itinerariesIds.includes(doc._id.toString())){
+            doc.activities.forEach(activity => {
+                if(activityIds.includes(activity._id.toString())){
+                    query2.push({ _id: doc._id });
+                }
+            });
         }
     }
 
-    return this.find({ $or: query }).populate('tourGuide').populate('activities').exec();
+    if(query2.length === 0)
+        return [];
+
+    return this.find({ $or: query2 }).populate('tourGuide').populate('activities').exec();
 };
 
 module.exports = mongoose.model('Itinerary', itinerarySchema);
