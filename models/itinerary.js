@@ -125,7 +125,10 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
 
     const itinerariesIds = itineraries.map(itinerary => itinerary._id);
     const cursor = this.find().cursor();
-    const activities = await Activity.findByTagTypes(types);
+    let activities=[];
+    if(types.length>0){
+        activities = await Activity.findByTagTypes(types);
+    }
 
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
         for(const activity of activities){

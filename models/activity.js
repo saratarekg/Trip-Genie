@@ -102,8 +102,15 @@ activitySchema.statics.findByFields = async function(searchCriteria) {
 };
 
 activitySchema.statics.findByTagTypes = async function(types) {
+   if(types.length()===0){
+    return this.find().populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
+   }
+  
+  
+  
     const cursor = this.find().cursor();
-    const tagIds = await Tag.find({ type: { $in: types } }).map(tag => tag._id);
+    const tags = await Tag.find({ type: { $in: types } });
+    const tagIds = tags.map(tag => tag._id);
     const query = [];
 
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
