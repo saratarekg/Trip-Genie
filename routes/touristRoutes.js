@@ -3,6 +3,7 @@ const touristController = require('../controllers/touristController');
 const productController = require('../controllers/productController');
 const itineraryController = require('../controllers/itineraryController.js');
 const activityController = require('../controllers/activityController.js');
+const bookingController = require('../controllers/bookingController.js');
 const historicalPlacesController= require('../controllers/historicalPlacesController');
 
 const router = express.Router();
@@ -24,5 +25,10 @@ router.get('/filter-historical-places',historicalPlacesController.filterHistoric
 router.get('/search-historical-places',historicalPlacesController.searchHistoricalPlaces);
 router.get('/search-activities',activityController.searchActivities);
 router.get('/search-itineraries',itineraryController.searchItineraries);
+
+router.get('/view-bookings', bookingController.getUserBookings);
+router.delete('/delete-booking/:id', bookingController.deleteBooking);
+router.post('/add-booking', bookingController.createBooking);
+
 
 module.exports = router;

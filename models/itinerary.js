@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Activity = require('./activity');
-
 const Schema = mongoose.Schema;
 
 const itinerarySchema = new Schema({
