@@ -37,5 +37,3 @@ app.use('/tourist', requireAuth('tourist'), touristRoutes);
 app.use('/seller', requireAuth('seller'), sellerRoutes);
 app.use('/tour-guide',requireAuth('tourGuide'), tourGuideRoutes);
 app.use('/advertiser',requireAuth('advertiser'), advertiserRoutes);
-
-

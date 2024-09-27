@@ -5,6 +5,7 @@ import Home from './components/Home.jsx';
 import Login from './components/login.jsx';
 import SellerList from './components/SellerList.jsx';
 import ActivityList from './components/ActivityList.jsx';
+import ItineraryList from './components/ItineraryList.jsx';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/seller' element={<SellerList />} />
             <Route path = '/activity' element = {<ActivityList/>}/>
+            <Route path = '/iteneraries' element = {<ItineraryList/>}/>
 
           </Routes>
         </div>
