@@ -13,7 +13,8 @@ router.put('/', touristController.updateTourist);
 router.get('/sort-products-rating', productController.sortProductsByRating);
 router.get('/itineraries', itineraryController.getAllItineraries);
 
-router.post('/filter-activities',activityController.filterActivities);
+router.get('/filter-activities',activityController.filterActivities);
+router.get('/activities', activityController.getAllActivities);
 
 router.get('/products', productController.getAllProducts);
 router.get('/products/:name', productController.getProductbyName);

@@ -63,6 +63,7 @@ const updateItinerary = async (req, res) => {
 };
 const filterItineraries = async (req, res) => {
     try {
+        
         const { price , date, preferences, language } = req.body;
 
         // Build the query object

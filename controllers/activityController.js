@@ -85,16 +85,15 @@ const getActivitiesByAdvertiser = async (req, res) => {
 
 const filterActivities = async (req, res) => {
     try {
-        const { price, startDate, endDate, category, minRating } = req.query;
+        const { price, startDate, endDate, category, minRating } = req.body;
 
         // Build the query object
-        let query = {
-            // 'timeline.start': { $gte: new Date() } // Only upcoming activities
-        };
+        let query = {};
 
         if (price) {
-            query.price = price;
+            query.price = { $lte: price }; // Less than or equal to the specified budget
         }
+
 
         if (startDate) {
             const start = new Date(startDate);
