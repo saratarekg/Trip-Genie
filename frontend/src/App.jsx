@@ -7,12 +7,16 @@ import SellerList from './components/SellerList.jsx';
 import ActivityList from './components/ActivityList.jsx';
 import ItineraryList from './components/ItineraryList.jsx';
 import HistoricalPlaceList from './components/HistoricalPlaceList.jsx';
+import Hero from './components/Hero.jsx';
+
 
 function App() {
   return (
     <div className="App">
       <Router>
       <Navbar/> 
+      <Hero/> 
+
       {/* {isLoginPage ? null : <Navbar />} */}
       <div className='pages'>
           <Routes>

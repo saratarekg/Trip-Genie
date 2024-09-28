@@ -1,0 +1,130 @@
+.heroContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    
+}
+
+.heroImg1 {
+    position: relative;
+    display: block; /* Ensure the image container takes up space */
+    filter: brightness(70%);
+
+}
+.heroImg1:hover {
+
+    filter: brightness(100%);
+
+}
+
+.heroImg1 img {
+    display: block; /* Prevents inline spacing issues with images */
+    width: 100%; /* Ensure the image fills its container */
+}
+
+.heroImg1::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.7) 100%);
+    z-index: 1; /* Ensure it is on top of the image */
+    pointer-events: none; /* Makes sure it's not blocking clicks or interactions */
+}
+.heroImg2 {
+    position: relative;
+    display: block; /* Ensure the image container takes up space */
+    filter: brightness(70%);
+
+}
+.heroImg2:hover {
+
+    filter: brightness(100%);
+
+}
+
+.heroImg2 img {
+    display: block; /* Prevents inline spacing issues with images */
+    width: 100%; /* Ensure the image fills its container */
+}
+
+.heroImg2::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.7) 100%);
+    z-index: 1; /* Ensure it is on top of the image */
+    pointer-events: none; /* Makes sure it's not blocking clicks or interactions */
+}
+.heroImg3 {
+    position: relative;
+    display: block; /* Ensure the image container takes up space */
+    filter: brightness(70%);
+}
+.heroImg3:hover {
+
+    filter: brightness(100%);
+
+}
+.heroImg3 img {
+    display: block; /* Prevents inline spacing issues with images */
+    width: 100%; /* Ensure the image fills its container */
+}
+
+.heroImg3::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.7) 100%);
+    z-index: 1; /* Ensure it is on top of the image */
+    pointer-events: none; /* Makes sure it's not blocking clicks or interactions */
+}
+.imgW{
+    width: 576px;
+    overflow: hidden;
+    position: relative;
+
+}
+
+.heroTitle{
+    color: #FFF;
+text-align: center;
+font-family: Urbanist;
+font-size: 80px;
+font-style: normal;
+font-weight: 800;
+line-height: normal;
+position: absolute;
+top: 200px;
+margin:0 80px;
+}
+
+.heroLinks{
+position: absolute;
+bottom: 36px;
+left: 70px;
+color: #FFF;
+font-family: Urbanist;
+font-size: 42px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+}
+
+.heroArrow{
+    position: absolute;
+    bottom: 22px;
+    right: 65px;
+    width: 76px;
+height: 76px;
+flex-shrink: 0;
+}

@@ -2,7 +2,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: sticky;
+  position: fixed;
+  background-color: transparent;
+  z-index: 20;
 }
 
 .frame14 {
