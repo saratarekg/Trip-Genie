@@ -2,6 +2,18 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --dark-orange: #FFB915;
+  --light-orange: #FFD358;
+  --light-blue: #003566;
+  --dark-blue: #002a45;
+  --darker-blue: #011b2f;
+}
+
 *{
   font-family: Urbanist;
 }
