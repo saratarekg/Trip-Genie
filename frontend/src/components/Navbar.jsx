@@ -22,13 +22,13 @@ const Navbar = () => {
         <p className="text">
           <Link to="/seller">Seller</Link>
         </p>
-        {/* <p className="text">
+        <p className="text">
           <Link to="/iteneraries">Iteneraries</Link>
         </p>
 
         <p className="text">
           <Link to="/museums">Museum/Historical Places</Link>
-        </p> */}
+        </p>
       </div>
 
       <div className="frame12">
