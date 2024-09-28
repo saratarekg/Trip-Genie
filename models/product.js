@@ -14,17 +14,17 @@ const productSchema = new mongoose.Schema({
           required: true
          },
     description: {
-         type: String, 
-         required: true 
-        },
-        seller: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Seller', // Reference to the Seller schema
-          required: true
-        }, 
-     rating: {
-            type: Number
-            },     
+      type: String, 
+      required: true 
+    },
+    seller: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Seller', // Reference to the Seller schema
+      required: true
+    }, 
+    rating: {
+          type: Number
+          },     
     reviews: [
       {
         user: { type: String, required: true },
@@ -33,24 +33,9 @@ const productSchema = new mongoose.Schema({
       }
     ],
     quantity: {
-         type: Number,
-         required: true 
-    },
-    seller: {  
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Seller', 
-      required: true,
+          type: Number,
+          required: true 
     }
   });
-
-  productSchema.pre('save', function (next) {
-     if (this.reviews.length > 0) {
-       const totalRating = this.reviews.reduce((acc, review) => acc + review.rating, 0);
-       this.rating = totalRating / this.reviews.length;
-     } else {
-       this.rating = 0; // No reviews, so rating is set to 0 or you can leave it null
-     }
-     next();
-   });
 
 module.exports = mongoose.model('Product', productSchema);
