@@ -38,7 +38,7 @@ const getHistoricalPlace = async (req, res) => {
 
 const getAllHistoricalPlaces = async (req, res) => {
     try {
-        const museum = await Museum.find();
+        const museum = await Museum.find().populate('historicalTag').exec();
         res.status(200).json(museum);
     } catch (error) {
         res.status(400).json({ error: error.message });

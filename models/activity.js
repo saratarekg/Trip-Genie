@@ -106,11 +106,10 @@ activitySchema.statics.findByFields = async function(searchCriteria) {
 };
 
 activitySchema.statics.findByTagTypes = async function(types) {
-   if(types.length()===0){
+   if(types.length===0){
     return this.find().populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
    }
-  
-  
+
   
     const cursor = this.find().cursor();
     const tags = await Tag.find({ type: { $in: types } });
@@ -126,8 +125,40 @@ activitySchema.statics.findByTagTypes = async function(types) {
         }
     }
 
+    if(query.length === 0)
+        return [];
+
+
     return this.find({ $or: query }).populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
 };
+
+activitySchema.statics.findByCategoryNames = async function(names) {
+    if(names.length===0){
+     return this.find().populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
+    }
+   
+   
+   
+     const cursor = this.find().cursor();
+     const categories = await Category.find({ name: { $in: names } });
+     const categoryIds = categories.map(category => category._id.toString());
+     console.log(categoryIds);
+     const query = [];
+ 
+     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+         for(const categoryId of categoryIds){
+             if(doc.category.includes(categoryId.toString())){
+                 query.push({ _id: doc._id });
+                 break;
+             }
+         }
+     }
+     if(query.length===0){
+        return [];
+     }
+ 
+     return this.find({ $or: query }).populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
+ };
 
 
 module.exports = mongoose.model('Activity', activitySchema);

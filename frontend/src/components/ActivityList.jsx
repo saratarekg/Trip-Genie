@@ -9,7 +9,7 @@ const ActivityList = () => {
         const fetchActivities = async () => {
             try {
                 const token = Cookies.get('jwt'); // Replace with your actual token
-                const response = await axios.get('http://localhost:4000/advertiser/activity', {
+                const response = await axios.get('http://localhost:4000/tourist/activities', {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -54,7 +54,6 @@ const ActivityList = () => {
                         <p>Booking Open: {activity.isBookingOpen ? 'Yes' : 'No'}</p>
                         <p>Start Time: {new Date(activity.timeline.start).toLocaleString()}</p>
                         <p>End Time: {new Date(activity.timeline.end).toLocaleString()}</p>
-                        <br />
                     </li>
                 ))}
             </ul>

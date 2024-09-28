@@ -57,7 +57,7 @@ const Login = () => {
                         id="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        required
+                        
                     />
                 </div>
                 <div className="form-group">
@@ -67,7 +67,6 @@ const Login = () => {
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        required
                     />
                 </div>
                 <button type="submit">Login</button>
