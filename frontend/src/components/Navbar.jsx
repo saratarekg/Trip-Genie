@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/images/text-logo.png";
+import logo from "../assets/images/trip-genie.png";
 import searchGlass from "../assets/images/searchGlass.svg";
 
 import "./Navbar.css";
