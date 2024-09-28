@@ -19,7 +19,7 @@ router.get('/activities', activityController.getAllActivities);
 
 router.get('/products/filterbyprice', productController.filterProductsByPrice);
 router.get('/products', productController.getAllProducts);
-router.get('/products/:name', productController.getProductbyName);
+router.get('/products/search', productController.searchProductbyName);
 
 
 

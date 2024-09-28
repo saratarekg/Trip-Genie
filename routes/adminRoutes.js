@@ -88,7 +88,7 @@ router.get('/sort-products-rating', productController.sortProductsByRating);
 
 router.get('/products/filterbyprice', productController.filterProductsByPrice);
 router.get('/products', productController.getAllProducts);
-router.get('/products/:name', productController.getProductbyName);
+router.get('/products/search', productController.searchProductbyName);
 router.post('/products', productController.addProduct);
 
 router.put('/products/:id',productController.editProduct);
