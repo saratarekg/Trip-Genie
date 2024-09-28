@@ -1,12 +1,13 @@
-const Product = require("../models/product");
-const Seller = require("../models/seller");
+const Product = require('../models/product');
+const Seller = require('../models/seller');
+
 
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({error: error.message});
   }
 };
 
@@ -22,12 +23,25 @@ const getAllProducts = async (req, res) => {
 // };
 
 const addProduct = async (req, res) => {
-  const { name, picture, price, description, rating, reviews, quantity } =
-    req.body; // Extract the data from request
-
-  try {
-    // Use the sellerType from the Seller document
+    const { name, picture , price,description, rating , reviews , quantity } = req.body; // Extract the data from request
+  
+    try {
+  
+      // Use the sellerType from the Seller document
     //   const sellerType = seller.seller;
+  
+      // Create the product with the fetched sellerType
+      const product = new Product({
+        name, picture , price,description, seller:res.locals.user_id, rating , reviews , quantity
+      });
+  
+      // Save the product to the database
+      await product.save();
+      res.status(201).json(product);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
+  };
 
 const searchProductbyName = async (req, res) => {
   const { name } = req.body;
@@ -35,34 +49,11 @@ const searchProductbyName = async (req, res) => {
     if(name === undefined || name === null || name === "") {
       return this.find().populate('seller').exec();
     }
-    // Create the product with the fetched sellerType
-    const product = new Product({
-      name,
-      picture,
-      price,
-      description,
-      seller: res.locals.user_id,
-      rating,
-      reviews,
-      quantity,
-    });
-
-    // Save the product to the database
-    await product.save();
-    res.status(201).json(product);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
-const getProductbyName = async (req, res) => {
-  try {
-    const product = await Product.findOne({ name: req.params.name });
-    if (!product) {
+    const products = await Product.find({ name: { $regex: new RegExp(name, 'i') } });
+    if (!products) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.status(200).json(product);
-
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -77,9 +68,7 @@ const sortProductsByRating = async (req, res) => {
     res.status(200).json(products);
   } catch (error) {
     // Handle any errors
-    res
-      .status(500)
-      .json({ message: "Error fetching products", error: error.message });
+    res.status(500).json({ message: 'Error fetching products', error: error.message });
   }
 };
 
