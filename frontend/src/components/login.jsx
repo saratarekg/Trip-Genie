@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// let role = null;
+let role = null;
 const Login = () => {
     const [email, setEmail] = useState(''); 
     const [username, setUsername] = useState('');
@@ -24,8 +24,11 @@ const Login = () => {
     
             if (response.ok) {
                 // role = response.body.role;
+                const data = await response.json();
+                role = data.role;
+
                 // console.log(response.body.message);
-                if (email === 'aw@example.com'){
+                if (role === 'tour-guide'){
                     navigate('/tour-guide-home');
                 }
                 else{
@@ -83,4 +86,4 @@ const Login = () => {
     );
 };
 
-export  default Login;
+export { Login as default, role };

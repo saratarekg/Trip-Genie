@@ -46,7 +46,7 @@ const login = async (req, res) => {
             user = await Tourist.login(email, password);
         }
         else if(await TourGuide.findOne({email})){
-            role = 'tourGuide';
+            role = 'tour-guide';
             user = await TourGuide.login(email, password);
         }
         else if(await Advertiser.findOne({email})){
@@ -62,7 +62,7 @@ const login = async (req, res) => {
             user = await Admin.login(username, password);
         }
         else if(await TourismGovernor.findOne({username})){
-            role = 'tourismGovernor';
+            role = 'tourism-governor';
             user = await TourismGovernor.login(username, password);
         }
         else{

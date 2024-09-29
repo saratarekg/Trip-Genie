@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import {role} from './login';
 
 import {
   Card,
@@ -24,7 +25,9 @@ const HistoricalPlaceList = () => {
         const fetchHistoricalPlaces = async () => {
             try {
                 const token = Cookies.get('jwt');
-                const response = await axios.get('http://localhost:4000/tourist/historical-places', {
+                const api = 'http://localhost:4000/'+role+'/historical-places';
+                console.log(api);
+                const response = await axios.get(api, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
