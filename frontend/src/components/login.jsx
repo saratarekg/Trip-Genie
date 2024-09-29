@@ -24,9 +24,14 @@ const Login = () => {
     
             if (response.ok) {
                 // role = response.body.role;
-                // console.log(response.body.message); 
+                // console.log(response.body.message);
+                if (email === 'aw@example.com'){
+                    navigate('/tour-guide-home');
+                }
+                else{
                 navigate('/');
                 console.log('Login successful!');
+                }
             } else {
                 console.error('Login failed. Please check your credentials.');
             }

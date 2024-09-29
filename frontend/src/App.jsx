@@ -7,6 +7,7 @@ import SellerList from './components/SellerList.jsx';
 import ActivityList from './components/ActivityListAdvertiser.jsx';
 import ItineraryList from './components/ItineraryListTourGuide.jsx';
 import HistoricalPlaceList from './components/HistoricalPlaceListGovernor.jsx';
+import Tghome from './components/TourGuideHome.jsx';
 import Hero from './components/Hero.jsx';
 import { NavbarComponent } from './components/navbar.jsx';
 
@@ -15,12 +16,13 @@ function App() {
     <div className="App">
       <Router>
       <NavbarComponent/> 
-      <Hero/> 
+
 
       {/* {isLoginPage ? null : <Navbar />} */}
       <div className='pages'>
           <Routes>
             <Route path='/' element={<Home />} />
+            <Route path='/tour-guide-home' element={<Tghome />} />
             <Route path='/login' element={<Login />} />
             <Route path='/seller' element={<SellerList />} />
             <Route path = '/activity' element = {<ActivityList/>}/>
