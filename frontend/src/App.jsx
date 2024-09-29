@@ -1,20 +1,20 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/Navbar.jsx';
+import Navbar1 from './components/Navbar1.jsx';
 import Home from './components/Home.jsx';
 import Login from './components/login.jsx';
 import SellerList from './components/SellerList.jsx';
-import ActivityList from './components/ActivityList.jsx';
-import ItineraryList from './components/ItineraryList.jsx';
-import HistoricalPlaceList from './components/HistoricalPlaceList.jsx';
+import ActivityList from './components/ActivityListAdvertiser.jsx';
+import ItineraryList from './components/ItineraryListTourGuide.jsx';
+import HistoricalPlaceList from './components/HistoricalPlaceListGovernor.jsx';
 import Hero from './components/Hero.jsx';
-
+import { NavbarComponent } from './components/navbar.jsx';
 
 function App() {
   return (
     <div className="App">
       <Router>
-      <Navbar/> 
+      <NavbarComponent/> 
       <Hero/> 
 
       {/* {isLoginPage ? null : <Navbar />} */}
@@ -24,7 +24,7 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/seller' element={<SellerList />} />
             <Route path = '/activity' element = {<ActivityList/>}/>
-            <Route path = '/iteneraries' element = {<ItineraryList/>}/>
+            <Route path = '/itineraries' element = {<ItineraryList/>}/>
             <Route path = '/museums' element = {<HistoricalPlaceList/>}/>
           </Routes>
         </div>
