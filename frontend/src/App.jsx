@@ -10,14 +10,12 @@ import HistoricalPlaceList from './components/HistoricalPlaceListGovernor.jsx';
 import Tghome from './components/TourGuideHome.jsx';
 import Hero from './components/Hero.jsx';
 import { NavbarComponent } from './components/navbar.jsx';
-import { HistoricalPlacesComponent } from './components/HistoricalPlaces.jsx';
 
 function App() {
   return (
     <div className="App">
       <Router>
       <NavbarComponent/> 
-      <HistoricalPlacesComponent/> 
 
 
       {/* {isLoginPage ? null : <Navbar />} */}

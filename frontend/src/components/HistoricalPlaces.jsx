@@ -23,7 +23,7 @@ export function HistoricalPlacesComponent() {
             Authorization: `Bearer ${token}`,
           }
         })
-        setPlaces(response.data) 
+        setPlaces(response.data.slice(0,10)) 
       } catch (err) {
         setError(err.message)
       }
@@ -55,7 +55,8 @@ export function HistoricalPlacesComponent() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-3xl font-bold">Historical Places</h2>
-          <p className="text-gray-600 mt-2">Most popular historical places around the world.</p>
+          <hr className="border-red-500 w-1/2 mb-3 mt-1" />
+          <p className="text-gray-600 mt-2 mb-8">Most popular historical places around the world.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="icon" onClick={prevSlide} aria-label="Previous place">
@@ -68,7 +69,7 @@ export function HistoricalPlacesComponent() {
       </div>
 
       {/* Outer container (with overflow hidden) */}
-      <div className="overflow-hidden">
+      <div >
         {/* Inner sliding container */}
         <div
           className="flex gap-6 transition-transform duration-300"
@@ -80,9 +81,9 @@ export function HistoricalPlacesComponent() {
           {places.map((place) => (
             <div
               key={place.id}
-              className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4"
+              className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 transition-transform duration-300 hover:-translate-y-12 hover:z-10 relative"
             >
-              <div className="relative aspect-[3/4] rounded-lg overflow-hidden">
+              <div className=" cursor-pointer relative aspect-[3/4] rounded-lg overflow-hidden">
                 <img
                   src={Array.isArray(place.pictures) ? place.pictures[0] : place.pictures}
                   alt={place.title}
@@ -101,17 +102,17 @@ export function HistoricalPlacesComponent() {
           ))}
         </div>
       </div>
+
       {/* View More Button */}
       <div className="flex justify-end mt-4">
-  <Button 
-    variant="primary" 
-    onClick={() => alert("View More clicked!")} 
-    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-  >
-    View More
-  </Button>
-</div>
-
+        <Button 
+          variant="primary" 
+          onClick={() => alert("View More clicked!")} 
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+        >
+          View More
+        </Button>
+      </div>
     </div>
   )
 }

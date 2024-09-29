@@ -1,11 +1,17 @@
 import React from 'react'
 import TravelHero from './TravelHero.jsx'
+import { HistoricalPlacesComponent } from './HistoricalPlaces.jsx';
 
 const Home = () => {
   return (
-    <div className='text-5xl uppercase'>
-    <TravelHero></TravelHero>
+    <>    <div >
+      <TravelHero></TravelHero>
+
     </div>
+      <div>
+        <HistoricalPlacesComponent />
+      </div></>
+
   )
 }
 
