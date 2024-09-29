@@ -10,7 +10,13 @@ const router = express.Router();
 
 
 
+
 router.get("/itineraries/sort",itineraryController.sortItineraries);
+
+router.get('/products/filterbyprice', productController.filterProductsByPrice);
+router.get('/products', productController.getAllProducts);
+router.get('/products/search', productController.searchProductbyName);
+
 
 
 

@@ -2,6 +2,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: fixed;
+  width: 100vw;
+  z-index: 20;
 }
 
 .frame14 {
@@ -15,7 +18,7 @@
 }
 
 .logo {
-  width: 150px;
+  width: 100px;
 }
 
 .frame10 {
@@ -32,7 +35,7 @@
 
 .text {
   color: black;
-  font-size: 24px;
+  font-size: 1.3rem;
   font-style: normal;
   font-weight: 800;
   line-height: normal;
