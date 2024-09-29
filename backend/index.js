@@ -32,8 +32,8 @@ mongoose.connect(process.env.URI)
 
 app.use('/auth',authRoutes);
 app.use('/admin', requireAuth('admin'), adminRoutes);
-app.use('/tourism-governor', requireAuth('tourismGovernor'), tourismGovernorRoutes);
+app.use('/tourism-governor', requireAuth('tourism-governor'), tourismGovernorRoutes);
 app.use('/tourist', requireAuth('tourist'), touristRoutes);
 app.use('/seller', requireAuth('seller'), sellerRoutes);
-app.use('/tour-guide',requireAuth('tourGuide'), tourGuideRoutes);
+app.use('/tour-guide',requireAuth('tour-guide'), tourGuideRoutes);
 app.use('/advertiser',requireAuth('advertiser'), advertiserRoutes);
