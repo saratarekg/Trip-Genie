@@ -1,9 +1,10 @@
 import React from 'react'
+import TravelHero from './TravelHero.jsx'
 
 const Home = () => {
   return (
     <div className='text-5xl uppercase'>
-      Home Page 
+    <TravelHero></TravelHero>
     </div>
   )
 }
