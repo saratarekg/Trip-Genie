@@ -14,8 +14,8 @@ const Museum = require('../models/historicalPlaces');
 // }
 
 const createHistoricalPlace = async (req, res) => {
-    const { description, location,  historicalTag, openingHours, ticketPrices, pictures} = req.body;
-    const historicalPlace = new Museum({description, location,  historicalTag, openingHours, ticketPrices, pictures, governor:res.locals.user_id});
+    const {title, description, location,  historicalTag, openingHours, ticketPrices, pictures} = req.body;
+    const historicalPlace = new Museum({title,description, location,  historicalTag, openingHours, ticketPrices, pictures, governor:res.locals.user_id});
 
     try {
         await historicalPlace.save();
