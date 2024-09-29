@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom'; // Import Link from React Router
-import logo from '../assets/images/tgLogofinal2.png';
+import logo from '../assets/images/tgLogofinal6.png';
 
 const NavLink = ({ to, children }) => (
   <Link
@@ -31,22 +31,22 @@ export function NavbarComponent() {
               {/* Logo */}
               <div className="flex-shrink-0">
                 <Link to="/" className="flex items-center">
-                  <img src = {logo} alt="logo" className="h-12 w-auto" />
+                  <img src={logo} alt="logo" className="h-12 w-auto" />
                 </Link>
               </div>
 
               {/* Desktop Navigation */}
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  {['Home', 'Explore', 'Travel', 'Museums', 'Pricing'].map((item) => (
-                    <NavLink key={item} to={`/${item.toLowerCase()}`}>
+                  {['Home', 'Explore', 'Travel', 'Museums', 'Pricing', 'Historical Places'].map((item) => (
+                    <NavLink key={item} to={`/${item.toLowerCase().replace(/\s+/g, '-')}`}>
                       {item}
                     </NavLink>
                   ))}
                 </div>
               </div>
 
-              {/* Login and Sign Up */}
+              {/* Login, Sign Up, and Contact Us Buttons */}
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center md:ml-6">
                   <button className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium">
@@ -55,6 +55,13 @@ export function NavbarComponent() {
                   <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
                     Sign up
                   </button>
+
+                  {/* New Contact Us Button */}
+                  <Link to="/contact">
+                    <button className="ml-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                      Contact Us
+                    </button>
+                  </Link>
                 </div>
               </div>
 
@@ -78,15 +85,17 @@ export function NavbarComponent() {
           {isMenuOpen && (
             <div className="md:hidden bg-black bg-opacity-50">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                {['Home', 'Explore', 'Travel', 'Blog', 'Pricing'].map((item) => (
+                {['Home', 'Explore', 'Travel', 'Museums', 'Pricing', 'Historical Places'].map((item) => (
                   <Link
                     key={item}
-                    to={`/${item.toLowerCase()}`}
+                    to={`/${item.toLowerCase().replace(/\s+/g, '-')}`}
                     className="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium">
                     {item}
                   </Link>
                 ))}
               </div>
+
+              {/* Login, Sign Up, and Contact Us in Mobile View */}
               <div className="pt-4 pb-3 border-t border-white border-opacity-25">
                 <div className="flex items-center px-5">
                   <button className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-base font-medium">
@@ -95,6 +104,11 @@ export function NavbarComponent() {
                   <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-base font-medium">
                     Sign up
                   </button>
+                  
+                  {/* New Contact Us Button in Mobile */}
+                  <Link to="/contact" className="ml-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-base font-medium">
+                    Contact Us
+                  </Link>
                 </div>
               </div>
             </div>
