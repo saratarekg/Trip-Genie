@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Navbar from './components/Navbar.jsx';
+import Navbar1 from './components/Navbar1.jsx';
 import Home from './components/Home.jsx';
 import Login from './components/login.jsx';
 import SellerList from './components/SellerList.jsx';
@@ -8,13 +8,13 @@ import ActivityList from './components/ActivityList.jsx';
 import ItineraryList from './components/ItineraryList.jsx';
 import HistoricalPlaceList from './components/HistoricalPlaceList.jsx';
 import Hero from './components/Hero.jsx';
-
+import { NavbarComponent } from './components/navbar.jsx';
 
 function App() {
   return (
     <div className="App">
       <Router>
-      <Navbar/> 
+      <NavbarComponent/> 
       <Hero/> 
 
       {/* {isLoginPage ? null : <Navbar />} */}

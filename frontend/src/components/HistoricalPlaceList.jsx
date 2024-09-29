@@ -13,6 +13,8 @@ import {
 
 import { Button } from "@/components/ui/button"
 
+import { CoolButton } from './cool-button';
+
 
 const HistoricalPlaceList = () => {
     const [jsonData, setPlaces] = useState([]);
@@ -121,7 +123,7 @@ const HistoricalPlaceList = () => {
               <p><strong>Pictures:</strong> {item.pictures.length > 0 ? "Yes" : "No"}</p>
             </CardContent>
             <CardFooter className = "flex justify-between">
-            <Button variant="secondary" >View More</Button>
+            <CoolButton >View More</CoolButton>
             </CardFooter>
           </Card>
         ))}
