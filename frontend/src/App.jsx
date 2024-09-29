@@ -22,12 +22,12 @@ function App() {
       <div className='pages'>
           <Routes>
             <Route path='/' element={<Home />} />
-            <Route path='/tour-guide-home' element={<Tghome />} />
+            {/* <Route path='/tour-guide-home' element={<Tghome />} /> */}
             <Route path='/login' element={<Login />} />
             <Route path='/seller' element={<SellerList />} />
             <Route path = '/activity' element = {<ActivityList/>}/>
             <Route path = '/itineraries' element = {<ItineraryList/>}/>
-            <Route path = '/museums' element = {<HistoricalPlaceList/>}/>
+            {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
           </Routes>
         </div>
       </Router>
