@@ -7,26 +7,23 @@ const HistoricalPlaceList = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchHistoricalPlaces = async () => {
-            try {
-                const token = Cookies.get('jwt');
-                const response = await axios.get('http://localhost:4000/governor//my-historical-places', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    }
-                });
-                setPlaces(response.data);
-            } catch (err) {
-                setError(err.message);
-            }
-        };
+      const fetchActivities = async () => {
+          try {
+              const token = Cookies.get('jwt'); // Replace with your actual token
+              const response = await axios.get('http://localhost:4000/tourism-governor/my-historical-places', {
+                  headers: {
+                      Authorization: `Bearer ${token}`,
+                  },
+              });
+              setActivities(response.data);
+          } catch (error) {
+              console.error('Error fetching activities:', error);
+          }
+      };
+      
 
-        fetchHistoricalPlaces();
-    }, []);
-
-    if (error) {
-        return <div>Error: {error}</div>;
-    }
+      fetchActivities();
+  }, []);
 
     return (
         <div style={{ padding: "20px" }}>

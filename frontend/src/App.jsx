@@ -4,8 +4,8 @@ import Navbar1 from './components/Navbar1.jsx';
 import Home from './components/Home.jsx';
 import Login from './components/login.jsx';
 import SellerList from './components/SellerList.jsx';
-import ActivityList from './components/ActivityList.jsx';
-import ItineraryList from './components/ItineraryList.jsx';
+import ActivityList from './components/ActivityListAdvertiser.jsx';
+import ItineraryList from './components/ItineraryListTourGuide.jsx';
 import HistoricalPlaceList from './components/HistoricalPlaceList.jsx';
 import Hero from './components/Hero.jsx';
 import { NavbarComponent } from './components/navbar.jsx';
@@ -24,7 +24,7 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/seller' element={<SellerList />} />
             <Route path = '/activity' element = {<ActivityList/>}/>
-            <Route path = '/iteneraries' element = {<ItineraryList/>}/>
+            <Route path = '/itineraries' element = {<ItineraryList/>}/>
             <Route path = '/museums' element = {<HistoricalPlaceList/>}/>
           </Routes>
         </div>

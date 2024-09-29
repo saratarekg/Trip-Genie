@@ -38,7 +38,7 @@ export function NavbarComponent() {
               {/* Desktop Navigation */}
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  {['Home', 'Explore', 'Travel', 'Museums', 'Pricing', 'Historical Places'].map((item) => (
+                  {['activity', 'itineraries', 'Travel', 'Museums', 'Pricing', 'Historical Places'].map((item) => (
                     <NavLink key={item} to={`/${item.toLowerCase().replace(/\s+/g, '-')}`}>
                       {item}
                     </NavLink>
