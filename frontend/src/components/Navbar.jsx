@@ -38,7 +38,7 @@ export function NavbarComponent() {
               {/* Desktop Navigation */}
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  {['activity', 'itineraries', 'Travel', 'Museums', 'Pricing', 'Historical Places'].map((item) => (
+                  {['Activity', 'Itineraries', 'Travel', 'Museums', 'Pricing', 'Historical Places'].map((item) => (
                     <NavLink key={item} to={`/${item.toLowerCase().replace(/\s+/g, '-')}`}>
                       {item}
                     </NavLink>
@@ -46,22 +46,15 @@ export function NavbarComponent() {
                 </div>
               </div>
 
-              {/* Login, Sign Up, and Contact Us Buttons */}
+              {/* Login, Sign Up*/}
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center md:ml-6">
-                  <button className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium">
+                  <NavLink to="/login" className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium">
                     Login
-                  </button>
+                  </NavLink>
                   <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
                     Sign up
                   </button>
-
-                  {/* New Contact Us Button */}
-                  <Link to="/contact">
-                    <button className="ml-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                      Contact Us
-                    </button>
-                  </Link>
                 </div>
               </div>
 
@@ -95,20 +88,17 @@ export function NavbarComponent() {
                 ))}
               </div>
 
-              {/* Login, Sign Up, and Contact Us in Mobile View */}
+              {/* Login, Sign Up in Mobile View */}
               <div className="pt-4 pb-3 border-t border-white border-opacity-25">
                 <div className="flex items-center px-5">
+                  <Link to="/login">
                   <button className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-base font-medium">
                     Login
                   </button>
+                  </Link>
                   <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-base font-medium">
                     Sign up
                   </button>
-                  
-                  {/* New Contact Us Button in Mobile */}
-                  <Link to="/contact" className="ml-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-base font-medium">
-                    Contact Us
-                  </Link>
                 </div>
               </div>
             </div>
