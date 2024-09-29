@@ -26,8 +26,15 @@ const Login = () => {
                 // role = response.body.role;
                 const data = await response.json();
                 role = data.role;
+
+                // console.log(response.body.message);
+                if (role === 'tour-guide'){
+                    navigate('/tour-guide-home');
+                }
+                else{
                 navigate('/');
                 console.log('Login successful!');
+                }
             } else {
                 console.error('Login failed. Please check your credentials.');
             }

@@ -40,7 +40,6 @@ const HistoricalPlaceList = () => {
               borderRadius: "5px"
             }}
           >
-
             <p><strong>Description:</strong> {item.description}</p>
             <p><strong>Location</strong></p>
             <ul style={{ listStyleType: "none", paddingLeft: "0" }}>
