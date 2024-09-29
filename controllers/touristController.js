@@ -66,6 +66,13 @@ const updateTourist = async (req, res) => {
 
 
 
+
+
+
+
+
+
+
 module.exports = {
     deleteTouristAccount,
     getAllTourists,
