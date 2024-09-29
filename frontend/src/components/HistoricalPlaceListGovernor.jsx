@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+// import {role} from './login.jsx';
 
 const HistoricalPlaceList = () => {
     const [jsonData, setPlaces] = useState([]);
     const [error, setError] = useState(null);
-
+    // console.log(role);
     useEffect(() => {
       const fetchActivities = async () => {
           try {
@@ -17,7 +18,7 @@ const HistoricalPlaceList = () => {
               });
               setActivities(response.data);
           } catch (error) {
-              console.error('Error fetching activities:', error);
+              console.error('Error fetching historical places:', error);
           }
       };
       
@@ -28,6 +29,7 @@ const HistoricalPlaceList = () => {
     return (
         <div style={{ padding: "20px" }}>
         <h1>Historical Places</h1>
+
         {jsonData.map((item, index) => (
           <div 
             key={item._id} 

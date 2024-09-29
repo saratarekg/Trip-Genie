@@ -84,6 +84,7 @@ const filterHistoricalPlaces = async (req, res) => {
 const getHistoricalPlacesByGovernor = async (req, res) => {
     try {
         const  governorId  = res.locals.user_id; // Assuming governorId is passed in the request params
+        console.log(governorId);
         const historicalPlaces = await Museum.findByGovernor(governorId);
         if (!historicalPlaces || historicalPlaces.length === 0) {
             return res.status(404).json({ message: 'No historical places found for this governor.' });

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
+// let role = null;
 const Login = () => {
     const [email, setEmail] = useState(''); 
     const [username, setUsername] = useState('');
@@ -23,7 +23,8 @@ const Login = () => {
             });
     
             if (response.ok) {
-                console.log(response.body.message); 
+                // role = response.body.role;
+                // console.log(response.body.message); 
                 navigate('/');
                 console.log('Login successful!');
             } else {
@@ -32,7 +33,9 @@ const Login = () => {
         } catch (error) {
             console.error('An error occurred during login:', error);
         }
+        
     };
+   
     
 
     return (
@@ -75,4 +78,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export  default Login;

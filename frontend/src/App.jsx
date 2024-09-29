@@ -6,7 +6,7 @@ import Login from './components/login.jsx';
 import SellerList from './components/SellerList.jsx';
 import ActivityList from './components/ActivityListAdvertiser.jsx';
 import ItineraryList from './components/ItineraryListTourGuide.jsx';
-import HistoricalPlaceList from './components/HistoricalPlaceList.jsx';
+import HistoricalPlaceList from './components/HistoricalPlaceListGovernor.jsx';
 import Hero from './components/Hero.jsx';
 import { NavbarComponent } from './components/navbar.jsx';
 
