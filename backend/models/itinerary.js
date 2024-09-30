@@ -7,16 +7,16 @@ const itinerarySchema = new Schema({
         type: String,
         required: true,
     },
-    description: {
-        type: String,
-        required: true,
-    },
     activities: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Activity', 
         },
     ],
+    timeline: {
+        type: String,
+        required: true,
+    },
     language: {
         type: String,
         required: true,
@@ -85,7 +85,7 @@ itinerarySchema.statics.findByFields = async function(searchCriteria) {
     const activityIds = activities.map(tag => tag._id);
 
     query.push({["title"] : { $regex: new RegExp(searchCriteria, 'i') }});  // Case-insensitive
-    query.push({["description"] : { $regex: new RegExp(searchCriteria, 'i') }});  // Case-insensitive
+    query.push({["timeline"] : { $regex: new RegExp(searchCriteria, 'i') }});  // Case-insensitive
     
     const cursor = this.find().cursor();
 

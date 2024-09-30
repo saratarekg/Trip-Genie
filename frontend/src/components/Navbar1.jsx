@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import logo from "../assets/images/trip-genie.png";
 import searchGlass from "../assets/images/searchGlass.svg";
 
-import "./Navbar.css";
+import "../styles/Navbar.css";
 
 const Navbar = () => {
   return (

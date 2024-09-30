@@ -27,7 +27,7 @@ const getItineraryById = async (req, res) => {
 const createItinerary = async (req, res) => {
   const {
     title,
-    description,
+    timeline,
     activities,
     language,
     price,
@@ -38,7 +38,7 @@ const createItinerary = async (req, res) => {
   } = req.body;
   const itinerary = new Itinerary({
     title,
-    description,
+    timeline,
     activities,
     language,
     price,
