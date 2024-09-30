@@ -16,7 +16,9 @@ export function HistoricalPlaces() {
     const fetchHistoricalPlaces = async () => {
       try {
         const token = Cookies.get('jwt')
-        const role = Cookies.get('role')
+        let role = Cookies.get('role')
+        if (role === undefined) 
+          role = 'guest'
         const api = `http://localhost:4000/${role}/historical-places`
         const response = await axios.get(api, {
           headers: {

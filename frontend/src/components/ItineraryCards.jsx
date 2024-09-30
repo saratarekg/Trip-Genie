@@ -11,8 +11,11 @@ export const ItineraryCards = () => {
     const fetchItineraries = async () => {
       try {
         const token = Cookies.get("jwt");
+        let role = Cookies.get('role')
+        if (role === undefined) 
+          role = 'guest'
         const response = await axios.get(
-          "http://localhost:4000/tourist/itineraries",
+          `http://localhost:4000/${role}/itineraries`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

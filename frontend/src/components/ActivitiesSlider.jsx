@@ -17,9 +17,11 @@ export function Activities() {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const token = Cookies.get('jwt');
-        const role = Cookies.get('role');
-        const api = `http://localhost:4000/${role}/activities`;
+        const token = Cookies.get('jwt')
+        let role = Cookies.get('role')
+        if (role === undefined) 
+          role = 'guest'
+        const api = `http://localhost:4000/${role}/activities`
         const response = await axios.get(api, {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -11,17 +11,6 @@ const getAllProducts = async (req, res) => {
   }
 };
 
-// const addProduct = async (req, res) => {
-//     const product = new Product(req.body);
-//     try {
-//         await product.save();
-//         res.status(201).json(product);
-//         res.send('Product added successfully!');
-//     } catch (error) {
-//         res.status(400).json({ error: error.message });
-//     }
-// };
-
 const addProduct = async (req, res) => {
     const { name, picture , price,description, rating , reviews , quantity } = req.body; // Extract the data from request
   
@@ -152,6 +141,50 @@ const filterProductsByPrice = async (req, res) => {
   }
 };
 
+const getProductById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.status(200).json(product);
+  }
+  catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteProduct = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await Product.findByIdAndDelete(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteProductOfSeller = async (req, res) => {
+  const { id } = req.params;
+  const product = await Product.findById(id);
+  if(product.seller != res.locals.user_id){
+    return res.status(403).json({ message: "You are not authorized to delete this product" });
+  }
+  try {
+    const product = await Product.findByIdAndDelete(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 module.exports = {
   getAllProducts,
   addProduct,
@@ -159,5 +192,8 @@ module.exports = {
   sortProductsByRating,
   editProduct,
   filterProductsByPrice,
-  editProductOfSeller
+  editProductOfSeller,
+  getProductById,
+  deleteProduct,
+  deleteProductOfSeller
 };

@@ -9,7 +9,6 @@ const historicalPlacesController = require("../controllers/historicalPlacesContr
 const router = express.Router();
 
 
-
 router.get("/itineraries/sort",itineraryController.sortItineraries);
 router.get("/itineraries/search", itineraryController.searchItineraries);
 router.get("/itineraries", itineraryController.getAllItineraries);
@@ -33,11 +32,6 @@ router.get("/historical-places",historicalPlacesController.getAllHistoricalPlace
 router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);
 router.get("/historical-places/filter",historicalPlacesController.filterHistoricalPlaces);
 router.get("/historical-places/search",historicalPlacesController.searchHistoricalPlaces);
-
-router.get("/bookings", bookingController.getUserBookings);
-router.delete("/bookings/:id", bookingController.deleteBooking);
-router.post("/bookings", bookingController.createBooking);
-
 
 
 module.exports = router;
