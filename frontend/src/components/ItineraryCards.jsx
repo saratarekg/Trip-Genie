@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from "react";
 import line1 from "../assets/images/line-1.svg";
 import rating from "../assets/images/rating.svg";
-import Cookies from 'js-cookie'
-import axios from 'axios'
-
+import Cookies from "js-cookie";
+import axios from "axios";
 
 export const ItineraryCards = () => {
   const [itineraries, setItineraries] = useState([]);
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
-        const token = Cookies.get('jwt')
-        const response = await axios.get("http://localhost:4000/tourist/itineraries", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-        }} );
+        const token = Cookies.get("jwt");
+        const response = await axios.get(
+          "http://localhost:4000/tourist/itineraries",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const data = await response.data.slice(0, 4);
         setItineraries(data);
       } catch (error) {
@@ -26,46 +29,53 @@ export const ItineraryCards = () => {
   }, []);
 
   return (
-    <div className="flex items-center gap-[100px] pl-[182px] pr-0 py-[140px] relative">
-      <div className="inline-flex items-center gap-8 relative flex-[0_0_auto]">
-        <div className="inline-flex flex-col items-center justify-center gap-8 relative flex-[0_0_auto]">
-          <div className="inline-flex flex-col items-start gap-5 relative flex-[0_0_auto]">
-            <div className="relative w-fit mt-[-1.00px] [font-family:'Playfair_Display-Regular',Helvetica] font-normal text-[#172432] text-[64px] tracking-[0] leading-[normal]">
-              Itineraries
-            </div>
-            <img className="relative w-[231px] h-[3px]" alt="Line" src={line1} />
-          </div>
-          <p className="relative self-stretch [font-family:'Rubik-Regular',Helvetica] font-normal text-[#767e86] text-lg tracking-[0] leading-[normal]">
-            20 years from now you will be more disappointed by the things that you didn’t do. Stop regretting and start
-            travelling, start throwing off the bowlines.
-          </p>
-          <button className="all-[unset] box-border inline-flex items-center justify-center p-5 absolute top-[271px] left-10 bg-[#ff7757] rounded-xl">
-            <div className="relative w-fit mt-[-1.00px] [font-family:'Rubik-Regular',Helvetica] font-normal text-white text-lg tracking-[0] leading-[normal] whitespace-nowrap">
-              View all trip plans
-            </div>
-          </button>
+    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-10 lg:gap-[100px] px-4 md:px-16 lg:px-[182px] py-[140px]">
+      {/* Left Side: Itineraries Title, Line, Description, Button */}
+      <div className="flex flex-col gap-5 flex-[1] max-w-full lg:max-w-[20%]">
+        <div className="relative">
+          <h1 className="text-[#172432] text-[40px] md:text-[64px] [font-family:'Playfair_Display-Regular',Helvetica]">
+            Itineraries
+          </h1>
+          <img
+            className="w-[150px] md:w-[231px] h-[2px] md:h-[3px] mt-2"
+            alt="Line"
+            src={line1}
+          />
         </div>
+        <p className="[font-family:'Rubik-Regular',Helvetica] text-[#767e86] text-base md:text-lg leading-[normal]">
+          20 years from now you will be more disappointed by the things that you
+          didn’t do. Stop regretting and start travelling, start throwing off
+          the bowlines.
+        </p>
+        <button className="self-start bg-[#ff7757] text-white text-sm md:text-lg p-4 md:p-5 rounded-xl mt-4 lg:mt-8">
+          View all trip plans
+        </button>
       </div>
-      <div className="flex items-center gap-8 relative flex-1 grow">
+
+      {/* Right Side: Itineraries Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-[1] w-full">
         {itineraries.map((itinerary) => (
-          <div key={itinerary._id} className="relative w-[300px] h-[399px] bg-[#00000033] rounded-[26px]">
-            <div className="flex flex-col items-start justify-end gap-3 px-5 py-5 relative h-full">
-              <div className="flex items-start justify-between relative self-stretch w-full">
-                <div className="relative [font-family:'Rubik-Regular',Helvetica] font-normal text-[#172432] text-lg whitespace-nowrap">
+          <div
+            key={itinerary._id}
+            className="bg-[#00000033] rounded-[26px] p-5 h-full"
+          >
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between">
+                <div className="[font-family:'Rubik-Regular',Helvetica] font-normal text-[#172432] text-lg">
                   {itinerary.title}
                 </div>
-                <div className="relative [font-family:'Rubik-Regular',Helvetica] font-normal text-[#172432] text-lg whitespace-nowrap">
+                <div className="[font-family:'Rubik-Regular',Helvetica] font-normal text-[#172432] text-lg">
                   €{itinerary.price}/Day
                 </div>
               </div>
-              <div className="relative [font-family:'Playfair_Display-SemiBold',Helvetica] font-semibold text-[#172432] text-[20px]">
-                {itinerary.description}
-              </div>
-              <div className="flex items-start justify-between relative self-stretch w-full">
-                <img className="relative flex-[0_0_auto]" alt="Rating" src={rating} />
-                <div className="relative w-fit [font-family:'Rubik-Regular',Helvetica] font-normal text-[#172432] text-lg whitespace-nowrap">
-                  {itinerary.availableDates.length > 0 
-                    ? new Date(itinerary.availableDates[0].date).toLocaleDateString() 
+
+              <div className="flex justify-between">
+                <img alt="Rating" src={rating} />
+                <div className="[font-family:'Rubik-Regular',Helvetica] font-normal text-[#172432] text-lg">
+                  {itinerary.availableDates.length > 0
+                    ? new Date(
+                        itinerary.availableDates[0].date
+                      ).toLocaleDateString()
                     : "No dates available"}
                 </div>
               </div>

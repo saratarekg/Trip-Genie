@@ -2,6 +2,8 @@ import React from 'react'
 import TravelHero from '../components/TravelHero.jsx'
 import { HistoricalPlaces } from '../components/HistoricalPlacesSlider.jsx';
 import {Activities} from '../components/ActivitiesSlider.jsx'
+import { ItineraryCards } from '../components/ItineraryCards.jsx';
+
 
 const Home = () => {
   return (
@@ -14,6 +16,9 @@ const Home = () => {
       </div>
       <div>
         <Activities />
+      </div>
+      <div>
+        <ItineraryCards/>
       </div>
     </>
 
