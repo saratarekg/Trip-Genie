@@ -56,7 +56,7 @@ export function HistoricalPlacesComponent() {
         <div>
           <h2 className="text-3xl font-bold">Historical Places</h2>
           <hr className="border-red-500 w-1/2 mb-3 mt-1" />
-          <p className="text-gray-600 mt-2 mb-8">Most popular historical places around the world.</p>
+          <p className="text-gray-600 mt-2 ">Most popular historical places around the world.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="icon" onClick={prevSlide} aria-label="Previous place">
@@ -69,7 +69,7 @@ export function HistoricalPlacesComponent() {
       </div>
 
       {/* Outer container (with overflow hidden) */}
-      <div >
+      <div className="overflow-hidden" >
         {/* Inner sliding container */}
         <div
           className="flex gap-6 transition-transform duration-300"
@@ -83,7 +83,7 @@ export function HistoricalPlacesComponent() {
               key={place.id}
               className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 transition-transform duration-300 hover:-translate-y-12 hover:z-10 relative"
             >
-              <div className=" cursor-pointer relative aspect-[3/4] rounded-lg overflow-hidden">
+              <div className=" cursor-pointer relative aspect-[3/4] rounded-lg overflow-hidden mt-12">
                 <img
                   src={Array.isArray(place.pictures) ? place.pictures[0] : place.pictures}
                   alt={place.title}
