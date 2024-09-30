@@ -1,18 +1,19 @@
-import React from 'react'
-import TravelHero from './TravelHero.jsx'
-import { HistoricalPlacesComponent } from './HistoricalPlaces.jsx';
+import React from "react";
+import TravelHero from "./TravelHero.jsx";
+import { HistoricalPlacesComponent } from "./HistoricalPlaces.jsx";
+import { ItineraryCards } from "./ItineraryCards.jsx";
 
 const Home = () => {
   return (
-    <>    <div >
-      <TravelHero></TravelHero>
+    <>
+      {" "}
+      <div className="flex flex-col justify-center items-center">
+        <TravelHero />
+        <HistoricalPlacesComponent/>
+        <ItineraryCards/>
+      </div>
+    </>
+  );
+};
 
-    </div>
-      <div>
-        <HistoricalPlacesComponent />
-      </div></>
-
-  )
-}
-
-export default Home
+export default Home;
