@@ -6,6 +6,7 @@ import axios from "axios";
 
 export const ItineraryCards = () => {
   const [itineraries, setItineraries] = useState([]);
+  
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
@@ -48,18 +49,19 @@ export const ItineraryCards = () => {
           the bowlines.
         </p>
         <button className="self-start bg-[#ff7757] text-white text-sm md:text-lg p-4 md:p-5 rounded-xl mt-4 lg:mt-8">
-          View all trip plans
+          View all itineraries
         </button>
       </div>
 
       {/* Right Side: Itineraries Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-[1] w-full">
+      <div className="flex flex-wrap gap-6">
         {itineraries.map((itinerary) => (
           <div
             key={itinerary._id}
-            className="bg-[#00000033] rounded-[26px] p-5 h-full"
+            className="bg-[#00000033] rounded-[26px] p-5"
+            style={{ width: "250px", height: "350px" }}
           >
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 h-full">
               <div className="flex justify-between">
                 <div className="[font-family:'Rubik-Regular',Helvetica] font-normal text-[#172432] text-lg">
                   {itinerary.title}

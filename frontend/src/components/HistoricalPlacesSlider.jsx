@@ -59,10 +59,10 @@ export function HistoricalPlaces() {
           <p className="text-gray-600 mt-2 mb-8">Most popular historical places around the world.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={prevSlide} aria-label="Previous place" className="bg-black text-white">
+          <Button variant="outline" size="icon" onClick={prevSlide} aria-label="Previous place" className="bg-black text-white hover:bg-gray-700">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={nextSlide} aria-label="Next place" className="bg-orange-500 text-white">
+          <Button variant="outline" size="icon" onClick={nextSlide} aria-label="Next place" className="bg-orange-500 text-white hover:bg-orange-600">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
