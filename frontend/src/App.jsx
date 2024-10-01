@@ -11,6 +11,7 @@ import Tghome from './components/TourGuideHome.jsx';
 import Hero from './components/Hero.jsx';
 import { NavbarComponent } from './components/navbar.jsx';
 import { FooterComponent } from './components/footer.jsx';
+import { AllItinerariesComponent } from './components/all-trip-plans.jsx';
 
 function App() {
   return (
@@ -27,7 +28,7 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/seller' element={<SellerList />} />
             <Route path = '/activity' element = {<ActivityList/>}/>
-            <Route path = '/itineraries' element = {<ItineraryList/>}/>
+            <Route path = '/all-itineraries' element = {<AllItinerariesComponent/>}/>
             {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
           </Routes>
         </div>

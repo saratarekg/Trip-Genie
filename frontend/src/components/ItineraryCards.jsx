@@ -4,6 +4,7 @@ import rating from "../assets/images/rating.svg";
 import Cookies from "js-cookie";
 import axios from "axios";
 import defaultImage from "../assets/images/default-image.jpg"; // Import your default image
+import { Link } from "react-router-dom";
 
 export const ItineraryCards = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -51,9 +52,11 @@ export const ItineraryCards = () => {
           didn’t do. Stop regretting and start travelling, start throwing off
           the bowlines.
         </p>
+        <Link to="/all-itineraries">
         <button className="self-start bg-[#ff7757] text-white text-sm md:text-lg p-4 md:p-5 rounded-xl mt-4 lg:mt-8 hover:bg-orange-600 bg-orange-500">
           View all itineraries
         </button>
+        </Link>
       </div>
 
       {/* Right Side: Itineraries Cards */}
