@@ -3,7 +3,7 @@ const Itinerary = require("../models/itinerary");
 // GET all itineraries
 const getAllItineraries = async (req, res) => {
   try {
-    const itineraries = await Itinerary.find().populate("tourGuide").exec();
+    const itineraries = await Itinerary.find().populate("tourGuide").populate('activities').exec();
     res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });
