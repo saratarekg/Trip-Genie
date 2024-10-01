@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {role} from './login';
 
 import {
   Card,
@@ -25,7 +24,10 @@ const HistoricalPlaceList = () => {
         const fetchHistoricalPlaces = async () => {
             try {
                 const token = Cookies.get('jwt');
-                const api = 'http://localhost:4000/'+role+'/historical-places';
+                let role = Cookies.get('role')
+                if (role === undefined) 
+                  role = 'guest'
+                const api = `http://localhost:4000/'${role}/historical-places`;
                 console.log(api);
                 const response = await axios.get(api, {
                     headers: {

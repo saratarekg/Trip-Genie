@@ -67,15 +67,18 @@ const login = async (req, res) => {
         }
         else{
             res.cookie('jwt', '', { maxAge: 1 });
+            res.cookie('role','',{maxAge: 1});
             throw new Error('Email not found');
         }
 
         const token = createToken(user._id,role);
         res.cookie('jwt', token, { httpOnly: false, maxAge: process.env.MAX_AGE*1000});
+        res.cookie('role',role,{ httpOnly: false, maxAge: process.env.MAX_AGE*1000})
         res.setHeader('Authorization', `Bearer ${token}`);
         res.status(200).json({ message: 'Login succesful', role });
     } catch (error) {
         res.cookie('jwt', '', { maxAge: 1 });
+        res.cookie('role','',{maxAge: 1});
         res.status(400).json({ message: error.message });
     }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './TourGuideHome.css';  // Optional: for styling
+import '../styles/TourGuideHome.css';  // Optional: for styling
 import axios from 'axios';
 import Cookies from 'js-cookie'; 
 
@@ -61,7 +61,7 @@ const TourGuideHome = () => {
                     View Profile
                 </button>
                 <button className="tour-button" onClick={updateProfile}>
-                update Profile
+                    update Profile
                 </button>
             </div>
             

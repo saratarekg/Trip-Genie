@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
 const authRoutes = require('./routes/authRoutes');
-
+const guestRoutes = require('./routes/guestRoutes');
 const touristRoutes = require('./routes/touristRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const tourismGovernorRoutes = require('./routes/tourismGovernorRoutes');
@@ -31,6 +31,7 @@ mongoose.connect(process.env.URI)
   .catch(err => console.log(err));
 
 app.use('/auth',authRoutes);
+app.use('/guest', guestRoutes);
 app.use('/admin', requireAuth('admin'), adminRoutes);
 app.use('/tourism-governor', requireAuth('tourism-governor'), tourismGovernorRoutes);
 app.use('/tourist', requireAuth('tourist'), touristRoutes);

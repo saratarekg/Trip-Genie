@@ -9,6 +9,10 @@ const activitySchema = new Schema({
         type: String,
         required: true,
     },
+    description: {
+        type: String,
+        required: true,
+    },
     location: {
         type: String,
         required: true,
@@ -17,15 +21,9 @@ const activitySchema = new Schema({
         type: Number,
         required: true,
     },
-    timeline: {
-        start: {
-            type: Date,
-            required: true,
-        },
-        end: {
-            type: Date,
-            required: true,
-        },
+    timing: {
+        type: Date,
+        required: true
     },
     price: {
         type: Number,
@@ -58,6 +56,10 @@ const activitySchema = new Schema({
     rating: {
         type: Number
         }, 
+    pictures: {
+        type:[String],
+        default: "/src/assets/images/defaultImages.png"
+    },
     advertiser: {  // New field for the maker's ID
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Advertiser', // Replace 'User' with the appropriate model name for makers
@@ -84,6 +86,7 @@ activitySchema.statics.findByFields = async function(searchCriteria) {
 
     query.push({["name"] : { $regex: new RegExp(searchCriteria, 'i') }});  // Case-insensitive
     query.push({["location"] : { $regex: new RegExp(searchCriteria, 'i') }});  // Case-insensitive
+    query.push({["description"] : { $regex: new RegExp(searchCriteria, 'i') }});  // Case-insensitive
     
     const cursor = this.find().cursor();
 
