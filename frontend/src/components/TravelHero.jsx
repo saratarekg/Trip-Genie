@@ -7,7 +7,6 @@ const images = [
   "/images/travelHero(2).jpg",
   "/images/travelHero(3).jpg",
   "/images/travelHero(6).jpg",
-  //  '/images/travelHero(7).jpg'
   "/images/travel-sam.jpg",
 ];
 
@@ -31,6 +30,20 @@ export default function TravelHero() {
     });
   };
 
+  const getVisibleDotIndices = () => {
+    const totalDots = 5;
+    const half = Math.floor(totalDots / 2);
+    const indices = [];
+
+    for (let i = -half; i <= half; i++) {
+      indices.push((currentImage + i + images.length) % images.length);
+    }
+
+    return indices;
+  };
+
+  const visibleDotIndices = getVisibleDotIndices();
+
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {images.map((src, index) => (
@@ -47,6 +60,8 @@ export default function TravelHero() {
           />
         </div>
       ))}
+
+      {/* Overlay Text */}
       <div className="absolute inset-0 bg-black bg-opacity-40">
         <div className="container mx-auto h-full px-4">
           <div className="flex h-[calc(100%-5rem)] flex-col justify-between">
@@ -58,52 +73,69 @@ export default function TravelHero() {
                 The best travel for your journey begins now
               </p>
             </div>
-            {/* <div className="mb-8 flex items-end">
-              <div className="grid w-full max-w-4xl grid-cols-5 gap-4 rounded-lg bg-white p-4">
-                <input
-                  type="text"
-                  placeholder="Destination"
-                  className="col-span-2 rounded border p-2"
-                />
-                <input
-                  type="number"
-                  placeholder="Person"
-                  className="col-span-1 rounded border p-2"
-                />
-                <input
-                  type="date"
-                  placeholder="Check in"
-                  className="col-span-1 rounded border p-2"
-                />
-                <button className="col-span-1 rounded bg-orange-500 p-2 text-white hover:bg-orange-600">
-                  Book Now
-                </button>
-              </div>
-            </div> */}
           </div>
         </div>
       </div>
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 space-y-2">
-        <button
-          onClick={() => navigate("up")}
-          className="rounded-full bg-white p-2 text-black hover:bg-gray-200"
-        >
-          <ChevronUp size={24} />
-        </button>
-        {images.map((_, index) => (
-          <div
-            key={index}
-            className={`h-2 w-2 rounded-full ${
-              index === currentImage ? "bg-white" : "bg-gray-400"
-            }`}
-          />
-        ))}
-        <button
-          onClick={() => navigate("down")}
-          className="rounded-full bg-white p-2 text-black hover:bg-gray-200"
-        >
-          <ChevronDown size={24} />
-        </button>
+
+      {/* Navigation Dots */}
+      <div className="absolute right-8 top-1/2 -translate-y-1/2">
+        <div className="flex flex-col items-center justify-center space-y-2">
+          {/* Up Button */}
+          <button
+            onClick={() => navigate("up")}
+            className="text-white opacity-50 hover:opacity-100 transition-opacity duration-300"
+            aria-label="Previous image"
+          >
+            <ChevronUp size={18} />
+          </button>
+
+          {/* Dots */}
+          <div className="flex flex-col items-center space-y-2">
+            {visibleDotIndices.map((index, dotPosition) => {
+              const isActive = index === currentImage;
+              const distanceFromActive = Math.abs(
+                dotPosition - Math.floor(visibleDotIndices.length / 2)
+              );
+
+              // Determine size and transparency based on proximity to the active dot
+              const size = 12 - distanceFromActive * 2; // Active dot is largest, surrounding dots smaller
+              const opacity = 1 - distanceFromActive * 0.3; // Active dot fully opaque, surrounding dots more transparent
+
+              return (
+                <div
+                  key={index}
+                  className="rounded-full transition-all duration-300"
+                  style={{
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    backgroundColor: isActive
+                      ? "rgba(255, 255, 255, 1)" // Active dot is white
+                      : "rgba(211, 211, 211, 0.7)", // Inactive dots are very light grey
+                    opacity: opacity,
+                  }}
+                  aria-label={`Image ${index + 1} of ${images.length}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setCurrentImage(index)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      setCurrentImage(index);
+                    }
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Down Button */}
+          <button
+            onClick={() => navigate("down")}
+            className="text-white opacity-50 hover:opacity-100 transition-opacity duration-300"
+            aria-label="Next image"
+          >
+            <ChevronDown size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );
