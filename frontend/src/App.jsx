@@ -10,6 +10,7 @@ import HistoricalPlaceList from './components/HistoricalPlaceListGovernor.jsx';
 import Tghome from './components/TourGuideHome.jsx';
 import Hero from './components/Hero.jsx';
 import { NavbarComponent } from './components/navbar.jsx';
+import { FooterComponent } from './components/footer.jsx';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           </Routes>
         </div>
       </Router>
+      <FooterComponent/>
     </div>
   );
 }

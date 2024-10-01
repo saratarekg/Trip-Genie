@@ -22,7 +22,7 @@ export const ItineraryCards = () => {
             },
           }
         );
-        const data = await response.data.slice(0, 4);
+        const data = await response.data.slice(0, 6);
         setItineraries(data);
       } catch (error) {
         console.error("Error fetching itineraries:", error);
@@ -51,7 +51,7 @@ export const ItineraryCards = () => {
           didn’t do. Stop regretting and start travelling, start throwing off
           the bowlines.
         </p>
-        <button className="self-start bg-[#ff7757] text-white text-sm md:text-lg p-4 md:p-5 rounded-xl mt-4 lg:mt-8">
+        <button className="self-start bg-[#ff7757] text-white text-sm md:text-lg p-4 md:p-5 rounded-xl mt-4 lg:mt-8 hover:bg-orange-600 bg-orange-500">
           View all itineraries
         </button>
       </div>
