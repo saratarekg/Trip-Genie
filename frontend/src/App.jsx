@@ -12,6 +12,7 @@ import Hero from './components/Hero.jsx';
 import { NavbarComponent } from './components/navbar.jsx';
 import { FooterComponent } from './components/footer.jsx';
 import { AllItinerariesComponent } from './components/all-trip-plans.jsx';
+import { SignupForm } from './components/signup-form.jsx';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path='/seller' element={<SellerList />} />
             <Route path = '/activity' element = {<ActivityList/>}/>
             <Route path = '/all-itineraries' element = {<AllItinerariesComponent/>}/>
+            <Route path='/sign-up' element={<SignupForm />} />
             {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
           </Routes>
         </div>
