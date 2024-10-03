@@ -3,7 +3,10 @@ const Itinerary = require("../models/itinerary");
 // GET all itineraries
 const getAllItineraries = async (req, res) => {
   try {
-    const itineraries = await Itinerary.find().populate("tourGuide").populate('activities').exec();
+    const itineraries = await Itinerary.find()
+      .populate("tourGuide")
+      .populate("activities")
+      .exec();
     res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -120,20 +123,16 @@ const deleteItinerary = async (req, res) => {
 
     // Check if the itinerary belongs to the current tour guide
     if (itinerary.tourGuide.toString() !== tourGuideId) {
-      return res
-        .status(403)
-        .json({
-          message: "Unauthorized: You can only delete your own itineraries",
-        });
+      return res.status(403).json({
+        message: "Unauthorized: You can only delete your own itineraries",
+      });
     }
 
     // Check if the itinerary is booked
     if (itinerary.isBooked) {
-      return res
-        .status(400)
-        .json({
-          message: "Itinerary cannot be deleted as it is already booked",
-        });
+      return res.status(400).json({
+        message: "Itinerary cannot be deleted as it is already booked",
+      });
     }
 
     // If all checks pass, delete the itinerary
@@ -165,9 +164,15 @@ const searchItineraries = async (req, res) => {
   try {
     const { searchBy } = req.query;
     const itineraries = await Itinerary.findByFields(searchBy);
+
+    console.log("Search By:", searchBy); // Log the search criteria
+    console.log("Itineraries Found:", itineraries); // Log the itineraries found
+
+    // Instead of checking for 404, return an empty array if no itineraries are found
     if (!itineraries || itineraries.length === 0) {
-      return res.status(404).json({ message: "No itineraries found." });
+      return res.status(200).json([]); // Return an empty array with a 200 status
     }
+
     res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -179,12 +184,10 @@ const sortItineraries = async (req, res) => {
     const { order } = req.query;
     let sortCriteria = {};
 
-   
     sortCriteria.price = order === "desc" ? -1 : 1;
 
-    
     const itineraries = await Itinerary.find({
-      "availableDates.date": { $gte: new Date() }, 
+      "availableDates.date": { $gte: new Date() },
     }).sort(sortCriteria);
 
     if (itineraries.length === 0) {
