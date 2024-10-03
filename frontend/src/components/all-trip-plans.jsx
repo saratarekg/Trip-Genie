@@ -1,44 +1,45 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import defaultImage from "../assets/images/default-image.jpg"; // Import your default image
 import ItineraryDetail from './ItineraryDetail.jsx';
 
 // ItineraryCard Component
-const ItineraryCard = ({ trip, onSelect }) => (
-  <div className="bg-white rounded-lg overflow-hidden shadow-lg cursor-pointer" onClick={() => onSelect(trip)}>
-    <img
-      src={trip.activities[0]?.pictures[0] || '/placeholder.svg'}
-      alt={trip.title}
-      className="w-full h-48 object-cover"
-    />
-    <div className="p-4">
-      <span className="text-sm text-gray-500">
-        {trip.activities[0]?.category || 'UNKNOWN TYPE'}
-      </span>
-      <h3 className="text-xl font-semibold mt-2">{trip.title}</h3>
-      <div className="flex items-center mt-2">
-        {[...Array(5)].map((_, i) => (
-          <svg
-            key={i}
-            className={`w-5 h-5 ${i < 5 ? 'text-yellow-400' : 'text-gray-300'}`}
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-            />
-          </svg>
-        ))}
-      </div>
-      <div className="flex justify-between items-center mt-4">
-        <span className="text-lg font-bold text-blue-600">€{trip.price}/Day</span>
-        <span className="text-sm text-gray-500">
-          {trip.activities[0]?.duration || 'N/A'} Hours
-        </span>
-      </div>
-    </div>
-  </div>
-);
+// const ItineraryCard = ({ trip }) => (
+//   <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+//     <img
+//       src={trip.activities[0]?.pictures[0] || '/placeholder.svg'}
+//       alt={trip.title}
+//       className="w-full h-48 object-cover"
+//     />
+//     <div className="p-4">
+//       <span className="text-sm text-gray-500">
+//       {trip.activities && trip.activities.length > 0 ? trip.activities[0].category : ''}
+//       </span>
+//       <h3 className="text-xl font-semibold mt-2">{trip.title}</h3>
+//       <div className="flex items-center mt-2">
+//         {[...Array(5)].map((_, i) => (
+//           <svg
+//             key={i}
+//             className={`w-5 h-5 ${i < 5 ? 'text-yellow-400' : 'text-gray-300'}`}
+//             fill="currentColor"
+//             viewBox="0 0 20 20"
+//           >
+//             <path
+//               d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+//             />
+//           </svg>
+//         ))}
+//       </div>
+//       <div className="flex justify-between items-center mt-4">
+//         <span className="text-lg font-bold text-blue-600">€{trip.price}/Day</span>
+//         <span className="text-sm text-gray-500">
+//           {trip.activities[0]?.duration || 'N/A'} Hours
+//         </span>
+//       </div>
+//     </div>
+//   </div>
+// );
 
 // AllItinerariesComponent
 export function AllItinerariesComponent() {
@@ -186,6 +187,38 @@ export function AllItinerariesComponent() {
   const handleSortSelect = (option) => {
     sortItineraries(option);
   };
+
+  // ItineraryCard Component
+const ItineraryCard = ({ itinerary }) => (
+<div className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-150 hover:shadow-xl">
+      <div className="overflow-hidden">
+        <img
+          src={itinerary.activities &&
+          itinerary.activities.length > 0 &&
+          itinerary.activities[0].pictures &&
+          itinerary.activities[0].pictures.length > 0
+            ? itinerary.activities[0].pictures[0]
+            : defaultImage}
+          alt={itinerary.title}
+          className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
+      </div>
+      <div className="p-4 ">
+        <span className="text-sm text-gray-500">
+          {itinerary.activities && itinerary.activities.length > 0 ? itinerary.activities[0].category[0] : ''}
+        </span>
+        <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
+        <h3 className="text-sm mt-2 text-gray-700">{itinerary.description}</h3>
+        <div className="flex justify-between items-center mt-4">
+          <span className="text-lg font-bold text-blue-600">€{itinerary.price}/Day</span>
+          <span className="text-sm text-gray-500">
+            {itinerary.language} 
+          </span>
+        </div>
+      </div>
+    </div>
+);
+
 
   // Pagination logic
   const indexOfLastTrip = currentPage * tripsPerPage;
