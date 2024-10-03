@@ -31,7 +31,7 @@ const touristSchema = new Schema({
         type: String,
         required: true,
         trim: true,
-        match: [/^\d{11}$/, 'Please enter a valid 11-digit mobile number']
+        match: [/^\+\d{1,3}\d{7,15}$/, 'Please enter a valid phone number with a country code and 7 to 15 digits.']
     },
     nationality: {
         type: mongoose.Schema.Types.ObjectId,

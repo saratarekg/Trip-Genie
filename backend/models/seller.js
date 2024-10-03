@@ -34,6 +34,12 @@ const sellerSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    mobile: {
+        type: String,
+        required: true,
+        trim: true,
+        match: [/^\+\d{1,3}\d{7,15}$/, 'Please enter a valid phone number with a country code and 7 to 15 digits.']
+    },
     isAccepted: {
         type: Boolean,
         default: false 
