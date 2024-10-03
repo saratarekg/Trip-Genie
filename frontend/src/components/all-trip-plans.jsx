@@ -32,6 +32,7 @@ const ItineraryCard = ({ trip }) => (
 export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const tripsPerPage = 6;
 
