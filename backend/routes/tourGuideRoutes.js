@@ -15,7 +15,7 @@ router.get('/', getTourGuideProfile);
 router.put('/', updateTourGuideProfile);
 
 // Get tour guides specific itinerary list
-router.get('/itinerary',itineraryController.getItinerariesByTourGuide);
+router.get('/itineraries',itineraryController.getItinerariesByTourGuide);
 
 // Delete itinerary with certain id
 router.delete('/itinerary/:id', itineraryController.deleteItinerary)

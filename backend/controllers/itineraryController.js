@@ -163,7 +163,7 @@ const getItinerariesByTourGuide = async (req, res) => {
 
 const searchItineraries = async (req, res) => {
   try {
-    const { searchBy } = req.body;
+    const { searchBy } = req.query;
     const itineraries = await Itinerary.findByFields(searchBy);
     if (!itineraries || itineraries.length === 0) {
       return res.status(404).json({ message: "No itineraries found." });

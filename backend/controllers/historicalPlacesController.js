@@ -97,7 +97,7 @@ const getHistoricalPlacesByGovernor = async (req, res) => {
 
 const searchHistoricalPlaces = async (req, res) => {
     try {
-        const { searchBy } = req.body;
+        const { searchBy } = req.query;
         const historicalPlaces = await Museum.findByFields(searchBy);
         if (!historicalPlaces || historicalPlaces.length === 0) {
             return res.status(404).json({ message: 'No historical places found.' });

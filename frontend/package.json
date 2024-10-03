@@ -24,6 +24,7 @@
     "flag-icon-css": "^4.1.7",
     "frontend": "file:",
     "js-cookie": "^3.0.5",
+    "libphonenumber": "^0.0.10",
     "libphonenumber-js": "^1.11.10",
     "lucide-react": "^0.446.0",
     "react": "^18.3.1",

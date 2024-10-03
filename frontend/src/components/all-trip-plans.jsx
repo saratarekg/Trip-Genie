@@ -55,12 +55,16 @@ export function AllItinerariesComponent() {
   const fetchItineraries = async () => {
     try {
       const token = Cookies.get('jwt');
+      let role = Cookies.get('role')
+      if (role === undefined) 
+                  role = 'guest'
       const response = await fetch(`http://localhost:4000/${role}/itineraries`,  {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       const data = await response.json();
+      console.log("line 3");
       setItineraries(data);
     } catch (error) {
       console.error('Error fetching itineraries:', error);
