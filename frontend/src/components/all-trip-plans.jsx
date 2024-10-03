@@ -1,7 +1,6 @@
-'use client'
-
-import React, { useEffect, useState } from 'react'
-import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import React, { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ItineraryCard = ({ trip }) => (
   <div className="bg-white rounded-lg overflow-hidden shadow-lg">
@@ -13,7 +12,7 @@ const ItineraryCard = ({ trip }) => (
         {[...Array(5)].map((_, i) => (
           <svg
             key={i}
-            className={`w-5 h-5 ${i < 5 ? 'text-yellow-400' : 'text-gray-300'}`} // Assuming 5 stars for now
+            className={`w-5 h-5 ${i < 5 ? 'text-yellow-400' : 'text-gray-300'}`}
             fill="currentColor"
             viewBox="0 0 20 20">
             <path
@@ -27,28 +26,60 @@ const ItineraryCard = ({ trip }) => (
       </div>
     </div>
   </div>
-)
+);
 
 export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const tripsPerPage = 6;
+  let role = Cookies.get('role');
 
   useEffect(() => {
-    fetch('http://localhost:4000/guest/itineraries')
-      .then(response => response.json())
-      .then(data => setItineraries(data))
-      .catch(error => console.error('Error fetching data:', error));
+    fetchItineraries();
   }, []);
 
-  const filteredTrips = itineraries.filter(trip =>
-    trip.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm) {
+        searchItineraries();
+      } else {
+        fetchItineraries();
+      }
+    }, 300); // Delay to prevent too many API calls
 
+    return () => clearTimeout(delayDebounceFn); // Cleanup on unmount
+  }, [searchTerm]);
+
+  const fetchItineraries = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/${role}/itineraries`);
+      const data = await response.json();
+      setItineraries(data);
+    } catch (error) {
+      console.error('Error fetching itineraries:', error);
+      setError('Error fetching itineraries');
+    }
+  };
+
+  const searchItineraries = async () => {
+    if (role === undefined) role = 'guest';
+
+    try {
+      const response = await fetch(`http://localhost:4000/${role}/itineraries/search`);
+      const data = await response.json();
+      setItineraries(data);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+      setError('Error fetching search results');
+    }
+  };
+
+  // Pagination logic
   const indexOfLastTrip = currentPage * tripsPerPage;
   const indexOfFirstTrip = indexOfLastTrip - tripsPerPage;
-  const currentTrips = filteredTrips.slice(indexOfFirstTrip, indexOfLastTrip);
+  const currentTrips = itineraries.slice(indexOfFirstTrip, indexOfLastTrip);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -99,7 +130,7 @@ export function AllItinerariesComponent() {
               <span className="sr-only">Previous</span>
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
             </button>
-            {[...Array(Math.ceil(filteredTrips.length / tripsPerPage))].map((_, index) => (
+            {[...Array(Math.ceil(itineraries.length / tripsPerPage))].map((_, index) => (
               <button
                 key={index}
                 onClick={() => paginate(index + 1)}
@@ -113,7 +144,7 @@ export function AllItinerariesComponent() {
             ))}
             <button
               onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === Math.ceil(filteredTrips.length / tripsPerPage)}
+              disabled={currentPage === Math.ceil(itineraries.length / tripsPerPage)}
               className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
               <span className="sr-only">Next</span>
               <ChevronRight className="h-5 w-5" aria-hidden="true" />
