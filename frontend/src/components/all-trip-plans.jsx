@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Cookies from 'js-cookie';
 import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import ItineraryDetail from './ItineraryDetail.jsx';
 
 // ItineraryCard Component
-const ItineraryCard = ({ trip }) => (
-  <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+const ItineraryCard = ({ trip, onSelect }) => (
+  <div className="bg-white rounded-lg overflow-hidden shadow-lg cursor-pointer" onClick={() => onSelect(trip)}>
     <img
       src={trip.activities[0]?.pictures[0] || '/placeholder.svg'}
       alt={trip.title}
@@ -49,6 +50,7 @@ export function AllItinerariesComponent() {
   const tripsPerPage = 6;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [selectedItinerary, setSelectedItinerary] = useState(null);
 
   // Function to get the user's role, defaulting to 'guest'
   const getUserRole = () => {
@@ -60,7 +62,6 @@ export function AllItinerariesComponent() {
   // Fetch itineraries on component mount
   useEffect(() => {
     fetchItineraries();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch itineraries when searchTerm changes with debounce
@@ -74,7 +75,6 @@ export function AllItinerariesComponent() {
     }, 300); // Delay to prevent too many API calls
 
     return () => clearTimeout(delayDebounceFn); // Cleanup on unmount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
   // Close dropdown when clicking outside
@@ -198,153 +198,177 @@ export function AllItinerariesComponent() {
     setCurrentPage(pageNumber);
   };
 
+  // Function to handle itinerary selection
+  const handleItinerarySelect = (itinerary) => {
+    setSelectedItinerary(itinerary);
+  };
+
+  // Function to go back to the list view
+  const handleBackToList = () => {
+    setSelectedItinerary(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Heading */}
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">All Trip Plans</h1>
-
-        {/* Search and Filter Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          {/* Search Input */}
-          <div className="relative w-full md:w-96 mb-4 md:mb-0">
-            <input
-              type="text"
-              placeholder="Search trips..."
-              className="w-full pl-10 pr-4 py-2 border rounded-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Search className="absolute left-3 top-2.5 text-gray-400" />
-          </div>
-
-          {/* Filters and Sort */}
-          <div className="flex space-x-4">
-            {/* Filters Button */}
-            <button className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-              <Filter className="mr-2" size={18} />
-              Filters
+        {selectedItinerary ? (
+          <>
+            <button
+              onClick={handleBackToList}
+              className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
+            >
+              <ChevronLeft className="mr-1" /> Back to All Itineraries
             </button>
+            <ItineraryDetail itinerary={selectedItinerary} />
+          </>
+        ) : (
+          <>
+            {/* Heading */}
+            <h1 className="text-4xl font-bold text-gray-900 mb-8">All Trip Plans</h1>
 
-            {/* Sort Dropdown */}
-            <div className="relative inline-block text-left" ref={dropdownRef}>
-              <div>
-                <button
-                  type="button"
-                  className="inline-flex justify-center w-full rounded-full border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
-                  id="menu-button"
-                  aria-expanded={isDropdownOpen}
-                  aria-haspopup="true"
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                >
-                  Sort by
-                  <ChevronDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
-                </button>
+            {/* Search and Filter Section */}
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+              {/* Search Input */}
+              <div className="relative w-full md:w-96 mb-4 md:mb-0">
+                <input
+                  type="text"
+                  placeholder="Search trips..."
+                  className="w-full pl-10 pr-4 py-2 border rounded-full"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Search className="absolute left-3 top-2.5 text-gray-400" />
               </div>
 
-              {/* Dropdown Menu */}
-              {isDropdownOpen && (
-                <div
-                  className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="menu-button"
-                  tabIndex="-1"
-                >
-                  <div className="py-1" role="none">
+              {/* Filters and Sort */}
+              <div className="flex space-x-4">
+                {/* Filters Button */}
+                <button className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+                  <Filter className="mr-2" size={18} />
+                  Filters
+                </button>
+
+                {/* Sort Dropdown */}
+                <div className="relative inline-block text-left" ref={dropdownRef}>
+                  <div>
                     <button
-                      onClick={() => handleSortSelect('price')}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      role="menuitem"
-                      tabIndex="-1"
-                      id="menu-item-0"
+                      type="button"
+                      className="inline-flex justify-center w-full rounded-full border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
+                      id="menu-button"
+                      aria-expanded={isDropdownOpen}
+                      aria-haspopup="true"
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     >
-                      Price
-                    </button>
-                    <button
-                      onClick={() => handleSortSelect('date')}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      role="menuitem"
-                      tabIndex="-1"
-                      id="menu-item-1"
-                    >
-                      Date
+                      Sort by
+                      <ChevronDown className="ml-2 -mr-1 h-5 w-5" aria-hidden="true" />
                     </button>
                   </div>
+
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <div
+                      className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+                      role="menu"
+                      aria-orientation="vertical"
+                      aria-labelledby="menu-button"
+                      tabIndex="-1"
+                    >
+                      <div className="py-1" role="none">
+                        <button
+                          onClick={() => handleSortSelect('price')}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          role="menuitem"
+                          tabIndex="-1"
+                          id="menu-item-0"
+                        >
+                          Price
+                        </button>
+                        <button
+                          onClick={() => handleSortSelect('date')}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          role="menuitem"
+                          tabIndex="-1"
+                          id="menu-item-1"
+                        >
+                          Date
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* End Sort Dropdown */}
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                {error}
+              </div>
+            )}
+
+            {/* Trip Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {currentTrips.length > 0 ? (
+                currentTrips.map((trip) => (
+                  <ItineraryCard key={trip._id} trip={trip} onSelect={handleItinerarySelect} />
+                ))
+              ) : (
+                <div className="text-center text-gray-500 col-span-full">
+                  <p className="text-lg">No itineraries found</p>
                 </div>
               )}
             </div>
-            {/* End Sort Dropdown */}
-          </div>
-        </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-
-        {/* Trip Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {currentTrips.length > 0 ? (
-            currentTrips.map((trip) => (
-              <ItineraryCard key={trip._id} trip={trip} />
-            ))
-          ) : (
-            <div className="text-center text-gray-500 col-span-full">
-              <p className="text-lg">No itineraries found</p>
-            </div>
-          )}
-        </div>
-
-        {/* Pagination */}
-        {itineraries.length > 0 && (
-          <div className="mt-12 flex justify-center">
-            <nav
-              className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-              aria-label="Pagination"
-            >
-              {/* Previous Button */}
-              <button
-                onClick={() => paginate(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${
-                  currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <span className="sr-only">Previous</span>
-                <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-              </button>
-
-              {/* Page Numbers */}
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => paginate(index + 1)}
-                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                    currentPage === index + 1
-                      ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                  }`}
+            {/* Pagination */}
+            {itineraries.length > 0 && (
+              <div className="mt-12 flex justify-center">
+                <nav
+                  className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                  aria-label="Pagination"
                 >
-                  {index + 1}
-                </button>
-              ))}
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${
+                      currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                  </button>
 
-              {/* Next Button */}
-              <button
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${
-                  currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <span className="sr-only">Next</span>
-                <ChevronRight className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </nav>
-          </div>
+                  {/* Page Numbers */}
+                  {[...Array(totalPages)].map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => paginate(index + 1)}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                        currentPage === index + 1
+                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 ${
+                      currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </nav>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
