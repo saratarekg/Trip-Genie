@@ -54,7 +54,12 @@ export function AllItinerariesComponent() {
 
   const fetchItineraries = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/${role}/itineraries`);
+      const token = Cookies.get('jwt');
+      const response = await fetch(`http://localhost:4000/${role}/itineraries`,  {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       setItineraries(data);
     } catch (error) {
@@ -66,8 +71,19 @@ export function AllItinerariesComponent() {
   const searchItineraries = async () => {
     if (role === undefined) role = 'guest';
 
+    const url = new URL(`http://localhost:4000/${role}/itineraries/search`);
+    url.searchParams.append('searchBy', searchTerm);
+
     try {
-      const response = await fetch(`http://localhost:4000/${role}/itineraries/search`);
+      const token = Cookies.get('jwt');
+      const response = await fetch(url,
+        {headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }} ,
+
+
+      );
       const data = await response.json();
       setItineraries(data);
     } catch (error) {
