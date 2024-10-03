@@ -28,29 +28,8 @@ const tourGuideSchema = new Schema({
         minlength: [3, 'Username must be at least 3 characters long']
     },
     nationality: {
-        type: String,
-        enum: ["Afghan", "Albanian", "Algerian", "American", "Andorran", "Angolan", "Antiguan", 
-            "Argentinean", "Armenian", "Australian", "Austrian", "Azerbaijani", "Bahamian", "Bahraini",
-            "Bangladeshi", "Barbadian", "Barbudan", "Batswana", "Belarusian", "Belgian", "Belizean", "Beninese", 
-            "Bhutanese", "Bolivian", "Bosnian", "Brazilian", "British", "Bruneian", "Bulgarian", "Burkinabe",
-            "Burmese", "Burundian", "Cambodian", "Cameroonian", "Canadian", "Cape Verdean", "Central African", "Chadian", "Chilean", 
-            "Chinese", "Colombian", "Comoran", "Congolese", "Costa Rican", "Croatian", "Cuban", "Cypriot", "Czech", 
-            "Danish", "Djiboutian", "Dominican", "Dutch", "East Timorese", "Ecuadorian", "Egyptian", "Emirati", "Equatorial Guinean",
-            "Eritrean", "Estonian", "Ethiopian", "Fijian", "Filipino", "Finnish", "French", "Gabonese", "Gambian",
-            "Georgian", "German", "Ghanaian", "Greek", "Grenadian", "Guatemalan", "Guinea-Bissauan", "Guinean", "Guyanese", "Haitian", "Herzegovinian",
-            "Honduran", "Hungarian", "Icelander", "Indian", "Indonesian", "Iranian", "Iraqi", "Irish", "Italian", 
-            "Ivorian", "Jamaican", "Japanese", "Jordanian", "Kazakhstani", "Kenyan", "Kittian", "Nevisian", 
-            "Kuwaiti", "Kyrgyz", "Laotian", "Latvian", "Lebanese", "Liberian", "Libyan", "Liechtensteiner", 
-            "Lithuanian", "Luxembourger", "Macedonian", "Malagasy", "Malawian", "Malaysian", "Maldivian", 
-            "Malian", "Maltese", "Marshallese", "Mauritanian", "Mauritian", "Mexican", "Micronesian", "Moldovan", 
-            "Monacan", "Mongolian", "Moroccan", "Mosotho", "Motswana", "Mozambican", "Namibian", "Nauruan", 
-            "Nepalese", "New Zealander", "Ni-Vanuatu", "Nicaraguan", "Nigerien", "North Korean", "Northern Irish", 
-            "Norwegian", "Omani", "Pakistani", "Palauan", "Palestinian", "Panamanian", "Papua New Guinean", "Paraguayan",
-            "Peruvian", "Polish", "Portuguese", "Qatari", "Romanian", "Russian", "Rwandan", "Saint Lucian", "Salvadoran", "Samoan", "San Marinese", 
-            "Sao Tomean", "Saudi", "Scottish", "Senegalese", "Serbian", "Seychellois", "Sierra Leonean", "Singaporean", "Slovak", "Slovenian", "Solomon Islander", 
-            "Somali", "South African", "South Korean", "South Sudanese", "Spanish", "Sri Lankan", "Sudanese", "Surinamer", "Swazi", "Swedish", "Swiss", "Syrian", 
-            "Taiwanese", "Tajik", "Tanzanian", "Thai", "Togolese", "Tongan", "Trinidadian", "Tunisian", "Turkish", "Tuvaluan", "Ugandan", "Ukrainian", "Uruguayan", "Uzbekistani", 
-            "Venezuelan", "Vietnamese", "Vincentian", "Yemeni", "Zambian", "Zimbabwean"],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Nationality',
         required: true,
         trim: true
     },
@@ -104,8 +83,11 @@ tourGuideSchema.pre('save', async function(next) {
     next();
 });
 
-tourGuideSchema.statics.login = async function(email,password){
-    const tourGuide = await this.findOne({email});
+tourGuideSchema.statics.login = async function(username,password){
+    let tourGuide = await this.findOne({username});
+    if(tourGuide===null || tourGuide===undefined){
+        tourGuide = await this.findOne({email:username});
+    }
     if(tourGuide){
         const auth = await bcrypt.compare(password, tourGuide.password )
         if(auth){
@@ -113,7 +95,7 @@ tourGuideSchema.statics.login = async function(email,password){
         }
         throw Error('Incorrect password');
     }
-    throw Error("Email is not registered");
+    throw Error("Email/Username is not registered");
 }
 
 const TourGuide = mongoose.model('TourGuide', tourGuideSchema);

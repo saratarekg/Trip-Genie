@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm,Controller } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
@@ -35,7 +35,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const formSchema = z.object({
   username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+    message: "Username must be at least 3 characters.",
   }),
   email: z.string().email({
     message: "Please enter a valid email address.",
@@ -54,7 +54,6 @@ const formSchema = z.object({
 
 export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false)
-  const { control } = useForm();
   const [nationalities, setNationalities] = useState([]);
 
 
@@ -251,6 +250,7 @@ export function SignupForm() {
                               minDate={new Date("1900-01-01")}
                               maxDate={new Date()}
                               dateFormat="dd/MM/yyyy"
+                              inline
                             />
                         </PopoverContent>
                       </Popover>

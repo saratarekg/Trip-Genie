@@ -57,8 +57,11 @@ advertiserSchema.pre('save', async function(next) {
     next();
 });
 
-advertiserSchema.statics.login = async function(email,password){
-    const advertiser = await this.findOne({email});
+advertiserSchema.statics.login = async function(username,password){
+    let advertiser = await this.findOne({username});
+    if(advertiser===null || advertiser===undefined){
+        advertiser = await this.findOne({email:username});
+    }
     if(advertiser){
         const auth = await bcrypt.compare(password, advertiser.password )
         if(auth){
@@ -66,7 +69,7 @@ advertiserSchema.statics.login = async function(email,password){
         }
         throw Error('Incorrect password');
     }
-    throw Error("Email is not registered");
+    throw Error("Email/Username is not registered");
 }
 
 const Advertiser = mongoose.model('Advertiser', advertiserSchema);

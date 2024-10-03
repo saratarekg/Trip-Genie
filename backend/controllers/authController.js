@@ -36,32 +36,31 @@ const touristSignup = async (req, res) => {
 }
 
 const login = async (req, res) => {
-    const { email, username, password } = req.body;
+    const {   username, password } = req.body;
 
     try {
         let role = '';
         let user = null;
-        if(await Tourist.findOne({email})){
+        if(await Tourist.findOne({email:username}) || await Tourist.findOne({username})){
             role = 'tourist';
-            user = await Tourist.login(email, password);
+            user = await Tourist.login(username, password);
         }
-        else if(await TourGuide.findOne({email})){
-            role = 'tour-guide';
-            user = await TourGuide.login(email, password);
+        else if(await TourGuide.findOne({email:username}) || await TourGuide.findOne({username})){
+            user = await TourGuide.login(username, password);
         }
-        else if(await Advertiser.findOne({email})){
+        else if(await Advertiser.findOne({email:username}) || await Advertiser.findOne({username})){
             role = 'advertiser';
-            user = await Advertiser.login(email, password);
+            user = await Advertiser.login(username, password);
         }
-        else if(await Seller.findOne({email})){
+        else if(await Seller.findOne({email:username}) || await Seller.findOne({username})){
             role = 'seller';
-            user = await Seller.login(email, password);
+            user = await Seller.login(username, password);
         }
-        else if(await Admin.findOne({username})){
+        else if(await Admin.findOne({email:username}) || await Admin.findOne({username})){
             role = 'admin';
             user = await Admin.login(username, password);
         }
-        else if(await TourismGovernor.findOne({username})){
+        else if(await TourismGovernor.findOne({email:username}) || await TourismGovernor.findOne({username})){
             role = 'tourism-governor';
             user = await TourismGovernor.login(username, password);
         }
