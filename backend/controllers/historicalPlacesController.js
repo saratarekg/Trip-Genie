@@ -100,7 +100,7 @@ const searchHistoricalPlaces = async (req, res) => {
         const { searchBy } = req.query;
         const historicalPlaces = await Museum.findByFields(searchBy);
         if (!historicalPlaces || historicalPlaces.length === 0) {
-            return res.status(404).json({ message: 'No historical places found.' });
+            return res.status(200).json([]);
         }
         res.status(200).json(historicalPlaces);
     } catch (error) {

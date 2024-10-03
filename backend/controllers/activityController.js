@@ -156,7 +156,7 @@ const searchActivities = async (req, res) => {
     const { searchBy } = req.query;
     const activities = await Activity.findByFields(searchBy);
     if (!activities || activities.length === 0) {
-      return res.status(404).json({ message: "No activities places found." });
+      return res.status(200).json([]);
     }
     res.status(200).json(activities);
   } catch (error) {

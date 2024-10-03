@@ -33,14 +33,14 @@ const addProduct = async (req, res) => {
   };
 
 const searchProductbyName = async (req, res) => {
-  const { name } = req.body;
+  const { name } = req.query;
   try {
     if(name === undefined || name === null || name === "") {
       return this.find().populate('seller').exec();
     }
     const products = await Product.find({ name: { $regex: new RegExp(name, 'i') } });
-    if (!products) {
-      return res.status(404).json({ message: "Product not found" });
+    if (!products || products.length === 0) {
+      return res.status(200).json([]);
     }
     res.status(200).json(products);
   } catch (error) {
