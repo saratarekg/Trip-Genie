@@ -54,7 +54,12 @@ export function AllItinerariesComponent() {
 
   const fetchItineraries = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/${role}/itineraries`);
+      const token = Cookies.get('jwt');
+      const response = await fetch(`http://localhost:4000/${role}/itineraries`,  {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       setItineraries(data);
     } catch (error) {
@@ -67,7 +72,12 @@ export function AllItinerariesComponent() {
     if (role === undefined) role = 'guest';
 
     try {
-      const response = await fetch(`http://localhost:4000/${role}/itineraries/search`);
+      const token = Cookies.get('jwt');
+      const response = await fetch(`http://localhost:4000/${role}/itineraries/search`,  {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
       setItineraries(data);
     } catch (error) {
