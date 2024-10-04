@@ -2,36 +2,37 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import ItineraryDetail from './ItineraryDetail.jsx';
-import FilterComponent from './Filter.jsx'; // Import the new component
+import FilterComponent from './Filter.jsx'; 
 import defaultImage from "../assets/images/default-image.jpg";
 
 const ItineraryCard = ({ itinerary, onSelect }) => (
-  <div 
-    className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
-    onClick={() => onSelect(itinerary)}
-  >
-    <div className="overflow-hidden">
-      <img
-        src={itinerary.activities[0]?.pictures[0] || defaultImage}
-        alt={itinerary.title}
-        className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-      />
-    </div>
-    <div className="p-4">
-      <span className="text-sm text-gray-500">
-        {itinerary.activities[0]?.category[0] || 'N/A'}
-      </span>
-      <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
-      <h3 className="text-sm mt-2 text-gray-700">{itinerary.description}</h3>
-      <div className="flex justify-between items-center mt-4">
-        <span className="text-lg font-bold text-blue-600">€{itinerary.price}/Day</span>
-        <span className="text-sm text-gray-500">
-          {itinerary.language}
-        </span>
+  <div className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"   onClick={() => onSelect(itinerary)}>
+    
+        <div className="overflow-hidden">
+          <img
+            src={itinerary.activities &&
+            itinerary.activities.length > 0 &&
+            itinerary.activities[0].pictures &&
+            itinerary.activities[0].pictures.length > 0
+              ? itinerary.activities[0].pictures[0]
+              : defaultImage}
+            alt={itinerary.title}
+            className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+          />
+        </div>
+        <div className="p-4 ">
+          <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
+          <h3 className="text-sm mt-2 text-gray-700">{itinerary.description}</h3>
+          <div className="flex justify-between items-center mt-4">
+            <span className="text-lg font-bold text-blue-600">€{itinerary.price}/Day</span>
+            <span className="text-sm text-gray-500">
+              {itinerary.language} 
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-);
+  );
+  
 
 export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);

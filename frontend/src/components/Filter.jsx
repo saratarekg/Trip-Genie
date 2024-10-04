@@ -1,46 +1,64 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Filter, ChevronDown, ArrowUpDown } from 'lucide-react';
 
-const FilterComponent = ({ 
-  filtersVisible, 
-  toggleFilters, 
-  sortOrder, 
-  sortItineraries, 
-  price, 
-  setPrice, 
-  dateRange, 
-  setDateRange, 
-  type, 
-  setType, 
-  language, 
-  setLanguage, 
-  searchItineraries 
+const FilterComponent = ({
+  filtersVisible,
+  toggleFilters,
+  sortOrder,
+  sortItineraries,
+  price,
+  setPrice,
+  dateRange,
+  setDateRange,
+  type,
+  setType,
+  language,
+  setLanguage,
+  searchItineraries
 }) => {
-  return (
-    <div className="w-full">
-      <div className="flex flex-wrap justify-between items-center mb-4">
-        <div className="flex space-x-4 mb-4 sm:mb-0">
-          {/* Toggle Filters Button */}
-          <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-            <Filter className="mr-2" size={18} />
-            Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
-          </button>
 
-          {/* Sort Button */}
-          <button
-            onClick={() => sortItineraries('price')}
-            className="flex items-center px-4 py-2 bg-white rounded-full shadow"
-          >
-            <ArrowUpDown className="mr-2" size={18} />
-            Sort by Price ({sortOrder === 'asc' ? 'Low to High' : 'High to Low'})
-          </button>
-        </div>
+  const handleLowerDateChange = (e) => {
+    const newLowerDate = e.target.value;
+    if (newLowerDate <= dateRange.upper || !dateRange.upper) {
+      setDateRange({ ...dateRange, lower: newLowerDate });
+    } else {
+      alert("The start date must be before the end date.");
+    }
+  };
+
+  const handleUpperDateChange = (e) => {
+    const newUpperDate = e.target.value;
+    if (newUpperDate >= dateRange.lower || !dateRange.lower) {
+      setDateRange({ ...dateRange, upper: newUpperDate });
+    } else {
+      alert("The end date must be after the start date.");
+    }
+  };
+
+  return (
+    <>
+      {/* Filters and Sort Button in a horizontal row */}
+      <div className="flex space-x-4 mb-4">
+        {/* Toggle Filters Button */}
+        <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+          <Filter className="mr-2" size={18} />
+          Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Sort Button */}
+        <button
+          onClick={() => sortItineraries('price')}
+          className="flex items-center px-4 py-2 bg-white rounded-full shadow"
+        >
+          <ArrowUpDown className="mr-2" size={18} />
+          Sort by Price ({sortOrder === 'asc' ? 'Low to High' : 'High to Low'})
+        </button>
       </div>
 
-      {/* Filters Section */}
+      {/* Filters Section - Display below the buttons */}
       {filtersVisible && (
-        <div className="mb-8 bg-white p-4 rounded-lg shadow-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">
+          <div className="flex flex-col space-y-4">
             {/* Price Filter */}
             <div>
               <label className="block text-gray-700">Price</label>
@@ -56,17 +74,20 @@ const FilterComponent = ({
             {/* Date Range Filter */}
             <div>
               <label className="block text-gray-700">Date Range</label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex space-x-2">
+                {/* Lower Date */}
                 <input
                   type="date"
                   value={dateRange.lower}
-                  onChange={(e) => setDateRange({ ...dateRange, lower: e.target.value })}
+                  onChange={handleLowerDateChange}
                   className="w-full mt-1 border rounded-lg p-2"
                 />
+
+                {/* Upper Date */}
                 <input
                   type="date"
                   value={dateRange.upper}
-                  onChange={(e) => setDateRange({ ...dateRange, upper: e.target.value })}
+                  onChange={handleUpperDateChange}
                   className="w-full mt-1 border rounded-lg p-2"
                 />
               </div>
@@ -106,7 +127,7 @@ const FilterComponent = ({
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
