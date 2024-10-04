@@ -38,6 +38,7 @@ const createItinerary = async (req, res) => {
     accessibility,
     pickUpLocation,
     dropOffLocation,
+    rating,
   } = req.body;
   const itinerary = new Itinerary({
     title,
@@ -50,6 +51,7 @@ const createItinerary = async (req, res) => {
     pickUpLocation,
     dropOffLocation,
     tourGuide: res.locals.user_id,
+    rating,
   });
 
   try {
