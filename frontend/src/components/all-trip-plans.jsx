@@ -99,7 +99,7 @@ export function AllItinerariesComponent() {
   const searchItineraries = async () => {
     try {
       const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/itineraries/filter`);
+      const url = new URL(`http://localhost:4000/${role}/itineraries`);
   
       // Add the search term and filter parameters
       if (searchTerm) {
