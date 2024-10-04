@@ -1,17 +1,5 @@
 const Museum = require('../models/historicalPlaces');
 
-// const createHistoricalPlace = (req, res) => {
-//     const museum = new Museum(req.body);
-
-//     museum.save()
-//         .then((result) => {
-//             res.status(201).json({ museum: result });
-//         })
-//         .catch((err) => {
-//             res.status(400).json({message: err.message})
-//             console.log(err);
-//         });
-// }
 
 const createHistoricalPlace = async (req, res) => {
     const {title, description, location,  historicalTag, openingHours, ticketPrices, pictures} = req.body;
@@ -38,10 +26,27 @@ const getHistoricalPlace = async (req, res) => {
 
 const getAllHistoricalPlaces = async (req, res) => {
     try {
-        const museum = await Museum.find().populate('historicalTag').exec();
-        res.status(200).json(museum);
+        const { types,periods,myPlaces } = req.query;
+        const filterResult = await Museum.filterByTag(types,periods);
+        const searchResult = await Museum.findByFields(searchBy);
+
+        const searchResultIds = searchResult.map((place) => place._id);
+        const filterResultIds = filterResult.map((place) => place._id);
+        const query = [];
+        query.push({ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }});
+        if(myPlaces==='true'){
+            query.push({ governor: res.locals.user_id });
+        }
+
+        const historicalPlaces = await Museum.find({
+        $and: query,
+        }).populate('historicalTag').exec();
+        if (!historicalPlaces || historicalPlaces.length === 0) {
+            return res.status(404).json({ message: 'No historical places found.' });
+        }
+        res.status(200).json(historicalPlaces);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -91,7 +96,6 @@ const filterHistoricalPlaces = async (req, res) => {
 const getHistoricalPlacesByGovernor = async (req, res) => {
     try {
         const  governorId  = res.locals.user_id; // Assuming governorId is passed in the request params
-        console.log(governorId);
         const historicalPlaces = await Museum.findByGovernor(governorId);
         if (!historicalPlaces || historicalPlaces.length === 0) {
             return res.status(404).json({ message: 'No historical places found for this governor.' });
@@ -101,18 +105,5 @@ const getHistoricalPlacesByGovernor = async (req, res) => {
         res.status(500).json({  error: error.message });
     }
 };
-
-// const searchHistoricalPlaces = async (req, res) => {
-//     try {
-//         const { searchBy } = req.query;
-//         const historicalPlaces = await Museum.findByFields(searchBy);
-//         if (!historicalPlaces || historicalPlaces.length === 0) {
-//             return res.status(200).json([]);
-//         }
-//         res.status(200).json(historicalPlaces);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
 
 module.exports = { createHistoricalPlace,getHistoricalPlace,getAllHistoricalPlaces,updateHistoricalPlace, deleteHistoricalPlace,filterHistoricalPlaces,getHistoricalPlacesByGovernor};

@@ -4,6 +4,7 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import ItineraryDetail from './ItineraryDetail.jsx';
 import FilterComponent from './Filter.jsx'; 
 import defaultImage from "../assets/images/default-image.jpg";
+import axios from 'axios';
 
 const ItineraryCard = ({ itinerary, onSelect }) => (
   <div className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"   onClick={() => onSelect(itinerary)}>
@@ -39,7 +40,8 @@ export function AllItinerariesComponent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortOrder, setSortOrder] = useState('');
+  const [sortBy, setSortBy] = useState('');
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [price, setPrice] = useState('');
   const [dateRange, setDateRange] = useState({ lower: '', upper: '' });
@@ -47,6 +49,9 @@ export function AllItinerariesComponent() {
   const [language, setLanguage] = useState('');
   const tripsPerPage = 6;
   const [selectedItinerary, setSelectedItinerary] = useState(null);
+  const [typesOptions, setTypesOptions] = useState([]); 
+  const [languagesOptions, setLanguagesOptions] = useState([]); 
+
 
   const getUserRole = () => {
     let role = Cookies.get('role');
@@ -54,8 +59,38 @@ export function AllItinerariesComponent() {
     return role;
   };
 
+  
+
   useEffect(() => {
     fetchItineraries();
+  }, []);
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      console.log('Fetching Languages');
+      try {
+        const response = await axios.get('http://localhost:4000/api/getAllLanguages');
+        console.log('Languages:', response.data);
+        setLanguagesOptions(response.data);
+      }catch(error){
+        console.error('Error fetching Languages:', error);
+      }
+    };
+    fetchLanguages();
+  }, []);
+
+  useEffect(() => {
+    // Fetch types from the backend
+    const fetchType = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/getAllTypes');
+        console.log('Type:', response.data);
+        setTypesOptions(response.data);
+      }catch(error){
+        console.error('Error fetching Type:', error);
+      }
+    };
+    fetchType();
   }, []);
 
   useEffect(() => {
@@ -70,6 +105,19 @@ export function AllItinerariesComponent() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
+  useEffect(() => {
+    if (sortBy) {
+      searchItineraries();
+    }
+  }, [sortBy, sortOrder]);
+
+
+  const handleSort = (attribute) => {
+    const newSortOrder = sortOrder === 1 ? -1 : 1;
+    setSortBy(attribute);
+    setSortOrder(newSortOrder);
+    searchItineraries(); // Call this to fetch sorted itineraries
+  };
   const fetchItineraries = async () => {
     try {
       const token = Cookies.get('jwt');
@@ -121,7 +169,14 @@ export function AllItinerariesComponent() {
       if (language) {
         url.searchParams.append('languages', language);
       }
-  
+
+  // Add sorting parameters
+  if (sortBy) {
+    url.searchParams.append('sort', sortBy);
+  }
+  if (sortOrder) {
+    url.searchParams.append('asc', sortOrder);
+  }
       const token = Cookies.get('jwt');
       const response = await fetch(url, {
         headers: {
@@ -135,6 +190,7 @@ export function AllItinerariesComponent() {
       }
   
       const data = await response.json();
+
       setItineraries(data);
       setError(null);
       setCurrentPage(1);
@@ -148,18 +204,23 @@ export function AllItinerariesComponent() {
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
   };
+  
+  // export const handleSort = (setSortBy, setSortOrder, attribute) => {
+  //   setSortBy(attribute); // Set the attribute for sorting
+  //   setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc')); // Toggle the order
+  // };
 
-  const sortItineraries = (key) => {
-    const sortedItineraries = [...itineraries].sort((a, b) => {
-      if (sortOrder === 'asc') {
-        return a[key] > b[key] ? 1 : -1;
-      } else {
-        return a[key] < b[key] ? 1 : -1;
-      }
-    });
-    setItineraries(sortedItineraries);
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-  };
+  // const sortItineraries = (key) => {
+  //   const sortedItineraries = [...itineraries].sort((a, b) => {
+  //     if (sortOrder === 'asc') {
+  //       return a[key] > b[key] ? 1 : -1;
+  //     } else {
+  //       return a[key] < b[key] ? 1 : -1;
+  //     }
+  //   });
+  //   setItineraries(sortedItineraries);
+  //   setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  // };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -194,7 +255,9 @@ export function AllItinerariesComponent() {
               filtersVisible={filtersVisible}
               toggleFilters={toggleFilters}
               sortOrder={sortOrder}
-              sortItineraries={sortItineraries}
+              sortBy={sortBy}
+              handleSort={handleSort}
+              // sortItineraries={sortItineraries}
               price={price}
               setPrice={setPrice}
               dateRange={dateRange}
@@ -204,6 +267,8 @@ export function AllItinerariesComponent() {
               language={language}
               setLanguage={setLanguage}
               searchItineraries={searchItineraries}
+              typesOptions={typesOptions}   // Passing the fetched types
+              languagesOptions={languagesOptions} // Passing the fetched languages
             />
           </div>
 

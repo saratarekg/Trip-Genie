@@ -4,8 +4,9 @@ const Itinerary = require("../models/itinerary");
 const getAllItineraries = async (req, res) => {
 
   try {
-    const { budget, upperDate, lowerDate, types, languages,searchBy,sort,asc } = req.query;
-
+    
+    const { budget, upperDate, lowerDate, types, languages,searchBy,sort,asc,myItineraries } = req.query;
+console.log(sort,asc);
     const filterResult = await Itinerary.filter(
       budget,
       upperDate,
@@ -19,15 +20,30 @@ const getAllItineraries = async (req, res) => {
     const searchResultIds = searchResult.map((itinerary) => itinerary._id);
     const filterResultIds = filterResult.map((itinerary) => itinerary._id);
 
-    let itinerariesQuery = await Itinerary.find({
-      $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
-    });
+    let query = [];
+    query.push({ _id: { $in: searchResultIds }});
+    query.push({ _id: { $in: filterResultIds }});
+    query.push({"availableDates": {
+      $elemMatch: {
+        date: { $gte: new Date() }, // Match any date that is upcoming
+      }
+    } });
+    if(myItineraries){
+      query.push({ tourGuide: res.locals.user_id });
+    }
 
+    let itinerariesQuery = await Itinerary.find({
+      $and: query,
+    });
     if (sort) {
       const sortBy = {};
-      sortBy[sort] = asc; // Sort ascending (1) or descending (-1) based on your needs
-      itinerariesQuery = itinerariesQuery.sort(sortBy);
+      sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
+      itinerariesQuery = await Itinerary.find({
+        $and: query,
+      }).sort(sortBy);
     }
+ 
+    console.log(itinerariesQuery);
 
     const itineraries = await itinerariesQuery;
 
@@ -170,6 +186,14 @@ const getItinerariesByTourGuide = async (req, res) => {
   }
 };
 
+const getAllLanguages = async (req, res) => {
+  try {
+    const languages = await Itinerary.find().distinct("language");
+    res.status(200).json(languages);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 
 module.exports = {
@@ -178,5 +202,6 @@ module.exports = {
   createItinerary,
   deleteItinerary,
   updateItinerary,
-  getItinerariesByTourGuide
+  getItinerariesByTourGuide,
+  getAllLanguages,
 };
