@@ -62,7 +62,7 @@ const formSchema = z.object({
   nationality: z.string().optional(),
   dateOfBirth: z.date().optional(),
   occupation: z.string().trim().optional(),
-  yearsOfExperience: z.string(),
+  yearsOfExperience: z.string().optional(),
   previousWorks: z.array(z.object({
     title: z.string().trim().min(1, {
       message: "Title is required",
@@ -134,11 +134,12 @@ const formSchema = z.object({
       ctx.addIssue({
         path: ["sellerType"],
         message: "Seller type is required.",
+
       });
     }
     if (!data.name) {
       ctx.addIssue({
-        message: "Name is required for VTP sellers.",
+        message: "Name is required for sellers.",
       })
     }
   }
