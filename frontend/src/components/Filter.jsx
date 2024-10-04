@@ -1,12 +1,16 @@
 import React from 'react';
-import { Filter, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { Filter, ChevronDown, ArrowUpDown, Plus } from 'lucide-react';
+// import {handleSort} from './all-trip-plans'
+import { Link } from 'react-router-dom';
 
 const FilterComponent = ({
   filtersVisible,
   toggleFilters,
   sortOrder,
-  sortBy,
-  handleSort,
+  sortBy, // Get sortBy from props
+  handleSort, // Get handleSort from props
+  clearFilters,
+  // sortItineraries,
   price,
   setPrice,
   dateRange,
@@ -54,28 +58,35 @@ const FilterComponent = ({
 
   return (
     <>
-      <div className="flex space-x-4 mb-4">
-        <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-          <Filter className="mr-2" size={18} />
-          Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
-        </button>
+<div className="flex mb-4">
+  <div className="flex space-x-4">
+    <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+      <Filter className="mr-2" size={18} />
+      Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
+    </button>
 
-        <button
-          onClick={() => handleSort('price')}
-          className="flex items-center px-4 py-2 bg-white rounded-full shadow"
-        >
-          <ArrowUpDown className="mr-2" size={18} />
-          Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-        </button>
+    <button onClick={() => handleSort('price')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+      <ArrowUpDown className="mr-2" size={18} />
+      Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+    </button>
 
-        <button
-          onClick={() => handleSort('rating')}
-          className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-4"
-        >
-          <ArrowUpDown className="mr-2" size={18} />
-          Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-        </button>
-      </div>
+    <button onClick={() => handleSort('rating')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+      <ArrowUpDown className="mr-2" size={18} />
+      Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+    </button>
+
+    <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+      Clear Filters
+    </button>
+  </div>
+
+  {/* Link styled as a button */}
+  <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
+    <Plus className="mr-2" size={18} />
+    Create
+  </Link>
+</div>
+
 
       {filtersVisible && (
         <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">
