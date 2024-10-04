@@ -219,6 +219,5 @@ module.exports = {
   updateItinerary,
   filterItineraries,
   getItinerariesByTourGuide,
-  searchItineraries,
   sortItineraries,
 };

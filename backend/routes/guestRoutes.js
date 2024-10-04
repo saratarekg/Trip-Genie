@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.get("/itineraries/filter", itineraryController.filterItineraries);
 router.get("/itineraries/sort",itineraryController.sortItineraries);
-router.get("/itineraries/search", itineraryController.searchItineraries);
+// router.get("/itineraries/search", itineraryController.searchItineraries);
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 
