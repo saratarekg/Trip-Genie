@@ -67,6 +67,18 @@ const itinerarySchema = new Schema({
         ref: 'TourGuide',
         required: true
       },
+      rating: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 5,
+        validate: {
+            validator: function(v) {
+                return v % 0.5 === 0;
+            },
+            message: props => `${props.value} is not a valid rating!`
+        }
+}
 }, {
     timestamps: true, 
 });

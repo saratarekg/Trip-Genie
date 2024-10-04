@@ -179,12 +179,14 @@ const searchItineraries = async (req, res) => {
   }
 };
 
+
 const sortItineraries = async (req, res) => {
   try {
-    const { order } = req.query;
+    const { order, ratingOrder } = req.query;
     let sortCriteria = {};
 
     sortCriteria.price = order === "desc" ? -1 : 1;
+    sortCriteria.rating = ratingOrder === "desc" ? -1 : 1;
 
     const itineraries = await Itinerary.find({
       "availableDates.date": { $gte: new Date() },
@@ -199,6 +201,7 @@ const sortItineraries = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 module.exports = {
   getAllItineraries,

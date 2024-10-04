@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Cookies from 'js-cookie';
-import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight, ArrowUpDown } from 'lucide-react';
+import { Search, Filter, ChevronDown, ChevronLeft, ChevronRight, ArrowUpDown, Star } from 'lucide-react';
 import ItineraryDetail from './ItineraryDetail.jsx';
 import defaultImage from "../assets/images/default-image.jpg";
 
@@ -17,18 +17,24 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
       />
     </div>
     <div className="p-4">
-      <span className="text-sm text-gray-500">
-        {itinerary.activities[0]?.category[0] || 'N/A'}
-      </span>
       <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
       <h3 className="text-sm mt-2 text-gray-700">{itinerary.description}</h3>
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-bold text-blue-600">€{itinerary.price}/Day</span>
-        <span className="text-sm text-gray-500">
-          {itinerary.language}
-        </span>
+        <div className="flex items-center">
+          <Star className="w-4 h-4 text-yellow-400 mr-1" />
+          <span className="text-sm text-gray-500">{itinerary.rating || 'N/A'}</span>
+        </div>
       </div>
     </div>
+  </div>
+);
+
+const LoadingSpinner = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
+    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
+    </svg>
   </div>
 );
 
@@ -37,7 +43,11 @@ export function AllItinerariesComponent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortCriteria, setSortCriteria] = useState('price');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const tripsPerPage = 6;
   const [selectedItinerary, setSelectedItinerary] = useState(null);
 
@@ -63,7 +73,21 @@ export function AllItinerariesComponent() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const fetchItineraries = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get('jwt');
       const role = getUserRole();
@@ -86,10 +110,13 @@ export function AllItinerariesComponent() {
       console.error('Error fetching itineraries:', error);
       setError('Error fetching itineraries');
       setItineraries([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const searchItineraries = async () => {
+    setIsLoading(true);
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries/search`);
@@ -115,16 +142,20 @@ export function AllItinerariesComponent() {
       console.error('Error fetching search results:', error);
       setError('Error fetching search results');
       setItineraries([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const sortItineraries = async () => {
+    setIsLoading(true);
     try {
       const role = getUserRole();
       const newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
       setSortOrder(newSortOrder);
 
       const url = new URL(`http://localhost:4000/${role}/itineraries/sort`);
+      url.searchParams.append('sortBy', sortCriteria);
       url.searchParams.append('order', newSortOrder);
 
       const token = Cookies.get('jwt');
@@ -147,7 +178,15 @@ export function AllItinerariesComponent() {
       console.error('Error fetching sorted results:', error);
       setError('Error fetching sorted results');
       setItineraries([]);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleSortChange = (criteria) => {
+    setSortCriteria(criteria);
+    sortItineraries();
+    setIsDropdownOpen(false);
   };
 
   const indexOfLastTrip = currentPage * tripsPerPage;
@@ -170,9 +209,16 @@ export function AllItinerariesComponent() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      {isLoading && <LoadingSpinner />}
       <div className="max-w-7xl mx-auto">
         {selectedItinerary ? (
           <>
+          <div className="text-white">
+            <p>kkkkkkkkkkkkkkkkkk
+              
+              
+              kkkkkkkkkkkkkkkkkkkkkkkkkkkk</p>
+          </div>
             <button
               onClick={handleBackToList}
               className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
@@ -203,13 +249,45 @@ export function AllItinerariesComponent() {
                   Filters
                 </button>
 
-                <button
-                  onClick={sortItineraries}
-                  className="flex items-center px-4 py-2 bg-white rounded-full shadow"
-                >
-                  <ArrowUpDown className="mr-2" size={18} />
-                  Sort by Price ({sortOrder === 'asc' ? 'Low to High' : 'High to Low'})
-                </button>
+                <div className="relative inline-block text-left" ref={dropdownRef}>
+                  <div>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center w-full rounded-full border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
+                      id="sort-menu"
+                      aria-haspopup="true"
+                      aria-expanded="true"
+                      onClick={() => sortItineraries()}
+                      onMouseEnter={() => setIsDropdownOpen(true)}
+                    >
+                      <ArrowUpDown className="mr-2" size={18} />
+                      Sort by {sortCriteria === 'price' ? 'Price' : 'Rating'} ({sortOrder === 'asc' ? 'Low to High' : 'High to Low'})
+                    </button>
+                  </div>
+                  {isDropdownOpen && (
+                    <div 
+                      className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                      onMouseLeave={() => setIsDropdownOpen(false)}
+                    >
+                      <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="sort-menu">
+                        <button
+                          onClick={() => handleSortChange('price')}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                          role="menuitem"
+                        >
+                          Sort by Price
+                        </button>
+                        <button
+                          onClick={() => handleSortChange('rating')}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                          role="menuitem"
+                        >
+                          Sort by Rating
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -278,6 +356,43 @@ export function AllItinerariesComponent() {
           </>
         )}
       </div>
+      <style jsx>{`
+        .spinner {
+          animation: rotator 1.4s linear infinite;
+        }
+
+        @keyframes rotator {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(270deg); }
+        }
+
+        .path {
+          stroke-dasharray: 187;
+          stroke-dashoffset: 0;
+          transform-origin: center;
+          animation: dash 1.4s ease-in-out infinite, colors 5.6s ease-in-out infinite;
+        }
+
+        @keyframes colors {
+          0% { stroke: #3B82F6; }
+          25% { stroke: #EF4444; }
+          50% { stroke: #F59E0B; }
+          75% { stroke: #10B981; }
+          100% { stroke: #3B82F6; }
+        }
+
+        @keyframes dash {
+         0% { stroke-dashoffset: 187; }
+         50% {
+           stroke-dashoffset: 46.75;
+           transform: rotate(135deg);
+         }
+         100% {
+           stroke-dashoffset: 187;
+           transform: rotate(450deg);
+         }
+        }
+      `}</style>
     </div>
   );
 }

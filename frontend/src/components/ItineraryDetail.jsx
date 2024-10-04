@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { ChevronLeft, ChevronRight, Calendar, Clock, MapPin, Users, DollarSign, Globe, Accessibility } from 'lucide-react';
+import { ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2 } from 'lucide-react';
 
-const ItineraryDetail = (props) => {
-  const [itinerary, setItinerary] = useState(null);
+const LoadingSpinner = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
+    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
+    </svg>
+  </div>
+);
+
+const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
+  const [itinerary, setItinerary] = useState(initialItinerary);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  // Ensure selectedItinerary and its _id are defined
-  const id = props.itinerary ? props.itinerary._id : null;
 
   useEffect(() => {
-    if (!id) {
-      console.log(id);
-      setError('Invalid itinerary ID.');
+    if (!itinerary || !itinerary._id) {
+      setError('Invalid itinerary data.');
       setLoading(false);
       return;
     }
@@ -24,38 +27,19 @@ const ItineraryDetail = (props) => {
       try {
         const role = Cookies.get('role') || 'guest';
         const token = Cookies.get('jwt');
-        const response = await fetch(`http://localhost:3000/${role}/itineraries/${id}`, {
+        const response = await fetch(`http://localhost:4000/${role}/itineraries/${itinerary._id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log("line 1");
 
-        if (!response.ok) { 
+        if (!response.ok) {
           throw new Error('Failed to fetch itinerary details');
         }
-        
-        console.log("line 2");
 
-        // Log the response text
-        const responseText = await response.text();
-        console.log("Response Text:", responseText);
-
-        // Check if the response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Response is not JSON');
-        }
-
-        const data = JSON.parse(responseText);
-        
-        console.log("line 3");
+        const data = await response.json();
         setItinerary(data);
-        
-        console.log("line 4");
         setError(null);
-        
-        console.log("line 5");
       } catch (err) {
         setError('Error fetching itinerary details. Please try again later.');
         console.error('Error fetching itinerary details:', err);
@@ -63,25 +47,22 @@ const ItineraryDetail = (props) => {
         setLoading(false);
       }
     };
-    
 
     fetchItineraryDetails();
-  }, [id]);
+  }, [itinerary._id]);
 
-  const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % (itinerary?.images?.length || 1));
+  const handleUpdate = () => {
+    // Implement update functionality
+    console.log('Update itinerary');
   };
 
-  const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex - 1 + (itinerary?.images?.length || 1)) % (itinerary?.images?.length || 1));
+  const handleDelete = () => {
+    // Implement delete functionality
+    console.log('Delete itinerary');
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-orange-500"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
@@ -97,17 +78,14 @@ const ItineraryDetail = (props) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      
+
       {/* Hero Section */}
-      <div className="relative h-96 bg-cover bg-center">
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white text-center">{itinerary.title}</h1>
+      <div className="bg-blue-600 text-white py-20 px-4">
+        <div className="container mx-auto text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4">{itinerary.title}</h1>
+          <p className="text-xl md:text-2xl">{itinerary.description}</p>
         </div>
-        <button onClick={prevImage} className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full" aria-label="Previous image">
-          <ChevronLeft className="w-6 h-6 text-gray-800" />
-        </button>
-        <button onClick={nextImage} className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full" aria-label="Next image">
-          <ChevronRight className="w-6 h-6 text-gray-800" />
-        </button>
       </div>
 
       {/* Content Section */}
@@ -115,13 +93,15 @@ const ItineraryDetail = (props) => {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           {/* Itinerary Details */}
           <div className="p-6">
-            <h2 className="text-3xl font-semibold mb-4">Itinerary Details</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-3xl font-semibold">Itinerary Details</h2>
+              <div className="flex items-center">
+                <Star className="w-6 h-6 text-yellow-400 mr-1" />
+                <span className="text-lg font-semibold">{itinerary.rating || 'N/A'}</span>
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <div className="flex items-center">
-                  <Clock className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Timeline: {itinerary.timeline}</span>
-                </div>
                 <div className="flex items-center">
                   <Globe className="w-6 h-6 mr-2 text-orange-500" />
                   <span className="text-gray-700">Language: {itinerary.language}</span>
@@ -186,13 +166,68 @@ const ItineraryDetail = (props) => {
 
           {/* Booking Section */}
           <div className="p-6 border-t border-gray-200">
-            <h3 className="text-2xl font-semibold mb-4">Book This Itinerary</h3>
-            <button className="bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition duration-300">
+            <div className="flex justify-between items-center">
+              <h3 className="text-2xl font-semibold">Book This Itinerary</h3>
+              <div className="space-x-2">
+                <button
+                  onClick={handleUpdate}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
+                >
+                  <Edit className="inline-block w-4 h-4 mr-2" />
+                  Update
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-300"
+                >
+                  <Trash2 className="inline-block w-4 h-4 mr-2" />
+                  Delete
+                </button>
+              </div>
+            </div>
+            <button className="mt-4 bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition duration-300">
               Book Now
             </button>
           </div>
         </div>
       </div>
+      <style jsx>{`
+        .spinner {
+          animation: rotator 1.4s linear infinite;
+        }
+
+        @keyframes rotator {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(270deg); }
+        }
+
+        .path {
+          stroke-dasharray: 187;
+          stroke-dashoffset: 0;
+          transform-origin: center;
+          animation: dash 1.4s ease-in-out infinite, colors 5.6s ease-in-out infinite;
+        }
+
+        @keyframes colors {
+          0% { stroke: #3B82F6; }
+          25% { stroke: #EF4444; }
+          50% { stroke: #F59E0B; }
+          75% { stroke: #10B981; }
+          100% { stroke: #3B82F6; }
+        }
+
+        @keyframes dash {
+         0% { stroke-dashoffset: 187; }
+         50% {
+           stroke-dashoffset: 46.75;
+           transform: rotate(135deg);
+         }
+         100% {
+           stroke-dashoffset: 187;
+           transform: rotate(450deg);
+         }
+        }
+      `}</style>
     </div>
   );
 };
