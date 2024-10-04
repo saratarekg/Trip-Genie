@@ -1,6 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useState,useEffect } from 'react';
+import axios from 'axios';
+import Cookies from 'js-cookie'
+
 
 const ItineraryForm = () => {
+  const [activities, setActivities] = useState([])
+  const [error, setError] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
     timeline: '',
@@ -13,6 +19,30 @@ const ItineraryForm = () => {
     dropOffLocation: '',
     rating: '',
   });
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const token = Cookies.get('jwt')
+        let role = Cookies.get('role')
+        if (role === undefined) 
+          role = 'guest'
+        const api = `http://localhost:4000/${role}/activities`
+        const response = await axios.get(api, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        })
+        console.log(response.data)
+        setActivities(response.data) 
+      } catch (err) {
+        setError(err.message)
+      }
+    }
+  
+    fetchActivities()
+  }, [])
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -153,18 +183,24 @@ const ItineraryForm = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="activities">
+          <label className="block text-gray-700" htmlFor="Activity">
             Activities
           </label>
-          <input
-            type="text"
-            name="activities"
-            id="activities"
+          <select
+            name="Activity"
+            id="Activity"
             className="border border-gray-300 rounded-xl p-2 w-full"
-            value={formData.activities}
-            onChange={(e) => setFormData({ ...formData, activities: [e.target.value] })}
+            //value={formData.Activity[0]} // Select the first activity by default
+            onChange={(e) => setFormData({ ...formData, Activity: [e.target.value] })}
             required
-          />
+          >
+            <option value="">Select an activity</option>
+            {activities.map((activity) => (
+              <option key={activity._id} value={activity._id}>
+                {activity.name} {/* Assuming each activity has a 'name' field */}
+              </option>
+            ))}
+          </select>
         </div>
 
         {formData.availableDates.map((date, index) => (
@@ -229,7 +265,7 @@ const ItineraryForm = () => {
               checked={formData.accessibility}
               onChange={(e) => setFormData({ ...formData, accessibility: e.target.checked })}
             />
-            Accessible
+            Is it accesible for people with disabilities.
           </label>
         </div>
 

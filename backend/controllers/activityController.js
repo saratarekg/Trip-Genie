@@ -4,8 +4,11 @@ const Itinerary = require("../models/itinerary");
 
 const getAllActivities = async (req, res) => {
   try {
+
     const { price, startDate, endDate, category, minRating,searchBy,sort,asc,myActivities } = req.query;
+
     const filterResult = await Activity.filter(price, startDate, endDate, category, minRating);
+
     const searchResult = await Activity.findByFields(searchBy);
 
     const searchResultIds = searchResult.map((activity) => activity._id);
@@ -18,14 +21,14 @@ const getAllActivities = async (req, res) => {
     if(myActivities){
       query.push({ advertiser: res.locals.user_id });
     }
-
     let activitiesQuery = await Activity.find({
       $and: query,
     });
+    console.log(activitiesQuery);
 
     if (sort) {
       const sortBy = {};
-      sortBy[sort] = asc; // Sort ascending (1) or descending (-1) based on your needs
+      sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
       activitiesQuery = activitiesQuery.sort(sortBy);
     }
 
