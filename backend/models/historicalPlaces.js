@@ -33,7 +33,7 @@ const historicalPlacesSchema = new Schema({
 
     governor: {  // New field for the maker's ID
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'governor', // Replace 'User' with the appropriate model name for makers
+        ref: 'TourismGovernor', // Replace 'User' with the appropriate model name for makers
         required: true, // Assuming it's required, you can set this to false if it's optional
     },
 });
@@ -74,8 +74,9 @@ historicalPlacesSchema.statics.findByFields = async function(searchCriteria) {
 historicalPlacesSchema.statics.filterByTag = async function(types,periods) {
     const query = [];
     let historicalTags = null;
-    if((types === undefined || types === null || types.length===0) && (periods === undefined || periods === null || periods.length===0))
-        return this.find().populate('governor').populate('historicalTag').exec();
+    if((types === undefined || types === null || types.length===0) && (periods === undefined || periods === null || periods.length===0)){
+        return await this.find().populate('governor').populate('historicalTag').exec();
+    }
     else if(types === undefined || types === null || types.length===0)
         historicalTags = await HistoricalTag.find({ period: { $in: periods } });
     else if(periods === undefined || periods === null || periods.length===0)

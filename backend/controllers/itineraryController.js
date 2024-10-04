@@ -6,7 +6,6 @@ const getAllItineraries = async (req, res) => {
   try {
     
     const { budget, upperDate, lowerDate, types, languages,searchBy,sort,asc,myItineraries } = req.query;
-console.log(sort,asc);
     const filterResult = await Itinerary.filter(
       budget,
       upperDate,
@@ -43,7 +42,6 @@ console.log(sort,asc);
       }).sort(sortBy);
     }
  
-    console.log(itinerariesQuery);
 
     const itineraries = await itinerariesQuery;
 
@@ -141,7 +139,6 @@ const deleteItinerary = async (req, res) => {
 
     // Find the itinerary by ID
     const itinerary = await Itinerary.findById(req.params.id);
-    console.log(tourGuideId);
 
     if (!itinerary) {
       return res.status(404).json({ message: "Itinerary not found" });
