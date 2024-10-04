@@ -92,9 +92,9 @@ const updateItinerary = async (req, res) => {
 
 const filterItineraries = async (req, res) => {
   try {
-    const { budget, upperDate, lowerDate, types, languages } = req.query;
+    const { budget, upperDate, lowerDate, types, languages,searchBy } = req.query;
 
-    const itinerary = await Itinerary.filter(
+    const filterResult = await Itinerary.filter(
       budget,
       upperDate,
       lowerDate,
@@ -102,7 +102,11 @@ const filterItineraries = async (req, res) => {
       languages
     );
 
-    console.log("Itinerary:", itinerary);
+    const searchResult = await Itinerary.findByFields(searchBy);
+
+    let itinerary = filterResult.filter((itinerary) =>
+      searchResult.includes(itinerary)
+    );
 
     if (!itinerary || itinerary.length === 0) {
       return res.status(200).json([]);
@@ -164,24 +168,24 @@ const getItinerariesByTourGuide = async (req, res) => {
   }
 };
 
-const searchItineraries = async (req, res) => {
-  try {
-    const { searchBy } = req.query;
-    const itineraries = await Itinerary.findByFields(searchBy);
+// const searchItineraries = async (req, res) => {
+//   try {
+//     const { searchBy } = req.query;
+//     const itineraries = await Itinerary.findByFields(searchBy);
 
-    console.log("Search By:", searchBy); // Log the search criteria
-    console.log("Itineraries Found:", itineraries); // Log the itineraries found
+//     console.log("Search By:", searchBy); // Log the search criteria
+//     console.log("Itineraries Found:", itineraries); // Log the itineraries found
 
-    // Instead of checking for 404, return an empty array if no itineraries are found
-    if (!itineraries || itineraries.length === 0) {
-      return res.status(200).json([]); // Return an empty array with a 200 status
-    }
+//     // Instead of checking for 404, return an empty array if no itineraries are found
+//     if (!itineraries || itineraries.length === 0) {
+//       return res.status(200).json([]); // Return an empty array with a 200 status
+//     }
 
-    res.status(200).json(itineraries);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+//     res.status(200).json(itineraries);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 
 const sortItineraries = async (req, res) => {
