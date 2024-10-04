@@ -163,5 +163,32 @@ activitySchema.statics.findByCategoryNames = async function(names) {
      return this.find({ $or: query }).populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
  };
 
+ activitySchema.statics.filter = async function(price, startDate, endDate, category, minRating) {
+    const query = [];
+
+    if (price !== undefined && price !== null && price !== "") {
+        query.push({ ["price"]: { $lte: price } });
+    }
+    if (startDate !== undefined && startDate !== null && startDate !== "") {
+        query.push({ ["timing"]: { $gte: startDate } });
+    }
+    if (endDate !== undefined && endDate !== null && endDate !== "") {
+        query.push({ ["timing"]: { $lte: endDate } });
+    }
+
+    if (category) {
+      // Find the category by name and get its ObjectId
+      const activityList = await Activity.findByCategoryNames(category);
+      const activityIds = activityList.map((activity) => activity._id);
+      query.push({ ["_id"]: { $in: activityIds } });
+    }
+
+    if (minRating !== undefined && minRating !== null && minRating !== "") {
+      query.push({ ["rating"]: { $gte: minRating } });
+    }
+
+    return this.find({ $and: query }).populate('category tags advertiser').exec();
+}
+
 
 module.exports = mongoose.model('Activity', activitySchema);

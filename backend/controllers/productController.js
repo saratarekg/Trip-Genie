@@ -3,33 +3,27 @@ const Seller = require('../models/seller');
 
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, maxPrice,searchBy,asc } = req.query;
+  const { minPrice, maxPrice,searchBy,asc,myProducts } = req.query;
 
   try {
-    const priceFilter = {};
-    if (minPrice !== undefined) {
-      priceFilter.$gte = minPrice;
-    }
-    if (maxPrice !== undefined) {
-      priceFilter.$lte = maxPrice;
-    }
-    const filterConditions = {};
-
-    if (minPrice !== undefined || maxPrice !== undefined) {
-      filterConditions.price = priceFilter;
-    }
-
-    const filterResult = await Product.find(filterConditions);
+    const filterResult = await Product.filterByPrice(minPrice, maxPrice);
     const searchResult = await Product.searchByNames(searchBy);
 
     const searchResultIds = searchResult.map((product) => product._id);
     const filterResultIds = filterResult.map((product) => product._id);
 
+    let query = [];
+    query.push({ _id: { $in: searchResultIds }});
+    query.push({ _id: { $in: filterResultIds }});
+    if(myProducts){
+      query.push({ seller: res.locals.user_id });
+    }
+
     let productsQuery = await Product.find({
-      $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
+      $and: query,
     });
 
-    if (sort) {
+    if (asc!==undefined) {
       const sortBy = {};
       sortBy['rating'] = asc;
       productsQuery = productsQuery.sort(sortBy);
@@ -170,6 +164,7 @@ const deleteProductOfSeller = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 }
+
 
 module.exports = {
   getAllProducts,

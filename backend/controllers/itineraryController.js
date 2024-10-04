@@ -4,7 +4,7 @@ const Itinerary = require("../models/itinerary");
 const getAllItineraries = async (req, res) => {
 
   try {
-    const { budget, upperDate, lowerDate, types, languages,searchBy,sort,asc } = req.query;
+    const { budget, upperDate, lowerDate, types, languages,searchBy,sort,asc,myItineraries } = req.query;
 
     const filterResult = await Itinerary.filter(
       budget,
@@ -19,8 +19,20 @@ const getAllItineraries = async (req, res) => {
     const searchResultIds = searchResult.map((itinerary) => itinerary._id);
     const filterResultIds = filterResult.map((itinerary) => itinerary._id);
 
+    let query = [];
+    query.push({ _id: { $in: searchResultIds }});
+    query.push({ _id: { $in: filterResultIds }});
+    query.push({"availableDates": {
+      $elemMatch: {
+        date: { $gte: new Date() }, // Match any date that is upcoming
+      }
+    } });
+    if(myItineraries){
+      query.push({ tourGuide: res.locals.user_id });
+    }
+
     let itinerariesQuery = await Itinerary.find({
-      $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
+      $and: query,
     });
 
     if (sort) {
