@@ -2,6 +2,8 @@ const TourGuide = require('../models/tourGuide');
 
 const Itinerary = require('../models/itinerary'); // Adjust the path as needed
 
+const { deleteItinerary } = require('./itineraryController');
+
 
 
 const getTourGuideProfile = async (req, res) => {
@@ -87,6 +89,16 @@ const deleteTourGuideAccount = async (req, res) => {
         if (!tourGuide) {
             return res.status(404).json({ message: 'TourGuide not found' });
         }
+
+
+        
+          // Find all activities associated with the advertiser
+          const itineraries = await Itinerary.find({ advertiser: req.params.id });
+
+          // Call the deleteActivity method for each activity associated with the advertiser
+          for (const itinerary of itineraries) {
+              await deleteItinerary({ params: { id: activity._id } }, res);
+          }
         res.status(201).json({ message: 'TourGuide deleted' });
     } catch (error) {
         res.status(500).json({ error: error.message });

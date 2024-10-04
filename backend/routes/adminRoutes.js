@@ -8,6 +8,7 @@ const tourismGovernorController = require('../controllers/tourismGovernorControl
 const tagController = require('../controllers/tagController');
 const categoryController = require('../controllers/categoryController');
 const productController = require('../controllers/productController');
+const historicalTagController = require('../controllers/historicalTagController');
 
 
 const router = express.Router();
@@ -75,6 +76,7 @@ router.get('/tags/:id', tagController.getTag);
 router.get('/tags', tagController.getAlltags);
 router.put('/tags/:id', tagController.updateTag);
 
+router.delete('/historical-tags/:id', historicalTagController.deleteTag);
 
 
 router.post('/categories',categoryController.createCategory);

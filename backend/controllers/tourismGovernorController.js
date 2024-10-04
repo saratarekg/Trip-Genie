@@ -5,6 +5,7 @@ const Tourist = require('../models/tourist');
 const Seller = require('../models/seller');
 const Advertiser = require('../models/advertiser');
 const TourGuide = require('../models/tourGuide');
+const { deleteHistoricalPlace } = require('./historicalPlacesController');
 
 
 const addTourismGovernor = async (req, res) => {
@@ -35,6 +36,14 @@ const deleteTourismGovAccount = async (req, res) => {
         if (!tourismGov) {
             return res.status(404).json({ message: 'Tourism Governor not found' });
         }
+
+          // Find all activities associated with the advertiser
+          const historicals = await HistoricalPlace.find({ advertiser: req.params.id });
+
+          // Call the deleteActivity method for each activity associated with the advertiser
+          for (const historical of historicals) {
+              await deleteHistoricalPlace({ params: { id: activity._id } }, res);
+          }
         res.status(201).json({ message: 'Tourism Governor deleted' });
     } catch (error) {
         res.status(500).json({ error: error.message });

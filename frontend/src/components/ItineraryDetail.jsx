@@ -211,7 +211,7 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
           <div className="p-6 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-semibold">Book This Itinerary</h3>
-              {userRole === 'tourGuide' && (
+              {userRole === 'tour-guide' && (
                 <div className="space-x-2">
                   <button
                     onClick={handleUpdate}

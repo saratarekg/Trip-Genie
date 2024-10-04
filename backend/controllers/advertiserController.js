@@ -1,5 +1,6 @@
 const Advertiser = require('../models/advertiser');
-const activity = require('../models/activity');
+const Activity = require('../models/activity');
+const { deleteActivity } = require('./activityController');
 
 
 const deleteAdvertiserAccount = async (req, res) => {
@@ -8,11 +9,21 @@ const deleteAdvertiserAccount = async (req, res) => {
         if (!advertiser) {
             return res.status(404).json({ message: 'Advertiser not found' });
         }
-        res.status(201).json({ message: 'Advertiser deleted' });
+
+        // Find all activities associated with the advertiser
+        const activities = await Activity.find({ advertiser: req.params.id });
+
+        // Call the deleteActivity method for each activity associated with the advertiser
+        for (const activity of activities) {
+            await deleteActivity({ params: { id: activity._id } }, res);
+        }
+
+        res.status(201).json({ message: 'Advertiser and associated activities deleted' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
 
 const getAllAdvertisers = async (req, res) => {
     try {
@@ -75,3 +86,8 @@ const getAdvertiser = async (req, res) => {
 
 
 module.exports = { deleteAdvertiserAccount,getAllAdvertisers,getAdvertiserByID,updateAdvertiser,getAdvertiser};
+
+
+
+
+
