@@ -132,10 +132,11 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
         query.push({ language: { $in: languages } });
     }
     
+    console.log(query);
     if(query.length === 0)
-        itineraries = await this.find().exec();
+        itineraries = await this.find().populate('tourGuide').populate('activities').exec();
     else
-        itineraries = await this.find({ $and: query }).exec();
+        itineraries = await this.find({ $and: query }).populate('tourGuide').populate('activities').exec();
 
     if(itineraries.length === 0)
         return [];
@@ -147,7 +148,7 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
         activities = await Activity.findByTagTypes(types);
     }
     else{
-        activities = await Activity.find();
+        return itineraries;
     }
 
     if(activities.length === 0)
@@ -155,6 +156,7 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
 
     const activityIds = activities.map(activity => activity._id.toString());
     const query2 = [];
+
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
         if(itinerariesIds.includes(doc._id.toString())){
             doc.activities.forEach(activity => {
@@ -165,6 +167,7 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
         }
     }
 
+    console.log(query2);
     if(query2.length === 0)
         return [];
 

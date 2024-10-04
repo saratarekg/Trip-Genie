@@ -1,6 +1,10 @@
 const TourismGovernor = require('../models/tourismGovernor');
 const Admin = require('../models/admin');
 const HistoricalPlace = require('../models/historicalPlaces'); // Adjust the path as needed
+const Tourist = require('../models/tourist');
+const Seller = require('../models/seller');
+const Advertiser = require('../models/advertiser');
+const TourGuide = require('../models/tourGuide');
 
 
 const addTourismGovernor = async (req, res) => {
@@ -59,10 +63,12 @@ const getTourismGovByID = async (req, res) => {
 };
 
 const usernameExists = async (username) => {
-    if(await Admin.findOne({username})){
-        return true;
-    }
-    else if(await TourismGovernor.findOne({username})){
+    if(await Tourist.findOne({username}) 
+        || await TourGuide.findOne({username}) 
+        || await Advertiser.findOne({username}) 
+        || await Seller.findOne({username})
+        || await Admin.findOne({username})
+        || await TourismGovernor.findOne({username})){
         return true;
     }
     else{

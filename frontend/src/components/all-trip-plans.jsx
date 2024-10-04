@@ -17,9 +17,6 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
       />
     </div>
     <div className="p-4">
-      <span className="text-sm text-gray-500">
-        {itinerary.activities[0]?.category[0] || 'N/A'}
-      </span>
       <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
       <h3 className="text-sm mt-2 text-gray-700">{itinerary.description}</h3>
       <div className="flex justify-between items-center mt-4">

@@ -19,6 +19,9 @@ const touristSignup = async (req, res) => {
         if(await emailExists(req.body.email)){
             throw new Error('Email already exists');
         }
+        if(await usernameExists(req.body.username)){
+            throw new Error('Username already exists');
+        }
         const { email, username, password, nationality, mobile, dateOfBirth, jobOrStudent} = req.body;
         const tourist = new Tourist({ email, username, password, nationality, mobile, dateOfBirth, jobOrStudent});
 
@@ -46,6 +49,7 @@ const login = async (req, res) => {
             user = await Tourist.login(username, password);
         }
         else if(await TourGuide.findOne({email:username}) || await TourGuide.findOne({username})){
+            role = 'tour-guide';
             user = await TourGuide.login(username, password);
         }
         else if(await Advertiser.findOne({email:username}) || await Advertiser.findOne({username})){
@@ -87,6 +91,9 @@ const advertiserSignup = async (req, res) => {
         if(await emailExists(req.body.email)){
             throw new Error('Email already exists');
         }
+        if(await usernameExists(req.body.username)){
+            throw new Error('Username already exists');
+        }
         const advertiser = new Advertiser(req.body);
 
         advertiser.save()
@@ -108,6 +115,9 @@ const tourGuideSignup = async (req, res) => {
         if(await emailExists(req.body.email)){
             throw new Error('Email already exists');
         }
+        if(await usernameExists(req.body.username)){
+            throw new Error('Username already exists');
+        }
         const tourGuide = new TourGuide(req.body);
 
         tourGuide.save()
@@ -127,6 +137,9 @@ const sellerSignup = async (req, res) => {
     try{
         if(await emailExists(req.body.email)){
             throw new Error('Email already exists');
+        }
+        if(await usernameExists(req.body.username)){
+            throw new Error('Username already exists');
         }
         const seller = new Seller(req.body);
 
@@ -161,6 +174,20 @@ const emailExists = async (email) => {
         return true;
     }
     else if(await Seller.findOne({email})){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+const usernameExists = async (username) => {
+    if(await Tourist.findOne({username}) 
+        || await TourGuide.findOne({username}) 
+        || await Advertiser.findOne({username}) 
+        || await Seller.findOne({username})
+        || await Admin.findOne({username})
+        || await TourismGovernor.findOne({username})){
         return true;
     }
     else{
