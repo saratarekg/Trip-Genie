@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Importing useNavigate
+import Loader from './Loader';
 
-const LoadingSpinner = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
-    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
-    </svg>
-  </div>
-);
+
 
 const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
   const [itinerary, setItinerary] = useState(initialItinerary);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
+
+  const navigate = useNavigate(); // Move useNavigate to the top level
 
   useEffect(() => {
     if (!itinerary || !itinerary._id) {
@@ -52,8 +50,8 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
   }, [itinerary._id, userRole]);
 
   const handleUpdate = () => {
-    // Implement update functionality
-    console.log('Update itinerary');
+    // Redirect to the update page with the itinerary ID
+    navigate('/update-itinerary'); // Pass the itinerary ID in the route
   };
 
   const handleDelete = async () => {
@@ -75,9 +73,6 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
         throw new Error('Failed to delete itinerary');
       }
 
-      // Optionally, you can handle the response data if the API returns any
-      // const data = await response.json();
-
       // Notify the user of successful deletion
       alert('Itinerary deleted successfully.');
 
@@ -92,7 +87,7 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
   };
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <Loader />;
   }
 
   if (error) {
@@ -119,7 +114,7 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
       </nav>
 
       {/* Hero Section */}
-      <div className="bg-[#1a202c] text-white py-20 px-4"> {/* Updated background color */}
+      <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{itinerary.title}</h1>
           <p className="text-xl md:text-2xl">{itinerary.description}</p>
@@ -238,43 +233,6 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
           </div>
         </div>
       </div>
-      <style jsx>{`
-        .spinner {
-          animation: rotator 1.4s linear infinite;
-        }
-
-        @keyframes rotator {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(270deg); }
-        }
-
-        .path {
-          stroke-dasharray: 187;
-          stroke-dashoffset: 0;
-          transform-origin: center;
-          animation: dash 1.4s ease-in-out infinite, colors 5.6s ease-in-out infinite;
-        }
-
-        @keyframes colors {
-          0% { stroke: #3B82F6; }
-          25% { stroke: #EF4444; }
-          50% { stroke: #F59E0B; }
-          75% { stroke: #10B981; }
-          100% { stroke: #3B82F6; }
-        }
-
-        @keyframes dash {
-          0% { stroke-dashoffset: 187; }
-          50% {
-            stroke-dashoffset: 46.75;
-            transform: rotate(135deg);
-          }
-          100% {
-            stroke-dashoffset: 187;
-            transform: rotate(450deg);
-          }
-        }
-      `}</style>
     </div>
   );
 };

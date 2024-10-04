@@ -4,6 +4,8 @@ import Navbar1 from "./components/Navbar1.jsx";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/login.jsx";
 import SellerList from "./components/SellerList.jsx";
+import ItineraryDetail from "./components/ItineraryDetail.jsx";
+import UpdateItinerary from "./components/UpdateItinerary.jsx";
 import ActivityList from "./components/ActivityListAdvertiser.jsx";
 import ItineraryList from "./components/ItineraryListTourGuide.jsx";
 import HistoricalPlaceList from "./components/HistoricalPlaceListGovernor.jsx";
@@ -34,6 +36,8 @@ function App() {
             <Route path="/all-itineraries" element={<AllItinerariesComponent />}/>
             <Route path="/sign-up" element={<SignupForm />} />
             <Route path="/admin" element={<AdminDash />} />
+            <Route path="/itinerary/:id" element={<ItineraryDetail />} />
+            <Route path="/update-itinerary" element={<UpdateItinerary />} />
             {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
           </Routes>
         </div>

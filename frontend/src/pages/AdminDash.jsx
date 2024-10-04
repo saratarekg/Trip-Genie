@@ -9,6 +9,7 @@ import image15 from "../assets/images/image-15.png";
 import logo from "../assets/images/logo.svg";
 import svgrepoIconcarrier from "../assets/images/svgrepo-iconcarrier.png";
 import { AdminGovernorPopup } from "@/components/admin-governor-popup";
+import { DeleteAccount } from "@/components/DeleteAccPopout";
 
 export const AdminDash = () => {
     return (
@@ -42,8 +43,8 @@ export const AdminDash = () => {
                 </div>
                 <div className="flex w-full justify-between">
                   <ActionButton title="Review Registrations" />
-                  <ActionButton title="Manage Accounts" />
                   <AdminGovernorPopup  />
+                  <DeleteAccount />
                   </div>
               </div>
 

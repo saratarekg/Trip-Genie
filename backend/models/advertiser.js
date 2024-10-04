@@ -66,7 +66,10 @@ advertiserSchema.statics.login = async function(username,password){
     if(advertiser){
         const auth = await bcrypt.compare(password, advertiser.password )
         if(auth){
-            return advertiser;
+          if(advertiser.isAccepted===false){
+            throw Error('Your account is not accepted yet');
+          }
+          return advertiser;
         }
         throw Error('Incorrect password');
     }
