@@ -37,7 +37,7 @@ function App() {
             <Route path="/sign-up" element={<SignupForm />} />
             <Route path="/admin" element={<AdminDash />} />
             <Route path="/itinerary/:id" element={<ItineraryDetail />} />
-            <Route path="/update-itinerary" element={<UpdateItinerary />} />
+            <Route path="/update-itinerary/:id" element={<UpdateItinerary />} />
             {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
           </Routes>
         </div>

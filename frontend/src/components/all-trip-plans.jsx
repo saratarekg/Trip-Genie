@@ -221,17 +221,6 @@ export function AllItinerariesComponent() {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div className="max-w-7xl mx-auto">
-      {selectedItinerary ? (
-        <>
-          <button
-            onClick={() => setSelectedItinerary(null)}
-            className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
-          >
-            <ChevronLeft className="mr-1" /> Back to All Itineraries
-          </button>
-          <ItineraryDetail itinerary={selectedItinerary} />
-        </>
-      ) : (
         <>
           <h1 className="text-4xl font-bold text-gray-900 mb-8">All Trip Plans</h1>
 
@@ -313,7 +302,6 @@ export function AllItinerariesComponent() {
             </button>
           </div>
         </>
-      )}
     </div>
   </div>
   );
