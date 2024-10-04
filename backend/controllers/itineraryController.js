@@ -4,8 +4,9 @@ const Itinerary = require("../models/itinerary");
 const getAllItineraries = async (req, res) => {
 
   try {
+    
     const { budget, upperDate, lowerDate, types, languages,searchBy,sort,asc,myItineraries } = req.query;
-
+console.log(sort,asc);
     const filterResult = await Itinerary.filter(
       budget,
       upperDate,
@@ -34,12 +35,15 @@ const getAllItineraries = async (req, res) => {
     let itinerariesQuery = await Itinerary.find({
       $and: query,
     });
-
     if (sort) {
       const sortBy = {};
-      sortBy[sort] = asc; // Sort ascending (1) or descending (-1) based on your needs
-      itinerariesQuery = itinerariesQuery.sort(sortBy);
+      sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
+      itinerariesQuery = await Itinerary.find({
+        $and: query,
+      }).sort(sortBy);
     }
+ 
+    console.log(itinerariesQuery);
 
     const itineraries = await itinerariesQuery;
 

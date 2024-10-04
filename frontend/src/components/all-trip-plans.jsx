@@ -40,7 +40,8 @@ export function AllItinerariesComponent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortOrder, setSortOrder] = useState('');
+  const [sortBy, setSortBy] = useState('');
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [price, setPrice] = useState('');
   const [dateRange, setDateRange] = useState({ lower: '', upper: '' });
@@ -104,6 +105,19 @@ export function AllItinerariesComponent() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
+  useEffect(() => {
+    if (sortBy) {
+      searchItineraries();
+    }
+  }, [sortBy, sortOrder]);
+
+
+  const handleSort = (attribute) => {
+    const newSortOrder = sortOrder === 1 ? -1 : 1;
+    setSortBy(attribute);
+    setSortOrder(newSortOrder);
+    searchItineraries(); // Call this to fetch sorted itineraries
+  };
   const fetchItineraries = async () => {
     try {
       const token = Cookies.get('jwt');
@@ -155,7 +169,14 @@ export function AllItinerariesComponent() {
       if (language) {
         url.searchParams.append('languages', language);
       }
-  
+
+  // Add sorting parameters
+  if (sortBy) {
+    url.searchParams.append('sort', sortBy);
+  }
+  if (sortOrder) {
+    url.searchParams.append('asc', sortOrder);
+  }
       const token = Cookies.get('jwt');
       const response = await fetch(url, {
         headers: {
@@ -183,18 +204,23 @@ export function AllItinerariesComponent() {
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
   };
+  
+  // export const handleSort = (setSortBy, setSortOrder, attribute) => {
+  //   setSortBy(attribute); // Set the attribute for sorting
+  //   setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc')); // Toggle the order
+  // };
 
-  const sortItineraries = (key) => {
-    const sortedItineraries = [...itineraries].sort((a, b) => {
-      if (sortOrder === 'asc') {
-        return a[key] > b[key] ? 1 : -1;
-      } else {
-        return a[key] < b[key] ? 1 : -1;
-      }
-    });
-    setItineraries(sortedItineraries);
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-  };
+  // const sortItineraries = (key) => {
+  //   const sortedItineraries = [...itineraries].sort((a, b) => {
+  //     if (sortOrder === 'asc') {
+  //       return a[key] > b[key] ? 1 : -1;
+  //     } else {
+  //       return a[key] < b[key] ? 1 : -1;
+  //     }
+  //   });
+  //   setItineraries(sortedItineraries);
+  //   setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  // };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -229,7 +255,9 @@ export function AllItinerariesComponent() {
               filtersVisible={filtersVisible}
               toggleFilters={toggleFilters}
               sortOrder={sortOrder}
-              sortItineraries={sortItineraries}
+              sortBy={sortBy}
+              handleSort={handleSort}
+              // sortItineraries={sortItineraries}
               price={price}
               setPrice={setPrice}
               dateRange={dateRange}

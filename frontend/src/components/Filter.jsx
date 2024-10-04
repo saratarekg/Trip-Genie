@@ -1,11 +1,14 @@
 import React from 'react';
 import { Filter, ChevronDown, ArrowUpDown } from 'lucide-react';
+// import {handleSort} from './all-trip-plans'
 
 const FilterComponent = ({
   filtersVisible,
   toggleFilters,
   sortOrder,
-  sortItineraries,
+  sortBy, // Get sortBy from props
+  handleSort, // Get handleSort from props
+  // sortItineraries,
   price,
   setPrice,
   dateRange,
@@ -42,12 +45,20 @@ const FilterComponent = ({
         </button>
 
         <button
-          onClick={() => sortItineraries('price')}
-          className="flex items-center px-4 py-2 bg-white rounded-full shadow"
-        >
-          <ArrowUpDown className="mr-2" size={18} />
-          Sort by Price ({sortOrder === 'asc' ? 'Low to High' : 'High to Low'})
-        </button>
+                    onClick={() => handleSort('price')}
+                    className="flex items-center px-4 py-2 bg-white rounded-full shadow"
+                  >
+                    <ArrowUpDown className="mr-2" size={18} />
+                    Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+                  </button>
+
+                  <button
+                    onClick={() => handleSort('rating')}
+                    className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-4"
+                  >
+                    <ArrowUpDown className="mr-2" size={18} />
+                    Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+                  </button>
       </div>
 
       {filtersVisible && (
