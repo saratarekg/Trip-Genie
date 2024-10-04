@@ -19,6 +19,7 @@ import { SignupForm } from "./components/signup-form.jsx";
 import {AdminDash} from "./pages/AdminDash.jsx";
 
 function App() {
+  
   return (
     <div className="App">
       <Router>
