@@ -24,7 +24,7 @@ const ItineraryDetail = (props) => {
       try {
         const role = Cookies.get('role') || 'guest';
         const token = Cookies.get('jwt');
-        const response = await fetch(`http://localhost:3000/${role}/itineraries/${id}`, {
+        const response = await fetch(`http://localhost:4000/${role}/itineraries/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
