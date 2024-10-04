@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react"
-import axios from "axios"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useFieldArray, Controller } from "react-hook-form"
-import * as z from "zod"
-import { format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import * as z from "zod";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import {
@@ -16,160 +16,192 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
-  const phoneNumber = parsePhoneNumberFromString('+'+value);
+  const phoneNumber = parsePhoneNumberFromString("+" + value);
   if (!phoneNumber || !phoneNumber.isValid()) {
     return false;
   }
   return true;
 };
 
-const formSchema = z.object({
-  username: z.string().min(3, {
-    message: "Username must be at least 3 characters.",
-  }).trim(),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }).trim().toLowerCase(),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
-  }).regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/, {
-    message: "Password must contain at least one uppercase letter, one lowercase letter, and one number.\nOnly these characters are allowed: @$!%*?&",
-  }).trim(),
-  userType: z.enum(["tourist", "tourGuide", "advertiser", "seller"], {
-    required_error: "Please select a user type.",
-  }),
-  mobile: z.string().trim().optional(),
-  nationality: z.string().optional(),
-  dateOfBirth: z.date().optional(),
-  occupation: z.string().trim().optional(),
-  yearsOfExperience: z.string().optional(),
-  previousWorks: z.array(z.object({
-    title: z.string().trim().min(1, {
-      message: "Title is required",
-    }),
-    company: z.string().trim().min(1, {
-      message: "Company is required",
-    }),
-    duration: z.string().trim().min(1, {
-      message: "Duration is required",
-    }),
-    description: z.string().trim().optional(),
-  })).optional(),
-  name: z.string().trim().optional(),
-  description: z.string().trim().optional(),
-  website: z.string().trim().optional(),
-  hotline: z.string().trim().optional(),
-  logoUrl: z.string().trim().optional(),
-  sellerType: z.enum(["VTP", "External Seller"], {
-    required_error: "Please select a seller type.",
-  }).optional(),
-}).superRefine((data, ctx) => {
-  if (data.userType === "tourist" || data.userType === "tourGuide" || data.userType === "seller") {
-    if (!phoneValidator(data.mobile)) {
-      // Use custom validation logic directly inside superRefine
-      ctx.addIssue({
-        path: ["mobile"],
-        message: "Please enter a valid phone number with a valid country code.",
-      });
-    }
-  }
-  if (data.userType === "tourist" || data.userType === "tourGuide") {
-    if (!data.nationality) {
-      ctx.addIssue({
-        path: ["nationality"],
-        message: "Nationality is required.",
-      });
-    }
-  }
-  if (data.userType === "tourist") {
-    if (!data.dateOfBirth) {
-      ctx.addIssue({
-        path: ["dateOfBirth"],
-        message: "Date of birth is required.",
-      });
-    }
-    if (!data.occupation) {
-      ctx.addIssue({
-        path: ["occupation"],
-        message: "Occupation is required for tourists.",
-      });
-    }
-  }
-  if (data.userType === "tourGuide") {
-    if (data.yearsOfExperience < 0 || data.yearsOfExperience > 50) {
-      ctx.addIssue({
-        path: ["yearsOfExperience"],
-        message: "Experience must be between 0 and 50 years.",
-      });
-    }
-    if (!Number.isInteger(data.yearsOfExperience)) {
-      ctx.addIssue({
-        path: ["yearsOfExperience"],
-        message: "Experience must be an integer value.",
-      });
-    }
-  }
-  if (data.userType === "seller") {
-    if (!data.sellerType) {
-      ctx.addIssue({
-        path: ["sellerType"],
-        message: "Seller type is required.",
-
-      });
-    }
-    if (!data.name) {
-      ctx.addIssue({
-        message: "Name is required for sellers.",
+const formSchema = z
+  .object({
+    username: z
+      .string()
+      .min(3, {
+        message: "Username must be at least 3 characters.",
       })
+      .trim(),
+    email: z
+      .string()
+      .email({
+        message: "Please enter a valid email address.",
+      })
+      .trim()
+      .toLowerCase(),
+    password: z
+      .string()
+      .min(8, {
+        message: "Password must be at least 8 characters.",
+      })
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/, {
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, and one number.\nOnly these characters are allowed: @$!%*?&",
+      })
+      .trim(),
+    userType: z.enum(["tourist", "tourGuide", "advertiser", "seller"], {
+      required_error: "Please select a user type.",
+    }),
+    mobile: z.string().trim().optional(),
+    nationality: z.string().optional(),
+    dateOfBirth: z.date().optional(),
+    occupation: z.string().trim().optional(),
+    yearsOfExperience: z.number().int().optional(),
+    previousWorks: z
+      .array(
+        z.object({
+          title: z.string().trim().optional(),
+          company: z.string().trim().optional(),
+          duration: z.string().trim().optional(),
+          description: z.string().trim().optional(),
+        })
+      )
+      .optional(),
+    name: z.string().trim().optional(),
+    description: z.string().trim().optional(),
+    website: z.string().trim().optional(),
+    hotline: z.string().trim().optional(),
+    logoUrl: z.string().trim().optional(),
+    sellerType: z
+      .enum(["VTP", "External Seller"], {
+        required_error: "Please select a seller type.",
+      })
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.userType === "tourist" ||
+      data.userType === "tourGuide" ||
+      data.userType === "seller"
+    ) {
+      if (!phoneValidator(data.mobile)) {
+        // Use custom validation logic directly inside superRefine
+        ctx.addIssue({
+          path: ["mobile"],
+          message:
+            "Please enter a valid phone number with a valid country code.",
+        });
+      }
     }
-  }
-
-});
-
-export function SignupForm() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [nationalities, setNationalities] = useState([]);
-  
-  const { control, register } = useForm();
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "previousWorks"
+    if (data.userType === "tourist" || data.userType === "tourGuide") {
+      if (!data.nationality) {
+        ctx.addIssue({
+          path: ["nationality"],
+          message: "Nationality is required.",
+        });
+      }
+    }
+    if (data.userType === "tourist") {
+      if (!data.dateOfBirth) {
+        ctx.addIssue({
+          path: ["dateOfBirth"],
+          message: "Date of birth is required.",
+        });
+      }
+      if (!data.occupation) {
+        ctx.addIssue({
+          path: ["occupation"],
+          message: "Occupation is required for tourists.",
+        });
+      }
+    }
+    if (data.userType === "tourGuide") {
+      if (data.yearsOfExperience < 0 || data.yearsOfExperience > 50) {
+        ctx.addIssue({
+          path: ["yearsOfExperience"],
+          message: "Experience must be between 0 and 50 years.",
+        });
+      }
+      if (!Number.isInteger(data.yearsOfExperience)) {
+        ctx.addIssue({
+          path: ["yearsOfExperience"],
+          message: "Experience must be an integer value.",
+        });
+      }
+      if (data.previousWorks.length > 0) {
+        data.previousWorks.forEach((work, index) => {
+          // If any required field is missing, add an issue
+          if (work.title === "") {
+            ctx.addIssue({
+              path: ["previousWorks", index, "title"],
+              message: "Please enter the title for your previous work.",
+            });
+          }
+          if (work.company === "") {
+            ctx.addIssue({
+              path: ["previousWorks", index, "company"],
+              message: "Please enter the company for your previous work.",
+            });
+          }
+          if (work.duration === "") {
+            ctx.addIssue({
+              path: ["previousWorks", index, "duration"],
+              message: "Please enter the duration for your previous work.",
+            });
+          }
+        });
+      }
+    }
+    if (data.userType === "seller") {
+      if (!data.sellerType) {
+        ctx.addIssue({
+          path: ["sellerType"],
+          message: "Seller type is required.",
+        });
+      }
+    }
+    if (data.userType === "advertiser" || data.userType === "seller") {
+      if (!data.name) {
+        ctx.addIssue({
+          path: ["name"],
+          message: "Name is required.",
+        });
+      }
+    }
+    if (data.userType === "advertiser") {
+      if (!data.hotline) {
+        ctx.addIssue({
+          path: ["hotline"],
+          message: "Hotline is required.",
+        });
+      }
+    }
   });
 
-  useEffect(() => {
-    // Fetch nationalities from the backend
-    const fetchNationalities = async () => {
-      try {
-        const response = await axios.get('http://localhost:4000/api/nationalities')
-        console.log('Nationalities:', response.data);
-        setNationalities(response.data);
-      }catch(error){
-        console.error('Error fetching nationalities:', error);
-      }
-    };
-    fetchNationalities();
-  }, []);
+export function SignupForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [nationalities, setNationalities] = useState([]);
 
+  // Use a single useForm call to handle the form logic
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -181,25 +213,58 @@ export function SignupForm() {
       nationality: "",
       dateOfBirth: undefined,
       occupation: "",
+      yearsOfExperience: 0,
+      previousWorks: [], // Default empty array
     },
-  })
+  });
 
-  const userType = form.watch("userType")
+  // Destructure form to extract control
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = form;
 
-  function onSubmit(values) {
-    setIsLoading(true)
-    // Simulate API call
+  // Set up useFieldArray for dynamically managing previousWorks
+  const { fields, append, remove } = useFieldArray({
+    control, // Use control from the single useForm instance
+    name: "previousWorks",
+  });
+
+  // Fetch nationalities from backend
+  useEffect(() => {
+    const fetchNationalities = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:4000/api/nationalities"
+        );
+        setNationalities(response.data);
+      } catch (error) {
+        console.error("Error fetching nationalities:", error);
+      }
+    };
+    fetchNationalities();
+  }, []);
+
+  const userType = form.watch("userType");
+
+  // Handle form submission
+  const onSubmit = (values) => {
+    setIsLoading(true);
     setTimeout(() => {
-      console.log(values)
-      setIsLoading(false)
-    }, 2000)
-  }
+      console.log(values);
+      setIsLoading(false);
+    }, 2000);
+  };
 
   return (
-    (<div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg mt-20 mb-20">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Create an account</h2>
+          <h2 className="text-3xl font-bold text-gray-900">
+            Create an account
+          </h2>
           <p className="mt-2 text-sm text-gray-600">
             Join us and start your unforgettable journey
           </p>
@@ -217,7 +282,8 @@ export function SignupForm() {
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-              )} />
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -225,11 +291,16 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="mail@example.com" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="mail@example.com"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-              )} />
+              )}
+            />
             <FormField
               control={form.control}
               name="password"
@@ -241,14 +312,18 @@ export function SignupForm() {
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-              )} />
+              )}
+            />
             <FormField
               control={form.control}
               name="userType"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>I am a</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Please choose your role" />
@@ -263,8 +338,11 @@ export function SignupForm() {
                   </Select>
                   <FormMessage />
                 </FormItem>
-              )} />
-            {(userType === "tourist" || userType==="tourGuide" || userType==="seller") && (
+              )}
+            />
+            {(userType === "tourist" ||
+              userType === "tourGuide" ||
+              userType === "seller") && (
               <>
                 <FormField
                   control={form.control}
@@ -274,16 +352,16 @@ export function SignupForm() {
                       <FormLabel>Mobile</FormLabel>
                       <FormControl>
                         <PhoneInput
-                          country={'eg'} // Default country code
+                          country={"eg"} // Default country code
                           value={field.value}
                           onChange={(value) => field.onChange(value)}
                           //enableSearch={true} // Optional: To search for countries
-                          excludeCountries={['il']}
+                          excludeCountries={["il"]}
                           inputProps={{
-                            name: 'mobile',
+                            name: "mobile",
                             required: true,
                             autoFocus: true,
-                            placeholder: '+1234567890',
+                            placeholder: "+1234567890",
                           }}
                         />
                       </FormControl>
@@ -293,22 +371,25 @@ export function SignupForm() {
                 />
               </>
             )}
-            {(userType === "tourist" || userType==="tourGuide") && (
+            {(userType === "tourist" || userType === "tourGuide") && (
               <>
-              <FormField
+                <FormField
                   control={form.control}
                   name="nationality"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nationality</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Please choose your nationality" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {nationalities.map(nat => (
+                          {nationalities.map((nat) => (
                             <SelectItem key={nat._id} value={nat._id}>
                               {nat.name}
                             </SelectItem>
@@ -320,7 +401,7 @@ export function SignupForm() {
                   )}
                 />
               </>
-              )}
+            )}
             {userType === "tourist" && (
               <>
                 <FormField
@@ -337,9 +418,10 @@ export function SignupForm() {
                               className={cn(
                                 "w-full pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
-                              )}>
+                              )}
+                            >
                               {field.value ? (
-                                format(field.value, "PPP")  
+                                format(field.value, "PPP")
                               ) : (
                                 <span>Pick a date</span>
                               )}
@@ -347,23 +429,24 @@ export function SignupForm() {
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start" >
-                            <DatePicker
-                              selected={field.value}
-                              onChange={field.onChange}
-                              showYearDropdown
-                              showMonthDropdown
-                              dropdownMode="select"
-                              minDate={new Date("1900-01-01")}
-                              maxDate={new Date()}
-                              dateFormat="dd/MM/yyyy"
-                              inline
-                            />
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <DatePicker
+                            selected={field.value}
+                            onChange={field.onChange}
+                            showYearDropdown
+                            showMonthDropdown
+                            dropdownMode="select"
+                            minDate={new Date("1900-01-01")}
+                            maxDate={new Date()}
+                            dateFormat="dd/MM/yyyy"
+                            inline
+                          />
                         </PopoverContent>
                       </Popover>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="occupation"
@@ -375,43 +458,119 @@ export function SignupForm() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )}
+                />
               </>
             )}
             {userType === "tourGuide" && (
               <>
-                <FormField control={form.control} name="yearsOfExperience" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Years of experience</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="Years of experience" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                <FormField
+                  control={form.control}
+                  name="yearsOfExperience"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Years of experience</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="Years of experience"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === "" ? 0 : +e.target.value
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormItem className="space-y-4">
-                  <FormLabel className="text-lg font-semibold">Previous works</FormLabel>
+                  <FormLabel className="text-lg font-semibold">
+                    Previous works
+                  </FormLabel>
                   {fields.map((item, index) => (
-                    <div key={item.id} className="flex flex-col space-y-2 mb-4 border p-4 rounded-md shadow-sm">
+                    <div
+                      key={item.id}
+                      className="flex flex-col space-y-2 mb-4 border p-4 rounded-md shadow-sm"
+                    >
                       <FormControl>
-                        <Input placeholder="Title" {...register(`previousWorks.${index}.title`)} className="border rounded-md p-2" />
+                        <>
+                          <Input
+                            placeholder="Title"
+                            {...register(`previousWorks.${index}.title`)}
+                            defaultValue={item.title} // Ensure defaultValue is set
+                            className="border rounded-md p-2"
+                          />
+                          {errors?.previousWorks?.[index]?.title && (
+                            <p className="text-red-500 text-sm">
+                              {errors.previousWorks[index].title.message}
+                            </p>
+                          )}
+                        </>
                       </FormControl>
                       <FormControl>
-                        <Input placeholder="Company" {...register(`previousWorks.${index}.company`)} className="border rounded-md p-2" />
+                        <>
+                          <Input
+                            placeholder="Company"
+                            {...register(`previousWorks.${index}.company`)}
+                            defaultValue={item.company} // Ensure defaultValue is set
+                            className="border rounded-md p-2"
+                          />
+                          {errors?.previousWorks?.[index]?.company && (
+                            <p className="text-red-500 text-sm">
+                              {errors.previousWorks[index].company.message}
+                            </p>
+                          )}
+                        </>
                       </FormControl>
                       <FormControl>
-                        <Input placeholder="Duration" {...register(`previousWorks.${index}.duration`)} className="border rounded-md p-2" />
+                        <>
+                          <Input
+                            type="number"
+                            placeholder="Duration in years"
+                            {...register(`previousWorks.${index}.duration`)}
+                            defaultValue={item.duration} // Ensure defaultValue is set
+                            className="border rounded-md p-2"
+                          />
+                          {errors?.previousWorks?.[index]?.duration && (
+                            <p className="text-red-500 text-sm">
+                              {errors.previousWorks[index].duration.message}
+                            </p>
+                          )}
+                        </>
                       </FormControl>
                       <FormControl>
-                        <Input placeholder="Description" {...register(`previousWorks.${index}.description`)} className="border rounded-md p-2" />
+                        <Input
+                          placeholder="Description"
+                          {...register(`previousWorks.${index}.description`)}
+                          defaultValue={item.description} // Ensure defaultValue is set
+                          className="border rounded-md p-2"
+                        />
                       </FormControl>
-                      <Button type="button" onClick={() => remove(index)} className="self-end bg-orange-500 text-white p-2 rounded-md">
+                      <Button
+                        type="button"
+                        onClick={() => remove(index)}
+                        className="self-end bg-orange-500 text-white p-2 rounded-md"
+                      >
                         Remove
                       </Button>
                     </div>
                   ))}
                   <div>
-                    <Button type="button" onClick={() => append({ title: "", company: "", duration: "", description: "" })} className="bg-purple-900 text-white p-2 rounded-md">
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        append({
+                          title: "",
+                          company: "",
+                          duration: "",
+                          description: "",
+                        })
+                      }
+                      className="bg-purple-900 text-white p-2 rounded-md"
+                    >
                       Add Previous Work
                     </Button>
                   </div>
@@ -419,7 +578,7 @@ export function SignupForm() {
                 </FormItem>
               </>
             )}
-            {(userType === "seller" || userType==="advertiser") && (
+            {(userType === "seller" || userType === "advertiser") && (
               <>
                 <FormField
                   control={form.control}
@@ -432,7 +591,8 @@ export function SignupForm() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="description"
@@ -444,18 +604,22 @@ export function SignupForm() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
-                </>
+                  )}
+                />
+              </>
             )}
             {userType === "seller" && (
-                <>
+              <>
                 <FormField
                   control={form.control}
                   name="sellerType"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Seller type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Please choose your seller type" />
@@ -463,15 +627,18 @@ export function SignupForm() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="VTP">VTP</SelectItem>
-                          <SelectItem value="External Seller">External Seller</SelectItem>
+                          <SelectItem value="External Seller">
+                            External Seller
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
-                  )} />
-                </>)
-            }
-            {(userType==="advertiser") && (
+                  )}
+                />
+              </>
+            )}
+            {userType === "advertiser" && (
               <>
                 <FormField
                   control={form.control}
@@ -484,7 +651,8 @@ export function SignupForm() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="hotline"
@@ -496,7 +664,8 @@ export function SignupForm() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="logoUrl"
@@ -508,13 +677,15 @@ export function SignupForm() {
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )} />
+                  )}
+                />
               </>
             )}
             <Button
               type="submit"
               className="w-full bg-orange-500 hover:bg-orange-600"
-              disabled={isLoading}>
+              disabled={isLoading}
+            >
               {isLoading ? "Signing up..." : "Sign up"}
             </Button>
           </form>
@@ -522,12 +693,15 @@ export function SignupForm() {
         <div className="mt-4 text-center text-sm">
           <p className="text-gray-600">
             Already have an account?{" "}
-            <a href="#" className="font-medium text-orange-500 hover:text-orange-600">
+            <a
+              href="#"
+              className="font-medium text-orange-500 hover:text-orange-600"
+            >
               Sign in
             </a>
           </p>
         </div>
       </div>
-    </div>)
+    </div>
   );
 }
