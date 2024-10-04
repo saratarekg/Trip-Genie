@@ -6,6 +6,7 @@ import FilterComponent from './Filter.jsx';
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Loader from './Loader';
 
 const ItineraryCard = ({ itinerary, onSelect}) => (
   <div className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"   onClick={() => onSelect(itinerary._id)}>
@@ -38,6 +39,7 @@ const ItineraryCard = ({ itinerary, onSelect}) => (
 
 export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,14 +68,18 @@ export function AllItinerariesComponent() {
 
   useEffect(() => {
     fetchItineraries();
+    setLoading(false);
   }, []);
 
   const handleItinerarySelect = (id) => {
+    setLoading(true);
     navigate(`/itinerary/${id}`); // Navigate to the itinerary details page
+    setLoading(false);
   };
 
   useEffect(() => {
     const fetchLanguages = async () => {
+      setLoading(true);
       console.log('Fetching Languages');
       try {
         const response = await axios.get('http://localhost:4000/api/getAllLanguages');
@@ -83,6 +89,7 @@ export function AllItinerariesComponent() {
         console.error('Error fetching Languages:', error);
       }
     };
+    setLoading(false);
     fetchLanguages();
   }, []);
 
@@ -90,6 +97,7 @@ export function AllItinerariesComponent() {
     // Fetch types from the backend
     const fetchType = async () => {
       try {
+        setLoading(true);
         const response = await axios.get('http://localhost:4000/api/getAllTypes');
         console.log('Type:', response.data);
         setTypesOptions(response.data);
@@ -98,6 +106,7 @@ export function AllItinerariesComponent() {
       }
     };
     fetchType();
+    setLoading(true);
   }, []);
 
   useEffect(() => {
@@ -120,13 +129,16 @@ export function AllItinerariesComponent() {
 
 
   const handleSort = (attribute) => {
+    setLoading(true);
     const newSortOrder = sortOrder === 1 ? -1 : 1;
     setSortBy(attribute);
     setSortOrder(newSortOrder);
     searchItineraries(); // Call this to fetch sorted itineraries
+    setLoading(false);
   };
   const fetchItineraries = async () => {
     try {
+      setLoading(true);
       const token = Cookies.get('jwt');
       const role = getUserRole();
       const response = await fetch(
@@ -144,6 +156,7 @@ export function AllItinerariesComponent() {
       setItineraries(data);
       setError(null);
       setCurrentPage(1);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching itineraries:', error);
       setError('Error fetching itineraries');
@@ -166,6 +179,7 @@ export function AllItinerariesComponent() {
 
   const searchItineraries = async () => {
     try {
+      setLoading(true);
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
   
@@ -214,6 +228,7 @@ export function AllItinerariesComponent() {
       setItineraries(data);
       setError(null);
       setCurrentPage(1);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching filtered results:', error);
       setError('Error fetching filtered results');
@@ -222,7 +237,9 @@ export function AllItinerariesComponent() {
   };
 
   const toggleFilters = () => {
+    setLoading(true);
     setFiltersVisible(!filtersVisible);
+    setLoading(false);
   };
   
   // Handle type and language selections
@@ -237,6 +254,10 @@ export function AllItinerariesComponent() {
       prev.includes(option) ? prev.filter(lang => lang !== option) : [...prev, option]
     );
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">

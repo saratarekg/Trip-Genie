@@ -1,31 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom'; // Importing useNavigate
+import { ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Loader from './Loader';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-
-
-const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
-  const [itinerary, setItinerary] = useState(initialItinerary);
+const ItineraryDetail = ({ onBack }) => {
+  const { id } = useParams();
+  const [itinerary, setItinerary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false); // For the success message dialog
 
-  const navigate = useNavigate(); // Move useNavigate to the top level
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!itinerary || !itinerary._id) {
-      setError('Invalid itinerary data.');
-      setLoading(false);
-      return;
-    }
-
     const fetchItineraryDetails = async () => {
+      if (!id) {
+        setError('Invalid itinerary ID.');
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         const token = Cookies.get('jwt');
-        const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${itinerary._id}`, {
+        const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -47,22 +50,18 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
     };
 
     fetchItineraryDetails();
-  }, [itinerary._id, userRole]);
+  }, [id, userRole]);
 
   const handleUpdate = () => {
-    // Redirect to the update page with the itinerary ID
-    navigate('/update-itinerary'); // Pass the itinerary ID in the route
+    navigate(`/update-itinerary/${id}`);
   };
 
   const handleDelete = async () => {
-    // Confirmation prompt before deletion
-    const confirmDelete = window.confirm('Are you sure you want to delete this itinerary?');
-    if (!confirmDelete) return;
-
+    setShowDeleteConfirm(false);
     setLoading(true);
     try {
       const token = Cookies.get('jwt');
-      const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${itinerary._id}`, {
+      const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${id}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -73,11 +72,8 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
         throw new Error('Failed to delete itinerary');
       }
 
-      // Notify the user of successful deletion
-      alert('Itinerary deleted successfully.');
-
-      // Navigate back to the list of itineraries
-      onBack();
+      // Show success dialog after deletion
+      setShowDeleteSuccess(true);
     } catch (err) {
       setError('Error deleting itinerary. Please try again later.');
       console.error('Error deleting itinerary:', err);
@@ -103,17 +99,14 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navigation Bar (placeholder) */}
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="text-xl font-semibold">Your Logo</div>
-            {/* Add navigation items here */}
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
       <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{itinerary.title}</h1>
@@ -121,15 +114,8 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
         </div>
       </div>
 
-      {/* Hidden paragraph */}
-      <div className="bg-gray-100 text-gray-100">
-        <p>kkkkkkkkkkkkkkkkkk kkkkkkkkkkkkkkkkkkkkkkkkkkkk</p>
-      </div>
-
-      {/* Content Section */}
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          {/* Itinerary Details */}
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-3xl font-semibold">Itinerary Details</h2>
@@ -170,7 +156,6 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
             </div>
           </div>
 
-          {/* Activities */}
           <div className="p-6 border-t border-gray-200">
             <h3 className="text-2xl font-semibold mb-4">Activities</h3>
             <ul className="list-disc list-inside space-y-2">
@@ -180,7 +165,6 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
             </ul>
           </div>
 
-          {/* Available Dates */}
           <div className="p-6 border-t border-gray-200">
             <h3 className="text-2xl font-semibold mb-4">Available Dates</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -198,41 +182,74 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
                     ))}
                   </ul>
                 </div>
-              ))}
+              ))} 
             </div>
           </div>
 
-          {/* Booking Section */}
           <div className="p-6 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-semibold">Book This Itinerary</h3>
               {userRole === 'tour-guide' && (
                 <div className="space-x-2">
-                  <button
-                    onClick={handleUpdate}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
-                  >
-                    <Edit className="inline-block w-4 h-4 mr-2" />
+                  <Button onClick={handleUpdate} variant="outline">
+                    <Edit className="w-4 h-4 mr-2" />
                     Update
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-300"
-                  >
-                    <Trash2 className="inline-block w-4 h-4 mr-2" />
+                  </Button>
+                  <Button onClick={() => setShowDeleteConfirm(true)} variant="destructive">
+                    <Trash2 className="w-4 h-4 mr-2" />
                     Delete
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
             {(userRole === 'tourist' || userRole === 'guest') && (
-              <button className="mt-4 bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition duration-300">
+              <Button className="mt-4" variant="default">
                 Book Now
-              </button>
+              </Button>
             )}
           </div>
         </div>
+
+        <Button className="mt-6" variant="outline" onClick={() => navigate('/all-itineraries')}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Back to All Itineraries
+        </Button>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <AlertCircle className="w-6 h-6 text-red-500 mr-2" />
+              Are you sure you want to delete this itinerary?
+            </DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Success Dialog */}
+      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+              Success
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            Itinerary deleted successfully. You can navigate back to all itineraries.
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteSuccess(false)}>Close</Button>
+            <Button onClick={() => navigate('/all-itineraries')} variant="default">Go to All Itineraries</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
