@@ -26,12 +26,13 @@ const ItineraryForm = () => {
         let role = Cookies.get('role')
         if (role === undefined) 
           role = 'guest'
-        const api = `http://localhost:4000/${role}/activity`
+        const api = `http://localhost:4000/${role}/activities`
         const response = await axios.get(api, {
           headers: {
             Authorization: `Bearer ${token}`,
           }
         })
+        console.log(response.data)
         setActivities(response.data) 
       } catch (err) {
         setError(err.message)
