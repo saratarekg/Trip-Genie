@@ -143,7 +143,19 @@ export function AllItinerariesComponent() {
       setItineraries([]);
     }
   };
-
+  const clearFilters = () => {
+    // Reset all filter states to initial values
+    setSearchTerm('');
+    setPrice('');
+    setDateRange({ lower: '', upper: '' });
+    setType('');
+    setLanguage('');
+    setSortBy('');
+    setSortOrder('');
+    
+    // Fetch itineraries without any filters
+    fetchItineraries();
+  };
   const searchItineraries = async () => {
     try {
       const role = getUserRole();
@@ -257,6 +269,7 @@ export function AllItinerariesComponent() {
               sortOrder={sortOrder}
               sortBy={sortBy}
               handleSort={handleSort}
+              clearFilters={clearFilters}
               // sortItineraries={sortItineraries}
               price={price}
               setPrice={setPrice}
