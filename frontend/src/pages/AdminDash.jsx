@@ -8,6 +8,7 @@ import frame from "../assets/images/frame.svg";
 import image15 from "../assets/images/image-15.png";
 import logo from "../assets/images/logo.svg";
 import svgrepoIconcarrier from "../assets/images/svgrepo-iconcarrier.png";
+import { AdminGovernorPopup } from "@/components/admin-governor-popup";
 
 export const AdminDash = () => {
     return (
@@ -42,8 +43,8 @@ export const AdminDash = () => {
                 <div className="flex w-full justify-between">
                   <ActionButton title="Review Registrations" />
                   <ActionButton title="Manage Accounts" />
-                  <ActionButton title="Add Admin/ Governor" />
-                </div>
+                  <AdminGovernorPopup  />
+                  </div>
               </div>
 
               {/* Activities Section */}
