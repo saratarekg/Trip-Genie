@@ -117,7 +117,7 @@ const getActivitiesByAdvertiser = async (req, res) => {
 
 const filterActivities = async (req, res) => {
   try {
-    const { price, startDate, endDate, category, minRating } = req.body;
+    const { price, startDate, endDate, category, minRating,searchBy } = req.query;
     let query = [];
 
     if (price !== undefined && price !== null && price !== "") {
@@ -141,28 +141,37 @@ const filterActivities = async (req, res) => {
     }
     console.log("Query Object:", query); // Log the query object
 
-    const activities = await Activity.find({ $and: query }).populate(
+    const filterResult = await Activity.find({ $and: query }).populate(
       "category tags"
     );
 
+    const searchResult = await Activity.findByFields(searchBy);
+
+    const searchResultIds = searchResult.map((activity) => activity._id);
+    const filterResultIds = filterResult.map((activity) => activity._id);
+
+    const activities = await Activity.find({
+      $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
+    });
+
     res.status(200).json(activities);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-const searchActivities = async (req, res) => {
-  try {
-    const { searchBy } = req.query;
-    const activities = await Activity.findByFields(searchBy);
-    if (!activities || activities.length === 0) {
-      return res.status(200).json([]);
-    }
-    res.status(200).json(activities);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+// const searchActivities = async (req, res) => {
+//   try {
+//     const { searchBy } = req.query;
+//     const activities = await Activity.findByFields(searchBy);
+//     if (!activities || activities.length === 0) {
+//       return res.status(200).json([]);
+//     }
+//     res.status(200).json(activities);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
 const sortActivities = async (req, res) => {
   try {
@@ -203,6 +212,6 @@ module.exports = {
   updateActivity,
   filterActivities,
   getActivitiesByAdvertiser,
-  searchActivities,
+  // searchActivities,
   sortActivities,
 };

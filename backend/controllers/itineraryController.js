@@ -2,11 +2,38 @@ const Itinerary = require("../models/itinerary");
 
 // GET all itineraries
 const getAllItineraries = async (req, res) => {
+
   try {
-    const itineraries = await Itinerary.find()
-      .populate("tourGuide")
-      .populate("activities")
-      .exec();
+    const { budget, upperDate, lowerDate, types, languages,searchBy,sort,asc } = req.query;
+
+    const filterResult = await Itinerary.filter(
+      budget,
+      upperDate,
+      lowerDate,
+      types,
+      languages
+    );
+
+    const searchResult = await Itinerary.findByFields(searchBy);
+
+    const searchResultIds = searchResult.map((itinerary) => itinerary._id);
+    const filterResultIds = filterResult.map((itinerary) => itinerary._id);
+
+    let itinerariesQuery = await Itinerary.find({
+      $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
+    });
+
+    if (sort) {
+      const sortBy = {};
+      sortBy[sort] = asc; // Sort ascending (1) or descending (-1) based on your needs
+      itinerariesQuery = itinerariesQuery.sort(sortBy);
+    }
+
+    const itineraries = await itinerariesQuery;
+
+    if (!itineraries || itineraries.length === 0) {
+      return res.status(200).json([]);
+    }
     res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -90,41 +117,6 @@ const updateItinerary = async (req, res) => {
   }
 };
 
-const filterItineraries = async (req, res) => {
-  try {
-    const { budget, upperDate, lowerDate, types, languages,searchBy } = req.query;
-
-    const filterResult = await Itinerary.filter(
-      budget,
-      upperDate,
-      lowerDate,
-      types,
-      languages
-    );
-
-    const searchResult = await Itinerary.findByFields(searchBy);
-
-    console.log("Search By:", searchBy); // Log the search criteria
-    console.log("Itineraries Found:", searchResult); // Log the itineraries found
-
-    const searchResultIds = searchResult.map((itinerary) => itinerary._id);
-    const filterResultIds = filterResult.map((itinerary) => itinerary._id);
-
-    const itineraries = await Itinerary.find({
-      $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
-    });
-
-    console.log("Itineraries Found:", itineraries); // Log the itineraries found
-
-    if (!itineraries || itineraries.length === 0) {
-      return res.status(200).json([]);
-    }
-    res.status(200).json(itineraries);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
 const deleteItinerary = async (req, res) => {
   try {
     const tourGuideId = res.locals.user_id; // Get the current tour guide's ID
@@ -176,47 +168,6 @@ const getItinerariesByTourGuide = async (req, res) => {
   }
 };
 
-// const searchItineraries = async (req, res) => {
-//   try {
-//     const { searchBy } = req.query;
-//     const itineraries = await Itinerary.findByFields(searchBy);
-
-//     console.log("Search By:", searchBy); // Log the search criteria
-//     console.log("Itineraries Found:", itineraries); // Log the itineraries found
-
-//     // Instead of checking for 404, return an empty array if no itineraries are found
-//     if (!itineraries || itineraries.length === 0) {
-//       return res.status(200).json([]); // Return an empty array with a 200 status
-//     }
-
-//     res.status(200).json(itineraries);
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-
-const sortItineraries = async (req, res) => {
-  try {
-    const { order, ratingOrder } = req.query;
-    let sortCriteria = {};
-
-    sortCriteria.price = order === "desc" ? -1 : 1;
-    sortCriteria.rating = ratingOrder === "desc" ? -1 : 1;
-
-    const itineraries = await Itinerary.find({
-      "availableDates.date": { $gte: new Date() },
-    }).sort(sortCriteria);
-
-    if (itineraries.length === 0) {
-      return res.status(404).json({ message: "No itineraries found" });
-    }
-
-    res.status(200).json(itineraries);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 
 module.exports = {
@@ -225,7 +176,5 @@ module.exports = {
   createItinerary,
   deleteItinerary,
   updateItinerary,
-  filterItineraries,
-  getItinerariesByTourGuide,
-  sortItineraries,
+  getItinerariesByTourGuide
 };

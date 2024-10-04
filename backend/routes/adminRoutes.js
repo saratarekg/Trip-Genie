@@ -78,17 +78,12 @@ router.put('/tags/:id', tagController.updateTag);
 
 
 router.post('/categories',categoryController.createCategory);
-router.get('/categories/:id', categoryController.getCategory);
 router.get('/categories', categoryController.getAllCategories);
+router.get('/categories/:id', categoryController.getCategory);
 router.delete('/categories/:id', categoryController.deleteCategory);
 router.put('/categories/:id', categoryController.updateCategory);
 
-router.get('/sort-products-rating', productController.sortProductsByRating);
-
-
-router.get('/products/filterbyprice', productController.filterProductsByPrice);
 router.get('/products', productController.getAllProducts);
-router.get('/products/search', productController.searchProductbyName);
 router.post('/products', productController.addProduct);
 
 router.put('/products/:id',productController.editProduct);

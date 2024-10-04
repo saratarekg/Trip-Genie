@@ -3,11 +3,49 @@ const Seller = require('../models/seller');
 
 
 const getAllProducts = async (req, res) => {
+  const { minPrice, maxPrice,searchBy,asc } = req.query;
+
   try {
-    const products = await Product.find();
+    const priceFilter = {};
+    if (minPrice !== undefined) {
+      priceFilter.$gte = minPrice;
+    }
+    if (maxPrice !== undefined) {
+      priceFilter.$lte = maxPrice;
+    }
+    const filterConditions = {};
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      filterConditions.price = priceFilter;
+    }
+
+    const filterResult = await Product.find(filterConditions);
+    const searchResult = await Product.searchByNames(searchBy);
+
+    const searchResultIds = searchResult.map((product) => product._id);
+    const filterResultIds = filterResult.map((product) => product._id);
+
+    let productsQuery = await Product.find({
+      $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
+    });
+
+    if (sort) {
+      const sortBy = {};
+      sortBy['rating'] = asc;
+      productsQuery = productsQuery.sort(sortBy);
+    }
+
+    const products = await productsQuery;
+
+    if (!products.length) {
+      return res
+        .status(404)
+        .json({ message: "No products found" });
+    }
+
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({error: error.message});
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -31,35 +69,6 @@ const addProduct = async (req, res) => {
       res.status(400).json({ error: error.message });
     }
   };
-
-const searchProductbyName = async (req, res) => {
-  const { name } = req.query;
-  try {
-    if(name === undefined || name === null || name === "") {
-      return this.find().populate('seller').exec();
-    }
-    const products = await Product.find({ name: { $regex: new RegExp(name, 'i') } });
-    if (!products || products.length === 0) {
-      return res.status(200).json([]);
-    }
-    res.status(200).json(products);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-const sortProductsByRating = async (req, res) => {
-  try {
-    // Fetch products sorted by rating in descending order
-    const products = await Product.find().sort({ rating: -1 }); // Use 1 for ascending order
-
-    // Send the sorted products as a response
-    res.status(200).json(products);
-  } catch (error) {
-    // Handle any errors
-    res.status(500).json({ message: 'Error fetching products', error: error.message });
-  }
-};
 
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
@@ -118,29 +127,6 @@ const editProductOfSeller = async (req, res) => {
   }
 };
 
-const filterProductsByPrice = async (req, res) => {
-  const { minPrice, maxPrice } = req.query;
-
-  try {
-    const products = await Product.find({
-      price: {
-        $gte: minPrice,
-        $lte: maxPrice,
-      },
-    });
-
-    if (!products.length) {
-      return res
-        .status(404)
-        .json({ message: "No products found" });
-    }
-
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -188,10 +174,7 @@ const deleteProductOfSeller = async (req, res) => {
 module.exports = {
   getAllProducts,
   addProduct,
-  searchProductbyName,
-  sortProductsByRating,
   editProduct,
-  filterProductsByPrice,
   editProductOfSeller,
   getProductById,
   deleteProduct,

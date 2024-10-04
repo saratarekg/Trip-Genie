@@ -3,13 +3,14 @@ const historicalTagController = require('../controllers/historicalTagController'
 const historicalPlacesController = require('../controllers/historicalPlacesController');
 const tourismGovernorController = require('../controllers/tourismGovernorController');
 const router = express.Router();
-router.post('/add-historical-places', historicalPlacesController.createHistoricalPlace);
-router.get('/historical-places/:id', historicalPlacesController.getHistoricalPlace);
+router.post('/historical-places', historicalPlacesController.createHistoricalPlace);
 router.get('/historical-places', historicalPlacesController.getAllHistoricalPlaces);
+router.get("/historical-places/filter",historicalPlacesController.filterHistoricalPlaces);
+router.get('/historical-places/:id', historicalPlacesController.getHistoricalPlace);
 router.delete('/historical-places/:id', historicalPlacesController.deleteHistoricalPlace);
 router.put('/historical-places/:id', historicalPlacesController.updateHistoricalPlace);
 
-router.post('/add-historical-tag', historicalTagController.addHistoricalTag);
+router.post('/historical-tag', historicalTagController.addHistoricalTag);
 
 router.get('/my-historical-places', historicalPlacesController.getHistoricalPlacesByGovernor);
 

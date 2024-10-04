@@ -70,8 +70,15 @@ const filterHistoricalPlaces = async (req, res) => {
     try {
         const { types,periods } = req.body;
         console.log(types,periods);
-        const historicalPlaces = await Museum.filterByTag(types,periods);
-        console.log(historicalPlaces);
+        const filterResult = await Museum.filterByTag(types,periods);
+        const searchResult = await Museum.findByFields(searchBy);
+
+        const searchResultIds = searchResult.map((place) => place._id);
+        const filterResultIds = filterResult.map((place) => place._id);
+
+        const historicalPlaces = await Museum.find({
+        $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
+        });
         if (!historicalPlaces || historicalPlaces.length === 0) {
             return res.status(404).json({ message: 'No historical places found.' });
         }
@@ -95,17 +102,17 @@ const getHistoricalPlacesByGovernor = async (req, res) => {
     }
 };
 
-const searchHistoricalPlaces = async (req, res) => {
-    try {
-        const { searchBy } = req.query;
-        const historicalPlaces = await Museum.findByFields(searchBy);
-        if (!historicalPlaces || historicalPlaces.length === 0) {
-            return res.status(200).json([]);
-        }
-        res.status(200).json(historicalPlaces);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+// const searchHistoricalPlaces = async (req, res) => {
+//     try {
+//         const { searchBy } = req.query;
+//         const historicalPlaces = await Museum.findByFields(searchBy);
+//         if (!historicalPlaces || historicalPlaces.length === 0) {
+//             return res.status(200).json([]);
+//         }
+//         res.status(200).json(historicalPlaces);
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// };
 
-module.exports = { createHistoricalPlace,getHistoricalPlace,getAllHistoricalPlaces,updateHistoricalPlace, deleteHistoricalPlace,filterHistoricalPlaces,getHistoricalPlacesByGovernor, searchHistoricalPlaces};
+module.exports = { createHistoricalPlace,getHistoricalPlace,getAllHistoricalPlaces,updateHistoricalPlace, deleteHistoricalPlace,filterHistoricalPlaces,getHistoricalPlacesByGovernor};
