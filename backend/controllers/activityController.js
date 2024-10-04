@@ -24,7 +24,7 @@ const getAllActivities = async (req, res) => {
     let activitiesQuery = await Activity.find({
       $and: query,
     });
-    console.log(activitiesQuery);
+    // console.log(activitiesQuery);
 
     if (sort) {
       const sortBy = {};

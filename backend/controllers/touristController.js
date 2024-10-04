@@ -52,7 +52,7 @@ const getTourist = async (req, res) => {
 const updateTourist = async (req, res) => {
     try {
         const { email, nationality, mobile, jobOrStudent} = req.body; // Data to update
-        console.log(email, nationality, mobile, jobOrStudent);
+        // console.log(email, nationality, mobile, jobOrStudent);
         const tourist = await Tourist.findByIdAndUpdate(res.locals.user_id,{ email, nationality, mobile, jobOrStudent}, { new: true, runValidators: true });
         if (!tourist) {
             return res.status(404).json({ message: 'Tourist not found' });

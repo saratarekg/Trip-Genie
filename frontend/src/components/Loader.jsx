@@ -1,7 +1,7 @@
 import React from 'react'
 
 const Loader = () => (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
       <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
         <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
       </svg>
