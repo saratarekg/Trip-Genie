@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Importing useNavigate
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -15,6 +16,8 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
+
+  const navigate = useNavigate(); // Move useNavigate to the top level
 
   useEffect(() => {
     if (!itinerary || !itinerary._id) {
@@ -52,8 +55,8 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
   }, [itinerary._id, userRole]);
 
   const handleUpdate = () => {
-    // Implement update functionality
-    console.log('Update itinerary');
+    // Redirect to the update page with the itinerary ID
+    navigate('/update-itinerary'); // Pass the itinerary ID in the route
   };
 
   const handleDelete = async () => {
@@ -74,9 +77,6 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
       if (!response.ok) {
         throw new Error('Failed to delete itinerary');
       }
-
-      // Optionally, you can handle the response data if the API returns any
-      // const data = await response.json();
 
       // Notify the user of successful deletion
       alert('Itinerary deleted successfully.');
@@ -119,7 +119,7 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
       </nav>
 
       {/* Hero Section */}
-      <div className="bg-[#1a202c] text-white py-20 px-4"> {/* Updated background color */}
+      <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{itinerary.title}</h1>
           <p className="text-xl md:text-2xl">{itinerary.description}</p>
