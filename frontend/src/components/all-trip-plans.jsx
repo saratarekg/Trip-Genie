@@ -230,7 +230,6 @@ export function AllItinerariesComponent() {
         ) : (
           <>
             <h1 className="text-4xl font-bold text-gray-900 mb-8">All Trip Plans</h1>
-
             <div className="flex flex-col md:flex-row justify-between items-center mb-8">
               <div className="relative w-full md:w-96 mb-4 md:mb-0">
                 <input

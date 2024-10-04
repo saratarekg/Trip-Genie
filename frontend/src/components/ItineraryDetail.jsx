@@ -14,6 +14,7 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
   const [itinerary, setItinerary] = useState(initialItinerary);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
 
   useEffect(() => {
     if (!itinerary || !itinerary._id) {
@@ -25,9 +26,8 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
     const fetchItineraryDetails = async () => {
       setLoading(true);
       try {
-        const role = Cookies.get('role') || 'guest';
         const token = Cookies.get('jwt');
-        const response = await fetch(`http://localhost:4000/${role}/itineraries/${itinerary._id}`, {
+        const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${itinerary._id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -49,16 +49,46 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
     };
 
     fetchItineraryDetails();
-  }, [itinerary._id]);
+  }, [itinerary._id, userRole]);
 
   const handleUpdate = () => {
     // Implement update functionality
     console.log('Update itinerary');
   };
 
-  const handleDelete = () => {
-    // Implement delete functionality
-    console.log('Delete itinerary');
+  const handleDelete = async () => {
+    // Confirmation prompt before deletion
+    const confirmDelete = window.confirm('Are you sure you want to delete this itinerary?');
+    if (!confirmDelete) return;
+
+    setLoading(true);
+    try {
+      const token = Cookies.get('jwt');
+      const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${itinerary._id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete itinerary');
+      }
+
+      // Optionally, you can handle the response data if the API returns any
+      // const data = await response.json();
+
+      // Notify the user of successful deletion
+      alert('Itinerary deleted successfully.');
+
+      // Navigate back to the list of itineraries
+      onBack();
+    } catch (err) {
+      setError('Error deleting itinerary. Please try again later.');
+      console.error('Error deleting itinerary:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -78,14 +108,27 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      
+      {/* Navigation Bar (placeholder) */}
+      <nav className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <div className="text-xl font-semibold">Your Logo</div>
+            {/* Add navigation items here */}
+          </div>
+        </div>
+      </nav>
 
       {/* Hero Section */}
-      <div className="bg-blue-600 text-white py-20 px-4">
+      <div className="bg-[#1a202c] text-white py-20 px-4"> {/* Updated background color */}
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{itinerary.title}</h1>
           <p className="text-xl md:text-2xl">{itinerary.description}</p>
         </div>
+      </div>
+
+      {/* Hidden paragraph */}
+      <div className="bg-gray-100 text-gray-100">
+        <p>kkkkkkkkkkkkkkkkkk kkkkkkkkkkkkkkkkkkkkkkkkkkkk</p>
       </div>
 
       {/* Content Section */}
@@ -168,26 +211,30 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
           <div className="p-6 border-t border-gray-200">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-semibold">Book This Itinerary</h3>
-              <div className="space-x-2">
-                <button
-                  onClick={handleUpdate}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
-                >
-                  <Edit className="inline-block w-4 h-4 mr-2" />
-                  Update
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-300"
-                >
-                  <Trash2 className="inline-block w-4 h-4 mr-2" />
-                  Delete
-                </button>
-              </div>
+              {userRole === 'tourGuide' && (
+                <div className="space-x-2">
+                  <button
+                    onClick={handleUpdate}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-300"
+                  >
+                    <Edit className="inline-block w-4 h-4 mr-2" />
+                    Update
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-300"
+                  >
+                    <Trash2 className="inline-block w-4 h-4 mr-2" />
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
-            <button className="mt-4 bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition duration-300">
-              Book Now
-            </button>
+            {(userRole === 'tourist' || userRole === 'guest') && (
+              <button className="mt-4 bg-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-600 transition duration-300">
+                Book Now
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -217,15 +264,15 @@ const ItineraryDetail = ({ itinerary: initialItinerary, onBack }) => {
         }
 
         @keyframes dash {
-         0% { stroke-dashoffset: 187; }
-         50% {
-           stroke-dashoffset: 46.75;
-           transform: rotate(135deg);
-         }
-         100% {
-           stroke-dashoffset: 187;
-           transform: rotate(450deg);
-         }
+          0% { stroke-dashoffset: 187; }
+          50% {
+            stroke-dashoffset: 46.75;
+            transform: rotate(135deg);
+          }
+          100% {
+            stroke-dashoffset: 187;
+            transform: rotate(450deg);
+          }
         }
       `}</style>
     </div>
