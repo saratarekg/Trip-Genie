@@ -1,5 +1,9 @@
 const Admin = require('../models/admin');
 const TourismGovernor = require('../models/tourismGovernor');
+const Tourist = require('../models/tourist');
+const Seller = require('../models/seller');
+const Advertiser = require('../models/advertiser');
+const TourGuide = require('../models/tourGuide');
 
 const addAdmin = async (req, res) => {
     try{
@@ -56,10 +60,12 @@ const getAdminByID = async (req, res) => {
 };
 
 const usernameExists = async (username) => {
-    if(await Admin.findOne({username})){
-        return true;
-    }
-    else if(await TourismGovernor.findOne({username})){
+    if(await Tourist.findOne({username}) 
+        || await TourGuide.findOne({username}) 
+        || await Advertiser.findOne({username}) 
+        || await Seller.findOne({username})
+        || await Admin.findOne({username})
+        || await TourismGovernor.findOne({username})){
         return true;
     }
     else{
