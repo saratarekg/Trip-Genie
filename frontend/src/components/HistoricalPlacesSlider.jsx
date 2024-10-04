@@ -82,7 +82,7 @@ export function HistoricalPlaces() {
         >
           {places.map((place) => (
             <div
-              key={place.id}
+              key={place._id}
               className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 transition-transform duration-300 hover:-translate-y-12 hover:z-10 relative"
             >
               <div className=" cursor-pointer relative aspect-[3/4] rounded-lg overflow-hidden">

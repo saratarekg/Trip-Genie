@@ -95,7 +95,7 @@ export function Activities() {
         >
           {activities.map((act) => (
             <div
-              key={act.id}
+              key={act._id}
               className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 rounded-lg overflow-hidden shadow-lg"
               style={{ backgroundColor: 'rgb(255, 248, 241)' }}
             >
