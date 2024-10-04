@@ -65,6 +65,8 @@ sellerSchema.statics.login = async function(username,password){
     if(seller){
         const auth = await bcrypt.compare(password, seller.password )
         if(auth){
+            if(seller.isAccepted === false)
+                throw Error('Your account is not accepted yet');
             return seller;
         }
         throw Error('Incorrect password');

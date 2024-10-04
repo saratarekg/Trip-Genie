@@ -92,6 +92,9 @@ tourGuideSchema.statics.login = async function(username,password){
     if(tourGuide){
         const auth = await bcrypt.compare(password, tourGuide.password )
         if(auth){
+            if(tourGuide.isAccepted === false){
+                throw Error('Your account is not accepted yet');
+            }
             return tourGuide;
         }
         throw Error('Incorrect password');
