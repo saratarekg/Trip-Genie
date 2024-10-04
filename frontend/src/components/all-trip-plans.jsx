@@ -148,14 +148,15 @@ export function AllItinerariesComponent() {
     setSearchTerm('');
     setPrice('');
     setDateRange({ lower: '', upper: '' });
-    setType('');
-    setLanguage('');
-    setSortBy('');
-    setSortOrder('');
-    
+    setSelectedTypes([]); // Reset selected types
+    setSelectedLanguages([]); // Reset selected languages
+    setSortBy(''); // Reset sorting
+    setSortOrder(''); // Reset sort order
+
     // Fetch itineraries without any filters
     fetchItineraries();
-  };
+};
+
   const searchItineraries = async () => {
     try {
       const role = getUserRole();
