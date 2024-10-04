@@ -1,4 +1,6 @@
 const Category = require('../models/category');
+const Activity = require('../models/activity');
+
 
 const createCategory = (req, res) => {
     const category = new Category(req.body);
@@ -49,15 +51,26 @@ const updateCategory = async (req, res) => {
 
 
 
-const deleteCategory= async (req, res) => {
+const deleteCategory = async (req, res) => {
     try {
+        // Delete the category
         const category = await Category.findByIdAndDelete(req.params.id);
-      
-        res.status(201).json({ message: 'Category deleted' });
+        if (!category) {
+            return res.status(404).json({ message: 'Category not found' });
+        }
+
+        // Remove the deleted category from the 'categories' array in Activity model
+        await Activity.updateMany(
+            { category: req.params.id }, // Find activities with this category
+            { $pull: { categories: req.params.id } } // Remove the category from the array
+        );
+
+        res.status(201).json({ message: 'Category deleted and removed from activities' });
     } catch (error) {
-        res.status(404).json({ message: 'Category not found' });
+        res.status(500).json({ error: error.message });
     }
 };
+
 
 module.exports={createCategory,getCategory, getAllCategories, updateCategory,deleteCategory};
 

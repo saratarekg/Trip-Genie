@@ -12,9 +12,11 @@ const sellerRoutes = require("./routes/sellerRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
 const nationalityController = require('./controllers/nationalityController');
+const tagController = require('./controllers/tagController');
 //const productRoutes = require("./routes/productRoutes");
 const cookieParser = require('cookie-parser');
 const {requireAuth} = require('./middlewares/authMiddleware');
+const { getAllLanguages } = require('./controllers/itineraryController');
 
 
 const PORT = process.env.PORT;
@@ -40,3 +42,5 @@ app.use('/seller', requireAuth('seller'), sellerRoutes);
 app.use('/tour-guide',requireAuth('tour-guide'), tourGuideRoutes);
 app.use('/advertiser',requireAuth('advertiser'), advertiserRoutes);
 app.get('/api/nationalities',nationalityController.getAllNationalities);
+app.get('/api/getAllTypes',tagController.getAllTypes);
+app.get('/api/getAllLanguages' ,getAllLanguages)

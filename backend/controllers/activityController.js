@@ -1,5 +1,6 @@
 const Activity = require("../models/activity");
 const Category = require("../models/category");
+const Itinerary = require("../models/itinerary");
 
 const getAllActivities = async (req, res) => {
   try {
@@ -88,15 +89,24 @@ const createActivity = async (req, res) => {
 
 const deleteActivity = async (req, res) => {
   try {
+    // Delete the activity
     const activity = await Activity.findByIdAndDelete(req.params.id);
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
     }
+
+    // Remove the deleted activity from the 'activities' array in the Itinerary model
+    await Itinerary.updateMany(
+      { activities: req.params.id }, // Find itineraries with this activity
+      { $pull: { activities: req.params.id } } // Remove the activity from the array
+    );
+
     res.status(204).json();
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 const updateActivity = async (req, res) => {
   try {

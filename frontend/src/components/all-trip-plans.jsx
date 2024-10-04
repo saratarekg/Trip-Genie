@@ -4,6 +4,7 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import ItineraryDetail from './ItineraryDetail.jsx';
 import FilterComponent from './Filter.jsx'; 
 import defaultImage from "../assets/images/default-image.jpg";
+import axios from 'axios';
 
 const ItineraryCard = ({ itinerary, onSelect }) => (
   <div className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"   onClick={() => onSelect(itinerary)}>
@@ -47,6 +48,9 @@ export function AllItinerariesComponent() {
   const [language, setLanguage] = useState('');
   const tripsPerPage = 6;
   const [selectedItinerary, setSelectedItinerary] = useState(null);
+  const [typesOptions, setTypesOptions] = useState([]); 
+  const [languagesOptions, setLanguagesOptions] = useState([]); 
+
 
   const getUserRole = () => {
     let role = Cookies.get('role');
@@ -54,8 +58,38 @@ export function AllItinerariesComponent() {
     return role;
   };
 
+  
+
   useEffect(() => {
     fetchItineraries();
+  }, []);
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      console.log('Fetching Languages');
+      try {
+        const response = await axios.get('http://localhost:4000/api/getAllLanguages');
+        console.log('Languages:', response.data);
+        setLanguagesOptions(response.data);
+      }catch(error){
+        console.error('Error fetching Languages:', error);
+      }
+    };
+    fetchLanguages();
+  }, []);
+
+  useEffect(() => {
+    // Fetch types from the backend
+    const fetchType = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/api/getAllTypes');
+        console.log('Type:', response.data);
+        setTypesOptions(response.data);
+      }catch(error){
+        console.error('Error fetching Type:', error);
+      }
+    };
+    fetchType();
   }, []);
 
   useEffect(() => {
@@ -135,6 +169,7 @@ export function AllItinerariesComponent() {
       }
   
       const data = await response.json();
+
       setItineraries(data);
       setError(null);
       setCurrentPage(1);
@@ -204,6 +239,8 @@ export function AllItinerariesComponent() {
               language={language}
               setLanguage={setLanguage}
               searchItineraries={searchItineraries}
+              typesOptions={typesOptions}   // Passing the fetched types
+              languagesOptions={languagesOptions} // Passing the fetched languages
             />
           </div>
 

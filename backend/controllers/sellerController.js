@@ -1,4 +1,5 @@
 const Seller = require('../models/seller');
+const Product = require('../models/product');
 
 
 // Update
@@ -30,7 +31,11 @@ const deleteSellerAccount = async (req, res) => {
         if (!seller) {
             return res.status(404).json({ message: 'Seller not found' });
         }
-        res.status(201).json({ message: 'Seller deleted' });
+
+        // Delete all products associated with the seller
+        await Product.deleteMany({ seller: seller._id });
+
+        res.status(201).json({ message: 'Seller and associated products deleted' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

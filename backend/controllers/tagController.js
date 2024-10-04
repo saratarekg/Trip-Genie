@@ -1,4 +1,6 @@
 const Tag = require('../models/tag');
+const Activity = require('../models/activity');
+
 
 const addTag = (req, res) => {
     const tag = new Tag(req.body);
@@ -12,15 +14,26 @@ const addTag = (req, res) => {
             console.log(err);
         });
 }
-const deleteTag= async (req, res) => {
+const deleteTag = async (req, res) => {
     try {
+        // Delete the tag
         const tag = await Tag.findByIdAndDelete(req.params.id);
-      
-        res.status(200).json({ message: 'tag deleted' });
+        if (!tag) {
+            return res.status(404).json({ message: 'Tag not found' });
+        }
+
+        // Remove the deleted tag from the 'tags' array in Activity model
+        await Activity.updateMany(
+            { tags: req.params.id }, // Find activities with this tag
+            { $pull: { tags: req.params.id } } // Remove the tag from the array
+        );
+
+        res.status(200).json({ message: 'Tag deleted and removed from activities' });
     } catch (error) {
-        res.status(404).json({ message: 'tag not found' });
+        res.status(500).json({ error: error.message });
     }
 };
+
 const updateTag = async (req, res) => {
     try {
         const tag = await Tag.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
@@ -48,6 +61,16 @@ const getAlltags = async (req, res) => {
     }
 };
 
+const getAllTypes = async (req, res) => {
+    
+    try {
+        const tag = await Tag.find();
+        const types = tag.map((tag) => tag.type);
+        res.status(200).json(types);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 
-module.exports = {addTag,deleteTag,updateTag,getTag,getAlltags};
+module.exports = {addTag,deleteTag,updateTag,getTag,getAlltags,getAllTypes};
