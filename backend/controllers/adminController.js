@@ -7,7 +7,7 @@ const TourGuide = require('../models/tourGuide');
 
 const addAdmin = async (req, res) => {
     try{
-        console.log(req.body);
+        // console.log(req.body);
         if(await usernameExists(req.body.username)){
             throw new Error('Username already exists');
         }

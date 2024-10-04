@@ -109,7 +109,7 @@ itinerarySchema.statics.findByFields = async function(searchCriteria) {
             }
         }
     }
-    console.log(query);
+    // console.log(query);
 
     return this.find({ $or: query }).populate('tourGuide').populate('activities').exec();  // Perform a search with the regex query
 };
@@ -123,7 +123,7 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
         query.push({["price"] : { $lte: budget }});
     }
     if(upperdate !== undefined && upperdate !== null && upperdate !== "") {
-        console.log(upperdate);
+        // console.log(upperdate);
         query.push({["availableDates.date"] : { $lte: upperdate }});
     }
     if(lowerdate !== undefined && lowerdate !== null && lowerdate !== "") {
@@ -133,7 +133,7 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
         query.push({ language: { $in: languages } });
     }
     
-    console.log(query);
+    // console.log(query);
     if(query.length === 0)
         itineraries = await this.find().populate('tourGuide').populate('activities').exec();
     else
@@ -168,7 +168,7 @@ itinerarySchema.statics.filter = async function(budget,upperdate, lowerdate, typ
         }
     }
 
-    console.log(query2);
+    // console.log(query2);
     if(query2.length === 0)
         return [];
 
