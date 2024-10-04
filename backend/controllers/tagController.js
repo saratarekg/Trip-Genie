@@ -61,6 +61,16 @@ const getAlltags = async (req, res) => {
     }
 };
 
+const getAllTypes = async (req, res) => {
+    
+    try {
+        const tag = await Tag.find();
+        const types = tag.map((tag) => tag.type);
+        res.status(200).json(types);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
 
-module.exports = {addTag,deleteTag,updateTag,getTag,getAlltags};
+module.exports = {addTag,deleteTag,updateTag,getTag,getAlltags,getAllTypes};

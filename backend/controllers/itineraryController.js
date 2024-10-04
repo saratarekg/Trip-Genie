@@ -170,6 +170,14 @@ const getItinerariesByTourGuide = async (req, res) => {
   }
 };
 
+const getAllLanguages = async (req, res) => {
+  try {
+    const languages = await Itinerary.find().distinct("language");
+    res.status(200).json(languages);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 
 module.exports = {
@@ -178,5 +186,6 @@ module.exports = {
   createItinerary,
   deleteItinerary,
   updateItinerary,
-  getItinerariesByTourGuide
+  getItinerariesByTourGuide,
+  getAllLanguages,
 };
