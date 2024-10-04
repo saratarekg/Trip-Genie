@@ -104,14 +104,22 @@ const filterItineraries = async (req, res) => {
 
     const searchResult = await Itinerary.findByFields(searchBy);
 
-    let itinerary = filterResult.filter((itinerary) =>
-      searchResult.includes(itinerary)
-    );
+    console.log("Search By:", searchBy); // Log the search criteria
+    console.log("Itineraries Found:", searchResult); // Log the itineraries found
 
-    if (!itinerary || itinerary.length === 0) {
+    const searchResultIds = searchResult.map((itinerary) => itinerary._id);
+    const filterResultIds = filterResult.map((itinerary) => itinerary._id);
+
+    const itineraries = await Itinerary.find({
+      $and: [{ _id: { $in: searchResultIds }}, {_id: { $in: filterResultIds }} ],
+    });
+
+    console.log("Itineraries Found:", itineraries); // Log the itineraries found
+
+    if (!itineraries || itineraries.length === 0) {
       return res.status(200).json([]);
     }
-    res.status(200).json(itinerary);
+    res.status(200).json(itineraries);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

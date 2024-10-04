@@ -104,9 +104,10 @@ export function AllItinerariesComponent() {
       if (searchTerm) {
         url.searchParams.append('searchBy', searchTerm);
       }
-      if (price) {
+      if (price && price !== '') {
         url.searchParams.append('budget', price);
       }
+      
       if (dateRange.upper) {
         url.searchParams.append('upperDate', dateRange.upper);
       }

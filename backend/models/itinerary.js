@@ -109,6 +109,7 @@ itinerarySchema.statics.findByFields = async function(searchCriteria) {
             }
         }
     }
+    console.log(query);
 
     return this.find({ $or: query }).populate('tourGuide').populate('activities').exec();  // Perform a search with the regex query
 };
