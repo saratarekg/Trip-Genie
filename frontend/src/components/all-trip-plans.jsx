@@ -5,9 +5,10 @@ import ItineraryDetail from './ItineraryDetail.jsx';
 import FilterComponent from './Filter.jsx'; 
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const ItineraryCard = ({ itinerary, onSelect }) => (
-  <div className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"   onClick={() => onSelect(itinerary)}>
+const ItineraryCard = ({ itinerary, onSelect}) => (
+  <div className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"   onClick={() => onSelect(itinerary._id)}>
     
         <div className="overflow-hidden">
           <img
@@ -51,6 +52,7 @@ export function AllItinerariesComponent() {
   const [selectedItinerary, setSelectedItinerary] = useState(null);
   const [typesOptions, setTypesOptions] = useState([]); 
   const [languagesOptions, setLanguagesOptions] = useState([]); 
+  const navigate = useNavigate();
 
 
   const getUserRole = () => {
@@ -61,9 +63,14 @@ export function AllItinerariesComponent() {
 
   
 
+
   useEffect(() => {
     fetchItineraries();
   }, []);
+
+  const handleItinerarySelect = (id) => {
+    navigate(`/itinerary/${id}`); // Navigate to the itinerary details page
+  };
 
   useEffect(() => {
     const fetchLanguages = async () => {
@@ -234,17 +241,6 @@ export function AllItinerariesComponent() {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div className="max-w-7xl mx-auto">
-      {selectedItinerary ? (
-        <>
-          <button
-            onClick={() => setSelectedItinerary(null)}
-            className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
-          >
-            <ChevronLeft className="mr-1" /> Back to All Itineraries
-          </button>
-          <ItineraryDetail itinerary={selectedItinerary} />
-        </>
-      ) : (
         <>
           <h1 className="text-4xl font-bold text-gray-900 mb-8">All Trip Plans</h1>
 
@@ -296,7 +292,7 @@ export function AllItinerariesComponent() {
                 <ItineraryCard
                   key={itinerary.id}
                   itinerary={itinerary}
-                  onSelect={setSelectedItinerary}
+                  onSelect={handleItinerarySelect}
                 />
               ))}
           </div>
@@ -328,7 +324,7 @@ export function AllItinerariesComponent() {
             </button>
           </div>
         </>
-      )}
+      
     </div>
   </div>
   );
