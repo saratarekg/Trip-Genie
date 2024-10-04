@@ -45,8 +45,8 @@ export function AllItinerariesComponent() {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [price, setPrice] = useState('');
   const [dateRange, setDateRange] = useState({ lower: '', upper: '' });
-  const [type, setType] = useState('');
-  const [language, setLanguage] = useState('');
+  const [selectedTypes, setSelectedTypes] = useState([]); // Changed to selectedTypes array
+  const [selectedLanguages, setSelectedLanguages] = useState([]); // Changed to selectedLanguages array
   const tripsPerPage = 6;
   const [selectedItinerary, setSelectedItinerary] = useState(null);
   const [typesOptions, setTypesOptions] = useState([]); 
@@ -163,11 +163,11 @@ export function AllItinerariesComponent() {
       if (dateRange.lower) {
         url.searchParams.append('lowerDate', dateRange.lower);
       }
-      if (type) {
-        url.searchParams.append('types', type);
+      if (selectedTypes.length > 0) {
+        url.searchParams.append('types', selectedTypes.join(',')); // Multiple types as a comma-separated string
       }
-      if (language) {
-        url.searchParams.append('languages', language);
+      if (selectedLanguages.length > 0) {
+        url.searchParams.append('languages', selectedLanguages.join(',')); // Multiple languages as a comma-separated string
       }
 
   // Add sorting parameters
@@ -205,22 +205,18 @@ export function AllItinerariesComponent() {
     setFiltersVisible(!filtersVisible);
   };
   
-  // export const handleSort = (setSortBy, setSortOrder, attribute) => {
-  //   setSortBy(attribute); // Set the attribute for sorting
-  //   setSortOrder((prevOrder) => (prevOrder === 'asc' ? 'desc' : 'asc')); // Toggle the order
-  // };
+  // Handle type and language selections
+  const handleTypeSelection = (option) => {
+    setSelectedTypes(prev => 
+      prev.includes(option) ? prev.filter(type => type !== option) : [...prev, option]
+    );
+  };
 
-  // const sortItineraries = (key) => {
-  //   const sortedItineraries = [...itineraries].sort((a, b) => {
-  //     if (sortOrder === 'asc') {
-  //       return a[key] > b[key] ? 1 : -1;
-  //     } else {
-  //       return a[key] < b[key] ? 1 : -1;
-  //     }
-  //   });
-  //   setItineraries(sortedItineraries);
-  //   setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-  // };
+  const handleLanguageSelection = (option) => {
+    setSelectedLanguages(prev => 
+      prev.includes(option) ? prev.filter(lang => lang !== option) : [...prev, option]
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -257,59 +253,65 @@ export function AllItinerariesComponent() {
               sortOrder={sortOrder}
               sortBy={sortBy}
               handleSort={handleSort}
-              // sortItineraries={sortItineraries}
               price={price}
               setPrice={setPrice}
               dateRange={dateRange}
               setDateRange={setDateRange}
-              type={type}
-              setType={setType}
-              language={language}
-              setLanguage={setLanguage}
+              selectedTypes={selectedTypes} // Pass selectedTypes array
+              setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
+              selectedLanguages={selectedLanguages} // Pass selectedLanguages array
+              setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
               searchItineraries={searchItineraries}
-              typesOptions={typesOptions}   // Passing the fetched types
-              languagesOptions={languagesOptions} // Passing the fetched languages
+              typesOptions={typesOptions}
+              languagesOptions={languagesOptions}
             />
           </div>
 
-          {error ? (
-            <div className="text-red-600 mb-4">{error}</div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {itineraries
-                  .slice((currentPage - 1) * tripsPerPage, currentPage * tripsPerPage)
-                  .map((itinerary) => (
-                    <ItineraryCard
-                      key={itinerary.id}
-                      itinerary={itinerary}
-                      onSelect={(itinerary) => setSelectedItinerary(itinerary)}
-                    />
-                  ))}
-              </div>
-              <div className="mt-8 flex justify-between items-center">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 bg-blue-600 text-white rounded-full ${currentPage === 1 ? 'opacity-50' : ''}`}
-                >
-                  <ChevronLeft />
-                </button>
-                <span className="text-gray-700">
-                  Page {currentPage} of {Math.ceil(itineraries.length / tripsPerPage)}
-                </span>
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, Math.ceil(itineraries.length / tripsPerPage)))}
-                  disabled={currentPage === Math.ceil(itineraries.length / tripsPerPage)}
-                  className={`px-4 py-2 bg-blue-600 text-white rounded-full ${
-                    currentPage === Math.ceil(itineraries.length / tripsPerPage) ? 'opacity-50' : ''
-                  }`}
-                >
-                  <ChevronRight />
-                </button>
-              </div>
-            </>
+          {error && (
+            <div className="text-red-500 text-center mb-4">{error}</div>
           )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {itineraries
+              .slice(
+                (currentPage - 1) * tripsPerPage,
+                currentPage * tripsPerPage
+              )
+              .map((itinerary) => (
+                <ItineraryCard
+                  key={itinerary.id}
+                  itinerary={itinerary}
+                  onSelect={setSelectedItinerary}
+                />
+              ))}
+          </div>
+
+          <div className="mt-8 flex justify-center space-x-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-full bg-white shadow ${
+                currentPage === 1 ? 'text-gray-300' : 'text-blue-600'
+              }`}
+            >
+              <ChevronLeft />
+            </button>
+            <button
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  Math.min(prev + 1, Math.ceil(itineraries.length / tripsPerPage))
+                )
+              }
+              disabled={currentPage === Math.ceil(itineraries.length / tripsPerPage)}
+              className={`px-4 py-2 rounded-full bg-white shadow ${
+                currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                  ? 'text-gray-300'
+                  : 'text-blue-600'
+              }`}
+            >
+              <ChevronRight />
+            </button>
+          </div>
         </>
       )}
     </div>

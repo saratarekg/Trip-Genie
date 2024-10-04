@@ -1,26 +1,42 @@
 import React from 'react';
 import { Filter, ChevronDown, ArrowUpDown } from 'lucide-react';
-// import {handleSort} from './all-trip-plans'
 
 const FilterComponent = ({
   filtersVisible,
   toggleFilters,
   sortOrder,
-  sortBy, // Get sortBy from props
-  handleSort, // Get handleSort from props
-  // sortItineraries,
+  sortBy,
+  handleSort,
   price,
   setPrice,
   dateRange,
   setDateRange,
-  type,
-  setType,
-  language,
-  setLanguage,
+  selectedTypes = [], // Default to empty array
+  setSelectedTypes,
+  selectedLanguages = [], // Default to empty array
+  setSelectedLanguages,
   searchItineraries,
-  typesOptions,   // Props for types
-  languagesOptions // Props for languages
+  typesOptions = [], // Default to empty array for types options
+  languagesOptions = [] // Default to empty array for language options
 }) => {
+
+  // Handle checkbox for types
+  const handleTypeChange = (type) => {
+    if (selectedTypes.includes(type)) {
+      setSelectedTypes(selectedTypes.filter((t) => t !== type));
+    } else {
+      setSelectedTypes([...selectedTypes, type]);
+    }
+  };
+
+  // Handle checkbox for languages
+  const handleLanguageChange = (language) => {
+    if (selectedLanguages.includes(language)) {
+      setSelectedLanguages(selectedLanguages.filter((l) => l !== language));
+    } else {
+      setSelectedLanguages([...selectedLanguages, language]);
+    }
+  };
 
   const handleLowerDateChange = (e) => {
     const newLowerDate = e.target.value;
@@ -45,25 +61,26 @@ const FilterComponent = ({
         </button>
 
         <button
-                    onClick={() => handleSort('price')}
-                    className="flex items-center px-4 py-2 bg-white rounded-full shadow"
-                  >
-                    <ArrowUpDown className="mr-2" size={18} />
-                    Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-                  </button>
+          onClick={() => handleSort('price')}
+          className="flex items-center px-4 py-2 bg-white rounded-full shadow"
+        >
+          <ArrowUpDown className="mr-2" size={18} />
+          Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+        </button>
 
-                  <button
-                    onClick={() => handleSort('rating')}
-                    className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-4"
-                  >
-                    <ArrowUpDown className="mr-2" size={18} />
-                    Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-                  </button>
+        <button
+          onClick={() => handleSort('rating')}
+          className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-4"
+        >
+          <ArrowUpDown className="mr-2" size={18} />
+          Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+        </button>
       </div>
 
       {filtersVisible && (
         <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">
           <div className="flex flex-col space-y-4">
+            {/* Price Input */}
             <div>
               <label className="block text-gray-700">Price</label>
               <input
@@ -75,6 +92,7 @@ const FilterComponent = ({
               />
             </div>
 
+            {/* Date Range Input */}
             <div>
               <label className="block text-gray-700">Date Range</label>
               <div className="flex space-x-2">
@@ -94,41 +112,44 @@ const FilterComponent = ({
               </div>
             </div>
 
-            {/* Type Dropdown */}
+            {/* Type Checkboxes */}
             <div>
               <label className="block text-gray-700">Type</label>
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                className="w-full mt-1 border rounded-lg p-2"
-              >
-                <option value="">Select Type</option>
-                {typesOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
+              <div className="flex flex-wrap">
+                {typesOptions.map((type) => (
+                  <label key={type} className="mr-4 mb-2 flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedTypes.includes(type)} // Check if type is selected
+                      onChange={() => handleTypeChange(type)}
+                      className="form-checkbox"
+                    />
+                    <span className="ml-2">{type}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
-            {/* Language Dropdown */}
+            {/* Language Checkboxes */}
             <div>
               <label className="block text-gray-700">Language</label>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full mt-1 border rounded-lg p-2"
-              >
-                <option value="">Select Language</option>
-                {languagesOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
+              <div className="flex flex-wrap">
+                {languagesOptions.map((language) => (
+                  <label key={language} className="mr-4 mb-2 flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedLanguages.includes(language)} // Check if language is selected
+                      onChange={() => handleLanguageChange(language)}
+                      className="form-checkbox"
+                    />
+                    <span className="ml-2">{language}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
 
+          {/* Apply Filters Button */}
           <button
             onClick={searchItineraries}
             className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
