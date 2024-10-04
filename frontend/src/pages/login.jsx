@@ -56,8 +56,8 @@ const Login = () => {
                 const data = await response.json();
                 role = data.role;
 
-                if (role === 'tour-guide') {
-                    navigate('/tour-guide-home');
+                if (role === 'admin') {
+                    navigate('/admin');
                 } else {
                     navigate('/');
                 }
