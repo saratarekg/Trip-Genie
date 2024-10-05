@@ -20,6 +20,7 @@ import { NavbarComponent } from "./components/navbar.jsx";
 import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./components/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
+import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./components/signup-form.jsx";
@@ -54,6 +55,7 @@ function App() {
               path="/all-historical-places"
               element={<AllHistoricalPlacesComponent />}
             />
+            <Route path="/historical-place/:id" element={<HistoricalPlaceDetail />}/>
             <Route path="/sign-up" element={<SignupForm />} />
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/itinerary/:id" element={<ItineraryDetail />} />
