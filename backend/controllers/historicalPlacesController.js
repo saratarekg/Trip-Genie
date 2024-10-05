@@ -28,7 +28,7 @@ const getAllHistoricalPlaces = async (req, res) => {
     try {
         const { types,periods,myPlaces, searchBy } = req.query;
         const filterResult = await Museum.filterByTag(types,periods);
-
+console.log(types);
         const searchResult = await Museum.findByFields(searchBy);
 
         const searchResultIds = searchResult.map((place) => place._id);
