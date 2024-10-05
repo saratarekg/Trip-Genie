@@ -56,14 +56,26 @@ export function HistoricalPlaces() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <div>
+        <div className="w-full sm:w-1/2">
           <h2 className="text-3xl font-bold">Historical Places</h2>
           <hr className="border-red-500 w-1/2 mb-3 mt-1 border-t-2" />
           <p className="text-gray-600 mt-2 mb-8">
-            Most popular historical places around the world.
+          Explore the world's most captivating historical landmarks, where rich cultural heritage and architectural wonders come to life. Each destination tells a story of the past, offering a unique journey through history. Plan your adventure today!
           </p>
         </div>
+        
         <div className="flex gap-2">
+          {/* View More Button */}
+          <div className="flex">
+            <Link to="/all-historical-places">
+              <Button
+                variant="primary"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-lg font-medium"
+              >
+                View More
+              </Button>
+            </Link>
+          </div>
           <Button
             variant="outline"
             size="icon"
@@ -128,18 +140,7 @@ export function HistoricalPlaces() {
         </div>
       </div>
 
-      {/* View More Button */}
-      <div className="flex justify-end mt-4">
-      <Link to="/all-historical-places">
 
-        <Button
-          variant="primary"
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-        >
-          View More
-        </Button>
-        </Link>
-      </div>
     </div>
   );
 }

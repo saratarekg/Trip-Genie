@@ -178,7 +178,7 @@ const ItineraryForm = () => {
           </label>
           <input
             {...register("price", { valueAsNumber: true })}
-            type="number"
+            type="number" min="0"
             className="border border-gray-300 rounded-xl p-2 w-full"
             id="price"
           />

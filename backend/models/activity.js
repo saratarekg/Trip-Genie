@@ -54,7 +54,8 @@ const activitySchema = new Schema({
         default: true,
     },
     rating: {
-        type: Number
+        type: Number,
+        required: true,
     },
     pictures: {
         type: [String],

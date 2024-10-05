@@ -36,11 +36,14 @@ historicalTagSchema.statics.filterByFields = async function(searchFields) {
     return this.find(query);  // Perform a search with the regex query
 }
 
-historicalTagSchema.statics.searchByFields = async function(searchFields) {
+historicalTagSchema.statics.searchByFields = async function(searchCriteria) {
+    if(searchCriteria === undefined || searchCriteria === null || searchCriteria === "") {
+        return this.find().exec();
+    }
     const query = [];
 
-    query.push({ ["type"]: { $regex: new RegExp(searchFields, 'i') } });
-    query.push({ ["period"]: { $regex: new RegExp(searchFields, 'i') } });
+    query.push({ ["type"]: { $regex: new RegExp(searchCriteria, 'i') } });
+    query.push({ ["period"]: { $regex: new RegExp(searchCriteria, 'i') } });
     return this.find({ $or: query });  // Perform a search with the regex query
 }
 
