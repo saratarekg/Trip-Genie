@@ -132,7 +132,7 @@ const ItineraryDetail = () => {
       <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{itinerary.title}</h1>
-          <p className="text-xl md:text-2xl">{itinerary.description}</p>
+          <p className="text-xl md:text-2xl">{itinerary.timeline}</p>
         </div>
       </div>
 
