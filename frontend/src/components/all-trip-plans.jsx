@@ -300,6 +300,7 @@ export function AllItinerariesComponent() {
                   searchItineraries={searchItineraries}
                   typesOptions={typesOptions}
                   languagesOptions={languagesOptions}
+                  role={getUserRole()}
                 />
               </div>
 
