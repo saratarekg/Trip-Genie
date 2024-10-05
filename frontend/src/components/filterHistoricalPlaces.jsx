@@ -94,12 +94,12 @@ const FilterComponent = ({
           </button>
         </div>
 
-          {/* {role === 'tour-guide'?  (
+          {role === 'tourism-governor'?  (
              <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
              <Plus className="mr-2" size={18} />
              Create
            </Link>
-          ) : null} */}
+          ) : null}
  
        
       </div>
