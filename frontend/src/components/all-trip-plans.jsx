@@ -17,9 +17,9 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
       <img
         src={
           itinerary.activities &&
-          itinerary.activities.length > 0 &&
-          itinerary.activities[0].pictures &&
-          itinerary.activities[0].pictures.length > 0
+            itinerary.activities.length > 0 &&
+            itinerary.activities[0].pictures &&
+            itinerary.activities[0].pictures.length > 0
             ? itinerary.activities[0].pictures[0]
             : defaultImage
         }
@@ -29,7 +29,7 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
     </div>
     <div className="p-4 ">
       <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
-      <h3 className="text-sm mt-2 text-gray-700">{itinerary.description}</h3>
+      <h3 className="text-sm mt-2 text-gray-700">{itinerary.timeline}</h3>
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-bold text-blue-600">
           €{itinerary.price}/Day
@@ -52,7 +52,7 @@ export function AllItinerariesComponent() {
   const [dateRange, setDateRange] = useState({ lower: "", upper: "" });
   const [selectedTypes, setSelectedTypes] = useState([]); // Changed to selectedTypes array
   const [selectedLanguages, setSelectedLanguages] = useState([]); // Changed to selectedLanguages array
-  const tripsPerPage = 6;
+  const tripsPerPage = 3;
   const [selectedItinerary, setSelectedItinerary] = useState(null);
   const [typesOptions, setTypesOptions] = useState([]);
   const [languagesOptions, setLanguagesOptions] = useState([]);
@@ -99,18 +99,16 @@ export function AllItinerariesComponent() {
     // Fetch types from the backend
     const fetchType = async () => {
       try {
-        setIsLoading(true);
-        const response = await axios.get(
-          "http://localhost:4000/api/getAllTypes"
-        );
-        console.log("Type:", response.data);
+        setIsLoading(false);
+        const response = await axios.get('http://localhost:4000/api/getAllTypes');
+        console.log('Type:', response.data);
         setTypesOptions(response.data);
       } catch (error) {
         console.error("Error fetching Type:", error);
       }
     };
     fetchType();
-    setIsLoading(true);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -134,18 +132,21 @@ export function AllItinerariesComponent() {
   const handleSort = (attribute) => {
     setIsLoading(true);
     const newSortOrder = sortOrder === 1 ? -1 : 1;
-    setSortBy(attribute);
     setSortOrder(newSortOrder);
-    searchItineraries(); // Call this to fetch sorted itineraries
+    setSortBy(attribute); 
     setIsLoading(false);
   };
   const fetchItineraries = async () => {
     try {
-      setIsLoading(true);
-      const token = Cookies.get("jwt");
+      setIsLoading(false);
+      const token = Cookies.get('jwt');
       const role = getUserRole();
+      const url =  new URL(`http://localhost:4000/${role}/itineraries`);
+
+
+
       const response = await fetch(
-        `http://localhost:4000/${role}/itineraries`,
+        url,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -184,7 +185,7 @@ export function AllItinerariesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
-
+   
       // Add the search term and filter parameters
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
@@ -200,10 +201,10 @@ export function AllItinerariesComponent() {
         url.searchParams.append("lowerDate", dateRange.lower);
       }
       if (selectedTypes.length > 0) {
-        url.searchParams.append("types", selectedTypes.join(",")); // Multiple types as a comma-separated string
+        url.searchParams.append("types", selectedTypes.join(",")); // Send selected types as comma-separated
       }
       if (selectedLanguages.length > 0) {
-        url.searchParams.append("languages", selectedLanguages.join(",")); // Multiple languages as a comma-separated string
+        url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
       }
 
       // Add sorting parameters
@@ -238,7 +239,7 @@ export function AllItinerariesComponent() {
   };
 
   const toggleFilters = () => {
-    setIsLoading(true);
+    setIsLoading(false);
     setFiltersVisible(!filtersVisible);
     setIsLoading(false);
   };
@@ -303,6 +304,7 @@ export function AllItinerariesComponent() {
                   searchItineraries={searchItineraries}
                   typesOptions={typesOptions}
                   languagesOptions={languagesOptions}
+                  role={getUserRole()}
                 />
               </div>
 
@@ -325,39 +327,41 @@ export function AllItinerariesComponent() {
                   ))}
               </div>
 
-              <div className="mt-8 flex justify-center space-x-4">
+              <div className="mt-8 flex justify-center items-center space-x-4">
                 <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                  }`}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                    }`}
                 >
                   <ChevronLeft />
                 </button>
+
+              
+
+                {/* Page X of Y */}
+                <span className="text-lg font-medium">
+                  Page {currentPage} of {Math.ceil(itineraries.length / tripsPerPage)}
+                </span>
+
                 <button
                   onClick={() =>
                     setCurrentPage((prev) =>
-                      Math.min(
-                        prev + 1,
-                        Math.ceil(itineraries.length / tripsPerPage)
-                      )
+                      Math.min(prev + 1, Math.ceil(itineraries.length / tripsPerPage))
                     )
                   }
                   disabled={
                     currentPage === Math.ceil(itineraries.length / tripsPerPage)
                   }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                      ? "text-gray-300"
-                      : "text-blue-600"
-                  }`}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                    ? "text-gray-300"
+                    : "text-blue-600"
+                    }`}
                 >
                   <ChevronRight />
                 </button>
               </div>
+
             </>
           </div>
         </div>
@@ -365,3 +369,5 @@ export function AllItinerariesComponent() {
     </div>
   );
 }
+
+

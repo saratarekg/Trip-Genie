@@ -81,6 +81,8 @@ router.get('/tags', tagController.getAlltags);
 router.put('/tags/:id', tagController.updateTag);
 
 router.delete('/historical-tags/:id', historicalTagController.deleteTag);
+router.get('/historical-tags', historicalTagController.getAlltags);
+
 
 
 router.post('/categories',categoryController.createCategory);

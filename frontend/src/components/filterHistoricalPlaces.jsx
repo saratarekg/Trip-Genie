@@ -5,25 +5,30 @@ import { Link } from 'react-router-dom';
 const FilterComponent = ({
   filtersVisible,
   toggleFilters,
-  sortOrder,
-  sortBy,
-  handleSort,
+//   sortOrder,
+//   sortBy,
+//   handleSort,
   clearFilters,
-  price,
-  setPrice,
-  dateRange,
-  setDateRange,
+//   price,
+//   setPrice,
+//   dateRange,
+//   setDateRange,
   selectedTypes = [],
   setSelectedTypes,
-  selectedLanguages = [],
-  setSelectedLanguages,
-  searchItineraries,
+  selectedPeriods,
+  setSelectedPeriods,
+//   selectedLanguages = [],
+//   setSelectedLanguages,
+  searchHistoricalPlaces,
   typesOptions = [],
-  languagesOptions = [], 
+  periodsOptions=[],
+//   languagesOptions = [], 
   role,
 }) => {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
-  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
+
+//   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   // Handle checkbox for types
   const handleTypeChange = (type) => {
@@ -34,28 +39,36 @@ const FilterComponent = ({
     }
   };
 
+  const handlePeriodChange = (period) => {
+    if (selectedPeriods.includes(period)) {
+      setSelectedPeriods(selectedPeriods.filter((t) => t !== period));
+    } else {
+      setSelectedPeriods([...selectedPeriods, period]);
+    }
+  };
+
   // Handle checkbox for languages
-  const handleLanguageChange = (language) => {
-    if (selectedLanguages.includes(language)) {
-      setSelectedLanguages(selectedLanguages.filter((l) => l !== language));
-    } else {
-      setSelectedLanguages([...selectedLanguages, language]);
-    }
-  };
+//   const handleLanguageChange = (language) => {
+//     if (selectedLanguages.includes(language)) {
+//       setSelectedLanguages(selectedLanguages.filter((l) => l !== language));
+//     } else {
+//       setSelectedLanguages([...selectedLanguages, language]);
+//     }
+//   };
 
-  const handleLowerDateChange = (e) => {
-    const newLowerDate = e.target.value;
-    if (newLowerDate > dateRange.upper) {
-      setDateRange({ lower: newLowerDate, upper: newLowerDate });
-    } else {
-      setDateRange({ ...dateRange, lower: newLowerDate });
-    }
-  };
+//   const handleLowerDateChange = (e) => {
+//     const newLowerDate = e.target.value;
+//     if (newLowerDate > dateRange.upper) {
+//       setDateRange({ lower: newLowerDate, upper: newLowerDate });
+//     } else {
+//       setDateRange({ ...dateRange, lower: newLowerDate });
+//     }
+//   };
 
-  const handleUpperDateChange = (e) => {
-    const newUpperDate = e.target.value;
-    setDateRange({ ...dateRange, upper: newUpperDate });
-  };
+//   const handleUpperDateChange = (e) => {
+//     const newUpperDate = e.target.value;
+//     setDateRange({ ...dateRange, upper: newUpperDate });
+//   };
 
   return (
     <>
@@ -66,22 +79,22 @@ const FilterComponent = ({
             Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
           </button>
 
-          <button onClick={() => handleSort('price')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+          {/* <button onClick={() => handleSort('price')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             <ArrowUpDown className="mr-2" size={18} />
             Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-          </button>
-
+          </button> */}
+{/* 
           <button onClick={() => handleSort('rating')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             <ArrowUpDown className="mr-2" size={18} />
             Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-          </button>
+          </button> */}
 
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
           </button>
         </div>
 
-          {role === 'tour-guide'?  (
+          {role === 'tourism-governor'?  (
              <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
              <Plus className="mr-2" size={18} />
              Create
@@ -95,7 +108,7 @@ const FilterComponent = ({
         <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">
           <div className="flex flex-col space-y-4">
             {/* Price Input */}
-            <div>
+            {/* <div>
               <label className="block text-gray-700">Price</label>
               <input
                 type="number"
@@ -104,10 +117,10 @@ const FilterComponent = ({
                 onChange={(e) => setPrice(e.target.value)}
                 className="w-full mt-1 border rounded-lg p-2"
               />
-            </div>
+            </div> */}
 
             {/* Date Range Input */}
-            <div>
+            {/* <div>
               <label className="block text-gray-700">Date Range</label>
               <div className="flex space-x-2">
                 <input
@@ -124,7 +137,7 @@ const FilterComponent = ({
                   className="w-full mt-1 border rounded-lg p-2"
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Type Dropdown */}
             <div>
@@ -154,8 +167,35 @@ const FilterComponent = ({
               </div>
             </div>
 
-            {/* Language Dropdown */}
             <div>
+              <label className="block text-gray-700">Period</label>
+              <div className="relative">
+                <button
+                  onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
+                  className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
+                >
+                  Select Period(s) <ChevronDown className={`ml-1 transform ${showPeriodDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                {showPeriodDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    {periodsOptions.map((period) => (
+                      <label key={period} className="flex items-center px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedPeriods.includes(period)}
+                          onChange={() => handlePeriodChange(period)}
+                          className="form-checkbox"
+                        />
+                        <span className="ml-2">{period}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Language Dropdown */}
+            {/* <div>
               <label className="block text-gray-700">Language</label>
               <div className="relative">
                 <button
@@ -180,13 +220,13 @@ const FilterComponent = ({
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Apply Filters Button */}
           <button
-            onClick={searchItineraries}
-            className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+            onClick={searchHistoricalPlaces}
+            className="mt-12 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 "
           >
             Apply Filters
           </button>

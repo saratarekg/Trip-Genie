@@ -112,5 +112,6 @@ module.exports = {
     updateTourGuideProfile,
     deleteTourGuideAccount,
     getTourGuideByID,
-    getAllTourGuides
+    getAllTourGuides,
+    getTourGuideByID
 };
