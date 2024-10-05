@@ -70,6 +70,10 @@ router.get('/advertisers/:id', advertiserController.getAdvertiserByID);
 
 router.get('/advertisers', advertiserController.getAllAdvertisers);
 
+router.get('/users', adminController.getAllUsers);
+router.get('/userbyrole', adminController.getUsersByRoles);
+
+
 router.delete('/tags/:id', tagController.deleteTag);
 router.post('/tags', tagController.addTag);
 router.get('/tags/:id', tagController.getTag);

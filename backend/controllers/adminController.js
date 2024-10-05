@@ -4,6 +4,12 @@ const Tourist = require('../models/tourist');
 const Seller = require('../models/seller');
 const Advertiser = require('../models/advertiser');
 const TourGuide = require('../models/tourGuide');
+const TourismGovernor1=require('../controllers/tourismGovernorController');
+const Tourist1=require('../controllers/touristController');
+const Seller1= require('../controllers/sellerController');
+const Advertiser1= require('../controllers/advertiserController');
+const TourGuide1= require('../controllers/tourGuideController');
+
 
 const addAdmin = async (req, res) => {
     try{
@@ -48,6 +54,76 @@ const getAllAdmins = async (req, res) => {
     }
 };
 
+const getUsersByRoles = async (req, res) => {
+    const { role } = req.query; // Extract the role from the query parameters
+  
+    try {
+      // Fetch all users for each category
+      const admin = await Admin.find();
+      const tourist = await Tourist.find();
+      const governor = await TourismGovernor.find();
+      const seller = await Seller.find();
+      const tourGuide = await TourGuide.find();
+      const advertiser = await Advertiser.find();
+  
+      // Combine all users into one array
+      const allUsers = [
+        ...admin.map(user => ({ ...user.toObject(), role: 'admin' })),
+        ...tourist.map(user => ({ ...user.toObject(), role: 'tourist' })),
+        ...governor.map(user => ({ ...user.toObject(), role: 'governor' })),
+        ...seller.map(user => ({ ...user.toObject(), role: 'seller' })),
+        ...tourGuide.map(user => ({ ...user.toObject(), role: 'tourGuide' })),
+        ...advertiser.map(user => ({ ...user.toObject(), role: 'advertiser' })),
+      ];
+  
+      // Filter users by role if specified
+      const filteredUsers = role ? allUsers.filter(user => user.role === role) : allUsers;
+  
+      // Return the filtered array as a response
+      res.status(200).json({
+        users: filteredUsers,
+      });
+  
+    } catch (error) {
+      // Handle any errors that occur
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+
+const getAllUsers = async (req, res) => {
+    try {
+      // Fetch all users for each category
+      const admin = await Admin.find(); 
+      const tourist = await Tourist.find();
+      const governor = await TourismGovernor.find();
+      const seller = await Seller.find();
+      const tourGuide = await TourGuide.find();
+      const advertiser = await Advertiser.find();
+  
+      // Combine all users into one array
+      const allUsers = [...admin, ...tourist, ...governor, ...seller, ...tourGuide, ...advertiser];
+  
+      
+
+  
+      // Return the combined array as a response
+      res.status(200).json({
+        allUsers,
+       
+      });
+      
+    } catch (error) {
+      // Handle any errors that occur
+      res.status(500).json({ error: error.message });
+    }
+  };
+  
+      
+
+
+
+
 const getAdminByID = async (req, res) => {
     try {
         const admin = await Admin.findById(req.params.id);
@@ -75,4 +151,4 @@ const usernameExists = async (username) => {
 }
 
 
-module.exports = {addAdmin,getAdminByID,getAllAdmins,deleteAdminAccount};
+module.exports = {addAdmin,getAdminByID,getAllAdmins,deleteAdminAccount,getAllUsers,getUsersByRoles};
