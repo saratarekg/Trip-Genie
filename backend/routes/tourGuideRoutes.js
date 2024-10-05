@@ -26,6 +26,5 @@ router.get('/activity/:id', activityController.getActivityById);
 router.put('/activity/:id', activityController.updateActivity);
 
 
-
 module.exports = router;
 

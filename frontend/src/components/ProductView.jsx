@@ -55,23 +55,25 @@ export function ProductViewer() {
     <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row">
       {isLoading && <Loader />}
       <div className="w-full md:w-1/3 pr-8 mb-8 md:mb-0">
-        <h1 className="text-4xl font-bold mb-4">Products</h1>
-        <div className="w-16 h-1 bg-orange-500 mb-6"></div>
+        <h2 className="text-3xl font-bold">Products</h2>
+        <hr className="border-red-500 w-1/2 mb-3 mt-1 border-t-2" />
         <p className="text-gray-600 mb-8">
         Explore our exclusive collection of treasures and locally-inspired keepsakes. Whether for yourself or a loved one, each item tells a story and celebrates the culture of our vibrant destination. Bring home a piece of your adventure today!
         </p>
         <div className="flex justify-center">
   <div className="relative">
-    <div className="absolute left-0 top-0 w-8 h-8 bg-gray-800 -translate-x-1/2 -translate-y-1/2 rounded"></div>
-    <div className="absolute right-0 bottom-0 w-8 h-8 bg-gray-300 translate-x-1/2 translate-y-1/2 rounded"></div>
+    <div className="absolute left-0 top-0 w-8 h-8 bg-gray-800 -translate-x-1/2 -translate-y-1/2 rounded z-0"></div>
+    <div className="absolute right-0 bottom-0 w-8 h-8 bg-gray-300 translate-x-1/2 translate-y-1/2 rounded z-0"></div>
     <button 
       onClick={handleViewAllProducts}
-      className="relative bg-coral text-white px-8 py-3 rounded text-lg font-semibold bg-orange-500 transition duration-300 z-10" // Set z-index for the button
+      className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-lg font-medium transition duration-300 z-20 relative" // Set z-index higher and make button relative
     >
-      <span className="relative z-10">View all products</span>
+      View all products
     </button>
   </div>
 </div>
+
+
 
 
       </div>
@@ -92,7 +94,7 @@ export function ProductViewer() {
                 <span className="text-xs font-semibold text-gray-600 uppercase">{'BUY ONLINE'}</span>
                 <span className="text-lg font-bold">€{product.price}</span>
               </div>
-              <h2 className="text-xl font-serif mb-2">{product.name}</h2>
+              <h2 className="text-l mb-2">{product.name}</h2>
               <div className="flex justify-between items-center">
                 <div className="text-yellow-400 text-s">
                   {renderStars(product.rating)}
