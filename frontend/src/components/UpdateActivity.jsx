@@ -20,14 +20,17 @@ const LoadingSpinner = () => (
 export default function UpdateActivity() {
   const { id } = useParams();
   const [activity, setActivity] = useState({
-    name: '',
+    title: '',
     description: '',
     price: 0,
     location: '',
-    isActive: false,
+    duration: '',
+    isPopular: false,
+    isAvailable: false,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const navigate = useNavigate();
 
@@ -36,7 +39,7 @@ export default function UpdateActivity() {
       setLoading(true);
       try {
         const token = Cookies.get('jwt');
-        const response = await fetch(`http://localhost:4000/tour-guide/activities/${id}`, {
+        const response = await fetch(`http://localhost:4000/${userRole}/activities/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -56,7 +59,7 @@ export default function UpdateActivity() {
     };
 
     fetchActivityDetails();
-  }, [id]);
+  }, [id, userRole]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,7 +74,7 @@ export default function UpdateActivity() {
     setLoading(true);
     try {
       const token = Cookies.get('jwt');
-      const response = await fetch(`http://localhost:4000/tour-guide/activity/${id}`, {
+      const response = await fetch(`http://localhost:4000/${userRole}/activities/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -116,11 +119,11 @@ export default function UpdateActivity() {
           <div className="p-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">Activity Name</Label>
+                <Label htmlFor="title">Title</Label>
                 <Input
-                  id="name"
-                  name="name"
-                  value={activity.name}
+                  id="title"
+                  name="title"
+                  value={activity.title}
                   onChange={handleChange}
                 />
               </div>
@@ -152,13 +155,30 @@ export default function UpdateActivity() {
                   onChange={handleChange}
                 />
               </div>
+              <div>
+                <Label htmlFor="duration">Duration</Label>
+                <Input
+                  id="duration"
+                  name="duration"
+                  value={activity.duration}
+                  onChange={handleChange}
+                />
+              </div>
               <div className="flex items-center space-x-2">
                 <Switch
-                  id="isActive"
-                  checked={activity.isActive}
-                  onCheckedChange={() => handleSwitchChange('isActive')}
+                  id="isPopular"
+                  checked={activity.isPopular}
+                  onCheckedChange={() => handleSwitchChange('isPopular')}
                 />
-                <Label htmlFor="isActive">Active</Label>
+                <Label htmlFor="isPopular">Popular Activity</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isAvailable"
+                  checked={activity.isAvailable}
+                  onCheckedChange={() => handleSwitchChange('isAvailable')}
+                />
+                <Label htmlFor="isAvailable">Availability</Label>
               </div>
             </div>
 
@@ -186,7 +206,7 @@ export default function UpdateActivity() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate('/activty')}>
+            <Button onClick={() => navigate('/all-activities')}>
               Back to All Activities
             </Button>
           </DialogFooter>

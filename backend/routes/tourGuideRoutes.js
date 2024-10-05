@@ -22,8 +22,8 @@ router.delete('/itineraries/:id', itineraryController.deleteItinerary)
 router.get('/itineraries/:id',itineraryController.getItineraryById);
 
 router.get('/activities', activityController.getAllActivities);
-router.get('/activity/:id', activityController.getActivityById);
-router.put('/activity/:id', activityController.updateActivity);
+router.get('/activities/:id', activityController.getActivityById);
+router.put('/activities/:id', activityController.updateActivity);
 
 
 module.exports = router;

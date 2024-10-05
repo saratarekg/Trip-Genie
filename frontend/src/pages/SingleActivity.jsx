@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { XCircle, CheckCircle, ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2, Mail, Phone, Award } from 'lucide-react';
+import { XCircle, CheckCircle, ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2, Mail, Phone, Award, Clock } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Loader from '../components/Loader';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -147,11 +147,11 @@ const ActivityDetail = () => {
                 </div>
                 <div className="flex items-center">
                   <Accessibility className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Accessibility: {activity.accessibility ? 'Yes' : 'No'}</span>
+                  <span className="text-gray-700">Booking: {activity.isBookingOpen ? 'Open' : 'Closed'}</span>
                 </div>
                 <div className="flex items-center">
                   <Calendar className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Timing: {new Date(activity.timing).toLocaleDateString()}</span>
+                  <span className="text-gray-700">Date: {new Date(activity.timing).toLocaleDateString()}</span>
                 </div>
               </div>
               <div className="space-y-4">
@@ -171,6 +171,23 @@ const ActivityDetail = () => {
                   <Award className="w-6 h-6 mr-2 text-orange-500" />
                   <span className="text-gray-700">Special Discount: {activity.specialDiscount}%</span>
                 </div>
+                <div className="flex items-center">
+                  <Clock className="w-6 h-6 mr-2 text-orange-500" />
+                  <span className="text-gray-700">Time: {new Date(activity.timing).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Updated Section for Category and Tags */}
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center">
+                <h2 className="text-2xl font-semibold mr-2">Categories:</h2>
+                <p className="text-gray-700">{activity.category && activity.category.length > 0 ? activity.category.map(cat => cat.name).join(', ') : 'N/A'}</p>
+              </div>
+
+              <div className="flex items-center">
+                <h2 className="text-2xl font-semibold mr-2">Tags:</h2>
+                <p className="text-gray-700">{activity.tags && activity.tags.length > 0 ? activity.tags.map(tag => tag.type).join(', ') : 'N/A'}</p>
               </div>
             </div>
           </div>
