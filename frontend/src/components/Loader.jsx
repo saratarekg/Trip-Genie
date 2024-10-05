@@ -6,7 +6,7 @@ const Loader = () => (
         <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
       </svg>
 
-      <style jsx>{`
+      <style>{`
         .spinner {
           animation: rotator 1.4s linear infinite;
         }

@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import defaultImage from "../assets/images/default-image.jpg";
 
 export function HistoricalPlaces() {
   const [places, setPlaces] = useState([])
@@ -82,15 +83,20 @@ export function HistoricalPlaces() {
         >
           {places.map((place) => (
             <div
-              key={place.id}
+              key={place._id}
               className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 transition-transform duration-300 hover:-translate-y-12 hover:z-10 relative"
             >
               <div className=" cursor-pointer relative aspect-[3/4] rounded-lg overflow-hidden">
-                <img
-                  src={Array.isArray(place.pictures) ? place.pictures[0] : place.pictures}
-                  alt={place.title}
-                  className="w-full h-full object-cover"
-                />
+              <img
+  src={
+    Array.isArray(place.pictures) && place.pictures.length > 0
+      ? place.pictures[0]
+      : defaultImage
+  }
+  alt={place.title}
+  className="w-full h-full object-cover"
+/>
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
                   <h3 className="text-xl font-semibold">{place.title}</h3>
