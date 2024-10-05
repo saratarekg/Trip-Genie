@@ -1,10 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { XCircle, CheckCircle, ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2, Mail, Phone, Award } from 'lucide-react';
+import { ChevronLeft, Star, Edit, Trash2, Mail, Phone, Award, User, DollarSign, Package, CheckCircle, XCircle } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Loader from './Loader';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+const LoadingSpinner = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
+    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
+    </svg>
+  </div>
+);
+
+const StarRating = ({ rating }) => {
+  return (
+    <div className="flex items-center">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-5 h-5 ${
+            star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+          }`}
+        />
+      ))}
+    </div>
+  );
+};
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -15,7 +40,6 @@ const ProductDetail = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
-  const [SellerProfile, setSellerProfile] = useState(null);
 
   const navigate = useNavigate();
 
@@ -43,21 +67,6 @@ const ProductDetail = () => {
         const data = await response.json();
         setProduct(data);
         setError(null);
-
-        if (data.seller) {
-          const guideResponse = await fetch(`http://localhost:4000/${userRole}/seller/${data.seller}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (!guideResponse.ok) {
-            throw new Error('Failed to fetch seller profile');
-          }
-
-          const guideData = await guideResponse.json();
-          setTourGuideProfile(guideData);
-        }
       } catch (err) {
         setError('Error fetching product details. Please try again later.');
         console.error('Error fetching product details:', err);
@@ -105,7 +114,7 @@ const ProductDetail = () => {
   };
 
   if (loading) {
-    return <Loader />;
+    return <LoadingSpinner />;
   }
 
   if (error) {
@@ -129,116 +138,114 @@ const ProductDetail = () => {
         </div>
       </nav>
 
-      <div className="bg-[#1a202c] text-white py-20 px-4">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">{product.title}</h1>
-          <p className="text-xl md:text-2xl">{product.timeline}</p>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-4xl font-bold">Product Details</h1>
-              <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                <Star className="w-8 h-8 text-yellow-500 mr-2" />
-                <span className="text-2xl font-semibold">{product.rating || 'N/A'}</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <Globe className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Language: {product.language}</span>
-                </div>
-                <div className="flex items-center">
-                  <DollarSign className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Price: ${product.price}</span>
-                </div>
-                <div className="flex items-center">
-                  <Accessibility className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Accessibility: {product.accessibility ? 'Yes' : 'No'}</span>
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Pick-up: {product.pickUpLocation}</span>
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Drop-off: {product.dropOffLocation}</span>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <Users className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Tour Guide: {tourGuideProfile ? tourGuideProfile.username : 'Loading...'}</span>
-                </div>
-                <div className="flex items-center">
-                  <Mail className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Email: {tourGuideProfile ? tourGuideProfile.email : 'Loading...'}</span>
-                </div>
-                <div className="flex items-center">
-                  <Phone className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Phone: {tourGuideProfile ? tourGuideProfile.phoneNumber : 'Loading...'}</span>
-                </div>
-                <div className="flex items-center">
-                  <Award className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Experience: {tourGuideProfile ? `${tourGuideProfile.yearsOfExperience} years` : 'Loading...'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 border-t border-gray-200">
-         
-            <h3 className="text-2xl font-semibold mb-4">Activities</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ul className="list-disc list-inside space-y-2">
-              {product.activities.map((activity, index) => (
-                <li key={index} className="text-gray-700"> hy {activity.name}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="p-6 border-t border-gray-200">
-            <h3 className="text-2xl font-semibold mb-4">Available Dates</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {product.availableDates.map((dateInfo, index) => (
-                <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                  <div className="flex items-center mb-2">
-                    <Calendar className="w-5 h-5 mr-2 text-orange-500" />
-                    <span className="font-semibold">{new Date(dateInfo.date).toLocaleDateString()}</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-3xl font-bold">{product.name}</CardTitle>
+                <CardDescription className= "flex items-center">
+                            {product.rating ? (
+                              <>
+                                <StarRating rating={product.rating} />
+                                <span className="ml-2 text-lg font-semibold">{product.rating.toFixed(1)}</span>
+                              </>
+                            ) : (
+                              <span className="ml-2 text-lg font-semibold">N/A</span>
+                            )}
+                          </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <img src={product.picture} alt={product.name} className="w-full h-64 object-cover rounded-lg mb-4" />
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <DollarSign className="w-6 h-6 mr-2 text-green-500" />
+                    <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>
                   </div>
-                  <ul className="space-y-1">
-                    {dateInfo.times.map((time, timeIndex) => (
-                      <li key={timeIndex} className="text-sm text-gray-600">
-                        {time.startTime} - {time.endTime}
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="flex items-center">
+                    <Package className="w-6 h-6 mr-2 text-blue-500" />
+                    <span className="text-lg">Quantity: {product.quantity}</span>
+                  </div>
+                  <p className="text-gray-700">{product.description}</p>
                 </div>
-              ))} 
-            </div>
+              </CardContent>
+            </Card>
+
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Traveler's Experiences</CardTitle>
+                <CardDescription>Here's some awesome feedback from our travelers</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {product.reviews.map((review, index) => (
+                    <div key={index} className="flex space-x-4">
+                      <Avatar>
+                        <AvatarFallback>{review.user[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-lg font-semibold">{review.user}</h4>
+                          <StarRating rating={review.rating} />
+                        </div>
+                        <p className="text-gray-600 mt-1">{review.comment}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
-            <div className="flex justify-between mt-8">
-              <Button onClick={() => navigate('/all-products')} variant="outline">
-                <ChevronLeft className="mr-2" /> Back to All Products
-              </Button>
-              <div className="flex space-x-2">
-                <Button onClick={handleUpdate} variant="default">
-                  <Edit className="mr-2" /> Update
+
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl font-bold">Seller Profile</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-4 mb-4">
+                  <Avatar className="w-16 h-16">
+                    <AvatarImage src={product.seller.avatar} />
+                    <AvatarFallback><User className="w-8 h-8" /></AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-lg font-semibold">{product.seller.name}</h3>
+                    <Badge variant="secondary">Verified Seller</Badge>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <Mail className="w-5 h-5 mr-2 text-gray-500" />
+                    <span>{product.seller.email}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Phone className="w-5 h-5 mr-2 text-gray-500" />
+                    <span>{product.seller.phone}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <Award className="w-5 h-5 mr-2 text-gray-500" />
+                    <span>{product.seller.experience} years of experience</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="mt-8 space-y-4">
+              {(userRole === 'admin' || userRole === 'seller') && (
+                <Button className="w-full" variant="default" onClick={handleUpdate}>
+                  <Edit className="w-4 h-4 mr-2" /> Update Product
                 </Button>
-                <Button onClick={() => setShowDeleteConfirm(true)} variant="destructive">
-                  <Trash2 className="mr-2" /> Delete
+              )}
+              {userRole === 'admin' && (
+                <Button className="w-full" variant="destructive" onClick={() => setShowDeleteConfirm(true)}>
+                  <Trash2 className="w-4 h-4 mr-2" /> Delete Product
                 </Button>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
@@ -258,35 +265,40 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Success Dialog */}
       <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>  <CheckCircle className="w-10 h-10 text-green-500 inline-block mr-2" /> Product Deleted</DialogTitle>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Product Deleted
+            </DialogTitle>
             <DialogDescription>
               The product has been successfully deleted.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="default" onClick={() => navigate('/all-products')}>
-              Back to All Product
+              Back to All Products
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={deleteError} onOpenChange={setDeleteError}>
+      <Dialog open={deleteError !== null} onOpenChange={() => setDeleteError(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>  <XCircle className="w-10 h-10 text-red-500 inline-block mr-2" /> Failed to Delete Product</DialogTitle>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Failed to Delete Product
+            </DialogTitle>
             <DialogDescription>
-              The product is already booked.
+              {deleteError}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-          <Button variant="default" onClick={() => setDeleteError(null)}>
-                Close
-              </Button>
+            <Button variant="default" onClick={() => setDeleteError(null)}>
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

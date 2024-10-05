@@ -54,7 +54,7 @@ router.get('/tourists', touristController.getAllTourists);
 
 
 
-router.get('/sellers/:id', sellerController.getSellerByID);
+router.get('/seller/:id', sellerController.getSellerByID);
 
 router.get('/sellers', sellerController.getAllSellers);
 
