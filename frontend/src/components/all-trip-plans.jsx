@@ -47,6 +47,7 @@ export function AllItinerariesComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
+  const [myItineraries, setmyItineraries] = useState(false);
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [price, setPrice] = useState("");
   const [dateRange, setDateRange] = useState({ lower: "", upper: "" });
@@ -129,11 +130,22 @@ export function AllItinerariesComponent() {
     }
   }, [sortBy, sortOrder]);
 
+  useEffect(() => {
+
+      searchItineraries();
+    
+  }, [myItineraries]);
+
   const handleSort = (attribute) => {
     setIsLoading(true);
     const newSortOrder = sortOrder === 1 ? -1 : 1;
     setSortOrder(newSortOrder);
     setSortBy(attribute); 
+    setIsLoading(false);
+  };
+  const handlemyItineraries = (attribute) => {
+    setIsLoading(true);
+    setmyItineraries(attribute); 
     setIsLoading(false);
   };
   const fetchItineraries = async () => {
@@ -142,8 +154,8 @@ export function AllItinerariesComponent() {
       const token = Cookies.get('jwt');
       const role = getUserRole();
       const url =  new URL(`http://localhost:4000/${role}/itineraries`);
-
-
+ 
+      
 
       const response = await fetch(
         url,
@@ -176,6 +188,7 @@ export function AllItinerariesComponent() {
     setSelectedLanguages([]); // Reset selected languages
     setSortBy(""); // Reset sorting
     setSortOrder(""); // Reset sort order
+    setmyItineraries(false);
 
     // Fetch itineraries without any filters
     fetchItineraries();
@@ -187,6 +200,9 @@ export function AllItinerariesComponent() {
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
    
       // Add the search term and filter parameters
+      if(myItineraries){
+        url.searchParams.append("myItineraries", myItineraries);
+      }
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
       }
@@ -290,6 +306,8 @@ export function AllItinerariesComponent() {
                   toggleFilters={toggleFilters}
                   sortOrder={sortOrder}
                   sortBy={sortBy}
+                  myItineraries= {myItineraries}
+                  handlemyItineraries= {handlemyItineraries}
                   handleSort={handleSort}
                   clearFilters={clearFilters}
                   // sortItineraries={sortItineraries}

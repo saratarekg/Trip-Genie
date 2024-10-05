@@ -177,7 +177,7 @@ const ActivityDetail = () => {
 
           <div className="p-6 border-t border-gray-200">
             <div className="flex justify-between mt-8">
-              <Button onClick={() => navigate('/all-activities')} variant="outline">
+              <Button onClick={() => navigate('/activity')} variant="outline">
                 <ChevronLeft className="mr-2" /> Back to All Activities
               </Button>
               <div className="flex space-x-2">
