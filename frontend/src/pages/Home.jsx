@@ -15,16 +15,57 @@ const Home = () => {
     <>
       <div className="flex flex-col items-center justify-center min-h-screen">
       <TravelHero/>
-      {/* if i am  a tour guide i can't view historical places */}
-      {/* {role !== 'tour-guide' &&
-      <HistoricalPlaces />
-      } */}
+      {role === "guest" && (
+        <>
+          <HistoricalPlaces />
+          <Activities />
+          <ItineraryCards />
+          <ProductViewer />
+        </>
+      )}
 
-      <HistoricalPlaces />
+      {role === "tourist" && (
+         <>
+         <HistoricalPlaces />
+         <Activities />
+         <ItineraryCards />
+         <ProductViewer />
+       </>
+      )}
+
+{role === "tourism-governor" && (
+         <>
+         <HistoricalPlaces />
+       </>
+      )}
+      {role === "admin" && (
+         <>
+         <HistoricalPlaces />
+         <Activities />
+         <ItineraryCards />
+         <ProductViewer />
+       </>
+      )}
+      {role === "advertiser" && (
+         <>
+         <Activities />
+        
+       </>
+      )}
+      {role === "seller" && (
+         <>
+         
+         <ProductViewer />
+       </>
+      )}
+
+{role === "tour-guide" && (
+         <>
+         <Activities />
+         <ItineraryCards />
+       </>
+      )}
       
-      <Activities />
-      <ItineraryCards />
-      <ProductViewer />
       </div>
     </>
   );
