@@ -1,4 +1,5 @@
 const express = require("express");
+const tourguideController = require("../controllers/tourGuideController")
 const touristController = require("../controllers/touristController");
 const productController = require("../controllers/productController");
 const itineraryController = require("../controllers/itineraryController.js");
@@ -11,12 +12,13 @@ const router = express.Router();
 
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
+router.get('/tour-guide/:id',tourguideController.getTourGuideByID);
 
 router.get('/products', productController.getAllProducts);
 router.get('/products/:id', productController.getProductById);
 
 router.get("/activities", activityController.getAllActivities);
-router.get("/activities/:id", activityController.getActivityById);
+router.get("/activity/:id", activityController.getActivityById);
 
 router.get("/historical-places",historicalPlacesController.getAllHistoricalPlaces);
 router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);

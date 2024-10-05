@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import ItineraryDetail from "./ItineraryDetail.jsx";
-import FilterComponent from "./Filter.jsx";
+import ItineraryDetail from "../components/ItineraryDetail.jsx";
+import FilterComponent from "../components/Filter.jsx"; 
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Loader from "./Loader.jsx";
+import Loader from "../components/Loader.jsx";
 
 const ItineraryCard = ({ itinerary, onSelect }) => (
   <div
@@ -40,7 +40,7 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
   </div>
 );
 
-export function AllItinerariesComponent() {
+export function AllActivitiesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -33,6 +34,7 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { Alert } from "@/components/ui/alert";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
@@ -68,13 +70,13 @@ const formSchema = z
           "Password must contain at least one uppercase letter, one lowercase letter, and one number.\nOnly these characters are allowed: @$!%*?&",
       })
       .trim(),
-    userType: z.enum(["tourist", "tourGuide", "advertiser", "seller"], {
+    userType: z.enum(["tourist", "tour-guide", "advertiser", "seller"], {
       required_error: "Please select a user type.",
     }),
     mobile: z.string().trim().optional(),
     nationality: z.string().optional(),
     dateOfBirth: z.date().optional(),
-    occupation: z.string().trim().optional(),
+    jobOrStudent: z.string().trim().optional(),
     yearsOfExperience: z.number().int().optional(),
     previousWorks: z
       .array(
@@ -100,11 +102,10 @@ const formSchema = z
   .superRefine((data, ctx) => {
     if (
       data.userType === "tourist" ||
-      data.userType === "tourGuide" ||
+      data.userType === "tour-guide" ||
       data.userType === "seller"
     ) {
       if (!phoneValidator(data.mobile)) {
-        // Use custom validation logic directly inside superRefine
         ctx.addIssue({
           path: ["mobile"],
           message:
@@ -112,7 +113,7 @@ const formSchema = z
         });
       }
     }
-    if (data.userType === "tourist" || data.userType === "tourGuide") {
+    if (data.userType === "tourist" || data.userType === "tour-guide") {
       if (!data.nationality) {
         ctx.addIssue({
           path: ["nationality"],
@@ -121,20 +122,23 @@ const formSchema = z
       }
     }
     if (data.userType === "tourist") {
-      if (!data.dateOfBirth) {
+      if (
+        data.dateOfBirth > new Date() ||
+        data.dateOfBirth > new Date().setFullYear(new Date().getFullYear() - 18)
+      ) {
         ctx.addIssue({
           path: ["dateOfBirth"],
-          message: "Date of birth is required.",
+          message: "You must be at least 18 years old.",
         });
       }
-      if (!data.occupation) {
+      if (!data.jobOrStudent) {
         ctx.addIssue({
-          path: ["occupation"],
-          message: "Occupation is required for tourists.",
+          path: ["jobOrStudent"],
+          message: "Occupation is required.",
         });
       }
     }
-    if (data.userType === "tourGuide") {
+    if (data.userType === "tour-guide") {
       if (data.yearsOfExperience < 0 || data.yearsOfExperience > 50) {
         ctx.addIssue({
           path: ["yearsOfExperience"],
@@ -147,9 +151,8 @@ const formSchema = z
           message: "Experience must be an integer value.",
         });
       }
-      if (data.previousWorks.length > 0) {
+      if (data.previousWorks && data.previousWorks.length > 0) {
         data.previousWorks.forEach((work, index) => {
-          // If any required field is missing, add an issue
           if (work.title === "") {
             ctx.addIssue({
               path: ["previousWorks", index, "title"],
@@ -200,8 +203,29 @@ const formSchema = z
 export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [nationalities, setNationalities] = useState([]);
+  const [apiError, setApiError] = useState(null);
+  const alertRef = useRef(null);
+  const navigate = useNavigate();
 
-  // Use a single useForm call to handle the form logic
+  // Create refs for form fields
+  const formRefs = {
+    username: useRef(null),
+    email: useRef(null),
+    password: useRef(null),
+    userType: useRef(null),
+    mobile: useRef(null),
+    nationality: useRef(null),
+    dateOfBirth: useRef(null),
+    jobOrStudent: useRef(null),
+    yearsOfExperience: useRef(null),
+    name: useRef(null),
+    description: useRef(null),
+    website: useRef(null),
+    hotline: useRef(null),
+    logoUrl: useRef(null),
+    sellerType: useRef(null),
+  };
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -212,27 +236,25 @@ export function SignupForm() {
       mobile: "",
       nationality: "",
       dateOfBirth: undefined,
-      occupation: "",
+      jobOrStudent: "",
       yearsOfExperience: 0,
-      previousWorks: [], // Default empty array
+      previousWorks: [],
     },
   });
 
-  // Destructure form to extract control
   const {
     control,
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = form;
 
-  // Set up useFieldArray for dynamically managing previousWorks
   const { fields, append, remove } = useFieldArray({
-    control, // Use control from the single useForm instance
+    control,
     name: "previousWorks",
   });
 
-  // Fetch nationalities from backend
   useEffect(() => {
     const fetchNationalities = async () => {
       try {
@@ -247,15 +269,55 @@ export function SignupForm() {
     fetchNationalities();
   }, []);
 
-  const userType = form.watch("userType");
+  useEffect(() => {
+    if (apiError && alertRef.current) {
+      alertRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [apiError]);
 
-  // Handle form submission
-  const onSubmit = (values) => {
+  const userType = watch("userType");
+
+  const scrollToError = (errors) => {
+    for (const field in errors) {
+      if (formRefs[field] && formRefs[field].current) {
+        formRefs[field].current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        break;
+      }
+    }
+  };
+
+  const onSubmit = async (values) => {
     setIsLoading(true);
-    setTimeout(() => {
-      console.log(values);
+    setApiError(null);
+    values.mobile = "+" + values.mobile;
+    try {
+      await axios.post(
+        `http://localhost:4000/auth/sign-up/${values.userType}`,
+        values
+      );
+      navigate("/login", {
+        state: {
+          successMessage:
+            "Your account has been created successfully. Please log in.",
+        },
+      });
+    } catch (error) {
+      if (error.response) {
+        setApiError(
+          error.response.data.message || "An error occurred during signup"
+        );
+      } else if (error.request) {
+        setApiError("No response received from server. Please try again.");
+      } else {
+        setApiError("An error occurred during signup. Please try again.");
+      }
+      console.error("Signup error:", error);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -269,32 +331,27 @@ export function SignupForm() {
             Join us and start your unforgettable journey
           </p>
         </div>
+        {apiError && (
+          <div ref={alertRef}>
+            <Alert message={apiError} onClose={() => setApiError(null)} />
+          </div>
+        )}
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={handleSubmit(onSubmit, scrollToError)}
+            className="space-y-6"
+          >
             <FormField
-              control={form.control}
+              control={control}
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Username*</FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
-                      placeholder="mail@example.com"
+                      placeholder="Username"
                       {...field}
+                      ref={formRefs.username}
                     />
                   </FormControl>
                   <FormMessage />
@@ -302,36 +359,59 @@ export function SignupForm() {
               )}
             />
             <FormField
-              control={form.control}
-              name="password"
+              control={control}
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Email*</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Password" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="mail@example.com"
+                      {...field}
+                      ref={formRefs.email}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
-              control={form.control}
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password*</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Password"
+                      {...field}
+                      ref={formRefs.password}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
               name="userType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>I am a</FormLabel>
+                  <FormLabel>I am a*</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger ref={formRefs.userType}>
                         <SelectValue placeholder="Please choose your role" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="tourist">Tourist</SelectItem>
-                      <SelectItem value="tourGuide">Tour Guide</SelectItem>
+                      <SelectItem value="tour-guide">Tour Guide</SelectItem>
                       <SelectItem value="advertiser">Advertiser</SelectItem>
                       <SelectItem value="seller">Seller</SelectItem>
                     </SelectContent>
@@ -341,27 +421,28 @@ export function SignupForm() {
               )}
             />
             {(userType === "tourist" ||
-              userType === "tourGuide" ||
+              userType === "tour-guide" ||
               userType === "seller") && (
               <>
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="mobile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mobile</FormLabel>
+                      <FormLabel>Mobile*</FormLabel>
                       <FormControl>
                         <PhoneInput
-                          country={"eg"} // Default country code
+                          country={"eg"}
                           value={field.value}
                           onChange={(value) => field.onChange(value)}
-                          //enableSearch={true} // Optional: To search for countries
-                          excludeCountries={["il"]}
+                          exclu
+                          deCountries={["il"]}
                           inputProps={{
                             name: "mobile",
                             required: true,
                             autoFocus: true,
                             placeholder: "+1234567890",
+                            ref: formRefs.mobile,
                           }}
                         />
                       </FormControl>
@@ -371,20 +452,20 @@ export function SignupForm() {
                 />
               </>
             )}
-            {(userType === "tourist" || userType === "tourGuide") && (
+            {(userType === "tourist" || userType === "tour-guide") && (
               <>
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="nationality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nationality</FormLabel>
+                      <FormLabel>Nationality*</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={formRefs.nationality}>
                             <SelectValue placeholder="Please choose your nationality" />
                           </SelectTrigger>
                         </FormControl>
@@ -405,11 +486,11 @@ export function SignupForm() {
             {userType === "tourist" && (
               <>
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="dateOfBirth"
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
-                      <FormLabel>Date of birth</FormLabel>
+                      <FormLabel>Date of birth*</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -419,6 +500,7 @@ export function SignupForm() {
                                 "w-full pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
+                              ref={formRefs.dateOfBirth}
                             >
                               {field.value ? (
                                 format(field.value, "PPP")
@@ -448,13 +530,17 @@ export function SignupForm() {
                   )}
                 />
                 <FormField
-                  control={form.control}
-                  name="occupation"
+                  control={control}
+                  name="jobOrStudent"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Occupation/Student</FormLabel>
+                      <FormLabel>Occupation/Student*</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your occupation" {...field} />
+                        <Input
+                          placeholder="Your occupation"
+                          {...field}
+                          ref={formRefs.jobOrStudent}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -462,14 +548,14 @@ export function SignupForm() {
                 />
               </>
             )}
-            {userType === "tourGuide" && (
+            {userType === "tour-guide" && (
               <>
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="yearsOfExperience"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Years of experience</FormLabel>
+                      <FormLabel>Years of experience*</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -480,6 +566,7 @@ export function SignupForm() {
                               e.target.value === "" ? 0 : +e.target.value
                             )
                           }
+                          ref={formRefs.yearsOfExperience}
                         />
                       </FormControl>
                       <FormMessage />
@@ -500,7 +587,7 @@ export function SignupForm() {
                           <Input
                             placeholder="Title"
                             {...register(`previousWorks.${index}.title`)}
-                            defaultValue={item.title} // Ensure defaultValue is set
+                            defaultValue={item.title}
                             className="border rounded-md p-2"
                           />
                           {errors?.previousWorks?.[index]?.title && (
@@ -515,7 +602,7 @@ export function SignupForm() {
                           <Input
                             placeholder="Company"
                             {...register(`previousWorks.${index}.company`)}
-                            defaultValue={item.company} // Ensure defaultValue is set
+                            defaultValue={item.company}
                             className="border rounded-md p-2"
                           />
                           {errors?.previousWorks?.[index]?.company && (
@@ -531,7 +618,7 @@ export function SignupForm() {
                             type="number"
                             placeholder="Duration in years"
                             {...register(`previousWorks.${index}.duration`)}
-                            defaultValue={item.duration} // Ensure defaultValue is set
+                            defaultValue={item.duration}
                             className="border rounded-md p-2"
                           />
                           {errors?.previousWorks?.[index]?.duration && (
@@ -545,7 +632,7 @@ export function SignupForm() {
                         <Input
                           placeholder="Description"
                           {...register(`previousWorks.${index}.description`)}
-                          defaultValue={item.description} // Ensure defaultValue is set
+                          defaultValue={item.description}
                           className="border rounded-md p-2"
                         />
                       </FormControl>
@@ -581,26 +668,34 @@ export function SignupForm() {
             {(userType === "seller" || userType === "advertiser") && (
               <>
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>Name*</FormLabel>
                       <FormControl>
-                        <Input placeholder="Name" {...field} />
+                        <Input
+                          placeholder="Name"
+                          {...field}
+                          ref={formRefs.name}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Input placeholder="Description" {...field} />
+                        <Input
+                          placeholder="Description"
+                          {...field}
+                          ref={formRefs.description}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -611,17 +706,17 @@ export function SignupForm() {
             {userType === "seller" && (
               <>
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="sellerType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Seller type</FormLabel>
+                      <FormLabel>Seller type*</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger ref={formRefs.sellerType}>
                             <SelectValue placeholder="Please choose your seller type" />
                           </SelectTrigger>
                         </FormControl>
@@ -641,39 +736,51 @@ export function SignupForm() {
             {userType === "advertiser" && (
               <>
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="website"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Website</FormLabel>
                       <FormControl>
-                        <Input placeholder="Website" {...field} />
+                        <Input
+                          placeholder="Website"
+                          {...field}
+                          ref={formRefs.website}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="hotline"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Hotline</FormLabel>
+                      <FormLabel>Hotline*</FormLabel>
                       <FormControl>
-                        <Input placeholder="Hotline" {...field} />
+                        <Input
+                          placeholder="Hotline"
+                          {...field}
+                          ref={formRefs.hotline}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
-                  control={form.control}
+                  control={control}
                   name="logoUrl"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Logo URL</FormLabel>
                       <FormControl>
-                        <Input placeholder="Logo URL" {...field} />
+                        <Input
+                          placeholder="Logo URL"
+                          {...field}
+                          ref={formRefs.logoUrl}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

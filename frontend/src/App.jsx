@@ -17,10 +17,15 @@ import Hero from "./components/Hero.jsx";
 import CreateItineraryPage from "./pages/CreateItineraryPage.jsx";
 import { NavbarComponent } from "./components/navbar.jsx";
 import { FooterComponent } from "./components/footer.jsx";
+import { AllHistoricalPlacesComponent } from "./components/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
+
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./components/signup-form.jsx";
 import {AdminDash} from "./pages/AdminDash.jsx";
+import CreateHpPage from "./pages/CreateHpPage.jsx";
+import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
+import ActivityDetail from "./pages/SingleActivity.jsx";
 
 function App() {
   
@@ -35,10 +40,13 @@ function App() {
             <Route path="/" element={<Home />} />
             {/* <Route path='/tour-guide-home' element={<Tghome />} /> */}
             <Route path="/login" element={<Login />} />
+            <Route path="/create-historicalPlace" element={<CreateHpPage />} />
             <Route path="/create-itinerary" element={<CreateItineraryPage />} />
             <Route path="/seller" element={<SellerList />} />
-            <Route path="/activity" element={<ActivityList />} />
+            <Route path="/activity" element={<AllActivitiesComponent />} />
             <Route path="/all-itineraries" element={<AllItinerariesComponent />}/>
+            <Route path="/all-historical-places" element={<AllHistoricalPlacesComponent />}/>
+
             <Route path="/sign-up" element={<SignupForm />} />
             <Route path="/admin" element={<AdminDash />} />
             <Route path="/itinerary/:id" element={<ItineraryDetail />} />
@@ -46,6 +54,8 @@ function App() {
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/update-product/:id" element={<UpdateProduct />} />
             <Route path="/update-itinerary/:id" element={<UpdateItinerary />} />
+            <Route path="/activity/:id" element={<ActivityDetail />} />
+
             {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
           </Routes>
         </div>
