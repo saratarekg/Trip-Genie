@@ -35,7 +35,33 @@ const deleteTag = async (req, res) => {
 };
 
 
+const getAlltags = async (req, res) => {
+    try {
+        const tag = await HistoricalTag.find();
+        res.status(200).json(tag);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+const getAllHistoricalTypes = async (req, res) => {
+    
+    try {
+        const tag = await HistoricalTag.find();
+        const types = tag.map((HistoricalTag) => HistoricalTag.type);
+        res.status(200).json(types);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+const getAllHistoricalPeriods = async (req, res) => {
+    
+    try {
+        const tag = await HistoricalTag.find();
+        const types = tag.map((HistoricalTag) => HistoricalTag.period);
+        res.status(200).json(types);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
 
-
-
-module.exports = {addHistoricalTag,deleteTag};
+module.exports = {addHistoricalTag,deleteTag,getAlltags,getAllHistoricalTypes,getAllHistoricalPeriods};

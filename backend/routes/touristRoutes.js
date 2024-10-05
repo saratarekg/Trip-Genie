@@ -23,7 +23,7 @@ router.get("/activities/:id", activityController.getActivityById);
 
 
 router.get("/historical-places",historicalPlacesController.getAllHistoricalPlaces);
-router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);
+// router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);
 
 router.get("/bookings", bookingController.getUserBookings);
 router.delete("/bookings/:id", bookingController.deleteBooking);

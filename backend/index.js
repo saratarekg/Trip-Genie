@@ -13,6 +13,8 @@ const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
 const nationalityController = require('./controllers/nationalityController');
 const tagController = require('./controllers/tagController');
+const historicaltagController = require('./controllers/historicalTagController');
+
 //const productRoutes = require("./routes/productRoutes");
 const cookieParser = require('cookie-parser');
 const {requireAuth} = require('./middlewares/authMiddleware');
@@ -43,4 +45,7 @@ app.use('/tour-guide',requireAuth('tour-guide'), tourGuideRoutes);
 app.use('/advertiser',requireAuth('advertiser'), advertiserRoutes);
 app.get('/api/nationalities',nationalityController.getAllNationalities);
 app.get('/api/getAllTypes',tagController.getAllTypes);
+app.get('/api/getAllHistoricalTypes',historicaltagController.getAllHistoricalTypes);
+app.get('/api/getAllHistoricalPeriods',historicaltagController.getAllHistoricalPeriods);
+
 app.get('/api/getAllLanguages' ,getAllLanguages)

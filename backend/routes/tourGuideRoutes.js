@@ -14,8 +14,7 @@ const activityController = require('../controllers/activityController.js')
 router.get('/', getTourGuideProfile);
 // Route for updating a tour guide by ID
 router.put('/', updateTourGuideProfile);
-router.get('/tour-guide/:id',getTourGuideByID);
-router.get('/itineraries',itineraryController.getItinerariesByTourGuide);
+router.get('/itineraries',itineraryController.getAllItineraries);
 router.post('/itineraries', itineraryController.createItinerary);
 router.put('/itineraries/:id', itineraryController.updateItinerary);
 router.delete('/itineraries/:id', itineraryController.deleteItinerary)

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import Cookies from "js-cookie";
 import defaultImage from "../assets/images/default-image.jpg";
+import { Link } from "react-router-dom";
 
 export function HistoricalPlaces() {
   const [places, setPlaces] = useState([]);
@@ -129,13 +130,15 @@ export function HistoricalPlaces() {
 
       {/* View More Button */}
       <div className="flex justify-end mt-4">
+      <Link to="/all-historical-places">
+
         <Button
           variant="primary"
-          onClick={() => alert("View More clicked!")}
           className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
         >
           View More
         </Button>
+        </Link>
       </div>
     </div>
   );

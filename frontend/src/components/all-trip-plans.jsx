@@ -141,8 +141,12 @@ export function AllItinerariesComponent() {
       setIsLoading(false);
       const token = Cookies.get('jwt');
       const role = getUserRole();
+      const url =  new URL(`http://localhost:4000/${role}/itineraries`);
+
+
+
       const response = await fetch(
-        `http://localhost:4000/${role}/itineraries`,
+        url,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -181,7 +185,7 @@ export function AllItinerariesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
-
+   
       // Add the search term and filter parameters
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
@@ -365,3 +369,5 @@ export function AllItinerariesComponent() {
     </div>
   );
 }
+
+
