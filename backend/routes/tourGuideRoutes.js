@@ -3,7 +3,8 @@ const router = express.Router();
 const {
     updateTourGuideProfile,
     getTourGuideProfile,
-    deleteItinerary
+    deleteItinerary,
+    getTourGuideByID
 } = require('../controllers/tourGuideController'); // Import the controller functions
 
 const itineraryController = require('../controllers/itineraryController.js');
