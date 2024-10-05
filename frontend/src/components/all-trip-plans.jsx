@@ -200,10 +200,10 @@ export function AllItinerariesComponent() {
         url.searchParams.append("lowerDate", dateRange.lower);
       }
       if (selectedTypes.length > 0) {
-        url.searchParams.append("types", selectedTypes.join(",")); // Multiple types as a comma-separated string
+        url.searchParams.append("types", selectedTypes.join(",")); // Send selected types as comma-separated
       }
       if (selectedLanguages.length > 0) {
-        url.searchParams.append("languages", selectedLanguages.join(",")); // Multiple languages as a comma-separated string
+        url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
       }
 
       // Add sorting parameters

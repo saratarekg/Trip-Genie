@@ -1,28 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Filter, ChevronDown, ArrowUpDown, Plus } from 'lucide-react';
-// import {handleSort} from './all-trip-plans'
 import { Link } from 'react-router-dom';
 
 const FilterComponent = ({
   filtersVisible,
   toggleFilters,
   sortOrder,
-  sortBy, // Get sortBy from props
-  handleSort, // Get handleSort from props
+  sortBy,
+  handleSort,
   clearFilters,
-  // sortItineraries,
   price,
   setPrice,
   dateRange,
   setDateRange,
-  selectedTypes = [], // Default to empty array
+  selectedTypes = [],
   setSelectedTypes,
-  selectedLanguages = [], // Default to empty array
+  selectedLanguages = [],
   setSelectedLanguages,
   searchItineraries,
-  typesOptions = [], // Default to empty array for types options
-  languagesOptions = [] // Default to empty array for language options
+  typesOptions = [],
+  languagesOptions = []
 }) => {
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   // Handle checkbox for types
   const handleTypeChange = (type) => {
@@ -58,35 +58,33 @@ const FilterComponent = ({
 
   return (
     <>
-<div className="flex mb-4">
-  <div className="flex space-x-4">
-    <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-      <Filter className="mr-2" size={18} />
-      Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
-    </button>
+      <div className="flex mb-4">
+        <div className="flex space-x-4">
+          <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+            <Filter className="mr-2" size={18} />
+            Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
+          </button>
 
-    <button onClick={() => handleSort('price')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-      <ArrowUpDown className="mr-2" size={18} />
-      Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-    </button>
+          <button onClick={() => handleSort('price')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+            <ArrowUpDown className="mr-2" size={18} />
+            Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+          </button>
 
-    <button onClick={() => handleSort('rating')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-      <ArrowUpDown className="mr-2" size={18} />
-      Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-    </button>
+          <button onClick={() => handleSort('rating')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+            <ArrowUpDown className="mr-2" size={18} />
+            Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+          </button>
 
-    <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-      Clear Filters
-    </button>
-  </div>
+          <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+            Clear Filters
+          </button>
+        </div>
 
-  {/* Link styled as a button */}
-  <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
-    <Plus className="mr-2" size={18} />
-    Create
-  </Link>
-</div>
-
+        <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
+          <Plus className="mr-2" size={18} />
+          Create
+        </Link>
+      </div>
 
       {filtersVisible && (
         <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">
@@ -123,39 +121,59 @@ const FilterComponent = ({
               </div>
             </div>
 
-            {/* Type Checkboxes */}
+            {/* Type Dropdown */}
             <div>
               <label className="block text-gray-700">Type</label>
-              <div className="flex flex-wrap">
-                {typesOptions.map((type) => (
-                  <label key={type} className="mr-4 mb-2 flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedTypes.includes(type)} // Check if type is selected
-                      onChange={() => handleTypeChange(type)}
-                      className="form-checkbox"
-                    />
-                    <span className="ml-2">{type}</span>
-                  </label>
-                ))}
+              <div className="relative">
+                <button
+                  onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                  className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
+                >
+                  Select Type(s) <ChevronDown className={`ml-1 transform ${showTypeDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                {showTypeDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    {typesOptions.map((type) => (
+                      <label key={type} className="flex items-center px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedTypes.includes(type)}
+                          onChange={() => handleTypeChange(type)}
+                          className="form-checkbox"
+                        />
+                        <span className="ml-2">{type}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Language Checkboxes */}
+            {/* Language Dropdown */}
             <div>
               <label className="block text-gray-700">Language</label>
-              <div className="flex flex-wrap">
-                {languagesOptions.map((language) => (
-                  <label key={language} className="mr-4 mb-2 flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedLanguages.includes(language)} // Check if language is selected
-                      onChange={() => handleLanguageChange(language)}
-                      className="form-checkbox"
-                    />
-                    <span className="ml-2">{language}</span>
-                  </label>
-                ))}
+              <div className="relative">
+                <button
+                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+                  className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
+                >
+                  Select Language(s) <ChevronDown className={`ml-1 transform ${showLanguageDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                {showLanguageDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    {languagesOptions.map((language) => (
+                      <label key={language} className="flex items-center px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedLanguages.includes(language)}
+                          onChange={() => handleLanguageChange(language)}
+                          className="form-checkbox"
+                        />
+                        <span className="ml-2">{language}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
