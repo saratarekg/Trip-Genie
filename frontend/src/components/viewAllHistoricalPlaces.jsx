@@ -207,38 +207,18 @@ export function AllHistoricalPlacesComponent() {
         try {
             const role = getUserRole();
             const url = new URL(`http://localhost:4000/${role}/historical-places`);
-
+    
             // Add the search term and filter parameters
             if (searchTerm) {
                 url.searchParams.append("searchBy", searchTerm);
             }
-            //   if (price && price !== "") {
-            //     url.searchParams.append("budget", price);
-            //   }
-
-            //   if (dateRange.upper) {
-            //     url.searchParams.append("upperDate", dateRange.upper);
-            //   }
-            //   if (dateRange.lower) {
-            //     url.searchParams.append("lowerDate", dateRange.lower);
-            //   }
-              if (selectedTypes.length > 0) {
+            if (selectedTypes.length > 0) {
                 url.searchParams.append("types", selectedTypes.join(",")); // Send selected types as comma-separated
-              }
-              if (selectedPeriods.length > 0) {
-                url.searchParams.append("periods", selectedPeriods.join(",")); // Send selected types as comma-separated
-              }
-            //   if (selectedLanguages.length > 0) {
-            //     url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
-            //   }
-
-            // Add sorting parameters
-            //   if (sortBy) {
-            //     url.searchParams.append("sort", sortBy);
-            //   }
-            //   if (sortOrder) {
-            //     url.searchParams.append("asc", sortOrder);
-            //   }
+            }
+            if (selectedPeriods.length > 0) {
+                url.searchParams.append("periods", selectedPeriods.join(",")); // Send selected periods as comma-separated
+            }
+    
             const token = Cookies.get("jwt");
             const response = await fetch(url, {
                 headers: {
@@ -246,22 +226,33 @@ export function AllHistoricalPlacesComponent() {
                     "Content-Type": "application/json",
                 },
             });
-
+    
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
+    
             const data = await response.json();
-
-            setHistoricalPlaces(data);
-            setError(null);
+    
+            // Check if the result is empty
+            if (!data || data.length === 0) {
+                setError("No historical places found.");
+                setHistoricalPlaces([]); // Clear historical places if no results
+            } else {
+                setHistoricalPlaces(data); // Set places if data exists
+                setError(null); // Clear any error message
+            }
+    
             setCurrentPage(1);
         } catch (error) {
             console.error("Error fetching filtered results:", error);
+    
+            // Handle actual errors (network, server issues)
             setError("Error fetching filtered results");
             setHistoricalPlaces([]);
         }
     };
+    
+    
 
     const toggleFilters = () => {
         setIsLoading(false);
