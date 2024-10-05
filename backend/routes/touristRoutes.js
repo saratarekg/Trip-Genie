@@ -5,9 +5,12 @@ const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
 const bookingController = require("../controllers/bookingController.js");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
+const tourguideController = require("../controllers/tourGuideController")
 
 const router = express.Router();
 
+
+router.get('/tour-guide/:id',tourguideController.getTourGuideByID);
 
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.get("/itineraries/:id", itineraryController.getItineraryById);

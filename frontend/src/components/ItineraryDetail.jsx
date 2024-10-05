@@ -45,7 +45,7 @@ const ItineraryDetail = () => {
         setError(null);
 
         if (data.tourGuide) {
-          const guideResponse = await fetch(`http://localhost:4000/tour-guide`, {
+          const guideResponse = await fetch(`http://localhost:4000/${userRole}/tour-guide/${data.tourGuide}`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
