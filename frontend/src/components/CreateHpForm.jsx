@@ -12,7 +12,7 @@ const formSchema = z.object({
   description: z.string().min(1, 'Please enter a description'),
   location: z.object({
     address: z.string().min(1, 'Please enter an address'),
-    city: z.string().min(1, 'Please select a city'),
+    city: z.string().min(1, 'Please enter a city'),
     country: z.string().min(1, 'Please select a country'),
   }),
   historicalTag: z.array(z.string()).min(1, 'Please enter at least one tag'),
@@ -31,8 +31,6 @@ const CreateHpForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [cities, setCities] = useState([]);
-  const [country, setCountry] = useState('');
   const [countries, setCountries] = useState([]);
   const [pictures, setPictures] = useState([]); // State for uploaded pictures
   const navigate = useNavigate();
@@ -82,20 +80,6 @@ const CreateHpForm = () => {
     };
     fetchCountries();
   }, []);
-
-  const handleCountryChange = async (selectedCountry) => {
-    setCountry(selectedCountry);
-    setCities([]);
-    if (selectedCountry) {
-      try {
-        const response = await axios.get(`https://countries-and-cities-api.dev/api/cities/country/${selectedCountry}`);
-        setCities(response.data.cities);
-      } catch (err) {
-        console.error('Error fetching cities:', err.message);
-        setError('Failed to fetch cities. Please try again.');
-      }
-    }
-  };
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -179,7 +163,6 @@ const CreateHpForm = () => {
           <select
             {...register('location.country')}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            onChange={(e) => handleCountryChange(e.target.value)}
           >
             <option value="">Select a country</option>
             {countries.map((country) => (
@@ -191,18 +174,11 @@ const CreateHpForm = () => {
           {errors.location?.country && <span className="text-red-500">{errors.location.country.message}</span>}
 
           <label className="block text-gray-700 mb-2">City</label>
-          <select
+          <input
             {...register('location.city')}
+            placeholder="Enter city"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            disabled={!country}
-          >
-            <option value="">Select a city</option>
-            {cities.map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </select>
+          />
           {errors.location?.city && <span className="text-red-500">{errors.location.city.message}</span>}
 
           <label className="block text-gray-700 mb-2">Address</label>
@@ -254,51 +230,44 @@ const CreateHpForm = () => {
 
         {/* Ticket Prices */}
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Prices</label>
-          <input 
-            type="number"
+          <label className="block text-gray-700 mb-2">Adult Ticket Price</label>
+          <input
             {...register('ticketPrices.adult')}
-            placeholder="Adult Ticket Price"
+            type="number"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            placeholder="Enter price"
           />
           {errors.ticketPrices?.adult && <span className="text-red-500">{errors.ticketPrices.adult.message}</span>}
         </div>
 
         <div>
-          <input 
-            type="number"
+          <label className="block text-gray-700 mb-2">Child Ticket Price</label>
+          <input
             {...register('ticketPrices.child')}
-            placeholder="Child Ticket Price"
+            type="number"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            placeholder="Enter price"
           />
           {errors.ticketPrices?.child && <span className="text-red-500">{errors.ticketPrices.child.message}</span>}
         </div>
 
-        {/* Picture Upload Section */}
+        {/* Upload Pictures */}
         <div>
           <label className="block text-gray-700 mb-2">Upload Pictures</label>
           <input
             type="file"
             multiple
+            accept="image/*"
             onChange={handlePictureChange}
-            className="border border-gray-300 rounded-xl p-2 w-full mb-4"
+            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           />
-          <div className="mt-2">
-            {pictures.length > 0 && (
-              <ul className="list-disc pl-5">
-                {pictures.map((pic, index) => (
-                  <li key={index} className="text-gray-600">{pic.name}</li> // Displaying the name of the uploaded image
-                ))}
-              </ul>
-            )}
-          </div>
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
+          className="w-full bg-orange-500 text-white rounded-xl p-2 h-12 mt-4"
           disabled={loading}
-          className="bg-orange-500 text-white py-2 px-4 rounded-xl w-full mt-4"
         >
           {loading ? 'Creating...' : 'Create Historical Place'}
         </button>
