@@ -36,7 +36,7 @@ export default function UpdateActivity() {
       setLoading(true);
       try {
         const token = Cookies.get('jwt');
-        const response = await fetch(`http://localhost:4000/tour-guide/activity/${id}`, {
+        const response = await fetch(`http://localhost:4000/tour-guide/activities/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -186,7 +186,7 @@ export default function UpdateActivity() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate('/activity')}>
+            <Button onClick={() => navigate('/activty')}>
               Back to All Activities
             </Button>
           </DialogFooter>

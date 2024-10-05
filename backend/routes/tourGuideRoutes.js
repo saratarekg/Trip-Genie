@@ -24,7 +24,6 @@ router.get('/itineraries/:id',itineraryController.getItineraryById);
 router.get('/activities', activityController.getAllActivities);
 router.get('/activity/:id', activityController.getActivityById);
 router.put('/activity/:id', activityController.updateActivity);
-router.get('/advertisers/:id', advertiserController.getAdvertiserByID);
 
 
 module.exports = router;
