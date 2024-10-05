@@ -71,8 +71,6 @@ const addProduct = async (req, res) => {
       price,
       description,
       seller: res.locals.user_id,
-      rating,
-      reviews,
       quantity,
     });
 
