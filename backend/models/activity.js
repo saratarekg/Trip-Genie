@@ -81,6 +81,7 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
 
     const tags = await Tag.find({ type: { $regex: new RegExp(searchCriteria, 'i') } });
     const tagIds = tags.map(tag => tag._id);
+
     const categories = await Category.find({ name: { $regex: new RegExp(searchCriteria, 'i') } });
     const categoryIds = categories.map(category => category._id);
 
@@ -90,20 +91,23 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
 
     const cursor = this.find().cursor();
 
+
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
         for (const tagId of tagIds) {
-            if (doc.tags.includes(tagId)) {
+            if (doc.tags && doc.tags.includes(tagId)) {
                 query.push({ _id: doc._id });
                 break;
             }
         }
         for (const categoryId of categoryIds) {
-            if (doc.category.includes(categoryId)) {
+            if (doc.category && doc.category.includes(categoryId)) {
                 query.push({ _id: doc._id });
                 break;
             }
         }
+
     }
+
 
     return this.find({ $or: query }).populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
 };

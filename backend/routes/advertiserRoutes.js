@@ -4,11 +4,11 @@ const advertiserController = require('../controllers/advertiserController');
 
 const router = express.Router();
 
-router.post('/activity', activityController.createActivity);
-router.get('/activity', activityController.getAllActivities);
-router.get('/activity/:id', activityController.getActivityById);
-router.put('/activity/:id', activityController.updateActivity);
-router.delete('/activity/:id', activityController.deleteActivity);
+router.post('/activities', activityController.createActivity);
+router.get('/activities', activityController.getAllActivities);
+router.get('/activities/:id', activityController.getActivityById);
+router.put('/activities/:id', activityController.updateActivity);
+router.delete('/activities/:id', activityController.deleteActivity);
 
 router.get('/', advertiserController.getAdvertiser);
 router.put('/', advertiserController.updateAdvertiser);

@@ -1,47 +1,46 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
-import ItineraryDetail from "../components/ItineraryDetail.jsx";
-import FilterComponent from "../components/Filter.jsx"; 
+import FilterComponent from "../components/FilterActivities.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader.jsx";
+import ActivityDetail from "./SingleActivity.jsx";
 
-const ItineraryCard = ({ itinerary, onSelect }) => (
+const ActivityCard = ({ activity, onSelect }) => (
   <div
     className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
-    onClick={() => onSelect(itinerary._id)}
+    onClick={() => onSelect(activity._id)}
   >
     <div className="overflow-hidden">
       <img
         src={
-          itinerary.activities &&
-            itinerary.activities.length > 0 &&
-            itinerary.activities[0].pictures &&
-            itinerary.activities[0].pictures.length > 0
-            ? itinerary.activities[0].pictures[0]
+          activity.pictures && activity.pictures.length > 0
+            ? activity.pictures[0]
             : defaultImage
         }
-        alt={itinerary.title}
+        alt={activity.name}
         className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
       />
     </div>
-    <div className="p-4 ">
-      <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
-      <h3 className="text-sm mt-2 text-gray-700">{itinerary.timeline}</h3>
+    <div className="p-4">
+      <h3 className="text-xl font-semibold mt-2">{activity.name}</h3>
+      <p className="text-sm mt-2 text-gray-700">{activity.location}</p>
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-bold text-blue-600">
-          €{itinerary.price}/Day
+          €{activity.price}
         </span>
-        <span className="text-sm text-gray-500">{itinerary.language}</span>
+        <span className="text-sm text-gray-500">
+          {new Date(activity.timing).toLocaleDateString()}
+        </span>
       </div>
     </div>
   </div>
 );
 
 export function AllActivitiesComponent() {
-  const [itineraries, setItineraries] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,13 +49,13 @@ export function AllActivitiesComponent() {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [price, setPrice] = useState("");
   const [dateRange, setDateRange] = useState({ lower: "", upper: "" });
-  const [selectedTypes, setSelectedTypes] = useState([]); // Changed to selectedTypes array
-  const [selectedLanguages, setSelectedLanguages] = useState([]); // Changed to selectedLanguages array
-  const tripsPerPage = 3;
-  const [selectedItinerary, setSelectedItinerary] = useState(null);
-  const [typesOptions, setTypesOptions] = useState([]);
-  const [languagesOptions, setLanguagesOptions] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const activitiesPerPage = 3;
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [minStars, setMinStars] = useState(0);
+
 
   const navigate = useNavigate();
 
@@ -67,56 +66,24 @@ export function AllActivitiesComponent() {
   };
 
   useEffect(() => {
-    fetchItineraries();
+    fetchActivities();
     setIsLoading(false);
   }, []);
 
-  const handleItinerarySelect = (id) => {
+  const handleActivitySelect = (id) => {
     setIsLoading(true);
-    navigate(`/itinerary/${id}`); // Navigate to the itinerary details page
+    navigate(`/activity/${id}`);
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    const fetchLanguages = async () => {
-      setIsLoading(true);
-      console.log("Fetching Languages");
-      try {
-        const response = await axios.get(
-          "http://localhost:4000/api/getAllLanguages"
-        );
-        console.log("Languages:", response.data);
-        setLanguagesOptions(response.data);
-      } catch (error) {
-        console.error("Error fetching Languages:", error);
-      }
-    };
-    setIsLoading(false);
-    fetchLanguages();
-  }, []);
 
-  useEffect(() => {
-    // Fetch types from the backend
-    const fetchType = async () => {
-      try {
-        setIsLoading(false);
-        const response = await axios.get('http://localhost:4000/api/getAllTypes');
-        console.log('Type:', response.data);
-        setTypesOptions(response.data);
-      } catch (error) {
-        console.error("Error fetching Type:", error);
-      }
-    };
-    fetchType();
-    setIsLoading(false);
-  }, []);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchTerm) {
-        searchItineraries();
+        searchActivities();
       } else {
-        fetchItineraries();
+        fetchActivities();
       }
     }, 300);
 
@@ -125,7 +92,7 @@ export function AllActivitiesComponent() {
 
   useEffect(() => {
     if (sortBy) {
-      searchItineraries();
+      searchActivities();
     }
   }, [sortBy, sortOrder]);
 
@@ -133,60 +100,43 @@ export function AllActivitiesComponent() {
     setIsLoading(true);
     const newSortOrder = sortOrder === 1 ? -1 : 1;
     setSortOrder(newSortOrder);
-    setSortBy(attribute); 
+    setSortBy(attribute);
     setIsLoading(false);
   };
-  const fetchItineraries = async () => {
+
+  const fetchActivities = async () => {
     try {
-      setIsLoading(false);
-      const token = Cookies.get('jwt');
+      setIsLoading(true);
+      const token = Cookies.get("jwt");
       const role = getUserRole();
-      const url =  new URL(`http://localhost:4000/${role}/itineraries`);
+      const url = new URL(`http://localhost:4000/${role}/activities`);
 
-
-
-      const response = await fetch(
-        url,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setItineraries(data);
+      setActivities(data);
       setError(null);
       setCurrentPage(1);
       setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching itineraries:", error);
-      setError("Error fetching itineraries");
-      setItineraries([]);
+      console.error("Error fetching activities:", error);
+      setError("Error fetching activities");
+      setActivities([]);
+      setIsLoading(false);
     }
   };
-  const clearFilters = () => {
-    // Reset all filter states to initial values
-    setSearchTerm("");
-    setPrice("");
-    setDateRange({ lower: "", upper: "" });
-    setSelectedTypes([]); // Reset selected types
-    setSelectedLanguages([]); // Reset selected languages
-    setSortBy(""); // Reset sorting
-    setSortOrder(""); // Reset sort order
 
-    // Fetch itineraries without any filters
-    fetchItineraries();
-  };
-
-  const searchItineraries = async () => {
+  const searchActivities = async () => {
     try {
       const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/itineraries`);
-   
-      // Add the search term and filter parameters
+      const url = new URL(`http://localhost:4000/${role}/activities`);
+
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
       }
@@ -200,14 +150,13 @@ export function AllActivitiesComponent() {
       if (dateRange.lower) {
         url.searchParams.append("lowerDate", dateRange.lower);
       }
-      if (selectedTypes.length > 0) {
-        url.searchParams.append("types", selectedTypes.join(",")); // Send selected types as comma-separated
+      if (selectedCategories.length > 0) {
+        url.searchParams.append("categories", selectedCategories.join(","));
       }
-      if (selectedLanguages.length > 0) {
-        url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
+      if (minStars) {
+        url.searchParams.append("minRating", minStars);
       }
 
-      // Add sorting parameters
       if (sortBy) {
         url.searchParams.append("sort", sortBy);
       }
@@ -228,14 +177,24 @@ export function AllActivitiesComponent() {
 
       const data = await response.json();
 
-      setItineraries(data);
+      setActivities(data);
       setError(null);
       setCurrentPage(1);
     } catch (error) {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
-      setItineraries([]);
+      setActivities([]);
     }
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setPrice("");
+    setDateRange({ lower: "", upper: "" });
+    setSelectedCategories([]);
+    setSortBy("");
+    setSortOrder("");
+    fetchActivities();
   };
 
   const toggleFilters = () => {
@@ -244,22 +203,14 @@ export function AllActivitiesComponent() {
     setIsLoading(false);
   };
 
-  // Handle type and language selections
-  const handleTypeSelection = (option) => {
-    setSelectedTypes((prev) =>
+  const handleCategorySelection = (option) => {
+    setSelectedCategories((prev) =>
       prev.includes(option)
-        ? prev.filter((type) => type !== option)
+        ? prev.filter((cat) => cat !== option)
         : [...prev, option]
     );
   };
 
-  const handleLanguageSelection = (option) => {
-    setSelectedLanguages((prev) =>
-      prev.includes(option)
-        ? prev.filter((lang) => lang !== option)
-        : [...prev, option]
-    );
-  };
 
   return (
     <div>
@@ -270,14 +221,14 @@ export function AllActivitiesComponent() {
           <div className="max-w-7xl mx-auto">
             <>
               <h1 className="text-4xl font-bold text-gray-900 mb-8">
-                All Trip Plans
+                All Activities
               </h1>
 
               <div className="flex flex-col mb-8">
                 <div className="relative w-full mb-4">
                   <input
                     type="text"
-                    placeholder="Search trips..."
+                    placeholder="Search activities..."
                     className="w-full pl-10 pr-4 py-2 border rounded-full"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -292,76 +243,59 @@ export function AllActivitiesComponent() {
                   sortBy={sortBy}
                   handleSort={handleSort}
                   clearFilters={clearFilters}
-                  // sortItineraries={sortItineraries}
                   price={price}
                   setPrice={setPrice}
                   dateRange={dateRange}
                   setDateRange={setDateRange}
-                  selectedTypes={selectedTypes} // Pass selectedTypes array
-                  setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
-                  selectedLanguages={selectedLanguages} // Pass selectedLanguages array
-                  setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
-                  searchItineraries={searchItineraries}
-                  typesOptions={typesOptions}
-                  languagesOptions={languagesOptions}
-                  role={getUserRole()}
+                  selectedCategories={selectedCategories}
+                  setSelectedCategories={setSelectedCategories}
+                  handleCategorySelection={handleCategorySelection}
+                  categoryOptions={categoryOptions}
+                  minStars={minStars} // Pass the minStars state
+                  setMinStars={setMinStars} // Pass the setMinStars handler
                 />
               </div>
 
-              {error && (
-                <div className="text-red-500 text-center mb-4">{error}</div>
+              {activities.length > 0 ? (
+                <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
+                  {activities
+                    .slice(
+                      (currentPage - 1) * activitiesPerPage,
+                      currentPage * activitiesPerPage
+                    )
+                    .map((activity) => (
+                      <ActivityCard
+                        key={activity._id}
+                        activity={activity}
+                        onSelect={handleActivitySelect}
+                      />
+                    ))}
+                </div>
+              ) : (
+                <p>No activities found.</p>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {itineraries
-                  .slice(
-                    (currentPage - 1) * tripsPerPage,
-                    currentPage * tripsPerPage
-                  )
-                  .map((itinerary) => (
-                    <ItineraryCard
-                      key={itinerary._id} // Use the unique _id as the key
-                      itinerary={itinerary}
-                      onSelect={handleItinerarySelect}
-                    />
-                  ))}
-              </div>
-
-              <div className="mt-8 flex justify-center items-center space-x-4">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                    }`}
-                >
-                  <ChevronLeft />
-                </button>
-
-              
-
-                {/* Page X of Y */}
-                <span className="text-lg font-medium">
-                  Page {currentPage} of {Math.ceil(itineraries.length / tripsPerPage)}
-                </span>
-
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(prev + 1, Math.ceil(itineraries.length / tripsPerPage))
-                    )
-                  }
-                  disabled={
-                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                  }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                    ? "text-gray-300"
-                    : "text-blue-600"
-                    }`}
-                >
-                  <ChevronRight />
-                </button>
-              </div>
-
+              {activities.length > activitiesPerPage && (
+                <div className="mt-8 flex justify-center">
+                  <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="mr-4 p-2"
+                  >
+                    <ChevronLeft />
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={
+                      currentPage ===
+                      Math.ceil(activities.length / activitiesPerPage)
+                    }
+                    className="ml-4 p-2"
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              )}
             </>
           </div>
         </div>
@@ -370,4 +304,4 @@ export function AllActivitiesComponent() {
   );
 }
 
-
+export default AllActivitiesComponent;
