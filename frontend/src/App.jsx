@@ -48,7 +48,6 @@ function App() {
             <Route path="/activity" element={<AllActivitiesComponent />} />
             <Route path="/all-itineraries" element={<AllItinerariesComponent />}/>
             <Route path="/all-historical-places" element={<AllHistoricalPlacesComponent />}/>
-
             <Route path="/sign-up" element={<SignupForm />} />
             <Route path="/admin" element={<AdminDash />} />
             <Route path="/itinerary/:id" element={<ItineraryDetail />} />
