@@ -29,7 +29,7 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
     </div>
     <div className="p-4 ">
       <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
-      <h3 className="text-sm mt-2 text-gray-700">{itinerary.description}</h3>
+      <h3 className="text-sm mt-2 text-gray-700">{itinerary.timeline}</h3>
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-bold text-blue-600">
           €{itinerary.price}/Day
