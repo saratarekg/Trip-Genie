@@ -29,7 +29,7 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
     </div>
     <div className="p-4 ">
       <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
-      <h3 className="text-sm mt-2 text-gray-700">{itinerary.description}</h3>
+      <h3 className="text-sm mt-2 text-gray-700">{itinerary.timeline}</h3>
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-bold text-blue-600">
           €{itinerary.price}/Day
@@ -99,18 +99,16 @@ export function AllItinerariesComponent() {
     // Fetch types from the backend
     const fetchType = async () => {
       try {
-        setIsLoading(true);
-        const response = await axios.get(
-          "http://localhost:4000/api/getAllTypes"
-        );
-        console.log("Type:", response.data);
+        setIsLoading(false);
+        const response = await axios.get('http://localhost:4000/api/getAllTypes');
+        console.log('Type:', response.data);
         setTypesOptions(response.data);
       } catch (error) {
         console.error("Error fetching Type:", error);
       }
     };
     fetchType();
-    setIsLoading(true);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -134,18 +132,21 @@ export function AllItinerariesComponent() {
   const handleSort = (attribute) => {
     setIsLoading(true);
     const newSortOrder = sortOrder === 1 ? -1 : 1;
-    setSortBy(attribute);
     setSortOrder(newSortOrder);
-    searchItineraries(); // Call this to fetch sorted itineraries
+    setSortBy(attribute); 
     setIsLoading(false);
   };
   const fetchItineraries = async () => {
     try {
-      setIsLoading(true);
-      const token = Cookies.get("jwt");
+      setIsLoading(false);
+      const token = Cookies.get('jwt');
       const role = getUserRole();
+      const url =  new URL(`http://localhost:4000/${role}/itineraries`);
+
+
+
       const response = await fetch(
-        `http://localhost:4000/${role}/itineraries`,
+        url,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -184,7 +185,7 @@ export function AllItinerariesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
-
+   
       // Add the search term and filter parameters
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
@@ -238,7 +239,7 @@ export function AllItinerariesComponent() {
   };
 
   const toggleFilters = () => {
-    setIsLoading(true);
+    setIsLoading(false);
     setFiltersVisible(!filtersVisible);
     setIsLoading(false);
   };
@@ -303,6 +304,7 @@ export function AllItinerariesComponent() {
                   searchItineraries={searchItineraries}
                   typesOptions={typesOptions}
                   languagesOptions={languagesOptions}
+                  role={getUserRole()}
                 />
               </div>
 
@@ -367,3 +369,5 @@ export function AllItinerariesComponent() {
     </div>
   );
 }
+
+

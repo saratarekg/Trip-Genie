@@ -43,8 +43,8 @@ export const AdminDash = () => {
                 </div>
                 <div className="flex w-full justify-between">
                   <ActionButton title="Review Registrations" />
+                  <DeleteAccount  />
                   <AdminGovernorPopup  />
-                  <DeleteAccount />
                   </div>
               </div>
 
