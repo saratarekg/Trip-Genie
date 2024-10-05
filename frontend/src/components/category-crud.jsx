@@ -42,8 +42,15 @@ export function CategoryCRUD() {
     // Clear message when button is clicked
     setMessage('');  
     if (newCategory) {
+
       try {
-        await axios.post('http://localhost:4000/admin/categories', { name: newCategory });
+        const token = Cookies.get('jwt'); 
+        await axios.post('http://localhost:4000/admin/categories', { name: newCategory, 
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`, 
+          },
+         });
         setNewCategory('');
         setMessage('Category created successfully!');
         fetchCategories(); // Refresh the categories list
@@ -60,21 +67,51 @@ export function CategoryCRUD() {
   const updateCategory = async () => {
     // Clear message when button is clicked
     setMessage('');  
+  
     if (oldCategory && updatedCategory) {
       try {
-        await axios.put(`http://localhost:4000/admin/categories/${id}`, { name: updatedCategory });
-        setOldCategory('');
-        setUpdatedCategory('');
-        setMessage('Category updated successfully!');
-        fetchCategories(); // Refresh the categories list
-        resetButtons();
+        const token = Cookies.get('jwt');
+        const url = `http://localhost:4000/admin/categoriesName?name=${oldCategory}`;
+  
+        // Fetch the category by name
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        // Ensure the category exists in the response
+        const category = response.data; // Assuming the category object is returned as 'data'
+  
+        if (category && category._id) {
+          // Update the category name using its ID
+          await axios.put(`http://localhost:4000/admin/categories/${category._id}`, 
+          { name: updatedCategory }, { // Ensure 'name' is a string, not an object
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+  
+          // Clear input fields after successful update
+          setOldCategory('');
+          setUpdatedCategory('');
+          setMessage('Category updated successfully!');
+          fetchCategories(); // Refresh the categories list
+          resetButtons(); // Reset button visibility
+        } else {
+          setMessage('Category not found.');
+        }
+  
       } catch (error) {
+        console.error('Error updating category:', error.response?.data || error.message);
         setMessage('Error updating category');
       }
     } else {
       setMessage('Please provide old and new category names.');
     }
   };
+  
+  
 
   // Function to delete a category
   const deleteCategory = async () => {
