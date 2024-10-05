@@ -14,7 +14,9 @@ import Hero from "./components/Hero.jsx";
 import CreateItineraryPage from "./pages/CreateItineraryPage.jsx";
 import { NavbarComponent } from "./components/navbar.jsx";
 import { FooterComponent } from "./components/footer.jsx";
+import { AllHistoricalPlacesComponent } from "./components/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
+
 import { SignupForm } from "./components/signup-form.jsx";
 import {AdminDash} from "./pages/AdminDash.jsx";
 
@@ -35,6 +37,8 @@ function App() {
             <Route path="/seller" element={<SellerList />} />
             <Route path="/activity" element={<ActivityList />} />
             <Route path="/all-itineraries" element={<AllItinerariesComponent />}/>
+            <Route path="/all-historical-places" element={<AllHistoricalPlacesComponent />}/>
+
             <Route path="/sign-up" element={<SignupForm />} />
             <Route path="/admin" element={<AdminDash />} />
             <Route path="/itinerary/:id" element={<ItineraryDetail />} />
