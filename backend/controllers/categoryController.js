@@ -29,6 +29,21 @@ const getCategory = async (req, res) => {
     }
 };
 
+
+// get categories by name 
+
+const getCategoriesByName = async (req, res) => {
+    try {
+        const categories = await Category.findOne({ name: req.query.name });
+        if (categories.length === 0) {
+            return res.status(404).json({ message: 'No categories found with that name' });
+        }
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
 const getAllCategories = async (req, res) => {
     try {
         const category = await Category.find();
@@ -72,5 +87,5 @@ const deleteCategory = async (req, res) => {
 };
 
 
-module.exports={createCategory,getCategory, getAllCategories, updateCategory,deleteCategory};
+module.exports={createCategory,getCategory, getAllCategories, updateCategory,deleteCategory, getCategoriesByName};
 
