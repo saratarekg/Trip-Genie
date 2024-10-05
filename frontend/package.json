@@ -44,6 +44,7 @@
     "react-hook-form": "^7.53.0",
     "react-phone-input-2": "^2.15.1",
     "react-router-dom": "^6.26.2",
+    "react-switch": "^7.0.0",
     "react-toastify": "^10.0.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
