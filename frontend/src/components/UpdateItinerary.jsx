@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -17,7 +18,29 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const UpdateItinerary = () => {
+const worldLanguages = [
+  "Abkhaz", "Afar", "Afrikaans", "Akan", "Albanian", "Amharic", "Arabic", "Aragonese", "Armenian", "Assamese",
+  "Avaric", "Avestan", "Aymara", "Azerbaijani", "Bambara", "Bashkir", "Basque", "Belarusian", "Bengali", "Bihari",
+  "Bislama", "Bosnian", "Breton", "Bulgarian", "Burmese", "Catalan", "Chamorro", "Chechen", "Chichewa", "Chinese",
+  "Chuvash", "Cornish", "Corsican", "Cree", "Croatian", "Czech", "Danish", "Divehi", "Dutch", "Dzongkha", "English",
+  "Esperanto", "Estonian", "Ewe", "Faroese", "Fijian", "Finnish", "French", "Fula", "Galician", "Georgian", "German",
+  "Greek", "Guaraní", "Gujarati", "Haitian", "Hausa", "Hebrew", "Herero", "Hindi", "Hiri Motu", "Hungarian",
+  "Interlingua", "Indonesian", "Interlingue", "Irish", "Igbo", "Inupiaq", "Ido", "Icelandic", "Italian", "Inuktitut",
+  "Japanese", "Javanese", "Kalaallisut", "Kannada", "Kanuri", "Kashmiri", "Kazakh", "Khmer", "Kikuyu", "Kinyarwanda",
+  "Kirghiz", "Komi", "Kongo", "Korean", "Kurdish", "Kwanyama", "Latin", "Luxembourgish", "Luganda", "Limburgish",
+  "Lingala", "Lao", "Lithuanian", "Luba-Katanga", "Latvian", "Manx", "Macedonian", "Malagasy", "Malay", "Malayalam",
+  "Maltese", "Māori", "Marathi", "Marshallese", "Mongolian", "Nauru", "Navajo", "Norwegian Bokmål", "North Ndebele",
+  "Nepali", "Ndonga", "Norwegian Nynorsk", "Norwegian", "Nuosu", "South Ndebele", "Occitan", "Ojibwe", "Old Church Slavonic",
+  "Oromo", "Oriya", "Ossetian", "Panjabi", "Pāli", "Persian", "Polish", "Pashto", "Portuguese", "Quechua", "Romansh",
+  "Kirundi", "Romanian", "Russian", "Sanskrit", "Sardinian", "Sindhi", "Northern Sami", "Samoan", "Sango", "Serbian",
+  "Scottish Gaelic", "Shona", "Sinhala", "Slovak", "Slovene", "Somali", "Southern Sotho", "Spanish", "Sundanese",
+  "Swahili", "Swati", "Swedish", "Tamil", "Telugu", "Tajik", "Thai", "Tigrinya", "Tibetan", "Turkmen", "Tagalog",
+  "Tswana", "Tonga", "Turkish", "Tsonga", "Tatar", "Twi", "Tahitian", "Uighur", "Ukrainian", "Urdu", "Uzbek",
+  "Venda", "Vietnamese", "Volapük", "Walloon", "Welsh", "Wolof", "Western Frisian", "Xhosa", "Yiddish", "Yoruba",
+  "Zhuang", "Zulu"
+];
+
+export default function UpdateItinerary() {
   const { id } = useParams();
   const [itinerary, setItinerary] = useState({
     title: '',
@@ -79,6 +102,10 @@ const UpdateItinerary = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setItinerary((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLanguageChange = (value) => {
+    setItinerary((prev) => ({ ...prev, language: value }));
   };
 
   const handleSwitchChange = (name) => {
@@ -209,12 +236,18 @@ const UpdateItinerary = () => {
                 </div>
                 <div>
                   <Label htmlFor="language">Language</Label>
-                  <Input
-                    id="language"
-                    name="language"
-                    value={itinerary.language}
-                    onChange={handleChange}
-                  />
+                  <Select value={itinerary.language} onValueChange={handleLanguageChange}>
+                    <SelectTrigger id="language" className="w-full">
+                      <SelectValue placeholder="Select a language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {worldLanguages.map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {language}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="price">Price</Label>
@@ -254,30 +287,6 @@ const UpdateItinerary = () => {
                   />
                   <Label htmlFor="accessibility">Accessibility</Label>
                 </div>
-                {/* <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isBooked"
-                    checked={itinerary.isBooked}
-                    onCheckedChange={() => handleSwitchChange('isBooked')}
-                  />
-                  <Label htmlFor="isBooked">Is Booked</Label>
-                </div> */}
-                {/* <div>
-                  <Label htmlFor="rating">Rating</Label>
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      id="rating"
-                      name="rating"
-                      type="number"
-                      min="0"
-                      max="5"
-                      step="0.5"
-                      value={itinerary.rating}
-                      onChange={handleChange}
-                    />
-                    <Star className="w-6 h-6 text-yellow-400" />
-                  </div>
-                </div> */}
               </div>
             </div>
 
@@ -309,6 +318,7 @@ const UpdateItinerary = () => {
                         variant="destructive" 
                         size="sm" 
                         onClick={() => removeActivity(activity._id)}
+                        className="w-20"
                       >
                         Remove
                       </Button>
@@ -327,8 +337,9 @@ const UpdateItinerary = () => {
                       type="date"
                       value={dateObj.date.split('T')[0]}
                       onChange={(e) => handleDateChange(e.target.value, dateIndex)}
+                      className="w-40"
                     />
-                    <Button variant="destructive" size="icon" onClick={() => removeDate(dateIndex)}>
+                    <Button variant="destructive" size="icon" onClick={() => removeDate(dateIndex)} className="w-10 h-10">
                       <Trash className="h-4 w-4" />
                     </Button>
                   </div>
@@ -338,13 +349,15 @@ const UpdateItinerary = () => {
                         type="time"
                         value={timeObj.startTime}
                         onChange={(e) => handleTimeChange(e.target.value, dateIndex, timeIndex, 'startTime')}
+                        className="w-32"
                       />
                       <Input
                         type="time"
                         value={timeObj.endTime}
                         onChange={(e) => handleTimeChange(e.target.value, dateIndex, timeIndex, 'endTime')}
+                        className="w-32"
                       />
-                      <Button variant="destructive" size="icon" onClick={() => removeTime(dateIndex, timeIndex)}>
+                      <Button variant="destructive" size="icon" onClick={() => removeTime(dateIndex, timeIndex)} className="w-10 h-10">
                         <Trash className="h-4 w-4" />
                       </Button>
                     </div>
@@ -391,6 +404,4 @@ const UpdateItinerary = () => {
       </Dialog>
     </div>
   );
-};
-
-export default UpdateItinerary;
+}
