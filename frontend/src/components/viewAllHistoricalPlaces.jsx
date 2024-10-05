@@ -86,7 +86,7 @@ export function AllHistoricalPlacesComponent() {
     const [selectedPeriods, setSelectedPeriods] = useState([]); // Changed to selectedTypes array
 
     //   const [selectedLanguages, setSelectedLanguages] = useState([]); // Changed to selectedLanguages array
-    const tripsPerPage = 3;
+    const tripsPerPage = 6;
     const [selectedItinerary, setSelectedItinerary] = useState(null);
     const [typesOptions, setTypesOptions] = useState([]);
     const [periodOptions, setPeriodOptions] = useState([]);
