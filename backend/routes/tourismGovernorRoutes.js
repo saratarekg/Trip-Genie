@@ -13,6 +13,6 @@ router.put('/historical-places/:id', historicalPlacesController.updateHistorical
 router.post('/historical-tag', historicalTagController.addHistoricalTag);
 
 router.get('/my-historical-places', historicalPlacesController.getHistoricalPlacesByGovernor);
-
+router.get('/advertisers/:id', advertiserController.getAdvertiserByID);
 
 module.exports = router;
