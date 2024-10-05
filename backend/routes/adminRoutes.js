@@ -23,7 +23,7 @@ router.delete('/advertisers/:id',advertiserController.deleteAdvertiserAccount);
 router.delete('/sellers/:id', sellerController.deleteSellerAccount);
 
 // Route to delete a Tour Guide
-router.delete('/tour-guides/:id', tourGuideController.deleteTourGuideAccount);
+router.delete('/tourGuides/:id', tourGuideController.deleteTourGuideAccount);
 
 
 // Route to delete a Tourist
