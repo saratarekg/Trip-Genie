@@ -1,8 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { XCircle, CheckCircle, ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2, Mail, Phone, Award, Clock, Info } from 'lucide-react';
+import {
+  XCircle,
+  CheckCircle,
+  ChevronLeft,
+  Calendar,
+  MapPin,
+  Users,
+  DollarSign,
+  Globe,
+  Accessibility,
+  Star,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  Award,
+  Clock,
+  Info,
+} from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -218,24 +243,24 @@ const ItineraryDetail = () => {
             </div>
 
             <div className="p-6 border-t border-gray-200">
-            <h3 className="text-2xl font-semibold mb-4">Available Dates</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {itinerary.availableDates.map((dateInfo, index) => (
-                <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                  <div className="flex items-center mb-2">
-                    <Calendar className="w-5 h-5 mr-2 text-orange-500" />
-                    <span className="font-semibold">{new Date(dateInfo.date).toLocaleDateString()}</span>
+              <h3 className="text-2xl font-semibold mb-4">Available Dates</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {itinerary.availableDates.map((dateInfo, index) => (
+                  <div key={index} className="bg-gray-100 p-4 rounded-lg">
+                    <div className="flex items-center mb-2">
+                      <Calendar className="w-5 h-5 mr-2 text-orange-500" />
+                      <span className="font-semibold">{new Date(dateInfo.date).toLocaleDateString()}</span>
+                    </div>
+                    <ul className="space-y-1">
+                      {dateInfo.times.map((time, timeIndex) => (
+                        <li key={timeIndex} className="text-sm text-gray-600">
+                          {time.startTime} - {time.endTime}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="space-y-1">
-                    {dateInfo.times.map((time, timeIndex) => (
-                      <li key={timeIndex} className="text-sm text-gray-600">
-                        {time.startTime} - {time.endTime}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))} 
-            </div>
+                ))}
+              </div>
             </div>
 
             <div className="mt-8">
@@ -330,11 +355,38 @@ const ItineraryDetail = () => {
       <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Itinerary Deleted</DialogTitle>
-            <DialogDescription>The itinerary has been deleted successfully.</DialogDescription>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Itinerary Deleted
+            </DialogTitle>
+            <DialogDescription>
+              The itinerary has been successfully deleted.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="primary" onClick={() => navigate('/itineraries')}>Go Back</Button>
+            <Button variant="default" onClick={() => navigate('/all-itineraries')}>
+              Back to All Itineraries
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog open={deleteError !== null} onOpenChange={() => setDeleteError(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Failed to Delete Itinerary
+            </DialogTitle>
+            <DialogDescription>
+              {deleteError || 'Itinerary is already booked!'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="default" onClick={() => setDeleteError(null)}>
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
