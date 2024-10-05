@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie'
 
@@ -19,12 +19,22 @@ const ItineraryForm = () => {
     dropOffLocation: '',
     rating: '',
   });
+
+  const handleCheckboxChange = (activityId) => {
+    const updatedActivities = formData.activities.includes(activityId)
+      ? formData.activities.filter((id) => id !== activityId)  // Deselect if already selected
+      : [...formData.activities, activityId];  // Select activity if not already selected
+
+    setFormData({ ...formData, activities: updatedActivities });
+  };
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   useEffect(() => {
     const fetchActivities = async () => {
       try {
         const token = Cookies.get('jwt')
         let role = Cookies.get('role')
-        if (role === undefined) 
+        if (role === undefined)
           role = 'guest'
         const api = `http://localhost:4000/${role}/activities`
         const response = await axios.get(api, {
@@ -33,12 +43,12 @@ const ItineraryForm = () => {
           }
         })
         console.log(response.data)
-        setActivities(response.data) 
+        setActivities(response.data)
       } catch (err) {
         setError(err.message)
       }
     }
-  
+
     fetchActivities()
   }, [])
 
@@ -80,9 +90,14 @@ const ItineraryForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (formData.activities.length === 0) {
+      alert('Please select at least one activity!');
+      return;
+    }
     console.log('Form data submitted:', formData);
     // Add your form submission logic here
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -182,25 +197,39 @@ const ItineraryForm = () => {
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="Activity">
+        <div className="mb-4 relative">
+          <label className="block text-gray-700" htmlFor="activities">
             Activities
           </label>
-          <select
-            name="Activity"
-            id="Activity"
-            className="border border-gray-300 rounded-xl p-2 w-full"
-            //value={formData.Activity[0]} // Select the first activity by default
-            onChange={(e) => setFormData({ ...formData, Activity: [e.target.value] })}
-            required
+          <button
+            type="button"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="border border-gray-300 rounded-xl p-2 w-full text-left"
           >
-            <option value="">Select an activity</option>
-            {activities.map((activity) => (
-              <option key={activity._id} value={activity._id}>
-                {activity.name} {/* Assuming each activity has a 'name' field */}
-              </option>
-            ))}
-          </select>
+            {formData.activities.length > 0
+              ? `Selected: ${activities
+                .filter((activity) => formData.activities.includes(activity._id))
+                .map((activity) => activity.name)
+                .join(', ')}`
+              : 'Select activities'}
+          </button>
+
+          {dropdownOpen && (
+            <div className="absolute z-10 mt-2 w-full border border-gray-300 rounded-xl bg-white shadow-lg max-h-60 overflow-y-auto">
+              {activities.map((activity) => (
+                <div key={activity._id} className="flex items-center p-2">
+                  <input
+                    type="checkbox"
+                    id={activity._id}
+                    className="mr-2"
+                    checked={formData.activities.includes(activity._id)}
+                    onChange={() => handleCheckboxChange(activity._id)}
+                  />
+                  <label htmlFor={activity._id}>{activity.name}</label>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {formData.availableDates.map((date, index) => (
