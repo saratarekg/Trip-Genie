@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom"; // Import Link from React Router
 import logo from "../assets/images/tgLogofinal6.png";
 import Cookies from "js-cookie";
-
+import { useNavigate } from "react-router-dom";
 const NavLink = ({ to, children }) => (
   <Link
     to={to}
@@ -18,6 +18,7 @@ const NavLink = ({ to, children }) => (
 export function NavbarComponent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const role = Cookies.get("role");
+  const navigate = useNavigate();
 
   // Define the logOut function
   const logOut = async () => {
@@ -31,6 +32,7 @@ export function NavbarComponent() {
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
+        navigate("/login"); // Redirect to login page after logout
         window.location.reload(); // Refresh the page after logout
       } else {
         console.error("Logout failed.");

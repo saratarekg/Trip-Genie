@@ -74,7 +74,7 @@ export function AllActivitiesComponent() {
   const [price, setPrice] = useState("");
   const [dateRange, setDateRange] = useState({ lower: "", upper: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const activitiesPerPage = 3;
+  const activitiesPerPage = 6;
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

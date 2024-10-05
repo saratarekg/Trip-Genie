@@ -345,6 +345,7 @@ export function AllItinerariesComponent() {
                   ))}
               </div>
 
+              {/* Pagination */}
               <div className="mt-8 flex justify-center items-center space-x-4">
                 <button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
