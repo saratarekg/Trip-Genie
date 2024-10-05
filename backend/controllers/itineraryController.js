@@ -117,19 +117,36 @@ const createItinerary = async (req, res) => {
 // };
 
 // Update a single itinerary
+
 const updateItinerary = async (req, res) => {
   try {
-    const itinerary = await Itinerary.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const tourGuideId = res.locals.user_id; // Get the current tour guide's ID
+
+    // Find the itinerary by ID
+    const itinerary = await Itinerary.findById(req.params.id);
+
     if (!itinerary) {
       return res.status(404).json({ message: "Itinerary not found" });
     }
-    res.status(200).json(itinerary);
+
+    // Check if the itinerary belongs to the current tour guide
+    if (itinerary.tourGuide.toString() !== tourGuideId) {
+      return res.status(403).json({
+        message: "Unauthorized: You can only update your own itineraries",
+      });
+    }
+
+    // Check if the itinerary is booked
+
+
+    // If all checks pass, delete the itinerary
+    const {title, availableDates, price, language, timeline, activities, accessibility, pickUpLocation, dropOffLocation} = req.body;
+
+    await Itinerary.findByIdAndUpdate(req.params.id, {title, availableDates, price, language, timeline, activities, accessibility, pickUpLocation, dropOffLocation}  );
+
+    res.status(200).json({ message: "Itinerary updated successfully" });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { ChevronLeft, Trash, Plus, Star, Check } from 'lucide-react';
+import { XCircle, CheckCircle, ChevronLeft, Trash, Plus, Star, Check } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,7 @@ export default function UpdateItinerary() {
   const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
   const [availableActivities, setAvailableActivities] = useState([]);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -180,7 +181,16 @@ export default function UpdateItinerary() {
         body: JSON.stringify(itinerary),
       });
 
-      if (!response.ok) {
+       if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400) {
+          setShowErrorPopup(errorData.message);
+          return;
+        }
+        if (response.status === 403){
+          setShowErrorPopup(errorData.message);
+          return;
+        }
         throw new Error('Failed to update itinerary');
       }
 
@@ -388,7 +398,7 @@ export default function UpdateItinerary() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Check className="w-6 h-6 text-green-500 mr-2" />
+              <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
               Itinerary Updated
             </DialogTitle>
             <DialogDescription>
@@ -398,6 +408,25 @@ export default function UpdateItinerary() {
           <DialogFooter>
             <Button onClick={() => navigate('/all-itineraries')}>
               Back to All Itineraries
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showErrorPopup !== null} onOpenChange={() => setErrorPopup(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Failed to Update Itinerary
+            </DialogTitle>
+            <DialogDescription>
+              {showErrorPopup || 'Not your itinerary!'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="default" onClick={() => setShowErrorPopup(null)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

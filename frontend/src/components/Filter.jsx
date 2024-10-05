@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Filter, ChevronDown, ArrowUpDown, Plus } from 'lucide-react';
+import { Filter, ChevronDown, ArrowUpDown, Plus,ContactRound  } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
 
 const FilterComponent = ({
   filtersVisible,
@@ -10,6 +11,8 @@ const FilterComponent = ({
   handleSort,
   clearFilters,
   price,
+  myItineraries,
+  handlemyItineraries,
   setPrice,
   dateRange,
   setDateRange,
@@ -33,6 +36,8 @@ const FilterComponent = ({
       setSelectedTypes([...selectedTypes, type]);
     }
   };
+
+  //const [myItineraries, setmyItineraries] = useState(false);
 
   // Handle checkbox for languages
   const handleLanguageChange = (language) => {
@@ -61,6 +66,7 @@ const FilterComponent = ({
     <>
       <div className="flex mb-4">
         <div className="flex space-x-4">
+
           <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             <Filter className="mr-2" size={18} />
             Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
@@ -79,6 +85,20 @@ const FilterComponent = ({
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
           </button>
+
+          <button
+            onClick={() => handlemyItineraries(!myItineraries)} // Toggle myItineraries state
+            className={`flex items-center px-4 py-2 rounded-full shadow bg-white text-black `}
+          >
+            <ContactRound strokeWidth={1.25}  /> 
+            {myItineraries ? ' My' : '   All'} Itineraries
+             
+          </button>
+
+          {/* <button onClick={() => handlemyItineraries()} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+            <ArrowUpDown className="mr-2" size={18} />
+            My itineraries {myItineraries === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+          </button> */}
         </div>
 
           {role === 'tour-guide'?  (
