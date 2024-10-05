@@ -81,36 +81,26 @@ const ItineraryDetail = () => {
         setError(null);
 
         if (data.tourGuide) {
-          // const guideResponse = await fetch(`http://localhost:4000/${userRole}/tour-guide/${data.tourGuide}`, {
-          //   headers: {
-          //     Authorization: `Bearer ${token}`,
-          //   },
-          // });
-
-          // if (!guideResponse.ok) {
-          //   throw new Error('Failed to fetch tour guide profile');
-          // }
-
-          // const guideData = await guideResponse.json();
           setTourGuideProfile(data.tourGuide);
         }
 
-        const activityDetails = await Promise.all(
-          data.activities.map(async (activity) => {
-            const activityResponse = await fetch(`http://localhost:4000/${userRole}/activity/${activity}`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
+        // const activityDetails = await Promise.all(
+        //   data.activities.map(async (activity) => {
+        //     const activityResponse = await fetch(`http://localhost:4000/${userRole}/activity/${activity}`, {
+        //       headers: {
+        //         Authorization: `Bearer ${token}`,
+        //       },
+        //     });
 
-            if (!activityResponse.ok) {
-              throw new Error('Failed to fetch activity details');
-            }
+        //     if (!activityResponse.ok) {
+        //       throw new Error('Failed to fetch activity details');
+        //     }
 
-            return await activityResponse.json();
-          })
-        );
-        setActivities(activityDetails);
+        //     return await activityResponse.json();
+        //   })
+        // );
+        console.log(data);
+        setActivities(data.activities);
 
       } catch (err) {
         setError('Error fetching itinerary details. Please try again later.');

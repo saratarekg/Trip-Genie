@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"; // Assuming you're using a UI library
 
 export function CategoryCRUD() {
-  const { id } = useParams();
+
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [oldCategory, setOldCategory] = useState('');
