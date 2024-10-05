@@ -258,7 +258,7 @@ const ItineraryForm = () => {
 
         <button
           type="button"
-          className="bg-green-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-green-600 transition duration-200"
+          className="bg-gray-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-gray-600 transition duration-200"
           onClick={() =>
             appendDate({ date: '', times: [{ startTime: '', endTime: '' }] })
           }
@@ -281,7 +281,7 @@ const ItineraryForm = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-blue-600 transition duration-200"
+          className="bg-orange-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-orange-600 transition duration-200"
         >
           {loading ? 'Submitting...' : 'Submit'}
         </button>
