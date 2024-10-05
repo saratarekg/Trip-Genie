@@ -45,18 +45,7 @@ const ActivityDetail = () => {
         setError(null);
 
         if (data.advertiser) {
-          const advertiserResponse = await fetch(`http://localhost:4000/advertiser/${data.advertiser}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (!advertiserResponse.ok) {
-            throw new Error('Failed to fetch advertiser profile');
-          }
-
-          const advertiserData = await advertiserResponse.json();
-          setAdvertiserProfile(advertiserData);
+          setAdvertiserProfile(data.advertiser);
         }
       } catch (err) {
         setError('Error fetching activity details. Please try again later.');
@@ -176,7 +165,7 @@ const ActivityDetail = () => {
                 </div>
                 <div className="flex items-center">
                   <Phone className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Phone: {advertiserProfile ? advertiserProfile.phoneNumber : 'Loading...'}</span>
+                  <span className="text-gray-700">Hotline: {advertiserProfile ? advertiserProfile.hotline : 'Loading...'}</span>
                 </div>
                 <div className="flex items-center">
                   <Award className="w-6 h-6 mr-2 text-orange-500" />

@@ -4,7 +4,37 @@ import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+  } from "@/components/ui/dialog";
+  import {
+    XCircle,
+    CheckCircle,
+    ChevronLeft,
+    Calendar,
+    MapPin,
+    Users,
+    DollarSign,
+    Globe,
+    Accessibility,
+    Star,
+    Edit,
+    Trash2,
+    Mail,
+    Phone,
+    Award,
+    Clock,
+    Info,
+  } from 'lucide-react';
+  import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { role } from '@/pages/login';
 // Form validation schema using zod
 const formSchema = z.object({
   name: z.string().min(1, 'Please enter a product name'),
@@ -18,7 +48,7 @@ const CreateProductForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
+  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
   const {
     register,
     handleSubmit,
@@ -41,10 +71,28 @@ const CreateProductForm = () => {
 
     const token = Cookies.get('jwt'); // Assuming the token is stored in cookies
     try {
-      await axios.post('http://localhost:4000/seller/products', data, {
+      await axios.post(`http://localhost:4000/${userRole}/products`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSuccess('Product created successfully!');
+      <Dialog>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+            Itinerary Deleted
+          </DialogTitle>
+          <DialogDescription>
+            The itinerary has been successfully deleted.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="default" onClick={() => navigate('/all-products')}>
+            Back to All Itineraries
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     } catch (err) {
       setError('Failed to create product. Please try again.');
       console.error(err.message);
@@ -130,6 +178,7 @@ const CreateProductForm = () => {
           {loading ? 'Submitting...' : 'Submit'}
         </button>
       </form>
+  
     </div>
   );
 };

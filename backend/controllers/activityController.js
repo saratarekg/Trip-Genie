@@ -13,12 +13,10 @@ const getAllActivities = async (req, res) => {
 
 
     const searchResult = await Activity.findByFields(searchBy);
-    console.log("I am eternal");
 
     const searchResultIds = searchResult.map((activity) => activity._id);
     const filterResultIds = filterResult.map((activity) => activity._id);
 
-    console.log("I am all knowing");
 
     const query = [];
     query.push({ _id: { $in: searchResultIds }});
@@ -55,7 +53,7 @@ const getAllActivities = async (req, res) => {
 
 const getActivityById = async (req, res) => {
   try {
-    const activity = await Activity.findById(req.params.id);
+    const activity = await Activity.findById(req.params.id).populate("advertiser").exec();
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
     }

@@ -57,7 +57,7 @@ const getAllItineraries = async (req, res) => {
 // GET a single itinerary
 const getItineraryById = async (req, res) => {
   try {
-    const itinerary = await Itinerary.findById(req.params.id);
+    const itinerary = await Itinerary.findById(req.params.id).populate("tourGuide").exec();
     if (!itinerary) {
       return res.status(404).json({ message: "Itinerary not found" });
     }
