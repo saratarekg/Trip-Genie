@@ -5,6 +5,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Link } from 'react-router-dom';
+
 
 export function Activities() {
   const [activities, setActivities] = useState([]);
@@ -55,33 +57,43 @@ export function Activities() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+       <div className="flex justify-between items-center mb-6">
+        <div className="w-full sm:w-1/2">
+          <h2 className="text-3xl font-bold">Activities</h2>
+          <hr className="border-red-500 w-1/2 mb-3 mt-1 border-t-2" />
+          <p className="text-gray-600 mt-2 mb-8">
+          Explore a range of exciting activities on our travel website! Whether it's guided tours, outdoor adventures, or cultural experiences, we have something for every traveler. Start planning today for unforgettable memories!
+          </p>
+        </div>
         <div className="flex gap-2">
-          {/* Previous Button*/}
+        <div className="flex">
+        <Link to="/activity">
+        <Button
+                variant="primary"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-lg font-medium"
+              >
+                View More
+              </Button>
+              </Link>
+          </div>
           <Button
             variant="outline"
             size="icon"
             onClick={prevSlide}
             aria-label="Previous place"
-            className="bg-black text-white hover:bg-gray-700 transition-colors duration-300"
+            className="bg-black text-white hover:bg-gray-700"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          {/* Next Button with hover effect */}
           <Button
             variant="outline"
             size="icon"
             onClick={nextSlide}
             aria-label="Next place"
-            className="bg-orange-500 text-white hover:bg-orange-600 transition-colors duration-300"
+            className="bg-orange-500 text-white hover:bg-orange-600"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
-        </div>
-        <div className="text-right">
-          <h2 className="text-3xl font-bold">Activities</h2>
-          <hr className="border-red-500 w-1/2 mb-3 mt-1 ml-auto border-t-2" />
-          <p className="text-gray-600 mt-2 mb-8">Latest available activities.</p>
         </div>
       </div>
 
