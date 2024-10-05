@@ -1,20 +1,44 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
-import { Link } from 'react-router-dom'; // Import Link from React Router
-import logo from '../assets/images/tgLogofinal6.png';
+import React, { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom"; // Import Link from React Router
+import logo from "../assets/images/tgLogofinal6.png";
+import Cookies from "js-cookie";
 
 const NavLink = ({ to, children }) => (
   <Link
     to={to}
-    className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium">
+    className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium"
+  >
     {children}
   </Link>
 );
 
 export function NavbarComponent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const role = Cookies.get("role");
+
+  // Define the logOut function
+  const logOut = async () => {
+    console.log("Logging out...");
+    try {
+      const response = await fetch("http://localhost:4000/auth/logout");
+
+      if (response.ok) {
+        Cookies.set("jwt", "");
+        Cookies.set("role", "");
+        Cookies.remove("jwt");
+        Cookies.remove("role");
+        console.log("Logged out successfully");
+        window.location.reload(); // Refresh the page after logout
+      } else {
+        console.error("Logout failed.");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50">
@@ -22,7 +46,8 @@ export function NavbarComponent() {
         {/* Background Image */}
         <div
           className="absolute inset-0 w-full h-[70px] bg-cover bg-center"
-          style={{ background: 'transparent' }}></div>
+          style={{ background: "transparent" }}
+        ></div>
 
         {/* Navbar Content */}
         <div className="relative bg-black bg-opacity-50">
@@ -38,25 +63,47 @@ export function NavbarComponent() {
               {/* Desktop Navigation */}
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  {['Activity', 'Itineraries', 'Travel', 'Museums', 'Pricing', 'Historical Places'].map((item) => (
-                    <NavLink key={item} to={`/${item.toLowerCase().replace(/\s+/g, '-')}`}>
+                  {[
+                    "Activity",
+                    "Itineraries",
+                    "Travel",
+                    "Museums",
+                    "Pricing",
+                    "Historical Places",
+                  ].map((item) => (
+                    <NavLink
+                      key={item}
+                      to={`/${item.toLowerCase().replace(/\s+/g, "-")}`}
+                    >
                       {item}
                     </NavLink>
                   ))}
                 </div>
               </div>
 
-              {/* Login, Sign Up*/}
+              {/* Login, Sign Up */}
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center md:ml-6">
-                  <NavLink to="/login" className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium">
-                    Login
-                  </NavLink>
-                  <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                  <NavLink to="/sign-up" className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium">
-                    sign up
-                  </NavLink>
-                  </button>
+                  {role === undefined ? (
+                    <>
+                      <NavLink
+                        to="/login"
+                        className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium"
+                      >
+                        Login
+                      </NavLink>
+                      <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <NavLink to="/sign-up">Sign up</NavLink>
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={logOut} // Call logOut on button click
+                      className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                    >
+                      Logout
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -64,7 +111,8 @@ export function NavbarComponent() {
               <div className="md:hidden">
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white hover:bg-opacity-10 focus:outline-none">
+                  className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white hover:bg-opacity-10 focus:outline-none"
+                >
                   <span className="sr-only">Open main menu</span>
                   {isMenuOpen ? (
                     <X className="block h-6 w-6" aria-hidden="true" />
@@ -80,11 +128,19 @@ export function NavbarComponent() {
           {isMenuOpen && (
             <div className="md:hidden bg-black bg-opacity-50">
               <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                {['Home', 'Explore', 'Travel', 'Museums', 'Pricing', 'Historical Places'].map((item) => (
+                {[
+                  "Home",
+                  "Explore",
+                  "Travel",
+                  "Museums",
+                  "Pricing",
+                  "Historical Places",
+                ].map((item) => (
                   <Link
                     key={item}
-                    to={`/${item.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium">
+                    to={`/${item.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium"
+                  >
                     {item}
                   </Link>
                 ))}
@@ -94,9 +150,9 @@ export function NavbarComponent() {
               <div className="pt-4 pb-3 border-t border-white border-opacity-25">
                 <div className="flex items-center px-5">
                   <Link to="/login">
-                  <button className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-base font-medium">
-                    Login
-                  </button>
+                    <button className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-base font-medium">
+                      Login
+                    </button>
                   </Link>
                   <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-base font-medium">
                     Sign up

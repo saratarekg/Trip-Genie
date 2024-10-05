@@ -14,14 +14,16 @@ const Login = () => {
   const logOut = async () => {
     console.log("Logging out...");
     try {
-      const response = await fetch("http://localhost:4000/auth/logout", {
-        method: "POST",
-        credentials: "include", // Ensure cookies are sent in the request
-      });
+      const response = await fetch("http://localhost:4000/auth/logout");
   
       if (response.ok) {
-
+        Cookies.set("jwt", "");
+        Cookies.set("role", "");
+        Cookies.remove("jwt");
+        Cookies.remove("role");
         console.log("Logged out successfully");
+        window.location.reload();
+
       } else {
         console.error("Logout failed.");
       }
@@ -86,6 +88,8 @@ const Login = () => {
           navigate("/");
         }
         console.log("Login successful!");
+        window.location.reload();
+
       } else {
         setErrorMessage("Login failed. Please check your credentials.");
       }
