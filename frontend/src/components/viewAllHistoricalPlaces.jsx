@@ -40,7 +40,7 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
   </div>
 );
 
-export function AllItinerariesComponent() {
+export function AllHistoricalPlacesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
