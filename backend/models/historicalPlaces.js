@@ -26,8 +26,9 @@ const historicalPlacesSchema = new Schema({
         weekends: String,
     },
     ticketPrices: {
-        adult: Number,
-        child: Number,
+        foreigner: Number,
+        native: Number,
+        student: Number,
 
     },
     pictures: [String], // Array of GridFS filenames
