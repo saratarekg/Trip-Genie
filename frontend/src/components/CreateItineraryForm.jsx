@@ -1,216 +1,193 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
+const formSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  timeline: z.string().min(1, 'Timeline is required'),
+  language: z.string().min(1, 'Language is required'),
+  price: z.number().min(1, 'Price is required'),
+  pickUpLocation: z.string().min(1, 'Pick-up location is required'),
+  dropOffLocation: z.string().min(1, 'Drop-off location is required'),
+  activities: z.array(z.string()).min(1, 'At least one activity must be selected'),
+  availableDates: z
+    .array(
+      z.object({
+        date: z.string().min(1, 'Date is required'),
+        times: z.array(
+          z.object({
+            startTime: z.string().min(1, 'Start time is required'),
+            endTime: z.string().min(1, 'End time is required'),
+          })
+        ),
+      })
+    )
+    .min(1, 'At least one date is required'),
+  accessibility: z.boolean().optional(),
+});
 
 const ItineraryForm = () => {
-  const [activities, setActivities] = useState([])
-  const [error, setError] = useState(null)
-  const [formData, setFormData] = useState({
-    title: '',
-    timeline: '',
-    language: '',
-    price: '',
-    availableDates: [{ date: '', times: [{ startTime: '', endTime: '' }] }],
-    activities: [''],
-    accessibility: false,
-    pickUpLocation: '',
-    dropOffLocation: '',
-    rating: '',
+  const [activities, setActivities] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: '',
+      timeline: '',
+      language: '',
+      price: '',
+      availableDates: [{ date: '', times: [{ startTime: '', endTime: '' }] }],
+      activities: [],
+      pickUpLocation: '',
+      dropOffLocation: '',
+      accessibility: false,
+    },
   });
 
-  const handleCheckboxChange = (activityId) => {
-    const updatedActivities = formData.activities.includes(activityId)
-      ? formData.activities.filter((id) => id !== activityId)  // Deselect if already selected
-      : [...formData.activities, activityId];  // Select activity if not already selected
+  const { fields: availableDates, append: appendDate, remove: removeDate } = useFieldArray({
+    control,
+    name: 'availableDates',
+  });
 
-    setFormData({ ...formData, activities: updatedActivities });
-  };
-
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const token = Cookies.get('jwt')
-        let role = Cookies.get('role')
-        if (role === undefined)
-          role = 'guest'
-        const api = `http://localhost:4000/${role}/activities`
-        const response = await axios.get(api, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        })
-        console.log(response.data)
-        setActivities(response.data)
+        const token = Cookies.get('jwt');
+        let role = Cookies.get('role');
+        if (role === undefined) role = 'guest';
+        const response = await axios.get(`http://localhost:4000/${role}/activities`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setActivities(response.data);
       } catch (err) {
-        setError(err.message)
+        console.error(err.message);
       }
-    }
+    };
+    fetchActivities();
+  }, []);
 
-    fetchActivities()
-  }, [])
-
-
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleDateChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedDates = [...formData.availableDates];
-    updatedDates[index][name] = value;
-    setFormData({ ...formData, availableDates: updatedDates });
-  };
-
-  const handleTimeChange = (dateIndex, timeIndex, e) => {
-    const { name, value } = e.target;
-    const updatedDates = [...formData.availableDates];
-    updatedDates[dateIndex].times[timeIndex][name] = value;
-    setFormData({ ...formData, availableDates: updatedDates });
-  };
-
-  const addDateField = () => {
-    setFormData({
-      ...formData,
-      availableDates: [...formData.availableDates, { date: '', times: [{ startTime: '', endTime: '' }] }],
-    });
-  };
-
-  const removeDateField = (index) => {
-    if (formData.availableDates.length > 1) {
-      const updatedDates = [...formData.availableDates];
-      updatedDates.splice(index, 1);
-      setFormData({ ...formData, availableDates: updatedDates });
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    const token = Cookies.get('jwt');
+    const role = Cookies.get('role') || 'guest';
+    
+    try {
+      const response = await axios.post(`http://localhost:4000/${role}/itineraries`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setSuccess('Itinerary created successfully!');
+      console.log('Created itinerary:', response.data);
+    } catch (err) {
+      setError('Failed to create itinerary. Please try again.');
+      console.error(err.message);
+    } finally {
+      setLoading(false);
     }
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.activities.length === 0) {
-      alert('Please select at least one activity!');
-      return;
-    }
-    console.log('Form data submitted:', formData);
-    // Add your form submission logic here
-  };
-
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form
         className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-20 mb-20"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
       >
         <h2 className="text-xl font-semibold mb-4 text-center">Create Itinerary</h2>
 
+        {/* Display success or error messages */}
+        {success && <div className="text-green-500 mb-4">{success}</div>}
+        {error && <div className="text-red-500 mb-4">{error}</div>}
+
+        {/* Form Fields */}
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="title">
-            Title
-          </label>
+          <label className="block text-gray-700" htmlFor="title">Title</label>
           <input
-            type="text"
-            name="title"
+            {...register('title')}
+            className="border border-gray-300 rounded-xl p-2 w-full"
             id="title"
-            className="border border-gray-300 rounded-xl p-2 w-full"
-            value={formData.title}
-            onChange={handleChange}
-            required
           />
+          {errors.title && <span className="text-red-500">{errors.title.message}</span>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="timeline">
-            Timeline
-          </label>
+          <label className="block text-gray-700" htmlFor="timeline">Timeline</label>
           <input
-            type="text"
-            name="timeline"
+            {...register('timeline')}
+            className="border border-gray-300 rounded-xl p-2 w-full"
             id="timeline"
-            className="border border-gray-300 rounded-xl p-2 w-full"
-            value={formData.timeline}
-            onChange={handleChange}
-            required
           />
+          {errors.timeline && <span className="text-red-500">{errors.timeline.message}</span>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="language">
-            Language
-          </label>
+          <label className="block text-gray-700" htmlFor="language">Language</label>
           <input
-            type="text"
-            name="language"
+            {...register('language')}
+            className="border border-gray-300 rounded-xl p-2 w-full"
             id="language"
-            className="border border-gray-300 rounded-xl p-2 w-full"
-            value={formData.language}
-            onChange={handleChange}
-            required
           />
+          {errors.language && <span className="text-red-500">{errors.language.message}</span>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="price">
-            Price
-          </label>
+          <label className="block text-gray-700" htmlFor="price">Price</label>
           <input
+            {...register('price', { valueAsNumber: true })}
             type="number"
-            name="price"
+            className="border border-gray-300 rounded-xl p-2 w-full"
             id="price"
-            className="border border-gray-300 rounded-xl p-2 w-full"
-            value={formData.price}
-            onChange={handleChange}
-            required
           />
+          {errors.price && <span className="text-red-500">{errors.price.message}</span>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="pickUpLocation">
-            Pick-Up Location
-          </label>
+          <label className="block text-gray-700" htmlFor="pickUpLocation">Pick-Up Location</label>
           <input
-            type="text"
-            name="pickUpLocation"
+            {...register('pickUpLocation')}
+            className="border border-gray-300 rounded-xl p-2 w-full"
             id="pickUpLocation"
-            className="border border-gray-300 rounded-xl p-2 w-full"
-            value={formData.pickUpLocation}
-            onChange={handleChange}
-            required
           />
+          {errors.pickUpLocation && <span className="text-red-500">{errors.pickUpLocation.message}</span>}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="dropOffLocation">
-            Drop-Off Location
-          </label>
+          <label className="block text-gray-700" htmlFor="dropOffLocation">Drop-Off Location</label>
           <input
-            type="text"
-            name="dropOffLocation"
-            id="dropOffLocation"
+            {...register('dropOffLocation')}
             className="border border-gray-300 rounded-xl p-2 w-full"
-            value={formData.dropOffLocation}
-            onChange={handleChange}
-            required
+            id="dropOffLocation"
           />
+          {errors.dropOffLocation && <span className="text-red-500">{errors.dropOffLocation.message}</span>}
         </div>
 
+        {/* Activities Selection */}
         <div className="mb-4 relative">
-          <label className="block text-gray-700" htmlFor="activities">
-            Activities
-          </label>
+          <label className="block text-gray-700" htmlFor="activities">Activities</label>
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="border border-gray-300 rounded-xl p-2 w-full text-left"
           >
-            {formData.activities.length > 0
+            {watch('activities').length > 0
               ? `Selected: ${activities
-                .filter((activity) => formData.activities.includes(activity._id))
-                .map((activity) => activity.name)
-                .join(', ')}`
+                  .filter((activity) => watch('activities').includes(activity._id))
+                  .map((activity) => activity.name)
+                  .join(', ')}`
               : 'Select activities'}
           </button>
 
@@ -220,89 +197,93 @@ const ItineraryForm = () => {
                 <div key={activity._id} className="flex items-center p-2">
                   <input
                     type="checkbox"
-                    id={activity._id}
+                    value={activity._id}
+                    {...register('activities')}
                     className="mr-2"
-                    checked={formData.activities.includes(activity._id)}
-                    onChange={() => handleCheckboxChange(activity._id)}
                   />
-                  <label htmlFor={activity._id}>{activity.name}</label>
+                  <label>{activity.name}</label>
                 </div>
               ))}
             </div>
           )}
+          {errors.activities && <span className="text-red-500">{errors.activities.message}</span>}
         </div>
 
-        {formData.availableDates.map((date, index) => (
+        {/* Available Dates */}
+        {availableDates.map((date, index) => (
           <div key={index} className="mb-4">
-            <label className="block text-gray-700">
-              Available Date {index + 1}
-            </label>
-            <input
-              type="date"
-              name="date"
-              className="border border-gray-300 rounded-xl p-2 w-full"
-              value={date.date}
-              onChange={(e) => handleDateChange(index, e)}
-              required
-            />
-            {date.times.map((time, timeIndex) => (
-              <div key={timeIndex} className="flex justify-between">
+            <label className="block text-gray-700">Available Date {index + 1}</label>
+            <Controller
+              name={`availableDates.${index}.date`}
+              control={control}
+              render={({ field }) => (
                 <input
-                  type="time"
-                  name="startTime"
-                  className="border border-gray-300 rounded-xl p-2 mt-2"
-                  value={time.startTime}
-                  onChange={(e) => handleTimeChange(index, timeIndex, e)}
-                  required
+                  type="date"
+                  className="border border-gray-300 rounded-xl p-2 w-full"
+                  {...field}
                 />
-                <input
-                  type="time"
-                  name="endTime"
-                  className="border border-gray-300 rounded-xl p-2 mt-2"
-                  value={time.endTime}
-                  onChange={(e) => handleTimeChange(index, timeIndex, e)}
-                  required
+              )}
+            />
+            {errors.availableDates?.[index]?.date && <span className="text-red-500">{errors.availableDates[index].date.message}</span>}
+            
+            {/* Times */}
+            {date.times.map((_, timeIndex) => (
+              <div key={timeIndex} className="flex space-x-4">
+                <Controller
+                  name={`availableDates.${index}.times.${timeIndex}.startTime`}
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      type="time"
+                      className="border border-gray-300 rounded-xl p-2 w-full"
+                      {...field}
+                    />
+                  )}
+                />
+                <Controller
+                  name={`availableDates.${index}.times.${timeIndex}.endTime`}
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      type="time"
+                      className="border border-gray-300 rounded-xl p-2 w-full"
+                      {...field}
+                    />
+                  )}
                 />
               </div>
             ))}
-            {index > 0 && (
-              <button
-                type="button"
-                className="bg-red-500 text-white font-semibold py-1 px-3 rounded-xl mt-2 hover:bg-red-600 transition duration-200"
-                onClick={() => removeDateField(index)}
-              >
-                Remove Date
-              </button>
-            )}
           </div>
         ))}
 
         <button
           type="button"
-          className="bg-gray-500 text-white font-semibold py-2 px-4 rounded-xl w-full mt-2 hover:bg-gray-600"
-          onClick={addDateField}
+          className="bg-green-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-green-600 transition duration-200"
+          onClick={() =>
+            appendDate({ date: '', times: [{ startTime: '', endTime: '' }] })
+          }
         >
           Add Another Date
         </button>
 
-        <div className="mb-4">
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              name="accessibility"
-              className="mr-2"
-              checked={formData.accessibility}
-              onChange={(e) => setFormData({ ...formData, accessibility: e.target.checked })}
-            />
-            Is it accesible for people with disabilities.
-          </label>
+        {/* Accessibility Checkbox */}
+        <div className="mb-4 mt-4">
+          <label className="block text-gray-700" htmlFor="accessibility">Accessibility</label>
+          <input
+            type="checkbox"
+            {...register('accessibility')}
+            className="mr-2"
+            id="accessibility"
+          />
+          Accessible for Disabled?
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className="bg-orange-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-orange-600 transition duration-200"
+          className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-blue-600 transition duration-200"
         >
-          Submit
+          {loading ? 'Submitting...' : 'Submit'}
         </button>
       </form>
     </div>
