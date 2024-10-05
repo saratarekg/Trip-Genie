@@ -3,45 +3,62 @@ const Seller = require('../models/seller');
 
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, maxPrice,searchBy,asc,myProducts } = req.query;
+  const { minPrice, budget, searchBy, asc, myProducts } = req.query;
 
   try {
-    const filterResult = await Product.filterByPrice(minPrice, maxPrice);
-    const searchResult = await Product.searchByNames(searchBy);
+    // Debugging: Log incoming query parameters
+    console.log('Received query:', req.query);
 
-    const searchResultIds = searchResult.map((product) => product._id);
-    const filterResultIds = filterResult.map((product) => product._id);
+    // Build the query object dynamically
+    const query = {};
 
-    let query = [];
-    query.push({ _id: { $in: searchResultIds }});
-    query.push({ _id: { $in: filterResultIds }});
-    if(myProducts){
-      query.push({ seller: res.locals.user_id });
+    // Apply search filter (by name) if provided
+    if (searchBy) {
+      query.name = { $regex: searchBy, $options: 'i' }; // Case-insensitive regex search
+      console.log('Search applied:', query.name);
     }
 
-    let productsQuery = await Product.find({
-      $and: query,
-    });
-
-    if (asc!==undefined) {
-      const sortBy = {};
-      sortBy['rating'] = asc;
-      productsQuery = productsQuery.sort(sortBy);
+    // Apply price range filter if provided
+    if (minPrice || budget) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice); // Apply minPrice if given
+      if (budget) query.price.$lte = parseFloat(budget); // Apply budget if given
+      console.log('Price filter applied:', query.price); // Log the price filter
     }
 
+    // Filter by the user's products (myProducts)
+    if (myProducts) {
+      query.seller = res.locals.user_id;
+      console.log('Filtering by user\'s products:', query.seller);
+    }
+
+    // Perform the query
+    let productsQuery = Product.find(query);
+
+    // Apply sorting if 'asc' is defined (for sorting by rating)
+    if (asc !== undefined) {
+      const sortOrder = parseInt(asc, 10);
+      productsQuery = productsQuery.sort({ rating: sortOrder });
+      console.log('Sorting applied:', { rating: sortOrder });
+    }
+
+    // Execute the query and get the products
     const products = await productsQuery;
 
+    // Check if no products match the filters
     if (!products.length) {
-      return res
-        .status(404)
-        .json({ message: "No products found" });
+      return res.status(404).json({ message: "No products found" });
     }
 
+    // Return filtered products
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
 
 const addProduct = async (req, res) => {
     const { name, picture , price,description, rating , reviews , quantity } = req.body; // Extract the data from request

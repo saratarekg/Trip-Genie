@@ -3,6 +3,7 @@ import TravelHero from "../components/TravelHero.jsx";
 import { HistoricalPlaces } from "../components/HistoricalPlacesSlider.jsx";
 import { Activities } from "../components/ActivitiesSlider.jsx";
 import { ItineraryCards } from "../components/ItineraryCards.jsx";
+import { ProductViewer } from "../components/ProductView.jsx";
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
       <HistoricalPlaces />
       <Activities />
       <ItineraryCards />
+      <ProductViewer />
       </div>
     </>
   );
