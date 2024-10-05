@@ -50,6 +50,7 @@ historicalPlacesSchema.statics.findByFields = async function(searchCriteria) {
     const query = [];
     
     const historicalTags = await HistoricalTag.searchByFields(searchCriteria);
+    console.log(historicalTags);
     const tagIds = historicalTags.map(tag => tag._id);
 
     searchFields = ["title", "description", "location.address","location.city","location.country"];
@@ -61,7 +62,7 @@ historicalPlacesSchema.statics.findByFields = async function(searchCriteria) {
 
     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
         for(const tagId of tagIds){
-            if(doc.historicalTag.includes(tagId)){
+            if(doc.historicalTag && doc.historicalTag.includes(tagId)){
                 query.push({ _id: doc._id });
                 break;
             }
@@ -97,6 +98,9 @@ historicalPlacesSchema.statics.filterByTag = async function(types,periods) {
                 break;
             }
         }
+    }
+    if (query.length === 0){
+        return [];
     }
     return this.find({ $or: query }).populate('governor').populate('historicalTag').exec();
 };

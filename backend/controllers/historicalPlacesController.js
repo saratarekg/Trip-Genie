@@ -43,7 +43,7 @@ const getAllHistoricalPlaces = async (req, res) => {
         $and: query,
         }).populate('historicalTag').exec();
         if (!historicalPlaces || historicalPlaces.length === 0) {
-            return res.status(404).json({ message: 'No historical places found.' });
+            return res.status(200).json([]);
         }
         res.status(200).json(historicalPlaces);
     } catch (error) {
