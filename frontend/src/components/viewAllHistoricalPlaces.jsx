@@ -58,14 +58,16 @@ export function AllHistoricalPlacesComponent() {
     const [filtersVisible, setFiltersVisible] = useState(false);
     //   const [price, setPrice] = useState("");
     //   const [dateRange, setDateRange] = useState({ lower: "", upper: "" });
-       const [selectedTypes, setSelectedTypes] = useState([]); // Changed to selectedTypes array
-       const [selectedPeriods, setSelectedPeriods] = useState([]); // Changed to selectedTypes array
+    const [selectedTypes, setSelectedTypes] = useState([]); // Changed to selectedTypes array
+    const [selectedPeriods, setSelectedPeriods] = useState([]); // Changed to selectedTypes array
 
     //   const [selectedLanguages, setSelectedLanguages] = useState([]); // Changed to selectedLanguages array
     const tripsPerPage = 3;
     const [selectedItinerary, setSelectedItinerary] = useState(null);
-       const [typesOptions, setTypesOptions] = useState([]);
-       const [periodOptions, setPeriodOptions] = useState([]);
+    const [typesOptions, setTypesOptions] = useState([]);
+    const [periodOptions, setPeriodOptions] = useState([]);
+    const [myHistoricalPlaces, setmyHistoricalPlaces] = useState(false);
+
 
     //   const [languagesOptions, setLanguagesOptions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -107,37 +109,37 @@ export function AllHistoricalPlacesComponent() {
     //     fetchLanguages();
     //   }, []);
 
-      useEffect(() => {
+    useEffect(() => {
         // Fetch types from the backend
         const fetchType = async () => {
-          try {
-            setIsLoading(false);
-            const response = await axios.get('http://localhost:4000/api/getAllHistoricalTypes');
-            console.log('Type:', response.data);
-            setTypesOptions(response.data);
-          } catch (error) {
-            console.error("Error fetching Type:", error);
-          }
+            try {
+                setIsLoading(false);
+                const response = await axios.get('http://localhost:4000/api/getAllHistoricalTypes');
+                console.log('Type:', response.data);
+                setTypesOptions(response.data);
+            } catch (error) {
+                console.error("Error fetching Type:", error);
+            }
         };
         fetchType();
         setIsLoading(false);
-      }, []);
+    }, []);
 
-      useEffect(() => {
+    useEffect(() => {
         // Fetch types from the backend
         const fetchType = async () => {
-          try {
-            setIsLoading(false);
-            const response = await axios.get('http://localhost:4000/api/getAllHistoricalPeriods');
-            console.log('Period:', response.data);
-            setPeriodOptions(response.data);
-          } catch (error) {
-            console.error("Error fetching Period:", error);
-          }
+            try {
+                setIsLoading(false);
+                const response = await axios.get('http://localhost:4000/api/getAllHistoricalPeriods');
+                console.log('Period:', response.data);
+                setPeriodOptions(response.data);
+            } catch (error) {
+                console.error("Error fetching Period:", error);
+            }
         };
         fetchType();
         setIsLoading(false);
-      }, []);
+    }, []);
 
 
     useEffect(() => {
@@ -152,19 +154,19 @@ export function AllHistoricalPlacesComponent() {
         return () => clearTimeout(delayDebounceFn);
     }, [searchTerm]);
 
-    //   useEffect(() => {
-    //     if (sortBy) {
-    //       searchItineraries();
-    //     }
-    //   }, [sortBy, sortOrder]);
 
-    //   const handleSort = (attribute) => {
-    //     setIsLoading(true);
-    //     const newSortOrder = sortOrder === 1 ? -1 : 1;
-    //     setSortOrder(newSortOrder);
-    //     setSortBy(attribute); 
-    //     setIsLoading(false);
-    //   };
+    useEffect(() => {
+
+        searchHistoricalPlace();
+
+    }, [myHistoricalPlaces]);
+
+    const handlemyHistoricalPlaces = (attribute) => {
+        setIsLoading(true);
+        setmyHistoricalPlaces(attribute);
+        setIsLoading(false);
+    };
+
     const fetchHistoricalPlace = async () => {
         try {
             setIsLoading(false);
@@ -197,7 +199,7 @@ export function AllHistoricalPlacesComponent() {
         setSearchTerm("");
         setSelectedTypes([]); // Reset selected types
         setSelectedPeriods([]); // Reset selected periods
-
+        setmyHistoricalPlaces(false);
 
         // Fetch itineraries without any filters
         fetchHistoricalPlace();
@@ -207,8 +209,11 @@ export function AllHistoricalPlacesComponent() {
         try {
             const role = getUserRole();
             const url = new URL(`http://localhost:4000/${role}/historical-places`);
-    
+
             // Add the search term and filter parameters
+            if (myHistoricalPlaces) {
+                url.searchParams.append("myPlaces", myHistoricalPlaces);
+            }
             if (searchTerm) {
                 url.searchParams.append("searchBy", searchTerm);
             }
@@ -218,7 +223,7 @@ export function AllHistoricalPlacesComponent() {
             if (selectedPeriods.length > 0) {
                 url.searchParams.append("periods", selectedPeriods.join(",")); // Send selected periods as comma-separated
             }
-    
+
             const token = Cookies.get("jwt");
             const response = await fetch(url, {
                 headers: {
@@ -226,13 +231,13 @@ export function AllHistoricalPlacesComponent() {
                     "Content-Type": "application/json",
                 },
             });
-    
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-    
+
             const data = await response.json();
-    
+
             // Check if the result is empty
             if (!data || data.length === 0) {
                 setError("No historical places found.");
@@ -241,18 +246,18 @@ export function AllHistoricalPlacesComponent() {
                 setHistoricalPlaces(data); // Set places if data exists
                 setError(null); // Clear any error message
             }
-    
+
             setCurrentPage(1);
         } catch (error) {
             console.error("Error fetching filtered results:", error);
-    
+
             // Handle actual errors (network, server issues)
             setError("Error fetching filtered results");
             setHistoricalPlaces([]);
         }
     };
-    
-    
+
+
 
     const toggleFilters = () => {
         setIsLoading(false);
@@ -261,13 +266,13 @@ export function AllHistoricalPlacesComponent() {
     };
 
     // Handle type and language selections
-      const handleTypeSelection = (option) => {
+    const handleTypeSelection = (option) => {
         setSelectedTypes((prev) =>
-          prev.includes(option)
-            ? prev.filter((type) => type !== option)
-            : [...prev, option]
+            prev.includes(option)
+                ? prev.filter((type) => type !== option)
+                : [...prev, option]
         );
-      };
+    };
 
     //   const handleLanguageSelection = (option) => {
     //     setSelectedLanguages((prev) =>
@@ -302,29 +307,31 @@ export function AllHistoricalPlacesComponent() {
                                 </div>
 
                                 <FilterComponent
-                  filtersVisible={filtersVisible}
-                  toggleFilters={toggleFilters}
-                //   sortOrder={sortOrder}
-                //   sortBy={sortBy}
-                //   handleSort={handleSort}
-                  clearFilters={clearFilters}
-                  // sortItineraries={sortItineraries}
-                //   price={price}
-                //   setPrice={setPrice}
-                //   dateRange={dateRange}
-                //   setDateRange={setDateRange}
-                  selectedTypes={selectedTypes} // Pass selectedTypes array
-                  setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
-                  selectedPeriods={selectedPeriods} // Pass periods array
-                  setSelectedPeriods={setSelectedPeriods} // Pass periods function
-                //   selectedLanguages={selectedLanguages} // Pass selectedLanguages array
-                //   setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
-                  searchHistoricalPlaces={searchHistoricalPlace}
-                  typesOptions={typesOptions}
-                  periodsOptions={periodOptions}
-                //   languagesOptions={languagesOptions}
-                  role={getUserRole()}
-                />
+                                    filtersVisible={filtersVisible}
+                                    toggleFilters={toggleFilters}
+                                    //   sortOrder={sortOrder}
+                                    //   sortBy={sortBy}
+                                    //   handleSort={handleSort}
+                                    clearFilters={clearFilters}
+                                    myHistoricalPlaces={myHistoricalPlaces}
+                                    handlemyHistoricalPlaces={handlemyHistoricalPlaces}
+                                    // sortItineraries={sortItineraries}
+                                    //   price={price}
+                                    //   setPrice={setPrice}
+                                    //   dateRange={dateRange}
+                                    //   setDateRange={setDateRange}
+                                    selectedTypes={selectedTypes} // Pass selectedTypes array
+                                    setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
+                                    selectedPeriods={selectedPeriods} // Pass periods array
+                                    setSelectedPeriods={setSelectedPeriods} // Pass periods function
+                                    //   selectedLanguages={selectedLanguages} // Pass selectedLanguages array
+                                    //   setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
+                                    searchHistoricalPlaces={searchHistoricalPlace}
+                                    typesOptions={typesOptions}
+                                    periodsOptions={periodOptions}
+                                    //   languagesOptions={languagesOptions}
+                                    role={getUserRole()}
+                                />
                             </div>
 
                             {error && (
