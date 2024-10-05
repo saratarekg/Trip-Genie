@@ -6,46 +6,70 @@ import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "./Loader.jsx";
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+
+
 
 const HistoricalPlaceCard = ({ historicalPlace, onSelect }) => (
-    <div
-        className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
-        onClick={() => onSelect(historicalPlace._id)}
-    >
-        <div className="overflow-hidden">
-            <img
-                src={
-                    historicalPlace.pictures &&
-                        historicalPlace.pictures.length > 0
-                        ? historicalPlace.pictures[0]
-                        : defaultImage
-                }
-                alt={historicalPlace.title}
-                className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-            />
-        </div>
-        <div className="p-4 ">
-            <h3 className="text-xl font-semibold mt-2">{historicalPlace.title}</h3>
-            <h3 className="text-sm mt-2 text-gray-700">{historicalPlace.description}</h3>
-            <div className="flex justify-between items-center mt-4">
-                <div className="flex flex-col">
-                    <span className="text-lg font-bold text-blue-600">
-                        {historicalPlace.ticketPrices && historicalPlace.ticketPrices.adult
-                            ? `Adult: €${historicalPlace.ticketPrices.adult}/Day`
-                            : ''}
-                    </span>
-                    <span className="text-lg font-bold text-blue-600">
-                        {historicalPlace.ticketPrices && historicalPlace.ticketPrices.child
-                            ? `Child: €${historicalPlace.ticketPrices.child}/Day`
-                            : ''}
+    <Card
+    className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
+            onClick={() => onSelect(historicalPlace._id)}>
+        {/* <div
+            className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
+            onClick={() => onSelect(historicalPlace._id)}
+        > */}
+            <div className="overflow-hidden">
+                <img
+                    src={
+                        historicalPlace.pictures &&
+                            historicalPlace.pictures.length > 0
+                            ? historicalPlace.pictures[0]
+                            : defaultImage
+                    }
+                    alt={historicalPlace.title}
+                    className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+                />
+            </div>
+            <CardHeader>
+                <h3 className="text-xl font-semibold mt-2">{historicalPlace.title}</h3>
+                <h3 className="text-sm mt-2 text-gray-700">{historicalPlace.description}</h3>
+            </CardHeader>
+            <CardContent>
+                <div className="flex justify-between items-center mt-4">
+                    <div className="flex flex-col">
+                        <span className="text-lg font-bold text-blue-600">
+                            {historicalPlace.ticketPrices && historicalPlace.ticketPrices.adult
+                                ? `Adult: €${historicalPlace.ticketPrices.adult}/Day`
+                                : ''}
+                        </span>
+                        <span className="text-lg font-bold text-blue-600">
+                            {historicalPlace.ticketPrices && historicalPlace.ticketPrices.child
+                                ? `Child: €${historicalPlace.ticketPrices.child}/Day`
+                                : ''}
+                        </span>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                        {historicalPlace.location.city}, {historicalPlace.location.country}
                     </span>
                 </div>
-                <span className="text-sm text-gray-500">
-                    {historicalPlace.location.city}, {historicalPlace.location.country}
-                </span>
-            </div>
-        </div>
-    </div>
+            </CardContent>
+            <CardFooter className="p-4 pt-0">
+                <div className="flex flex-wrap gap-2">
+                    {historicalPlace.historicalTag.map((historicalTag, index) => (
+                        <Badge key={index} variant="secondary">
+                            {historicalTag.type}
+                        </Badge>
+                    ))}
+                    {historicalPlace.historicalTag.map((historicalTag, index) => (
+                        <Badge key={index} variant="secondary">
+                            {historicalTag.period}
+                        </Badge>
+                    ))}
+                </div>
+            </CardFooter>
+        {/* </div> */}
+    </Card>
 );
 
 export function AllHistoricalPlacesComponent() {
