@@ -26,6 +26,7 @@ import {AdminDash} from "./pages/AdminDash.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
+import UpdateActivity from "./components/UpdateActivity.jsx";
 
 function App() {
   
@@ -55,6 +56,7 @@ function App() {
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/update-product/:id" element={<UpdateProduct />} />
             <Route path="/update-itinerary/:id" element={<UpdateItinerary />} />
+            <Route path="/update-activity/:id" element={<UpdateActivity />} />
             <Route path="/activity/:id" element={<ActivityDetail />} />
 
             {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}

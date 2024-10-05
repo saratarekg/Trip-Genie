@@ -145,6 +145,10 @@ const ItineraryDetail = () => {
           setDeleteError(errorData.message);
           return;
         }
+        if (response.status === 403){
+          setDeleteError(errorData.message);
+          return;
+        }
         throw new Error('Failed to delete itinerary');
       }
 
@@ -323,7 +327,7 @@ const ItineraryDetail = () => {
               )}
             </div>
 
-            {userRole === 'tour-guide' && (
+            {userRole === 'tour-guide' &&  (
               <div className="mt-6 flex justify-end space-x-4">
                 <Button onClick={handleUpdate} variant="default" className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]">
                   <Edit className="w-4 h-4 mr-2" />
