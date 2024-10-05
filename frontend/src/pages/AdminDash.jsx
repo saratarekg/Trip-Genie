@@ -10,7 +10,7 @@ import logo from "../assets/images/logo.svg";
 import svgrepoIconcarrier from "../assets/images/svgrepo-iconcarrier.png";
 import { AdminGovernorPopup } from "@/components/admin-governor-popup";
 import { DeleteAccount } from "@/components/DeleteAccPopout";
-
+import { CategoryCRUD } from "@/components/category-crud";
 export const AdminDash = () => {
     return (
       <div className="w-full min-h-screen bg-white pt-[80px] pb-20 flex flex-col"> {/* Ensure flex column layout */}
@@ -63,8 +63,8 @@ export const AdminDash = () => {
                   </div>
                 </div>
                 <div className="flex w-full justify-between">
-                  <ActionButton title="Manage Categories" />
                   <ActionButton title="Manage Activities" />
+                  <CategoryCRUD/>
                 </div>
               </div>
 
