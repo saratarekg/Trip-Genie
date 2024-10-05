@@ -160,6 +160,7 @@ const sellerSignup = async (req, res) => {
 
 const logout = (req, res) => {
     res.cookie('jwt', '', { maxAge: 1 });
+    res.cookie('role','',{maxAge: 1});
     res.json({ message: 'Logout successful' });
 }
 
