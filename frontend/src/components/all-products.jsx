@@ -54,6 +54,7 @@ export function AllProducts() {
   const tripsPerPage = 6;
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [myProducts, setmyProducts] = useState(false);
 
   const navigate = useNavigate();
 
@@ -74,6 +75,12 @@ export function AllProducts() {
     setIsLoading(false);
   };
 
+  useEffect(() => {
+
+    searchItineraries();
+  
+}, [myProducts]);
+
   const searchProducts = async () => {
     try {
       const role = getUserRole();
@@ -82,6 +89,9 @@ export function AllProducts() {
       // Add the search term and filter parameters
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
+      }
+      if (myProducts) {
+        url.searchParams.append("myproducts", myProducts);
       }
       if (price && price !== "") {
         url.searchParams.append("budget", price);
@@ -143,6 +153,11 @@ export function AllProducts() {
     setSortBy(attribute); 
     setIsLoading(false);
   };
+  const handlemyProducts = (attribute) => {
+    setIsLoading(true);
+    setmyProducts(attribute); 
+    setIsLoading(false);
+  };
   const fetchProducts = async () => {
     try {
       setIsLoading(false);
@@ -176,6 +191,7 @@ export function AllProducts() {
     setPrice("");
     setSortBy(""); // Reset sorting
     setSortOrder(""); // Reset sort order
+    setmyProducts(false);
 
     // Fetch products without any filters
     fetchProducts();
@@ -218,6 +234,8 @@ export function AllProducts() {
                   sortBy={sortBy}
                   handleSort={handleSort}
                   clearFilters={clearFilters}
+                  myProducts= {myProducts}
+                  handlemyProducts= {handlemyProducts}
                   // sortProducts={sortProducts}
                   price={price}
                   setPrice={setPrice}

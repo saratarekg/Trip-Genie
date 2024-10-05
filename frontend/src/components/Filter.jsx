@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Filter, ChevronDown, ArrowUpDown, Plus,ContactRound  } from 'lucide-react';
+import { Filter, ChevronDown, ArrowUpDown, Plus ,ContactRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 
 const FilterComponent = ({
   filtersVisible,
@@ -88,11 +87,12 @@ const FilterComponent = ({
 
           <button
             onClick={() => handlemyItineraries(!myItineraries)} // Toggle myItineraries state
-            className={`flex items-center px-4 py-2 rounded-full shadow bg-white text-black `}
+            className={`flex items-center px-4 py-2 rounded-full shadow ${
+              myItineraries ? "bg-orange-500 text-white" : "bg-white text-black"
+            }`}
           >
             <ContactRound strokeWidth={1.25}  /> 
-            {myItineraries ? ' My' : '   All'} Itineraries
-             
+             My Itineraries
           </button>
 
           {/* <button onClick={() => handlemyItineraries()} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
