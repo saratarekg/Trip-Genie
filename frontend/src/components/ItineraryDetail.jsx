@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import { ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
+import { XCircle, CheckCircle, ChevronLeft, Calendar, MapPin, Users, DollarSign, Globe, Accessibility, Star, Edit, Trash2, Mail, Phone, Award } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Loader from './Loader';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const ItineraryDetail = ({ onBack }) => {
+const ItineraryDetail = () => {
   const { id } = useParams();
   const [itinerary, setItinerary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false); // For the success message dialog
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [tourGuideProfile, setTourGuideProfile] = useState(null);
 
   const navigate = useNavigate();
 
@@ -41,6 +43,21 @@ const ItineraryDetail = ({ onBack }) => {
         const data = await response.json();
         setItinerary(data);
         setError(null);
+
+        if (data.tourGuide) {
+          const guideResponse = await fetch(`http://localhost:4000/tour-guide`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!guideResponse.ok) {
+            throw new Error('Failed to fetch tour guide profile');
+          }
+
+          const guideData = await guideResponse.json();
+          setTourGuideProfile(guideData);
+        }
       } catch (err) {
         setError('Error fetching itinerary details. Please try again later.');
         console.error('Error fetching itinerary details:', err);
@@ -59,6 +76,7 @@ const ItineraryDetail = ({ onBack }) => {
   const handleDelete = async () => {
     setShowDeleteConfirm(false);
     setLoading(true);
+    setDeleteError(null);
     try {
       const token = Cookies.get('jwt');
       const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${id}`, {
@@ -69,10 +87,14 @@ const ItineraryDetail = ({ onBack }) => {
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400) {
+          setDeleteError(errorData.message);
+          return;
+        }
         throw new Error('Failed to delete itinerary');
       }
 
-      // Show success dialog after deletion
       setShowDeleteSuccess(true);
     } catch (err) {
       setError('Error deleting itinerary. Please try again later.');
@@ -117,14 +139,14 @@ const ItineraryDetail = ({ onBack }) => {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-3xl font-semibold">Itinerary Details</h2>
-              <div className="flex items-center">
-                <Star className="w-6 h-6 text-yellow-400 mr-1" />
-                <span className="text-lg font-semibold">{itinerary.rating || 'N/A'}</span>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-4xl font-bold">Itinerary Details</h1>
+              <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                <Star className="w-8 h-8 text-yellow-500 mr-2" />
+                <span className="text-2xl font-semibold">{itinerary.rating || 'N/A'}</span>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <div className="flex items-center">
                   <Globe className="w-6 h-6 mr-2 text-orange-500" />
@@ -138,8 +160,6 @@ const ItineraryDetail = ({ onBack }) => {
                   <Accessibility className="w-6 h-6 mr-2 text-orange-500" />
                   <span className="text-gray-700">Accessibility: {itinerary.accessibility ? 'Yes' : 'No'}</span>
                 </div>
-              </div>
-              <div className="space-y-4">
                 <div className="flex items-center">
                   <MapPin className="w-6 h-6 mr-2 text-orange-500" />
                   <span className="text-gray-700">Pick-up: {itinerary.pickUpLocation}</span>
@@ -148,19 +168,35 @@ const ItineraryDetail = ({ onBack }) => {
                   <MapPin className="w-6 h-6 mr-2 text-orange-500" />
                   <span className="text-gray-700">Drop-off: {itinerary.dropOffLocation}</span>
                 </div>
+              </div>
+              <div className="space-y-4">
                 <div className="flex items-center">
                   <Users className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Tour Guide: {itinerary.tourGuide.name}</span>
+                  <span className="text-gray-700">Tour Guide: {tourGuideProfile ? tourGuideProfile.username : 'Loading...'}</span>
+                </div>
+                <div className="flex items-center">
+                  <Mail className="w-6 h-6 mr-2 text-orange-500" />
+                  <span className="text-gray-700">Email: {tourGuideProfile ? tourGuideProfile.email : 'Loading...'}</span>
+                </div>
+                <div className="flex items-center">
+                  <Phone className="w-6 h-6 mr-2 text-orange-500" />
+                  <span className="text-gray-700">Phone: {tourGuideProfile ? tourGuideProfile.phoneNumber : 'Loading...'}</span>
+                </div>
+                <div className="flex items-center">
+                  <Award className="w-6 h-6 mr-2 text-orange-500" />
+                  <span className="text-gray-700">Experience: {tourGuideProfile ? `${tourGuideProfile.yearsOfExperience} years` : 'Loading...'}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="p-6 border-t border-gray-200">
+         
             <h3 className="text-2xl font-semibold mb-4">Activities</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <ul className="list-disc list-inside space-y-2">
               {itinerary.activities.map((activity, index) => (
-                <li key={index} className="text-gray-700">{activity.name}</li>
+                <li key={index} className="text-gray-700"> hy {activity.name}</li>
               ))}
             </ul>
           </div>
@@ -185,49 +221,39 @@ const ItineraryDetail = ({ onBack }) => {
               ))} 
             </div>
           </div>
-
-          <div className="p-6 border-t border-gray-200">
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-semibold">Book This Itinerary</h3>
-              {userRole === 'tour-guide' && (
-                <div className="space-x-2">
-                  <Button onClick={handleUpdate} variant="outline">
-                    <Edit className="w-4 h-4 mr-2" />
-                    Update
-                  </Button>
-                  <Button onClick={() => setShowDeleteConfirm(true)} variant="destructive">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
-                </div>
-              )}
-            </div>
-            {(userRole === 'tourist' || userRole === 'guest') && (
-              <Button className="mt-4" variant="default">
-                Book Now
+            <div className="flex justify-between mt-8">
+              <Button onClick={() => navigate('/all-itineraries')} variant="outline">
+                <ChevronLeft className="mr-2" /> Back to All Itineraries
               </Button>
-            )}
+              <div className="flex space-x-2">
+                <Button onClick={handleUpdate} variant="default">
+                  <Edit className="mr-2" /> Update
+                </Button>
+                <Button onClick={() => setShowDeleteConfirm(true)} variant="destructive">
+                  <Trash2 className="mr-2" /> Delete
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-
-        <Button className="mt-6" variant="outline" onClick={() => navigate('/all-itineraries')}>
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          Back to All Itineraries
-        </Button>
       </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <AlertCircle className="w-6 h-6 text-red-500 mr-2" />
-              Are you sure you want to delete this itinerary?
-            </DialogTitle>
+            <DialogTitle>Delete Itinerary</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this itinerary? This action cannot be undone.
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -236,17 +262,31 @@ const ItineraryDetail = ({ onBack }) => {
       <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-              Success
-            </DialogTitle>
+            <DialogTitle>  <CheckCircle className="w-10 h-10 text-green-500 inline-block mr-2" /> Itinerary Deleted</DialogTitle>
+            <DialogDescription>
+              The itinerary has been successfully deleted.
+            </DialogDescription>
           </DialogHeader>
-          <DialogDescription>
-            Itinerary deleted successfully. You can navigate back to all itineraries.
-          </DialogDescription>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteSuccess(false)}>Close</Button>
-            <Button onClick={() => navigate('/all-itineraries')} variant="default">Go to All Itineraries</Button>
+            <Button variant="default" onClick={() => navigate('/all-itineraries')}>
+              Back to All Itineraries
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteError} onOpenChange={setDeleteError}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>  <XCircle className="w-10 h-10 text-red-500 inline-block mr-2" /> Failed to Delete Itinerary</DialogTitle>
+            <DialogDescription>
+              The itinerary is already booked.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+          <Button variant="default" onClick={() => setDeleteError(null)}>
+                Close
+              </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

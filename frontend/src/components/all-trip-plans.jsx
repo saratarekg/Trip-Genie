@@ -74,14 +74,14 @@ export function AllItinerariesComponent() {
   }, []);
 
   const handleItinerarySelect = (id) => {
-    setLoading(true);
+    setLoading(false);
     navigate(`/itinerary/${id}`); // Navigate to the itinerary details page
     setLoading(false);
   };
 
   useEffect(() => {
     const fetchLanguages = async () => {
-      setLoading(true);
+      setLoading(false);
       console.log('Fetching Languages');
       try {
         const response = await axios.get('http://localhost:4000/api/getAllLanguages');
@@ -99,7 +99,7 @@ export function AllItinerariesComponent() {
     // Fetch types from the backend
     const fetchType = async () => {
       try {
-        setLoading(true);
+        setLoading(false);
         const response = await axios.get('http://localhost:4000/api/getAllTypes');
         console.log('Type:', response.data);
         setTypesOptions(response.data);
@@ -108,7 +108,7 @@ export function AllItinerariesComponent() {
       }
     };
     fetchType();
-    setLoading(true);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -131,7 +131,7 @@ export function AllItinerariesComponent() {
 
 
   const handleSort = (attribute) => {
-    setLoading(true);
+    setLoading(false);
     const newSortOrder = sortOrder === 1 ? -1 : 1;
     setSortBy(attribute);
     setSortOrder(newSortOrder);
@@ -140,7 +140,7 @@ export function AllItinerariesComponent() {
   };
   const fetchItineraries = async () => {
     try {
-      setLoading(true);
+      setLoading(false);
       const token = Cookies.get('jwt');
       const role = getUserRole();
       const response = await fetch(
@@ -181,7 +181,7 @@ export function AllItinerariesComponent() {
 
   const searchItineraries = async () => {
     try {
-      setLoading(true);
+      setIsLoading(true);
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
   
@@ -239,7 +239,7 @@ export function AllItinerariesComponent() {
   };
 
   const toggleFilters = () => {
-    setLoading(true);
+    setLoading(false);
     setFiltersVisible(!filtersVisible);
     setLoading(false);
   };
@@ -256,10 +256,6 @@ export function AllItinerariesComponent() {
       prev.includes(option) ? prev.filter(lang => lang !== option) : [...prev, option]
     );
   };
-
-  if (loading) {
-    return <Loader />;
-  }
 
   return (
     <div>
