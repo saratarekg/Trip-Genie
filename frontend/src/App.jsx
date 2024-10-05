@@ -19,6 +19,7 @@ import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
 
 import { SignupForm } from "./components/signup-form.jsx";
 import {AdminDash} from "./pages/AdminDash.jsx";
+import CreateHpPage from "./pages/CreateHpPage.jsx";
 
 function App() {
   
@@ -33,6 +34,7 @@ function App() {
             <Route path="/" element={<Home />} />
             {/* <Route path='/tour-guide-home' element={<Tghome />} /> */}
             <Route path="/login" element={<Login />} />
+            <Route path="/create-historicalPlace" element={<CreateHpPage />} />
             <Route path="/create-itinerary" element={<CreateItineraryPage />} />
             <Route path="/seller" element={<SellerList />} />
             <Route path="/activity" element={<ActivityList />} />
