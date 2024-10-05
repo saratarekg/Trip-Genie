@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -33,6 +34,7 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { Alert } from "@/components/ui/alert";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
@@ -120,12 +122,6 @@ const formSchema = z
       }
     }
     if (data.userType === "tourist") {
-      if (!data.dateOfBirth) {
-        ctx.addIssue({
-          path: ["dateOfBirth"],
-          message: "Date of birth is required.",
-        });
-      }
       if (
         data.dateOfBirth > new Date() ||
         data.dateOfBirth > new Date().setFullYear(new Date().getFullYear() - 18)
@@ -207,6 +203,9 @@ const formSchema = z
 export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [nationalities, setNationalities] = useState([]);
+  const [apiError, setApiError] = useState(null);
+  const alertRef = useRef(null);
+  const navigate = useNavigate();
 
   // Create refs for form fields
   const formRefs = {
@@ -270,9 +269,14 @@ export function SignupForm() {
     fetchNationalities();
   }, []);
 
+  useEffect(() => {
+    if (apiError && alertRef.current) {
+      alertRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [apiError]);
+
   const userType = watch("userType");
 
-  // Helper function to scroll to error field
   const scrollToError = (errors) => {
     for (const field in errors) {
       if (formRefs[field] && formRefs[field].current) {
@@ -285,12 +289,35 @@ export function SignupForm() {
     }
   };
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     setIsLoading(true);
-    setTimeout(() => {
-      console.log(values);
+    setApiError(null);
+    values.mobile = "+" + values.mobile;
+    try {
+      await axios.post(
+        `http://localhost:4000/auth/sign-up/${values.userType}`,
+        values
+      );
+      navigate("/login", {
+        state: {
+          successMessage:
+            "Your account has been created successfully. Please log in.",
+        },
+      });
+    } catch (error) {
+      if (error.response) {
+        setApiError(
+          error.response.data.message || "An error occurred during signup"
+        );
+      } else if (error.request) {
+        setApiError("No response received from server. Please try again.");
+      } else {
+        setApiError("An error occurred during signup. Please try again.");
+      }
+      console.error("Signup error:", error);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -304,6 +331,11 @@ export function SignupForm() {
             Join us and start your unforgettable journey
           </p>
         </div>
+        {apiError && (
+          <div ref={alertRef}>
+            <Alert message={apiError} onClose={() => setApiError(null)} />
+          </div>
+        )}
         <Form {...form}>
           <form
             onSubmit={handleSubmit(onSubmit, scrollToError)}
@@ -403,7 +435,8 @@ export function SignupForm() {
                           country={"eg"}
                           value={field.value}
                           onChange={(value) => field.onChange(value)}
-                          excludeCountries={["il"]}
+                          exclu
+                          deCountries={["il"]}
                           inputProps={{
                             name: "mobile",
                             required: true,
