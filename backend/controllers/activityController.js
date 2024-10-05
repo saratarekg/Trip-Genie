@@ -42,7 +42,7 @@ const getAllActivities = async (req, res) => {
     }
     let activitiesQuery = Activity.find({
       $and: query,
-    });
+    }).populate("tags").populate("category");
 
     if (sort) {
       const sortBy = {};
