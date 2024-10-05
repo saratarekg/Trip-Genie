@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight , ContactRound} from "lucide-react";
 import FilterComponent from "./FilterProduct.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
@@ -77,8 +77,9 @@ export function AllProducts() {
 
   useEffect(() => {
 
-    searchItineraries();
+    searchProducts();
   
+
 }, [myProducts]);
 
   const searchProducts = async () => {
@@ -125,6 +126,66 @@ export function AllProducts() {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
       setProducts([]);
+    }
+  };
+
+    const searchItineraries = async () => {
+    try {
+      const role = getUserRole();
+      const url = new URL(`http://localhost:4000/${role}/itineraries`);
+   
+      // Add the search term and filter parameters
+      if(myItineraries){
+        url.searchParams.append("myItineraries", myItineraries);
+      }
+      if (searchTerm) {
+        url.searchParams.append("searchBy", searchTerm);
+      }
+      if (price && price !== "") {
+        url.searchParams.append("budget", price);
+      }
+
+      if (dateRange.upper) {
+        url.searchParams.append("upperDate", dateRange.upper);
+      }
+      if (dateRange.lower) {
+        url.searchParams.append("lowerDate", dateRange.lower);
+      }
+      if (selectedTypes.length > 0) {
+        url.searchParams.append("types", selectedTypes.join(",")); // Send selected types as comma-separated
+      }
+      if (selectedLanguages.length > 0) {
+        url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
+      }
+
+      // Add sorting parameters
+      if (sortBy) {
+        url.searchParams.append("sort", sortBy);
+      }
+      if (sortOrder) {
+        url.searchParams.append("asc", sortOrder);
+      }
+      const token = Cookies.get("jwt");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setItineraries(data);
+      setError(null);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error fetching filtered results:", error);
+      setError("Error fetching filtered results");
+      setItineraries([]);
     }
   };
 
@@ -240,6 +301,7 @@ export function AllProducts() {
                   price={price}
                   setPrice={setPrice}
                   searchProducts={searchProducts}
+                 
                   role={getUserRole()}
                 />
               </div>

@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 const ActivityCard = ({ activity, onSelect }) => (
-    <Card
+  <Card
     className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
     onClick={() => onSelect(activity._id)}
   >
@@ -58,7 +58,6 @@ const ActivityCard = ({ activity, onSelect }) => (
           </Badge>
         ))}
       </div>
-
     </CardFooter>
   </Card>
 );
@@ -80,7 +79,6 @@ export function AllActivitiesComponent() {
   const [isLoading, setIsLoading] = useState(true);
   const [minStars, setMinStars] = useState(0);
 
-
   const navigate = useNavigate();
 
   const getUserRole = () => {
@@ -99,8 +97,6 @@ export function AllActivitiesComponent() {
     navigate(`/activity/${id}`);
     setIsLoading(false);
   };
-
-
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -235,7 +231,6 @@ export function AllActivitiesComponent() {
     );
   };
 
-
   return (
     <div>
       {isLoading ? (
@@ -272,60 +267,74 @@ export function AllActivitiesComponent() {
                   dateRange={dateRange}
                   setDateRange={setDateRange}
                   selectedCategories={selectedCategories}
-                  setSelectedCategories={setSelectedCategories}
                   handleCategorySelection={handleCategorySelection}
+                  minStars={minStars}
+                  setMinStars={setMinStars}
                   categoryOptions={categoryOptions}
-                  minStars={minStars} // Pass the minStars state
-                  setMinStars={setMinStars} // Pass the setMinStars handler
                 />
-              </div>
 
-              {activities.length > 0 ? (
-                <div className="grid gap-8 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1">
-                  {activities
-                    .slice(
-                      (currentPage - 1) * activitiesPerPage,
-                      currentPage * activitiesPerPage
-                    )
-                    .map((activity) => (
-                      <ActivityCard
-                        key={activity._id}
-                        activity={activity}
-                        onSelect={handleActivitySelect}
-                      />
-                    ))}
-                </div>
-              ) : (
-                <p>No activities found.</p>
-              )}
+                {activities.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {activities
+                      .slice(
+                        (currentPage - 1) * activitiesPerPage,
+                        currentPage * activitiesPerPage
+                      )
+                      .map((activity) => (
+                        <ActivityCard
+                          key={activity._id}
+                          activity={activity}
+                          onSelect={handleActivitySelect}
+                        />
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500">
+                    No activities found.
+                  </p>
+                )}
 
-              {activities.length > activitiesPerPage && (
-                <div className="mt-8 flex justify-center">
-                  <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="mr-4 p-2"
-                  >
-                    <ChevronLeft />
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={
-                      currentPage ===
-                      Math.ceil(activities.length / activitiesPerPage)
-                    }
-                    className="ml-4 p-2"
-                  >
-                    <ChevronRight />
-                  </button>
-                </div>
-              )}
-            </>
+                 {/* Pagination Section */}
+            <div className="mt-8 flex justify-center items-center space-x-4">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-full bg-white shadow ${
+                  currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                }`}
+              >
+                <ChevronLeft />
+              </button>
+
+              {/* Page X of Y */}
+              <span className="text-lg font-medium">
+                Page {currentPage} of {Math.ceil(activities.length / activitiesPerPage)}
+              </span>
+
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(prev + 1, Math.ceil(activities.length / activitiesPerPage))
+                  )
+                }
+                disabled={
+                  currentPage === Math.ceil(activities.length / activitiesPerPage)
+                }
+                className={`px-4 py-2 rounded-full bg-white shadow ${
+                  currentPage === Math.ceil(activities.length / activitiesPerPage)
+                    ? "text-gray-300"
+                    : "text-blue-600"
+                }`}
+              >
+                <ChevronRight />
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        </>
+      </div>
     </div>
-  );
-}
-
+  )}
+</div>
+  )}
+  
 export default AllActivitiesComponent;
