@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/login.jsx";
 import SellerList from "./components/SellerList.jsx";
@@ -30,48 +35,55 @@ import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import UpdateActivity from "./components/UpdateActivity.jsx";
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/sign-up";
   return (
     <div className="App">
-      <Router>
-        <NavbarComponent />
+      {!isAuthPage && <NavbarComponent />}
 
-        {/* {isLoginPage ? null : <Navbar />} */}
-        <div className="pages">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            {/* <Route path='/tour-guide-home' element={<Tghome />} /> */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/create-historicalPlace" element={<CreateHpPage />} />
-            <Route path="/create-product" element={<CreateProduct />} />
-            <Route path="/create-itinerary" element={<CreateItineraryPage />} />
-            <Route path="/seller" element={<SellerList />} />
-            <Route path="/activity" element={<AllActivitiesComponent />} />
-            <Route
-              path="/all-itineraries"
-              element={<AllItinerariesComponent />}
-            />
-            <Route
-              path="/all-historical-places"
-              element={<AllHistoricalPlacesComponent />}
-            />
-            <Route path="/historical-place/:id" element={<HistoricalPlaceDetail />}/>
-            <Route path="/sign-up" element={<SignupForm />} />
-            <Route path="/admin" element={<Dashboard />} />
-            <Route path="/itinerary/:id" element={<ItineraryDetail />} />
-            <Route path="/all-products" element={<AllProducts />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/update-product/:id" element={<UpdateProduct />} />
-            <Route path="/update-itinerary/:id" element={<UpdateItinerary />} />
-            <Route path="/update-activity/:id" element={<UpdateActivity />} />
-            <Route path="/activity/:id" element={<ActivityDetail />} />
+      <div className="pages">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          {/* <Route path='/tour-guide-home' element={<Tghome />} /> */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/create-historicalPlace" element={<CreateHpPage />} />
+          <Route path="/create-product" element={<CreateProduct />} />
+          <Route path="/create-itinerary" element={<CreateItineraryPage />} />
+          <Route path="/seller" element={<SellerList />} />
+          <Route path="/activity" element={<AllActivitiesComponent />} />
+          <Route
+            path="/all-itineraries"
+            element={<AllItinerariesComponent />}
+          />
+          <Route
+            path="/all-historical-places"
+            element={<AllHistoricalPlacesComponent />}
+          />
+          <Route path="/sign-up" element={<SignupForm />} />
+          <Route path="/admin" element={<Dashboard />} />
+          <Route path="/itinerary/:id" element={<ItineraryDetail />} />
+          <Route path="/all-products" element={<AllProducts />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/update-product/:id" element={<UpdateProduct />} />
+          <Route path="/update-itinerary/:id" element={<UpdateItinerary />} />
+          <Route path="/update-activity/:id" element={<UpdateActivity />} />
+          <Route path="/activity/:id" element={<ActivityDetail />} />
 
-            {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
-          </Routes>
-        </div>
-      </Router>
-      <FooterComponent />
+          {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
+        </Routes>
+      </div>
+      {!isAuthPage && <FooterComponent />}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
