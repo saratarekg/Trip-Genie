@@ -141,8 +141,14 @@ export function AllItinerariesComponent() {
       setIsLoading(false);
       const token = Cookies.get('jwt');
       const role = getUserRole();
+      const url =  new URL(`http://localhost:4000/${role}/itineraries`);
+
+      if (role === "tour-guide") {
+        url.searchParams.append("myItineraries", true);
+      }
+
       const response = await fetch(
-        `http://localhost:4000/${role}/itineraries`,
+        url,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -182,6 +188,10 @@ export function AllItinerariesComponent() {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
 
+      if(role === "tour-guide"){
+        url.searchParams.append("myItineraries", true);
+      }
+   
       // Add the search term and filter parameters
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
