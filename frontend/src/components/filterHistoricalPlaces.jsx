@@ -1,34 +1,36 @@
 import React, { useState } from 'react';
-import { Filter, ChevronDown, ArrowUpDown, Plus } from 'lucide-react';
+import { Filter, ChevronDown, ArrowUpDown, Plus, ContactRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FilterComponent = ({
   filtersVisible,
   toggleFilters,
-//   sortOrder,
-//   sortBy,
-//   handleSort,
+  //   sortOrder,
+  //   sortBy,
+  //   handleSort,
   clearFilters,
-//   price,
-//   setPrice,
-//   dateRange,
-//   setDateRange,
+  myHistoricalPlaces,
+  handlemyHistoricalPlaces,
+  //   price,
+  //   setPrice,
+  //   dateRange,
+  //   setDateRange,
   selectedTypes = [],
   setSelectedTypes,
   selectedPeriods,
   setSelectedPeriods,
-//   selectedLanguages = [],
-//   setSelectedLanguages,
+  //   selectedLanguages = [],
+  //   setSelectedLanguages,
   searchHistoricalPlaces,
   typesOptions = [],
-  periodsOptions=[],
-//   languagesOptions = [], 
+  periodsOptions = [],
+  //   languagesOptions = [], 
   role,
 }) => {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
 
-//   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  //   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   // Handle checkbox for types
   const handleTypeChange = (type) => {
@@ -48,27 +50,27 @@ const FilterComponent = ({
   };
 
   // Handle checkbox for languages
-//   const handleLanguageChange = (language) => {
-//     if (selectedLanguages.includes(language)) {
-//       setSelectedLanguages(selectedLanguages.filter((l) => l !== language));
-//     } else {
-//       setSelectedLanguages([...selectedLanguages, language]);
-//     }
-//   };
+  //   const handleLanguageChange = (language) => {
+  //     if (selectedLanguages.includes(language)) {
+  //       setSelectedLanguages(selectedLanguages.filter((l) => l !== language));
+  //     } else {
+  //       setSelectedLanguages([...selectedLanguages, language]);
+  //     }
+  //   };
 
-//   const handleLowerDateChange = (e) => {
-//     const newLowerDate = e.target.value;
-//     if (newLowerDate > dateRange.upper) {
-//       setDateRange({ lower: newLowerDate, upper: newLowerDate });
-//     } else {
-//       setDateRange({ ...dateRange, lower: newLowerDate });
-//     }
-//   };
+  //   const handleLowerDateChange = (e) => {
+  //     const newLowerDate = e.target.value;
+  //     if (newLowerDate > dateRange.upper) {
+  //       setDateRange({ lower: newLowerDate, upper: newLowerDate });
+  //     } else {
+  //       setDateRange({ ...dateRange, lower: newLowerDate });
+  //     }
+  //   };
 
-//   const handleUpperDateChange = (e) => {
-//     const newUpperDate = e.target.value;
-//     setDateRange({ ...dateRange, upper: newUpperDate });
-//   };
+  //   const handleUpperDateChange = (e) => {
+  //     const newUpperDate = e.target.value;
+  //     setDateRange({ ...dateRange, upper: newUpperDate });
+  //   };
 
   return (
     <>
@@ -83,25 +85,39 @@ const FilterComponent = ({
             <ArrowUpDown className="mr-2" size={18} />
             Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
           </button> */}
-{/* 
+          {/* 
           <button onClick={() => handleSort('rating')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             <ArrowUpDown className="mr-2" size={18} />
             Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
           </button> */}
 
+          {role === 'tourism-governor' ? (
+
+          <button
+            onClick={() => handlemyHistoricalPlaces(!myHistoricalPlaces)}
+            className={`flex items-center px-4 py-2 rounded-full shadow ${myHistoricalPlaces ? "bg-orange-500 text-white" : "bg-white text-black"
+              }`}          >
+            <ContactRound strokeWidth={1.25} />
+            My Places
+
+          </button>
+           ) : null}
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
           </button>
+         
         </div>
 
-          {role === 'tourism-governor'?  (
-             <Link to="/create-historicalPlace" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
-             <Plus className="mr-2" size={18} />
-             Create
-           </Link>
-          ) : null}
- 
-       
+
+
+        {role === 'tourism-governor' ? (
+          <Link to="/create-historicalPlace" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
+            <Plus className="mr-2" size={18} />
+            Create
+          </Link>
+        ) : null}
+
+
       </div>
 
       {filtersVisible && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight , ContactRound} from "lucide-react";
 import FilterComponent from "./FilterProduct.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
@@ -54,6 +54,7 @@ export function AllProducts() {
   const tripsPerPage = 6;
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [myProducts, setmyProducts] = useState(false);
 
   const navigate = useNavigate();
 
@@ -74,6 +75,13 @@ export function AllProducts() {
     setIsLoading(false);
   };
 
+  useEffect(() => {
+
+    searchProducts();
+  
+
+}, [myProducts]);
+
   const searchProducts = async () => {
     try {
       const role = getUserRole();
@@ -82,6 +90,9 @@ export function AllProducts() {
       // Add the search term and filter parameters
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
+      }
+      if (myProducts) {
+        url.searchParams.append("myproducts", myProducts);
       }
       if (price && price !== "") {
         url.searchParams.append("budget", price);
@@ -118,6 +129,66 @@ export function AllProducts() {
     }
   };
 
+    const searchItineraries = async () => {
+    try {
+      const role = getUserRole();
+      const url = new URL(`http://localhost:4000/${role}/itineraries`);
+   
+      // Add the search term and filter parameters
+      if(myItineraries){
+        url.searchParams.append("myItineraries", myItineraries);
+      }
+      if (searchTerm) {
+        url.searchParams.append("searchBy", searchTerm);
+      }
+      if (price && price !== "") {
+        url.searchParams.append("budget", price);
+      }
+
+      if (dateRange.upper) {
+        url.searchParams.append("upperDate", dateRange.upper);
+      }
+      if (dateRange.lower) {
+        url.searchParams.append("lowerDate", dateRange.lower);
+      }
+      if (selectedTypes.length > 0) {
+        url.searchParams.append("types", selectedTypes.join(",")); // Send selected types as comma-separated
+      }
+      if (selectedLanguages.length > 0) {
+        url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
+      }
+
+      // Add sorting parameters
+      if (sortBy) {
+        url.searchParams.append("sort", sortBy);
+      }
+      if (sortOrder) {
+        url.searchParams.append("asc", sortOrder);
+      }
+      const token = Cookies.get("jwt");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setItineraries(data);
+      setError(null);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error fetching filtered results:", error);
+      setError("Error fetching filtered results");
+      setItineraries([]);
+    }
+  };
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchTerm) {
@@ -141,6 +212,11 @@ export function AllProducts() {
     const newSortOrder = sortOrder === 1 ? -1 : 1;
     setSortOrder(newSortOrder);
     setSortBy(attribute); 
+    setIsLoading(false);
+  };
+  const handlemyProducts = (attribute) => {
+    setIsLoading(true);
+    setmyProducts(attribute); 
     setIsLoading(false);
   };
   const fetchProducts = async () => {
@@ -176,6 +252,7 @@ export function AllProducts() {
     setPrice("");
     setSortBy(""); // Reset sorting
     setSortOrder(""); // Reset sort order
+    setmyProducts(false);
 
     // Fetch products without any filters
     fetchProducts();
@@ -218,10 +295,13 @@ export function AllProducts() {
                   sortBy={sortBy}
                   handleSort={handleSort}
                   clearFilters={clearFilters}
+                  myProducts= {myProducts}
+                  handlemyProducts= {handlemyProducts}
                   // sortProducts={sortProducts}
                   price={price}
                   setPrice={setPrice}
                   searchProducts={searchProducts}
+                 
                   role={getUserRole()}
                 />
               </div>

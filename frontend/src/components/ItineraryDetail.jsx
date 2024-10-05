@@ -76,6 +76,7 @@ const ItineraryDetail = () => {
         }
 
         const data = await response.json();
+        console.log(data);
         setItinerary(data);
         setError(null);
 
