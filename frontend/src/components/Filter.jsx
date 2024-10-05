@@ -19,7 +19,8 @@ const FilterComponent = ({
   setSelectedLanguages,
   searchItineraries,
   typesOptions = [],
-  languagesOptions = []
+  languagesOptions = [], 
+  role,
 }) => {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
@@ -80,10 +81,14 @@ const FilterComponent = ({
           </button>
         </div>
 
-        <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
-          <Plus className="mr-2" size={18} />
-          Create
-        </Link>
+          {role === 'tour-guide'?  (
+             <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
+             <Plus className="mr-2" size={18} />
+             Create
+           </Link>
+          ) : null}
+ 
+       
       </div>
 
       {filtersVisible && (
