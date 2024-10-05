@@ -131,28 +131,28 @@ const HistroricalPlaceDetail = () => {
           <div className="md:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-3xl font-bold">{historical-place.title}</CardTitle>
+                <CardTitle className="text-3xl font-bold">{historicalPlace.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <img src={historical-place.pictures} alt={historical-place.title} className="w-full h-64 object-cover rounded-lg mb-4" />
+                <img src={historicalPlace.pictures} alt={historicalPlace.title} className="w-full h-64 object-cover rounded-lg mb-4" />
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <span className="text-2xl font-bold">€ Prices:</span>
-                    <span className="text-xl font-bold">Foreigner: €{historical-place.ticketPrices.foreigner}</span>
-                    <span className="text-xl font-bold">Native: €{historical-place.ticketPrices.native}</span>
-                    <span className="text-xl font-bold">Student: €{historical-place.ticketPrices.student}</span>
+                    <span className="text-xl font-bold">Foreigner: €{historicalPlace.ticketPrices.foreigner}</span>
+                    <span className="text-xl font-bold">Native: €{historicalPlace.ticketPrices.native}</span>
+                    <span className="text-xl font-bold">Student: €{historicalPlace.ticketPrices.student}</span>
                   </div>
                   <div className="flex items-center">
                   {/* <ClockIcon className="w-6 h-6 mr-2 text-blue-500" /> */}
                     <span className="text-lg">Opening Hours: </span>
-                    <span className="text-l">Weekdays: {historical-place.openingHours.weekdays}</span>
-                    <span className="text-l">Weekends: {historical-place.openingHours.weekends}</span>
+                    <span className="text-l">Weekdays: {historicalPlace.openingHours.weekdays}</span>
+                    <span className="text-l">Weekends: {historicalPlace.openingHours.weekends}</span>
                   </div>
                   <div className="flex items-center">
                   {/* <LocationMarkerIcon className="w-6 h-6 mr-2 text-blue-500" /> */}
-                    <span className="text-lg">Location: {historical-place.location.address}, {historical-place.location.city}, {historical-place.location.country}</span>
+                    <span className="text-lg">Location: {historicalPlace.location.address}, {historicalPlace.location.city}, {historicalPlace.location.country}</span>
                   </div>
-                  <p className="text-gray-700">{historical-place.description}</p>
+                  <p className="text-gray-700">{historicalPlace.description}</p>
                 </div>
               </CardContent>
             </Card>

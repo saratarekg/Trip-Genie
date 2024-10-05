@@ -109,11 +109,11 @@ export function AllHistoricalPlacesComponent() {
         setIsLoading(false);
     }, []);
 
-    //   const handleItinerarySelect = (id) => {
-    //     setIsLoading(true);
-    //     navigate(`/itinerary/${id}`); // Navigate to the itinerary details page
-    //     setIsLoading(false);
-    //   };
+      const handleHistoricalPlaceSelect = (id) => {
+        setIsLoading(true);
+        navigate(`/historical-place/${id}`); // Navigate to the itinerary details page
+        setIsLoading(false);
+      };
 
     //   useEffect(() => {
     //     const fetchLanguages = async () => {
@@ -372,7 +372,7 @@ export function AllHistoricalPlacesComponent() {
                                         <HistoricalPlaceCard
                                             key={historicalPlace._id} // Use the unique _id as the key
                                             historicalPlace={historicalPlace}
-                                        //   onSelect={handleHistoricalPlaceSelect}
+                                         onSelect={handleHistoricalPlaceSelect}
                                         />
                                     ))}
                             </div>
