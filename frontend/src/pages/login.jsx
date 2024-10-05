@@ -55,19 +55,19 @@ const Login = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     // Only proceed if input is valid
     if (!isValid) {
       setErrorMessage("Please fix the errors before submitting.");
       return;
     }
-
+  
     // Create the request body (determine if it's an email or username)
     const requestBody = {
       username: identifier,
       password,
     };
-
+  
     try {
       const response = await fetch("http://localhost:4000/auth/login", {
         method: "POST",
@@ -77,11 +77,11 @@ const Login = () => {
         },
         body: JSON.stringify(requestBody), // Send only the non-empty fields
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         role = data.role;
-
+  
         if (role === "admin") {
           navigate("/admin");
         } else {
@@ -89,14 +89,21 @@ const Login = () => {
         }
         console.log("Login successful!");
         window.location.reload();
-
       } else {
-        setErrorMessage("Login failed. Please check your credentials.");
+        const errorData = await response.json();
+        
+        // Check for the specific message from the backend
+        if (errorData.message === "Your account is not accepted yet") {
+          setErrorMessage("Login failed. Your account is not accepted yet.");
+        } else {
+          setErrorMessage("Login failed. Please check your credentials.");
+        }
       }
     } catch (error) {
       setErrorMessage("An error occurred during login. Please try again.");
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

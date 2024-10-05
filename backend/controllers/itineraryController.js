@@ -2,10 +2,18 @@ const Itinerary = require("../models/itinerary");
 
 // GET all itineraries
 const getAllItineraries = async (req, res) => {
-
   try {
-    
-    const { budget, upperDate, lowerDate, types, languages,searchBy,sort,asc,myItineraries } = req.query;
+    const {
+      budget,
+      upperDate,
+      lowerDate,
+      types,
+      languages,
+      searchBy,
+      sort,
+      asc,
+      myItineraries,
+    } = req.query;
     const filterResult = await Itinerary.filter(
       budget,
       upperDate,
@@ -20,20 +28,25 @@ const getAllItineraries = async (req, res) => {
     const filterResultIds = filterResult.map((itinerary) => itinerary._id);
 
     let query = [];
-    query.push({ _id: { $in: searchResultIds }});
-    query.push({ _id: { $in: filterResultIds }});
-    query.push({"availableDates": {
-      $elemMatch: {
-        date: { $gte: new Date() }, // Match any date that is upcoming
-      }
-    } });
-    if(myItineraries){
+    query.push({ _id: { $in: searchResultIds } });
+    query.push({ _id: { $in: filterResultIds } });
+    query.push({
+      availableDates: {
+        $elemMatch: {
+          date: { $gte: new Date() }, // Match any date that is upcoming
+        },
+      },
+    });
+    if (myItineraries) {
       query.push({ tourGuide: res.locals.user_id });
     }
 
     let itinerariesQuery = await Itinerary.find({
       $and: query,
-    });
+    })
+      .populate("tourGuide")
+      .populate("activities")
+      .exec();
     if (sort) {
       const sortBy = {};
       sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
@@ -41,7 +54,6 @@ const getAllItineraries = async (req, res) => {
         $and: query,
       }).sort(sortBy);
     }
- 
 
     const itineraries = await itinerariesQuery;
 
@@ -57,7 +69,10 @@ const getAllItineraries = async (req, res) => {
 // GET a single itinerary
 const getItineraryById = async (req, res) => {
   try {
-    const itinerary = await Itinerary.findById(req.params.id).populate("tourGuide").exec();
+    const itinerary = await Itinerary.findById(req.params.id)
+      .populate("tourGuide")
+      .populate("activities")
+      .exec();
     if (!itinerary) {
       return res.status(404).json({ message: "Itinerary not found" });
     }
@@ -138,11 +153,30 @@ const updateItinerary = async (req, res) => {
 
     // Check if the itinerary is booked
 
-
     // If all checks pass, delete the itinerary
-    const {title, availableDates, price, language, timeline, activities, accessibility, pickUpLocation, dropOffLocation} = req.body;
+    const {
+      title,
+      availableDates,
+      price,
+      language,
+      timeline,
+      activities,
+      accessibility,
+      pickUpLocation,
+      dropOffLocation,
+    } = req.body;
 
-    await Itinerary.findByIdAndUpdate(req.params.id, {title, availableDates, price, language, timeline, activities, accessibility, pickUpLocation, dropOffLocation}  );
+    await Itinerary.findByIdAndUpdate(req.params.id, {
+      title,
+      availableDates,
+      price,
+      language,
+      timeline,
+      activities,
+      accessibility,
+      pickUpLocation,
+      dropOffLocation,
+    });
 
     res.status(200).json({ message: "Itinerary updated successfully" });
   } catch (error) {
@@ -186,7 +220,6 @@ const deleteItinerary = async (req, res) => {
 
 // Function to get all itineraries for a specific tour guide
 
-
 const getAllLanguages = async (req, res) => {
   try {
     const languages = await Itinerary.find().distinct("language");
@@ -195,7 +228,6 @@ const getAllLanguages = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
 
 module.exports = {
   getAllItineraries,
