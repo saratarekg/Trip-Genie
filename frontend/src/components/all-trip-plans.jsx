@@ -132,9 +132,8 @@ export function AllItinerariesComponent() {
   const handleSort = (attribute) => {
     setIsLoading(true);
     const newSortOrder = sortOrder === 1 ? -1 : 1;
-    setSortBy(attribute);
     setSortOrder(newSortOrder);
-    searchItineraries(); // Call this to fetch sorted itineraries
+    setSortBy(attribute); 
     setIsLoading(false);
   };
   const fetchItineraries = async () => {
