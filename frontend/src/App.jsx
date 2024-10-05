@@ -13,6 +13,7 @@ import ItineraryList from "./components/ItineraryListTourGuide.jsx";
 import HistoricalPlaceList from "./components/HistoricalPlaceListGovernor.jsx";
 import Tghome from "./components/TourGuideHome.jsx";
 import Hero from "./components/Hero.jsx";
+
 import CreateItineraryPage from "./pages/CreateItineraryPage.jsx";
 import CreateProduct from "./components/CreateProduct.jsx";
 import { NavbarComponent } from "./components/navbar.jsx";
@@ -23,14 +24,13 @@ import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./components/signup-form.jsx";
-import {AdminDash} from "./pages/AdminDash.jsx";
+import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import UpdateActivity from "./components/UpdateActivity.jsx";
 
 function App() {
-  
   return (
     <div className="App">
       <Router>
@@ -47,12 +47,17 @@ function App() {
             <Route path="/create-itinerary" element={<CreateItineraryPage />} />
             <Route path="/seller" element={<SellerList />} />
             <Route path="/activity" element={<AllActivitiesComponent />} />
-            <Route path="/all-itineraries" element={<AllItinerariesComponent />}/>
-            <Route path="/all-historical-places" element={<AllHistoricalPlacesComponent />}/>
+            <Route
+              path="/all-itineraries"
+              element={<AllItinerariesComponent />}
+            />
+            <Route
+              path="/all-historical-places"
+              element={<AllHistoricalPlacesComponent />}
+            />
             <Route path="/historical-place/:id" element={<HistoricalPlaceDetail />}/>
-
             <Route path="/sign-up" element={<SignupForm />} />
-            <Route path="/admin" element={<AdminDash />} />
+            <Route path="/admin" element={<Dashboard />} />
             <Route path="/itinerary/:id" element={<ItineraryDetail />} />
             <Route path="/all-products" element={<AllProducts />} />
             <Route path="/product/:id" element={<ProductDetail />} />

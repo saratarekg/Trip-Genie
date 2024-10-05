@@ -65,21 +65,89 @@ export function NavbarComponent() {
               {/* Desktop Navigation */}
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                  {[
-                    "Activity",
-                    "Itineraries",
-                    "Travel",
-                    "Museums",
-                    "Pricing",
-                    "Historical Places",
-                  ].map((item) => (
-                    <NavLink
-                      key={item}
-                      to={`/${item.toLowerCase().replace(/\s+/g, "-")}`}
-                    >
-                      {item}
-                    </NavLink>
-                  ))}
+                {role === "tour-guide" && (
+                        <>
+                          <NavLink to='/activity'>
+                            Activities
+                          </NavLink>
+                          <NavLink to='/all-itineraries'>
+                            Itineraries
+                          </NavLink>
+                        </>
+                      )}
+                      {role === "seller" && (
+                        <>
+                          
+                          <NavLink to='/all-products'>
+                            Products
+                          </NavLink>
+                        </>
+                      )}
+                    {role === "tourist" && (
+                      <>
+                        <NavLink to='/activity'>
+                          Activities
+                        </NavLink>
+                        <NavLink to='/all-itineraries'>
+                          Itineraries
+                        </NavLink>
+                        <NavLink to='/all-historical-places'>
+                          Historical Places
+                        </NavLink>
+                        <NavLink to='/all-products'>
+                          Products
+                        </NavLink>
+                      </>
+                    )}
+                      {role === "advertiser" && (
+                        <>
+                          <NavLink to='/activity'>
+                            Activities
+                          </NavLink>
+                          
+                        </>
+                      )}
+                    {role === "admin" && (
+                      <>
+                        <NavLink to='/activity'>
+                          Activities
+                        </NavLink>
+                        <NavLink to='/all-itineraries'>
+                          Itineraries
+                        </NavLink>
+                        <NavLink to='/all-historical-places'>
+                          Historical Places
+                        </NavLink>
+                        <NavLink to='/all-products'>
+                          Products
+                        </NavLink>
+                      </>
+                    )}
+                     {role === "tourism-governor" && (
+                      <>
+                        
+                        <NavLink to='/all-historical-places'>
+                          Historical Places
+                        </NavLink>
+                        
+                      </>
+                    )}
+                    {(role === "guest" || role === undefined) && (
+                      <>
+                        <NavLink to='/activity'>
+                          Activities
+                        </NavLink>
+                        <NavLink to='/all-itineraries'>
+                          Itineraries
+                        </NavLink>
+                        <NavLink to='/all-historical-places'>
+                          Historical Places
+                        </NavLink>
+                        <NavLink to='/all-products'>
+                          Products
+                        </NavLink>
+                      </>
+                    )}
                 </div>
               </div>
 

@@ -61,7 +61,7 @@ const getAllActivities = async (req, res) => {
 const getActivityById = async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.id)
-      .populate("advertiser")
+      .populate("advertiser").populate("category").populate("tags")
       .exec();
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
