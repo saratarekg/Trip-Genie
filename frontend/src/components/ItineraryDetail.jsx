@@ -55,18 +55,18 @@ const ItineraryDetail = () => {
         setError(null);
 
         if (data.tourGuide) {
-          const guideResponse = await fetch(`http://localhost:4000/${userRole}/tour-guide/${data.tourGuide}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          // const guideResponse = await fetch(`http://localhost:4000/${userRole}/tour-guide/${data.tourGuide}`, {
+          //   headers: {
+          //     Authorization: `Bearer ${token}`,
+          //   },
+          // });
 
-          if (!guideResponse.ok) {
-            throw new Error('Failed to fetch tour guide profile');
-          }
+          // if (!guideResponse.ok) {
+          //   throw new Error('Failed to fetch tour guide profile');
+          // }
 
-          const guideData = await guideResponse.json();
-          setTourGuideProfile(guideData);
+          // const guideData = await guideResponse.json();
+          setTourGuideProfile(data.tourGuide);
         }
 
         const activityDetails = await Promise.all(
@@ -208,11 +208,11 @@ const ItineraryDetail = () => {
                 </div>
                 <div className="flex items-center">
                   <Phone className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Phone: {tourGuideProfile ? tourGuideProfile.phoneNumber : 'Loading...'}</span>
+                  <span className="text-gray-700">Phone: {tourGuideProfile ? tourGuideProfile.mobile : 'Loading...'}</span>
                 </div>
                 <div className="flex items-center">
                   <Award className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">Certification: {tourGuideProfile ? tourGuideProfile.certification : 'Loading...'}</span>
+                  <span className="text-gray-700">Years of Experience: {tourGuideProfile ? tourGuideProfile.yearsOfExperience : 'Loading...'}</span>
                 </div>
               </div>
             </div>
