@@ -254,15 +254,15 @@ const UpdateItinerary = () => {
                   />
                   <Label htmlFor="accessibility">Accessibility</Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2">
                   <Switch
                     id="isBooked"
                     checked={itinerary.isBooked}
                     onCheckedChange={() => handleSwitchChange('isBooked')}
                   />
                   <Label htmlFor="isBooked">Is Booked</Label>
-                </div>
-                <div>
+                </div> */}
+                {/* <div>
                   <Label htmlFor="rating">Rating</Label>
                   <div className="flex items-center space-x-2">
                     <Input
@@ -277,7 +277,7 @@ const UpdateItinerary = () => {
                     />
                     <Star className="w-6 h-6 text-yellow-400" />
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 

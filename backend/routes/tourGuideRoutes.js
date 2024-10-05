@@ -18,7 +18,10 @@ router.post('/itineraries', itineraryController.createItinerary);
 router.put('/itineraries/:id', itineraryController.updateItinerary);
 router.delete('/itineraries/:id', itineraryController.deleteItinerary)
 router.get('/itineraries/:id',itineraryController.getItineraryById);
+
 router.get('/activities', activityController.getAllActivities);
+router.get('/activity/:id', activityController.getActivityById);
+router.put('/activity/:id', activityController.updateActivity);
 
 
 

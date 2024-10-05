@@ -99,7 +99,7 @@ export function AllItinerariesComponent() {
     // Fetch types from the backend
     const fetchType = async () => {
       try {
-        setLoading(false);
+        setIsLoading(false);
         const response = await axios.get('http://localhost:4000/api/getAllTypes');
         console.log('Type:', response.data);
         setTypesOptions(response.data);
@@ -108,7 +108,7 @@ export function AllItinerariesComponent() {
       }
     };
     fetchType();
-    setLoading(false);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -139,7 +139,7 @@ export function AllItinerariesComponent() {
   };
   const fetchItineraries = async () => {
     try {
-      setLoading(false);
+      setIsLoading(false);
       const token = Cookies.get('jwt');
       const role = getUserRole();
       const response = await fetch(
@@ -236,7 +236,7 @@ export function AllItinerariesComponent() {
   };
 
   const toggleFilters = () => {
-    setLoading(false);
+    setIsLoading(false);
     setFiltersVisible(!filtersVisible);
     setIsLoading(false);
   };
