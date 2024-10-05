@@ -143,9 +143,7 @@ export function AllItinerariesComponent() {
       const role = getUserRole();
       const url =  new URL(`http://localhost:4000/${role}/itineraries`);
 
-      if (role === "tour-guide") {
-        url.searchParams.append("myItineraries", true);
-      }
+
 
       const response = await fetch(
         url,
@@ -187,10 +185,6 @@ export function AllItinerariesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
-
-      if(role === "tour-guide"){
-        url.searchParams.append("myItineraries", true);
-      }
    
       // Add the search term and filter parameters
       if (searchTerm) {
