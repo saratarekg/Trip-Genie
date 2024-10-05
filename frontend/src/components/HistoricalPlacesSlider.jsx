@@ -57,7 +57,7 @@ export function HistoricalPlaces() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <div className="w-full sm:w-1/2">
-          <h2 className="text-3xl font-bold">Historical Places</h2>
+          <h1 className="text-3xl font-bold">Historical Places</h1>
           <hr className="border-red-500 w-1/2 mb-3 mt-1 border-t-2" />
           <p className="text-gray-600 mt-2 mb-8">
           Explore the world's most captivating historical landmarks, where rich cultural heritage and architectural wonders come to life. Each destination tells a story of the past, offering a unique journey through history. Plan your adventure today!
