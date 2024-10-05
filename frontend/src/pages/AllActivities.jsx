@@ -7,36 +7,60 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader.jsx";
 import ActivityDetail from "./SingleActivity.jsx";
+import { Star } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 const ActivityCard = ({ activity, onSelect }) => (
-  <div
-    className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
+    <Card
+    className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
     onClick={() => onSelect(activity._id)}
   >
-    <div className="overflow-hidden">
+    <div className="relative aspect-video overflow-hidden">
       <img
-        src={
-          activity.pictures && activity.pictures.length > 0
-            ? activity.pictures[0]
-            : defaultImage
-        }
+        src={activity.pictures && activity.pictures.length > 0 ? activity.pictures[0] : defaultImage}
         alt={activity.name}
-        className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
       />
     </div>
-    <div className="p-4">
-      <h3 className="text-xl font-semibold mt-2">{activity.name}</h3>
-      <p className="text-sm mt-2 text-gray-700">{activity.location}</p>
-      <div className="flex justify-between items-center mt-4">
-        <span className="text-lg font-bold text-blue-600">
-          €{activity.price}
-        </span>
-        <span className="text-sm text-gray-500">
-          {new Date(activity.timing).toLocaleDateString()}
-        </span>
+    <CardHeader className="p-4">
+      <CardTitle className="text-xl font-semibold">{activity.name}</CardTitle>
+      <p className="text-sm text-muted-foreground">{activity.location}</p>
+    </CardHeader>
+    <CardContent className="p-4 pt-0 space-y-2">
+      <div className="flex items-center space-x-1">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            className={`h-4 w-4 ${i < activity.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+          />
+        ))}
+        <span className="text-sm text-muted-foreground ml-1">{activity.rating.toFixed(1)}</span>
       </div>
-    </div>
-  </div>
+      <div className="flex justify-between items-center">
+        <span className="text-lg font-bold text-primary">€{activity.price}/Night</span>
+        <span className="text-sm text-muted-foreground">{activity.duration} nights</span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        {new Date(activity.timing).toLocaleDateString()}
+      </p>
+    </CardContent>
+    <CardFooter className="p-4 pt-0">
+      <div className="flex flex-wrap gap-2">
+        {activity.tags.map((tag, index) => (
+          <Badge key={index} variant="secondary">
+            {tag.type}
+          </Badge>
+        ))}
+        {activity.category.map((cat, index) => (
+          <Badge key={index} variant="secondary">
+            {cat.name}
+          </Badge>
+        ))}
+      </div>
+
+    </CardFooter>
+  </Card>
 );
 
 export function AllActivitiesComponent() {
