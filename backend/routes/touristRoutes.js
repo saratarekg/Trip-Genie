@@ -6,6 +6,7 @@ const activityController = require("../controllers/activityController.js");
 const bookingController = require("../controllers/bookingController.js");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
 const tourguideController = require("../controllers/tourGuideController")
+const sellerController = require('../controllers/sellerController');
 
 const router = express.Router();
 
@@ -17,6 +18,9 @@ router.get("/itineraries/:id", itineraryController.getItineraryById);
 
 router.get('/products', productController.getAllProducts);
 router.get('/products/:id', productController.getProductById);
+
+router.get('/seller/:id',sellerController.getSellerByID);
+
 
 router.get("/activities", activityController.getAllActivities);
 router.get("/activity/:id", activityController.getActivityById);

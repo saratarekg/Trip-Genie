@@ -15,6 +15,7 @@ import HistoricalPlaceList from "./components/HistoricalPlaceListGovernor.jsx";
 import Tghome from "./components/TourGuideHome.jsx";
 import Hero from "./components/Hero.jsx";
 import CreateItineraryPage from "./pages/CreateItineraryPage.jsx";
+import CreateProduct from "./components/CreateProduct.jsx";
 import { NavbarComponent } from "./components/navbar.jsx";
 import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./components/viewAllHistoricalPlaces.jsx";
@@ -41,6 +42,7 @@ function App() {
             {/* <Route path='/tour-guide-home' element={<Tghome />} /> */}
             <Route path="/login" element={<Login />} />
             <Route path="/create-historicalPlace" element={<CreateHpPage />} />
+            <Route path="/create-product" element={<CreateProduct />} />
             <Route path="/create-itinerary" element={<CreateItineraryPage />} />
             <Route path="/seller" element={<SellerList />} />
             <Route path="/activity" element={<AllActivitiesComponent />} />
