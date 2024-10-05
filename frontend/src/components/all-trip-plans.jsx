@@ -17,9 +17,9 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
       <img
         src={
           itinerary.activities &&
-          itinerary.activities.length > 0 &&
-          itinerary.activities[0].pictures &&
-          itinerary.activities[0].pictures.length > 0
+            itinerary.activities.length > 0 &&
+            itinerary.activities[0].pictures &&
+            itinerary.activities[0].pictures.length > 0
             ? itinerary.activities[0].pictures[0]
             : defaultImage
         }
@@ -52,7 +52,7 @@ export function AllItinerariesComponent() {
   const [dateRange, setDateRange] = useState({ lower: "", upper: "" });
   const [selectedTypes, setSelectedTypes] = useState([]); // Changed to selectedTypes array
   const [selectedLanguages, setSelectedLanguages] = useState([]); // Changed to selectedLanguages array
-  const tripsPerPage = 6;
+  const tripsPerPage = 3;
   const [selectedItinerary, setSelectedItinerary] = useState(null);
   const [typesOptions, setTypesOptions] = useState([]);
   const [languagesOptions, setLanguagesOptions] = useState([]);
@@ -325,39 +325,41 @@ export function AllItinerariesComponent() {
                   ))}
               </div>
 
-              <div className="mt-8 flex justify-center space-x-4">
+              <div className="mt-8 flex justify-center items-center space-x-4">
                 <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                  }`}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                    }`}
                 >
                   <ChevronLeft />
                 </button>
+
+              
+
+                {/* Page X of Y */}
+                <span className="text-lg font-medium">
+                  Page {currentPage} of {Math.ceil(itineraries.length / tripsPerPage)}
+                </span>
+
                 <button
                   onClick={() =>
                     setCurrentPage((prev) =>
-                      Math.min(
-                        prev + 1,
-                        Math.ceil(itineraries.length / tripsPerPage)
-                      )
+                      Math.min(prev + 1, Math.ceil(itineraries.length / tripsPerPage))
                     )
                   }
                   disabled={
                     currentPage === Math.ceil(itineraries.length / tripsPerPage)
                   }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                      ? "text-gray-300"
-                      : "text-blue-600"
-                  }`}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                    ? "text-gray-300"
+                    : "text-blue-600"
+                    }`}
                 >
                   <ChevronRight />
                 </button>
               </div>
+
             </>
           </div>
         </div>
