@@ -1,31 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  timeline: z.string().min(1, 'Timeline is required'),
-  language: z.string().min(1, 'Language is required'),
-  price: z.number().min(1, 'Price is required'),
-  pickUpLocation: z.string().min(1, 'Pick-up location is required'),
-  dropOffLocation: z.string().min(1, 'Drop-off location is required'),
-  activities: z.array(z.string()).min(1, 'At least one activity must be selected'),
+  title: z.string().min(1, "Title is required"),
+  timeline: z.string().min(1, "Timeline is required"),
+  language: z.string().min(1, "Language is required"),
+  price: z.number().min(1, "Price is required"),
+  pickUpLocation: z.string().min(1, "Pick-up location is required"),
+  dropOffLocation: z.string().min(1, "Drop-off location is required"),
+  activities: z
+    .array(z.string())
+    .min(1, "At least one activity must be selected"),
   availableDates: z
     .array(
       z.object({
-        date: z.string().min(1, 'Date is required'),
+        date: z.string().min(1, "Date is required"),
         times: z.array(
           z.object({
-            startTime: z.string().min(1, 'Start time is required'),
-            endTime: z.string().min(1, 'End time is required'),
+            startTime: z.string().min(1, "Start time is required"),
+            endTime: z.string().min(1, "End time is required"),
           })
         ),
       })
     )
-    .min(1, 'At least one date is required'),
+    .min(1, "At least one date is required"),
   accessibility: z.boolean().optional(),
 });
 
@@ -33,8 +36,9 @@ const ItineraryForm = () => {
   const [activities, setActivities] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const {
     register,
@@ -46,32 +50,39 @@ const ItineraryForm = () => {
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      timeline: '',
-      language: '',
-      price: '',
-      availableDates: [{ date: '', times: [{ startTime: '', endTime: '' }] }],
+      title: "",
+      timeline: "",
+      language: "",
+      price: "",
+      availableDates: [{ date: "", times: [{ startTime: "", endTime: "" }] }],
       activities: [],
-      pickUpLocation: '',
-      dropOffLocation: '',
+      pickUpLocation: "",
+      dropOffLocation: "",
       accessibility: false,
     },
   });
 
-  const { fields: availableDates, append: appendDate, remove: removeDate } = useFieldArray({
+  const {
+    fields: availableDates,
+    append: appendDate,
+    remove: removeDate,
+  } = useFieldArray({
     control,
-    name: 'availableDates',
+    name: "availableDates",
   });
 
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const token = Cookies.get('jwt');
-        let role = Cookies.get('role');
-        if (role === undefined) role = 'guest';
-        const response = await axios.get(`http://localhost:4000/${role}/activities`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const token = Cookies.get("jwt");
+        let role = Cookies.get("role");
+        if (role === undefined) role = "guest";
+        const response = await axios.get(
+          `http://localhost:4000/${role}/activities`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setActivities(response.data);
       } catch (err) {
         console.error(err.message);
@@ -82,19 +93,26 @@ const ItineraryForm = () => {
 
   const onSubmit = async (data) => {
     setLoading(true);
-    setError('');
-    setSuccess('');
-    const token = Cookies.get('jwt');
-    const role = Cookies.get('role') || 'guest';
-    
+    setError("");
+    setSuccess("");
+    const token = Cookies.get("jwt");
+    const role = Cookies.get("role") || "guest";
+
     try {
-      const response = await axios.post(`http://localhost:4000/${role}/itineraries`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSuccess('Itinerary created successfully!');
-      console.log('Created itinerary:', response.data);
+      const response = await axios.post(
+        `http://localhost:4000/${role}/itineraries`,
+        data,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setSuccess("Itinerary created successfully!");
+      console.log("Created itinerary:", response.data);
+      setTimeout(() => {
+        navigate("/all-itineraries");
+      }, 2000);
     } catch (err) {
-      setError('Failed to create itinerary. Please try again.');
+      setError("Failed to create itinerary. Please try again.");
       console.error(err.message);
     } finally {
       setLoading(false);
@@ -107,88 +125,118 @@ const ItineraryForm = () => {
         className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-20 mb-20"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <h2 className="text-xl font-semibold mb-4 text-center">Create Itinerary</h2>
-
-        {/* Display success or error messages */}
-        {success && <div className="text-green-500 mb-4">{success}</div>}
-        {error && <div className="text-red-500 mb-4">{error}</div>}
+        <h2 className="text-xl font-semibold mb-4 text-center">
+          Create Itinerary
+        </h2>
 
         {/* Form Fields */}
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="title">Title</label>
+          <label className="block text-gray-700" htmlFor="title">
+            Title
+          </label>
           <input
-            {...register('title')}
+            {...register("title")}
             className="border border-gray-300 rounded-xl p-2 w-full"
             id="title"
           />
-          {errors.title && <span className="text-red-500">{errors.title.message}</span>}
+          {errors.title && (
+            <span className="text-red-500">{errors.title.message}</span>
+          )}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="timeline">Timeline</label>
+          <label className="block text-gray-700" htmlFor="timeline">
+            Timeline
+          </label>
           <input
-            {...register('timeline')}
+            {...register("timeline")}
             className="border border-gray-300 rounded-xl p-2 w-full"
             id="timeline"
           />
-          {errors.timeline && <span className="text-red-500">{errors.timeline.message}</span>}
+          {errors.timeline && (
+            <span className="text-red-500">{errors.timeline.message}</span>
+          )}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="language">Language</label>
+          <label className="block text-gray-700" htmlFor="language">
+            Language
+          </label>
           <input
-            {...register('language')}
+            {...register("language")}
             className="border border-gray-300 rounded-xl p-2 w-full"
             id="language"
           />
-          {errors.language && <span className="text-red-500">{errors.language.message}</span>}
+          {errors.language && (
+            <span className="text-red-500">{errors.language.message}</span>
+          )}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="price">Price</label>
+          <label className="block text-gray-700" htmlFor="price">
+            Price
+          </label>
           <input
-            {...register('price', { valueAsNumber: true })}
+            {...register("price", { valueAsNumber: true })}
             type="number"
             className="border border-gray-300 rounded-xl p-2 w-full"
             id="price"
           />
-          {errors.price && <span className="text-red-500">{errors.price.message}</span>}
+          {errors.price && (
+            <span className="text-red-500">{errors.price.message}</span>
+          )}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="pickUpLocation">Pick-Up Location</label>
+          <label className="block text-gray-700" htmlFor="pickUpLocation">
+            Pick-Up Location
+          </label>
           <input
-            {...register('pickUpLocation')}
+            {...register("pickUpLocation")}
             className="border border-gray-300 rounded-xl p-2 w-full"
             id="pickUpLocation"
           />
-          {errors.pickUpLocation && <span className="text-red-500">{errors.pickUpLocation.message}</span>}
+          {errors.pickUpLocation && (
+            <span className="text-red-500">
+              {errors.pickUpLocation.message}
+            </span>
+          )}
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700" htmlFor="dropOffLocation">Drop-Off Location</label>
+          <label className="block text-gray-700" htmlFor="dropOffLocation">
+            Drop-Off Location
+          </label>
           <input
-            {...register('dropOffLocation')}
+            {...register("dropOffLocation")}
             className="border border-gray-300 rounded-xl p-2 w-full"
             id="dropOffLocation"
           />
-          {errors.dropOffLocation && <span className="text-red-500">{errors.dropOffLocation.message}</span>}
+          {errors.dropOffLocation && (
+            <span className="text-red-500">
+              {errors.dropOffLocation.message}
+            </span>
+          )}
         </div>
 
         {/* Activities Selection */}
         <div className="mb-4 relative">
-          <label className="block text-gray-700" htmlFor="activities">Activities</label>
+          <label className="block text-gray-700" htmlFor="activities">
+            Activities
+          </label>
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="border border-gray-300 rounded-xl p-2 w-full text-left"
           >
-            {watch('activities').length > 0
+            {watch("activities").length > 0
               ? `Selected: ${activities
-                  .filter((activity) => watch('activities').includes(activity._id))
+                  .filter((activity) =>
+                    watch("activities").includes(activity._id)
+                  )
                   .map((activity) => activity.name)
-                  .join(', ')}`
-              : 'Select activities'}
+                  .join(", ")}`
+              : "Select activities"}
           </button>
 
           {dropdownOpen && (
@@ -198,7 +246,7 @@ const ItineraryForm = () => {
                   <input
                     type="checkbox"
                     value={activity._id}
-                    {...register('activities')}
+                    {...register("activities")}
                     className="mr-2"
                   />
                   <label>{activity.name}</label>
@@ -206,13 +254,16 @@ const ItineraryForm = () => {
               ))}
             </div>
           )}
-          {errors.activities && <span className="text-red-500">{errors.activities.message}</span>}
+          {errors.activities && (
+            <span className="text-red-500">{errors.activities.message}</span>
+          )}
         </div>
 
-        {/* Available Dates */}
         {availableDates.map((date, index) => (
           <div key={index} className="mb-4">
-            <label className="block text-gray-700">Available Date {index + 1}</label>
+            <label className="block text-gray-700">
+              Available Date {index + 1}
+            </label>
             <Controller
               name={`availableDates.${index}.date`}
               control={control}
@@ -224,8 +275,12 @@ const ItineraryForm = () => {
                 />
               )}
             />
-            {errors.availableDates?.[index]?.date && <span className="text-red-500">{errors.availableDates[index].date.message}</span>}
-            
+            {errors.availableDates?.[index]?.date && (
+              <span className="text-red-500">
+                {errors.availableDates[index].date.message}
+              </span>
+            )}
+
             {/* Times */}
             {date.times.map((_, timeIndex) => (
               <div key={timeIndex} className="flex space-x-4">
@@ -253,6 +308,17 @@ const ItineraryForm = () => {
                 />
               </div>
             ))}
+
+            {/* Remove button for extra dates */}
+            {availableDates.length > 1 && (
+              <button
+                type="button"
+                className="text-red-500 mt-2"
+                onClick={() => removeDate(index)}
+              >
+                Remove Date
+              </button>
+            )}
           </div>
         ))}
 
@@ -260,7 +326,7 @@ const ItineraryForm = () => {
           type="button"
           className="bg-gray-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-gray-600 transition duration-200"
           onClick={() =>
-            appendDate({ date: '', times: [{ startTime: '', endTime: '' }] })
+            appendDate({ date: "", times: [{ startTime: "", endTime: "" }] })
           }
         >
           Add Another Date
@@ -268,22 +334,28 @@ const ItineraryForm = () => {
 
         {/* Accessibility Checkbox */}
         <div className="mb-4 mt-4">
-          <label className="block text-gray-700" htmlFor="accessibility">Accessibility</label>
+          <label className="block text-gray-700" htmlFor="accessibility">
+            Accessibility
+          </label>
           <input
             type="checkbox"
-            {...register('accessibility')}
+            {...register("accessibility")}
             className="mr-2"
             id="accessibility"
           />
           Accessible for Disabled?
         </div>
 
+        {/* Display success or error messages */}
+        {success && <div className="text-green-500 mb-4">{success}</div>}
+        {error && <div className="text-red-500 mb-4">{error}</div>}
+
         {/* Submit Button */}
         <button
           type="submit"
           className="bg-orange-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-orange-600 transition duration-200"
         >
-          {loading ? 'Submitting...' : 'Submit'}
+          {loading ? "Submitting..." : "Submit"}
         </button>
       </form>
     </div>
