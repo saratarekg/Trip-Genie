@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Filter, ChevronDown, ArrowUpDown, Plus } from 'lucide-react';
+import { Filter, ChevronDown, ArrowUpDown, Plus, ContactRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FilterComponent = ({
@@ -13,6 +13,8 @@ const FilterComponent = ({
   setPrice,
   searchProducts,
   role,
+  myProducts,
+  handlemyProducts,
 }) => {
 
   return (
@@ -29,10 +31,22 @@ const FilterComponent = ({
             Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
           </button>
 
+          <button
+            onClick={() => handlemyProducts(!myProducts)} // Toggle myItineraries state
+            className={`flex items-center px-4 py-2 rounded-full shadow ${
+              myProducts ? "bg-orange-500 text-white" : "bg-white text-black"
+            }`}
+          >
+            <ContactRound strokeWidth={1.25}  /> 
+             My Products
+          </button>
+
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
           </button>
-        </div>
+
+         
+          </div>
 
           {role === 'seller'?  (
              <Link to="/create-product" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">

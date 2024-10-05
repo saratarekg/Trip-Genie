@@ -5,7 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Calendar as CalendarIcon, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
@@ -35,6 +36,14 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { Alert } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
@@ -204,6 +213,7 @@ export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [nationalities, setNationalities] = useState([]);
   const [apiError, setApiError] = useState(null);
+  const [showSignupSuccess, setShowSignupSuccess] = useState(false);
   const alertRef = useRef(null);
   const navigate = useNavigate();
 
@@ -298,12 +308,13 @@ export function SignupForm() {
         `http://localhost:4000/auth/sign-up/${values.userType}`,
         values
       );
-      navigate("/login", {
-        state: {
-          successMessage:
-            "Your account has been created successfully. Please log in.",
-        },
-      });
+      setShowSignupSuccess(true);
+      // navigate("/login", {
+      //   state: {
+      //     successMessage:
+      //       "Your account has been created successfully. Please log in.",
+      //   },
+      // });
     } catch (error) {
       if (error.response) {
         setApiError(
@@ -800,15 +811,34 @@ export function SignupForm() {
         <div className="mt-4 text-center text-sm">
           <p className="text-gray-600">
             Already have an account?{" "}
-            <a
-              href="#"
+            <Link to = '/login'
               className="font-medium text-orange-500 hover:text-orange-600"
             >
               Sign in
-            </a>
+              </Link>
           </p>
         </div>
       </div>
+
+      <Dialog open={showSignupSuccess} onOpenChange={setShowSignupSuccess}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Successful Signup
+            </DialogTitle>
+            <DialogDescription>
+            Your account has been created successfully!
+             Please log in.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button  className=" bg-orange-500"variant="default"  onClick={() => navigate('/login')}>
+              Login
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

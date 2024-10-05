@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Filter, ChevronDown, ArrowUpDown, Plus,ContactRound  } from 'lucide-react';
+import { Filter, ChevronDown, ArrowUpDown, Plus ,ContactRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
 
 const FilterComponent = ({
   filtersVisible,
@@ -82,18 +81,21 @@ const FilterComponent = ({
             Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
           </button>
 
+          <button
+            onClick={() => handlemyItineraries(!myItineraries)} // Toggle myItineraries state
+            className={`flex items-center px-4 py-2 rounded-full shadow ${
+              myItineraries ? "bg-orange-500 text-white" : "bg-white text-black"
+            }`}
+          >
+            <ContactRound strokeWidth={1.25}  /> 
+             My Itineraries
+          </button>
+
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
           </button>
 
-          <button
-            onClick={() => handlemyItineraries(!myItineraries)} // Toggle myItineraries state
-            className={`flex items-center px-4 py-2 rounded-full shadow bg-white text-black `}
-          >
-            <ContactRound strokeWidth={1.25}  /> 
-            {myItineraries ? ' My' : '   All'} Itineraries
-             
-          </button>
+          
 
           {/* <button onClick={() => handlemyItineraries()} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             <ArrowUpDown className="mr-2" size={18} />
