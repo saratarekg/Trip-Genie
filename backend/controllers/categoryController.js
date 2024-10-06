@@ -1,7 +1,14 @@
 const Category = require("../models/category");
 const Activity = require("../models/activity");
 
-const createCategory = (req, res) => {
+const createCategory = async (req, res) => {
+  const { name } = req.body;
+  if (!name) {
+    return res.status(400).json({ message: "Please provide a name" });
+  }
+  if (await Category.findOne({ name })) {
+    return res.status(400).json({ message: "Category already exists" });
+  }
   const category = new Category(req.body);
 
   category
@@ -54,6 +61,12 @@ const getAllCategories = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   try {
+    if (!req.body.name) {
+      return res.status(400).json({ message: "Please provide a name" });
+    }
+    if (await Category.findOne({ name: req.body.name })) {
+      return res.status(400).json({ message: "Category already exists" });
+    }
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
