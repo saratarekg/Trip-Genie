@@ -40,6 +40,7 @@ import SellerProfile from "./pages/SellerProfile.jsx";
 import AdvertiserProfile from "./pages/AdvertiserProfile.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
 import CreateHtpage from "./pages/CreateHtpage.jsx";
+import NotFound from "./components/NotFound.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -252,11 +253,12 @@ function AppContent() {
             path="/create-historical-tag"
             element={
               <ProtectedRoute allowedRoles={["tourism-governor"]}>
-
-                <CreateHtpage/>
+                <CreateHtpage />
               </ProtectedRoute>
             }
           />
+
+          <Route path="*" element={<NotFound />} />
 
           {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
         </Routes>
