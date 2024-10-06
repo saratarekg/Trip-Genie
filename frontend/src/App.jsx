@@ -39,6 +39,7 @@ import CreateActivity from "./pages/CreateActivity.jsx";
 import SellerProfile from "./pages/SellerProfile.jsx";
 import AdvertiserProfile from "./pages/AdvertiserProfile.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
+import CreateHtpage from "./pages/CreateHtpage.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
