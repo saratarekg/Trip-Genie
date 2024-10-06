@@ -317,6 +317,21 @@ export default function CreateHpForm() {
           {loading ? 'Creating...' : 'Create Historical Place'}
         </button>
       </form>
+
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Activity Created Successfully</DialogTitle>
+            <DialogDescription>
+              Your activity has been created. What would you like to do next?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={handleGoBack}>Go to All Activities</Button>
+            <Button onClick={handleCreateNew}>Create New Activity</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
