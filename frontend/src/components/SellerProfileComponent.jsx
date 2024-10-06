@@ -43,15 +43,15 @@ export function SellerProfileComponent() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedSeller((prev) => ({ ...prev, [name]: value }));
+    setEditedSeller((prev) => ({ ...prev, [name]: value })); // Update editedSeller state
     setValidationMessages((prev) => ({ ...prev, [name]: "" })); // Clear validation message on change
   };
-
+  
   const validateFields = () => {
-    const { name, username, email, mobile, description } = editedSeller;
+    const { name, username, email, mobile } = editedSeller;
     const messages = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple regex for email validation
-
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
     if (!name) messages.name = "Name is required.";
     if (!username) messages.username = "Username is required.";
     if (!email) {
@@ -64,23 +64,29 @@ export function SellerProfileComponent() {
     } else if (mobile.length < 11) {
       messages.mobile = "Phone number must be at least 11 characters.";
     }
-    if (!description) messages.description = "Description is required.";
-
+  
     setValidationMessages(messages);
-    return Object.keys(messages).length === 0; // Return true if no messages
+    return Object.keys(messages).length === 0; // Return true if no validation messages
   };
+  
 
   const handleUpdate = async () => {
     if (!validateFields()) {
       return; // If validation fails, do not proceed
     }
-
+  
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-
+  
       const api = `http://localhost:4000/${role}/${seller._id}`;
-      const response = await axios.put(api, editedSeller, {
+      // Ensure description is either the user's input or an empty string
+      const dataToUpdate = {
+        ...editedSeller,
+        description: editedSeller.description || "", // Default to an empty string if description is null
+      };
+  
+      const response = await axios.put(api, dataToUpdate, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -92,6 +98,7 @@ export function SellerProfileComponent() {
       setError(err.message);
     }
   };
+  
 
   if (loading) {
     return (
@@ -239,29 +246,22 @@ export function SellerProfileComponent() {
         </div>
 
         {(seller.description || isEditing) && (
-          <div className="flex flex-col">
-            <h3 className="font-semibold mb-2">Description</h3>
-            {isEditing ? (
-              <div>
-                <textarea
-                  name="description"
-                  value={editedSeller.description}
-                  onChange={handleInputChange}
-                  className={`w-full border rounded px-2 py-1 ${
-                    validationMessages.description ? "border-red-500" : ""
-                  }`}
-                  rows="3"
-                  placeholder="Description"
-                />
-                {validationMessages.description && (
-                  <span className="text-red-500 text-sm">{validationMessages.description}</span>
-                )}
-              </div>
-            ) : (
-              <p className="text-gray-600">{seller.description}</p>
-            )}
-          </div>
-        )}
+  <div className="flex flex-col">
+    <h3 className="font-semibold mb-2">Description</h3>
+    {isEditing ? (
+      <textarea
+        name="description"
+        value={editedSeller.description || ""}
+        onChange={handleInputChange}
+        className="w-full border rounded px-2 py-1"
+        rows="3"
+        placeholder="Description"
+      />
+    ) : (
+      seller.description && <p className="text-gray-600">{seller.description}</p>
+    )}
+  </div>
+)}
 
         <div className="mt-6">
           {isEditing ? (
