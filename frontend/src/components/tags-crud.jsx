@@ -159,13 +159,16 @@ export function TagCRUD({ isOpen, onClose }) {
         <h3 className="font-bold mb-2">Tags List</h3>
         <div className="max-h-64 overflow-y-auto"> {/* Scrollable area */}
           {tags.length > 0 ? (
-            <ul className="list-disc pl-5">
+            <div className="flex flex-col">
               {tags.map((tag) => (
-                <li key={tag._id} className="text-gray-700">
+                <div
+                  key={tag._id}
+                  className="text-black p-2 m-1 border border-black rounded-lg" // Increased border thickness
+                >
                   {tag.type}
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           ) : (
             <p>No Tags found.</p>
           )}
@@ -179,9 +182,11 @@ export function TagCRUD({ isOpen, onClose }) {
       </div>
     </div>
   );
-
+  
+  // Rest of the code remains the same...
+  
   if (!isOpen) return null;
-
+  
   return (
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
@@ -214,7 +219,7 @@ export function TagCRUD({ isOpen, onClose }) {
             </Button>
           </div>
         )}
-
+  
         {buttonsVisible && (
           <>
             <Button
@@ -227,14 +232,14 @@ export function TagCRUD({ isOpen, onClose }) {
             >
               Create Tag
             </Button>
-
+  
             <Button
               onClick={handleGetTags}
               className="w-full bg-orange-500 hover:bg-orange-600 text-white"
             >
               Get Tags
             </Button>
-
+  
             <Button
               onClick={() => {
                 setShowUpdateTag(true);
@@ -245,7 +250,7 @@ export function TagCRUD({ isOpen, onClose }) {
             >
               Update Tag
             </Button>
-
+  
             <Button
               onClick={() => {
                 setShowDeleteTag(true);
@@ -258,7 +263,7 @@ export function TagCRUD({ isOpen, onClose }) {
             </Button>
           </>
         )}
-
+  
         {showUpdateTag && (
           <div>
             <Input
@@ -289,7 +294,7 @@ export function TagCRUD({ isOpen, onClose }) {
             </Button>
           </div>
         )}
-
+  
         {showDeleteTag && (
           <div>
             <Input
@@ -312,7 +317,7 @@ export function TagCRUD({ isOpen, onClose }) {
             </Button>
           </div>
         )}
-
+  
         {message && (
           <div className="mt-4 p-2 bg-red-100 text-red-800 rounded">
             {message}
@@ -329,5 +334,9 @@ export function TagCRUD({ isOpen, onClose }) {
       {showTagList && <TagListPopout />}
     </DialogContent>
   );
+  
+  
+  
+  
 }
 

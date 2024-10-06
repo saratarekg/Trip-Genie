@@ -81,6 +81,9 @@ export function NavbarComponent() {
                           <NavLink to='/all-products'>
                             Products
                           </NavLink>
+                          <NavLink to='/seller-profile'>
+                            Profile
+                          </NavLink>
                         </>
                       )}
                     {role === "tourist" && (

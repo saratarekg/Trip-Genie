@@ -314,31 +314,35 @@ export function CategoryCRUD({ isOpen, onClose }) {
 
       {/* Categories Modal Popout */}
       <Dialog open={isCategoriesModalOpen} onOpenChange={setIsCategoriesModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Categories List</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 max-h-[350px] overflow-y-auto">
-            {categories.length > 0 ? (
-              <ul className="list-disc pl-5">
-                {categories.map((category) => (
-                  <li key={category._id} className="text-gray-700">
-                    {category.name}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No categories found.</p>
-            )}
-          </div>
-          <Button
-            onClick={() => setIsCategoriesModalOpen(false)}
-            className="w-full mt-4 bg-gray-500 text-white"
-          >
-            Close
-          </Button>
-        </DialogContent>
-      </Dialog>
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader>
+      <DialogTitle>Categories List</DialogTitle>
+    </DialogHeader>
+    <div className="mt-4 max-h-[350px] overflow-y-auto">
+      {categories.length > 0 ? (
+        <ul className="list-none p-0">
+          {categories.map((category) => (
+            <li 
+              key={category._id} 
+              className="text-gray-700 border border-black rounded-lg py-2 px-4 mb-1" 
+            >
+              {category.name}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No categories found.</p>
+      )}
+    </div>
+    <Button
+      onClick={() => setIsCategoriesModalOpen(false)}
+      className="w-full mt-4 bg-gray-500 text-white"
+    >
+      Close
+    </Button>
+  </DialogContent>
+</Dialog>
+
     </>
   );
 }
