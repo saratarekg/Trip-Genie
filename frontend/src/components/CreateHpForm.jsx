@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from "react-router-dom";
+import Select from 'react-select';
+import  Cookies  from 'js-cookie';
 
 // Form validation schema using zod
 const formSchema = z.object({
@@ -15,29 +16,34 @@ const formSchema = z.object({
     city: z.string().min(1, 'Please enter a city'),
     country: z.string().min(1, 'Please select a country'),
   }),
-  historicalTag: z.array(z.string()).min(1, 'Please enter at least one tag'),
+  historicalTag: z.array(z.object({
+    value: z.string(),
+    label: z.string()
+  })).min(1, 'Please select at least one historical tag'),
   openingHours: z.object({
     weekdays: z.string().optional(),
     weekends: z.string().optional(),
   }),
   ticketPrices: z.object({
-    adult: z.number().min(0, 'Please enter a valid adult price').optional(),
-    child: z.number().min(0, 'Please enter a valid child price').optional(),
+    foreigner: z.string().optional().transform(val => val ? Number(val) : undefined),
+    native: z.string().optional().transform(val => val ? Number(val) : undefined),
+    student: z.string().optional().transform(val => val ? Number(val) : undefined),
   }),
 });
 
-const CreateHpForm = () => {
+export default function CreateHpForm() {
   const [historicalTags, setHistoricalTags] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [countries, setCountries] = useState([]);
-  const [pictures, setPictures] = useState([]); // State for uploaded pictures
+  const [pictures, setPictures] = useState([]);
   const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(formSchema),
@@ -55,13 +61,13 @@ const CreateHpForm = () => {
         weekends: '',
       },
       ticketPrices: {
-        adult: '',
-        child: '',
+        foreigner: '',
+        native: '',
+        student: '',
       },
     },
   });
 
-  // Fetch countries
   useEffect(() => {
     const fetchCountries = async () => {
       try {
@@ -79,38 +85,69 @@ const CreateHpForm = () => {
       }
     };
     fetchCountries();
+
+    const fetchHistoricalTags = async () => {
+      try {
+        const token = Cookies.get("jwt")
+        const response = await axios.get(`http://localhost:4000/tourism-governor/historical-tags`,  {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setHistoricalTags(response.data);
+      } catch (err) {
+        console.error('Error fetching historical tags:', err.message);
+        setError('Failed to fetch tags. Please try again.');
+      }
+    };
+    fetchHistoricalTags();
   }, []);
 
   const onSubmit = async (data) => {
+   
     setLoading(true);
     setError('');
     setSuccess('');
 
     const token = Cookies.get('jwt');
+    data["historicalTag"] = data["historicalTag"].map(tag=>tag.value);
 
-    // Create FormData object
-    const formData = new FormData();
-    // Append form data to FormData
-    for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        formData.append(key, JSON.stringify(data[key])); // Append each field as JSON string
-      }
-    }
-    // Append uploaded pictures
-    pictures.forEach((picture) => {
-      formData.append('pictures', picture); // Append each picture file
-    });
+    // const formData = new FormData();
+    // for (const key in data) {
+    //   if (data.hasOwnProperty(key)) {
+    //     if (key === 'historicalTag') {
+    //       formData.append(key, JSON.stringify(data[key].map(tag => tag.value)));
+    //     } else if (key === 'ticketPrices') {
+    //       formData.append(key, JSON.stringify({
+    //         adult: data[key].adult !== '' ? Number(data[key].adult) : undefined,
+    //         child: data[key].child !== '' ? Number(data[key].child) : undefined,
+    //       }));
+    //     } else {
+    //       formData.append(key, JSON.stringify(data[key]));
+    //     }
+    //   }
+    // }
+
+    // pictures.forEach((picture) => {
+    //   formData.append('pictures', picture);
+    // });
 
     try {
-      await axios.post('http://localhost:4000/historicalPlaces', formData, {
+      const response = await fetch(`http://localhost:4000/tourism-governor/historical-places`, {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data', // Set content type to multipart
+          'Content-Type': 'application/json',
+
+
         },
+        body:JSON.stringify(data)
       });
-      setSuccess('Historical place created successfully!');
-      // Optionally, navigate or reset the form
-      navigate('/'); // Adjust to your needs
+
+      if (response.ok){
+        setSuccess('Historical place created successfully!');
+        navigate('/');
+      }
+
+
     } catch (err) {
       setError('Failed to create historical place. Please try again.');
       console.error(err.message);
@@ -121,7 +158,7 @@ const CreateHpForm = () => {
 
   const handlePictureChange = (event) => {
     const files = Array.from(event.target.files);
-    setPictures(files); // Store the file objects instead of URLs
+    setPictures(files);
   };
 
   return (
@@ -135,7 +172,6 @@ const CreateHpForm = () => {
         {success && <div className="text-green-500 mb-4">{success}</div>}
         {error && <div className="text-red-500 mb-4">{error}</div>}
 
-        {/* Title */}
         <div>
           <label htmlFor="title" className="block text-gray-700 mb-2">Name</label>
           <input
@@ -146,7 +182,6 @@ const CreateHpForm = () => {
           {errors.title && <span className="text-red-500">{errors.title.message}</span>}
         </div>
 
-        {/* Description */}
         <div>
           <label htmlFor="description" className="block text-gray-700 mb-2">Description</label>
           <textarea
@@ -157,7 +192,6 @@ const CreateHpForm = () => {
           {errors.description && <span className="text-red-500">{errors.description.message}</span>}
         </div>
 
-        {/* Location */}
         <div>
           <label className="block text-gray-700 mb-2">Country</label>
           <select
@@ -190,24 +224,27 @@ const CreateHpForm = () => {
           {errors.location?.address && <span className="text-red-500">{errors.location.address.message}</span>}
         </div>
 
-        {/* Historical Tags */}
-        <label className="block text-gray-700 mb-2">Type</label>
-        <input
-          {...register('historicalTag.type')}
-          placeholder="Type"
-          className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-        />
-        {errors.historicalTag?.type && <span className="text-red-500">{errors.historicalTag.type.message}</span>}
+        <div>
+          <label className="block text-gray-700 mb-2">Historical Tags</label>
+          <Controller
+            name="historicalTag"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                isMulti
+                options={historicalTags.map(tag => ({
+                  value: tag._id,
+                  label: `${tag.type} - ${tag.period}`
+                }))}
+                className="rounded-xl"
+                classNamePrefix="select"
+              />
+            )}
+          />
+          {errors.historicalTag && <span className="text-red-500">{errors.historicalTag.message}</span>}
+        </div>
 
-        <label className="block text-gray-700 mb-2">Period</label>
-        <input
-          {...register('historicalTag.period')}
-          placeholder="example: 2000-2004"
-          className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-        />
-        {errors.historicalTag?.period && <span className="text-red-500">{errors.historicalTag.period.message}</span>}
-
-        {/* Opening Hours */}
         <div>
           <label className="block text-gray-700 mb-2">Opening Hours (Weekdays)</label>
           <input
@@ -228,30 +265,39 @@ const CreateHpForm = () => {
           {errors.openingHours?.weekends && <span className="text-red-500">{errors.openingHours.weekends.message}</span>}
         </div>
 
-        {/* Ticket Prices */}
         <div>
-          <label className="block text-gray-700 mb-2">Adult Ticket Price</label>
+          <label className="block text-gray-700 mb-2">Ticket Price (Foreigners)</label>
           <input
-            {...register('ticketPrices.adult')}
+            {...register('ticketPrices.foreigner')}
             type="number"
+            placeholder="Price for Foreigners"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            placeholder="Enter price"
           />
-          {errors.ticketPrices?.adult && <span className="text-red-500">{errors.ticketPrices.adult.message}</span>}
+          {errors.ticketPrices?.foreigner && <span className="text-red-500">{errors.ticketPrices.foreigner.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Child Ticket Price</label>
+          <label className="block text-gray-700 mb-2">Ticket Price (Native)</label>
           <input
-            {...register('ticketPrices.child')}
+            {...register('ticketPrices.native')}
             type="number"
+            placeholder="Price for natives"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            placeholder="Enter price"
           />
-          {errors.ticketPrices?.child && <span className="text-red-500">{errors.ticketPrices.child.message}</span>}
+          {errors.ticketPrices?.native && <span className="text-red-500">{errors.ticketPrices.native.message}</span>}
         </div>
 
-        {/* Upload Pictures */}
+        <div>
+          <label className="block text-gray-700 mb-2">Ticket Price (student)</label>
+          <input
+            {...register('ticketPrices.student')}
+            type="number"
+            placeholder="Price for students"
+            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+          />
+          {errors.ticketPrices?.student && <span className="text-red-500">{errors.ticketPrices.student.message}</span>}
+        </div>
+
         <div>
           <label className="block text-gray-700 mb-2">Upload Pictures</label>
           <input
@@ -259,11 +305,10 @@ const CreateHpForm = () => {
             multiple
             accept="image/*"
             onChange={handlePictureChange}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            className="border border-gray-300 rounded-xl p-2 w-full mb-4"
           />
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="w-full bg-orange-500 text-white rounded-xl p-2 h-12 mt-4"
@@ -274,6 +319,4 @@ const CreateHpForm = () => {
       </form>
     </div>
   );
-};
-
-export default CreateHpForm;
+}

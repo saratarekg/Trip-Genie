@@ -1,339 +1,388 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import axios from "axios";
-import Select from "react-select";
+import Cookies from "js-cookie";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { useDropzone } from "react-dropzone";
-import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Select from "react-select";
+import { useNavigate } from "react-router-dom";
 
 const schema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-  description: z.string().min(1, { message: "Description is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
-  coordinates: z.object({
-    lat: z.number(),
-    lng: z.number(),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  location: z.object({
+    address: z.string().min(1, "Address is required"),
+    coordinates: z.object({
+      longitude: z.number(),
+      latitude: z.number(),
+    }),
   }),
-  duration: z.number().min(1, { message: "Duration is required" }),
-  timing: z.string().min(1, { message: "Date is required" }),
-  price: z.number().min(1, { message: "Price is required" }),
-  category: z.object({
-    value: z.string(),
-    label: z.string(),
-  }),
-  tags: z.array(
-    z.object({
-      value: z.string(),
-      label: z.string(),
-    })
-  ),
-  specialDiscount: z.number().min(0).optional(),
+  duration: z.number().int().positive("Duration must be a positive integer"),
+  timing: z
+    .date()
+    .refine((date) => date > new Date(), {
+      message: "Timing must be a future date",
+    }),
+  price: z.number().int().positive("Price must be a positive integer"),
+  category: z
+    .array(z.object({ value: z.string(), label: z.string() }))
+    .nonempty("At least one category is required"),
+  tags: z
+    .array(z.object({ value: z.string(), label: z.string() }))
+    .nonempty("At least one tag is required"),
+  specialDiscount: z
+    .number()
+    .int()
+    .nonnegative("Discount must be a non-negative integer"),
   isBookingOpen: z.boolean(),
   pictures: z.array(z.string()).optional(),
 });
 
 export default function CreateActivity() {
-  const [categories, setCategories] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [latLng, setLatLng] = useState({ lat: 30.0444, lng: 31.2357 });
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const navigate = useNavigate();
-
   const {
     control,
-    register,
     handleSubmit,
-    formState: { errors },
     setValue,
+    formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
-  });
-
-  useEffect(() => {
-    // Fetch categories
-    axios
-      .get("http://localhost:4000/api/getAllCategories")
-      .then((res) =>
-        setCategories(
-          res.data.map((category) => ({
-            value: category.id,
-            label: category.name,
-          }))
-        )
-      )
-      .catch((err) => console.error("Failed to fetch categories:", err));
-
-    // Fetch tags (fix the mapping to suit backend response)
-    axios
-      .get("http://localhost:4000/api/getAllTypes")
-      .then((res) =>
-        setTags(res.data.map((tag) => ({ value: tag, label: tag })))
-      )
-      .catch((err) => console.error("Failed to fetch tags:", err));
-  }, []);
-
-  const MapClickHandler = () => {
-    useMapEvents({
-      click(e) {
-        setLatLng(e.latlng);
-        setValue("coordinates", e.latlng);
+    defaultValues: {
+      location: {
+        address: "",
+        coordinates: { longitude: 0, latitude: 0 },
       },
-    });
-    return null;
-  };
-
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: "image/*", // Ensure the file type is correctly set for images
-    onDrop: (acceptedFiles) => {
-      const files = acceptedFiles.map((file) => URL.createObjectURL(file));
-      setUploadedFiles(files);
-      setValue("pictures", files);
+      duration: 0,
+      price: 0,
+      specialDiscount: 0,
+      category: [],
+      tags: [],
+      isBookingOpen: true,
+      pictures: [],
     },
   });
 
-  const onSubmit = async (data) => {
-    setLoading(true);
-    setError("");
-    setSuccess("");
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [location, setLocation] = useState({
+    longitude: 31.1342,
+    latitude: 29.9792,
+  });
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await axios.get(
+        "http://localhost:4000/api/getAllCategories"
+      );
+      setCategories(
+        response.data.map((cat) => ({ value: cat._id, label: cat.name }))
+      );
+    };
+
+    const fetchTags = async () => {
+      const response = await axios.get("http://localhost:4000/api/getAllTags");
+      setTags(
+        response.data.map((tag) => ({ value: tag._id, label: tag.type }))
+      );
+    };
+
+    fetchCategories();
+    fetchTags();
+  }, []);
+
+  const onSubmit = async (data) => {
+    console.log("Submitted data:", data);
+    setLoading(true);
     const token = Cookies.get("jwt");
+    const role = Cookies.get("role") || "guest";
+
+    const activityData = {
+      ...data,
+      timing: new Date(data.timing), // Convert string to Date
+      duration: Number(data.duration),
+      price: Number(data.price),
+      specialDiscount: Number(data.specialDiscount),
+      location: {
+        ...data.location,
+        coordinates: location,
+      },
+      category: data.category.map((cat) => cat.value),
+      tags: data.tags.map((tag) => tag.value),
+    };
 
     try {
       const response = await axios.post(
-        `http://localhost:4000/advertiser/activities`,
-        data,
+        `http://localhost:4000/${role}/activities`,
+        activityData,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      setSuccess("Activity created successfully!");
       console.log("Created activity:", response.data);
-
-      setTimeout(() => {
-        navigate("/all-activities");
-      }, 2000);
-    } catch (err) {
-      setError("Failed to create activity. Please try again.");
-      console.error(err.message);
+      navigate("/activity");
+    } catch (error) {
+      console.error("Failed to create activity:", error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const MapClick = () => {
+    useMapEvents({
+      click: (e) => {
+        setLocation({ latitude: e.latlng.lat, longitude: e.latlng.lng });
+      },
+    });
+    return null;
+  };
+
   return (
-    <div className="container mx-auto py-8">
-      <Card className="w-full max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Create New Activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {loading && <p className="text-orange-500">Loading...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-            {success && <p className="text-green-500">{success}</p>}
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-center">
+          Create New Activity
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => <Input id="name" {...field} />}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-sm">{errors.name.message}</p>
+            )}
+          </div>
 
-            {/* Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" {...register("name")} />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => <Textarea id="description" {...field} />}
+            />
+            {errors.description && (
+              <p className="text-red-500 text-sm">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" {...register("description")} />
-              {errors.description && (
-                <p className="text-red-500 text-sm">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="address">Address</Label>
+            <Controller
+              name="location.address"
+              control={control}
+              render={({ field }) => <Input id="address" {...field} />}
+            />
+            {errors.location?.address && (
+              <p className="text-red-500 text-sm">
+                {errors.location.address.message}
+              </p>
+            )}
+          </div>
 
-            {/* Address */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input
-                id="address"
-                {...register("address")}
-                placeholder="Cairo, Egypt"
+              <Label htmlFor="duration">Duration (hours)</Label>
+              <Controller
+                name="duration"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    id="duration"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
+                )}
               />
-              {errors.address && (
-                <p className="text-red-500 text-sm">{errors.address.message}</p>
-              )}
-            </div>
-
-            {/* Map */}
-            <div className="space-y-2">
-              <Label>Location (click to set)</Label>
-              <div className="h-64 w-full rounded-md overflow-hidden">
-                <MapContainer
-                  center={latLng}
-                  zoom={13}
-                  style={{
-                    height: "100%",
-                    width: "100%",
-                    zIndex: 0,
-                    position: "relative",
-                  }} 
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <Marker position={latLng} />
-                  <MapClickHandler />
-                </MapContainer>
-              </div>
-              {errors.coordinates && (
+              {errors.duration && (
                 <p className="text-red-500 text-sm">
-                  {errors.coordinates.message}
+                  {errors.duration.message}
                 </p>
               )}
             </div>
 
-            {/* Duration and Date */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="duration">Duration (hours)</Label>
-                <Input type="number" id="duration" {...register("duration")} />
-                {errors.duration && (
-                  <p className="text-red-500 text-sm">
-                    {errors.duration.message}
-                  </p>
+            <div className="space-y-2">
+              <Label htmlFor="timing">Timing</Label>
+              <Controller
+                name="timing"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="datetime-local"
+                    id="timing"
+                    {...field}
+                    onChange={(e) => {
+                      const dateValue = new Date(e.target.value);
+                      field.onChange(dateValue);
+                    }}
+                  />
                 )}
-              </div>
+              />
+              {errors.timing && (
+                <p className="text-red-500 text-sm">{errors.timing.message}</p>
+              )}
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="timing">Date</Label>
-                <Input type="date" id="timing" {...register("timing")} />
-                {errors.timing && (
-                  <p className="text-red-500 text-sm">
-                    {errors.timing.message}
-                  </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="price">Price</Label>
+              <Controller
+                name="price"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    id="price"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 )}
-              </div>
+              />
+              {errors.price && (
+                <p className="text-red-500 text-sm">{errors.price.message}</p>
+              )}
             </div>
 
-            {/* Price and Discount */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price">Price</Label>
-                <Input type="number" id="price" {...register("price")} />
-                {errors.price && (
-                  <p className="text-red-500 text-sm">{errors.price.message}</p>
+            <div className="space-y-2">
+              <Label htmlFor="specialDiscount">Special Discount (%)</Label>
+              <Controller
+                name="specialDiscount"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    type="number"
+                    id="specialDiscount"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 )}
-              </div>
+              />
+              {errors.specialDiscount && (
+                <p className="text-red-500 text-sm">
+                  {errors.specialDiscount.message}
+                </p>
+              )}
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="specialDiscount">Special Discount</Label>
-                <Input
-                  type="number"
-                  id="specialDiscount"
-                  {...register("specialDiscount")}
+          <div className="space-y-2">
+            <Label>Categories</Label>
+            <Controller
+              name="category"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={categories}
+                  isMulti
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                 />
-              </div>
-            </div>
-
-            {/* Category */}
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Controller
-                name="category"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    options={categories}
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                  />
-                )}
-              />
-              {errors.category && (
-                <p className="text-red-500 text-sm">
-                  {errors.category.message}
-                </p>
               )}
-            </div>
+            />
+            {errors.category && (
+              <p className="text-red-500 text-sm">{errors.category.message}</p>
+            )}
+          </div>
 
-            {/* Tags */}
-            <div className="space-y-2">
-              <Label>Tags</Label>
-              <Controller
-                name="tags"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    isMulti
-                    options={tags}
-                    className="react-select-container"
-                    classNamePrefix="react-select"
-                  />
-                )}
-              />
-              {errors.tags && (
-                <p className="text-red-500 text-sm">{errors.tags.message}</p>
+          <div className="space-y-2">
+            <Label>Tags</Label>
+            <Controller
+              name="tags"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={tags}
+                  isMulti
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
               )}
-            </div>
+            />
+            {errors.tags && (
+              <p className="text-red-500 text-sm">{errors.tags.message}</p>
+            )}
+          </div>
 
-            {/* Booking Open */}
-            <div className="space-y-2">
-              <Label>
-                <Checkbox {...register("isBookingOpen")} />
-                Booking Open
-              </Label>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Controller
+              name="isBookingOpen"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  id="isBookingOpen"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
+            />
+            <Label htmlFor="isBookingOpen">Is Booking Open?</Label>
+          </div>
 
-            {/* Dropzone */}
-            <div className="space-y-2">
-              <Label>Pictures</Label>
-              <div
-                {...getRootProps({
-                  className:
-                    "border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-orange-500 transition-colors",
-                })}
+          <div className="space-y-2">
+            <Label htmlFor="pictures">Pictures (URLs)</Label>
+            <Controller
+              name="pictures"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  id="pictures"
+                  value={field.value.join(", ")}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value.split(",").map((url) => url.trim())
+                    )
+                  }
+                  placeholder="Enter picture URLs separated by commas"
+                />
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Location (click to set)</Label>
+            <div className="h-64 w-full rounded-md overflow-hidden">
+              <MapContainer
+                center={[location.latitude, location.longitude]}
+                zoom={13}
+                style={{ height: "100%", width: "100%", zIndex: 0 }}
               >
-                <input {...getInputProps()} />
-                <p>Drag & drop some files here, or click to select files</p>
-              </div>
-              {uploadedFiles.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  {uploadedFiles.map((file, index) => (
-                    <img
-                      key={index}
-                      src={file}
-                      alt="Preview"
-                      className="w-full h-32 object-cover rounded-md"
-                    />
-                  ))}
-                </div>
-              )}
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+                />
+                <MapClick />
+                <Marker position={[location.latitude, location.longitude]} />
+              </MapContainer>
             </div>
+          </div>
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white">
-              {loading ? "Submitting..." : "Create Activity"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          <Button
+            type="submit"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+            disabled={loading}
+          >
+            {loading ? "Creating..." : "Create Activity"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
