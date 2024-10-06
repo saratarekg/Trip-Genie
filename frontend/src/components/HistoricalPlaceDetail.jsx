@@ -506,6 +506,11 @@ const HistoricalPlaceDetail = () => {
           setDeleteError(errorData.message);
           return;
         }
+        if (response.status === 403) {
+          setDeleteError(errorData.message);
+          return;
+        }
+
         throw new Error('Failed to delete historical place');
       }
 
