@@ -71,7 +71,7 @@ export function AllActivitiesComponent() {
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [price, setPrice] = useState("");
-  const [dateRange, setDateRange] = useState({ lower: "", upper: "" });
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
   const [selectedActivity, setSelectedActivity] = useState(null);
@@ -109,6 +109,26 @@ export function AllActivitiesComponent() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
+
+  useEffect(() => {
+    // Fetch activities
+    fetchActivities();
+  
+   
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("http://localhost:4000/api/getAllCategories");  
+        setCategoryOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+  
+    fetchCategories();
+    setIsLoading(false);
+  }, []);
+  
+
 
   useEffect(() => {
     if (sortBy) {
@@ -164,11 +184,11 @@ export function AllActivitiesComponent() {
         url.searchParams.append("budget", price);
       }
 
-      if (dateRange.upper) {
-        url.searchParams.append("upperDate", dateRange.upper);
+      if (dateRange.end) {
+        url.searchParams.append("endDate", dateRange.end);
       }
-      if (dateRange.lower) {
-        url.searchParams.append("lowerDate", dateRange.lower);
+      if (dateRange.start) {
+        url.searchParams.append("startDate", dateRange.start);
       }
       if (selectedCategories.length > 0) {
         url.searchParams.append("categories", selectedCategories.join(","));
@@ -210,10 +230,11 @@ export function AllActivitiesComponent() {
   const clearFilters = () => {
     setSearchTerm("");
     setPrice("");
-    setDateRange({ lower: "", upper: "" });
+    setDateRange({ start: "", end: "" });
     setSelectedCategories([]);
     setSortBy("");
     setSortOrder("");
+    setMinStars(0);
     fetchActivities();
   };
 
@@ -223,14 +244,7 @@ export function AllActivitiesComponent() {
     setIsLoading(false);
   };
 
-  const handleCategorySelection = (option) => {
-    setSelectedCategories((prev) =>
-      prev.includes(option)
-        ? prev.filter((cat) => cat !== option)
-        : [...prev, option]
-    );
-  };
-
+ 
   return (
     <div>
       {isLoading ? (
@@ -266,11 +280,10 @@ export function AllActivitiesComponent() {
                   setPrice={setPrice}
                   dateRange={dateRange}
                   setDateRange={setDateRange}
-                  selectedCategories={selectedCategories}
-                  handleCategorySelection={handleCategorySelection}
                   minStars={minStars}
                   setMinStars={setMinStars}
                   categoryOptions={categoryOptions}
+                  searchActivites={searchActivities}
                 />
 
                 {activities.length > 0 ? (
