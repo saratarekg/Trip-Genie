@@ -14,9 +14,9 @@ const FilterComponent = ({
   setPrice,
   dateRange,
   setDateRange,
-  selectedCategory,
-  setSelectedCategory,
-  categoriesOptions = [],
+  selectedCategories,
+  setSelectedCategories,
+  categoriesOptions,
   minStars,
   setMinStars,  // Add state to control minimum stars
   searchActivites,
@@ -25,10 +25,13 @@ const FilterComponent = ({
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   role = Cookies.get('role');
   // Handle Category Selection
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
+  const handleCategoryChange = (type) => {
+    if (selectedCategories.includes(type)) {
+      setSelectedCategories(selectedCategories.filter((t) => t !== type));
+    } else {
+      setSelectedCategories([...selectedCategories, type]);
+    }
   };
-
   const handleStartDateChange = (e) => {
     const newStartDate = e.target.value;
     if (newStartDate > dateRange.end) {
@@ -118,7 +121,7 @@ const FilterComponent = ({
               </div>
             </div>
 
-            {/* Category Dropdown */}
+            {/* Category Dropdown
             <div>
               <label className="block text-gray-700">Category</label>
               <div className="relative">
@@ -126,20 +129,47 @@ const FilterComponent = ({
                   onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                   className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
                 >
-                  {selectedCategory || 'Select Category'} <ChevronDown className={`ml-1 transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                  {selectedcatsetSelectedCategories || 'Select Category'} <ChevronDown className={`ml-1 transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
                 </button>
                 {showCategoryDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
                     {categoriesOptions.map((category) => (
-                      <label key={category} className="flex items-center px-4 py-2">
+                      <label key={category._id} className="flex items-center px-4 py-2">
                         <input
-                          type="radio"
+                          category="radio"
                           name="category"
-                          checked={selectedCategory === category}
+                          checked={selectedcatsetSelectedCategories === category}
                           onChange={() => handleCategoryChange(category)}
                           className="form-radio"
                         />
-                        <span className="ml-2">{category}</span>
+                        <span className="ml-2">{category.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div> */}
+
+            <div>
+              <label className="block text-gray-700">Category</label>
+              <div className="relative">
+                <button
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
+                >
+                  Select Category(s) <ChevronDown className={`ml-1 transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                {showCategoryDropdown && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                    {categoriesOptions.map((category) => (
+                      <label key={category._id} className="flex items-center px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(category)}
+                          onChange={() => handleCategoryChange(category)}
+                          className="form-checkbox"
+                        />
+                        <span className="ml-2">{category.name}</span>
                       </label>
                     ))}
                   </div>
