@@ -38,7 +38,7 @@ const ActivityCard = ({ activity, onSelect }) => (
         <span className="text-sm text-muted-foreground ml-1">{activity.rating.toFixed(1)}</span>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-lg font-bold text-primary">€{activity.price}/Night</span>
+        <span className="text-lg font-bold text-primary">${activity.price}/Night</span>
         <span className="text-sm text-muted-foreground">{activity.duration} nights</span>
       </div>
       <p className="text-sm text-muted-foreground">
