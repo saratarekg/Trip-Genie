@@ -15,9 +15,20 @@ const activitySchema = new Schema(
       required: true,
     },
     location: {
-      type: String,
-      required: true,
-    },
+      address: {
+        type: String,
+        required: true,
+      },
+      coordinates: {
+        longitude: {
+          type: Number,
+          required: true,
+        },
+        latitude: {
+          type: Number,
+          required: true,
+        },
+    }},
     duration: {
       type: Number,
       required: true,
@@ -113,7 +124,7 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
   const categoryIds = categories.map((category) => category._id);
 
   query.push({ ["name"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
-  query.push({ ["location"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
+  query.push({ ["location.address"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
   query.push({ ["description"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
 
   const cursor = this.find().cursor();
