@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import Map from '../components/Map';
+
 import {
   XCircle,
   CheckCircle,
@@ -29,6 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Tag } from "lucide-react";
 
 const ActivityDetail = () => {
   const { id } = useParams();
@@ -40,7 +43,8 @@ const ActivityDetail = () => {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [advertiserProfile, setAdvertiserProfile] = useState(null);
-
+        
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -143,6 +147,7 @@ const ActivityDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+
       <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
@@ -171,7 +176,11 @@ const ActivityDetail = () => {
                   <span className="text-gray-700">
                     Location: {activity.location}
                   </span>
+
                 </div>
+                {/* should be replaced with activity position */}
+                <Map position={ [29.979, 31.134] } height={'200px'} width={'200px'} />
+
                 <div className="flex items-center">
                   <DollarSign className="w-6 h-6 mr-2 text-orange-500" />
                   <span className="text-gray-700">
@@ -237,26 +246,50 @@ const ActivityDetail = () => {
             </div>
 
             {/* Updated Section for Category and Tags */}
-            <div className="mt-8 space-y-4">
-              <div className="flex items-center">
-                <h2 className="text-2xl font-semibold mr-2">Categories:</h2>
-                <p className="text-gray-700">
-                  {activity.category && activity.category.length > 0
-                    ? activity.category.map((cat) => cat.name).join(", ")
-                    : "N/A"}
-                </p>
+            <div className="mt-8 space-y-6">
+              <div>
+                <h2 className="text-2xl font-semibold mb-3">Categories</h2>
+                <div className="flex flex-wrap gap-2">
+                  {activity.category && activity.category.length > 0 ? (
+                    activity.category.map((cat, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+                      >
+                        {cat.name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 italic">
+                      No categories available
+                    </span>
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-center">
-                <h2 className="text-2xl font-semibold mr-2">Tags:</h2>
-                <p className="text-gray-700">
-                  {activity.tags && activity.tags.length > 0
-                    ? activity.tags.map((tag) => tag.type).join(", ")
-                    : "N/A"}
-                </p>
+              <div>
+                <h2 className="text-2xl font-semibold mb-3">Tags</h2>
+                <div className="flex flex-wrap gap-2">
+                  {activity.tags && activity.tags.length > 0 ? (
+                    activity.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium flex items-center"
+                      >
+                        <Tag className="w-4 h-4 mr-1" />
+                        {tag.type}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 italic">
+                      No tags available
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
+
 
           <div className="p-6 border-t border-gray-200">
             <div className="flex justify-between mt-8">
