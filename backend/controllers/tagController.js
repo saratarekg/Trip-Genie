@@ -56,11 +56,13 @@ const getTag= async (req, res) => {
 
 const getTagbyType = async (req, res) => {
     try {
-        const tags = await Tag.findOne({ name: req.query.type });
+        const tags = await Tag.findOne({ type: req.query.type });
         if (tags.length === 0) {
             return res.status(404).json({ message: 'No tags found with that name' });
         }
+        console.log(tags);
         res.status(200).json(tags);
+        
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
