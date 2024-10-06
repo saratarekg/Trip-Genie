@@ -9,7 +9,7 @@ const getTourGuideProfile = async (req, res) => {
     const tourGuideId = res.locals.user_id;
 
     // Find the tour guide by their ID
-    const tourGuide = await TourGuide.findById(tourGuideId);
+    const tourGuide = await TourGuide.findById(tourGuideId).populate("nationality").exec();;
 
     if (!tourGuide) {
       return res.status(404).json({ message: "Tour Guide not found" });
@@ -64,6 +64,7 @@ const updateTourGuideProfile = async (req, res) => {
   try {
     const tourGuide1 = await TourGuide.findById(res.locals.user_id);
 
+
     const { email, username, nationality, mobile, yearsOfExperience , previousWorks} = req.body;
 
     if(username!==tourGuide1.username && await TourGuide.findOne({username})){
@@ -75,8 +76,8 @@ const updateTourGuideProfile = async (req, res) => {
     // Find the TourGuide by their ID and update with new data
     const tourGuide = await TourGuide.findByIdAndUpdate(
       res.locals.user_id,
-      { email, username, nationality, mobile, yearsOfExperience , previousWorks},{ new: true, runValidators: true }
-    );
+      { email, username, mobile, yearsOfExperience, nationality , previousWorks},
+    ).populate("nationality").exec();
 
     if (!tourGuide) {
       return res.status(404).json({ message: "Tour Guide not found" });
@@ -87,7 +88,8 @@ const updateTourGuideProfile = async (req, res) => {
       .status(200)
       .json({ message: "Profile updated successfully", tourGuide });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log("AMY");
+    res.status(500).json({error: error.message });
   }
 };
 
