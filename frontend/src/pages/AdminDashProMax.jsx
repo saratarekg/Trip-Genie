@@ -9,6 +9,7 @@ import { Pie } from 'react-chartjs-2';
 import { AdminGovernorPopup } from "@/components/admin-governor-popup";
 import { DeleteAccount } from "@/components/DeleteAccPopout";
 import { CategoryCRUD } from "@/components/category-crud";
+import { TagCRUD } from "@/components/tags-crud";
 import { Dialog } from "@/components/ui/dialog";
 import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 
@@ -34,7 +35,7 @@ export function Dashboard() {
   const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
   const [isAdminGovernorPopupOpen, setIsAdminGovernorPopupOpen] = useState(false);
   const [isCategoryCRUDOpen, setIsCategoryCRUDOpen] = useState(false);
-
+  const [isTagCRUDOpen, setIsTagCRUDOpen] = useState(false);
   const dashboardData = [
     {
       title: "Total Revenue",
@@ -69,8 +70,8 @@ export function Dashboard() {
       {
         label: 'Financial Overview',
         data: [30000, 10000, 5000],
-        backgroundColor: ['#808080', '#FF8C00', '#003366'], // grey, orange, dark blue
-        hoverBackgroundColor: ['#A9A9A9', '#FFA500', '#004080'], // hover colors
+        backgroundColor: ['#808080', '#FF8C00', '#003366'],
+        hoverBackgroundColor: ['#A9A9A9', '#FFA500', '#004080'],
       },
     ],
   };
@@ -81,8 +82,8 @@ export function Dashboard() {
       {
         label: 'User Metrics',
         data: [2350, 1234, 573],
-        backgroundColor: ['#808080', '#FF8C00', '#003366'], // grey, orange, dark blue
-        hoverBackgroundColor: ['#A9A9A9', '#FFA500', '#004080'], // hover colors
+        backgroundColor: ['#808080', '#FF8C00', '#003366'],
+        hoverBackgroundColor: ['#A9A9A9', '#FFA500', '#004080'],
       },
     ],
   };
@@ -188,10 +189,8 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    className="w-full bg-[#ED8936] hover:bg-[#003f66]"
-                    onClick={() => setIsCategoryCRUDOpen(true)}
-                  >
+                  <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]"
+                           onClick={() => setIsTagCRUDOpen(true)}>
                     Manage
                   </Button>
                 </CardContent>
@@ -219,23 +218,16 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    className="w-full bg-[#ED8936] hover:bg-[#003f66]"
-                    onClick={() => setIsCategoryCRUDOpen(true)}
-                  >
-                    Create 
+                  <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
+                    Create
                   </Button>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
         </Tabs>
-<hr></hr>
-<hr></hr>
-<hr></hr>
-<hr></hr>
-        {/* Add Pie Charts */}
-        <div className="mt-10 grid gap-4 md:grid-cols-2 mb-20"> {/* Ensure enough space at the bottom */}
+        <hr className="my-6" />
+        <div className="mt-10 grid gap-4 md:grid-cols-2 mb-20">
           <Card className="bg-white border-[#808080] border" style={{ width: '400px', height: '250px' }}>
             <CardHeader>
               <CardTitle className="text-sm font-medium text-[#003f66]">
@@ -257,7 +249,6 @@ export function Dashboard() {
             </CardContent>
           </Card>
         </div>
-
       </main>
 
       {isDeleteAccountOpen && (
@@ -272,7 +263,13 @@ export function Dashboard() {
       <Dialog open={isCategoryCRUDOpen} onOpenChange={setIsCategoryCRUDOpen}>
         <CategoryCRUD 
           isOpen={isCategoryCRUDOpen} 
-        
+          onClose={() => setIsCategoryCRUDOpen(false)} 
+        />
+      </Dialog>
+      <Dialog open={isTagCRUDOpen} onOpenChange={setIsTagCRUDOpen}>
+        <TagCRUD 
+          isOpen={isTagCRUDOpen} 
+          onClose={() => setIsTagCRUDOpen(false)} 
         />
       </Dialog>
     </div>
