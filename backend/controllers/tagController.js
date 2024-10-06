@@ -54,9 +54,9 @@ const getTag= async (req, res) => {
 };
 
 
-const getTagbyName = async (req, res) => {
+const getTagbyType = async (req, res) => {
     try {
-        const tags = await Tag.findOne({ name: req.query.name });
+        const tags = await Tag.findOne({ name: req.query.type });
         if (tags.length === 0) {
             return res.status(404).json({ message: 'No tags found with that name' });
         }
@@ -87,4 +87,4 @@ const getAllTypes = async (req, res) => {
 };
 
 
-module.exports = {addTag,deleteTag,updateTag,getTag,getAlltags,getAllTypes,getTagbyName};
+module.exports = {addTag,deleteTag,updateTag,getTag,getAlltags,getAllTypes,getTagbyType};
