@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export function TagCRUD({ isOpen, onClose }) {
-  const [tags, setTag] = useState([]);
+  const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [oldTag, setOldTag] = useState('');
   const [updatedTag, setUpdatedTag] = useState('');
@@ -27,7 +27,7 @@ export function TagCRUD({ isOpen, onClose }) {
           Authorization: `Bearer ${token}`,
         },
       });
-      setTag(response.data);
+      setTags(response.data);
     } catch (error) {
       console.error('Error fetching Tags:', error);
       setMessage('Error fetching Tags');
@@ -45,7 +45,7 @@ export function TagCRUD({ isOpen, onClose }) {
     if (newTag) {
       try {
         const token = Cookies.get('jwt');
-        await axios.post('http://localhost:4000/admin/tags', { name: newTag }, {
+        await axios.post('http://localhost:4000/admin/tags', { type: newTag }, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -64,10 +64,10 @@ export function TagCRUD({ isOpen, onClose }) {
 
   const updateTag = async () => {
     setMessage('');
-    if (oldTag && newTag) {
+    if (oldTag && updatedTag) {
       try {
         const token = Cookies.get('jwt');
-        const url = `http://localhost:4000/admin/tagbyname?name=${oldTag}`;
+        const url = `http://localhost:4000/admin/tagbytype?type=${oldTag}`;
         const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -78,7 +78,7 @@ export function TagCRUD({ isOpen, onClose }) {
 
         if (tag && tag._id) {
           await axios.put(`http://localhost:4000/admin/tags/${tag._id}`, 
-          { name: updatedTag }, {
+          { type: updatedTag }, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -105,7 +105,7 @@ export function TagCRUD({ isOpen, onClose }) {
     if (oldTag) {
       try {
         const token = Cookies.get('jwt');
-        const url = `http://localhost:4000/admin/tagbyname?name=${oldTag}`;
+        const url = `http://localhost:4000/admin/tagbytype?type=${oldTag}`;
         const response = await axios.get(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -146,8 +146,35 @@ export function TagCRUD({ isOpen, onClose }) {
 
   const handleGetTags = async () => {
     await fetchTags();
-    setShowTagList(true);
+    setShowTagList(true); // Show the tag list popout
   };
+
+  const TagListPopout = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-4 rounded shadow-lg max-w-lg w-full">
+        <h3 className="font-bold mb-2">Tags List</h3>
+        <div className="max-h-64 overflow-y-auto"> {/* Scrollable area */}
+          {tags.length > 0 ? (
+            <ul className="list-disc pl-5">
+              {tags.map((tag) => (
+                <li key={tag._id} className="text-gray-700">
+                  {tag.type}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No Tags found.</p>
+          )}
+        </div>
+        <Button
+          onClick={() => setShowTagList(false)} // Hide the tag list popout
+          className="w-full mt-4 bg-gray-500 text-white"
+        >
+          Close 
+        </Button>
+      </div>
+    </div>
+  );
 
   if (!isOpen) return null;
 
@@ -239,7 +266,7 @@ export function TagCRUD({ isOpen, onClose }) {
             />
             <Input
               type="text"
-              value={updateTag}
+              value={updatedTag}
               onChange={(e) => setUpdatedTag(e.target.value)}
               placeholder="New tag name"
               className="mt-2"
@@ -289,28 +316,7 @@ export function TagCRUD({ isOpen, onClose }) {
           </div>
         )}
 
-        {showTagList && (
-          <div className="mt-4">
-            <h3 className="font-bold mb-2">Tags List</h3>
-            {tags.length > 0 ? (
-              <ul className="list-disc pl-5">
-                {tags.map((tag) => (
-                  <li key={tag._id} className="text-gray-700">
-                    {tag.name}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No Tags found.</p>
-            )}
-            <Button
-              onClick={() => setShowTagList(false)}
-              className="w-full mt-4 bg-gray-500 text-white"
-            >
-              Close List
-            </Button>
-          </div>
-        )}
+        {showTagList && <TagListPopout />} {/* Show tag list popout */}
       </div>
     </DialogContent>
   );
