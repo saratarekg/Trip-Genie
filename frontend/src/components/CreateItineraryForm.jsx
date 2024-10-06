@@ -5,6 +5,15 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -39,6 +48,8 @@ const ItineraryForm = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false);
+  
 
   const {
     register,
@@ -108,15 +119,24 @@ const ItineraryForm = () => {
       );
       setSuccess("Itinerary created successfully!");
       console.log("Created itinerary:", response.data);
-      setTimeout(() => {
-        navigate("/all-itineraries");
-      }, 2000);
+      setShowDialog(true);
     } catch (err) {
       setError("Failed to create itinerary. Please try again.");
       console.error(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoBack = () => {
+    setShowDialog(false);
+    navigate("/all-itineraries");
+  };
+  
+  const handleCreateNew = () => {
+    setShowDialog(false)
+    window.location.reload();
+    
   };
 
   return (
@@ -346,9 +366,9 @@ const ItineraryForm = () => {
           Accessible for Disabled?
         </div>
 
-        {/* Display success or error messages */}
-        {success && <div className="text-green-500 mb-4">{success}</div>}
-        {error && <div className="text-red-500 mb-4">{error}</div>}
+        
+        {/* {success && <div className="text-green-500 mb-4">{success}</div>}
+        {error && <div className="text-red-500 mb-4">{error}</div>} */}
 
         {/* Submit Button */}
         <button
@@ -358,6 +378,26 @@ const ItineraryForm = () => {
           {loading ? "Submitting..." : "Submit"}
         </button>
       </form>
+
+
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">Success!</DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              The historical place was created successfully.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 flex justify-end space-x-4">
+            <Button colorScheme="blue" onClick={handleGoBack}>
+              Go to All Places
+            </Button>
+            <Button variant="outline" onClick={handleCreateNew}>
+              Create Another
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
