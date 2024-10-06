@@ -152,7 +152,9 @@ export function TagCRUD({ isOpen, onClose }) {
     await fetchTags();
     setShowTagList(true); // Show the tag list popout
   };
-
+  const handleButtonClick = () => {
+    setSuccessMessage('');
+  };
   const TagListPopout = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-4 rounded shadow-lg max-w-lg w-full">
@@ -264,34 +266,34 @@ export function TagCRUD({ isOpen, onClose }) {
           </>
         )}
   
-        {showUpdateTag && (
-          <div>
-            <Input
-              type="text"
-              value={oldTag}
-              onChange={(e) => setOldTag(e.target.value)}
-              placeholder="Old tag name"
-              className="mt-2"
-            />
-            <Input
-              type="text"
-              value={updatedTag}
-              onChange={(e) => setUpdatedTag(e.target.value)}
-              placeholder="New tag name"
-              className="mt-2"
-            />
-            <Button
-              onClick={updateTag}
+       
+          {showUpdateTag && (
+            <div>
+              <Input
+                type="text"
+                value={oldTag}
+                onChange={(e) => setOldTag(e.target.value)}
+                placeholder="Old tag name"
+                className="mt-2"
+              />
+              <Input
+                type="text"
+                value={updatedTag}
+                onChange={(e) => setUpdatedTag(e.target.value)}
+                placeholder="New tag name"
+                className="mt-2"
+              />
+        <Button onClick={updateTag}
               className="w-full mt-2 bg-green-500 text-white"
             >
               Submit
             </Button>
-            <Button
-              onClick={resetButtons}
-              className="w-full mt-2 bg-gray-500 text-white"
-            >
-              Cancel
-            </Button>
+              <Button
+                onClick={resetButtons}
+                className="w-full mt-2 bg-gray-500 text-white"
+              >
+                Cancel
+              </Button>
           </div>
         )}
   
@@ -304,7 +306,7 @@ export function TagCRUD({ isOpen, onClose }) {
               placeholder="Tag to delete"
               className="mt-2"
             />
-            <Button              onClick={deleteTag}
+            <Button onClick={deleteTag}
               className="w-full mt-2 bg-green-500 text-white"
             >
               Submit

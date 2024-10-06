@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+'use client'
+
+import React, { useState, useEffect, useMemo } from 'react';
 import Cookies from 'js-cookie';
-import { XCircle, CheckCircle, ChevronLeft, Trash, Plus, Star, Check } from 'lucide-react';
+import { XCircle, CheckCircle, ChevronLeft, Trash, Plus } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -44,16 +47,14 @@ export default function UpdateItinerary() {
   const { id } = useParams();
   const [itinerary, setItinerary] = useState({
     title: '',
-    activities: [],
     timeline: '',
     language: '',
-    price: 0,
-    availableDates: [],
-    accessibility: false,
+    price: '',
     pickUpLocation: '',
     dropOffLocation: '',
-    isBooked: false,
-    rating: 0,
+    accessibility: false,
+    availableDates: [],
+    activities: []
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -168,7 +169,31 @@ export default function UpdateItinerary() {
     }));
   };
 
+  const isFormValid = useMemo(() => {
+    return (
+      itinerary.title.trim() !== '' &&
+      itinerary.timeline.trim() !== '' &&
+      itinerary.language !== '' &&
+      itinerary.price !== '' &&
+      !isNaN(itinerary.price) &&
+      Number(itinerary.price) >= 0 &&
+      itinerary.pickUpLocation.trim() !== '' &&
+      itinerary.dropOffLocation.trim() !== '' &&
+      itinerary.availableDates.length > 0 &&
+      itinerary.availableDates.every(date => 
+        date.date && 
+        date.times.length > 0 && 
+        date.times.every(time => time.startTime && time.endTime)
+      )
+    );
+  }, [itinerary]);
+
   const handleUpdate = async () => {
+    if (!isFormValid) {
+      setShowErrorPopup("Please fill in all required fields before updating.");
+      return;
+    }
+    
     setLoading(true);
     try {
       const token = Cookies.get('jwt');
@@ -181,13 +206,9 @@ export default function UpdateItinerary() {
         body: JSON.stringify(itinerary),
       });
 
-       if (!response.ok) {
+      if (!response.ok) {
         const errorData = await response.json();
-        if (response.status === 400) {
-          setShowErrorPopup(errorData.message);
-          return;
-        }
-        if (response.status === 403){
+        if (response.status === 400 || response.status === 403) {
           setShowErrorPopup(errorData.message);
           return;
         }
@@ -222,6 +243,13 @@ export default function UpdateItinerary() {
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold mb-8">Update Itinerary</h1>
+        {!isFormValid && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>
+              Please fill in all required fields before updating the itinerary.
+            </AlertDescription>
+          </Alert>
+        )}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -233,7 +261,9 @@ export default function UpdateItinerary() {
                     name="title"
                     value={itinerary.title}
                     onChange={handleChange}
+                    className={!itinerary.title.trim() ? 'border-red-500' : ''}
                   />
+                  {!itinerary.title.trim() && <span className="text-red-500">Title is required.</span>}
                 </div>
                 <div>
                   <Label htmlFor="timeline">Timeline</Label>
@@ -242,12 +272,14 @@ export default function UpdateItinerary() {
                     name="timeline"
                     value={itinerary.timeline}
                     onChange={handleChange}
+                    className={!itinerary.timeline.trim() ? 'border-red-500' : ''}
                   />
+                  {!itinerary.timeline.trim() && <span className="text-red-500">Timeline is required.</span>}
                 </div>
                 <div>
                   <Label htmlFor="language">Language</Label>
                   <Select value={itinerary.language} onValueChange={handleLanguageChange}>
-                    <SelectTrigger id="language" className="w-full">
+                    <SelectTrigger id="language" className={`w-full ${!itinerary.language ? 'border-red-500' : ''}`}>
                       <SelectValue placeholder="Select a language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -258,6 +290,7 @@ export default function UpdateItinerary() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {!itinerary.language && <span className="text-red-500">Language is required.</span>}
                 </div>
                 <div>
                   <Label htmlFor="price">Price</Label>
@@ -267,7 +300,10 @@ export default function UpdateItinerary() {
                     type="number"
                     value={itinerary.price}
                     onChange={handleChange}
+                    className={itinerary.price === '' || isNaN(itinerary.price) || Number(itinerary.price) < 0 ? 'border-red-500' : ''}
                   />
+                  {(itinerary.price === '' || isNaN(itinerary.price) || Number(itinerary.price) < 0) && 
+                    <span className="text-red-500">Price must be a positive number.</span>}
                 </div>
               </div>
               <div className="space-y-4">
@@ -278,7 +314,9 @@ export default function UpdateItinerary() {
                     name="pickUpLocation"
                     value={itinerary.pickUpLocation}
                     onChange={handleChange}
+                    className={!itinerary.pickUpLocation.trim() ? 'border-red-500' : ''}
                   />
+                  {!itinerary.pickUpLocation.trim() && <span className="text-red-500">Pick-up location is required.</span>}
                 </div>
                 <div>
                   <Label htmlFor="dropOffLocation">Drop-off Location</Label>
@@ -287,7 +325,9 @@ export default function UpdateItinerary() {
                     name="dropOffLocation"
                     value={itinerary.dropOffLocation}
                     onChange={handleChange}
+                    className={!itinerary.dropOffLocation.trim() ? 'border-red-500' : ''}
                   />
+                  {!itinerary.dropOffLocation.trim() && <span className="text-red-500">Drop-off location is required.</span>}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -347,7 +387,7 @@ export default function UpdateItinerary() {
                       type="date"
                       value={dateObj.date.split('T')[0]}
                       onChange={(e) => handleDateChange(e.target.value, dateIndex)}
-                      className="w-40"
+                      className={`w-40 ${!dateObj.date ? 'border-red-500' : ''}`}
                     />
                     <Button variant="destructive" size="icon" onClick={() => removeDate(dateIndex)} className="w-10 h-10">
                       <Trash className="h-4 w-4" />
@@ -359,13 +399,13 @@ export default function UpdateItinerary() {
                         type="time"
                         value={timeObj.startTime}
                         onChange={(e) => handleTimeChange(e.target.value, dateIndex, timeIndex, 'startTime')}
-                        className="w-32"
+                        className={`w-32 ${!timeObj.startTime ? 'border-red-500' : ''}`}
                       />
                       <Input
                         type="time"
                         value={timeObj.endTime}
                         onChange={(e) => handleTimeChange(e.target.value, dateIndex, timeIndex, 'endTime')}
-                        className="w-32"
+                        className={`w-32 ${!timeObj.endTime ? 'border-red-500' : ''}`}
                       />
                       <Button variant="destructive" size="icon" onClick={() => removeTime(dateIndex, timeIndex)} className="w-10 h-10">
                         <Trash className="h-4 w-4" />
@@ -380,13 +420,14 @@ export default function UpdateItinerary() {
               <Button variant="outline" onClick={addDate}>
                 <Plus className="mr-2 h-4 w-4" /> Add Date
               </Button>
+              {itinerary.availableDates.length === 0 && <span className="text-red-500 block mt-2">At least one date is required.</span>}
             </div>
 
             <div className="mt-8 flex justify-between">
               <Button variant="outline" onClick={() => navigate(`/itinerary/${id}`)}>
                 <ChevronLeft className="mr-2 h-4 w-4" /> Back
               </Button>
-              <Button variant="default" onClick={handleUpdate}>
+              <Button variant="default" onClick={handleUpdate} disabled={!isFormValid}>
                 Update Itinerary
               </Button>
             </div>
@@ -413,7 +454,7 @@ export default function UpdateItinerary() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showErrorPopup !== null} onOpenChange={() => setErrorPopup(null)}>
+      <Dialog open={showErrorPopup !== null} onOpenChange={() => setShowErrorPopup(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -421,7 +462,7 @@ export default function UpdateItinerary() {
               Failed to Update Itinerary
             </DialogTitle>
             <DialogDescription>
-              {showErrorPopup || 'Not your itinerary!'}
+              {showErrorPopup || 'An error occurred while updating the itinerary.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
