@@ -81,7 +81,7 @@ export function AllHistoricalPlacesComponent() {
     const [filtersVisible, setFiltersVisible] = useState(false);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedPeriods, setSelectedPeriods] = useState([]);
-    const [myHistoricalPlaces,setMyHistoricalPlaces ] = useState(false);
+    const [myHistoricalPlaces,setmyHistoricalPlaces ] = useState(false);
     const tripsPerPage = 6;
     const navigate = useNavigate();
     const historicalPlacesContainerRef = useRef(null);
@@ -129,7 +129,7 @@ export function AllHistoricalPlacesComponent() {
 
     const handlemyHistoricalPlaces = (attribute) => {
         setIsLoading(true);
-        setMyHistoricalPlaces(attribute); 
+        setmyHistoricalPlaces(attribute); 
         setIsLoading(false);
       };
 
@@ -143,21 +143,6 @@ export function AllHistoricalPlacesComponent() {
         setCurrentPage(pageNumber);
         //scrollToTop(); // Scroll to top when changing pages
     };
-
-    const clearFilters = () => {
-        // Reset all filter states to initial values
-        setSearchTerm("");
-        setPrice("");
-        setDateRange({ lower: "", upper: "" });
-        setSelectedTypes([]); // Reset selected types
-        setSelectedLanguages([]); // Reset selected languages
-        setSortBy(""); // Reset sorting
-        setSortOrder(""); // Reset sort order
-        setMyHistoricalPlaces(false);
-    
-        // Fetch itineraries without any filters
-        fetchItineraries();
-      };
 
     // Fetching types
     useEffect(() => {
@@ -228,6 +213,17 @@ export function AllHistoricalPlacesComponent() {
         }
     };
 
+    const clearFilters = () => {
+        // Reset all filter states to initial values
+        setSearchTerm("");
+        setSelectedTypes([]); // Reset selected types
+        setSelectedPeriods([]); // Reset selected periods
+        setmyHistoricalPlaces(false);
+
+        // Fetch itineraries without any filters
+        fetchHistoricalPlace();
+    };
+
     // Function for searching historical places
     const searchHistoricalPlaces = async () => {
         try {
@@ -289,19 +285,29 @@ export function AllHistoricalPlacesComponent() {
                         />
                         <FilterComponent
                             filtersVisible={filtersVisible}
-                            setFiltersVisible={setFiltersVisible}
-                            typesOptions={typesOptions}
-                            selectedTypes={selectedTypes}
-                            setSelectedTypes={setSelectedTypes}
                             toggleFilters={toggleFilters}
-                            periodOptions={periodOptions}
-                            selectedPeriods={selectedPeriods}
-                            handlemyHistoricalPlaces= {handlemyHistoricalPlaces}
-                            myHistoricalPlaces= {myHistoricalPlaces}
+                            //   sortOrder={sortOrder}
+                            //   sortBy={sortBy}
+                            //   handleSort={handleSort}
                             clearFilters={clearFilters}
-                            setSelectedPeriods={setSelectedPeriods}
+                            myHistoricalPlaces={myHistoricalPlaces}
+                            handlemyHistoricalPlaces={handlemyHistoricalPlaces}
+                            // sortItineraries={sortItineraries}
+                            //   price={price}
+                            //   setPrice={setPrice}
+                            //   dateRange={dateRange}
+                            //   setDateRange={setDateRange}
+                            selectedTypes={selectedTypes} // Pass selectedTypes array
+                            setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
+                            selectedPeriods={selectedPeriods} // Pass periods array
+                            setSelectedPeriods={setSelectedPeriods} // Pass periods function
+                            //   selectedLanguages={selectedLanguages} // Pass selectedLanguages array
+                            //   setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
+                            searchHistoricalPlaces={searchHistoricalPlaces}
+                            typesOptions={typesOptions}
+                            periodsOptions={periodOptions}
+                            //   languagesOptions={languagesOptions}
                             role={getUserRole()}
-                           
                         />
                     </div>
                     {error && <div className="text-red-500">{error}</div>}
