@@ -1,15 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -44,8 +42,7 @@ const formSchema = z.object({
   }),
 });
 
-export function AdminGovernorPopup() {
-  const [open, setOpen] = useState(false);
+export function AdminGovernorPopup({ isOpen, onClose }) {
   const [successMessage, setSuccessMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
@@ -57,6 +54,14 @@ export function AdminGovernorPopup() {
       password: "",
     },
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      form.reset();
+      setSuccessMessage("");
+      setIsError(false);
+    }
+  }, [isOpen, form]);
 
   const onSubmit = async (values) => {
     try {
@@ -94,7 +99,7 @@ export function AdminGovernorPopup() {
       setIsError(false);
       setTimeout(() => {
         setSuccessMessage("");
-        setOpen(false);
+        onClose();
       }, 2000);
     } catch (error) {
       console.error("Error:", error.message);
@@ -103,103 +108,91 @@ export function AdminGovernorPopup() {
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-60 h-[230px] bg-white rounded-[40px] transition-transform transform hover:scale-105 focus:outline-none"
-        >
-          <div className="absolute top-1/2 transform -translate-y-1/2 w-full [font-family:'Rubik-Medium',Helvetica] font-medium text-black text-[32px] text-center tracking-[0] leading-[38.0px]">
-            Add Admin/
-            <br />
-            Governor
-          </div>
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="text-blue-900 text-xl font-bold">
-            Add Admin/Governor
-          </DialogTitle>
-          <DialogDescription className="text-blue-900">
-            Enter the details for the new admin or governor.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-blue-900">Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a user type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="governor">Governor</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-blue-900">Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-blue-900">Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Enter password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <Button
-                type="submit"
-                className="w-full h-full bg-orange-500 text-white rounded-[40px] transition-transform transform hover:scale-105 focus:outline-none"
-              >
-                Submit
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+  if (!isOpen) return null;
 
-        {successMessage && (
-          <div
-            className={`mt-4 p-4 rounded-md ${
-              isError ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
-            }`}
-          >
-            {successMessage}
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+  return (
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle className="text-blue-900 text-xl font-bold">
+          Add Admin/Governor
+        </DialogTitle>
+        <DialogDescription className="text-blue-900">
+          Enter the details for the new admin or governor.
+        </DialogDescription>
+      </DialogHeader>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-blue-900">Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a user type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="governor">Governor</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-blue-900">Username</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter username" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-blue-900">Password</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <DialogFooter>
+            <Button
+              type="submit"
+              className="w-full h-full bg-orange-500 text-white rounded-[40px] transition-transform transform hover:scale-105 focus:outline-none"
+            >
+              Submit
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+
+      {successMessage && (
+        <div
+          className={`mt-4 p-4 rounded-md ${
+            isError ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+          }`}
+        >
+          {successMessage}
+        </div>
+      )}
+    </DialogContent>
   );
 }

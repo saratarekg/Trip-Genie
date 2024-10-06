@@ -4,19 +4,15 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TabsContent, Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import {
-  BarChart,
-  Users,
-  Gift,
-  Activity,
-  UserCircle,
-  Layers,
-  ShoppingBag,
-} from "lucide-react";
-
+import { BarChart, Users, Gift, Activity, UserCircle, Layers, ShoppingBag } from "lucide-react";
+import { Pie } from 'react-chartjs-2';
 import { AdminGovernorPopup } from "@/components/admin-governor-popup";
 import { DeleteAccount } from "@/components/DeleteAccPopout";
 import { CategoryCRUD } from "@/components/category-crud";
+import { Dialog } from "@/components/ui/dialog";
+import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
+
+Chart.register(ArcElement, Tooltip, Legend);
 
 // Reusable DashboardCard component
 const DashboardCard = ({ title, value, subtitle, icon }) => (
@@ -66,31 +62,38 @@ export function Dashboard() {
     },
   ];
 
+  // Data for the pie charts with updated color palette
+  const pieData1 = {
+    labels: ['Revenue', 'Expenses', 'Profit'],
+    datasets: [
+      {
+        label: 'Financial Overview',
+        data: [30000, 10000, 5000],
+        backgroundColor: ['#808080', '#FF8C00', '#003366'], // grey, orange, dark blue
+        hoverBackgroundColor: ['#A9A9A9', '#FFA500', '#004080'], // hover colors
+      },
+    ],
+  };
+
+  const pieData2 = {
+    labels: ['Subscriptions', 'Sales', 'New Users'],
+    datasets: [
+      {
+        label: 'User Metrics',
+        data: [2350, 1234, 573],
+        backgroundColor: ['#808080', '#FF8C00', '#003366'], // grey, orange, dark blue
+        hoverBackgroundColor: ['#A9A9A9', '#FFA500', '#004080'], // hover colors
+      },
+    ],
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <header className="flex items-center justify-between p-4 bg-[#003f66] text-white">
-        <h1 className="text-2xl font-bold">Dashboard Genie</h1>
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:text-[#ED8936]"
-          >
-            <Users className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:text-[#ED8936]"
-          >
-            <Gift className="h-5 w-5" />
-          </Button>
-        </div>
-      </header>
       <main className="flex-1 p-6">
-        <h2 className="text-3xl font-bold mb-6 text-[#003f66]">
+        <br /><br /><br />
+        <p className="text-3xl font-bold mb-6 text-[#003f66]" >
           Welcome to your Dashboard Genie!
-        </h2>
+        </p>
         <Tabs defaultValue="accounts" className="space-y-6">
           <TabsList className="grid grid-cols-3 gap-4 bg-transparent">
             <TabsTrigger
@@ -181,11 +184,14 @@ export function Dashboard() {
               <Card className="bg-white border-[#808080] border">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-[#003f66]">
-                    Manage Activities
+                    Manage Tags
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
+                  <Button 
+                    className="w-full bg-[#ED8936] hover:bg-[#003f66]"
+                    onClick={() => setIsCategoryCRUDOpen(true)}
+                  >
                     Manage
                   </Button>
                 </CardContent>
@@ -213,38 +219,62 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
-                    Create
+                  <Button 
+                    className="w-full bg-[#ED8936] hover:bg-[#003f66]"
+                    onClick={() => setIsCategoryCRUDOpen(true)}
+                  >
+                    Create 
                   </Button>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
         </Tabs>
-        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {dashboardData.map((data, index) => (
-            <DashboardCard
-              key={index}
-              title={data.title}
-              value={data.value}
-              subtitle={data.subtitle}
-              icon={data.icon}
-            />
-          ))}
+<hr></hr>
+<hr></hr>
+<hr></hr>
+<hr></hr>
+        {/* Add Pie Charts */}
+        <div className="mt-10 grid gap-4 md:grid-cols-2 mb-20"> {/* Ensure enough space at the bottom */}
+          <Card className="bg-white border-[#808080] border" style={{ width: '400px', height: '250px' }}>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-[#003f66]">
+                Financial Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Pie data={pieData1} options={{ maintainAspectRatio: false }} />
+            </CardContent>
+          </Card>
+          <Card className="bg-white border-[#808080] border" style={{ width: '400px', height: '250px' }}>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-[#003f66]">
+                User Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Pie data={pieData2} options={{ maintainAspectRatio: false }} />
+            </CardContent>
+          </Card>
         </div>
+
       </main>
-      <DeleteAccount 
-        isOpen={isDeleteAccountOpen} 
-        onClose={() => setIsDeleteAccountOpen(false)}
-      />
-      <AdminGovernorPopup 
-        isOpen={isAdminGovernorPopupOpen} 
-        onClose={() => setIsAdminGovernorPopupOpen(false)}
-      />
-      <CategoryCRUD
-        isOpen={isCategoryCRUDOpen}
-        onClose={() => setIsCategoryCRUDOpen(false)}
-      />
+
+      {isDeleteAccountOpen && (
+        <DeleteAccount onClose={() => setIsDeleteAccountOpen(false)} />
+      )}
+      <Dialog open={isAdminGovernorPopupOpen} onOpenChange={setIsAdminGovernorPopupOpen}>
+        <AdminGovernorPopup 
+          isOpen={isAdminGovernorPopupOpen} 
+          onClose={() => setIsAdminGovernorPopupOpen(false)} 
+        />
+      </Dialog>
+      <Dialog open={isCategoryCRUDOpen} onOpenChange={setIsCategoryCRUDOpen}>
+        <CategoryCRUD 
+          isOpen={isCategoryCRUDOpen} 
+        
+        />
+      </Dialog>
     </div>
   );
 }

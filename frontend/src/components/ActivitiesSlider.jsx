@@ -130,7 +130,7 @@ export function Activities() {
                   })}
                 </div>
                 <p className="text-sm text-gray-600 mb-2">{`Description: ${act.description}`}</p>
-                <p className="text-sm text-gray-600 mb-2">{`Location: ${act.location}`}</p>
+                <p className="text-sm text-gray-600 mb-2">{`Location: ${act.location.address}`}</p>
                 <p className="text-sm text-gray-600 mb-2">{`Duration: ${act.duration}`}</p>
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold">From ${act.price}</span>

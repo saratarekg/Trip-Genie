@@ -53,24 +53,57 @@ console.log(types);
 
 
 const updateHistoricalPlace = async (req, res) => {
-    try {
-        const museum= await Museum.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-        res.status(200).json(museum);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+    const { id } = req.params; // Get product ID from URL parameters
+    const { title, location, description, historicalTag, openingHours, ticketPrices, pictures } = req.body; // Get details from request body
+    const museum = await Museum.findById(id);
+    if (museum.governor.toString() != res.locals.user_id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this historical place" });
     }
-};
+    try {
+      // Find the product by ID and update its details
+      const updatedHP = await Museum.findByIdAndUpdate(
+        id,
+        { title, location, description, historicalTag, openingHours, ticketPrices, pictures },
+        { new: true, runValidators: true } // Options: return the updated document and run validation
+      );
+  
+      if (!updatedHP) {
+        return res.status(404).json({ message: "Historical Place not found" });
+      }
+  
+  
+      res.status(200).json(updatedHP);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+
 
 
 
 const deleteHistoricalPlace= async (req, res) => {
     try {
-        const museum = await Museum.findByIdAndDelete(req.params.id);
-        res.status(201).json({ message: 'Place deleted' });
-    } catch (error) {
-         res.status(404).json({ message: 'Place not found' });
-    }
+        const { id } = req.params;
+        const museum = await Museum.findById(id);
+        if (museum.governor.toString() != res.locals.user_id) {
+            return res
+              .status(403)
+              .json({ message: "You are not authorized to delete this historical place" });
+          }
+          
+            const museum2 = await Museum.findByIdAndDelete(id);
+            if (!museum2) {
+              return res.status(404).json({ message: "Historical Place not found" });
+            }
+            res.status(200).json({ message: "Historical Place deleted successfully" });
+          } catch (error) {
+            res.status(500).json({ message: error.message });
+          }
 };
+
 
 const filterHistoricalPlaces = async (req, res) => {
     try {
