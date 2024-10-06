@@ -89,7 +89,7 @@ export default function CreateHpForm() {
     const fetchHistoricalTags = async () => {
       try {
         const token = Cookies.get("jwt")
-        const response = await axios.get(`http://localhost:4000/tourism-governor/historical-tags`,  {
+        const response = await axios.get(`http://localhost:4000/tourism-governor/historical-tag`,  {
           headers: { Authorization: `Bearer ${token}` },
         });
         setHistoricalTags(response.data);
@@ -318,20 +318,6 @@ export default function CreateHpForm() {
         </button>
       </form>
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Activity Created Successfully</DialogTitle>
-            <DialogDescription>
-              Your activity has been created. What would you like to do next?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={handleGoBack}>Go to All Activities</Button>
-            <Button onClick={handleCreateNew}>Create New Activity</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
