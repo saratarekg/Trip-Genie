@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -11,7 +11,7 @@ import SellerList from "./components/SellerList.jsx";
 import ItineraryDetail from "./components/ItineraryDetail.jsx";
 import UpdateItinerary from "./components/UpdateItinerary.jsx";
 import UpdateProduct from "./components/UpdateProduts.jsx";
-import UpdatehistoricalPlace from "./components/UpdateHP.jsx"
+import UpdatehistoricalPlace from "./components/UpdateHP.jsx";
 import ProductDetail from "./components/ProductDetail.jsx";
 
 import ActivityList from "./components/ActivityListAdvertiser.jsx";
@@ -38,12 +38,23 @@ import ActivityDetail from "./pages/SingleActivity.jsx";
 import UpdateActivity from "./components/UpdateActivity.jsx";
 import CreateActivity from "./pages/CreateActivity.jsx";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function AppContent() {
   const location = useLocation();
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/sign-up";
   return (
     <div className="App">
+      <ScrollToTop />
       {!isAuthPage && <NavbarComponent />}
 
       <div className="pages">
@@ -58,9 +69,15 @@ function AppContent() {
 
           <Route path="/seller" element={<SellerList />} />
           <Route path="/activity" element={<AllActivitiesComponent />} />
-          <Route path ="/historical-place/:id" element={<HistoricalPlaceDetail/>} />
-          <Route path ="/update-historical-place/:id" element={<UpdatehistoricalPlace/>} />
-          
+          <Route
+            path="/historical-place/:id"
+            element={<HistoricalPlaceDetail />}
+          />
+          <Route
+            path="/update-historical-place/:id"
+            element={<UpdatehistoricalPlace />}
+          />
+
           <Route
             path="/all-itineraries"
             element={<AllItinerariesComponent />}
