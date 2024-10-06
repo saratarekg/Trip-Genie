@@ -46,6 +46,7 @@ app.use('/tour-guide',requireAuth('tour-guide'), tourGuideRoutes);
 app.use('/advertiser',requireAuth('advertiser'), advertiserRoutes);
 app.get('/api/nationalities',nationalityController.getAllNationalities);
 app.get('/api/getAllTypes',tagController.getAllTypes);
+app.get('/api/getAllTags',tagController.getAlltags);
 app.get('/api/getAllCategories',categoryController.getAllCategories);
 app.get('/api/getAllHistoricalTypes',historicaltagController.getAllHistoricalTypes);
 app.get('/api/getAllHistoricalPeriods',historicaltagController.getAllHistoricalPeriods);
