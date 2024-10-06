@@ -8,7 +8,10 @@ export const ProtectedRoute = ({ allowedRoles, children }) => {
 
   if (!userRole || !allowedRoles.includes(userRole)) {
     // Redirect to login or unauthorized page
-    return <Navigate to="/login" replace />;
+    if (userRole === "admin") {
+      return <Navigate to="/admin" replace />;
+    }
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

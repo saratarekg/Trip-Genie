@@ -2,13 +2,35 @@ import React, { useEffect, useState } from "react";
 // import { ObjectId } from "mongodb";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Mail, Phone, User, CheckCircle, AtSign, Briefcase, Flag, Plus, Trash } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  User,
+  CheckCircle,
+  AtSign,
+  Briefcase,
+  Flag,
+  Plus,
+  Trash,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export function TourGuideProfileComponent() {
   const [tourGuide, setTourGuide] = useState(null);
@@ -18,7 +40,12 @@ export function TourGuideProfileComponent() {
   const [editedTourGuide, setEditedTourGuide] = useState(null);
   const [validationMessages, setValidationMessages] = useState({});
   const [showWorkDialog, setShowWorkDialog] = useState(false);
-  const [currentWork, setCurrentWork] = useState({ title: '', company: '', duration: '', description: '' });
+  const [currentWork, setCurrentWork] = useState({
+    title: "",
+    company: "",
+    duration: "",
+    description: "",
+  });
   const [nationalities, setNationalities] = useState([]);
 
   const getUserRole = () => {
@@ -54,7 +81,9 @@ export function TourGuideProfileComponent() {
   useEffect(() => {
     const fetchNationalities = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/api/nationalities");
+        const response = await axios.get(
+          "http://localhost:4000/api/nationalities"
+        );
         setNationalities(response.data);
       } catch (error) {
         console.error("Error fetching nationalities:", error);
@@ -69,18 +98,14 @@ export function TourGuideProfileComponent() {
     setValidationMessages((prev) => ({ ...prev, [name]: "" }));
   };
 
- 
-
   const handleNationalityChange = (value) => {
     console.log(value);
     if (!tourGuide.nationality) {
       // const objectId = new ObjectId(value); // Convert string to ObjectId
-      setEditedTourGuide((prev) => ({ ...prev, nationality: objectId }));
+      setEditedTourGuide((prev) => ({ ...prev, nationality: value }));
       setValidationMessages((prev) => ({ ...prev, nationality: "" }));
     }
   };
-  
-  
 
   const handleDiscard = () => {
     setEditedTourGuide(tourGuide);
@@ -88,7 +113,8 @@ export function TourGuideProfileComponent() {
   };
 
   const validateFields = () => {
-    const { username, email, mobile, yearsOfExperience, nationality } = editedTourGuide;
+    const { username, email, mobile, yearsOfExperience, nationality } =
+      editedTourGuide;
     const messages = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{7,15}$/;
@@ -107,7 +133,8 @@ export function TourGuideProfileComponent() {
     if (yearsOfExperience === undefined || yearsOfExperience === null) {
       messages.yearsOfExperience = "Years of experience is required.";
     } else if (yearsOfExperience < 0 || yearsOfExperience > 50) {
-      messages.yearsOfExperience = "Years of experience must be between 0 and 50.";
+      messages.yearsOfExperience =
+        "Years of experience must be between 0 and 50.";
     }
     if (!nationality) messages.nationality = "Nationality is required.";
 
@@ -123,7 +150,6 @@ export function TourGuideProfileComponent() {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-console.log(editedTourGuide);
       const api = `http://localhost:4000/${role}`;
       const response = await axios.put(api, editedTourGuide, {
         headers: {
@@ -132,7 +158,7 @@ console.log(editedTourGuide);
       });
 
       if (response.status === 200) {
-        setTourGuide(response.data);
+        setTourGuide(response.data.tourGuide);
         setIsEditing(false);
         setError("");
       }
@@ -148,7 +174,7 @@ console.log(editedTourGuide);
   };
 
   const handleAddWork = () => {
-    setCurrentWork({ title: '', company: '', duration: '', description: '' });
+    setCurrentWork({ title: "", company: "", duration: "", description: "" });
     setShowWorkDialog(true);
   };
 
@@ -166,7 +192,10 @@ console.log(editedTourGuide);
   const handleSaveWork = () => {
     if (currentWork.title && currentWork.company && currentWork.duration) {
       const newWorks = [...(editedTourGuide.previousWorks || [])];
-      const existingIndex = newWorks.findIndex(w => w.title === currentWork.title && w.company === currentWork.company);
+      const existingIndex = newWorks.findIndex(
+        (w) =>
+          w.title === currentWork.title && w.company === currentWork.company
+      );
       if (existingIndex !== -1) {
         newWorks[existingIndex] = currentWork;
       } else {
@@ -196,7 +225,9 @@ console.log(editedTourGuide);
   if (!tourGuide) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-lg font-semibold">No tour guide profile information is available.</p>
+        <p className="text-lg font-semibold">
+          No tour guide profile information is available.
+        </p>
       </div>
     );
   }
@@ -219,11 +250,15 @@ console.log(editedTourGuide);
                     name="username"
                     value={editedTourGuide.username}
                     onChange={handleInputChange}
-                    className={validationMessages.username ? "border-red-500" : ""}
+                    className={
+                      validationMessages.username ? "border-red-500" : ""
+                    }
                     placeholder="Username"
                   />
                   {validationMessages.username && (
-                    <span className="text-red-500 text-sm">{validationMessages.username}</span>
+                    <span className="text-red-500 text-sm">
+                      {validationMessages.username}
+                    </span>
                   )}
                 </div>
               ) : (
@@ -251,7 +286,9 @@ console.log(editedTourGuide);
               )}
             </div>
             {validationMessages.email && (
-              <span className="text-red-500 text-sm">{validationMessages.email}</span>
+              <span className="text-red-500 text-sm">
+                {validationMessages.email}
+              </span>
             )}
           </div>
 
@@ -272,7 +309,9 @@ console.log(editedTourGuide);
               )}
             </div>
             {validationMessages.mobile && (
-              <span className="text-red-500 text-sm">{validationMessages.mobile}</span>
+              <span className="text-red-500 text-sm">
+                {validationMessages.mobile}
+              </span>
             )}
           </div>
 
@@ -285,11 +324,15 @@ console.log(editedTourGuide);
                   name="yearsOfExperience"
                   value={editedTourGuide.yearsOfExperience}
                   onChange={handleInputChange}
-                  className={validationMessages.yearsOfExperience ? "border-red-500" : ""}
+                  className={
+                    validationMessages.yearsOfExperience ? "border-red-500" : ""
+                  }
                   placeholder="Years of Experience"
                 />
                 {validationMessages.yearsOfExperience && (
-                  <span className="text-red-500 text-sm">{validationMessages.yearsOfExperience}</span>
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.yearsOfExperience}
+                  </span>
                 )}
               </div>
             ) : (
@@ -299,10 +342,14 @@ console.log(editedTourGuide);
 
           <div className="flex items-center gap-2">
             <Flag className="w-4 h-4 text-gray-500" />
-            {isEditing  ? (
+            {isEditing ? (
               <div className="flex flex-col w-full">
                 <Select onValueChange={handleNationalityChange}>
-                  <SelectTrigger className={validationMessages.nationality ? "border-red-500" : ""}>
+                  <SelectTrigger
+                    className={
+                      validationMessages.nationality ? "border-red-500" : ""
+                    }
+                  >
                     <SelectValue placeholder="Select nationality" />
                   </SelectTrigger>
                   <SelectContent>
@@ -314,18 +361,26 @@ console.log(editedTourGuide);
                   </SelectContent>
                 </Select>
                 {validationMessages.nationality && (
-                  <span className="text-red-500 text-sm">{validationMessages.nationality}</span>
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.nationality}
+                  </span>
                 )}
               </div>
             ) : (
-              <span>{tourGuide.nationality ? tourGuide.nationality.name : "Nationality not set"}</span>
+              <span>
+                {tourGuide.nationality
+                  ? tourGuide.nationality.name
+                  : "Nationality not set"}
+              </span>
             )}
           </div>
 
           <div>
             <span
               className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                tourGuide.isAccepted ? "bg-green-100 text-green-800 text-lg" : "bg-yellow-100 text-yellow-800"
+                tourGuide.isAccepted
+                  ? "bg-green-100 text-green-800 text-lg"
+                  : "bg-yellow-100 text-yellow-800"
               }`}
             >
               <CheckCircle className="inline w-4 h-4 mr-1" />
@@ -336,24 +391,36 @@ console.log(editedTourGuide);
 
         <div className="mt-6">
           <h3 className="font-semibold mb-2">Previous Work Experience</h3>
-          {editedTourGuide.previousWorks && editedTourGuide.previousWorks.map((work, index) => (
-            <div key={index} className="mb-4 p-4 border rounded">
-              <h4 className="font-semibold">{work.title}</h4>
-              <p>{work.company}</p>
-              <p>{work.duration}</p>
-              {work.description && <p className="text-gray-600">{work.description}</p>}
-              {isEditing && (
-                <div className="mt-2">
-                  <Button onClick={() => handleEditWork(index)} variant="outline" size="sm" className="mr-2">
-                    Edit
-                  </Button>
-                  <Button onClick={() => handleRemoveWork(index)} variant="destructive" size="sm">
-                    Remove
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
+          {editedTourGuide.previousWorks &&
+            editedTourGuide.previousWorks.map((work, index) => (
+              <div key={index} className="mb-4 p-4 border rounded">
+                <h4 className="font-semibold">{work.title}</h4>
+                <p>{work.company}</p>
+                <p>{work.duration}</p>
+                {work.description && (
+                  <p className="text-gray-600">{work.description}</p>
+                )}
+                {isEditing && (
+                  <div className="mt-2">
+                    <Button
+                      onClick={() => handleEditWork(index)}
+                      variant="outline"
+                      size="sm"
+                      className="mr-2"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      onClick={() => handleRemoveWork(index)}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
           {isEditing && (
             <Button onClick={handleAddWork} variant="outline" className="mt-2">
               <Plus className="w-4 h-4 mr-2" /> Add Work Experience
@@ -382,7 +449,11 @@ console.log(editedTourGuide);
       <Dialog open={showWorkDialog} onOpenChange={setShowWorkDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{currentWork.title ? 'Edit Work Experience' : 'Add Work Experience'}</DialogTitle>
+            <DialogTitle>
+              {currentWork.title
+                ? "Edit Work Experience"
+                : "Add Work Experience"}
+            </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -392,7 +463,9 @@ console.log(editedTourGuide);
               <Input
                 id="title"
                 value={currentWork.title}
-                onChange={(e) => setCurrentWork((prev) => ({ ...prev, title: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentWork((prev) => ({ ...prev, title: e.target.value }))
+                }
                 className="col-span-3"
               />
             </div>
@@ -403,7 +476,12 @@ console.log(editedTourGuide);
               <Input
                 id="company"
                 value={currentWork.company}
-                onChange={(e) => setCurrentWork((prev) => ({ ...prev, company: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentWork((prev) => ({
+                    ...prev,
+                    company: e.target.value,
+                  }))
+                }
                 className="col-span-3"
               />
             </div>
@@ -414,7 +492,12 @@ console.log(editedTourGuide);
               <Input
                 id="duration"
                 value={currentWork.duration}
-                onChange={(e) => setCurrentWork((prev) => ({ ...prev, duration: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentWork((prev) => ({
+                    ...prev,
+                    duration: e.target.value,
+                  }))
+                }
                 className="col-span-3"
               />
             </div>
@@ -425,13 +508,25 @@ console.log(editedTourGuide);
               <Textarea
                 id="description"
                 value={currentWork.description}
-                onChange={(e) => setCurrentWork((prev) => ({ ...prev, description: e.target.value }))}
+                onChange={(e) =>
+                  setCurrentWork((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 className="col-span-3"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleSaveWork} disabled={!currentWork.title || !currentWork.company || !currentWork.duration}>
+            <Button
+              onClick={handleSaveWork}
+              disabled={
+                !currentWork.title ||
+                !currentWork.company ||
+                !currentWork.duration
+              }
+            >
               Save
             </Button>
           </DialogFooter>

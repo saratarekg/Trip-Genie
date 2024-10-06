@@ -1,5 +1,6 @@
 const TourGuide = require("../models/tourGuide");
-
+const Nationality = require("../models/nationality");
+const mongoose = require("mongoose");
 const Itinerary = require("../models/itinerary"); // Adjust the path as needed
 
 const { deleteItinerary } = require("./itineraryController");
@@ -9,7 +10,9 @@ const getTourGuideProfile = async (req, res) => {
     const tourGuideId = res.locals.user_id;
 
     // Find the tour guide by their ID
-    const tourGuide = await TourGuide.findById(tourGuideId).populate("nationality").exec();;
+    const tourGuide = await TourGuide.findById(tourGuideId)
+      .populate("nationality")
+      .exec();
 
     if (!tourGuide) {
       return res.status(404).json({ message: "Tour Guide not found" });
@@ -64,20 +67,41 @@ const updateTourGuideProfile = async (req, res) => {
   try {
     const tourGuide1 = await TourGuide.findById(res.locals.user_id);
 
+    const {
+      email,
+      username,
+      nationality,
+      mobile,
+      yearsOfExperience,
+      previousWorks,
+    } = req.body;
 
-    const { email, username, nationality, mobile, yearsOfExperience , previousWorks} = req.body;
+    const nat = await Nationality.findOne({ _id: nationality });
 
-    if(username!==tourGuide1.username && await TourGuide.findOne({username})){
-     return res.status(400).json({message:"Username already exists"});
+    if (
+      username !== tourGuide1.username &&
+      (await TourGuide.findOne({ username }))
+    ) {
+      return res.status(400).json({ message: "Username already exists" });
     }
-    if(email!==tourGuide1.email && await TourGuide.findOne({email}) ){
-      return res.status(400).json({message:"Email already exists"});
-     }
+    if (email !== tourGuide1.email && (await TourGuide.findOne({ email }))) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
     // Find the TourGuide by their ID and update with new data
     const tourGuide = await TourGuide.findByIdAndUpdate(
       res.locals.user_id,
-      { email, username, mobile, yearsOfExperience, nationality , previousWorks},
-    ).populate("nationality").exec();
+      {
+        email,
+        username,
+        mobile,
+        yearsOfExperience,
+        nationality: nat._id,
+        previousWorks,
+      },
+      { new: true }
+    )
+      .populate("nationality")
+      .exec();
 
     if (!tourGuide) {
       return res.status(404).json({ message: "Tour Guide not found" });
@@ -89,7 +113,7 @@ const updateTourGuideProfile = async (req, res) => {
       .json({ message: "Profile updated successfully", tourGuide });
   } catch (error) {
     console.log("AMY");
-    res.status(500).json({error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 

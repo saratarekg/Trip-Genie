@@ -12,7 +12,7 @@ import UpdateItinerary from "./components/UpdateItinerary.jsx";
 import UpdateProduct from "./components/UpdateProduts.jsx";
 import UpdatehistoricalPlace from "./components/UpdateHP.jsx";
 import ProductDetail from "./components/ProductDetail.jsx";
-import {TourGuideProfileComponent} from "./components/tourGuideProfile.jsx";
+import { TourGuideProfileComponent } from "./components/tourGuideProfile.jsx";
 
 import ActivityList from "./components/ActivityListAdvertiser.jsx";
 import ItineraryList from "./components/ItineraryListTourGuide.jsx";
@@ -41,6 +41,7 @@ import SellerProfile from "./pages/SellerProfile.jsx";
 import AdvertiserProfile from "./pages/AdvertiserProfile.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
 import CreateHtpage from "./pages/CreateHtpage.jsx";
+import NotFound from "./components/NotFound.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -159,7 +160,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/tour-guide-profile"
+            element={
+              <ProtectedRoute allowedRoles={["tour-guide"]}>
+                <TourGuideProfileComponent />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/all-itineraries"
             element={
@@ -253,11 +261,12 @@ function AppContent() {
             path="/create-historical-tag"
             element={
               <ProtectedRoute allowedRoles={["tourism-governor"]}>
-
-                <CreateHtpage/>
+                <CreateHtpage />
               </ProtectedRoute>
             }
           />
+
+          <Route path="*" element={<NotFound />} />
 
           {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
         </Routes>
