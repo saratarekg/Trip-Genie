@@ -76,6 +76,18 @@ const FilterComponent = ({
             Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
           </button>
 
+          {role === "advertiser" && (  // Check if role is "tour-guide"
+  <button
+    onClick={() => handlemyActivities(!myActivities)} // Toggle myActivities state
+    className={`flex items-center px-4 py-2 rounded-full shadow ${
+      myActivities ? "bg-orange-500 text-white" : "bg-white text-black"
+    }`}
+  >
+    <ContactRound strokeWidth={1.25} />
+    My Activities
+  </button>
+)}
+
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
           </button>
