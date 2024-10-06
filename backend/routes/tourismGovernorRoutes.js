@@ -11,6 +11,7 @@ router.delete('/historical-places/:id', historicalPlacesController.deleteHistori
 router.put('/historical-places/:id', historicalPlacesController.updateHistoricalPlace);
 
 router.post('/historical-tag', historicalTagController.addHistoricalTag);
+router.get('/historical-tags', historicalTagController.getAlltags);
 
 router.get('/my-historical-places', historicalPlacesController.getHistoricalPlacesByGovernor);
 module.exports = router;

@@ -38,6 +38,7 @@
     "flag-icon-css": "^4.1.7",
     "frontend": "file:",
     "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "libphonenumber": "^0.0.10",
     "libphonenumber-js": "^1.11.10",

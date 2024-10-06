@@ -19,7 +19,7 @@ const FilterComponent = ({
   categoriesOptions = [],
   minStars,
   setMinStars,  // Add state to control minimum stars
-  searchItineraries,
+  searchActivites,
   role,
 }) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -29,18 +29,18 @@ const FilterComponent = ({
     setSelectedCategory(category);
   };
 
-  const handleLowerDateChange = (e) => {
-    const newLowerDate = e.target.value;
-    if (newLowerDate > dateRange.upper) {
-      setDateRange({ lower: newLowerDate, upper: newLowerDate });
+  const handleStartDateChange = (e) => {
+    const newStartDate = e.target.value;
+    if (newStartDate > dateRange.end) {
+      setDateRange({ start: newStartDate, end: newStartDate });
     } else {
-      setDateRange({ ...dateRange, lower: newLowerDate });
+      setDateRange({ ...dateRange, start: newStartDate });
     }
   };
 
-  const handleUpperDateChange = (e) => {
-    const newUpperDate = e.target.value;
-    setDateRange({ ...dateRange, upper: newUpperDate });
+  const handleEndDateChange = (e) => {
+    const newEndDate = e.target.value;
+    setDateRange({ ...dateRange, end: newEndDate });
   };
 
   // Handle minimum star rating selection
@@ -104,15 +104,15 @@ const FilterComponent = ({
               <div className="flex space-x-2">
                 <input
                   type="date"
-                  value={dateRange.lower}
-                  onChange={handleLowerDateChange}
+                  value={dateRange.start}
+                  onChange={handleStartDateChange}
                   className="w-full mt-1 border rounded-lg p-2"
                 />
                 <input
                   type="date"
-                  value={dateRange.upper}
-                  onChange={handleUpperDateChange}
-                  min={dateRange.lower}
+                  value={dateRange.end}
+                  onChange={handleEndDateChange}
+                  min={dateRange.start}
                   className="w-full mt-1 border rounded-lg p-2"
                 />
               </div>
@@ -166,7 +166,7 @@ const FilterComponent = ({
 
           {/* Apply Filters Button */}
           <button
-            onClick={searchItineraries}
+            onClick={searchActivites}
             className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
           >
             Apply Filters
