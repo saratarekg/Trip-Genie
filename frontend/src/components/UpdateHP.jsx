@@ -152,7 +152,7 @@ export default function UpdateHistoricalPlace() {
   const fetchAvailableTags = async () => {
     try {
       const token = Cookies.get('jwt')
-      const response = await fetch(`http://localhost:4000/${userRole}/historical-tags`, {
+      const response = await fetch(`http://localhost:4000/${userRole}/historical-tag`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
