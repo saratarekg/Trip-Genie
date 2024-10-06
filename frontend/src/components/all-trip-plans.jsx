@@ -17,9 +17,9 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
       <img
         src={
           itinerary.activities &&
-            itinerary.activities.length > 0 &&
-            itinerary.activities[0].pictures &&
-            itinerary.activities[0].pictures.length > 0
+          itinerary.activities.length > 0 &&
+          itinerary.activities[0].pictures &&
+          itinerary.activities[0].pictures.length > 0
             ? itinerary.activities[0].pictures[0]
             : defaultImage
         }
@@ -70,15 +70,14 @@ export function AllItinerariesComponent() {
   useEffect(() => {
     setIsLoading(true);
     fetchItineraries();
-    setIsLoading(false);
   }, []);
 
   const handleItinerarySelect = (id) => {
-    setIsLoading(true);
-    navigate(`/itinerary/${id}`); // Navigate to the itinerary details page
-    setIsLoading(false);
+    setIsLoading(true); // Start the loader
+    navigate(`/itinerary/${id}`).then(() => {
+      setIsLoading(false); // End the loader after navigation is complete
+    });
   };
-
   useEffect(() => {
     const fetchLanguages = async () => {
       setIsLoading(true);
@@ -102,7 +101,9 @@ export function AllItinerariesComponent() {
     // Fetch types from the backend
     const fetchType = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/getAllTypes');
+        const response = await axios.get(
+          "http://localhost:4000/api/getAllTypes"
+        );
         setTypesOptions(response.data);
       } catch (error) {
         console.error("Error fetching Type:", error);
@@ -113,14 +114,12 @@ export function AllItinerariesComponent() {
   }, []);
 
   useEffect(() => {
-    setIsLoading(false);
     const delayDebounceFn = setTimeout(() => {
       if (searchTerm) {
         searchItineraries();
       } else {
         fetchItineraries();
       }
-      setIsLoading(false);
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
@@ -133,57 +132,48 @@ export function AllItinerariesComponent() {
   }, [sortBy, sortOrder]);
 
   useEffect(() => {
-    setIsLoading(true);
-      searchItineraries();
-      setIsLoading(false);
+    searchItineraries();
   }, [myItineraries]);
 
   const handleSort = (attribute) => {
     setIsLoading(true);
     const newSortOrder = sortOrder === 1 ? -1 : 1;
     setSortOrder(newSortOrder);
-    setSortBy(attribute); 
+    setSortBy(attribute);
     setIsLoading(false);
   };
 
-  
   useEffect(() => {
     scrollToTop();
-}, [currentPage]);
-
-
+  }, [currentPage]);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handlePageChange = (pageNumber) => {
     setIsLoading(true);
     setCurrentPage(pageNumber);
     setIsLoading(false);
-};
+  };
   const handlemyItineraries = (attribute) => {
     setIsLoading(true);
-    setmyItineraries(attribute); 
+    setmyItineraries(attribute);
     setIsLoading(false);
   };
+
   const fetchItineraries = async () => {
     try {
-      setIsLoading(true);
-      const token = Cookies.get('jwt');
+      setIsLoading(true); // Start the loader
+      const token = Cookies.get("jwt");
       const role = getUserRole();
-      const url =  new URL(`http://localhost:4000/${role}/itineraries`);
- 
-      
+      const url = new URL(`http://localhost:4000/${role}/itineraries`);
 
-      const response = await fetch(
-        url,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -191,14 +181,15 @@ export function AllItinerariesComponent() {
       setItineraries(data);
       setError(null);
       setCurrentPage(1);
-      
     } catch (error) {
       console.error("Error fetching itineraries:", error);
       setError("Error fetching itineraries");
       setItineraries([]);
+    } finally {
+      setIsLoading(false); // End the loader after everything is done
     }
-    setIsLoading(false);
   };
+
   const clearFilters = () => {
     // Reset all filter states to initial values
     setSearchTerm("");
@@ -218,9 +209,9 @@ export function AllItinerariesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
-   
+
       // Add the search term and filter parameters
-      if(myItineraries){
+      if (myItineraries) {
         url.searchParams.append("myItineraries", myItineraries);
       }
       if (searchTerm) {
@@ -275,9 +266,7 @@ export function AllItinerariesComponent() {
   };
 
   const toggleFilters = () => {
-    setIsLoading(false);
     setFiltersVisible(!filtersVisible);
-    setIsLoading(false);
   };
 
   // Handle type and language selections
@@ -326,8 +315,8 @@ export function AllItinerariesComponent() {
                   toggleFilters={toggleFilters}
                   sortOrder={sortOrder}
                   sortBy={sortBy}
-                  myItineraries= {myItineraries}
-                  handlemyItineraries= {handlemyItineraries}
+                  myItineraries={myItineraries}
+                  handlemyItineraries={handlemyItineraries}
                   handleSort={handleSort}
                   clearFilters={clearFilters}
                   // sortItineraries={sortItineraries}
@@ -351,7 +340,6 @@ export function AllItinerariesComponent() {
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* {setIsLoading(true)} */}
                 {itineraries
                   .slice(
                     (currentPage - 1) * tripsPerPage,
@@ -363,42 +351,51 @@ export function AllItinerariesComponent() {
                       itinerary={itinerary}
                       onSelect={handleItinerarySelect}
                     />
-                    
-                  ))} 
+                  ))}
               </div>
 
-                  {/* Pagination Component here */}
-                  <div className="mt-8 flex justify-center items-center space-x-4">
-                        <button
-                            onClick={() => {
-                                handlePageChange(currentPage - 1);
-                            }}
-                            disabled={currentPage === 1}
-                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"}`}
-                        >
-                            <ChevronLeft />
-                        </button>
+              {/* Pagination Component here */}
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <button
+                  onClick={() => {
+                    handlePageChange(currentPage - 1);
+                  }}
+                  disabled={currentPage === 1}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${
+                    currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                  }`}
+                >
+                  <ChevronLeft />
+                </button>
 
-                        {/* Page X of Y */}
-                        <span className="text-lg font-medium">
-                        {/* {setIsLoading(false)} */}
-                            {itineraries.length > 0
-                                ? `Page ${currentPage} of ${Math.ceil(itineraries.length / tripsPerPage)}`
-                                : "No pages available"}
-                                
-                        </span>
+                {/* Page X of Y */}
+                <span className="text-lg font-medium">
+                  {/* {setIsLoading(false)} */}
+                  {itineraries.length > 0
+                    ? `Page ${currentPage} of ${Math.ceil(
+                        itineraries.length / tripsPerPage
+                      )}`
+                    : "No pages available"}
+                </span>
 
-                        <button
-                            onClick={() => {
-                                handlePageChange(currentPage + 1);
-                            }}
-                            disabled={currentPage === Math.ceil(itineraries.length / tripsPerPage) || itineraries.length === 0}
-                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage) ? "text-gray-300" : "text-blue-600"}`}
-                        >
-                            <ChevronRight />
-                        </button>
-                    </div>
-
+                <button
+                  onClick={() => {
+                    handlePageChange(currentPage + 1);
+                  }}
+                  disabled={
+                    currentPage ===
+                      Math.ceil(itineraries.length / tripsPerPage) ||
+                    itineraries.length === 0
+                  }
+                  className={`px-4 py-2 rounded-full bg-white shadow ${
+                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                      ? "text-gray-300"
+                      : "text-blue-600"
+                  }`}
+                >
+                  <ChevronRight />
+                </button>
+              </div>
             </>
           </div>
         </div>
@@ -406,5 +403,3 @@ export function AllItinerariesComponent() {
     </div>
   );
 }
-
-
