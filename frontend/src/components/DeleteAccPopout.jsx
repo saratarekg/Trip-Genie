@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -148,7 +148,7 @@ export function DeleteAccount({ onClose }) {
             <div className="flex justify-between font-bold text-[#003f66] py-2 text-lg">
               <span>Username</span>
             </div>
-            <ul className="list-none">
+            <ul className="list-none max-h-[300px] overflow-y-auto"> {/* Added max height and scroll */}
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                   <li
