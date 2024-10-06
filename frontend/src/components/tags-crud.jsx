@@ -1,4 +1,4 @@
-"use client"
+"use client"; // Ensure client-side rendering
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -17,6 +17,7 @@ export function TagCRUD({ isOpen, onClose }) {
   const [showDeleteTag, setShowDeleteTag] = useState(false);
   const [buttonsVisible, setButtonsVisible] = useState(true);
   const [message, setMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [showTagList, setShowTagList] = useState(false);
 
   const fetchTags = async () => {
@@ -51,9 +52,10 @@ export function TagCRUD({ isOpen, onClose }) {
           },
         });
         setNewTag('');
-        setMessage('Tag created successfully!');
+        setSuccessMessage('Tag created successfully!');
         fetchTags();
         resetButtons();
+        setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
       } catch (error) {
         setMessage('Error creating tags');
       }
@@ -85,9 +87,10 @@ export function TagCRUD({ isOpen, onClose }) {
           });
           setOldTag('');
           setUpdatedTag('');
-          setMessage('Tag updated successfully!');
+          setSuccessMessage('Tag updated successfully!');
           fetchTags();
           resetButtons();
+          setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
         } else {
           setMessage('Tag not found.');
         }
@@ -121,9 +124,10 @@ export function TagCRUD({ isOpen, onClose }) {
             },
           });
           setOldTag('');
-          setMessage('Tag deleted successfully!');
+          setSuccessMessage('Tag deleted successfully!');
           fetchTags();
           resetButtons();
+          setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
         } else {
           setMessage('Tag not found.');
         }
@@ -300,8 +304,7 @@ export function TagCRUD({ isOpen, onClose }) {
               placeholder="Tag to delete"
               className="mt-2"
             />
-            <Button
-              onClick={deleteTag}
+            <Button              onClick={deleteTag}
               className="w-full mt-2 bg-green-500 text-white"
             >
               Submit
@@ -320,9 +323,15 @@ export function TagCRUD({ isOpen, onClose }) {
             {message}
           </div>
         )}
-  
-        {showTagList && <TagListPopout />} {/* Show tag list popout */}
+        {successMessage && (
+          <div className="mt-4 p-2 bg-green-100 text-green-800 rounded">
+            {successMessage}
+          </div>
+        )}
       </div>
+
+      {/* Show Tags List Popout */}
+      {showTagList && <TagListPopout />}
     </DialogContent>
   );
   
@@ -330,3 +339,4 @@ export function TagCRUD({ isOpen, onClose }) {
   
   
 }
+

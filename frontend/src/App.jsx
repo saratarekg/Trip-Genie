@@ -38,6 +38,7 @@ import ActivityDetail from "./pages/SingleActivity.jsx";
 import UpdateActivity from "./components/UpdateActivity.jsx";
 import CreateActivity from "./pages/CreateActivity.jsx";
 import SellerProfile from "./pages/SellerProfile.jsx";
+import AdvertiserProfile from "./pages/AdvertiserProfile.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -68,6 +69,7 @@ function AppContent() {
           <Route path="/create-itinerary" element={<CreateItineraryPage />} />
           <Route path="/create-activity" element={<CreateActivity />} />
           <Route path="/seller-profile" element={<SellerProfile />} />
+          <Route path="/advertiser-profile" element={<AdvertiserProfile />} />
 
           <Route path="/seller" element={<SellerList />} />
           <Route path="/activity" element={<AllActivitiesComponent />} />

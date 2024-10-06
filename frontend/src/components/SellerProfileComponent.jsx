@@ -46,7 +46,10 @@ export function SellerProfileComponent() {
     setEditedSeller((prev) => ({ ...prev, [name]: value })); // Update editedSeller state
     setValidationMessages((prev) => ({ ...prev, [name]: "" })); // Clear validation message on change
   };
-  
+  const handleDiscard = () => {
+    setEditedSeller(seller); // Reset to the original seller data
+    setIsEditing(false); // Exit editing mode
+  };
   const validateFields = () => {
     const { name, username, email, mobile } = editedSeller;
     const messages = {};
@@ -263,31 +266,33 @@ export function SellerProfileComponent() {
   </div>
 )}
 
-        <div className="mt-6">
-          {isEditing ? (
-            <div className="flex gap-2">
-              <button
-                onClick={handleUpdate}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-            >
-              Update
-            </button>
-          )}
-        </div>
+<div className="mt-6">
+  {isEditing ? (
+    <div className="flex gap-2">
+      <button
+        onClick={handleUpdate}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+      >
+        Save Changes
+      </button>
+      <button
+        onClick={handleDiscard}
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+      >
+        Discard Changes
+      </button>
+      
+    </div>
+  ) : (
+    <button
+      onClick={() => setIsEditing(true)}
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+    >
+      Edit Profile
+    </button>
+  )}
+</div>
+
       </div>
     </div>
   );

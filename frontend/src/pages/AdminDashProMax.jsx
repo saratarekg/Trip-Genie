@@ -20,6 +20,7 @@ import { CategoryCRUD } from "@/components/category-crud";
 import { TagCRUD } from "@/components/tags-crud";
 import { Dialog } from "@/components/ui/dialog";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
+import { Link } from "react-router-dom";
 
 Chart.register(ArcElement, Tooltip, Legend);
 
@@ -237,9 +238,11 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <Link to ="/all-products">
                   <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
                     Manage
                   </Button>
+                  </Link>
                 </CardContent>
               </Card>
               <Card className="bg-white border-[#808080] border">

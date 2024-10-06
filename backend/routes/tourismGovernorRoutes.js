@@ -29,6 +29,7 @@ router.get("/historical-tag", historicalTagController.getAlltags);
 router.put("/historical-tag/:id", historicalTagController.updateHistoricalTag);
 router.delete("/historical-tag/:id", historicalTagController.deleteTag);
 
+
 router.get(
   "/my-historical-places",
   historicalPlacesController.getHistoricalPlacesByGovernor
