@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Cookies from 'js-cookie';
-import { Check, Plus, XCircle,X, CheckCircle } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+"use client"
+
+import React, { useState, useEffect, useRef } from 'react'
+import Cookies from 'js-cookie'
+import { Check, Plus, XCircle, X, CheckCircle } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Card, CardContent } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -16,10 +18,10 @@ const LoadingSpinner = () => (
       <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
     </svg>
   </div>
-);
+)
 
-const UpdateHistoricalPlace = () => {
-  const { id } = useParams();
+export default function UpdateHistoricalPlace() {
+  const { id } = useParams()
   const [historicalPlace, setHistoricalPlace] = useState({
     title: '',
     description: '',
@@ -37,89 +39,86 @@ const UpdateHistoricalPlace = () => {
       student: 0,
       foreigner: 0,
     },
-    tags: [], // Initialize tags as an empty array
+    historicalTag: [],
     pictures: [],
-  });
-  const [loading, setLoading] = useState(true);
-  const [citiesLoading, setCitiesLoading] = useState(false); // Separate loading state for cities
-  const [error, setError] = useState(null);
-  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [newPictureUrl, setNewPictureUrl] = useState('');
-  const [countries, setCountries] = useState([]);
-  const [cities, setCities] = useState([]);
-  const [formErrors, setFormErrors] = useState({});
-  const [showErrorPopup, setShowErrorPopup] = useState(null);
-  const navigate = useNavigate();
+  })
+  const [loading, setLoading] = useState(true)
+  const [citiesLoading, setCitiesLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest')
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
+  const [newPictureUrl, setNewPictureUrl] = useState('')
+  const [countries, setCountries] = useState([])
+  const [cities, setCities] = useState([])
+  const [formErrors, setFormErrors] = useState({})
+  const [showErrorPopup, setShowErrorPopup] = useState(null)
+  const [availableTags, setAvailableTags] = useState([])
+  const [newTag, setNewTag] = useState('')
+  const navigate = useNavigate()
 
-  // Refs for form fields to scroll to on error
-  const titleRef = useRef(null);
-  const descriptionRef = useRef(null);
-  const addressRef = useRef(null);
-  const countryRef = useRef(null);
-  const cityRef = useRef(null);
-  const nativePriceRef = useRef(null);
-  const studentPriceRef = useRef(null);
-  const foreignerPriceRef = useRef(null);
-  const pictureUrlRef = useRef(null);
-  const tagsRefs = useRef([]); // Array of refs for tags
+  const titleRef = useRef(null)
+  const descriptionRef = useRef(null)
+  const addressRef = useRef(null)
+  const countryRef = useRef(null)
+  const cityRef = useRef(null)
+  const nativePriceRef = useRef(null)
+  const studentPriceRef = useRef(null)
+  const foreignerPriceRef = useRef(null)
+  const pictureUrlRef = useRef(null)
 
   useEffect(() => {
     const fetchHistoricalPlaceDetails = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const token = Cookies.get('jwt');
+        const token = Cookies.get('jwt')
         const response = await fetch(`http://localhost:4000/${userRole}/historical-places/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        })
 
         if (!response.ok) {
-          throw new Error('Failed to fetch data');
+          throw new Error('Failed to fetch data')
         }
 
-        const historicalPlaceData = await response.json();
-        // Ensure that tags exist
-        if (!historicalPlaceData.tags) {
-          historicalPlaceData.tags = [];
+        const historicalPlaceData = await response.json()
+        if (!historicalPlaceData.historicalTag) {
+          historicalPlaceData.historicalTag = []
         }
-        setHistoricalPlace(historicalPlaceData);
-        setError(null);
+        setHistoricalPlace(historicalPlaceData)
+        setError(null)
       } catch (err) {
-        setError('Error fetching data. Please try again later.');
-        console.error('Error fetching data:', err);
+        setError('Error fetching data. Please try again later.')
+        console.error('Error fetching data:', err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchHistoricalPlaceDetails();
-    fetchCountries();
-  }, [id, userRole]);
+    fetchHistoricalPlaceDetails()
+    fetchCountries()
+    fetchAvailableTags()
+  }, [id, userRole])
 
   useEffect(() => {
     if (historicalPlace.location.country) {
-      fetchCities(historicalPlace.location.country);
+      fetchCities(historicalPlace.location.country)
     } else {
-      setCities([]);
+      setCities([])
     }
-  }, [historicalPlace.location.country]);
+  }, [historicalPlace.location.country])
 
   const fetchCountries = async () => {
     try {
-      const response = await fetch('https://restcountries.com/v3.1/all');
-
-      
-      const data = await response.json();
-      
-      const sortedCountries = data.map(country => country.name.common).sort();
-      setCountries(sortedCountries);
+      const response = await fetch('https://restcountries.com/v3.1/all')
+      const data = await response.json()
+      const sortedCountries = data.map(country => country.name.common).sort()
+      setCountries(sortedCountries)
     } catch (error) {
-      console.error('Error fetching countries:', error);
+      console.error('Error fetching countries:', error)
     }
-  };
+  }
 
   const fetchCities = async (country) => {
-    setCitiesLoading(true);
+    setCitiesLoading(true)
     try {
       const response = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
         method: 'POST',
@@ -127,215 +126,153 @@ const UpdateHistoricalPlace = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ country }),
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
-      
-        if(response.status === 403){
-            setCities([]);
-        }
-      
+      if (response.status === 403) {
+        setCities([])
+      }
 
       if (data.error) {
-        throw new Error(data.msg || 'Failed to fetch cities');
+        throw new Error(data.msg || 'Failed to fetch cities')
       }
 
-      const sortedCities = data.data.sort();
-      setCities(sortedCities);
+      const sortedCities = data.data.sort()
+      setCities(sortedCities)
     } catch (err) {
-      setError('Error fetching cities. Please try again later.');
-      console.error('Error fetching cities:', err);
-      setCities([]);
+      setError('Error fetching cities. Please try again later.')
+      console.error('Error fetching cities:', err)
+      setCities([])
     } finally {
-      setCitiesLoading(false);
+      setCitiesLoading(false)
     }
-  };
+  }
+
+  const fetchAvailableTags = async () => {
+    try {
+      const token = Cookies.get('jwt')
+      const response = await fetch(`http://localhost:4000/${userRole}/historical-tags`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch tags')
+      }
+
+      const tags = await response.json()
+      setAvailableTags(tags)
+    } catch (err) {
+      console.error('Error fetching tags:', err)
+    }
+  }
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target
 
     setHistoricalPlace((prev) => {
-      const newState = { ...prev };
+      const newState = { ...prev }
       if (name.includes('.')) {
-        const [parent, child] = name.split('.');
-        newState[parent] = { ...newState[parent], [child]: value };
+        const [parent, child] = name.split('.')
+        newState[parent] = { ...newState[parent], [child]: value }
       } else {
-        newState[name] = value;
+        newState[name] = value
       }
 
-      // Prevent negative values for ticket prices
       if (name.startsWith('ticketPrices.')) {
-        const price = parseFloat(value);
+        const price = parseFloat(value)
         if (isNaN(price) || price < 0) {
-          newState.ticketPrices = { ...newState.ticketPrices, [name.split('.')[1]]: 0 };
+          newState.ticketPrices = { ...newState.ticketPrices, [name.split('.')[1]]: 0 }
         }
       }
 
-      return newState;
-    });
+      return newState
+    })
 
-    setFormErrors((prev) => ({ ...prev, [name]: '' }));
-  };
+    setFormErrors((prev) => ({ ...prev, [name]: '' }))
+  }
 
   const handleSelectChange = (name, value) => {
     setHistoricalPlace((prev) => {
-      const newState = { ...prev };
+      const newState = { ...prev }
       if (name.includes('.')) {
-        const [parent, child] = name.split('.');
-        newState[parent] = { ...newState[parent], [child]: value };
+        const [parent, child] = name.split('.')
+        newState[parent] = { ...newState[parent], [child]: value }
       } else {
-        newState[name] = value;
+        newState[name] = value
       }
-      return newState;
-    });
+      return newState
+    })
 
-    setFormErrors((prev) => ({ ...prev, [name]: '' }));
-  };
-
-  const handleTagChange = (index, field, value) => {
-    const updatedTags = [...historicalPlace.tags];
-    updatedTags[index] = { ...updatedTags[index], [field]: value };
-    setHistoricalPlace((prev) => ({ ...prev, tags: updatedTags }));
-
-    setFormErrors((prev) => {
-      const newErrors = { ...prev };
-      if (newErrors.tags && newErrors.tags[index]) {
-        newErrors.tags[index][field] = '';
-      }
-      return newErrors;
-    });
-  };
-
-  const addTag = () => {
-    setHistoricalPlace((prev) => ({
-      ...prev,
-      tags: [...prev.tags, { type: '', period: '' }],
-    }));
-  };
-
-  const removeTag = (index) => {
-    const updatedTags = historicalPlace.tags.filter((_, i) => i !== index);
-    setHistoricalPlace((prev) => ({ ...prev, tags: updatedTags }));
-
-    setFormErrors((prev) => {
-      const newErrors = { ...prev };
-      if (newErrors.tags) {
-        newErrors.tags.splice(index, 1);
-      }
-      return newErrors;
-    });
-  };
+    setFormErrors((prev) => ({ ...prev, [name]: '' }))
+  }
 
   const validateForm = () => {
-    const errors = {};
+    const errors = {}
 
     if (!historicalPlace.title.trim()) {
-      errors.title = 'Title is required';
+      errors.title = 'Title is required'
     }
     if (!historicalPlace.description.trim()) {
-      errors.description = 'Description is required';
+      errors.description = 'Description is required'
     }
     if (!historicalPlace.location.address.trim()) {
-      errors.address = 'Address is required';
+      errors.address = 'Address is required'
     }
     if (!historicalPlace.location.country) {
-      errors.country = 'Country is required';
+      errors.country = 'Country is required'
     }
     if (!historicalPlace.location.city) {
-      // Only set error if cities are available
       if (cities.length > 0) {
-        errors.city = 'City is required';
+        errors.city = 'City is required'
       }
     }
     if (historicalPlace.ticketPrices.native < 0) {
-      errors.nativePrice = 'Native ticket price cannot be negative';
+      errors.nativePrice = 'Native ticket price cannot be negative'
     }
     if (historicalPlace.ticketPrices.student < 0) {
-      errors.studentPrice = 'Student ticket price cannot be negative';
+      errors.studentPrice = 'Student ticket price cannot be negative'
     }
     if (historicalPlace.ticketPrices.foreigner < 0) {
-      errors.foreignerPrice = 'Foreigner ticket price cannot be negative';
+      errors.foreignerPrice = 'Foreigner ticket price cannot be negative'
     }
 
-    // Validate tags
-    if (historicalPlace.tags.length > 0) {
-      errors.tags = [];
-      historicalPlace.tags.forEach((tag, index) => {
-        const tagErrors = {};
-        if (!tag.type.trim()) {
-          tagErrors.type = 'Tag type is required';
-        }
-        if (!tag.period.trim()) {
-          tagErrors.period = 'Tag period is required';
-        }
-        if (Object.keys(tagErrors).length > 0) {
-          errors.tags[index] = tagErrors;
-        }
-      });
-    }
-
-    // Validate picture URL if adding a new one
     if (newPictureUrl && !/^https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp)$/i.test(newPictureUrl)) {
-      errors.pictureUrl = 'Invalid picture URL. Must be a valid image URL.';
+      errors.pictureUrl = 'Invalid picture URL. Must be a valid image URL.'
     }
 
-    setFormErrors(errors);
+    setFormErrors(errors)
 
-    return Object.keys(errors).length === 0;
-  };
+    return Object.keys(errors).length === 0
+  }
 
   const handleUpdate = async () => {
     if (!validateForm()) {
-      // Scroll to the first error field
-      const firstErrorField = Object.keys(formErrors)[0];
+      const firstErrorField = Object.keys(formErrors)[0]
       if (firstErrorField) {
-        if (firstErrorField === 'tags') {
-          // Find the first tag with an error
-          const tagErrors = formErrors.tags;
-          for (let i = 0; i < tagErrors.length; i++) {
-            if (tagErrors[i]) {
-              const firstTagErrorField = Object.keys(tagErrors[i])[0];
-              if (firstTagErrorField === 'type') {
-                if (tagsRefs.current[i] && tagsRefs.current[i].type) {
-                  tagsRefs.current[i].type.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  tagsRefs.current[i].type.focus();
-                  break;
-                }
-              } else if (firstTagErrorField === 'period') {
-                if (tagsRefs.current[i] && tagsRefs.current[i].period) {
-                  tagsRefs.current[i].period.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  tagsRefs.current[i].period.focus();
-                  break;
-                }
-              }
-            }
-          }
-        } else {
-          const refMap = {
-            title: titleRef,
-            description: descriptionRef,
-            'location.address': addressRef,
-            'location.country': countryRef,
-            'location.city': cityRef,
-            'ticketPrices.native': nativePriceRef,
-            'ticketPrices.student': studentPriceRef,
-            'ticketPrices.foreigner': foreignerPriceRef,
-            pictureUrl: pictureUrlRef,
-          };
-          const fieldRef = refMap[firstErrorField];
-          if (fieldRef && fieldRef.current) {
-            fieldRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            fieldRef.current.focus();
-          }
+        const refMap = {
+          title: titleRef,
+          description: descriptionRef,
+          'location.address': addressRef,
+          'location.country': countryRef,
+          'location.city': cityRef,
+          'ticketPrices.native': nativePriceRef,
+          'ticketPrices.student': studentPriceRef,
+          'ticketPrices.foreigner': foreignerPriceRef,
+          pictureUrl: pictureUrlRef,
+        }
+        const fieldRef = refMap[firstErrorField]
+        if (fieldRef && fieldRef.current) {
+          fieldRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          fieldRef.current.focus()
         }
       }
-      return;
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
-      const token = Cookies.get('jwt');
+      const token = Cookies.get('jwt')
       const response = await fetch(`http://localhost:4000/${userRole}/historical-places/${id}`, {
         method: 'PUT',
         headers: {
@@ -343,67 +280,80 @@ const UpdateHistoricalPlace = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(historicalPlace),
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json()
         if (response.status === 400) {
-            setShowErrorPopup(errorData.message);
-            return;
-          }
-          if (response.status === 403){
-            setShowErrorPopup(errorData.message);
-            return;
-          }
-        throw new Error('Failed to update historical place');
+          setShowErrorPopup(errorData.message)
+          return
+        }
+        if (response.status === 403) {
+          setShowErrorPopup(errorData.message)
+          return
+        }
+        throw new Error('Failed to update historical place')
       }
 
-      setShowSuccessPopup(true);
+      setShowSuccessPopup(true)
     } catch (err) {
-      setError('Error updating historical place. Please try again later.');
-      console.error('Error updating historical place:', err);
+      setError('Error updating historical place. Please try again later.')
+      console.error('Error updating historical place:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleAddPicture = () => {
-    const urlPattern = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i;
+    const urlPattern = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i
     if (!urlPattern.test(newPictureUrl)) {
-      setFormErrors((prev) => ({ ...prev, pictureUrl: 'Invalid picture URL. Must be a valid image URL.' }));
+      setFormErrors((prev) => ({ ...prev, pictureUrl: 'Invalid picture URL. Must be a valid image URL.' }))
       if (pictureUrlRef.current) {
-        pictureUrlRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        pictureUrlRef.current.focus();
+        pictureUrlRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        pictureUrlRef.current.focus()
       }
-      return;
+      return
     }
 
     if (newPictureUrl.trim()) {
       setHistoricalPlace((prev) => ({
         ...prev,
         pictures: [...prev.pictures, newPictureUrl.trim()],
-      }));
-      setNewPictureUrl('');
-      setFormErrors((prev) => ({ ...prev, pictureUrl: '' }));
+      }))
+      setNewPictureUrl('')
+      setFormErrors((prev) => ({ ...prev, pictureUrl: '' }))
     }
-  };
+  }
 
   const handleRemovePicture = (index) => {
     setHistoricalPlace((prev) => ({
       ...prev,
       pictures: prev.pictures.filter((_, i) => i !== index),
-    }));
-  };
+    }))
+  }
 
-  const handleTagRef = (index, field, element) => {
-    if (!tagsRefs.current[index]) {
-      tagsRefs.current[index] = {};
+  const handleAddTag = () => {
+    if (newTag && !historicalPlace.historicalTag.some(tag => tag._id === newTag)) {
+      const tagToAdd = availableTags.find(tag => tag._id === newTag)
+      if (tagToAdd) {
+        setHistoricalPlace((prev) => ({
+          ...prev,
+          historicalTag: [...prev.historicalTag, tagToAdd],
+        }))
+        setNewTag('')
+      }
     }
-    tagsRefs.current[index][field] = element;
-  };
+  }
+
+  const handleRemoveTag = (tagId) => {
+    setHistoricalPlace((prev) => ({
+      ...prev,
+      historicalTag: prev.historicalTag.filter((tag) => tag._id !== tagId),
+    }))
+  }
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (error) {
@@ -414,7 +364,7 @@ const UpdateHistoricalPlace = () => {
           <span className="block sm:inline"> {error}</span>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -424,7 +374,6 @@ const UpdateHistoricalPlace = () => {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-6">
             <div className="space-y-6">
-              {/* Title */}
               <div>
                 <Label htmlFor="title">Title</Label>
                 <Input
@@ -438,7 +387,6 @@ const UpdateHistoricalPlace = () => {
                 {formErrors.title && <p className="text-red-500">{formErrors.title}</p>}
               </div>
 
-              {/* Description */}
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -453,10 +401,8 @@ const UpdateHistoricalPlace = () => {
                 {formErrors.description && <p className="text-red-500">{formErrors.description}</p>}
               </div>
 
-              {/* Location */}
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Location</h2>
-                {/* Address */}
                 <div>
                   <Label htmlFor="location.address">Address</Label>
                   <Input
@@ -465,11 +411,10 @@ const UpdateHistoricalPlace = () => {
                     value={historicalPlace.location.address}
                     onChange={handleChange}
                     ref={addressRef}
-                    className={formErrors.address ? 'border-red-500' : ''}
+                    className={formErrors.address ? 'border-red-500'  : ''}
                   />
                   {formErrors.address && <p className="text-red-500">{formErrors.address}</p>}
                 </div>
-                {/* Country */}
                 <div>
                   <Label htmlFor="location.country">Country</Label>
                   <Select
@@ -492,7 +437,6 @@ const UpdateHistoricalPlace = () => {
                   </Select>
                   {formErrors.country && <p className="text-red-500">{formErrors.country}</p>}
                 </div>
-                {/* City */}
                 <div>
                   <Label htmlFor="location.city">City</Label>
                   {historicalPlace.location.country && cities.length === 0 && !citiesLoading && (
@@ -525,7 +469,6 @@ const UpdateHistoricalPlace = () => {
                 </div>
               </div>
 
-              {/* Opening Hours */}
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Opening Hours</h2>
                 <div>
@@ -548,10 +491,8 @@ const UpdateHistoricalPlace = () => {
                 </div>
               </div>
 
-              {/* Ticket Prices */}
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Ticket Prices</h2>
-                {/* Native Price */}
                 <div>
                   <Label htmlFor="ticketPrices.native">Native</Label>
                   <Input
@@ -566,7 +507,6 @@ const UpdateHistoricalPlace = () => {
                   />
                   {formErrors.nativePrice && <p className="text-red-500">{formErrors.nativePrice}</p>}
                 </div>
-                {/* Student Price */}
                 <div>
                   <Label htmlFor="ticketPrices.student">Student</Label>
                   <Input
@@ -581,7 +521,6 @@ const UpdateHistoricalPlace = () => {
                   />
                   {formErrors.studentPrice && <p className="text-red-500">{formErrors.studentPrice}</p>}
                 </div>
-                {/* Foreigner Price */}
                 <div>
                   <Label htmlFor="ticketPrices.foreigner">Foreigner</Label>
                   <Input
@@ -598,50 +537,45 @@ const UpdateHistoricalPlace = () => {
                 </div>
               </div>
 
-              {/* Tags */}
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Tags</h2>
-                {historicalPlace.tags.map((tag, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <div className="flex-1">
-                      <Label htmlFor={`tags.${index}.type`}>Tag Type</Label>
-                      <Input
-                        id={`tags.${index}.type`}
-                        name={`tags.${index}.type`}
-                        value={tag.type}
-                        onChange={(e) => handleTagChange(index, 'type', e.target.value)}
-                        ref={(el) => handleTagRef(index, 'type', el)}
-                        className={formErrors.tags && formErrors.tags[index] && formErrors.tags[index].type ? 'border-red-500' : ''}
-                      />
-                      {formErrors.tags && formErrors.tags[index] && formErrors.tags[index].type && (
-                        <p className="text-red-500">{formErrors.tags[index].type}</p>
-                      )}
+                <div className="flex flex-wrap gap-2">
+                  {historicalPlace.historicalTag.map((tag) => (
+                    <div key={tag._id} className="flex items-center bg-gray-200 rounded-full px-3 py-1">
+                      <span>{tag.type} - {tag.period}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-2 p-0"
+                        onClick={() => handleRemoveTag(tag._id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <div className="flex-1">
-                      <Label htmlFor={`tags.${index}.period`}>Tag Period</Label>
-                      <Input
-                        id={`tags.${index}.period`}
-                        name={`tags.${index}.period`}
-                        value={tag.period}
-                        onChange={(e) => handleTagChange(index, 'period', e.target.value)}
-                        ref={(el) => handleTagRef(index, 'period', el)}
-                        className={formErrors.tags && formErrors.tags[index] && formErrors.tags[index].period ? 'border-red-500' : ''}
-                      />
-                      {formErrors.tags && formErrors.tags[index] && formErrors.tags[index].period && (
-                        <p className="text-red-500">{formErrors.tags[index].period}</p>
-                      )}
-                    </div>
-                    <Button variant="destructive" onClick={() => removeTag(index)}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                <Button variant="outline" onClick={addTag}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Tag
-                </Button>
+                  ))}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Select
+                    value={newTag}
+                    onValueChange={setNewTag}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select a tag" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableTags.map((tag) => (
+                        <SelectItem key={tag._id} value={tag._id}>
+                          {tag.type} - {tag.period}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleAddTag} disabled={!newTag}>
+                    Add Tag
+                  </Button>
+                </div>
               </div>
 
-              {/* Pictures */}
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Pictures</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -681,7 +615,6 @@ const UpdateHistoricalPlace = () => {
               </div>
             </div>
 
-            {/* Update Button */}
             <div className="mt-8 flex justify-end">
               <Button variant="default" onClick={handleUpdate}>
                 Update Historical Place
@@ -691,7 +624,6 @@ const UpdateHistoricalPlace = () => {
         </div>
       </div>
 
-      {/* Success Popup */}
       <Dialog open={showSuccessPopup} onOpenChange={setShowSuccessPopup}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -711,15 +643,15 @@ const UpdateHistoricalPlace = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showErrorPopup !== null} onOpenChange={() => setErrorPopup(null)}>
+      <Dialog open={showErrorPopup !== null} onOpenChange={() => setShowErrorPopup(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
               <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
-              Failed to Update Itinerary
+              Failed to Update Historical Place
             </DialogTitle>
             <DialogDescription>
-              {showErrorPopup || 'Not your itinerary!'}
+              {showErrorPopup || 'An error occurred while updating the historical place.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -730,7 +662,5 @@ const UpdateHistoricalPlace = () => {
         </DialogContent>
       </Dialog>
     </div>
-  );
-};
-
-export default UpdateHistoricalPlace;
+  )
+}
