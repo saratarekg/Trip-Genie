@@ -3,7 +3,7 @@ const router = express.Router();
 const sellerController = require('../controllers/sellerController');
 const productController = require('../controllers/productController');
 
-router.put('/:id', sellerController.updateSeller);
+router.put('/', sellerController.updateSeller);
 router.get('/', sellerController.getSeller);
 router.get('/seller/:id',sellerController.getSellerByID);
 

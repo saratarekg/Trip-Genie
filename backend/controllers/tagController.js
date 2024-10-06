@@ -9,7 +9,7 @@ const addTag = async (req, res) => {
   if (await Tag.findOne({ type })) {
     return res.status(400).json({ message: "Tag already exists" });
   }
-  const tag = new Tag(type);
+  const tag = new Tag({type});
 
   tag
     .save()
