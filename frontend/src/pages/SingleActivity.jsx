@@ -179,7 +179,7 @@ const ActivityDetail = () => {
 
                 </div>
                 {/* should be replaced with activity position */}
-                <Map position={ [29.979, 31.134] } height={'200px'} width={'200px'} />
+                <Map position={ [activity.location.coordinates.longitude, activity.location.coordinates.latitude] } height={'200px'} width={'200px'} />
 
                 <div className="flex items-center">
                   <DollarSign className="w-6 h-6 mr-2 text-orange-500" />

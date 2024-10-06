@@ -81,7 +81,7 @@ export function AllHistoricalPlacesComponent() {
     const [filtersVisible, setFiltersVisible] = useState(false);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedPeriods, setSelectedPeriods] = useState([]);
-    const [myHistoricalPlaces,setMyHistoricalPlaces ] = useState(false);
+    const [myHistoricalPlaces,setmyHistoricalPlaces ] = useState(false);
     const tripsPerPage = 6;
     const navigate = useNavigate();
     const historicalPlacesContainerRef = useRef(null);
@@ -107,12 +107,31 @@ export function AllHistoricalPlacesComponent() {
         scrollToTop();
     }, [currentPage]);
 
+    useEffect(() => {
+
+        searchHistoricalPlaces();
+      
+    }, [myHistoricalPlaces]);
+  
+
     // Function to handle selection of a historical place
     const handleHistoricalPlaceSelect = (id) => {
         setIsLoading(true);
         navigate(`/historical-place/${id}`);
         setIsLoading(false);
     };
+
+    const toggleFilters = () => {
+        setIsLoading(false);
+        setFiltersVisible(!filtersVisible);
+        setIsLoading(false);
+      };
+
+    const handlemyHistoricalPlaces = (attribute) => {
+        setIsLoading(true);
+        setmyHistoricalPlaces(attribute); 
+        setIsLoading(false);
+      };
 
     // Function to scroll to the top of the page
     const scrollToTop = () => {
@@ -157,7 +176,7 @@ export function AllHistoricalPlacesComponent() {
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             if (searchTerm) {
-                searchHistoricalPlace();
+                searchHistoricalPlaces();
             } else {
                 fetchHistoricalPlace();
             }
@@ -194,8 +213,19 @@ export function AllHistoricalPlacesComponent() {
         }
     };
 
+    const clearFilters = () => {
+        // Reset all filter states to initial values
+        setSearchTerm("");
+        setSelectedTypes([]); // Reset selected types
+        setSelectedPeriods([]); // Reset selected periods
+        setmyHistoricalPlaces(false);
+
+        // Fetch itineraries without any filters
+        fetchHistoricalPlace();
+    };
+
     // Function for searching historical places
-    const searchHistoricalPlace = async () => {
+    const searchHistoricalPlaces = async () => {
         try {
           const role = getUserRole();
           const url = new URL(`http://localhost:4000/${role}/historical-places`);
@@ -255,13 +285,29 @@ export function AllHistoricalPlacesComponent() {
                         />
                         <FilterComponent
                             filtersVisible={filtersVisible}
-                            setFiltersVisible={setFiltersVisible}
+                            toggleFilters={toggleFilters}
+                            //   sortOrder={sortOrder}
+                            //   sortBy={sortBy}
+                            //   handleSort={handleSort}
+                            clearFilters={clearFilters}
+                            myHistoricalPlaces={myHistoricalPlaces}
+                            handlemyHistoricalPlaces={handlemyHistoricalPlaces}
+                            // sortItineraries={sortItineraries}
+                            //   price={price}
+                            //   setPrice={setPrice}
+                            //   dateRange={dateRange}
+                            //   setDateRange={setDateRange}
+                            selectedTypes={selectedTypes} // Pass selectedTypes array
+                            setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
+                            selectedPeriods={selectedPeriods} // Pass periods array
+                            setSelectedPeriods={setSelectedPeriods} // Pass periods function
+                            //   selectedLanguages={selectedLanguages} // Pass selectedLanguages array
+                            //   setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
+                            searchHistoricalPlaces={searchHistoricalPlaces}
                             typesOptions={typesOptions}
-                            selectedTypes={selectedTypes}
-                            setSelectedTypes={setSelectedTypes}
-                            periodOptions={periodOptions}
-                            selectedPeriods={selectedPeriods}
-                            setSelectedPeriods={setSelectedPeriods}
+                            periodsOptions={periodOptions}
+                            //   languagesOptions={languagesOptions}
+                            role={getUserRole()}
                         />
                     </div>
                     {error && <div className="text-red-500">{error}</div>}
