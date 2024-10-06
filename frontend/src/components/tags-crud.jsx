@@ -65,7 +65,7 @@ export function TagCRUD({ isOpen, onClose }) {
   };
 
   const updateTag = async () => {
-    setMessage('');
+    setMessage(''); // Clear previous messages
     if (oldTag && updatedTag) {
       try {
         const token = Cookies.get('jwt');
@@ -75,22 +75,27 @@ export function TagCRUD({ isOpen, onClose }) {
             Authorization: `Bearer ${token}`,
           },
         });
-
+  
         const tag = response.data;
-
+  
         if (tag && tag._id) {
+          console.log('Old Tag:', oldTag);  // Debugging to check old tag
+          console.log('Updated Tag:', updatedTag);  // Debugging to check updated tag
+  
           await axios.put(`http://localhost:4000/admin/tags/${tag._id}`, 
           { type: updatedTag }, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
+  
+          // Clear input fields after successful update
           setOldTag('');
           setUpdatedTag('');
           setSuccessMessage('Tag updated successfully!');
-          fetchTags();
-          resetButtons();
-          setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
+          fetchTags(); // Refresh the tag list
+          resetButtons(); // Reset UI
+          setTimeout(() => setSuccessMessage(''), 3000); // Clear success message after 3 seconds
         } else {
           setMessage('Tag not found.');
         }
@@ -102,6 +107,7 @@ export function TagCRUD({ isOpen, onClose }) {
       setMessage('Please provide old and new tag names.');
     }
   };
+  
 
   const deleteTag = async () => {
     setMessage('');
@@ -279,7 +285,7 @@ export function TagCRUD({ isOpen, onClose }) {
               <Input
                 type="text"
                 value={updatedTag}
-                onChange={(e) => setUpdatedTag(e.target.value)}
+                onChange={(e) => {setUpdatedTag(e.target.value) ;}}
                 placeholder="New tag name"
                 className="mt-2"
               />

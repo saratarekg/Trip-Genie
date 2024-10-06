@@ -53,10 +53,11 @@ const updateTag = async (req, res) => {
       return res.status(400).json({ message: "Tag already exists" });
     }
 
-    const tag = await Tag.findByIdAndUpdate(req.params.id, type, {
+    const tag = await Tag.findByIdAndUpdate(req.params.id,{ type }, {
       new: true,
       runValidators: true,
     });
+    console.log(tag.type);
 
     res.status(200).json(tag);
   } catch (error) {
