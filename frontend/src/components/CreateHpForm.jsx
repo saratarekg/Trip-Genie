@@ -300,7 +300,7 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Picture URLs *</label>
+          <label className="block text-gray-700 mb-2">Picture URLs</label>
           <textarea
             {...register('pictures')}
             placeholder="Enter picture URLs (one per line)"

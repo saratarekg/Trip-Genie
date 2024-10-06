@@ -133,6 +133,9 @@ export function NavbarComponent() {
                       <NavLink to="/all-historical-places">
                         Historical Places
                       </NavLink>
+                      <NavLink to="/create-historical-tag">
+                        Historical tag
+                      </NavLink>
                     </>
                   )}
                   {(role === "guest" || role === undefined) && (

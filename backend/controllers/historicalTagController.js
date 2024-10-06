@@ -1,14 +1,15 @@
 const HistoricalTag = require("../models/historicalTags");
 const HistoricalPlace = require("../models/historicalPlaces");
 
-const addHistoricalTag = (req, res) => {
+const addHistoricalTag  = async(req, res) => {
   const { type, period } = req.body;
   if (!type || !period) {
     return res
       .status(400)
       .json({ message: "Please provide a type and period" });
   }
-  if (HistoricalTag.findOne({ type, period })) {
+  
+  if (await HistoricalTag.findOne({ type, period })) {
     return res.status(400).json({ message: "Historical tag already exists" });
   }
   const historicalTag = new HistoricalTag({ type, period });

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -56,11 +57,22 @@ export default function CreateHtForm() {
 
       if (response.ok) {
         setShowDialog(true);
-      } else {
-        throw new Error('Failed to create historical tag.');
+        
+      }else{
+
+        const body = await response.json();
+        if(body.message === "Historical tag already exists"){
+             setError('Historical Tag already exists');
+         }else{
+
+             setError('Failed to create historical tag. Please try again.');
+ 
+         }
+      
       }
+     
     } catch (err) {
-      setError('Failed to create historical tag. Please try again.');
+        
       console.error(err.message);
     } finally {
       setLoading(false);
@@ -91,6 +103,7 @@ export default function CreateHtForm() {
             {...register('type')}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="type"
+            placeholder="Enter historical tag type"
           />
           {errors.type && <span className="text-red-500">{errors.type.message}</span>}
         </div>
@@ -101,6 +114,7 @@ export default function CreateHtForm() {
             {...register('period')}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="period"
+            placeholder="Example:2000-2008"
           />
           {errors.period && <span className="text-red-500">{errors.period.message}</span>}
         </div>
@@ -127,7 +141,7 @@ export default function CreateHtForm() {
           </DialogHeader>
           <DialogFooter className="mt-4 flex justify-end space-x-4">
             <Button colorScheme="blue" onClick={handleGoBack}>
-              Go to All Tags
+              Go to Home Page
             </Button>
             <Button variant="outline" onClick={handleCreateNew}>
               Create Another

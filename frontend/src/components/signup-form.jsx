@@ -571,6 +571,7 @@ export function SignupForm() {
                         <Input
                           type="number"
                           placeholder="Years of experience"
+                          min="0"
                           {...field}
                           onChange={(e) =>
                             field.onChange(
@@ -628,6 +629,7 @@ export function SignupForm() {
                           <Input
                             type="number"
                             placeholder="Duration in years"
+                            min="0"
                             {...register(`previousWorks.${index}.duration`)}
                             defaultValue={item.duration}
                             className="border rounded-md p-2"
