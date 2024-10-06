@@ -114,7 +114,6 @@ export function AdvertiserProfileComponent() {
    
 
             if(response.statusText==="OK"){
-                console.log("hi");
 
                 setAdvertiser(response.data.advertiser);
                 setIsEditing(false);

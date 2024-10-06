@@ -58,10 +58,10 @@ const updateAdvertiser = async (req, res) => {
     }
 
     const { email, username, name, description,hotline,website} = req.body;
-    if(username!==advertiser1.username && await Advertiser.find({username})){
+    if(username!==advertiser1.username && await Advertiser.findOne({username})){
      return res.status(400).json({message:"Username already exists"});
     }
-    if(email!==advertiser1.email && await Advertiser.find({email}) ){
+    if(email!==advertiser1.email && await Advertiser.findOne({email}) ){
       return res.status(400).json({message:"Email already exists"});
      }
     const advertiser = await Advertiser.findByIdAndUpdate(
