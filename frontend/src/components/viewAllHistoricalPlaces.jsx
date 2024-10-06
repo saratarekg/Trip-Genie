@@ -81,6 +81,7 @@ export function AllHistoricalPlacesComponent() {
     const [filtersVisible, setFiltersVisible] = useState(false);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedPeriods, setSelectedPeriods] = useState([]);
+    const [myHistoricalPlaces,setMyHistoricalPlaces ] = useState(false);
     const tripsPerPage = 6;
     const navigate = useNavigate();
     const historicalPlacesContainerRef = useRef(null);
@@ -106,12 +107,31 @@ export function AllHistoricalPlacesComponent() {
         scrollToTop();
     }, [currentPage]);
 
+    useEffect(() => {
+
+        searchHistoricalPlaces();
+      
+    }, [myHistoricalPlaces]);
+  
+
     // Function to handle selection of a historical place
     const handleHistoricalPlaceSelect = (id) => {
         setIsLoading(true);
         navigate(`/historical-place/${id}`);
         setIsLoading(false);
     };
+
+    const toggleFilters = () => {
+        setIsLoading(false);
+        setFiltersVisible(!filtersVisible);
+        setIsLoading(false);
+      };
+
+    const handlemyHistoricalPlaces = (attribute) => {
+        setIsLoading(true);
+        setMyHistoricalPlaces(attribute); 
+        setIsLoading(false);
+      };
 
     // Function to scroll to the top of the page
     const scrollToTop = () => {
@@ -123,6 +143,21 @@ export function AllHistoricalPlacesComponent() {
         setCurrentPage(pageNumber);
         //scrollToTop(); // Scroll to top when changing pages
     };
+
+    const clearFilters = () => {
+        // Reset all filter states to initial values
+        setSearchTerm("");
+        setPrice("");
+        setDateRange({ lower: "", upper: "" });
+        setSelectedTypes([]); // Reset selected types
+        setSelectedLanguages([]); // Reset selected languages
+        setSortBy(""); // Reset sorting
+        setSortOrder(""); // Reset sort order
+        setMyHistoricalPlaces(false);
+    
+        // Fetch itineraries without any filters
+        fetchItineraries();
+      };
 
     // Fetching types
     useEffect(() => {
@@ -156,7 +191,7 @@ export function AllHistoricalPlacesComponent() {
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             if (searchTerm) {
-                searchHistoricalPlace();
+                searchHistoricalPlaces();
             } else {
                 fetchHistoricalPlace();
             }
@@ -194,35 +229,48 @@ export function AllHistoricalPlacesComponent() {
     };
 
     // Function for searching historical places
-    const searchHistoricalPlace = async () => {
+    const searchHistoricalPlaces = async () => {
         try {
-            const token = Cookies.get('jwt');
-            const role = getUserRole();
-            const response = await fetch(
-                `http://localhost:4000/${role}/historical-places/search`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ searchTerm }),
-                }
-            );
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+          const role = getUserRole();
+          const url = new URL(`http://localhost:4000/${role}/historical-places`);
+       
+          // Add the search term and filter parameters
+          if(myHistoricalPlaces) {
+            url.searchParams.append("myPlaces", myHistoricalPlaces);
+          }
+          if (searchTerm) {
+            url.searchParams.append("searchBy", searchTerm);
+          }
+            if (selectedTypes.length > 0) {
+                url.searchParams.append("types", selectedTypes.join(","));
             }
-            const data = await response.json();
-            setHistoricalPlaces(data);
-            setError(null);
-            setCurrentPage(1);
-            setIsLoading(false);
+            if (selectedPeriods.length > 0) {
+                url.searchParams.append("periods", selectedPeriods.join(","));
+            }
+
+          const token = Cookies.get("jwt");
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+    
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+    
+          const data = await response.json();
+    
+          setHistoricalPlaces(data);
+          setError(null);
+          setCurrentPage(1);
         } catch (error) {
-            console.error("Error searching historical places:", error);
-            setError("Error searching historical places");
-            setHistoricalPlaces([]);
+          console.error("Error fetching filtered results:", error);
+          setError("Error fetching filtered results");
+          setHistoricalPlaces([]);
         }
-    };
+      };
 
     return (
         <div>
@@ -245,9 +293,15 @@ export function AllHistoricalPlacesComponent() {
                             typesOptions={typesOptions}
                             selectedTypes={selectedTypes}
                             setSelectedTypes={setSelectedTypes}
+                            toggleFilters={toggleFilters}
                             periodOptions={periodOptions}
                             selectedPeriods={selectedPeriods}
+                            handlemyHistoricalPlaces= {handlemyHistoricalPlaces}
+                            myHistoricalPlaces= {myHistoricalPlaces}
+                            clearFilters={clearFilters}
                             setSelectedPeriods={setSelectedPeriods}
+                            role={getUserRole()}
+                           
                         />
                     </div>
                     {error && <div className="text-red-500">{error}</div>}

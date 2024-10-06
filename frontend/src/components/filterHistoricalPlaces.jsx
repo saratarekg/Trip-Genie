@@ -98,12 +98,12 @@ const FilterComponent = ({
             className={`flex items-center px-4 py-2 rounded-full shadow ${myHistoricalPlaces ? "bg-orange-500 text-white" : "bg-white text-black"
               }`}          >
             <ContactRound strokeWidth={1.25} />
-            My Places
-
+            My Places 
           </button>
+
            ) : null}
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-            Clear Filters
+            Clear Filters 
           </button>
          
         </div>

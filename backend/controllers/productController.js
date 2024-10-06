@@ -107,7 +107,7 @@ const editProduct = async (req, res) => {
       $set: { rating: newRating },
     });
 
-    res.json(updatedProduct);
+    res.status(200).json(updatedProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -147,7 +147,7 @@ const editProductOfSeller = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    res.json(newProduct);
+    res.status(200).json(newProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -184,7 +184,7 @@ const deleteProduct = async (req, res) => {
 const deleteProductOfSeller = async (req, res) => {
   const { id } = req.params;
   const product = await Product.findById(id);
-  if (product.seller != res.locals.user_id) {
+  if (product.seller.toString() != res.locals.user_id) {
     return res
       .status(403)
       .json({ message: "You are not authorized to delete this product" });
