@@ -107,12 +107,31 @@ export function AllHistoricalPlacesComponent() {
         scrollToTop();
     }, [currentPage]);
 
+    useEffect(() => {
+
+        searchHistoricalPlaces();
+      
+    }, [myHistoricalPlaces]);
+  
+
     // Function to handle selection of a historical place
     const handleHistoricalPlaceSelect = (id) => {
         setIsLoading(true);
         navigate(`/historical-place/${id}`);
         setIsLoading(false);
     };
+
+    const toggleFilters = () => {
+        setIsLoading(false);
+        setFiltersVisible(!filtersVisible);
+        setIsLoading(false);
+      };
+
+    const handlemyHistoricalPlaces = (attribute) => {
+        setIsLoading(true);
+        setMyHistoricalPlaces(attribute); 
+        setIsLoading(false);
+      };
 
     // Function to scroll to the top of the page
     const scrollToTop = () => {
@@ -124,6 +143,21 @@ export function AllHistoricalPlacesComponent() {
         setCurrentPage(pageNumber);
         //scrollToTop(); // Scroll to top when changing pages
     };
+
+    const clearFilters = () => {
+        // Reset all filter states to initial values
+        setSearchTerm("");
+        setPrice("");
+        setDateRange({ lower: "", upper: "" });
+        setSelectedTypes([]); // Reset selected types
+        setSelectedLanguages([]); // Reset selected languages
+        setSortBy(""); // Reset sorting
+        setSortOrder(""); // Reset sort order
+        setMyHistoricalPlaces(false);
+    
+        // Fetch itineraries without any filters
+        fetchItineraries();
+      };
 
     // Fetching types
     useEffect(() => {
@@ -157,7 +191,7 @@ export function AllHistoricalPlacesComponent() {
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             if (searchTerm) {
-                searchHistoricalPlace();
+                searchHistoricalPlaces();
             } else {
                 fetchHistoricalPlace();
             }
@@ -195,7 +229,7 @@ export function AllHistoricalPlacesComponent() {
     };
 
     // Function for searching historical places
-    const searchHistoricalPlace = async () => {
+    const searchHistoricalPlaces = async () => {
         try {
           const role = getUserRole();
           const url = new URL(`http://localhost:4000/${role}/historical-places`);
@@ -259,9 +293,15 @@ export function AllHistoricalPlacesComponent() {
                             typesOptions={typesOptions}
                             selectedTypes={selectedTypes}
                             setSelectedTypes={setSelectedTypes}
+                            toggleFilters={toggleFilters}
                             periodOptions={periodOptions}
                             selectedPeriods={selectedPeriods}
+                            handlemyHistoricalPlaces= {handlemyHistoricalPlaces}
+                            myHistoricalPlaces= {myHistoricalPlaces}
+                            clearFilters={clearFilters}
                             setSelectedPeriods={setSelectedPeriods}
+                            role={getUserRole()}
+                           
                         />
                     </div>
                     {error && <div className="text-red-500">{error}</div>}
