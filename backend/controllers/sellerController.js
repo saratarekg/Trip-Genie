@@ -5,16 +5,23 @@ const Product = require('../models/product');
 // Update
 const updateSeller = async (req, res) => {
     try {
-        console.log("hiixxx")
 
-        const seller1 = await Seller.findById(req.params.id);
-        console.log("hii",seller1.isAccepted)
+        const seller1 = await Seller.findById(res.locals.user_id);
 
         if(!seller1.isAccepted){
             return res.status(400).json({ error: 'Seller is not accepted yet, Can not update profile' });
         }
         const { email, username, name, description} = req.body;
-        const seller = await Seller.findByIdAndUpdate(req.params.id, { email, username, name, description}, { new: true });
+console.log("abl if", username,seller1.username)
+        if(username!==seller1.username && await Seller.findOne({username})){
+            console.log("baad if", username,seller1.username,await Seller.find({username}))
+
+            return res.status(400).json({message:"Username already exists"});
+           }
+           if(email!==seller1.email && await Seller.findOne({email}) ){
+             return res.status(400).json({message:"Email already exists"});
+            }
+        const seller = await Seller.findByIdAndUpdate(res.locals.user_id, { email, username, name, description}, { new: true });
 
 
 

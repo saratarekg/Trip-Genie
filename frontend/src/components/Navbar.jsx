@@ -1,11 +1,15 @@
 "use client";
 
+import keyNavbar from "../assets/images/keyNavbar.svg";
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom"; // Import Link from React Router
 import logo from "../assets/images/tgLogofinal6.png";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import Lottie from "lottie-react";
+import bellAnimation from "../assets/images/bell.json";
+
 const NavLink = ({ to, children }) => (
   <Link
     to={to}
@@ -65,92 +69,82 @@ export function NavbarComponent() {
               {/* Desktop Navigation */}
               <div className="hidden md:block">
                 <div className="ml-10 flex items-baseline space-x-4">
-                {role === "tour-guide" && (
-                        <>
-                          <NavLink to='/activity'>
-                            Activities
-                          </NavLink>
-                          <NavLink to='/all-itineraries'>
-                            Itineraries
-                          </NavLink>
-                        </>
-                      )}
-                      {role === "seller" && (
-                        <>
-                          
-                          <NavLink to='/all-products'>
-                            Products
-                          </NavLink>
-                          <NavLink to='/seller-profile'>
-                            Profile
-                          </NavLink>
-                        </>
-                      )}
-                    {role === "tourist" && (
-                      <>
-                        <NavLink to='/activity'>
-                          Activities
-                        </NavLink>
-                        <NavLink to='/all-itineraries'>
-                          Itineraries
-                        </NavLink>
-                        <NavLink to='/all-historical-places'>
-                          Historical Places
-                        </NavLink>
-                        <NavLink to='/all-products'>
-                          Products
-                        </NavLink>
-                      </>
-                    )}
-                      {role === "advertiser" && (
-                        <>
-                          <NavLink to='/activity'>
-                            Activities
-                          </NavLink>
-                          
-                        </>
-                      )}
-                    {role === "admin" && (
-                      <>
-                        <NavLink to='/activity'>
-                          Activities
-                        </NavLink>
-                        <NavLink to='/all-itineraries'>
-                          Itineraries
-                        </NavLink>
-                        <NavLink to='/all-historical-places'>
-                          Historical Places
-                        </NavLink>
-                        <NavLink to='/all-products'>
-                          Products
-                        </NavLink>
-                      </>
-                    )}
-                     {role === "tourism-governor" && (
-                      <>
-                        
-                        <NavLink to='/all-historical-places'>
-                          Historical Places
-                        </NavLink>
-                        
-                      </>
-                    )}
-                    {(role === "guest" || role === undefined) && (
-                      <>
-                        <NavLink to='/activity'>
-                          Activities
-                        </NavLink>
-                        <NavLink to='/all-itineraries'>
-                          Itineraries
-                        </NavLink>
-                        <NavLink to='/all-historical-places'>
-                          Historical Places
-                        </NavLink>
-                        <NavLink to='/all-products'>
-                          Products
-                        </NavLink>
-                      </>
-                    )}
+                  {role === "tour-guide" && (
+                    <>
+                      <NavLink to="/activity">Activities</NavLink>
+                      <NavLink to="/all-itineraries">Itineraries</NavLink>
+                    </>
+                  )}
+                  {role === "seller" && (
+                    <>
+                      <NavLink to="/all-products">Products</NavLink>
+                      <NavLink to="/seller-profile">Profile</NavLink>
+                    </>
+                  )}
+                  {role === "tourist" && (
+                    <>
+                      <NavLink to="/activity">Activities</NavLink>
+                      <NavLink to="/all-itineraries">Itineraries</NavLink>
+                      <NavLink to="/all-historical-places">
+                        Historical Places
+                      </NavLink>
+                      <NavLink to="/all-products">Products</NavLink>
+                    </>
+                  )}
+                  {role === "advertiser" && (
+                    <>
+                      <NavLink to="/activity">Activities</NavLink>
+                      <NavLink to="/advertiser-profile">Profile</NavLink>
+                    </>
+                  )}
+                  {role === "admin" && (
+                    <>
+                      {/* Admin-specific Navbar */}
+                      <div className="hidden md:flex justify-between items-center w-full">
+                        {/* Middle part with two orange boxes */}
+                        <div className="flex items-center space-x-4">
+                          <div
+                            className="w-10 h-10 rounded-md flex justify-center items-center"
+                            style={{ backgroundColor: "#003F66" }}
+                          >
+                            <Lottie
+                              animationData={bellAnimation}
+                              loop={true}
+                              style={{ width: "100%", height: "100%" }}
+                            />
+                          </div>
+                          <div
+                            className="w-10 h-10 rounded-md flex justify-center items-center"
+                            style={{ backgroundColor: "#003F66" }}
+                          >
+                            <img
+                              src={keyNavbar}
+                              alt="Key Icon"
+                              className="h-6 w-6"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {role === "tourism-governor" && (
+                    <>
+                      <NavLink to="/all-historical-places">
+                        Historical Places
+                      </NavLink>
+                    </>
+                  )}
+                  {(role === "guest" || role === undefined) && (
+                    <>
+                      <NavLink to="/activity">Activities</NavLink>
+                      <NavLink to="/all-itineraries">Itineraries</NavLink>
+                      <NavLink to="/all-historical-places">
+                        Historical Places
+                      </NavLink>
+                      <NavLink to="/all-products">Products</NavLink>
+                    </>
+                  )}
                 </div>
               </div>
 

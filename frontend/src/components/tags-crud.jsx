@@ -65,7 +65,7 @@ export function TagCRUD({ isOpen, onClose }) {
   };
 
   const updateTag = async () => {
-    setMessage('');
+    setMessage(''); // Clear previous messages
     if (oldTag && updatedTag) {
       try {
         const token = Cookies.get('jwt');
@@ -75,22 +75,27 @@ export function TagCRUD({ isOpen, onClose }) {
             Authorization: `Bearer ${token}`,
           },
         });
-
+  
         const tag = response.data;
-
+  
         if (tag && tag._id) {
+          console.log('Old Tag:', oldTag);  // Debugging to check old tag
+          console.log('Updated Tag:', updatedTag);  // Debugging to check updated tag
+  
           await axios.put(`http://localhost:4000/admin/tags/${tag._id}`, 
           { type: updatedTag }, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
+  
+          // Clear input fields after successful update
           setOldTag('');
           setUpdatedTag('');
           setSuccessMessage('Tag updated successfully!');
-          fetchTags();
-          resetButtons();
-          setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
+          fetchTags(); // Refresh the tag list
+          resetButtons(); // Reset UI
+          setTimeout(() => setSuccessMessage(''), 3000); // Clear success message after 3 seconds
         } else {
           setMessage('Tag not found.');
         }
@@ -102,6 +107,7 @@ export function TagCRUD({ isOpen, onClose }) {
       setMessage('Please provide old and new tag names.');
     }
   };
+  
 
   const deleteTag = async () => {
     setMessage('');
@@ -152,7 +158,9 @@ export function TagCRUD({ isOpen, onClose }) {
     await fetchTags();
     setShowTagList(true); // Show the tag list popout
   };
-
+  const handleButtonClick = () => {
+    setSuccessMessage('');
+  };
   const TagListPopout = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-4 rounded shadow-lg max-w-lg w-full">
@@ -264,34 +272,34 @@ export function TagCRUD({ isOpen, onClose }) {
           </>
         )}
   
-        {showUpdateTag && (
-          <div>
-            <Input
-              type="text"
-              value={oldTag}
-              onChange={(e) => setOldTag(e.target.value)}
-              placeholder="Old tag name"
-              className="mt-2"
-            />
-            <Input
-              type="text"
-              value={updatedTag}
-              onChange={(e) => setUpdatedTag(e.target.value)}
-              placeholder="New tag name"
-              className="mt-2"
-            />
-            <Button
-              onClick={updateTag}
+       
+          {showUpdateTag && (
+            <div>
+              <Input
+                type="text"
+                value={oldTag}
+                onChange={(e) => setOldTag(e.target.value)}
+                placeholder="Old tag name"
+                className="mt-2"
+              />
+              <Input
+                type="text"
+                value={updatedTag}
+                onChange={(e) => {setUpdatedTag(e.target.value) ;}}
+                placeholder="New tag name"
+                className="mt-2"
+              />
+        <Button onClick={updateTag}
               className="w-full mt-2 bg-green-500 text-white"
             >
               Submit
             </Button>
-            <Button
-              onClick={resetButtons}
-              className="w-full mt-2 bg-gray-500 text-white"
-            >
-              Cancel
-            </Button>
+              <Button
+                onClick={resetButtons}
+                className="w-full mt-2 bg-gray-500 text-white"
+              >
+                Cancel
+              </Button>
           </div>
         )}
   
@@ -304,7 +312,7 @@ export function TagCRUD({ isOpen, onClose }) {
               placeholder="Tag to delete"
               className="mt-2"
             />
-            <Button              onClick={deleteTag}
+            <Button onClick={deleteTag}
               className="w-full mt-2 bg-green-500 text-white"
             >
               Submit

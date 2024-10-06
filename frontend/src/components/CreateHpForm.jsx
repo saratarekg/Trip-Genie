@@ -34,23 +34,19 @@ const formSchema = z.object({
     )
     .min(1, 'Please select at least one historical tag'),
   openingHours: z.object({
-    weekdays: z.string().optional(),
-    weekends: z.string().optional(),
+    weekdays: z.string().min(1, 'Please enter weekday opening hours'),
+    weekends: z.string().min(1, 'Please enter weekend opening hours'),
   }),
   ticketPrices: z.object({
-    foreigner: z
-      .string()
-      .optional()
-      .transform((val) => (val ? Number(val) : undefined)),
-    native: z
-      .string()
-      .optional()
-      .transform((val) => (val ? Number(val) : undefined)),
-    student: z
-      .string()
-      .optional()
-      .transform((val) => (val ? Number(val) : undefined)),
+    foreigner: z.string().min(1, 'Please enter foreigner ticket price'),
+    native: z.string().min(1, 'Please enter native ticket price'),
+    student: z.string().min(1, 'Please enter student ticket price'),
   }),
+  pictures: z.string().min(1, 'Please enter at least one picture URL')
+    .refine(
+      (value) => value.split('\n').every(url => url.trim().startsWith('http')),
+      'All URLs must start with http:// or https://'
+    ),
 });
 
 export default function CreateHpForm() {
@@ -59,7 +55,6 @@ export default function CreateHpForm() {
   const [error, setError] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [countries, setCountries] = useState([]);
-  const [pictures, setPictures] = useState([]);
   const navigate = useNavigate();
 
   const {
@@ -87,6 +82,7 @@ export default function CreateHpForm() {
         native: '',
         student: '',
       },
+      pictures: '',
     },
   });
 
@@ -128,20 +124,23 @@ export default function CreateHpForm() {
     setError('');
 
     const token = Cookies.get('jwt');
-    data['historicalTag'] = data['historicalTag'].map((tag) => tag.value);
 
     try {
       const response = await fetch(`http://localhost:4000/tourism-governor/historical-places`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          historicalTag: data.historicalTag.map(tag => tag.value),
+          pictures: data.pictures.split('\n').map(url => url.trim()).filter(url => url),
+        }),
       });
 
       if (response.ok) {
-        setShowDialog(true); // Show success dialog
+        setShowDialog(true);
       } else {
         throw new Error('Failed to create historical place.');
       }
@@ -155,16 +154,12 @@ export default function CreateHpForm() {
 
   const handleGoBack = () => {
     setShowDialog(false);
-    navigate('/all-historical-places'); // Redirect to all historical places
+    navigate('/all-historical-places');
   };
 
   const handleCreateNew = () => {
     setShowDialog(false);
-  };
-
-  const handlePictureChange = (event) => {
-    const files = Array.from(event.target.files);
-    setPictures(files);
+    window.location.reload();
   };
 
   return (
@@ -176,7 +171,7 @@ export default function CreateHpForm() {
         <h2 className="text-xl font-semibold mb-4 text-center">Create Historical Place</h2>
 
         <div>
-          <label htmlFor="title" className="block text-gray-700 mb-2">Name</label>
+          <label htmlFor="title" className="block text-gray-700 mb-2">Name *</label>
           <input
             {...register('title')}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
@@ -186,7 +181,7 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-gray-700 mb-2">Description</label>
+          <label htmlFor="description" className="block text-gray-700 mb-2">Description *</label>
           <textarea
             {...register('description')}
             className="border border-gray-300 rounded-xl p-2 w-full h-24 mb-4"
@@ -196,7 +191,7 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Country</label>
+          <label className="block text-gray-700 mb-2">Country *</label>
           <select
             {...register('location.country')}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
@@ -210,7 +205,7 @@ export default function CreateHpForm() {
           </select>
           {errors.location?.country && <span className="text-red-500">{errors.location.country.message}</span>}
 
-          <label className="block text-gray-700 mb-2">City</label>
+          <label className="block text-gray-700 mb-2">City *</label>
           <input
             {...register('location.city')}
             placeholder="Enter city"
@@ -218,7 +213,7 @@ export default function CreateHpForm() {
           />
           {errors.location?.city && <span className="text-red-500">{errors.location.city.message}</span>}
 
-          <label className="block text-gray-700 mb-2">Address</label>
+          <label className="block text-gray-700 mb-2">Address *</label>
           <input
             {...register('location.address')}
             placeholder="Address"
@@ -228,7 +223,7 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Historical Tags</label>
+          <label className="block text-gray-700 mb-2">Historical Tags *</label>
           <Controller
             name="historicalTag"
             control={control}
@@ -249,7 +244,7 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Opening Hours (Weekdays)</label>
+          <label className="block text-gray-700 mb-2">Opening Hours (Weekdays) *</label>
           <input
             {...register('openingHours.weekdays')}
             placeholder="e.g., 9 AM - 5 PM"
@@ -259,7 +254,7 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Opening Hours (Weekends)</label>
+          <label className="block text-gray-700 mb-2">Opening Hours (Weekends) *</label>
           <input
             {...register('openingHours.weekends')}
             placeholder="e.g., 10 AM - 4 PM"
@@ -269,44 +264,49 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Prices (Foreigner)</label>
+          <label className="block text-gray-700 mb-2">Ticket Prices (Foreigner) *</label>
           <input
             {...register('ticketPrices.foreigner')}
             placeholder="Enter foreigner ticket price"
             type="number"
+            min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           />
+          {errors.ticketPrices?.foreigner && <span className="text-red-500">{errors.ticketPrices.foreigner.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Prices (Native)</label>
+          <label className="block text-gray-700 mb-2">Ticket Prices (Native) *</label>
           <input
             {...register('ticketPrices.native')}
             placeholder="Enter native ticket price"
             type="number"
+            min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           />
+          {errors.ticketPrices?.native && <span className="text-red-500">{errors.ticketPrices.native.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Prices (Student)</label>
+          <label className="block text-gray-700 mb-2">Ticket Prices (Student) *</label>
           <input
             {...register('ticketPrices.student')}
             placeholder="Enter student ticket price"
             type="number"
+            min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           />
+          {errors.ticketPrices?.student && <span className="text-red-500">{errors.ticketPrices.student.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Upload Pictures</label>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handlePictureChange}
-            className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer"
+          <label className="block text-gray-700 mb-2">Picture URLs *</label>
+          <textarea
+            {...register('pictures')}
+            placeholder="Enter picture URLs (one per line)"
+            className="border border-gray-300 rounded-xl p-2 w-full h-32 mb-4"
           />
+          {errors.pictures && <span className="text-red-500">{errors.pictures.message}</span>}
         </div>
 
         <button

@@ -46,7 +46,7 @@ const getAllProducts = async (req, res) => {
 
     // Check if no products match the filters
     if (!products.length) {
-      return res.status(404).json({ message: "No products found" });
+      return res.status(200).json([]);
     }
 
     // Return filtered products
@@ -110,6 +110,7 @@ const addProductByAdmin = async (req, res) => {
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
   const { name, picture, price, description, quantity, reviews } = req.body; // Get details from request body
+  console.log(reviews);
   try {
     // Find the product by ID and update its details
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -127,11 +128,20 @@ const editProduct = async (req, res) => {
       (acc, review) => acc + review.rating,
       0
     );
-    const newRating = totalRating / product.reviews.length;
-    updatedProduct.rating = await Product.findByIdAndUpdate(productId, {
-      $set: { rating: newRating },
-    });
 
+
+    if (product.reviews.length > 0) {
+      const newRating = totalRating / product.reviews.length;
+      updatedProduct.rating = await Product.findByIdAndUpdate(id, {
+        $set: { rating: newRating },
+      });
+    }
+
+
+
+    console.log(updatedProduct);
+
+    
     res.status(200).json(updatedProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });

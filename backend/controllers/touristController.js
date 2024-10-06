@@ -51,9 +51,18 @@ const getTourist = async (req, res) => {
 
 const updateTourist = async (req, res) => {
     try {
-        const { email, nationality, mobile, jobOrStudent} = req.body; // Data to update
+        const tourist1 = await Tourist.findById(res.locals.user_id);
+
+        const {username, email, nationality, mobile, jobOrStudent} = req.body; // Data to update
+
+        if(username!==tourist1.username && await Tourist.findOne({username})){
+            return res.status(400).json({message:"Username already exists"});
+           }
+           if(email!==tourist1.email && await Tourist.findOne({email}) ){
+             return res.status(400).json({message:"Email already exists"});
+            }
         // console.log(email, nationality, mobile, jobOrStudent);
-        const tourist = await Tourist.findByIdAndUpdate(res.locals.user_id,{ email, nationality, mobile, jobOrStudent}, { new: true, runValidators: true });
+        const tourist = await Tourist.findByIdAndUpdate(res.locals.user_id,{username, email, nationality, mobile, jobOrStudent}, { new: true, runValidators: true });
         if (!tourist) {
             return res.status(404).json({ message: 'Tourist not found' });
         }

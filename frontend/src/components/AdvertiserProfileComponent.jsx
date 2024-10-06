@@ -49,14 +49,16 @@ export function AdvertiserProfileComponent() {
         validateFields();
     };
     const isValidURL = (string) => {
-        const res = string.match(/(http|https):\/\/[^\s]+/);
+        const res = string.match(/^(https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*$/i);
         return res !== null;
     };
+    
 
 
     const validateFields = () => {
-        const { email, username, name, hotline } = editedAdvertiser;
+        const { email, username, name, hotline, website } = editedAdvertiser;
         const messages = {};
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const hotlineRegex = /^\d+$/;
 
@@ -109,11 +111,31 @@ export function AdvertiserProfileComponent() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setAdvertiser(response.data.advertiser);
-            setIsEditing(false);
-            setError(""); // Clear previous errors
+   
+
+            if(response.statusText==="OK"){
+
+                setAdvertiser(response.data.advertiser);
+                setIsEditing(false);
+                setError(""); // Clear previous errors
+            }
+           
         } catch (err) {
-            setError(err.message);
+            if(err.response.data.message ==="Email already exists" ){
+                const email="Email already exists";
+                setValidationMessages({email});
+
+            }
+            else if(err.response.data.message ==="Username already exists"){
+                const username="Username already exists";
+                setValidationMessages({username});
+
+
+            }
+            else{
+                setError(err.message);
+
+            }
         }
     };
 
@@ -294,31 +316,32 @@ export function AdvertiserProfileComponent() {
                     </div>
                 )}
 
-                <div className="flex justify-between mt-4">
-                    {isEditing ? (
-                        <>
-                            <button
-                                onClick={handleUpdate}
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                            >
-                                Save Changes
-                            </button>
-                            <button
-                                onClick={handleDiscard}
-                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                            >
-                                Discard Changes
-                            </button>
-                        </>
-                    ) : (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                        >
-                            Edit Profile
-                        </button>
-                    )}
-                </div>
+<div className="mt-6">
+  {isEditing ? (
+    <div className="flex gap-2">
+      <button
+        onClick={handleUpdate}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+      >
+        Save Changes
+      </button>
+      <button
+        onClick={handleDiscard}
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+      >
+        Discard Changes
+      </button>
+      
+    </div>
+  ) : (
+    <button
+      onClick={() => setIsEditing(true)}
+      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+    >
+      Edit Profile
+    </button>
+  )}
+</div>
 
             </div>
         </div>

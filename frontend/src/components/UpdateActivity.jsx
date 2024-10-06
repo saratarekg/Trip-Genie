@@ -160,8 +160,8 @@ export default function UpdateActivity() {
       location: {
         ...data.location,
         coordinates: {
-          latitude: markerPosition.lat,
-          longitude: markerPosition.lng,
+          latitude: data.location.coordinates.latitude,
+          longitude: data.location.coordinates.longitude,
         },
       },
       category: data.category.map((cat) => cat.value),
@@ -169,6 +169,7 @@ export default function UpdateActivity() {
     };
 
     try {
+      console.log(data.location.coordinates)
       const response = await axios.put(
         `http://localhost:4000/${role}/activities/${id}`,
         activityData,
@@ -190,18 +191,19 @@ export default function UpdateActivity() {
     
     useEffect(() => {
       map.setView([mapCenter.lat, mapCenter.lng], map.getZoom());
-    }, [map, mapCenter]);
-
+    }, [map, mapCenter, markerPosition]);
+  
     useMapEvents({
       click: (e) => {
         const { lat, lng } = e.latlng;
-        setMarkerPosition({ lat, lng });
-        setValue("location.coordinates", { latitude: lat, longitude: lng });
+        setMarkerPosition({ lat, lng });  // Update the marker position state
+        setValue("location.coordinates", { latitude: lat, longitude: lng });  // Update the form's coordinates state
       },
     });
-
+  
     return <Marker position={[markerPosition.lat, markerPosition.lng]} />;
   };
+  
 
   const handleGoBack = () => {
     navigate("/activity");

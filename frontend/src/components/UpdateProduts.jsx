@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Cookies from 'js-cookie';
 import { ChevronLeft, Check } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -20,7 +21,7 @@ const UpdateProduct = () => {
   const { id } = useParams();
   const [product, setProduct] = useState({
     name: '',
-    price: 0,
+    price: '',
     description: '',
   });
   const [loading, setLoading] = useState(true);
@@ -45,7 +46,7 @@ const UpdateProduct = () => {
         const productData = await response.json();
         setProduct({
           name: productData.name,
-          price: productData.price,
+          price: productData.price.toString(),
           description: productData.description,
         });
         setError(null);
@@ -65,7 +66,22 @@ const UpdateProduct = () => {
     setProduct((prev) => ({ ...prev, [name]: value }));
   };
 
+  const isFormValid = useMemo(() => {
+    return (
+      product.name.trim() !== '' &&
+      product.description.trim() !== '' &&
+      product.price !== '' &&
+      !isNaN(parseFloat(product.price)) &&
+      parseFloat(product.price) >= 0
+    );
+  }, [product]);
+
   const handleUpdate = async () => {
+    if (!isFormValid) {
+      setError('Please fill in all fields correctly before updating.');
+      return;
+    }
+
     setLoading(true);
     try {
       const token = Cookies.get('jwt');
@@ -75,7 +91,10 @@ const UpdateProduct = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(product),
+        body: JSON.stringify({
+          ...product,
+          price: parseFloat(product.price),
+        }),
       });
 
       if (!response.ok) {
@@ -83,6 +102,7 @@ const UpdateProduct = () => {
       }
 
       setShowSuccessPopup(true);
+      setError(null);
     } catch (err) {
       setError('Error updating product. Please try again later.');
       console.error('Error updating product:', err);
@@ -95,21 +115,15 @@ const UpdateProduct = () => {
     return <LoadingSpinner />;
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Error!</strong>
-          <span className="block sm:inline"> {error}</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 pt-8">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold mb-8">Update Product</h1>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-6">
             <div className="space-y-4">
@@ -120,7 +134,11 @@ const UpdateProduct = () => {
                   name="name"
                   value={product.name}
                   onChange={handleChange}
+                  className={product.name.trim() === '' ? 'border-red-500' : ''}
                 />
+                {product.name.trim() === '' && (
+                  <p className="text-red-500 text-sm mt-1">Name is required</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="price">Price</Label>
@@ -130,7 +148,11 @@ const UpdateProduct = () => {
                   type="number"
                   value={product.price}
                   onChange={handleChange}
+                  className={product.price === '' || isNaN(parseFloat(product.price)) || parseFloat(product.price) < 0 ? 'border-red-500' : ''}
                 />
+                {(product.price === '' || isNaN(parseFloat(product.price)) || parseFloat(product.price) < 0) && (
+                  <p className="text-red-500 text-sm mt-1">Price must be a non-negative number</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="description">Description</Label>
@@ -140,18 +162,19 @@ const UpdateProduct = () => {
                   value={product.description}
                   onChange={handleChange}
                   rows={5}
+                  className={product.description.trim() === '' ? 'border-red-500' : ''}
                 />
+                {product.description.trim() === '' && (
+                  <p className="text-red-500 text-sm mt-1">Description is required</p>
+                )}
               </div>
             </div>
 
-            <div className="mt-8 flex justify-between">
-              <Button variant="outline" onClick={() => navigate(`/product/${id}`)}>
-                <ChevronLeft className="mr-2 h-4 w-4" /> Back
-              </Button>
-              <Button variant="default" onClick={handleUpdate}>
-                Update Product
-              </Button>
-            </div>
+            <div className="mt-8 flex justify-end"> {/* Use justify-end to align items to the right */}
+            <Button  variant="default" onClick={handleUpdate} disabled={!isFormValid}>
+              Update Product
+            </Button>
+          </div>
           </div>
         </div>
       </div>
