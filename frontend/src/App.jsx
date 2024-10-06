@@ -253,7 +253,7 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tourism-governor"]}>
 
-                <CreateHtPage/>
+                <CreateHtpage/>
               </ProtectedRoute>
             }
           />
