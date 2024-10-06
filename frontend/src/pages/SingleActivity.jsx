@@ -255,8 +255,8 @@ const ActivityDetail = () => {
                 <div className="flex-none">
                   <Map
                     position={[
-                      activity.location.coordinates.longitude,
                       activity.location.coordinates.latitude,
+                      activity.location.coordinates.longitude,
                     ]}
                     height={"200px"}
                     width={"200px"}

@@ -1,21 +1,47 @@
-import React from "react";
-import { XCircle } from "lucide-react";
+import * as React from "react"
+import { cva } from "class-variance-authority";
 
-export const Alert = ({ message, onClose }) => {
-  return (
-    <div
-      className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-      role="alert"
-    >
-      <strong className="font-bold mr-1">Error!</strong>
-      <span className="block sm:inline">{message}</span>
-      <button
-        onClick={onClose}
-        className="absolute top-0 bottom-0 right-0 px-4 py-3"
-        aria-label="Close alert"
-      >
-        <XCircle className="h-6 w-6 text-red-500" />
-      </button>
-    </div>
-  );
-};
+import { cn } from "@/lib/utils"
+
+const alertVariants = cva(
+  "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+  {
+    variants: {
+      variant: {
+        default: "bg-background text-foreground",
+        destructive:
+          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+const Alert = React.forwardRef(({ className, variant, ...props }, ref) => (
+  <div
+    ref={ref}
+    role="alert"
+    className={cn(alertVariants({ variant }), className)}
+    {...props} />
+))
+Alert.displayName = "Alert"
+
+const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
+  <h5
+    ref={ref}
+    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+    {...props} />
+))
+AlertTitle.displayName = "AlertTitle"
+
+const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("text-sm [&_p]:leading-relaxed", className)}
+    {...props} />
+))
+AlertDescription.displayName = "AlertDescription"
+
+export { Alert, AlertTitle, AlertDescription }
