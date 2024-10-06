@@ -3,9 +3,18 @@ import axios from 'axios';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
-import  Cookies  from 'js-cookie';
+import Cookies from 'js-cookie';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 // Form validation schema using zod
 const formSchema = z.object({
@@ -16,18 +25,31 @@ const formSchema = z.object({
     city: z.string().min(1, 'Please enter a city'),
     country: z.string().min(1, 'Please select a country'),
   }),
-  historicalTag: z.array(z.object({
-    value: z.string(),
-    label: z.string()
-  })).min(1, 'Please select at least one historical tag'),
+  historicalTag: z
+    .array(
+      z.object({
+        value: z.string(),
+        label: z.string(),
+      })
+    )
+    .min(1, 'Please select at least one historical tag'),
   openingHours: z.object({
     weekdays: z.string().optional(),
     weekends: z.string().optional(),
   }),
   ticketPrices: z.object({
-    foreigner: z.string().optional().transform(val => val ? Number(val) : undefined),
-    native: z.string().optional().transform(val => val ? Number(val) : undefined),
-    student: z.string().optional().transform(val => val ? Number(val) : undefined),
+    foreigner: z
+      .string()
+      .optional()
+      .transform((val) => (val ? Number(val) : undefined)),
+    native: z
+      .string()
+      .optional()
+      .transform((val) => (val ? Number(val) : undefined)),
+    student: z
+      .string()
+      .optional()
+      .transform((val) => (val ? Number(val) : undefined)),
   }),
 });
 
@@ -35,7 +57,7 @@ export default function CreateHpForm() {
   const [historicalTags, setHistoricalTags] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [showDialog, setShowDialog] = useState(false);
   const [countries, setCountries] = useState([]);
   const [pictures, setPictures] = useState([]);
   const navigate = useNavigate();
@@ -88,8 +110,8 @@ export default function CreateHpForm() {
 
     const fetchHistoricalTags = async () => {
       try {
-        const token = Cookies.get("jwt")
-        const response = await axios.get(`http://localhost:4000/tourism-governor/historical-tags`,  {
+        const token = Cookies.get('jwt');
+        const response = await axios.get(`http://localhost:4000/tourism-governor/historical-tag`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setHistoricalTags(response.data);
@@ -102,58 +124,43 @@ export default function CreateHpForm() {
   }, []);
 
   const onSubmit = async (data) => {
-   
     setLoading(true);
     setError('');
-    setSuccess('');
 
     const token = Cookies.get('jwt');
-    data["historicalTag"] = data["historicalTag"].map(tag=>tag.value);
-
-    // const formData = new FormData();
-    // for (const key in data) {
-    //   if (data.hasOwnProperty(key)) {
-    //     if (key === 'historicalTag') {
-    //       formData.append(key, JSON.stringify(data[key].map(tag => tag.value)));
-    //     } else if (key === 'ticketPrices') {
-    //       formData.append(key, JSON.stringify({
-    //         adult: data[key].adult !== '' ? Number(data[key].adult) : undefined,
-    //         child: data[key].child !== '' ? Number(data[key].child) : undefined,
-    //       }));
-    //     } else {
-    //       formData.append(key, JSON.stringify(data[key]));
-    //     }
-    //   }
-    // }
-
-    // pictures.forEach((picture) => {
-    //   formData.append('pictures', picture);
-    // });
+    data['historicalTag'] = data['historicalTag'].map((tag) => tag.value);
 
     try {
       const response = await fetch(`http://localhost:4000/tourism-governor/historical-places`, {
-        method: "POST",
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
-
-
         },
-        body:JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
-      if (response.ok){
-        setSuccess('Historical place created successfully!');
-        navigate('/');
+      if (response.ok) {
+        setShowDialog(true); // Show success dialog
+      } else {
+        throw new Error('Failed to create historical place.');
       }
-
-
     } catch (err) {
       setError('Failed to create historical place. Please try again.');
       console.error(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoBack = () => {
+    setShowDialog(false);
+    navigate('/all-historical-places'); // Redirect to all historical places
+  };
+
+  const handleCreateNew = () => {
+    setShowDialog(false)
+    window.location.reload();
   };
 
   const handlePictureChange = (event) => {
@@ -168,9 +175,6 @@ export default function CreateHpForm() {
         onSubmit={handleSubmit(onSubmit)}
       >
         <h2 className="text-xl font-semibold mb-4 text-center">Create Historical Place</h2>
-
-        {success && <div className="text-green-500 mb-4">{success}</div>}
-        {error && <div className="text-red-500 mb-4">{error}</div>}
 
         <div>
           <label htmlFor="title" className="block text-gray-700 mb-2">Name</label>
@@ -233,9 +237,9 @@ export default function CreateHpForm() {
               <Select
                 {...field}
                 isMulti
-                options={historicalTags.map(tag => ({
+                options={historicalTags.map((tag) => ({
                   value: tag._id,
-                  label: `${tag.type} - ${tag.period}`
+                  label: `${tag.type} - ${tag.period}`,
                 }))}
                 className="rounded-xl"
                 classNamePrefix="select"
@@ -266,36 +270,33 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Price (Foreigners)</label>
+          <label className="block text-gray-700 mb-2">Ticket Prices (Foreigner)</label>
           <input
             {...register('ticketPrices.foreigner')}
+            placeholder="Enter foreigner ticket price"
             type="number"
-            placeholder="Price for Foreigners"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           />
-          {errors.ticketPrices?.foreigner && <span className="text-red-500">{errors.ticketPrices.foreigner.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Price (Native)</label>
+          <label className="block text-gray-700 mb-2">Ticket Prices (Native)</label>
           <input
             {...register('ticketPrices.native')}
+            placeholder="Enter native ticket price"
             type="number"
-            placeholder="Price for natives"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           />
-          {errors.ticketPrices?.native && <span className="text-red-500">{errors.ticketPrices.native.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Price (student)</label>
+          <label className="block text-gray-700 mb-2">Ticket Prices (Student)</label>
           <input
             {...register('ticketPrices.student')}
+            placeholder="Enter student ticket price"
             type="number"
-            placeholder="Price for students"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           />
-          {errors.ticketPrices?.student && <span className="text-red-500">{errors.ticketPrices.student.message}</span>}
         </div>
 
         <div>
@@ -305,7 +306,7 @@ export default function CreateHpForm() {
             multiple
             accept="image/*"
             onChange={handlePictureChange}
-            className="border border-gray-300 rounded-xl p-2 w-full mb-4"
+            className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer"
           />
         </div>
 
@@ -316,19 +317,26 @@ export default function CreateHpForm() {
         >
           {loading ? 'Creating...' : 'Create Historical Place'}
         </button>
+
+        {error && <div className="text-red-500 mb-4">{error}</div>}
       </form>
 
+      {/* Success Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
+        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
           <DialogHeader>
-            <DialogTitle>Activity Created Successfully</DialogTitle>
-            <DialogDescription>
-              Your activity has been created. What would you like to do next?
+            <DialogTitle className="text-lg font-semibold">Success!</DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              The historical place was created successfully.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button onClick={handleGoBack}>Go to All Activities</Button>
-            <Button onClick={handleCreateNew}>Create New Activity</Button>
+          <DialogFooter className="mt-4 flex justify-end space-x-4">
+            <Button colorScheme="blue" onClick={handleGoBack}>
+              Go to All Places
+            </Button>
+            <Button variant="outline" onClick={handleCreateNew}>
+              Create Another
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

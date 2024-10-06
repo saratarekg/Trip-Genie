@@ -82,6 +82,31 @@ const addProduct = async (req, res) => {
   }
 };
 
+const addProductByAdmin = async (req, res) => {
+  const { name, picture, price, description, rating, reviews, quantity } =
+    req.body; // Extract the data from request
+
+  try {
+    // Use the sellerType from the Seller document
+    //   const sellerType = seller.seller;
+
+    // Create the product with the fetched sellerType
+    const product = new Product({
+      name,
+      picture,
+      price,
+      description,
+      quantity,
+    });
+
+    // Save the product to the database
+    await product.save();
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
   const { name, picture, price, description, quantity, reviews } = req.body; // Get details from request body
@@ -208,4 +233,5 @@ module.exports = {
   getProductById,
   deleteProduct,
   deleteProductOfSeller,
+  addProductByAdmin
 };

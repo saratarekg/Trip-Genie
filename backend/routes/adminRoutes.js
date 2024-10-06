@@ -93,9 +93,10 @@ router.delete('/categories/:id', categoryController.deleteCategory);
 router.put('/categories/:id', categoryController.updateCategory);
 
 router.get('/products', productController.getAllProducts);
-router.post('/products', productController.addProduct);
-
+router.post('/products', productController.addProductByAdmin);
+router.get('/products/:id', productController.getProductById);
 router.put('/products/:id',productController.editProduct);
+router.delete('/products/:id',productController.deleteProduct);
 
 
 module.exports = router;

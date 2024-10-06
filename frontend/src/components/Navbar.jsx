@@ -107,6 +107,9 @@ export function NavbarComponent() {
                           <NavLink to='/activity'>
                             Activities
                           </NavLink>
+                          <NavLink to='/advertiser-profile'>
+                            Profile
+                          </NavLink>
                           
                         </>
                       )}

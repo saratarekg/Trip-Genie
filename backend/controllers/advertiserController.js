@@ -56,15 +56,15 @@ const updateAdvertiser = async (req, res) => {
           error: "Advertiser is not accepted yet, Can not update profile",
         });
     }
-
+    const { email, username, name, description,hotline,website} = req.body;
     const advertiser = await Advertiser.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+      res.locals.user_id,
+      { email, username, name, description,hotline,website},
       { new: true, runValidators: true }
     );
 
     if (!advertiser) {
-      return res.status(404).json({ error: "Advertiser not found" });
+      return res.status(400).json({ error: "Advertiser not found" });
     }
     res.status(200).json({ message: "Advertiser profile updated", advertiser });
   } catch (error) {
