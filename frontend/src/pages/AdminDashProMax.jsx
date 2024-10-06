@@ -48,7 +48,7 @@ export function Dashboard() {
   const [footerHeight, setFooterHeight] = useState(0);
 
   useEffect(() => {
-    const footer = document.querySelector('footer');
+    const footer = document.querySelector("footer");
     if (footer) {
       setFooterHeight(footer.offsetHeight);
     }
@@ -59,8 +59,8 @@ export function Dashboard() {
       }
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const dashboardData = [
@@ -117,7 +117,7 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <main className="flex-1 p-6 overflow-y-auto" style={{ paddingBottom: `${footerHeight}px` }}>
+      <main className="flex-1 p-6 overflow-y-auto">
         <br />
         <br />
         <br />
@@ -259,29 +259,34 @@ export function Dashboard() {
         </Tabs>
         <hr className="my-6" />
         <div className="flex flex-col md:flex-row justify-evenly flex-wrap">
-  <Card className="bg-white border-[#808080] border mx-2 my-2" style={{ width: '90%', maxWidth: '400px', height: '250px' }}>
-    <CardHeader>
-      <CardTitle className="text-sm font-medium text-[#003f66]">
-        Financial Overview
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Pie data={pieData1} options={{ maintainAspectRatio: false }} />
-    </CardContent>
-  </Card>
+          <Card
+            className="bg-white border-[#808080] border mx-2 my-2"
+            style={{ width: "90%", maxWidth: "400px", height: "250px" }}
+          >
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-[#003f66]">
+                Financial Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Pie data={pieData1} options={{ maintainAspectRatio: false }} />
+            </CardContent>
+          </Card>
 
-  <Card className="bg-white border-[#808080] border mx-2 my-2" style={{ width: '90%', maxWidth: '400px', height: '250px' }}>
-    <CardHeader>
-      <CardTitle className="text-sm font-medium text-[#003f66]">
-        User Metrics
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <Pie data={pieData2} options={{ maintainAspectRatio: false }} />
-    </CardContent>
-  </Card>
-</div>
-
+          <Card
+            className="bg-white border-[#808080] border mx-2 my-2"
+            style={{ width: "90%", maxWidth: "400px", height: "250px" }}
+          >
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-[#003f66]">
+                User Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Pie data={pieData2} options={{ maintainAspectRatio: false }} />
+            </CardContent>
+          </Card>
+        </div>
       </main>
 
       {isDeleteAccountOpen && (
