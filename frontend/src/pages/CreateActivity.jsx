@@ -34,11 +34,9 @@ const schema = z.object({
     }),
   }),
   duration: z.number().int().positive("Duration must be a positive integer"),
-  timing: z
-    .date()
-    .refine((date) => date > new Date(), {
-      message: "Timing must be a future date",
-    }),
+  timing: z.date().refine((date) => date > new Date(), {
+    message: "Timing must be a future date",
+  }),
   price: z.number().int().positive("Price must be a positive integer"),
   category: z
     .array(z.object({ value: z.string(), label: z.string() }))
@@ -67,9 +65,6 @@ export default function CreateActivity() {
         address: "",
         coordinates: { longitude: 0, latitude: 0 },
       },
-      duration: 0,
-      price: 0,
-      specialDiscount: 0,
       category: [],
       tags: [],
       isBookingOpen: true,
@@ -164,245 +159,259 @@ export default function CreateActivity() {
 
   return (
     <>
-    <div className="pt-[100px] pb-[40px]">
-    <Card className="w-full max-w-4xl mx-auto shadow-lg"> 
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Create New Activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Controller
-                name="name"
-                control={control}
-                render={({ field }) => <Input id="name" {...field} />}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => <Textarea id="description" {...field} />}
-              />
-              {errors.description && (
-                <p className="text-red-500 text-sm">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Controller
-                name="location.address"
-                control={control}
-                render={({ field }) => <Input id="address" {...field} />}
-              />
-              {errors.location?.address && (
-                <p className="text-red-500 text-sm">
-                  {errors.location.address.message}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="pt-[100px] pb-[40px]">
+        <Card className="w-full max-w-4xl mx-auto shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">
+              Create New Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="duration">Duration (hours)</Label>
+                <Label htmlFor="name">Name</Label>
                 <Controller
-                  name="duration"
+                  name="name"
+                  control={control}
+                  render={({ field }) => <Input id="name" {...field} />}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Controller
+                  name="description"
                   control={control}
                   render={({ field }) => (
-                    <Input
-                      type="number"
-                      id="duration"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
+                    <Textarea id="description" {...field} />
                   )}
                 />
-                {errors.duration && (
+                {errors.description && (
                   <p className="text-red-500 text-sm">
-                    {errors.duration.message}
+                    {errors.description.message}
                   </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="timing">Timing</Label>
+                <Label htmlFor="address">Address</Label>
                 <Controller
-                  name="timing"
+                  name="location.address"
                   control={control}
-                  render={({ field }) => (
-                    <Input
-                      type="datetime-local"
-                      id="timing"
-                      {...field}
-                      onChange={(e) => {
-                        const dateValue = new Date(e.target.value);
-                        field.onChange(dateValue);
-                      }}
-                    />
-                  )}
+                  render={({ field }) => <Input id="address" {...field} />}
                 />
-                {errors.timing && (
-                  <p className="text-red-500 text-sm">{errors.timing.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price">Price</Label>
-                <Controller
-                  name="price"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      type="number"
-                      id="price"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  )}
-                />
-                {errors.price && (
-                  <p className="text-red-500 text-sm">{errors.price.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="specialDiscount">Special Discount (%)</Label>
-                <Controller
-                  name="specialDiscount"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      type="number"
-                      id="specialDiscount"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  )}
-                />
-                {errors.specialDiscount && (
+                {errors.location?.address && (
                   <p className="text-red-500 text-sm">
-                    {errors.specialDiscount.message}
+                    {errors.location.address.message}
                   </p>
                 )}
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Categories</Label>
-              <Controller
-                name="category"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    options={categories}
-                    isMulti
-                    className="react-select-container"
-                    classNamePrefix="react-select"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="duration">Duration (hours)</Label>
+                  <Controller
+                    name="duration"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type="number"
+                        id="duration"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    )}
                   />
-                )}
-              />
-              {errors.category && (
-                <p className="text-red-500 text-sm">{errors.category.message}</p>
-              )}
-            </div>
+                  {errors.duration && (
+                    <p className="text-red-500 text-sm">
+                      {errors.duration.message}
+                    </p>
+                  )}
+                </div>
 
-            <div className="space-y-2">
-              <Label>Tags</Label>
-              <Controller
-                name="tags"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    options={tags}
-                    isMulti
-                    className="react-select-container"
-                    classNamePrefix="react-select"
+                <div className="space-y-2">
+                  <Label htmlFor="timing">Timing</Label>
+                  <Controller
+                    name="timing"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type="datetime-local"
+                        id="timing"
+                        value={
+                          field.value
+                            ? field.value.toISOString().slice(0, 16)
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const dateValue = new Date(e.target.value);
+                          field.onChange(dateValue);
+                        }}
+                      />
+                    )}
                   />
-                )}
-              />
-              {errors.tags && (
-                <p className="text-red-500 text-sm">{errors.tags.message}</p>
-              )}
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Controller
-                name="isBookingOpen"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    id="isBookingOpen"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-              <Label htmlFor="isBookingOpen">Is Booking Open?</Label>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="pictures">Pictures (URLs)</Label>
-              <Controller
-                name="pictures"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    id="pictures"
-                    value={field.value.join(", ")}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value.split(",").map((url) => url.trim())
-                      )
-                    }
-                    placeholder="Enter picture URLs separated by commas"
-                  />
-                )}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Location (click to set)</Label>
-              <div className="h-64 w-full rounded-md overflow-hidden">
-                <MapContainer
-                  center={[location.latitude, location.longitude]}
-                  zoom={13}
-                  style={{ height: "100%", width: "100%", zIndex: 0 }}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-                  />
-                  <MapClick />
-                  <Marker position={[location.latitude, location.longitude]} />
-                </MapContainer>
+                  {errors.timing && (
+                    <p className="text-red-500 text-sm">
+                      {errors.timing.message}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Create Activity"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price</Label>
+                  <Controller
+                    name="price"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type="number"
+                        id="price"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    )}
+                  />
+                  {errors.price && (
+                    <p className="text-red-500 text-sm">
+                      {errors.price.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="specialDiscount">Special Discount (%)</Label>
+                  <Controller
+                    name="specialDiscount"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        type="number"
+                        id="specialDiscount"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    )}
+                  />
+                  {errors.specialDiscount && (
+                    <p className="text-red-500 text-sm">
+                      {errors.specialDiscount.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Categories</Label>
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={categories}
+                      isMulti
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                    />
+                  )}
+                />
+                {errors.category && (
+                  <p className="text-red-500 text-sm">
+                    {errors.category.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <Controller
+                  name="tags"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      options={tags}
+                      isMulti
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                    />
+                  )}
+                />
+                {errors.tags && (
+                  <p className="text-red-500 text-sm">{errors.tags.message}</p>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Controller
+                  name="isBookingOpen"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isBookingOpen"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <Label htmlFor="isBookingOpen">Is Booking Open?</Label>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pictures">Pictures (URLs)</Label>
+                <Controller
+                  name="pictures"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="pictures"
+                      value={field.value.join(", ")}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value.split(",").map((url) => url.trim())
+                        )
+                      }
+                      placeholder="Enter picture URLs separated by commas"
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Location (click to set)</Label>
+                <div className="h-64 w-full rounded-md overflow-hidden">
+                  <MapContainer
+                    center={[location.latitude, location.longitude]}
+                    zoom={13}
+                    style={{ height: "100%", width: "100%", zIndex: 0 }}
+                  >
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+                    />
+                    <MapClick />
+                    <Marker
+                      position={[location.latitude, location.longitude]}
+                    />
+                  </MapContainer>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Create Activity"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
