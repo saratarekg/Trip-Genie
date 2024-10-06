@@ -46,7 +46,7 @@ const getAllProducts = async (req, res) => {
 
     // Check if no products match the filters
     if (!products.length) {
-      return res.status(404).json({ message: "No products found" });
+      return res.status(200).json([]);
     }
 
     // Return filtered products
