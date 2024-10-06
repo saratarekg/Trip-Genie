@@ -16,7 +16,7 @@ const createHistoricalPlace = async (req, res) => {
 
 const getHistoricalPlace = async (req, res) => {
     try {
-        const museum = await Museum.findById(req.params.id);
+        const museum = await Museum.findById(req.params.id).populate('historicalTag').exec();;
         res.status(200).json(museum);
     } catch (error) {
          res.status(404).json({ message: 'Place not found' });

@@ -53,6 +53,7 @@ function AppContent() {
           <Route path="/create-itinerary" element={<CreateItineraryPage />} />
           <Route path="/seller" element={<SellerList />} />
           <Route path="/activity" element={<AllActivitiesComponent />} />
+          <Route path ="/historical-place/:id" element={<HistoricalPlaceDetail/>} />
           <Route
             path="/all-itineraries"
             element={<AllItinerariesComponent />}
