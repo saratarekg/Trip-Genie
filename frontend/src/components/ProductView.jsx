@@ -4,6 +4,7 @@ import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 import defaultImage from "../assets/images/default-image.jpg";
 import Loader from "./Loader.jsx";
+import { Star } from "lucide-react";
 
 export function ProductViewer() {
   const [products, setProducts] = useState([]);
@@ -46,9 +47,18 @@ export function ProductViewer() {
   };
 
   const renderStars = (rating) => {
-    return Array(5).fill().map((_, index) => (
-      <span key={index} className={`star ${index < rating ? 'filled' : ''}`}>★</span>
-    ));
+    return (
+      <div className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`w-5 h-5 ${
+              star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
+            }`}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -78,7 +88,7 @@ export function ProductViewer() {
           <div 
             key={product.id} 
             className="relative overflow-hidden rounded-lg cursor-pointer group h-72" 
-            onClick={() => handleProductClick(product.id)}
+            onClick={() => handleProductClick(product._id)}
           >
             <img
               src={product.picture || defaultImage}
@@ -88,7 +98,7 @@ export function ProductViewer() {
             <div className="absolute bottom-0 left-0 right-0 bg-white p-4 transform translate-y-full transition duration-300 group-hover:translate-y-0">
               <div className="flex justify-between items-start mb-2">
                 <span className="text-xs font-semibold text-gray-600 uppercase">{'BUY ONLINE'}</span>
-                <span className="text-lg font-bold">€{product.price}</span>
+                <span className="text-lg font-bold">${product.price}</span>
               </div>
               <h2 className="text-sm mb-2 truncate">{product.name}</h2>
               <div className="flex justify-between items-center">

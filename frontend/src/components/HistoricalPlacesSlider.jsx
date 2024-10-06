@@ -60,7 +60,7 @@ export function HistoricalPlaces() {
           <h1 className="text-3xl font-bold">Historical Places</h1>
           <hr className="border-red-500 w-1/2 mb-3 mt-1 border-t-2" />
           <p className="text-gray-600 mt-2 mb-8">
-          Explore the world's most captivating historical landmarks, where rich cultural heritage and architectural wonders come to life. Each destination tells a story of the past, offering a unique journey through history. Plan your adventure today!
+            Explore the world's most captivating historical landmarks, where rich cultural heritage and architectural wonders come to life. Each destination tells a story of the past, offering a unique journey through history. Plan your adventure today!
           </p>
         </div>
         
@@ -110,11 +110,8 @@ export function HistoricalPlaces() {
           }}
         >
           {places.map((place) => (
-            <div
-              key={place._id}
-              className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 transition-transform duration-300 hover:-translate-y-12 hover:z-10 relative"
-            >
-              <div className=" cursor-pointer relative aspect-[3/4] rounded-lg overflow-hidden">
+            <Link to={`/historical-place/${place._id}`} key={place._id} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 transition-transform duration-300 hover:-translate-y-12 hover:z-10 relative">
+              <div className="cursor-pointer relative aspect-[3/4] rounded-lg overflow-hidden">
                 <img
                   src={
                     Array.isArray(place.pictures) && place.pictures.length > 0
@@ -124,7 +121,6 @@ export function HistoricalPlaces() {
                   alt={place.title}
                   className="w-full h-full object-cover"
                 />
-
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
                   <h3 className="text-xl font-semibold">{place.title}</h3>
@@ -134,13 +130,11 @@ export function HistoricalPlaces() {
                   </p>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
           <div className="ml-auto"></div>
         </div>
       </div>
-
-
     </div>
   );
 }

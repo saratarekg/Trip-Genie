@@ -11,6 +11,7 @@ import SellerList from "./components/SellerList.jsx";
 import ItineraryDetail from "./components/ItineraryDetail.jsx";
 import UpdateItinerary from "./components/UpdateItinerary.jsx";
 import UpdateProduct from "./components/UpdateProduts.jsx";
+import UpdatehistoricalPlace from "./components/UpdateHP.jsx"
 import ProductDetail from "./components/ProductDetail.jsx";
 
 import ActivityList from "./components/ActivityListAdvertiser.jsx";
@@ -33,6 +34,7 @@ import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
+
 import UpdateActivity from "./components/UpdateActivity.jsx";
 
 function AppContent() {
@@ -54,6 +56,8 @@ function AppContent() {
           <Route path="/seller" element={<SellerList />} />
           <Route path="/activity" element={<AllActivitiesComponent />} />
           <Route path ="/historical-place/:id" element={<HistoricalPlaceDetail/>} />
+          <Route path ="/update-historical-place/:id" element={<UpdatehistoricalPlace/>} />
+          
           <Route
             path="/all-itineraries"
             element={<AllItinerariesComponent />}

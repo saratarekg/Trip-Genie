@@ -32,7 +32,7 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
       <h3 className="text-sm mt-2 text-gray-700">{itinerary.timeline}</h3>
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-bold text-blue-600">
-          €{itinerary.price}/Day
+          ${itinerary.price}/Day
         </span>
         <span className="text-sm text-gray-500">{itinerary.language}</span>
       </div>
@@ -282,7 +282,7 @@ export function AllItinerariesComponent() {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-100 py-12 px-4 pt-20 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <>
               <h1 className="text-4xl font-bold text-gray-900 mb-8">

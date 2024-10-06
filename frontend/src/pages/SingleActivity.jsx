@@ -59,7 +59,7 @@ const ActivityDetail = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
-          `http://localhost:4000/${userRole}/activities/${id}`,
+          `http://localhost:4000/${userRole}/activity/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -292,22 +292,20 @@ const ActivityDetail = () => {
 
 
           <div className="p-6 border-t border-gray-200">
-            <div className="flex justify-between mt-8">
-              <Button onClick={() => navigate("/activity")} variant="outline">
-                <ChevronLeft className="mr-2" /> Back to All Activities
-              </Button>
-              <div className="flex space-x-2">
-                <Button onClick={handleUpdate} variant="default">
-                  <Edit className="mr-2" /> Update
-                </Button>
-                <Button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="destructive"
-                >
-                  <Trash2 className="mr-2" /> Delete
-                </Button>
-              </div>
-            </div>
+          <div className="flex justify-end mt-8"> {/* Changed justify-between to justify-end */}
+  <div className="flex space-x-2">
+    <Button onClick={handleUpdate} variant="default">
+      <Edit className="mr-2" /> Update
+    </Button>
+    <Button
+      onClick={() => setShowDeleteConfirm(true)}
+      variant="destructive"
+    >
+      <Trash2 className="mr-2" /> Delete
+    </Button>
+  </div>
+</div>
+
           </div>
         </div>
       </div>

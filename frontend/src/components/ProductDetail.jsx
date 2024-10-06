@@ -178,7 +178,7 @@ const ProductDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 pt-10">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
@@ -285,11 +285,11 @@ const ProductDetail = () => {
                   </div>
                   <div className="flex items-center">
                     <Phone className="w-5 h-5 mr-2 text-gray-500" />
-                    <span>{product.seller.phone}</span>
+                    <span>{product.seller.mobile}</span>
                   </div>
                   <div className="flex items-center">
                     <Award className="w-5 h-5 mr-2 text-gray-500" />
-                    <span>{product.seller.experience} years of experience</span>
+                    <span>{product.seller.sellerType} Seller</span>
                   </div>
                 </div>
               </CardContent>

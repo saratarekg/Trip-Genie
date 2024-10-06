@@ -133,11 +133,14 @@ export function Activities() {
                 <p className="text-sm text-gray-600 mb-2">{`Location: ${act.location}`}</p>
                 <p className="text-sm text-gray-600 mb-2">{`Duration: ${act.duration}`}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold">From €{act.price}</span>
+                  <span className="text-lg font-bold">From ${act.price}</span>
                   {/* Details button with hover effect */}
+                  <Link to={`/activity/${act._id}`}>
                   <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
                     Details
                   </button>
+                </Link>
+                  
                 </div>
               </div>
             </div>

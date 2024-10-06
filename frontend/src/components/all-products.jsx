@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Search, ChevronLeft, ChevronRight , ContactRound} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight , Star} from "lucide-react";
 import FilterComponent from "./FilterProduct.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
@@ -8,9 +8,18 @@ import { useNavigate } from "react-router-dom";
 import Loader from "./Loader.jsx";
 
 const renderStars = (rating) => {
-  return Array(5).fill().map((_, index) => (
-    <span key={index} className={`star ${index < rating ? 'filled' : ''}`}>★</span>
-  ));
+  return (
+    <div className="flex items-center">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-5 h-5 ${
+            star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
+          }`}
+        />
+      ))}
+    </div>
+  );
 };
 
 const ProductCard = ({ product, onSelect }) => (
@@ -32,7 +41,7 @@ const ProductCard = ({ product, onSelect }) => (
       <h3 className="text-sm mt-2 text-gray-700">{product.description}</h3>
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-bold text-blue-600">
-          €{product.price}
+          ${product.price}
         </span>
         <div className="text-yellow-400 text-s">
                   {renderStars(product.rating)}
@@ -269,7 +278,7 @@ export function AllProducts() {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-100 pt-20 py-12 px-4 sm:px-6 lg:px-8 " >
           <div className="max-w-7xl mx-auto">
             <>
               <h1 className="text-4xl font-bold text-gray-900 mb-8">
