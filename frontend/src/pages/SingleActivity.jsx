@@ -174,7 +174,7 @@ const ActivityDetail = () => {
                 <div className="flex items-center">
                   <Globe className="w-6 h-6 mr-2 text-orange-500" />
                   <span className="text-gray-700">
-                    Location: {activity.location}
+                    Location: {activity.location.address}
                   </span>
 
                 </div>
