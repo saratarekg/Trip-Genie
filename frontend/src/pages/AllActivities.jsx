@@ -206,7 +206,7 @@ export function AllActivitiesComponent() {
         url.searchParams.append("startDate", dateRange.start);
       }
       if (selectedCategories.length > 0) {
-        url.searchParams.append("categories", selectedCategories.join(","));
+        url.searchParams.append("category", selectedCategories.map((c) => c.name).join(","));
       }
       if (minStars) {
         url.searchParams.append("minRating", minStars);
@@ -297,8 +297,10 @@ export function AllActivitiesComponent() {
                   setDateRange={setDateRange}
                   minStars={minStars}
                   setMinStars={setMinStars}
-                  categoryOptions={categoryOptions}
+                  categoriesOptions={categoryOptions}
                   searchActivites={searchActivities}
+                  selectedCategories={selectedCategories}
+                  setSelectedCategories={setSelectedCategories}
                 />
 
                 {activities.length > 0 ? (

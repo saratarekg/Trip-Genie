@@ -1,8 +1,8 @@
 // src/components/Map.js
-import React from 'react';
-import PropTypes from 'prop-types';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import React from "react";
+import PropTypes from "prop-types";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 const Map = ({ position, height, width }) => {
   const [latitude, longitude] = position;
@@ -10,11 +10,15 @@ const Map = ({ position, height, width }) => {
   // Function to open Google Maps in a new tab
   const openGoogleMaps = () => {
     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    window.open(googleMapsUrl, '_blank');
+    window.open(googleMapsUrl, "_blank");
   };
 
   return (
-    <MapContainer center={position} zoom={13} style={{ height, width }}>
+    <MapContainer
+      center={position}
+      zoom={13}
+      style={{ height, width, zIndex: 0, position: "relative" }}
+    >
       <TileLayer
         attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

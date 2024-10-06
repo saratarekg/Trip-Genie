@@ -78,6 +78,7 @@ router.delete('/tags/:id', tagController.deleteTag);
 router.post('/tags', tagController.addTag);
 router.get('/tags/:id', tagController.getTag);
 router.get('/tags', tagController.getAlltags);
+router.put('/tagbyname', tagController.getTagbyName);
 router.put('/tags/:id', tagController.updateTag);
 
 router.delete('/historical-tags/:id', historicalTagController.deleteTag);
