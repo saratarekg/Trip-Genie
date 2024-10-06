@@ -48,7 +48,7 @@ const FilterComponent = ({
          
           </div>
 
-          {role === 'seller'?  (
+          {(role === 'seller' || role === 'admin')?  (
              <Link to="/create-product" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
              <Plus className="mr-2" size={18} />
              Create

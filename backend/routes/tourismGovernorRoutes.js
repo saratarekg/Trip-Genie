@@ -25,7 +25,7 @@ router.put(
 );
 
 router.post("/historical-tag", historicalTagController.addHistoricalTag);
-router.get("/historical-tags", historicalTagController.getAlltags);
+router.get("/historical-tag", historicalTagController.getAlltags);
 router.put("/historical-tag/:id", historicalTagController.updateHistoricalTag);
 router.delete("/historical-tag/:id", historicalTagController.deleteTag);
 
