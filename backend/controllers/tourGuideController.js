@@ -62,14 +62,20 @@ const updateTourGuide = async (req, res) => {
 
 const updateTourGuideProfile = async (req, res) => {
   try {
-    const tourGuideId = res.locals.user_id; // Get the current user's ID
-    const updatedData = req.body; // The new profile data from the request body
+    const tourGuide1 = await TourGuide.findById(res.locals.user_id);
 
+    const { email, username, nationality, mobile, yearsOfExperience , previousWorks} = req.body;
+
+    if(username!==tourGuide1.username && await TourGuide.findOne({username})){
+     return res.status(400).json({message:"Username already exists"});
+    }
+    if(email!==tourGuide1.email && await TourGuide.findOne({email}) ){
+      return res.status(400).json({message:"Email already exists"});
+     }
     // Find the TourGuide by their ID and update with new data
     const tourGuide = await TourGuide.findByIdAndUpdate(
-      tourGuideId,
-      updatedData,
-      { new: true, runValidators: true }
+      res.locals.user_id,
+      { email, username, nationality, mobile, yearsOfExperience , previousWorks},{ new: true, runValidators: true }
     );
 
     if (!tourGuide) {
