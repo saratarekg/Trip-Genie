@@ -6,12 +6,14 @@ import Cookies from 'js-cookie';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
+import Loader from "./Loader.jsx";
 
 
 export function Activities() {
   const [activities, setActivities] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Number of visible slides (3 cards at a time)
   const visibleSlides = 3;
@@ -19,6 +21,7 @@ export function Activities() {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
+        setIsLoading(true);
         const token = Cookies.get('jwt')
         let role = Cookies.get('role')
         if (role === undefined) 
@@ -30,12 +33,14 @@ export function Activities() {
           },
         });
         setActivities(response.data);
+        
       } catch (err) {
         setError(err.message);
       }
     };
 
     fetchActivities();
+    setIsLoading(false);
   }, []);
 
   if (error) {

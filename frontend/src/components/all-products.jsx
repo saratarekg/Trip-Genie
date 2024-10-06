@@ -64,6 +64,7 @@ export function AllProducts() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [myProducts, setmyProducts] = useState(false);
+  
 
   const navigate = useNavigate();
 
@@ -74,6 +75,7 @@ export function AllProducts() {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     fetchProducts();
     setIsLoading(false);
   }, []);
@@ -85,10 +87,10 @@ export function AllProducts() {
   };
 
   useEffect(() => {
-
+    setIsLoading(true);
     searchProducts();
   
-
+    setIsLoading(false);
 }, [myProducts]);
 
 useEffect(() => {
@@ -107,6 +109,7 @@ const handlePageChange = (pageNumber) => {
 
   const searchProducts = async () => {
     try {
+      setIsLoading(true);
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/products`);
 
@@ -145,6 +148,7 @@ const handlePageChange = (pageNumber) => {
       setProducts(data);
       setError(null);
       setCurrentPage(1);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
@@ -168,9 +172,11 @@ const handlePageChange = (pageNumber) => {
   }, [searchTerm]);
 
   useEffect(() => {
+    setIsLoading(true);
     if (sortBy) {
       searchProducts();
     }
+    setIsLoading(false);
   }, [sortBy, sortOrder]);
 
   const handleSort = (attribute) => {
@@ -213,6 +219,7 @@ const handlePageChange = (pageNumber) => {
     }
   };
   const clearFilters = () => {
+    setIsLoading(true);
     // Reset all filter states to initial values
     setSearchTerm("");
     setPrice("");
@@ -222,10 +229,11 @@ const handlePageChange = (pageNumber) => {
 
     // Fetch products without any filters
     fetchProducts();
+    setIsLoading(false);
   };
 
   const toggleFilters = () => {
-    setIsLoading(false);
+    setIsLoading(true);
     setFiltersVisible(!filtersVisible);
     setIsLoading(false);
   };
