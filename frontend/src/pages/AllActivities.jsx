@@ -10,7 +10,6 @@ import ActivityDetail from "./SingleActivity.jsx";
 import { Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { s } from "vite/dist/node/types.d-aGj9QkWt.js";
 import { set } from "zod";
 
 const ActivityCard = ({ activity, onSelect }) => (

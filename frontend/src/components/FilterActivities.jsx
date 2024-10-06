@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Filter, ChevronDown, ArrowUpDown, Plus, Star } from 'lucide-react';
+import { Filter, ChevronDown, ArrowUpDown, Plus, Star, ContactRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
@@ -14,6 +14,8 @@ const FilterComponent = ({
   setPrice,
   dateRange,
   setDateRange,
+  myActivities, 
+  handlemyActivities,
   selectedCategories,
   setSelectedCategories,
   categoriesOptions,
