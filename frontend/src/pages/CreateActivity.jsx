@@ -164,7 +164,8 @@ export default function CreateActivity() {
 
   return (
     <>
-      <Card className="w-full max-w-4xl mx-auto">
+    <div className="pt-[100px] pb-[40px]">
+    <Card className="w-full max-w-4xl mx-auto shadow-lg"> 
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
             Create New Activity
@@ -402,6 +403,7 @@ export default function CreateActivity() {
           </form>
         </CardContent>
       </Card>
+      </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>

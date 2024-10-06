@@ -20,7 +20,6 @@ const productSchema = new mongoose.Schema({
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Seller", // Reference to the Seller schema
-    required: true,
   },
   rating: {
     type: Number,

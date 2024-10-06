@@ -130,19 +130,20 @@ export default function UpdateHistoricalPlace() {
 
       const data = await response.json()
 
-      if (response.status === 403) {
-        setCities([])
-      }
+      
 
       if (data.error) {
-        throw new Error(data.msg || 'Failed to fetch cities')
+        throw new Error(data.msg || 'Failed to fetch cities ')
       }
 
       const sortedCities = data.data.sort()
       setCities(sortedCities)
     } catch (err) {
-      setError('Error fetching cities. Please try again later.')
-      console.error('Error fetching cities:', err)
+      if (err.status===404){
+        setCities([])
+      }
+      //setError('Error fetching cities. Please try again later. ')
+      console.error('Error fetching cities: ', err)
       setCities([])
     } finally {
       setCitiesLoading(false)
@@ -152,7 +153,7 @@ export default function UpdateHistoricalPlace() {
   const fetchAvailableTags = async () => {
     try {
       const token = Cookies.get('jwt')
-      const response = await fetch(`http://localhost:4000/${userRole}/historical-tags`, {
+      const response = await fetch(`http://localhost:4000/${userRole}/historical-tag`, {
         headers: { Authorization: `Bearer ${token}` },
       })
 
@@ -209,7 +210,7 @@ export default function UpdateHistoricalPlace() {
 
   const validateForm = () => {
     const errors = {}
-
+  
     if (!historicalPlace.title.trim()) {
       errors.title = 'Title is required'
     }
@@ -223,10 +224,9 @@ export default function UpdateHistoricalPlace() {
       errors.country = 'Country is required'
     }
     if (!historicalPlace.location.city) {
-      if (cities.length > 0) {
-        errors.city = 'City is required'
-      }
+      errors.city = 'City is required'
     }
+    
     if (historicalPlace.ticketPrices.native < 0) {
       errors.nativePrice = 'Native ticket price cannot be negative'
     }
@@ -236,15 +236,24 @@ export default function UpdateHistoricalPlace() {
     if (historicalPlace.ticketPrices.foreigner < 0) {
       errors.foreignerPrice = 'Foreigner ticket price cannot be negative'
     }
-
+  
+    // Validate opening hours
+    if (!historicalPlace.openingHours.weekdays.trim()) {
+      errors.weekdays = 'Weekdays opening hours are required'
+    }
+    if (!historicalPlace.openingHours.weekends.trim()) {
+      errors.weekends = 'Weekends opening hours are required'
+    }
+  
     if (newPictureUrl && !/^https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp)$/i.test(newPictureUrl)) {
       errors.pictureUrl = 'Invalid picture URL. Must be a valid image URL.'
     }
-
+  
     setFormErrors(errors)
-
+  
     return Object.keys(errors).length === 0
   }
+  
 
   const handleUpdate = async () => {
     if (!validateForm()) {
@@ -470,26 +479,30 @@ export default function UpdateHistoricalPlace() {
               </div>
 
               <div className="space-y-4">
-                <h2 className="text-2xl font-semibold">Opening Hours</h2>
-                <div>
-                  <Label htmlFor="openingHours.weekdays">Weekdays</Label>
-                  <Input
-                    id="openingHours.weekdays"
-                    name="openingHours.weekdays"
-                    value={historicalPlace.openingHours.weekdays}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="openingHours.weekends">Weekends</Label>
-                  <Input
-                    id="openingHours.weekends"
-                    name="openingHours.weekends"
-                    value={historicalPlace.openingHours.weekends}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
+  <h2 className="text-2xl font-semibold">Opening Hours</h2>
+  <div>
+    <Label htmlFor="openingHours.weekdays">Weekdays</Label>
+    <Input
+      id="openingHours.weekdays"
+      name="openingHours.weekdays"
+      value={historicalPlace.openingHours.weekdays}
+      onChange={handleChange}
+      className={formErrors.weekdays ? 'border-red-500' : ''}
+    />
+    {formErrors.weekdays && <p className="text-red-500">{formErrors.weekdays}</p>}
+  </div>
+  <div>
+    <Label htmlFor="openingHours.weekends">Weekends</Label>
+    <Input
+      id="openingHours.weekends"
+      name="openingHours.weekends"
+      value={historicalPlace.openingHours.weekends}
+      onChange={handleChange}
+      className={formErrors.weekends ? 'border-red-500' : ''}
+    />
+    {formErrors.weekends && <p className="text-red-500">{formErrors.weekends}</p>}
+  </div>
+</div>
 
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Ticket Prices</h2>
