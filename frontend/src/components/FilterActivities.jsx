@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Filter, ChevronDown, ArrowUpDown, Plus, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const FilterComponent = ({
   filtersVisible,
@@ -22,7 +23,7 @@ const FilterComponent = ({
   role,
 }) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-
+  role = Cookies.get('role');
   // Handle Category Selection
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -69,14 +70,17 @@ const FilterComponent = ({
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
           </button>
-        </div>
 
-        {role === 'tour-guide' ? (
-          <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
-            <Plus className="mr-2" size={18} />
-            Create
-          </Link>
-        ) : null}
+
+
+        </div>
+        {role === 'advertiser'?  (
+             <Link to="/create-activity" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
+             <Plus className="mr-2" size={18} />
+             Create
+           </Link>
+          ) : null}
+
       </div>
 
       {filtersVisible && (

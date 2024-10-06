@@ -35,7 +35,7 @@ const ActivityList = () => {
                 {upcomingActivities.map(activity => (
                     <li key={activity._id}>
                         <h2>{activity.name}</h2>
-                        <p>Location: {activity.location}</p>
+                        <p>Location: {activity.location.address}</p>
                         <p>Duration: {activity.duration} hours</p>
                         <p>Price: ${activity.price}</p>
                         <p>Special Discount: {activity.specialDiscount}%</p>

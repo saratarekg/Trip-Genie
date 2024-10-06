@@ -25,7 +25,7 @@ const ActivityCard = ({ activity, onSelect }) => (
     </div>
     <CardHeader className="p-4">
       <CardTitle className="text-xl font-semibold">{activity.name}</CardTitle>
-      <p className="text-sm text-muted-foreground">{activity.location}</p>
+      <p className="text-sm text-muted-foreground">{activity.location.address}</p>
     </CardHeader>
     <CardContent className="p-4 pt-0 space-y-2">
       <div className="flex items-center space-x-1">
