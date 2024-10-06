@@ -42,12 +42,16 @@ const getAllActivities = async (req, res) => {
     }
     let activitiesQuery = Activity.find({
       $and: query,
-    }).populate("tags").populate("category");
+    })
+      .populate("tags")
+      .populate("category");
 
     if (sort) {
       const sortBy = {};
       sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
       activitiesQuery = activitiesQuery.sort(sortBy);
+    } else {
+      activitiesQuery = activitiesQuery.sort({ createdAt: -1 });
     }
 
     const activities = await activitiesQuery;
@@ -61,7 +65,9 @@ const getAllActivities = async (req, res) => {
 const getActivityById = async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.id)
-      .populate("advertiser").populate("category").populate("tags")
+      .populate("advertiser")
+      .populate("category")
+      .populate("tags")
       .exec();
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });

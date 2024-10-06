@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
+import * as jwtDecode from "jwt-decode";
 import {
   ChevronLeft,
   Star,
@@ -80,6 +81,7 @@ const ProductDetail = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [canModify, setCanModify] = useState(false);
 
   const navigate = useNavigate();
 
@@ -110,6 +112,11 @@ const ProductDetail = () => {
         const data = await response.json();
         setProduct(data);
         setError(null);
+
+        if (token) {
+          const decodedToken = jwtDecode.jwtDecode(token);
+          setCanModify(decodedToken.id === data.seller._id);
+        }
       } catch (err) {
         setError("Error fetching product details. Please try again later.");
         console.error("Error fetching product details:", err);
@@ -296,7 +303,8 @@ const ProductDetail = () => {
             </Card>
 
             <div className="mt-8 space-y-4">
-              {(userRole === "admin" || userRole === "seller") && (
+              {(userRole === "admin" ||
+                (userRole === "seller" && canModify)) && (
                 <Button
                   className="w-full"
                   variant="default"
