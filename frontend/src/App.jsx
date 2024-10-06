@@ -13,6 +13,7 @@ import UpdateItinerary from "./components/UpdateItinerary.jsx";
 import UpdateProduct from "./components/UpdateProduts.jsx";
 import UpdatehistoricalPlace from "./components/UpdateHP.jsx";
 import ProductDetail from "./components/ProductDetail.jsx";
+import {TourGuideProfileComponent} from "./components/tourGuideProfile.jsx";
 
 import ActivityList from "./components/ActivityListAdvertiser.jsx";
 import ItineraryList from "./components/ItineraryListTourGuide.jsx";
@@ -70,6 +71,8 @@ function AppContent() {
           <Route path="/create-activity" element={<CreateActivity />} />
           <Route path="/seller-profile" element={<SellerProfile />} />
           <Route path="/advertiser-profile" element={<AdvertiserProfile />} />
+          <Route path="/tour-guide-profile" element={<TourGuideProfileComponent />} />
+
 
           <Route path="/seller" element={<SellerList />} />
           <Route path="/activity" element={<AllActivitiesComponent />} />

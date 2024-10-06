@@ -73,6 +73,9 @@ export function NavbarComponent() {
                           <NavLink to='/all-itineraries'>
                             Itineraries
                           </NavLink>
+                          <NavLink to='/tour-guide-profile'>
+                            Profile
+                          </NavLink>
                         </>
                       )}
                       {role === "seller" && (
