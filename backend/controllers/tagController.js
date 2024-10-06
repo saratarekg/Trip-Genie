@@ -78,7 +78,7 @@ const getTagbyType = async (req, res) => {
         if (tags.length === 0) {
             return res.status(404).json({ message: 'No tags found with that name' });
         }
-        console.log(tags);
+    
         res.status(200).json(tags);
         
     } catch (error) {
