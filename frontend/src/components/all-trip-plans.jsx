@@ -102,7 +102,6 @@ export function AllItinerariesComponent() {
       try {
         setIsLoading(false);
         const response = await axios.get('http://localhost:4000/api/getAllTypes');
-        console.log('Type:', response.data);
         setTypesOptions(response.data);
       } catch (error) {
         console.error("Error fetching Type:", error);
