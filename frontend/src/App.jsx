@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/login.jsx";
-import SellerList from "./components/SellerList.jsx";
 import ItineraryDetail from "./components/ItineraryDetail.jsx";
 import UpdateItinerary from "./components/UpdateItinerary.jsx";
 import UpdateProduct from "./components/UpdateProduts.jsx";
@@ -40,6 +39,8 @@ import UpdateActivity from "./components/UpdateActivity.jsx";
 import CreateActivity from "./pages/CreateActivity.jsx";
 import SellerProfile from "./pages/SellerProfile.jsx";
 import AdvertiserProfile from "./pages/AdvertiserProfile.jsx";
+import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
+import CreateHtpage from "./pages/CreateHtpage.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -62,46 +63,201 @@ function AppContent() {
 
       <div className="pages">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "tourist",
+                  "seller",
+                  "tour-guide",
+                  "advertiser",
+                  "tourism-governor",
+                  "guest",
+                ]}
+              >
+                <Home />
+              </ProtectedRoute>
+            }
+          />
           {/* <Route path='/tour-guide-home' element={<Tghome />} /> */}
           <Route path="/login" element={<Login />} />
-          <Route path="/create-historicalPlace" element={<CreateHpPage />} />
-          <Route path="/create-product" element={<CreateProduct />} />
-          <Route path="/create-itinerary" element={<CreateItineraryPage />} />
-          <Route path="/create-activity" element={<CreateActivity />} />
-          <Route path="/seller-profile" element={<SellerProfile />} />
-          <Route path="/advertiser-profile" element={<AdvertiserProfile />} />
-          <Route path="/tour-guide-profile" element={<TourGuideProfileComponent />} />
+          <Route
+            path="/create-historicalPlace"
+            element={
+              <ProtectedRoute allowedRoles={["tourism-governor"]}>
+                <CreateHpPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-product"
+            element={
+              <ProtectedRoute allowedRoles={["seller", "admin"]}>
+                <CreateProduct />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-itinerary"
+            element={
+              <ProtectedRoute allowedRoles={["tour-guide"]}>
+                <CreateItineraryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-activity"
+            element={
+              <ProtectedRoute allowedRoles={["advertiser"]}>
+                <CreateActivity />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller-profile"
+            element={
+              <ProtectedRoute allowedRoles={["seller"]}>
+                <SellerProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/advertiser-profile"
+            element={
+              <ProtectedRoute allowedRoles={["advertiser"]}>
+                <AdvertiserProfile />
+              </ProtectedRoute>
+            }
+          />
 
-
-          <Route path="/seller" element={<SellerList />} />
-          <Route path="/activity" element={<AllActivitiesComponent />} />
+          <Route
+            path="/activity"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+              >
+                <AllActivitiesComponent />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/historical-place/:id"
-            element={<HistoricalPlaceDetail />}
+            element={
+              <ProtectedRoute
+                allowedRoles={["tourism-governor", "guest", "tourist"]}
+              >
+                <HistoricalPlaceDetail />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/update-historical-place/:id"
-            element={<UpdatehistoricalPlace />}
+            element={
+              <ProtectedRoute allowedRoles={["tourism-governor"]}>
+                <UpdatehistoricalPlace />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="/all-itineraries"
-            element={<AllItinerariesComponent />}
+            element={
+              <ProtectedRoute allowedRoles={["tour-guide", "guest", "tourist"]}>
+                <AllItinerariesComponent />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/all-historical-places"
-            element={<AllHistoricalPlacesComponent />}
+            element={
+              <ProtectedRoute
+                allowedRoles={["tourism-governor", "guest", "tourist"]}
+              >
+                <AllHistoricalPlacesComponent />
+              </ProtectedRoute>
+            }
           />
           <Route path="/sign-up" element={<SignupForm />} />
-          <Route path="/admin" element={<Dashboard />} />
-          <Route path="/itinerary/:id" element={<ItineraryDetail />} />
-          <Route path="/all-products" element={<AllProducts />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/update-product/:id" element={<UpdateProduct />} />
-          <Route path="/update-itinerary/:id" element={<UpdateItinerary />} />
-          <Route path="/update-activity/:id" element={<UpdateActivity />} />
-          <Route path="/activity/:id" element={<ActivityDetail />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/itinerary/:id"
+            element={
+              <ProtectedRoute allowedRoles={["tour-guide", "guest", "tourist"]}>
+                <ItineraryDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/all-products"
+            element={
+              <ProtectedRoute
+                allowedRoles={["seller", "admin", "guest", "tourist"]}
+              >
+                <AllProducts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/product/:id"
+            element={
+              <ProtectedRoute
+                allowedRoles={["seller", "admin", "guest", "tourist"]}
+              >
+                <ProductDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/update-product/:id"
+            element={
+              <ProtectedRoute allowedRoles={["seller", "admin"]}>
+                <UpdateProduct />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/update-itinerary/:id"
+            element={
+              <ProtectedRoute allowedRoles={["tour-guide"]}>
+                <UpdateItinerary />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/update-activity/:id"
+            element={
+              <ProtectedRoute allowedRoles={["advertiser"]}>
+                <UpdateActivity />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activity/:id"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+              >
+                <ActivityDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-historical-tag"
+            element={
+              <ProtectedRoute allowedRoles={["tourism-governor"]}>
+
+                <CreateHtpage/>
+              </ProtectedRoute>
+            }
+          />
 
           {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
         </Routes>

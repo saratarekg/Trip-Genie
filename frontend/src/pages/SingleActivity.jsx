@@ -448,7 +448,7 @@ const ActivityDetail = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate("/activities")} variant="default">
+            <Button onClick={() => navigate("/activity")} variant="default">
               OK
             </Button>
           </DialogFooter>
