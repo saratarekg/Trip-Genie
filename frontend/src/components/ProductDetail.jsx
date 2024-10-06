@@ -115,7 +115,12 @@ const ProductDetail = () => {
 
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
+          if(data.seller===undefined){
+            setCanModify(true);
+          }
+          else{
           setCanModify(decodedToken.id === data.seller._id);
+          }
         }
       } catch (err) {
         setError("Error fetching product details. Please try again later.");
@@ -264,6 +269,7 @@ const ProductDetail = () => {
           </div>
 
           <div>
+            {userRole==="seller" &&(
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-bold">
@@ -301,6 +307,7 @@ const ProductDetail = () => {
                 </div>
               </CardContent>
             </Card>
+)}
 
             <div className="mt-8 space-y-4">
               {(userRole === "admin" ||

@@ -33,6 +33,7 @@ const getHistoricalPlace = async (req, res) => {
   try {
     const museum = await Museum.findById(req.params.id)
       .populate("historicalTag")
+      .populate("governor")
       .exec();
     res.status(200).json(museum);
   } catch (error) {
@@ -85,11 +86,9 @@ const updateHistoricalPlace = async (req, res) => {
   } = req.body; // Get details from request body
   const museum = await Museum.findById(id);
   if (museum.governor.toString() != res.locals.user_id) {
-    return res
-      .status(403)
-      .json({
-        message: "You are not authorized to edit this historical place",
-      });
+    return res.status(403).json({
+      message: "You are not authorized to edit this historical place",
+    });
   }
   try {
     // Find the product by ID and update its details
