@@ -10,6 +10,7 @@ import ActivityDetail from "./SingleActivity.jsx";
 import { Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { set } from "zod";
 
 const ActivityCard = ({ activity, onSelect }) => (
   <Card
@@ -74,6 +75,7 @@ export function AllActivitiesComponent() {
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
+  const [myActivities, setMyActivities] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -114,6 +116,9 @@ export function AllActivitiesComponent() {
     scrollToTop();
   }, [currentPage]);
   
+  useEffect(() => {
+    searchActivities();
+  }, [myActivities]);
   
   
   const scrollToTop = () => {
@@ -122,6 +127,12 @@ export function AllActivitiesComponent() {
   
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handlemyActivities = (attribute) => {
+    setIsLoading(true);
+    setMyActivities(attribute);
+    setIsLoading(false);
   };
   
 
@@ -191,6 +202,9 @@ export function AllActivitiesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/activities`);
+      if (myActivities) {
+        url.searchParams.append("myActivities", myActivities);
+      }
 
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
@@ -251,6 +265,7 @@ export function AllActivitiesComponent() {
     setSortOrder("");
     setMinStars(0);
     fetchActivities();
+    setMyActivities(false);
   };
 
   const toggleFilters = () => {
@@ -301,6 +316,8 @@ export function AllActivitiesComponent() {
                   searchActivites={searchActivities}
                   selectedCategories={selectedCategories}
                   setSelectedCategories={setSelectedCategories}
+                  myActivities={myActivities}
+                  handlemyActivities={handlemyActivities}
                 />
 
                 {activities.length > 0 ? (
