@@ -325,7 +325,7 @@ const ItineraryDetail = () => {
                         <div className="space-y-2">
                           <div className="flex items-center">
                             <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-                            <span className="text-sm">{activity.location}</span>
+                            <span className="text-sm">{activity.location.address}</span>
                           </div>
                           <div className="flex items-center">
                             <Clock className="w-4 h-4 mr-2 text-gray-500" />

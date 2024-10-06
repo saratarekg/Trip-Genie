@@ -159,7 +159,8 @@ export default function CreateHpForm() {
   };
 
   const handleCreateNew = () => {
-    setShowDialog(false);
+    setShowDialog(false)
+    window.location.reload();
   };
 
   const handlePictureChange = (event) => {
