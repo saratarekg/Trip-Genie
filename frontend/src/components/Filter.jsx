@@ -61,6 +61,20 @@ const FilterComponent = ({
     setDateRange({ ...dateRange, upper: newUpperDate });
   };
 
+  const getSelectedTypesLabel = () => {
+    if (!selectedTypes || selectedTypes.length === 0) {
+      return "Select Type(s)";
+    }
+    return selectedTypes.join(', ');
+  };
+
+  const getSelectedLanguagesLabel = () => {
+    if (!selectedLanguages || selectedLanguages.length === 0) {
+      return "Select Language(s)";
+    }
+    return selectedLanguages.join(', ');
+  }
+
   return (
     <>
       <div className="flex mb-4">
@@ -159,7 +173,7 @@ const FilterComponent = ({
                   onClick={() => setShowTypeDropdown(!showTypeDropdown)}
                   className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
                 >
-                  Select Type(s) <ChevronDown className={`ml-1 transform ${showTypeDropdown ? 'rotate-180' : ''}`} />
+                  {getSelectedTypesLabel()} <ChevronDown className={`ml-1 transform ${showTypeDropdown ? 'rotate-180' : ''}`} />
                 </button>
                 {showTypeDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
@@ -187,7 +201,7 @@ const FilterComponent = ({
                   onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
                   className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
                 >
-                  Select Language(s) <ChevronDown className={`ml-1 transform ${showLanguageDropdown ? 'rotate-180' : ''}`} />
+                  {getSelectedLanguagesLabel()} <ChevronDown className={`ml-1 transform ${showLanguageDropdown ? 'rotate-180' : ''}`} />
                 </button>
                 {showLanguageDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
