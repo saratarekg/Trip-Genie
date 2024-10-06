@@ -247,6 +247,15 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/create-historical-tag"
+            element={
+              <ProtectedRoute allowedRoles={["tourism-governor"]}>
+
+                <CreateHtPage/>
+              </ProtectedRoute>
+            }
+          />
 
           {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
         </Routes>
