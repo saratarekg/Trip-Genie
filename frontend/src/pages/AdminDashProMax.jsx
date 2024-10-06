@@ -1,16 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TabsContent, Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { BarChart, Users, Gift, Activity, UserCircle, Layers, ShoppingBag } from "lucide-react";
-import { Pie } from 'react-chartjs-2';
+import {
+  BarChart,
+  Users,
+  Gift,
+  Activity,
+  UserCircle,
+  Layers,
+  ShoppingBag,
+} from "lucide-react";
+import { Pie } from "react-chartjs-2";
 import { AdminGovernorPopup } from "@/components/admin-governor-popup";
 import { DeleteAccount } from "@/components/DeleteAccPopout";
 import { CategoryCRUD } from "@/components/category-crud";
+import { TagCRUD } from "@/components/tags-crud";
 import { Dialog } from "@/components/ui/dialog";
-import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 
 Chart.register(ArcElement, Tooltip, Legend);
 
@@ -32,8 +41,27 @@ const DashboardCard = ({ title, value, subtitle, icon }) => (
 
 export function Dashboard() {
   const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
-  const [isAdminGovernorPopupOpen, setIsAdminGovernorPopupOpen] = useState(false);
+  const [isAdminGovernorPopupOpen, setIsAdminGovernorPopupOpen] =
+    useState(false);
   const [isCategoryCRUDOpen, setIsCategoryCRUDOpen] = useState(false);
+  const [isTagCRUDOpen, setIsTagCRUDOpen] = useState(false);
+  const [footerHeight, setFooterHeight] = useState(0);
+
+  useEffect(() => {
+    const footer = document.querySelector("footer");
+    if (footer) {
+      setFooterHeight(footer.offsetHeight);
+    }
+
+    const handleResize = () => {
+      if (footer) {
+        setFooterHeight(footer.offsetHeight);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const dashboardData = [
     {
@@ -64,34 +92,36 @@ export function Dashboard() {
 
   // Data for the pie charts with updated color palette
   const pieData1 = {
-    labels: ['Revenue', 'Expenses', 'Profit'],
+    labels: ["Revenue", "Expenses", "Profit"],
     datasets: [
       {
-        label: 'Financial Overview',
+        label: "Financial Overview",
         data: [30000, 10000, 5000],
-        backgroundColor: ['#808080', '#FF8C00', '#003366'], // grey, orange, dark blue
-        hoverBackgroundColor: ['#A9A9A9', '#FFA500', '#004080'], // hover colors
+        backgroundColor: ["#808080", "#FF8C00", "#003366"],
+        hoverBackgroundColor: ["#A9A9A9", "#FFA500", "#004080"],
       },
     ],
   };
 
   const pieData2 = {
-    labels: ['Subscriptions', 'Sales', 'New Users'],
+    labels: ["Subscriptions", "Sales", "New Users"],
     datasets: [
       {
-        label: 'User Metrics',
+        label: "User Metrics",
         data: [2350, 1234, 573],
-        backgroundColor: ['#808080', '#FF8C00', '#003366'], // grey, orange, dark blue
-        hoverBackgroundColor: ['#A9A9A9', '#FFA500', '#004080'], // hover colors
+        backgroundColor: ["#808080", "#FF8C00", "#003366"],
+        hoverBackgroundColor: ["#A9A9A9", "#FFA500", "#004080"],
       },
     ],
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <main className="flex-1 p-6">
-        <br /><br /><br />
-        <p className="text-3xl font-bold mb-6 text-[#003f66]" >
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <main className="flex-1 p-6 overflow-y-auto">
+        <br />
+        <br />
+        <br />
+        <p className="text-3xl font-bold mb-6 text-[#003f66]">
           Welcome to your Dashboard Genie!
         </p>
         <Tabs defaultValue="accounts" className="space-y-6">
@@ -139,7 +169,7 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button 
+                  <Button
                     className="w-full bg-[#ED8936] hover:bg-[#003f66]"
                     onClick={() => setIsDeleteAccountOpen(true)}
                   >
@@ -154,7 +184,7 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button 
+                  <Button
                     className="w-full bg-[#ED8936] hover:bg-[#003f66]"
                     onClick={() => setIsAdminGovernorPopupOpen(true)}
                   >
@@ -173,7 +203,7 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button 
+                  <Button
                     className="w-full bg-[#ED8936] hover:bg-[#003f66]"
                     onClick={() => setIsCategoryCRUDOpen(true)}
                   >
@@ -188,9 +218,9 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button 
+                  <Button
                     className="w-full bg-[#ED8936] hover:bg-[#003f66]"
-                    onClick={() => setIsCategoryCRUDOpen(true)}
+                    onClick={() => setIsTagCRUDOpen(true)}
                   >
                     Manage
                   </Button>
@@ -219,24 +249,20 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button 
-                    className="w-full bg-[#ED8936] hover:bg-[#003f66]"
-                    onClick={() => setIsCategoryCRUDOpen(true)}
-                  >
-                    Create 
+                  <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
+                    Create
                   </Button>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
         </Tabs>
-<hr></hr>
-<hr></hr>
-<hr></hr>
-<hr></hr>
-        {/* Add Pie Charts */}
-        <div className="mt-10 grid gap-4 md:grid-cols-2 mb-20"> {/* Ensure enough space at the bottom */}
-          <Card className="bg-white border-[#808080] border" style={{ width: '400px', height: '250px' }}>
+        <hr className="my-6" />
+        <div className="flex flex-col md:flex-row justify-evenly flex-wrap">
+          <Card
+            className="bg-white border-[#808080] border mx-2 my-2"
+            style={{ width: "90%", maxWidth: "400px", height: "250px" }}
+          >
             <CardHeader>
               <CardTitle className="text-sm font-medium text-[#003f66]">
                 Financial Overview
@@ -246,7 +272,11 @@ export function Dashboard() {
               <Pie data={pieData1} options={{ maintainAspectRatio: false }} />
             </CardContent>
           </Card>
-          <Card className="bg-white border-[#808080] border" style={{ width: '400px', height: '250px' }}>
+
+          <Card
+            className="bg-white border-[#808080] border mx-2 my-2"
+            style={{ width: "90%", maxWidth: "400px", height: "250px" }}
+          >
             <CardHeader>
               <CardTitle className="text-sm font-medium text-[#003f66]">
                 User Metrics
@@ -257,22 +287,30 @@ export function Dashboard() {
             </CardContent>
           </Card>
         </div>
-
       </main>
 
       {isDeleteAccountOpen && (
         <DeleteAccount onClose={() => setIsDeleteAccountOpen(false)} />
       )}
-      <Dialog open={isAdminGovernorPopupOpen} onOpenChange={setIsAdminGovernorPopupOpen}>
-        <AdminGovernorPopup 
-          isOpen={isAdminGovernorPopupOpen} 
-          onClose={() => setIsAdminGovernorPopupOpen(false)} 
+      <Dialog
+        open={isAdminGovernorPopupOpen}
+        onOpenChange={setIsAdminGovernorPopupOpen}
+      >
+        <AdminGovernorPopup
+          isOpen={isAdminGovernorPopupOpen}
+          onClose={() => setIsAdminGovernorPopupOpen(false)}
         />
       </Dialog>
       <Dialog open={isCategoryCRUDOpen} onOpenChange={setIsCategoryCRUDOpen}>
-        <CategoryCRUD 
-          isOpen={isCategoryCRUDOpen} 
-        
+        <CategoryCRUD
+          isOpen={isCategoryCRUDOpen}
+          onClose={() => setIsCategoryCRUDOpen(false)}
+        />
+      </Dialog>
+      <Dialog open={isTagCRUDOpen} onOpenChange={setIsTagCRUDOpen}>
+        <TagCRUD
+          isOpen={isTagCRUDOpen}
+          onClose={() => setIsTagCRUDOpen(false)}
         />
       </Dialog>
     </div>

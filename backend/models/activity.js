@@ -260,7 +260,12 @@ activitySchema.statics.filter = async function (
 
   if (category) {
     // Find the category by name and get its ObjectId
-    const activityList = await Activity.findByCategoryNames(category);
+   
+    const categoryArray = Array.isArray(category)
+      ? category
+      : category.split(","); // Ensure it's an array
+
+    const activityList = await this.findByCategoryNames(categoryArray);
     const activityIds = activityList.map((activity) => activity._id);
     query.push({ ["_id"]: { $in: activityIds } });
   }

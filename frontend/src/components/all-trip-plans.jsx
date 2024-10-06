@@ -68,6 +68,7 @@ export function AllItinerariesComponent() {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     fetchItineraries();
     setIsLoading(false);
   }, []);
@@ -92,15 +93,15 @@ export function AllItinerariesComponent() {
         console.error("Error fetching Languages:", error);
       }
     };
-    setIsLoading(false);
     fetchLanguages();
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     // Fetch types from the backend
     const fetchType = async () => {
       try {
-        setIsLoading(false);
         const response = await axios.get('http://localhost:4000/api/getAllTypes');
         setTypesOptions(response.data);
       } catch (error) {
@@ -112,12 +113,14 @@ export function AllItinerariesComponent() {
   }, []);
 
   useEffect(() => {
+    setIsLoading(false);
     const delayDebounceFn = setTimeout(() => {
       if (searchTerm) {
         searchItineraries();
       } else {
         fetchItineraries();
       }
+      setIsLoading(false);
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
@@ -130,9 +133,9 @@ export function AllItinerariesComponent() {
   }, [sortBy, sortOrder]);
 
   useEffect(() => {
-
+    setIsLoading(true);
       searchItineraries();
-    
+      setIsLoading(false);
   }, [myItineraries]);
 
   const handleSort = (attribute) => {
@@ -142,6 +145,23 @@ export function AllItinerariesComponent() {
     setSortBy(attribute); 
     setIsLoading(false);
   };
+
+  
+  useEffect(() => {
+    scrollToTop();
+}, [currentPage]);
+
+
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+  const handlePageChange = (pageNumber) => {
+    setIsLoading(true);
+    setCurrentPage(pageNumber);
+    setIsLoading(false);
+};
   const handlemyItineraries = (attribute) => {
     setIsLoading(true);
     setmyItineraries(attribute); 
@@ -149,7 +169,7 @@ export function AllItinerariesComponent() {
   };
   const fetchItineraries = async () => {
     try {
-      setIsLoading(false);
+      setIsLoading(true);
       const token = Cookies.get('jwt');
       const role = getUserRole();
       const url =  new URL(`http://localhost:4000/${role}/itineraries`);
@@ -171,12 +191,13 @@ export function AllItinerariesComponent() {
       setItineraries(data);
       setError(null);
       setCurrentPage(1);
-      setIsLoading(false);
+      
     } catch (error) {
       console.error("Error fetching itineraries:", error);
       setError("Error fetching itineraries");
       setItineraries([]);
     }
+    setIsLoading(false);
   };
   const clearFilters = () => {
     // Reset all filter states to initial values
@@ -330,6 +351,7 @@ export function AllItinerariesComponent() {
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* {setIsLoading(true)} */}
                 {itineraries
                   .slice(
                     (currentPage - 1) * tripsPerPage,
@@ -341,44 +363,41 @@ export function AllItinerariesComponent() {
                       itinerary={itinerary}
                       onSelect={handleItinerarySelect}
                     />
-                  ))}
+                    
+                  ))} 
               </div>
 
-              {/* Pagination */}
-              <div className="mt-8 flex justify-center items-center space-x-4">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                    }`}
-                >
-                  <ChevronLeft />
-                </button>
+                  {/* Pagination Component here */}
+                  <div className="mt-8 flex justify-center items-center space-x-4">
+                        <button
+                            onClick={() => {
+                                handlePageChange(currentPage - 1);
+                            }}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"}`}
+                        >
+                            <ChevronLeft />
+                        </button>
 
-              
+                        {/* Page X of Y */}
+                        <span className="text-lg font-medium">
+                        {/* {setIsLoading(false)} */}
+                            {itineraries.length > 0
+                                ? `Page ${currentPage} of ${Math.ceil(itineraries.length / tripsPerPage)}`
+                                : "No pages available"}
+                                
+                        </span>
 
-                {/* Page X of Y */}
-                <span className="text-lg font-medium">
-                  Page {currentPage} of {Math.ceil(itineraries.length / tripsPerPage)}
-                </span>
-
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(prev + 1, Math.ceil(itineraries.length / tripsPerPage))
-                    )
-                  }
-                  disabled={
-                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                  }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                    ? "text-gray-300"
-                    : "text-blue-600"
-                    }`}
-                >
-                  <ChevronRight />
-                </button>
-              </div>
+                        <button
+                            onClick={() => {
+                                handlePageChange(currentPage + 1);
+                            }}
+                            disabled={currentPage === Math.ceil(itineraries.length / tripsPerPage) || itineraries.length === 0}
+                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage) ? "text-gray-300" : "text-blue-600"}`}
+                        >
+                            <ChevronRight />
+                        </button>
+                    </div>
 
             </>
           </div>

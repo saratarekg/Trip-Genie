@@ -111,6 +111,21 @@ export function AllActivitiesComponent() {
   }, [searchTerm]);
 
   useEffect(() => {
+    scrollToTop();
+  }, [currentPage]);
+  
+  
+  
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+  
+
+  useEffect(() => {
     // Fetch activities
     fetchActivities();
   
@@ -191,7 +206,7 @@ export function AllActivitiesComponent() {
         url.searchParams.append("startDate", dateRange.start);
       }
       if (selectedCategories.length > 0) {
-        url.searchParams.append("categories", selectedCategories.join(","));
+        url.searchParams.append("category", selectedCategories.map((c) => c.name).join(","));
       }
       if (minStars) {
         url.searchParams.append("minRating", minStars);
@@ -282,8 +297,10 @@ export function AllActivitiesComponent() {
                   setDateRange={setDateRange}
                   minStars={minStars}
                   setMinStars={setMinStars}
-                  categoryOptions={categoryOptions}
+                  categoriesOptions={categoryOptions}
                   searchActivites={searchActivities}
+                  selectedCategories={selectedCategories}
+                  setSelectedCategories={setSelectedCategories}
                 />
 
                 {activities.length > 0 ? (
@@ -308,40 +325,36 @@ export function AllActivitiesComponent() {
                 )}
 
                  {/* Pagination Section */}
-            <div className="mt-8 flex justify-center items-center space-x-4">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-full bg-white shadow ${
-                  currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                }`}
-              >
-                <ChevronLeft />
-              </button>
+           {/* Pagination Component here */}
+           <div className="mt-8 flex justify-center items-center space-x-4">
+                        <button
+                            onClick={() => {
+                                handlePageChange(currentPage - 1);
+                            }}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"}`}
+                        >
+                            <ChevronLeft />
+                        </button>
 
-              {/* Page X of Y */}
-              <span className="text-lg font-medium">
-                Page {currentPage} of {Math.ceil(activities.length / activitiesPerPage)}
-              </span>
+                        {/* Page X of Y */}
+                        <span className="text-lg font-medium">
+                            {activities.length > 0
+                                ? `Page ${currentPage} of ${Math.ceil(activities.length / activitiesPerPage)}`
+                                : "No pages available"}
+                        </span>
 
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(prev + 1, Math.ceil(activities.length / activitiesPerPage))
-                  )
-                }
-                disabled={
-                  currentPage === Math.ceil(activities.length / activitiesPerPage)
-                }
-                className={`px-4 py-2 rounded-full bg-white shadow ${
-                  currentPage === Math.ceil(activities.length / activitiesPerPage)
-                    ? "text-gray-300"
-                    : "text-blue-600"
-                }`}
-              >
-                <ChevronRight />
-              </button>
-            </div>
+                        <button
+                            onClick={() => {
+                                handlePageChange(currentPage + 1);
+                            }}
+                            disabled={currentPage === Math.ceil(activities.length / activitiesPerPage) || activities.length === 0}
+                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(activities.length / activitiesPerPage) ? "text-gray-300" : "text-blue-600"}`}
+                        >
+                            <ChevronRight />
+                        </button>
+                    </div>
+
           </div>
         </>
       </div>

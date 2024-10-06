@@ -64,6 +64,7 @@ export function AllProducts() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [myProducts, setmyProducts] = useState(false);
+  
 
   const navigate = useNavigate();
 
@@ -74,6 +75,7 @@ export function AllProducts() {
   };
 
   useEffect(() => {
+    setIsLoading(true);
     fetchProducts();
     setIsLoading(false);
   }, []);
@@ -85,14 +87,29 @@ export function AllProducts() {
   };
 
   useEffect(() => {
-
+    setIsLoading(true);
     searchProducts();
   
-
+    setIsLoading(false);
 }, [myProducts]);
+
+useEffect(() => {
+  scrollToTop();
+}, [currentPage]);
+
+
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const handlePageChange = (pageNumber) => {
+  setCurrentPage(pageNumber);
+};
 
   const searchProducts = async () => {
     try {
+      setIsLoading(true);
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/products`);
 
@@ -131,6 +148,7 @@ export function AllProducts() {
       setProducts(data);
       setError(null);
       setCurrentPage(1);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
@@ -138,65 +156,8 @@ export function AllProducts() {
     }
   };
 
-    const searchItineraries = async () => {
-    try {
-      const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/itineraries`);
-   
-      // Add the search term and filter parameters
-      if(myItineraries){
-        url.searchParams.append("myItineraries", myItineraries);
-      }
-      if (searchTerm) {
-        url.searchParams.append("searchBy", searchTerm);
-      }
-      if (price && price !== "") {
-        url.searchParams.append("budget", price);
-      }
+ 
 
-      if (dateRange.upper) {
-        url.searchParams.append("upperDate", dateRange.upper);
-      }
-      if (dateRange.lower) {
-        url.searchParams.append("lowerDate", dateRange.lower);
-      }
-      if (selectedTypes.length > 0) {
-        url.searchParams.append("types", selectedTypes.join(",")); // Send selected types as comma-separated
-      }
-      if (selectedLanguages.length > 0) {
-        url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
-      }
-
-      // Add sorting parameters
-      if (sortBy) {
-        url.searchParams.append("sort", sortBy);
-      }
-      if (sortOrder) {
-        url.searchParams.append("asc", sortOrder);
-      }
-      const token = Cookies.get("jwt");
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      setItineraries(data);
-      setError(null);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Error fetching filtered results:", error);
-      setError("Error fetching filtered results");
-      setItineraries([]);
-    }
-  };
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -211,9 +172,11 @@ export function AllProducts() {
   }, [searchTerm]);
 
   useEffect(() => {
+    setIsLoading(true);
     if (sortBy) {
       searchProducts();
     }
+    setIsLoading(false);
   }, [sortBy, sortOrder]);
 
   const handleSort = (attribute) => {
@@ -256,6 +219,7 @@ export function AllProducts() {
     }
   };
   const clearFilters = () => {
+    setIsLoading(true);
     // Reset all filter states to initial values
     setSearchTerm("");
     setPrice("");
@@ -265,10 +229,11 @@ export function AllProducts() {
 
     // Fetch products without any filters
     fetchProducts();
+    setIsLoading(false);
   };
 
   const toggleFilters = () => {
-    setIsLoading(false);
+    setIsLoading(true);
     setFiltersVisible(!filtersVisible);
     setIsLoading(false);
   };
@@ -334,40 +299,36 @@ export function AllProducts() {
                   ))}
               </div>
 
+              {/* Pagination Component here */}
               <div className="mt-8 flex justify-center items-center space-x-4">
-                <button
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                    }`}
-                >
-                  <ChevronLeft />
-                </button>
+                        <button
+                            onClick={() => {
+                                handlePageChange(currentPage - 1);
+                            }}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"}`}
+                        >
+                            <ChevronLeft />
+                        </button>
 
-              
+                        {/* Page X of Y */}
+                        <span className="text-lg font-medium">
+                            {products.length > 0
+                                ? `Page ${currentPage} of ${Math.ceil(products.length / tripsPerPage)}`
+                                : "No pages available"}
+                        </span>
 
-                {/* Page X of Y */}
-                <span className="text-lg font-medium">
-                  Page {currentPage} of {Math.ceil(products.length / tripsPerPage)}
-                </span>
+                        <button
+                            onClick={() => {
+                                handlePageChange(currentPage + 1);
+                            }}
+                            disabled={currentPage === Math.ceil(products.length / tripsPerPage) || products.length === 0}
+                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(products.length / tripsPerPage) ? "text-gray-300" : "text-blue-600"}`}
+                        >
+                            <ChevronRight />
+                        </button>
+                    </div>
 
-                <button
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(prev + 1, Math.ceil(products.length / tripsPerPage))
-                    )
-                  }
-                  disabled={
-                    currentPage === Math.ceil(products.length / tripsPerPage)
-                  }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(products.length / tripsPerPage)
-                    ? "text-gray-300"
-                    : "text-blue-600"
-                    }`}
-                >
-                  <ChevronRight />
-                </button>
-              </div>
 
             </>
           </div>

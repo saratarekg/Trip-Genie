@@ -5,11 +5,14 @@ const Product = require('../models/product');
 // Update
 const updateSeller = async (req, res) => {
     try {
+        console.log("hiixxx")
+
         const seller1 = await Seller.findById(req.params.id);
+        console.log("hii",seller1.isAccepted)
+
         if(!seller1.isAccepted){
             return res.status(400).json({ error: 'Seller is not accepted yet, Can not update profile' });
         }
-        
         const { email, username, name, description} = req.body;
         const seller = await Seller.findByIdAndUpdate(req.params.id, { email, username, name, description}, { new: true });
 
