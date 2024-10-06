@@ -317,6 +317,8 @@ export function AllActivitiesComponent() {
                   searchActivites={searchActivities}
                   selectedCategories={selectedCategories}
                   setSelectedCategories={setSelectedCategories}
+                  myActivities={myActivities}
+                  handlemyActivities={handlemyActivities}
                 />
 
                 {activities.length > 0 ? (
