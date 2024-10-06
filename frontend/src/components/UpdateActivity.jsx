@@ -1,18 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
-import { ChevronLeft, Trash, Plus, Check } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import { ChevronLeft, Trash, Plus, Check } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
-    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
+    <svg
+      className="spinner"
+      width="65px"
+      height="65px"
+      viewBox="0 0 66 66"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        className="path"
+        fill="none"
+        strokeWidth="6"
+        strokeLinecap="round"
+        cx="33"
+        cy="33"
+        r="30"
+      ></circle>
     </svg>
   </div>
 );
@@ -20,17 +41,17 @@ const LoadingSpinner = () => (
 export default function UpdateActivity() {
   const { id } = useParams();
   const [activity, setActivity] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     price: 0,
-    location: '',
-    duration: '',
+    location: "",
+    duration: "",
     isPopular: false,
     isAvailable: false,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const navigate = useNavigate();
 
@@ -38,21 +59,24 @@ export default function UpdateActivity() {
     const fetchActivityDetails = async () => {
       setLoading(true);
       try {
-        const token = Cookies.get('jwt');
-        const response = await fetch(`http://localhost:4000/${userRole}/activities/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/activities/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch activity data');
+          throw new Error("Failed to fetch activity data");
         }
 
         const activityData = await response.json();
         setActivity(activityData);
         setError(null);
       } catch (err) {
-        setError('Error fetching activity data. Please try again later.');
-        console.error('Error fetching activity data:', err);
+        setError("Error fetching activity data. Please try again later.");
+        console.error("Error fetching activity data:", err);
       } finally {
         setLoading(false);
       }
@@ -73,24 +97,27 @@ export default function UpdateActivity() {
   const handleUpdate = async () => {
     setLoading(true);
     try {
-      const token = Cookies.get('jwt');
-      const response = await fetch(`http://localhost:4000/${userRole}/activities/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(activity),
-      });
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/activities/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(activity),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to update activity');
+        throw new Error("Failed to update activity");
       }
 
       setShowSuccessPopup(true);
     } catch (err) {
-      setError('Error updating activity. Please try again later.');
-      console.error('Error updating activity:', err);
+      setError("Error updating activity. Please try again later.");
+      console.error("Error updating activity:", err);
     } finally {
       setLoading(false);
     }
@@ -103,7 +130,10 @@ export default function UpdateActivity() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <strong className="font-bold">Error!</strong>
           <span className="block sm:inline"> {error}</span>
         </div>
@@ -168,7 +198,7 @@ export default function UpdateActivity() {
                 <Switch
                   id="isPopular"
                   checked={activity.isPopular}
-                  onCheckedChange={() => handleSwitchChange('isPopular')}
+                  onCheckedChange={() => handleSwitchChange("isPopular")}
                 />
                 <Label htmlFor="isPopular">Popular Activity</Label>
               </div>
@@ -176,14 +206,17 @@ export default function UpdateActivity() {
                 <Switch
                   id="isAvailable"
                   checked={activity.isAvailable}
-                  onCheckedChange={() => handleSwitchChange('isAvailable')}
+                  onCheckedChange={() => handleSwitchChange("isAvailable")}
                 />
                 <Label htmlFor="isAvailable">Availability</Label>
               </div>
             </div>
 
             <div className="mt-8 flex justify-between">
-              <Button variant="outline" onClick={() => navigate(`/activity/${id}`)}>
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/activity/${id}`)}
+              >
                 <ChevronLeft className="mr-2 h-4 w-4" /> Back
               </Button>
               <Button variant="default" onClick={handleUpdate}>
@@ -206,7 +239,7 @@ export default function UpdateActivity() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate('/all-activities')}>
+            <Button onClick={() => navigate("/activity")}>
               Back to All Activities
             </Button>
           </DialogFooter>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import Map from '../components/Map';
-
+import Map from "../components/Map";
+import * as jwtDecode from "jwt-decode";
 import {
   XCircle,
   CheckCircle,
@@ -43,8 +43,8 @@ const ActivityDetail = () => {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [advertiserProfile, setAdvertiserProfile] = useState(null);
-        
-  
+  const [canModify, setCanModify] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,7 +59,7 @@ const ActivityDetail = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
-          `http://localhost:4000/${userRole}/activity/${id}`,
+          `http://localhost:4000/${userRole}/activities/${id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -77,6 +77,10 @@ const ActivityDetail = () => {
 
         if (data.advertiser) {
           setAdvertiserProfile(data.advertiser);
+        }
+        if (token) {
+          const decodedToken = jwtDecode.jwtDecode(token);
+          setCanModify(decodedToken.id === data.advertiser._id);
         }
       } catch (err) {
         setError("Error fetching activity details. Please try again later.");
@@ -147,7 +151,6 @@ const ActivityDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-
       <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
@@ -176,10 +179,16 @@ const ActivityDetail = () => {
                   <span className="text-gray-700">
                     Location: {activity.location.address}
                   </span>
-
                 </div>
                 {/* should be replaced with activity position */}
-                <Map position={ [activity.location.coordinates.longitude, activity.location.coordinates.latitude] } height={'200px'} width={'200px'} />
+                <Map
+                  position={[
+                    activity.location.coordinates.longitude,
+                    activity.location.coordinates.latitude,
+                  ]}
+                  height={"200px"}
+                  width={"200px"}
+                />
 
                 <div className="flex items-center">
                   <DollarSign className="w-6 h-6 mr-2 text-orange-500" />
@@ -290,22 +299,24 @@ const ActivityDetail = () => {
             </div>
           </div>
 
-
           <div className="p-6 border-t border-gray-200">
-          <div className="flex justify-end mt-8"> {/* Changed justify-between to justify-end */}
-  <div className="flex space-x-2">
-    <Button onClick={handleUpdate} variant="default">
-      <Edit className="mr-2" /> Update
-    </Button>
-    <Button
-      onClick={() => setShowDeleteConfirm(true)}
-      variant="destructive"
-    >
-      <Trash2 className="mr-2" /> Delete
-    </Button>
-  </div>
-</div>
-
+            <div className="flex justify-end mt-8">
+              {" "}
+              {/* Changed justify-between to justify-end */}
+              {canModify && (
+                <div className="flex space-x-2">
+                  <Button onClick={handleUpdate} variant="default">
+                    <Edit className="mr-2" /> Update
+                  </Button>
+                  <Button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    variant="destructive"
+                  >
+                    <Trash2 className="mr-2" /> Delete
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -344,10 +355,7 @@ const ActivityDetail = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              onClick={() => navigate("/all-activities")}
-              variant="default"
-            >
+            <Button onClick={() => navigate("/activities")} variant="default">
               OK
             </Button>
           </DialogFooter>
