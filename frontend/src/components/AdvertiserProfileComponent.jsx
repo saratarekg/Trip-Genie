@@ -58,6 +58,7 @@ export function AdvertiserProfileComponent() {
     const validateFields = () => {
         const { email, username, name, hotline, website } = editedAdvertiser;
         const messages = {};
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const hotlineRegex = /^\d+$/;
 
@@ -110,11 +111,31 @@ export function AdvertiserProfileComponent() {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setAdvertiser(response.data.advertiser);
-            setIsEditing(false);
-            setError(""); // Clear previous errors
+   
+
+            if(response.statusText==="OK"){
+
+                setAdvertiser(response.data.advertiser);
+                setIsEditing(false);
+                setError(""); // Clear previous errors
+            }
+           
         } catch (err) {
-            setError(err.message);
+            if(err.response.data.message ==="Email already exists" ){
+                const email="Email already exists";
+                setValidationMessages({email});
+
+            }
+            else if(err.response.data.message ==="Username already exists"){
+                const username="Username already exists";
+                setValidationMessages({username});
+
+
+            }
+            else{
+                setError(err.message);
+
+            }
         }
     };
 

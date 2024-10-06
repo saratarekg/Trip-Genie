@@ -56,7 +56,14 @@ const updateAdvertiser = async (req, res) => {
           error: "Advertiser is not accepted yet, Can not update profile",
         });
     }
+
     const { email, username, name, description,hotline,website} = req.body;
+    if(username!==advertiser1.username && await Advertiser.findOne({username})){
+     return res.status(400).json({message:"Username already exists"});
+    }
+    if(email!==advertiser1.email && await Advertiser.findOne({email}) ){
+      return res.status(400).json({message:"Email already exists"});
+     }
     const advertiser = await Advertiser.findByIdAndUpdate(
       res.locals.user_id,
       { email, username, name, description,hotline,website},

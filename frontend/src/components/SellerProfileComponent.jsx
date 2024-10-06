@@ -82,7 +82,7 @@ export function SellerProfileComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
   
-      const api = `http://localhost:4000/${role}/${seller._id}`;
+      const api = `http://localhost:4000/${role}`;
       // Ensure description is either the user's input or an empty string
       const dataToUpdate = {
         ...editedSeller,
@@ -94,12 +94,29 @@ export function SellerProfileComponent() {
           Authorization: `Bearer ${token}`,
         },
       });
-      setSeller(response.data.seller);
-      setIsEditing(false);
-      setError(""); // Clear previous errors
-    } catch (err) {
-      setError(err.message);
+
+      if(response.statusText==="OK"){
+        setSeller(response.data.seller);
+        setIsEditing(false);
+        setError(""); // Clear previous errors
     }
+ 
+    } catch (err) {
+        if(err.response.data.message ==="Email already exists" ){
+            const email="Email already exists";
+            setValidationMessages({email});
+
+        }
+        else if(err.response.data.message ==="Username already exists"){
+            const username="Username already exists";
+            setValidationMessages({username});
+
+
+        }
+        else{
+            setError(err.message);
+
+        }    }
   };
   
 
