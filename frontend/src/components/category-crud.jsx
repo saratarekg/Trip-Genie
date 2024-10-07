@@ -10,15 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 export function CategoryCRUD({ isOpen, onClose }) {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
-  const [oldCategory, setOldCategory] = useState('');
   const [updatedCategory, setUpdatedCategory] = useState('');
-  const [showCreateCategory, setShowCreateCategory] = useState(false);
-  const [showUpdateCategory, setShowUpdateCategory] = useState(false);
-  const [showDeleteCategory, setShowDeleteCategory] = useState(false);
-  const [buttonsVisible, setButtonsVisible] = useState(true);
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
   const [message, setMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -54,7 +50,6 @@ export function CategoryCRUD({ isOpen, onClose }) {
         setNewCategory('');
         setSuccessMessage('Category created successfully!');
         fetchCategories();
-        resetButtons();
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
         setMessage('Error creating category');
@@ -64,241 +59,111 @@ export function CategoryCRUD({ isOpen, onClose }) {
     }
   };
 
-  const updateCategory = async () => {
+  const handleUpdateCategory = async () => {
     setMessage('');
-    if (oldCategory && updatedCategory) {
+    if (updatedCategory) {
       try {
         const token = Cookies.get('jwt');
-        const url = `http://localhost:4000/admin/categoriesName?name=${oldCategory}`;
-        const response = await axios.get(url, {
+        await axios.put(`http://localhost:4000/admin/categories/${selectedCategoryId}`, 
+        { name: updatedCategory }, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        const category = response.data;
-
-        if (category && category._id) {
-          await axios.put(`http://localhost:4000/admin/categories/${category._id}`, 
-          { name: updatedCategory }, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          setOldCategory('');
-          setUpdatedCategory('');
-          setSuccessMessage('Category updated successfully!');
-          fetchCategories();
-          resetButtons();
-          setTimeout(() => setSuccessMessage(''), 3000);
-        } else {
-          setMessage('Category not found.');
-        }
+        setUpdatedCategory('');
+        setSuccessMessage('Category updated successfully!');
+        fetchCategories();
+        setShowEditModal(false);
+        setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
         setMessage('Error updating category');
       }
     } else {
-      setMessage('Please provide old and new category names.');
+      setMessage('Please enter a new category name.');
     }
   };
 
-  const deleteCategory = async () => {
+  const deleteCategory = async (categoryId) => {
     setMessage('');
-    if (oldCategory) {
-      try {
-        const token = Cookies.get('jwt');
-        const url = `http://localhost:4000/admin/categoriesName?name=${oldCategory}`;
-        const response = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const category = response.data;
-
-        if (category && category._id) {
-          await axios.delete(`http://localhost:4000/admin/categories/${category._id}`,  {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          setOldCategory('');
-          setSuccessMessage('Category deleted successfully!');
-          fetchCategories();
-          resetButtons();
-          setTimeout(() => setSuccessMessage(''), 3000);
-        } else {
-          setMessage('Category not found.');
-        }
-      } catch (error) {
-        setMessage('Error deleting category');
-      }
-    } else {
-      setMessage('Please enter the category name you want to delete');
+    try {
+      const token = Cookies.get('jwt');
+      await axios.delete(`http://localhost:4000/admin/categories/${categoryId}`,  {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSuccessMessage('Category deleted successfully!');
+      fetchCategories();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error deleting category');
     }
   };
 
-  const resetButtons = () => {
-    setShowCreateCategory(false);
-    setShowUpdateCategory(false);
-    setShowDeleteCategory(false);
-    setButtonsVisible(true);
-    setMessage('');
-  };
-
-  const handleGetCategories = async () => {
-    await fetchCategories();
-    setIsCategoriesModalOpen(true); // Open categories popout
-  };
-
-  const handleButtonClick = () => {
-    setSuccessMessage('');
+  const handleEditClick = (categoryId, currentName) => {
+    setSelectedCategoryId(categoryId);
+    setUpdatedCategory(currentName);
+    setShowEditModal(true);
   };
 
   if (!isOpen) return null;
 
   return (
     <>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] p-6 bg-white shadow-lg rounded-lg">
         <DialogHeader>
-          <DialogTitle>Manage Categories</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Manage Categories</DialogTitle>
         </DialogHeader>
+
+        {/* Create Category */}
         <div className="space-y-4">
-          {showCreateCategory && (
-            <div>
-              <Input
-                type="text"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="Enter new category name"
-                className="mt-2"
-              />
-              <Button
-                onClick={() => {
-                  createCategory();
-                  handleButtonClick();
-                }}
-                className="w-full mt-2 bg-green-500 text-white"
-              >
-                Submit
-              </Button>
-              <Button
-                onClick={resetButtons}
-                className="w-full mt-2 bg-gray-500 text-white"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
+          <Input
+            type="text"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="Enter new category name"
+            className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <Button
+            onClick={createCategory}
+            className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150"
+          >
+            Create Category
+          </Button>
 
-          {buttonsVisible && (
-            <>
-              <Button
-                onClick={() => {
-                  setShowCreateCategory(true);
-                  setButtonsVisible(false);
-                  setMessage('');
-                  handleButtonClick();
-                }}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                Create Category
-              </Button>
+          {/* Categories List */}
+          <div className="mt-4 max-h-[350px] overflow-y-auto">
+            {categories.length > 0 ? (
+              <ul className="list-none p-0">
+                {categories.map((category) => (
+                  <li 
+                    key={category._id} 
+                    className="flex justify-between items-center text-gray-700 border border-gray-300 rounded-lg py-2 px-4 mb-1 hover:shadow-md transition"
+                  >
+                    <span>{category.name}</span>
+                    <div className="space-x-2">
+                      <Button
+                        onClick={() => handleEditClick(category._id, category.name)}
+                        className="bg-blue-500 text-white hover:bg-blue-600 transition duration-150"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => deleteCategory(category._id)}
+                        className="bg-red-500 text-white hover:bg-red-600 transition duration-150"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">No categories found.</p>
+            )}
+          </div>
 
-              <Button
-                onClick={handleGetCategories}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                Get Categories
-              </Button>
-
-              <Button
-                onClick={() => {
-                  setShowUpdateCategory(true);
-                  setButtonsVisible(false);
-                  setMessage('');
-                  handleButtonClick();
-                }}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                Update Category
-              </Button>
-
-              <Button
-                onClick={() => {
-                  setShowDeleteCategory(true);
-                  setButtonsVisible(false);
-                  setMessage('');
-                  handleButtonClick();
-                }}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                Delete Category
-              </Button>
-            </>
-          )}
-
-          {showUpdateCategory && (
-            <div>
-              <Input
-                type="text"
-                value={oldCategory}
-                onChange={(e) => setOldCategory(e.target.value)}
-                placeholder="Old category name"
-                className="mt-2"
-              />
-              <Input
-                type="text"
-                value={updatedCategory}
-                onChange={(e) => setUpdatedCategory(e.target.value)}
-                placeholder="New category name"
-                className="mt-2"
-              />
-              <Button
-                onClick={() => {
-                  updateCategory();
-                  handleButtonClick();
-                }}
-                className="w-full mt-2 bg-green-500 text-white"
-              >
-                Submit
-              </Button>
-              <Button
-                onClick={resetButtons}
-                className="w-full mt-2 bg-gray-500 text-white"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
-
-          {showDeleteCategory && (
-            <div>
-              <Input
-                type="text"
-                value={oldCategory}
-                onChange={(e) => setOldCategory(e.target.value)}
-                placeholder="Category to delete"
-                className="mt-2"
-              />
-              <Button
-                onClick={() => {
-                  deleteCategory();
-                  handleButtonClick();
-                }}
-                className="w-full mt-2 bg-green-500 text-white"
-              >
-                Submit
-              </Button>
-              <Button
-                onClick={resetButtons}
-                className="w-full mt-2 bg-gray-500 text-white"
-              >
-                Cancel
-              </Button>
-            </div>
-          )}
-
+          {/* Message Display */}
           {message && (
             <div className="mt-4 p-2 bg-red-100 text-red-800 rounded">
               {message}
@@ -312,37 +177,33 @@ export function CategoryCRUD({ isOpen, onClose }) {
         </div>
       </DialogContent>
 
-      {/* Categories Modal Popout */}
-      <Dialog open={isCategoriesModalOpen} onOpenChange={setIsCategoriesModalOpen}>
-  <DialogContent className="sm:max-w-[425px]">
-    <DialogHeader>
-      <DialogTitle>Categories List</DialogTitle>
-    </DialogHeader>
-    <div className="mt-4 max-h-[350px] overflow-y-auto">
-      {categories.length > 0 ? (
-        <ul className="list-none p-0">
-          {categories.map((category) => (
-            <li 
-              key={category._id} 
-              className="text-gray-700 border border-black rounded-lg py-2 px-4 mb-1" 
-            >
-              {category.name}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No categories found.</p>
-      )}
-    </div>
-    <Button
-      onClick={() => setIsCategoriesModalOpen(false)}
-      className="w-full mt-4 bg-gray-500 text-white"
-    >
-      Close
-    </Button>
-  </DialogContent>
-</Dialog>
-
+      {/* Edit Category Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-[425px] p-6 bg-white shadow-lg rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">Edit Category</DialogTitle>
+          </DialogHeader>
+          <Input
+            type="text"
+            value={updatedCategory}
+            onChange={(e) => setUpdatedCategory(e.target.value)}
+            placeholder="New category name"
+            className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <Button
+            onClick={handleUpdateCategory}
+            className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150"
+          >
+            Save Changes
+          </Button>
+          <Button
+            onClick={() => setShowEditModal(false)}
+            className="w-full mt-2 bg-gray-500 text-white hover:bg-gray-600 transition duration-150"
+          >
+            Cancel
+          </Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
