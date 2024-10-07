@@ -502,7 +502,7 @@ export default function CreateActivity() {
           </DialogHeader>
           <DialogFooter>
             <Button onClick={handleGoBack}>Go to All Activities</Button>
-            <Button onClick={handleCreateNew}>Create New Activity</Button>
+            <Button variant = "outline" onClick={handleCreateNew}>Create New Activity</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
