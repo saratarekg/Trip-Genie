@@ -1,7 +1,13 @@
 const TourGuide = require("../models/tourGuide");
+const Tourist = require("../models/tourist");
+const Advertiser = require("../models/advertiser");
+const Seller = require("../models/seller");
+const Admin = require("../models/admin");
+const TourismGovernor = require("../models/tourismGovernor");
 const Nationality = require("../models/nationality");
 const mongoose = require("mongoose");
 const Itinerary = require("../models/itinerary"); // Adjust the path as needed
+const authController = require("./authController");
 
 const { deleteItinerary } = require("./itineraryController");
 
@@ -78,13 +84,10 @@ const updateTourGuideProfile = async (req, res) => {
 
     const nat = await Nationality.findOne({ _id: nationality });
 
-    if (
-      username !== tourGuide1.username &&
-      (await TourGuide.findOne({ username }))
-    ) {
+    if (username !== tourGuide1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
     }
-    if (email !== tourGuide1.email && (await TourGuide.findOne({ email }))) {
+    if (email !== tourGuide1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
     }
     // Find the TourGuide by their ID and update with new data
@@ -112,7 +115,6 @@ const updateTourGuideProfile = async (req, res) => {
       .status(200)
       .json({ message: "Profile updated successfully", tourGuide });
   } catch (error) {
-    console.log("AMY");
     res.status(500).json({ error: error.message });
   }
 };
@@ -150,6 +152,38 @@ const deleteTourGuideAccount = async (req, res) => {
     res.status(201).json({ message: "TourGuide deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+const emailExists = async (email) => {
+  if (await Tourist.findOne({ email })) {
+    return true;
+  } else if (await TourGuide.findOne({ email })) {
+    return true;
+  } else if (await Advertiser.findOne({ email })) {
+    return true;
+  } else if (await Seller.findOne({ email })) {
+    return true;
+  } else {
+    console.log("email does not exist");
+    return false;
+  }
+};
+
+const usernameExists = async (username) => {
+  if (
+    (await Tourist.findOne({ username })) ||
+    (await TourGuide.findOne({ username })) ||
+    (await Advertiser.findOne({ username })) ||
+    (await Seller.findOne({ username })) ||
+    (await Admin.findOne({ username })) ||
+    (await TourismGovernor.findOne({ username }))
+  ) {
+    console.log("username exists");
+    return true;
+  } else {
+    console.log("username does not exist");
+    return false;
   }
 };
 

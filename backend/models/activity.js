@@ -28,7 +28,8 @@ const activitySchema = new Schema(
           type: Number,
           required: true,
         },
-    }},
+      },
+    },
     duration: {
       type: Number,
       required: true,
@@ -124,7 +125,9 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
   const categoryIds = categories.map((category) => category._id);
 
   query.push({ ["name"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
-  query.push({ ["location.address"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
+  query.push({
+    ["location.address"]: { $regex: new RegExp(searchCriteria, "i") },
+  }); // Case-insensitive
   query.push({ ["description"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
 
   const cursor = this.find().cursor();
@@ -217,7 +220,6 @@ activitySchema.statics.findByCategoryNames = async function (names) {
   const cursor = this.find().cursor();
   const categories = await Category.find({ name: { $in: names } });
   const categoryIds = categories.map((category) => category._id.toString());
-  console.log(categoryIds);
   const query = [];
 
   for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
@@ -260,7 +262,7 @@ activitySchema.statics.filter = async function (
 
   if (category) {
     // Find the category by name and get its ObjectId
-   
+
     const categoryArray = Array.isArray(category)
       ? category
       : category.split(","); // Ensure it's an array

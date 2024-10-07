@@ -31,15 +31,17 @@ const FilterComponent = ({
             Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
           </button>
 
-          <button
-            onClick={() => handlemyProducts(!myProducts)} // Toggle myItineraries state
-            className={`flex items-center px-4 py-2 rounded-full shadow ${
-              myProducts ? "bg-orange-500 text-white" : "bg-white text-black"
-            }`}
-          >
-            <ContactRound strokeWidth={1.25}  /> 
-             My Products
-          </button>
+          {(role === 'seller') && (
+            <button
+              onClick={() => handlemyProducts(!myProducts)} // Toggle myProducts state
+              className={`flex items-center px-4 py-2 rounded-full shadow ${
+                myProducts ? 'bg-orange-500 text-white' : 'bg-white text-black'
+              }`}
+            >
+              <ContactRound strokeWidth={1.25} />
+              My Products
+            </button>
+          )}
 
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
@@ -67,6 +69,7 @@ const FilterComponent = ({
               <input
                 type="number"
                 placeholder="Max budget"
+                min ="0"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 className="w-full mt-1 border rounded-lg p-2"

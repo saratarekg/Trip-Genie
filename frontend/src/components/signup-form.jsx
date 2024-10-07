@@ -35,7 +35,7 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { Alert } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -206,6 +206,23 @@ const formSchema = z
           message: "Hotline is required.",
         });
       }
+
+      if (!data.hotline.match(/^\d+$/)) {
+        ctx.addIssue({
+          path: ["hotline"],
+          message: "Hotline must be a number.",
+        });
+      }
+
+      if (
+        data.website &&
+        !data.website.match(/^(https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*$/i)
+      ) {
+        ctx.addIssue({
+          path: ["website"],
+          message: "Website must be a valid URL.",
+        });
+      }
     }
   });
 
@@ -344,7 +361,14 @@ export function SignupForm() {
         </div>
         {apiError && (
           <div ref={alertRef}>
-            <Alert message={apiError} onClose={() => setApiError(null)} />
+            <Alert
+              variant="destructive"
+              className="mb-4"
+              onClose={() => setApiError(null)}
+            >
+              <AlertDescription>{apiError}</AlertDescription>
+            </Alert>
+            {/* <Alert message={apiError} onClose={() => setApiError(null)} /> */}
           </div>
         )}
         <Form {...form}>
@@ -446,8 +470,7 @@ export function SignupForm() {
                           country={"eg"}
                           value={field.value}
                           onChange={(value) => field.onChange(value)}
-                          exclu
-                          deCountries={["il"]}
+                          excludeCountries={["il"]}
                           inputProps={{
                             name: "mobile",
                             required: true,
@@ -813,11 +836,12 @@ export function SignupForm() {
         <div className="mt-4 text-center text-sm">
           <p className="text-gray-600">
             Already have an account?{" "}
-            <Link to = '/login'
+            <Link
+              to="/login"
               className="font-medium text-orange-500 hover:text-orange-600"
             >
               Sign in
-              </Link>
+            </Link>
           </p>
         </div>
       </div>
@@ -830,12 +854,15 @@ export function SignupForm() {
               Successful Signup
             </DialogTitle>
             <DialogDescription>
-            Your account has been created successfully!
-             Please log in.
+              Your account has been created successfully! Please log in.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button  className=" bg-orange-500"variant="default"  onClick={() => navigate('/login')}>
+            <Button
+              className=" bg-orange-500"
+              variant="default"
+              onClick={() => navigate("/login")}
+            >
               Login
             </Button>
           </DialogFooter>

@@ -9,7 +9,7 @@ const addTag = async (req, res) => {
   if (await Tag.findOne({ type })) {
     return res.status(400).json({ message: "Tag already exists" });
   }
-  const tag = new Tag({type});
+  const tag = new Tag({ type });
 
   tag
     .save()
@@ -53,11 +53,14 @@ const updateTag = async (req, res) => {
       return res.status(400).json({ message: "Tag already exists" });
     }
 
-    const tag = await Tag.findByIdAndUpdate(req.params.id,{ type }, {
-      new: true,
-      runValidators: true,
-    });
-    console.log(tag.type);
+    const tag = await Tag.findByIdAndUpdate(
+      req.params.id,
+      { type },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     res.status(200).json(tag);
   } catch (error) {
@@ -74,17 +77,16 @@ const getTag = async (req, res) => {
 };
 
 const getTagbyType = async (req, res) => {
-    try {
-        const tags = await Tag.findOne({ type: req.query.type });
-        if (tags.length === 0) {
-            return res.status(404).json({ message: 'No tags found with that name' });
-        }
-    
-        res.status(200).json(tags);
-        
-    } catch (error) {
-        res.status(400).json({ error: error.message });
+  try {
+    const tags = await Tag.findOne({ type: req.query.type });
+    if (tags.length === 0) {
+      return res.status(404).json({ message: "No tags found with that name" });
     }
+
+    res.status(200).json(tags);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 const getAlltags = async (req, res) => {

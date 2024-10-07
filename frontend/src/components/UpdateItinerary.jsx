@@ -127,12 +127,16 @@ export default function UpdateItinerary() {
   };
 
   const addDate = () => {
+    const newDate = {
+      date: "", // Empty date value initially
+      times: [{ startTime: "", endTime: "" }] // Automatically add a default time
+    };
+    
     setItinerary((prev) => ({
       ...prev,
-      availableDates: [...prev.availableDates, { date: new Date().toISOString().split('T')[0], times: [] }],
+      availableDates: [...prev.availableDates, newDate],
     }));
   };
-
   const removeDate = (index) => {
     setItinerary((prev) => ({
       ...prev,
@@ -148,7 +152,13 @@ export default function UpdateItinerary() {
 
   const removeTime = (dateIndex, timeIndex) => {
     const newDates = [...itinerary.availableDates];
-    newDates[dateIndex].times = newDates[dateIndex].times.filter((_, i) => i !== timeIndex);
+    newDates[dateIndex].times.splice(timeIndex, 1); // Remove the specific time
+  
+    // Check if there are no more times for this date, then remove the date
+    if (newDates[dateIndex].times.length === 0) {
+      newDates.splice(dateIndex, 1);
+    }
+  
     setItinerary((prev) => ({ ...prev, availableDates: newDates }));
   };
 

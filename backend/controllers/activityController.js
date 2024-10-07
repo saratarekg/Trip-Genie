@@ -15,8 +15,7 @@ const getAllActivities = async (req, res) => {
       asc,
       myActivities,
     } = req.query;
-    
-    console.log("hi");
+
     const filterResult = await Activity.filter(
       price,
       startDate,
@@ -26,15 +25,15 @@ const getAllActivities = async (req, res) => {
     );
 
     const searchResult = await Activity.findByFields(searchBy);
-    
+
     const searchResultIds = searchResult.map((activity) => activity._id);
     const filterResultIds = filterResult.map((activity) => activity._id);
-    
+
     const query = [];
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
     query.push({ timing: { $gte: new Date() } });
-    
+
     if (myActivities) {
       query.push({ advertiser: res.locals.user_id });
     }
@@ -44,10 +43,10 @@ const getAllActivities = async (req, res) => {
       .populate("tags")
       .populate("category");
 
-      if (sort) {
-        const sortBy = {};
-        sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
-        activitiesQuery = activitiesQuery.sort(sortBy);
+    if (sort) {
+      const sortBy = {};
+      sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
+      activitiesQuery = activitiesQuery.sort(sortBy);
     } else {
       activitiesQuery = activitiesQuery.sort({ createdAt: -1 });
     }
