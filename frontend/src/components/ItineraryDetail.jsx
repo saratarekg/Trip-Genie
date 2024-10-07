@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import * as jwtDecode from "jwt-decode";
+import { TimelinePreviewComponent } from "@/components/timeline-preview";
 import {
   XCircle,
   CheckCircle,
@@ -200,7 +201,6 @@ const ItineraryDetail = () => {
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
             {itinerary.title}
           </h1>
-          <p className="text-xl md:text-2xl">{itinerary.timeline}</p>
         </div>
       </div>
 
@@ -269,7 +269,7 @@ const ItineraryDetail = () => {
                 <div className="flex items-center">
                   <Phone className="w-6 h-6 mr-2 text-orange-500" />
                   <span className="text-gray-700">
-                    Phone:{" "}
+                    Phone:{" +"}
                     {tourGuideProfile ? tourGuideProfile.mobile : "Loading..."}
                   </span>
                 </div>
@@ -282,6 +282,16 @@ const ItineraryDetail = () => {
                       : "Loading..."}
                   </span>
                 </div>
+
+
+                <div className="flex items-center">
+                  <Clock className="w-6 h-6 mr-2 text-orange-500" />
+                  <span className="text-gray-700">
+                    Timeline: {""}
+                    {itinerary.timeline}
+                  </span>
+                </div>
+
               </div>
             </div>
 
@@ -384,6 +394,12 @@ const ItineraryDetail = () => {
                 </div>
               )}
             </div>
+
+              {/* testing something */}
+              {itinerary.location && (
+            <div className="mt-8">
+              <TimelinePreviewComponent  />
+            </div>) }
 
             {userRole === "tour-guide" && canModify && (
               <div className="mt-6 flex justify-end space-x-4">
