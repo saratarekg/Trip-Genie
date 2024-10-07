@@ -3,6 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
     Dialog,
@@ -48,6 +49,8 @@ const CreateProductForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false);
   const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
   const {
     register,
@@ -63,9 +66,20 @@ const CreateProductForm = () => {
       quantity: '',
     },
   });
+  const handleGoBack = () => {
+    setShowDialog(false);
+    navigate('/all-products');
+  };
+
+  const handleCreateNew = () => {
+    setShowDialog(false);
+    window.location.reload();
+  };
 
   const onSubmit = async (data) => {
+  
     setLoading(true);
+    setShowDialog(true);
     setError('');
     setSuccess('');
 
@@ -109,10 +123,8 @@ const CreateProductForm = () => {
       >
         <h2 className="text-xl font-semibold mb-4 text-center">Create Product</h2>
 
-        {/* Success/Error Messages */}
-        {success && <div className="text-green-500 mb-4">{success}</div>}
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-
+        
+        
         {/* Product Name */}
         <div>
           <label htmlFor="name" className="block text-gray-700">Product Name</label>
@@ -177,7 +189,28 @@ const CreateProductForm = () => {
         >
           {loading ? 'Submitting...' : 'Submit'}
         </button>
+        {/* {success && <div className="text-green-500 mb-4">{success}</div>}
+        {error && <div className="text-red-500 mb-4">{error}</div>} */}
+
       </form>
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">Success!</DialogTitle>
+            <DialogDescription className="text-gray-600 mt-2">
+              The Product was created successfully.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4 flex justify-end space-x-4">
+            <Button colorScheme="blue" onClick={handleGoBack}>
+              Go to all products
+            </Button>
+            <Button variant="outline" onClick={handleCreateNew}>
+              Create Another
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
   
     </div>
   );
