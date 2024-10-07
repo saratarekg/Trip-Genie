@@ -446,8 +446,7 @@ export function SignupForm() {
                           country={"eg"}
                           value={field.value}
                           onChange={(value) => field.onChange(value)}
-                          exclu
-                          deCountries={["il"]}
+                          excludeCountries={["il"]}
                           inputProps={{
                             name: "mobile",
                             required: true,
@@ -813,11 +812,12 @@ export function SignupForm() {
         <div className="mt-4 text-center text-sm">
           <p className="text-gray-600">
             Already have an account?{" "}
-            <Link to = '/login'
+            <Link
+              to="/login"
               className="font-medium text-orange-500 hover:text-orange-600"
             >
               Sign in
-              </Link>
+            </Link>
           </p>
         </div>
       </div>
@@ -830,12 +830,15 @@ export function SignupForm() {
               Successful Signup
             </DialogTitle>
             <DialogDescription>
-            Your account has been created successfully!
-             Please log in.
+              Your account has been created successfully! Please log in.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button  className=" bg-orange-500"variant="default"  onClick={() => navigate('/login')}>
+            <Button
+              className=" bg-orange-500"
+              variant="default"
+              onClick={() => navigate("/login")}
+            >
               Login
             </Button>
           </DialogFooter>

@@ -139,7 +139,6 @@ const deleteHistoricalPlace = async (req, res) => {
 const filterHistoricalPlaces = async (req, res) => {
   try {
     const { types, periods } = req.body;
-    // console.log(types,periods);
     const filterResult = await Museum.filterByTag(types, periods);
     const searchResult = await Museum.findByFields(searchBy);
 

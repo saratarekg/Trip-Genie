@@ -6,7 +6,6 @@ const getAllProducts = async (req, res) => {
 
   try {
     // Debugging: Log incoming query parameters
-    console.log("Received query:", req.query);
 
     // Build the query object dynamically
     const query = {};
@@ -14,7 +13,6 @@ const getAllProducts = async (req, res) => {
     // Apply search filter (by name) if provided
     if (searchBy) {
       query.name = { $regex: searchBy, $options: "i" }; // Case-insensitive regex search
-      console.log("Search applied:", query.name);
     }
 
     // Apply price range filter if provided
@@ -22,13 +20,11 @@ const getAllProducts = async (req, res) => {
       query.price = {};
       if (minPrice) query.price.$gte = parseFloat(minPrice); // Apply minPrice if given
       if (budget) query.price.$lte = parseFloat(budget); // Apply budget if given
-      console.log("Price filter applied:", query.price); // Log the price filter
     }
 
     // Filter by the user's products (myProducts)
     if (myproducts) {
       query.seller = res.locals.user_id;
-      console.log("Filtering by user's products:", query.seller);
     }
 
     // Perform the query
@@ -38,7 +34,6 @@ const getAllProducts = async (req, res) => {
     if (asc !== undefined) {
       const sortOrder = parseInt(asc, 10);
       productsQuery = productsQuery.sort({ rating: sortOrder });
-      console.log("Sorting applied:", { rating: sortOrder });
     }
 
     // Execute the query and get the products
@@ -129,7 +124,6 @@ const editProduct = async (req, res) => {
       0
     );
 
-
     if (product.reviews.length > 0) {
       const newRating = totalRating / product.reviews.length;
       updatedProduct.rating = await Product.findByIdAndUpdate(id, {
@@ -137,11 +131,6 @@ const editProduct = async (req, res) => {
       });
     }
 
-
-
-    console.log(updatedProduct);
-
-    
     res.status(200).json(updatedProduct);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -175,7 +164,6 @@ const editProductOfSeller = async (req, res) => {
       0
     );
     const newRating = totalRating / product.reviews.length;
-    console.log(newRating);
     const newProduct = await Product.findByIdAndUpdate(
       id,
       { rating: newRating },
@@ -191,9 +179,7 @@ const editProductOfSeller = async (req, res) => {
 const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findById(id)
-    .populate("seller")
-      .exec();
+    const product = await Product.findById(id).populate("seller").exec();
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -243,5 +229,5 @@ module.exports = {
   getProductById,
   deleteProduct,
   deleteProductOfSeller,
-  addProductByAdmin
+  addProductByAdmin,
 };

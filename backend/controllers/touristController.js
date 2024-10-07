@@ -1,6 +1,10 @@
 const Tourist = require("../models/tourist");
+const TourGuide = require("../models/tourGuide");
+const Advertiser = require("../models/advertiser");
+const Seller = require("../models/seller");
+const Admin = require("../models/admin");
+const TourismGovernor = require("../models/tourismGovernor");
 const activity = require("../models/activity");
-const authController = require("./authController");
 
 const deleteTouristAccount = async (req, res) => {
   try {
@@ -53,13 +57,10 @@ const updateTourist = async (req, res) => {
 
     const { username, email, nationality, mobile, jobOrStudent } = req.body; // Data to update
 
-    if (
-      username !== tourist1.username &&
-      (await authController.usernameExists(username))
-    ) {
+    if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
     }
-    if (email !== tourist1.email && (await authController.emailExists(email))) {
+    if (email !== tourist1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
     }
     // console.log(email, nationality, mobile, jobOrStudent);
@@ -79,11 +80,7 @@ const updateTourist = async (req, res) => {
 
 const getTouristProfile = async (req, res) => {
   try {
-    console.log(
-      "ammmyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
-    );
     const touristId = res.locals.user_id;
-    console.log("ammmyyy");
 
     // Find the tour guide by their ID
     const tourist = await Tourist.findById(touristId)
@@ -93,8 +90,6 @@ const getTouristProfile = async (req, res) => {
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
-    console.log("helooooooo");
-    console.log(tourist);
 
     // Respond with the tour guide's profile
     res.status(200).json(tourist);
@@ -117,13 +112,10 @@ const updateTouristProfile = async (req, res) => {
       wallet,
     } = req.body;
 
-    if (
-      username !== tourist1.username &&
-      (await Tourist.findOne({ username }))
-    ) {
+    if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
     }
-    if (email !== tourist1.email && (await Tourist.findOne({ email }))) {
+    if (email !== tourist1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
     }
     // Find the Tourist by their ID and update with new data
@@ -150,7 +142,39 @@ const updateTouristProfile = async (req, res) => {
     // Respond with the updated profile
     res.status(200).json({ message: "Profile updated successfully", tourist });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const emailExists = async (email) => {
+  if (await Tourist.findOne({ email })) {
+    return true;
+  } else if (await TourGuide.findOne({ email })) {
+    return true;
+  } else if (await Advertiser.findOne({ email })) {
+    return true;
+  } else if (await Seller.findOne({ email })) {
+    return true;
+  } else {
+    console.log("email does not exist");
+    return false;
+  }
+};
+
+const usernameExists = async (username) => {
+  if (
+    (await Tourist.findOne({ username })) ||
+    (await TourGuide.findOne({ username })) ||
+    (await Advertiser.findOne({ username })) ||
+    (await Seller.findOne({ username })) ||
+    (await Admin.findOne({ username })) ||
+    (await TourismGovernor.findOne({ username }))
+  ) {
+    console.log("username exists");
+    return true;
+  } else {
+    console.log("username does not exist");
+    return false;
   }
 };
 
