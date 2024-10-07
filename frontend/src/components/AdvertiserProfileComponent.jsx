@@ -65,7 +65,7 @@ export function AdvertiserProfileComponent() {
         const messages = {};
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const hotlineRegex = /^\d+$/;
+        const hotlineRegex = /^\d{5}$/;
 
         if (!name) messages.name = "Name is required.";
         if (!username) messages.username = "Username is required.";
@@ -78,15 +78,27 @@ export function AdvertiserProfileComponent() {
             messages.hotline = "Hotline is required.";
 
         }
+        if (hotline.length>5) {
+            messages.hotline = "Hotline should be 5 digits only.";
+
+        }
+
+        if (!/^\d+$/.test(hotline)) {
+            messages.hotline = "Cannot include characters in the hotline.";
+
+        }
+        
+
         if (isEditing) {
             if (!website) {
                 messages.website = "Website is required."; // Set required validation message
             } else if (!isValidURL(website)) {
                 messages.website = "Invalid website format.";
             }
-        } else if (!hotlineRegex.test(hotline)) {
+        } else if (!hotlineRegex.test(hotline) ) {
             messages.hotline = "Hotline must contain only numbers.";
         }
+       
 
         setValidationMessages(messages);
         return Object.keys(messages).length === 0;
@@ -244,6 +256,28 @@ export function AdvertiserProfileComponent() {
                     </div>
 
                     <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <Phone className="w-4 h-4 text-gray-500" />
+            {isEditing ? (
+              <input
+                type="hotline"
+                name="hotline"
+                value={editedAdvertiser.hotline}
+                onChange={handleInputChange}
+                className={`border rounded px-2 py-1 flex-1 ${
+                  validationMessages.hotline ? "border-red-500" : ""
+                }`}
+                placeholder="Hotline"
+              />
+            ) : (
+              <span>{advertiser.hotline}</span>
+            )}
+          </div>
+          {validationMessages.hotline && (
+            <span className="text-red-500 text-sm">{validationMessages.hotline}</span>
+          )}
+        </div>
+                    {/* <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-gray-500" />
               {isEditing ? (
@@ -270,7 +304,7 @@ export function AdvertiserProfileComponent() {
             {validationMessages.mobile && (
               <span className="text-red-500 text-sm">{validationMessages.hotline}</span>
             )}
-          </div>
+          </div> */}
 
                     {advertiser.website && (
     <div className="flex flex-col mb-4">
