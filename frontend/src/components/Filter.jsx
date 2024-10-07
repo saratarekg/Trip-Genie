@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Filter, ChevronDown, ArrowUpDown, Plus ,ContactRound } from 'lucide-react';
+import { Filter, ChevronDown, ArrowUpDown, Plus, ContactRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FilterComponent = ({
@@ -23,6 +23,8 @@ const FilterComponent = ({
   typesOptions = [],
   languagesOptions = [], 
   role,
+  isBooked,
+  setIsBooked
 }) => {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
@@ -35,8 +37,6 @@ const FilterComponent = ({
       setSelectedTypes([...selectedTypes, type]);
     }
   };
-
-  //const [myItineraries, setmyItineraries] = useState(false);
 
   // Handle checkbox for languages
   const handleLanguageChange = (language) => {
@@ -73,13 +73,16 @@ const FilterComponent = ({
       return "Select Language(s)";
     }
     return selectedLanguages.join(', ');
-  }
+  };
+
+  const handleIsBookedChange = () => {
+    setIsBooked(!isBooked);
+  };
 
   return (
     <>
       <div className="flex mb-4">
         <div className="flex space-x-4">
-
           <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             <Filter className="mr-2" size={18} />
             Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
@@ -95,39 +98,27 @@ const FilterComponent = ({
             Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
           </button>
 
-          {role === "tour-guide" && (  // Check if role is "tour-guide"
-  <button
-    onClick={() => handlemyItineraries(!myItineraries)} // Toggle myItineraries state
-    className={`flex items-center px-4 py-2 rounded-full shadow ${
-      myItineraries ? "bg-orange-500 text-white" : "bg-white text-black"
-    }`}
-  >
-    <ContactRound strokeWidth={1.25} />
-    My Itineraries
-  </button>
-)}
-
+          {role === "tour-guide" && (
+            <button
+              onClick={() => handlemyItineraries(!myItineraries)}
+              className={`flex items-center px-4 py-2 rounded-full shadow ${myItineraries ? "bg-orange-500 text-white" : "bg-white text-black"}`}
+            >
+              <ContactRound strokeWidth={1.25} />
+              My Itineraries
+            </button>
+          )}
 
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters
           </button>
-
-          
-
-          {/* <button onClick={() => handlemyItineraries()} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-            <ArrowUpDown className="mr-2" size={18} />
-            My itineraries {myItineraries === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-          </button> */}
         </div>
 
-          {role === 'tour-guide'?  (
-             <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
-             <Plus className="mr-2" size={18} />
-             Create
-           </Link>
-          ) : null}
- 
-       
+        {role === 'tour-guide' ? (
+          <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
+            <Plus className="mr-2" size={18} />
+            Create
+          </Link>
+        ) : null}
       </div>
 
       {filtersVisible && (
@@ -220,6 +211,24 @@ const FilterComponent = ({
                 )}
               </div>
             </div>
+
+    <div>     
+  <div><label className="block text-gray-700">Booking Status</label></div>
+<div className="mt-2 pl-1">  
+  <label className="flex items-center space-x-3"> 
+    <input
+      type="checkbox"
+      checked={isBooked}
+      onChange={handleIsBookedChange}
+     
+      className="form-checkbox w-5 h-5"
+    />
+    <span className="text-gray-700 text-l">Booked Only</span> 
+  </label>
+</div>
+</div> 
+
+
           </div>
 
           {/* Apply Filters Button */}

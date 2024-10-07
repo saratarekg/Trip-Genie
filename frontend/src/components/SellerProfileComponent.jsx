@@ -3,6 +3,17 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Mail, Phone, User, CheckCircle, AtSign } from "lucide-react";
 import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+
+// Custom validator for mobile number
+const phoneValidator = (value) => {
+  const phoneNumber = parsePhoneNumberFromString("+" + value);
+  if (!phoneNumber || !phoneNumber.isValid()) {
+    return false;
+  }
+  return true;
+};
 
 export function SellerProfileComponent() {
   const [seller, setSeller] = useState(null);
@@ -43,7 +54,8 @@ export function SellerProfileComponent() {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e && e.target ? e.target : { name: 'mobile', value: e };
+    const { name, value } =
+      e && e.target ? e.target : { name: "mobile", value: e };
     setEditedSeller((prev) => ({ ...prev, [name]: value })); // Update editedSeller state
     setValidationMessages((prev) => ({ ...prev, [name]: "" })); // Clear validation message on change
   };
@@ -56,7 +68,7 @@ export function SellerProfileComponent() {
     const { name, username, email, mobile } = editedSeller;
     const messages = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
     if (!name) messages.name = "Name is required.";
     if (!username) messages.username = "Username is required.";
     if (!email) {
@@ -66,61 +78,53 @@ export function SellerProfileComponent() {
     }
     if (!mobile) {
       messages.mobile = "Phone number is required.";
-    } else if (mobile.length < 11) {
-      messages.mobile = "Phone number must be at least 11 characters.";
+    } else if (!phoneValidator(mobile)) {
+      messages.mobile = "Invalid phone number.";
     }
-  
+
     setValidationMessages(messages);
     return Object.keys(messages).length === 0; // Return true if no validation messages
   };
-  
 
   const handleUpdate = async () => {
     if (!validateFields()) {
       return; // If validation fails, do not proceed
     }
-  
+
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-  
+
       const api = `http://localhost:4000/${role}`;
       // Ensure description is either the user's input or an empty string
       const dataToUpdate = {
         ...editedSeller,
         description: editedSeller.description || "", // Default to an empty string if description is null
       };
-  
+
       const response = await axios.put(api, dataToUpdate, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if(response.statusText==="OK"){
+      if (response.statusText === "OK") {
         setSeller(response.data.seller);
         setIsEditing(false);
         setError(""); // Clear previous errors
-    }
- 
+      }
     } catch (err) {
-        if(err.response.data.message ==="Email already exists" ){
-            const email="Email already exists";
-            setValidationMessages({email});
-
-        }
-        else if(err.response.data.message ==="Username already exists"){
-            const username="Username already exists";
-            setValidationMessages({username});
-
-
-        }
-        else{
-            setError(err.message);
-
-        }    }
+      if (err.response.data.message === "Email already exists") {
+        const email = "Email already exists";
+        setValidationMessages({ email });
+      } else if (err.response.data.message === "Username already exists") {
+        const username = "Username already exists";
+        setValidationMessages({ username });
+      } else {
+        setError(err.message);
+      }
+    }
   };
-  
 
   if (loading) {
     return (
@@ -141,7 +145,9 @@ export function SellerProfileComponent() {
   if (!seller) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-lg font-semibold">No seller profile information is available.</p>
+        <p className="text-lg font-semibold">
+          No seller profile information is available.
+        </p>
       </div>
     );
   }
@@ -150,11 +156,11 @@ export function SellerProfileComponent() {
     <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="p-8">
         <div className="flex items-center gap-4 mb-6">
-        <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">
-  <User className="w-12 h-12 text-white" /> {/* Adjust the size of the icon here */}
-</div>
+          <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">
+            <User className="w-12 h-12 text-white" />{" "}
+            {/* Adjust the size of the icon here */}
+          </div>
 
-         
           <div>
             {/* Name - Displayed above the username */}
             {isEditing ? (
@@ -170,7 +176,9 @@ export function SellerProfileComponent() {
                   placeholder="Full Name"
                 />
                 {validationMessages.name && (
-                  <span className="text-red-500 text-sm">{validationMessages.name}</span>
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.name}
+                  </span>
                 )}
               </div>
             ) : (
@@ -193,7 +201,9 @@ export function SellerProfileComponent() {
                     placeholder="Username"
                   />
                   {validationMessages.username && (
-                    <span className="text-red-500 text-sm">{validationMessages.username}</span>
+                    <span className="text-red-500 text-sm">
+                      {validationMessages.username}
+                    </span>
                   )}
                 </div>
               ) : (
@@ -223,7 +233,9 @@ export function SellerProfileComponent() {
               )}
             </div>
             {validationMessages.email && (
-              <span className="text-red-500 text-sm">{validationMessages.email}</span>
+              <span className="text-red-500 text-sm">
+                {validationMessages.email}
+              </span>
             )}
           </div>
 
@@ -263,10 +275,14 @@ export function SellerProfileComponent() {
                       name: "mobile",
                       required: true,
                       placeholder: seller.mobile,
-                      className: `w-full p-2 ${validationMessages.mobile ? "border-red-500" : "border-gray-300"}`,
+                      className: `w-full p-2 ${
+                        validationMessages.mobile
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`,
                     }}
                     containerClass="w-full"
-                    inputStyle={{ width: '60%', marginLeft: '45px' }}
+                    inputStyle={{ width: "60%", marginLeft: "45px" }}
                   />
                 </div>
               ) : (
@@ -274,7 +290,9 @@ export function SellerProfileComponent() {
               )}
             </div>
             {validationMessages.mobile && (
-              <span className="text-red-500 text-sm">{validationMessages.mobile}</span>
+              <span className="text-red-500 text-sm">
+                {validationMessages.mobile}
+              </span>
             )}
           </div>
           {/* Mobile */}
@@ -330,7 +348,9 @@ export function SellerProfileComponent() {
           <div>
             <span
               className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                seller.isAccepted ? "bg-green-100 text-green-800 text-lg" : "bg-yellow-100 text-yellow-800"
+                seller.isAccepted
+                  ? "bg-green-100 text-green-800 text-lg"
+                  : "bg-yellow-100 text-yellow-800"
               }`}
             >
               <CheckCircle className="inline w-4 h-4 mr-1" />
@@ -340,50 +360,50 @@ export function SellerProfileComponent() {
         </div>
 
         {(seller.description || isEditing) && (
-  <div className="flex flex-col">
-    <h3 className="font-semibold mb-2">Description</h3>
-    {isEditing ? (
-      <textarea
-        name="description"
-        value={editedSeller.description || ""}
-        onChange={handleInputChange}
-        className="w-full border rounded px-2 py-1"
-        rows="3"
-        placeholder="Description"
-      />
-    ) : (
-      seller.description && <p className="text-gray-600">{seller.description}</p>
-    )}
-  </div>
-)}
+          <div className="flex flex-col">
+            <h3 className="font-semibold mb-2">Description</h3>
+            {isEditing ? (
+              <textarea
+                name="description"
+                value={editedSeller.description || ""}
+                onChange={handleInputChange}
+                className="w-full border rounded px-2 py-1"
+                rows="3"
+                placeholder="Description"
+              />
+            ) : (
+              seller.description && (
+                <p className="text-gray-600">{seller.description}</p>
+              )
+            )}
+          </div>
+        )}
 
-<div className="mt-6">
-  {isEditing ? (
-    <div className="flex gap-2">
-      <button
-        onClick={handleUpdate}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-      >
-        Save Changes
-      </button>
-      <button
-        onClick={handleDiscard}
-        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-      >
-        Discard Changes
-      </button>
-      
-    </div>
-  ) : (
-    <button
-      onClick={() => setIsEditing(true)}
-      className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-    >
-      Edit Profile
-    </button>
-  )}
-</div>
-
+        <div className="mt-6">
+          {isEditing ? (
+            <div className="flex gap-2">
+              <button
+                onClick={handleUpdate}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={handleDiscard}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+              >
+                Discard Changes
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            >
+              Edit Profile
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

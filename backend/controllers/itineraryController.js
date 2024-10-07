@@ -13,13 +13,15 @@ const getAllItineraries = async (req, res) => {
       sort,
       asc,
       myItineraries,
+      isBooked,
     } = req.query;
     const filterResult = await Itinerary.filter(
       budget,
       upperDate,
       lowerDate,
       types,
-      languages
+      languages,
+      isBooked
     );
 
     const searchResult = await Itinerary.findByFields(searchBy);
