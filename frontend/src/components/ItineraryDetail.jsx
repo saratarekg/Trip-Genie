@@ -330,7 +330,7 @@ const ItineraryDetail = () => {
                           <div className="flex items-center">
                             <Clock className="w-4 h-4 mr-2 text-gray-500" />
                             <span className="text-sm">
-                              Duration: {activity.duration} minutes
+                              Duration: {activity.duration} hours
                             </span>
                           </div>
                           <div className="flex items-center">
