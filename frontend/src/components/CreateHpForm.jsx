@@ -331,7 +331,7 @@ export default function CreateHpForm() {
           </DialogHeader>
           <DialogFooter className="mt-4 flex justify-end space-x-4">
             <Button colorScheme="blue" onClick={handleGoBack}>
-              Go to All Places
+              Go to All Historical Places
             </Button>
             <Button variant="outline" onClick={handleCreateNew}>
               Create Another

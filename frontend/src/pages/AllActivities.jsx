@@ -39,8 +39,8 @@ const ActivityCard = ({ activity, onSelect }) => (
         <span className="text-sm text-muted-foreground ml-1">{activity.rating.toFixed(1)}</span>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-lg font-bold text-primary">${activity.price}/Night</span>
-        <span className="text-sm text-muted-foreground">{activity.duration} nights</span>
+        <span className="text-lg font-bold text-primary">${activity.price}</span>
+        <span className="text-sm text-muted-foreground">{activity.duration} hours</span>
       </div>
       <p className="text-sm text-muted-foreground">
         {new Date(activity.timing).toLocaleDateString()}
@@ -210,7 +210,7 @@ export function AllActivitiesComponent() {
         url.searchParams.append("searchBy", searchTerm);
       }
       if (price && price !== "") {
-        url.searchParams.append("budget", price);
+        url.searchParams.append("price", price);
       }
 
       if (dateRange.end) {
