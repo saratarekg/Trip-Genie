@@ -52,7 +52,10 @@ const getAllItineraries = async (req, res) => {
       sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
       itinerariesQuery = await Itinerary.find({
         $and: query,
-      }).sort(sortBy);
+      })
+        .populate("tourGuide")
+        .populate("activities")
+        .sort(sortBy);
     }
 
     const itineraries = await itinerariesQuery;
