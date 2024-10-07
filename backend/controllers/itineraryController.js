@@ -49,8 +49,9 @@ const getAllItineraries = async (req, res) => {
       $and: query,
     })
       .populate("tourGuide")
-      .populate("activities")
+      .populate({path:"activities",populate:{path:"tags category"}})
       .exec();
+     
     if (sort) {
       const sortBy = {};
       sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs

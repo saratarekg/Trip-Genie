@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Search, ChevronLeft, ChevronRight , Badge} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import ItineraryDetail from "./ItineraryDetail.jsx";
 import FilterComponent from "./Filter.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
@@ -38,7 +39,33 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
         </span>
         <span className="text-sm text-gray-500">{itinerary.language}</span>
       </div>
-      
+      <div className="flex flex-wrap gap-2 mt-3">
+  {Array.isArray(itinerary.activities) && itinerary.activities.map((activity, index) => (
+    <div key={index} className="w-full">
+      {Array.isArray(activity.category) && activity.category.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {activity.category.map((cat) => (
+            <Badge key={cat.id || cat.name} variant="secondary">
+              {cat.name}
+            </Badge>
+          ))}
+        </div>
+      )}
+      {Array.isArray(activity.tags) && activity.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {activity.tags.map((tag) => (
+            <Badge key={tag.id || tag.type} variant="outline">
+              {tag.type}
+          </Badge>
+            
+          ))}
+          
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
     </div>
   </div>
 );
