@@ -118,6 +118,7 @@ export default function UpdateHistoricalPlace() {
   }
 
   const fetchCities = async (country) => {
+
     setCitiesLoading(true)
     try {
       const response = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {

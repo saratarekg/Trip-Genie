@@ -32,7 +32,7 @@ const formSchema = z.object({
         label: z.string(),
       })
     ),
-    
+
   openingHours: z.object({
     weekdays: z.string().min(1, 'Please enter weekday opening hours'),
     weekends: z.string().min(1, 'Please enter weekend opening hours'),
@@ -55,6 +55,8 @@ export default function CreateHpForm() {
   const [error, setError] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -118,7 +120,44 @@ export default function CreateHpForm() {
     };
     fetchHistoricalTags();
   }, []);
+  const fetchCities = async (country) => {
+    console.log("Fetching cities for country:", country); // Debugging line
 
+    setCitiesLoading(true)
+    try {
+      const response = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ country }),
+      })
+
+      const data = await response.json()
+
+
+
+      if (data.error) {
+        throw new Error(data.msg || 'Failed to fetch cities ')
+      }
+
+      const sortedCities = data.data.sort()
+      setCities(sortedCities)
+    } catch (err) {
+      if (err.status === 404) {
+        setCities([])
+      }
+      //setError('Error fetching cities. Please try again later. ')
+      console.error('Error fetching cities: ', err)
+      setCities([])
+    } finally {
+      setCitiesLoading(false)
+    }
+  }
+  const handleCountryChange = (event) => {
+    const country = event.target.value;
+    fetchCities(country);
+  };
   const onSubmit = async (data) => {
     setLoading(true);
     setError('');
@@ -194,25 +233,45 @@ export default function CreateHpForm() {
           <label className="block text-gray-700 mb-2">Country *</label>
           <select
             {...register('location.country')}
+            onChange={handleCountryChange}
+
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           >
             <option value="">Select a country</option>
             {countries.map((country) => (
-              <option key={country.code} value={country.code}>
+              <option key={country.name} value={country.name}>
                 {country.name}
               </option>
             ))}
           </select>
           {errors.location?.country && <span className="text-red-500">{errors.location.country.message}</span>}
-
-          <label className="block text-gray-700 mb-2">City *</label>
+   {/* Conditional message for no cities available */}
+   {(citiesLoading || !cities.length) && (
+            <span className="text-blue-500">This country has no cities.</span>
+          )}
+          {/* <label className="block text-gray-700 mb-2">City *</label>
           <input
             {...register('location.city')}
             placeholder="Enter city"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
           />
+          {errors.location?.city && <span className="text-red-500">{errors.location.city.message}</span>} */}
+          <label className="block text-gray-700 mb-2">City *</label>
+          <select
+            {...register('location.city')}
+            disabled={citiesLoading || !cities.length}
+            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+          >
+            <option value="">Select a city</option>
+            {cities.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
           {errors.location?.city && <span className="text-red-500">{errors.location.city.message}</span>}
-
+         
+         
           <label className="block text-gray-700 mb-2">Address *</label>
           <input
             {...register('location.address')}
