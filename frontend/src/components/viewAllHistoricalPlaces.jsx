@@ -273,7 +273,9 @@ export function AllHistoricalPlacesComponent() {
             {isLoading ? (
                 <Loader />
             ) : (
-                <div className="px-4 py-8 pt-20">
+                <div className="min-h-screen bg-gray-100 py-12 px-4 pt-20 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto">
+                        <>
                     <h1 className="text-2xl font-bold mb-4">All Historical Places</h1>
                     <div className="flex flex-col">
                         <input
@@ -349,6 +351,8 @@ export function AllHistoricalPlacesComponent() {
                             <ChevronRight />
                         </button>
                     </div>
+                    </>
+                </div>
                 </div>
             )}
         </div>
