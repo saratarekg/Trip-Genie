@@ -74,6 +74,7 @@ const itinerarySchema = new Schema(
       max: 5,
       default: 0,
     },
+    
     allRatings: [
       {
         type: Number,
@@ -131,7 +132,8 @@ itinerarySchema.statics.filter = async function (
   upperdate,
   lowerdate,
   types,
-  languages
+  languages,
+  isBooked
 ) {
   const query = [];
   let itineraries = null;
@@ -151,6 +153,9 @@ itinerarySchema.statics.filter = async function (
       ? languages
       : languages.split(","); // Ensure it's an array
     query.push({ language: { $in: languageArray } });
+  }
+  if (isBooked !== undefined && isBooked !== null) {
+    query.push({ isBooked: isBooked });
   }
 
   console.log(query);

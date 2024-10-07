@@ -7,6 +7,7 @@ import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "./Loader.jsx";
+import { set } from "date-fns";
 
 const ItineraryCard = ({ itinerary, onSelect }) => (
   <div
@@ -58,6 +59,7 @@ export function AllItinerariesComponent() {
   const [typesOptions, setTypesOptions] = useState([]);
   const [languagesOptions, setLanguagesOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBooked, setIsBooked] = useState(false);
 
   const navigate = useNavigate();
 
@@ -199,7 +201,8 @@ export function AllItinerariesComponent() {
     setSelectedLanguages([]); // Reset selected languages
     setSortBy(""); // Reset sorting
     setSortOrder(""); // Reset sort order
-    setmyItineraries(false);
+    setmyItineraries(false)
+    setIsBooked(false);
 
     // Fetch itineraries without any filters
     fetchItineraries();
@@ -232,6 +235,9 @@ export function AllItinerariesComponent() {
       }
       if (selectedLanguages.length > 0) {
         url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
+      }
+      if(isBooked){
+        url.searchParams.append("isBooked", isBooked);
       }
 
       // Add sorting parameters
@@ -332,6 +338,8 @@ export function AllItinerariesComponent() {
                   typesOptions={typesOptions}
                   languagesOptions={languagesOptions}
                   role={getUserRole()}
+                  isBooked={isBooked}
+                  setIsBooked={setIsBooked}
                 />
               </div>
 
