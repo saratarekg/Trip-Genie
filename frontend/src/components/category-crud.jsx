@@ -81,7 +81,7 @@ export function CategoryCRUD({ isOpen, onClose }) {
         setShowEditModal(false);
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
-        setMessage('Error updating category');
+        setMessage('The old and new category have the same name');
       }
     } else {
       setMessage('Please enter a new category name.');

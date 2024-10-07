@@ -80,7 +80,7 @@ export function TagCRUD({ isOpen, onClose }) {
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
         console.error('Error updating tag:', error.response?.data || error.message);
-        setMessage('Error updating tag');
+        setMessage('The old and new tag have the same name');
       }
     } else {
       setMessage('Please provide a valid tag name.');
