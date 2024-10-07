@@ -110,9 +110,9 @@ export function CategoryCRUD({ isOpen, onClose }) {
 
   return (
     <>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] p-6 bg-white shadow-lg rounded-lg">
         <DialogHeader>
-          <DialogTitle>Manage Categories</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Manage Categories</DialogTitle>
         </DialogHeader>
 
         {/* Create Category */}
@@ -122,11 +122,11 @@ export function CategoryCRUD({ isOpen, onClose }) {
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             placeholder="Enter new category name"
-            className="mt-2"
+            className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           <Button
             onClick={createCategory}
-            className="w-full mt-2 bg-green-500 text-white"
+            className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150"
           >
             Create Category
           </Button>
@@ -138,19 +138,19 @@ export function CategoryCRUD({ isOpen, onClose }) {
                 {categories.map((category) => (
                   <li 
                     key={category._id} 
-                    className="flex justify-between items-center text-gray-700 border border-black rounded-lg py-2 px-4 mb-1" 
+                    className="flex justify-between items-center text-gray-700 border border-gray-300 rounded-lg py-2 px-4 mb-1 hover:shadow-md transition"
                   >
                     <span>{category.name}</span>
                     <div className="space-x-2">
                       <Button
                         onClick={() => handleEditClick(category._id, category.name)}
-                        className="bg-blue-500 text-white"
+                        className="bg-blue-500 text-white hover:bg-blue-600 transition duration-150"
                       >
                         Edit
                       </Button>
                       <Button
                         onClick={() => deleteCategory(category._id)}
-                        className="bg-red-500 text-white"
+                        className="bg-red-500 text-white hover:bg-red-600 transition duration-150"
                       >
                         Delete
                       </Button>
@@ -159,10 +159,11 @@ export function CategoryCRUD({ isOpen, onClose }) {
                 ))}
               </ul>
             ) : (
-              <p>No categories found.</p>
+              <p className="text-gray-500">No categories found.</p>
             )}
           </div>
 
+          {/* Message Display */}
           {message && (
             <div className="mt-4 p-2 bg-red-100 text-red-800 rounded">
               {message}
@@ -178,26 +179,26 @@ export function CategoryCRUD({ isOpen, onClose }) {
 
       {/* Edit Category Modal */}
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] p-6 bg-white shadow-lg rounded-lg">
           <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">Edit Category</DialogTitle>
           </DialogHeader>
           <Input
             type="text"
             value={updatedCategory}
             onChange={(e) => setUpdatedCategory(e.target.value)}
             placeholder="New category name"
-            className="mt-2"
+            className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
           <Button
             onClick={handleUpdateCategory}
-            className="w-full mt-2 bg-green-500 text-white"
+            className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150"
           >
             Save Changes
           </Button>
           <Button
             onClick={() => setShowEditModal(false)}
-            className="w-full mt-2 bg-gray-500 text-white"
+            className="w-full mt-2 bg-gray-500 text-white hover:bg-gray-600 transition duration-150"
           >
             Cancel
           </Button>

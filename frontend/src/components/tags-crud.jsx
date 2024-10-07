@@ -101,36 +101,40 @@ export function TagCRUD({ isOpen, onClose }) {
   };
 
   return (
-    <DialogContent className="sm:max-w-[425px]">
+    <DialogContent className="sm:max-w-[425px] p-6 bg-white shadow-lg rounded-lg">
       <DialogHeader>
-        <DialogTitle>Manage Tags</DialogTitle>
-        <DialogDescription>
+        <DialogTitle className="text-lg font-semibold">Manage Tags</DialogTitle>
+        <DialogDescription className="text-gray-500">
+          Create, edit, or delete tags.
         </DialogDescription>
       </DialogHeader>
 
-      <div className="space-y-4">
+      <div className="space-y-4 pb-5">
         {/* Create Tag Section */}
-        <div className="mb-4">
+        <div className="mb-4 ">
           <Input
             type="text"
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
             placeholder="Enter new tag name"
-            className="mt-2"
+            className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
-          <Button onClick={createTag} className="w-full mt-2 bg-green-500 text-white">
+          <Button 
+            onClick={createTag} 
+            className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150">
             Create Tag
           </Button>
         </div>
 
         {/* Tags List */}
-        <div className="max-h-64 overflow-y-auto">
+        <div className="max-h-64 overflow-y-auto pb-3 pr-2">
           {tags.length > 0 ? (
             <div className="space-y-2">
               {tags.map((tag) => (
-                <div key={tag._id} className="flex justify-between items-center border border-gray-300 p-2 rounded-lg">
-                  <span className="text-black">{tag.type}</span>
-
+                <div 
+                  key={tag._id} 
+                  className="flex justify-between items-center border border-gray-300 p-3 rounded-lg hover:shadow-md transition-all duration-150">
+                  <span className="text-black font-medium">{tag.type}</span>
                   <div className="space-x-2">
                     {/* Edit button */}
                     <Button
@@ -138,16 +142,14 @@ export function TagCRUD({ isOpen, onClose }) {
                         setEditTagId(tag._id);
                         setEditTagName(tag.type);
                       }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white"
-                    >
+                      className="bg-blue-500 hover:bg-blue-600 text-white transition duration-150">
                       Edit
                     </Button>
 
                     {/* Delete button */}
                     <Button
                       onClick={() => deleteTag(tag._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white"
-                    >
+                      className="bg-red-500 hover:bg-red-600 text-white transition duration-150">
                       Delete
                     </Button>
                   </div>
@@ -155,24 +157,24 @@ export function TagCRUD({ isOpen, onClose }) {
               ))}
             </div>
           ) : (
-            <p>No tags available.</p>
+            <p className="text-gray-500">No tags available.</p>
           )}
         </div>
 
         {/* Edit Tag Modal */}
         {editTagId && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-4 rounded shadow-lg max-w-md w-full">
+            <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
               <h3 className="font-bold mb-2">Edit Tag</h3>
               <Input
                 type="text"
                 value={editTagName}
                 onChange={(e) => setEditTagName(e.target.value)}
                 placeholder="Enter new tag name"
-                className="mt-2"
+                className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               <div className="flex space-x-2 mt-4">
-                <Button onClick={updateTag} className="bg-green-500 text-white w-full">
+                <Button onClick={updateTag} className="bg-orange-500 text-white hover:bg-orange-600 w-full transition duration-150">
                   Save
                 </Button>
                 <Button
@@ -180,7 +182,7 @@ export function TagCRUD({ isOpen, onClose }) {
                     setEditTagId(null); // Close modal
                     setEditTagName(''); // Reset input
                   }}
-                  className="bg-gray-500 text-white w-full"
+                  className="bg-gray-500 text-white hover:bg-gray-600 w-full transition duration-150"
                 >
                   Cancel
                 </Button>
