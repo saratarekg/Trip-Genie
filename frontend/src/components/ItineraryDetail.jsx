@@ -95,6 +95,7 @@ const ItineraryDetail = () => {
             },
           }
         );
+        
 
         if (!response.ok) {
           throw new Error("Failed to fetch itinerary details");

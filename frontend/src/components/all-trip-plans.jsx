@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight , Badge} from "lucide-react";
 import ItineraryDetail from "./ItineraryDetail.jsx";
 import FilterComponent from "./Filter.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
@@ -8,6 +8,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "./Loader.jsx";
 import { set } from "date-fns";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 const ItineraryCard = ({ itinerary, onSelect }) => (
   <div
@@ -37,9 +38,17 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
         </span>
         <span className="text-sm text-gray-500">{itinerary.language}</span>
       </div>
+      
     </div>
   </div>
 );
+
+const getUniqueTags = (itinerary) => {
+  const allTags = itinerary.activities.flatMap(activity => 
+    activity.tags.map(tag => tag.type)
+  );
+  return [...new Set(allTags)];
+};
 
 export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
