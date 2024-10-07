@@ -34,6 +34,8 @@ const getAllProducts = async (req, res) => {
     if (asc !== undefined) {
       const sortOrder = parseInt(asc, 10);
       productsQuery = productsQuery.sort({ rating: sortOrder });
+    } else {
+      productsQuery = productsQuery.sort({ createdAt: -1 });
     }
 
     // Execute the query and get the products
@@ -172,7 +174,7 @@ const editProductOfSeller = async (req, res) => {
         { new: true, runValidators: true }
       );
     }
-    
+
     res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
