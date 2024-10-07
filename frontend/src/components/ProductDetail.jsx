@@ -269,7 +269,7 @@ const ProductDetail = () => {
           </div>
 
           <div>
-            {userRole ==="seller" &&(
+            {product.seller &&(
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-bold">

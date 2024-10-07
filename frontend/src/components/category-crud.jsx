@@ -15,7 +15,8 @@ export function CategoryCRUD({ isOpen, onClose }) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(''); // For general error messages
+  const [editErrorMessage, setEditErrorMessage] = useState(''); // For Edit modal-specific errors
   const [successMessage, setSuccessMessage] = useState('');
   const [showCategories, setShowCategories] = useState(false);
   const [showCreateCategory, setShowCreateCategory] = useState(false);
@@ -32,6 +33,7 @@ export function CategoryCRUD({ isOpen, onClose }) {
     } catch (error) {
       console.error('Error fetching categories:', error);
       setMessage('Error fetching categories');
+      hideErrorMessageAfterDelay();
     }
   };
 
@@ -40,6 +42,13 @@ export function CategoryCRUD({ isOpen, onClose }) {
       fetchCategories();
     }
   }, [isOpen]);
+
+  const hideErrorMessageAfterDelay = () => {
+    setTimeout(() => {
+      setMessage('');
+      setEditErrorMessage('');
+    }, 3000); // Clear the message after 3 seconds
+  };
 
   const createCategory = async () => {
     setMessage('');
@@ -58,14 +67,16 @@ export function CategoryCRUD({ isOpen, onClose }) {
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
         setMessage('This category already exists');
+        hideErrorMessageAfterDelay();
       }
     } else {
       setMessage('Please enter a category name.');
+      hideErrorMessageAfterDelay();
     }
   };
 
   const handleUpdateCategory = async () => {
-    setMessage('');
+    setEditErrorMessage(''); // Reset error message for the Edit modal
     if (updatedCategory) {
       try {
         const token = Cookies.get('jwt');
@@ -78,13 +89,15 @@ export function CategoryCRUD({ isOpen, onClose }) {
         setUpdatedCategory('');
         setSuccessMessage('Category updated successfully!');
         fetchCategories();
-        setShowEditModal(false);
+        setShowEditModal(false); // Close modal on success
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
-        setMessage('The old and new category have the same name');
+        setEditErrorMessage('Category name already exists'); // Set error for Edit modal
+        hideErrorMessageAfterDelay();
       }
     } else {
-      setMessage('Please enter a new category name.');
+      setEditErrorMessage('Please enter a new category name.');
+      hideErrorMessageAfterDelay();
     }
   };
 
@@ -102,6 +115,7 @@ export function CategoryCRUD({ isOpen, onClose }) {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       setMessage('Error deleting category');
+      hideErrorMessageAfterDelay();
     }
   };
 
@@ -121,6 +135,7 @@ export function CategoryCRUD({ isOpen, onClose }) {
   const handleEditClick = (categoryId, currentName) => {
     setSelectedCategoryId(categoryId);
     setUpdatedCategory(currentName);
+    setEditErrorMessage(''); // Reset error when opening modal
     setShowEditModal(true);
   };
 
@@ -194,11 +209,18 @@ export function CategoryCRUD({ isOpen, onClose }) {
 
           {showCategories && (
             <div className="mt-4 max-h-[350px] overflow-y-auto">
+              <Button
+                onClick={handleCancel}
+                className="w-full mt-4 bg-orange-500 text-white hover:bg-gray-600 transition duration-150"
+              >
+                Hide Categories
+              </Button>
+
               {categories.length > 0 ? (
                 <ul className="list-none p-0">
                   {categories.map((category) => (
-                    <li 
-                      key={category._id} 
+                    <li
+                      key={category._id}
                       className="flex justify-between items-center text-blue-900 border border-gray-300 rounded-lg py-2 px-4 mb-1 hover:shadow-md transition"
                     >
                       <span>{category.name}</span>
@@ -222,12 +244,6 @@ export function CategoryCRUD({ isOpen, onClose }) {
               ) : (
                 <p className="text-blue-900">No categories found.</p>
               )}
-              <Button
-                onClick={handleCancel}
-                className="w-full mt-4 bg-orange-500 text-white hover:bg-gray-600 transition duration-150"
-              >
-                Hide Categories
-              </Button>
             </div>
           )}
 
@@ -256,6 +272,11 @@ export function CategoryCRUD({ isOpen, onClose }) {
             placeholder="New category name"
             className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-blue-900"
           />
+          {editErrorMessage && (
+            <div className="mt-2 text-red-600 text-sm">
+              {editErrorMessage}
+            </div>
+          )}
           <Button
             onClick={handleUpdateCategory}
             className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150"

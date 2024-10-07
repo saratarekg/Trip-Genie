@@ -14,7 +14,8 @@ export function TagCRUD({ isOpen, onClose }) {
   const [editTagName, setEditTagName] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [tagToDelete, setTagToDelete] = useState(null);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState(''); // General message (e.g., success messages)
+  const [editErrorMessage, setEditErrorMessage] = useState(''); // Edit specific error messages
   const [successMessage, setSuccessMessage] = useState('');
   const [showCreateTag, setShowCreateTag] = useState(false);
   const [showTags, setShowTags] = useState(false);
@@ -31,6 +32,7 @@ export function TagCRUD({ isOpen, onClose }) {
     } catch (error) {
       console.error('Error fetching Tags:', error);
       setMessage('Error fetching Tags');
+      hideMessageAfterDelay(setMessage);
     }
   };
 
@@ -39,6 +41,12 @@ export function TagCRUD({ isOpen, onClose }) {
       fetchTags();
     }
   }, [isOpen]);
+
+  const hideMessageAfterDelay = (setMessageFunction) => {
+    setTimeout(() => {
+      setMessageFunction('');
+    }, 3000); // Clear the message after 3 seconds
+  };
 
   const createTag = async () => {
     setMessage('');
@@ -54,17 +62,19 @@ export function TagCRUD({ isOpen, onClose }) {
         setSuccessMessage('Tag created successfully!');
         fetchTags();
         setShowCreateTag(false);
-        setTimeout(() => setSuccessMessage(''), 3000);
+        hideMessageAfterDelay(setSuccessMessage);
       } catch (error) {
-        setMessage('This tag already exists ');
+        setMessage('This tag already exists.');
+        hideMessageAfterDelay(setMessage);
       }
     } else {
       setMessage('Please enter a tag name.');
+      hideMessageAfterDelay(setMessage);
     }
   };
 
   const updateTag = async () => {
-    setMessage('');
+    setEditErrorMessage(''); // Reset edit error message
     if (editTagName) {
       try {
         const token = Cookies.get('jwt');
@@ -77,13 +87,15 @@ export function TagCRUD({ isOpen, onClose }) {
         setEditTagId(null);
         setEditTagName('');
         fetchTags();
-        setTimeout(() => setSuccessMessage(''), 3000);
+        hideMessageAfterDelay(setSuccessMessage);
       } catch (error) {
         console.error('Error updating tag:', error.response?.data || error.message);
-        setMessage('The old and new tag have the same name');
+        setEditErrorMessage('Tag name already exists');
+        hideMessageAfterDelay(setEditErrorMessage); // Display specific error message in edit modal
       }
     } else {
-      setMessage('Please provide a valid tag name.');
+      setEditErrorMessage('Please provide a valid tag name.');
+      hideMessageAfterDelay(setEditErrorMessage);
     }
   };
 
@@ -98,10 +110,11 @@ export function TagCRUD({ isOpen, onClose }) {
       });
       setSuccessMessage('Tag deleted successfully!');
       fetchTags();
-      setTimeout(() => setSuccessMessage(''), 3000);
+      hideMessageAfterDelay(setSuccessMessage);
     } catch (error) {
       console.error('Error deleting tag:', error.response?.data || error.message);
       setMessage('Error deleting tag');
+      hideMessageAfterDelay(setMessage);
     }
   };
 
@@ -171,6 +184,12 @@ export function TagCRUD({ isOpen, onClose }) {
 
           {showTags && (
             <div className="mt-4 max-h-[350px] overflow-y-auto">
+              <Button
+                onClick={() => setShowTags(false)}
+                className="w-full mt-4 bg-orange-500 text-white hover:bg-gray-600 transition duration-150"
+              >
+                Hide Tags
+              </Button>
               {tags.length > 0 ? (
                 <div className="space-y-2">
                   {tags.map((tag) => (
@@ -199,12 +218,6 @@ export function TagCRUD({ isOpen, onClose }) {
               ) : (
                 <p className="text-blue-900">No tags available.</p>
               )}
-              <Button
-                onClick={() => setShowTags(false)}
-                className="w-full mt-4 bg-orange-500 text-white hover:bg-gray-600 transition duration-150"
-              >
-                Hide Tags
-              </Button>
             </div>
           )}
 
@@ -234,6 +247,11 @@ export function TagCRUD({ isOpen, onClose }) {
                 placeholder="Enter new tag name"
                 className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-blue-900"
               />
+              {editErrorMessage && (
+                <div className="mt-2 p-2 bg-red-100 text-red-800 rounded">
+                  {editErrorMessage}
+                </div>
+              )}
               <div className="flex space-x-2 mt-4">
                 <Button onClick={updateTag} className="bg-orange-500 text-white hover:bg-orange-600 w-full transition duration-150">
                   Save
@@ -242,6 +260,7 @@ export function TagCRUD({ isOpen, onClose }) {
                   onClick={() => {
                     setEditTagId(null);
                     setEditTagName('');
+                    setEditErrorMessage(''); // Clear error message when canceling
                   }}
                   className="bg-gray-500 text-white hover:bg-gray-600 w-full transition duration-150"
                 >
