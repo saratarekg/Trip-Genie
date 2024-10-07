@@ -164,9 +164,12 @@ export function NavbarComponent() {
                       >
                         Login
                       </NavLink>
-                      <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
-                        <NavLink to="/sign-up">Sign up</NavLink>
-                      </button>
+                      <Link
+                        to="/sign-up"
+                        className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                      >
+                        Sign up
+                      </Link>
                     </>
                   ) : (
                     <button
