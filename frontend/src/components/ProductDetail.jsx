@@ -208,7 +208,7 @@ const ProductDetail = () => {
                       </span>
                     </>
                   ) : (
-                    <span className="ml-2 text-lg font-semibold">N/A</span>
+                    <span className="ml-2 text-lg font-semibold"></span>
                   )}
                 </CardDescription>
               </CardHeader>
@@ -269,7 +269,7 @@ const ProductDetail = () => {
           </div>
 
           <div>
-            {userRole==="seller" &&(
+            {userRole ==="seller" &&(
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-bold">
@@ -320,7 +320,8 @@ const ProductDetail = () => {
                   <Edit className="w-4 h-4 mr-2" /> Update Product
                 </Button>
               )}
-              {userRole === "admin" && (
+             {(userRole === "admin" ||
+                (userRole === "seller" && canModify)) && (
                 <Button
                   className="w-full"
                   variant="destructive"
