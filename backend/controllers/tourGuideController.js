@@ -2,6 +2,7 @@ const TourGuide = require("../models/tourGuide");
 const Nationality = require("../models/nationality");
 const mongoose = require("mongoose");
 const Itinerary = require("../models/itinerary"); // Adjust the path as needed
+const authController = require("./authController");
 
 const { deleteItinerary } = require("./itineraryController");
 
@@ -80,11 +81,14 @@ const updateTourGuideProfile = async (req, res) => {
 
     if (
       username !== tourGuide1.username &&
-      (await TourGuide.findOne({ username }))
+      (await authController.usernameExists(username))
     ) {
       return res.status(400).json({ message: "Username already exists" });
     }
-    if (email !== tourGuide1.email && (await TourGuide.findOne({ email }))) {
+    if (
+      email !== tourGuide1.email &&
+      (await authController.emailExists(email))
+    ) {
       return res.status(400).json({ message: "Email already exists" });
     }
     // Find the TourGuide by their ID and update with new data

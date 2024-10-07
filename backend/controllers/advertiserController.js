@@ -1,6 +1,7 @@
 const Advertiser = require("../models/advertiser");
 const Activity = require("../models/activity");
 const { deleteActivity } = require("./activityController");
+const authController = require("./authController");
 
 const deleteAdvertiserAccount = async (req, res) => {
   try {
@@ -50,23 +51,27 @@ const updateAdvertiser = async (req, res) => {
   try {
     const advertiser1 = await Advertiser.findById(res.locals.user_id);
     if (!advertiser1.isAccepted) {
-      return res
-        .status(400)
-        .json({
-          error: "Advertiser is not accepted yet, Can not update profile",
-        });
+      return res.status(400).json({
+        error: "Advertiser is not accepted yet, Can not update profile",
+      });
     }
 
-    const { email, username, name, description,hotline,website} = req.body;
-    if(username!==advertiser1.username && await Advertiser.findOne({username})){
-     return res.status(400).json({message:"Username already exists"});
+    const { email, username, name, description, hotline, website } = req.body;
+    if (
+      username !== advertiser1.username &&
+      (await authController.usernameExists(username))
+    ) {
+      return res.status(400).json({ message: "Username already exists" });
     }
-    if(email!==advertiser1.email && await Advertiser.findOne({email}) ){
-      return res.status(400).json({message:"Email already exists"});
-     }
+    if (
+      email !== advertiser1.email &&
+      (await authController.emailExists(email))
+    ) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
     const advertiser = await Advertiser.findByIdAndUpdate(
       res.locals.user_id,
-      { email, username, name, description,hotline,website},
+      { email, username, name, description, hotline, website },
       { new: true, runValidators: true }
     );
 
@@ -84,11 +89,9 @@ const getAdvertiser = async (req, res) => {
   try {
     const advertiser = await Advertiser.findById(res.locals.user_id);
     if (!advertiser.isAccepted) {
-      return res
-        .status(400)
-        .json({
-          error: "Advertiser is not accepted yet, Can not view profile",
-        });
+      return res.status(400).json({
+        error: "Advertiser is not accepted yet, Can not view profile",
+      });
     }
     if (!advertiser) {
       return res.status(404).json({ message: "Advertiser not found" });
