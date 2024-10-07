@@ -50,7 +50,11 @@ const FilterComponent = ({
 
   // Handle minimum star rating selection
   const handleStarClick = (star) => {
-    setMinStars(star);
+    if (minStars === star) {
+      setMinStars(0);  // Reset stars filter if clicked again
+    } else {
+      setMinStars(star);
+    }
   };
 
   const getSelectedCategoriesLabel = () => {
@@ -188,11 +192,14 @@ const FilterComponent = ({
 
           {/* Apply Filters Button */}
           <button
-            onClick={searchActivites}
-            className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-          >
-            Apply Filters
-          </button>
+  onClick={() => {
+    searchActivites();
+    toggleFilters(); // Hide filters after applying them
+  }}
+  className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+>
+  Apply Filters
+</button>
         </div>
       )}
     </>

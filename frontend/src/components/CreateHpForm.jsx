@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
+import axios from 'axios';
 import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -16,13 +16,17 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-// Form validation schema using zod
-const formSchema = z.object({
+/**
+ * Creates a Zod schema for the form
+ * @param {boolean} isCityDisabled - Whether the city field is disabled
+ * @returns {import('zod').ZodObject}
+ */
+const createFormSchema = (isCityDisabled) => z.object({
   title: z.string().min(1, 'Please enter a name'),
   description: z.string().min(1, 'Please enter a description'),
   location: z.object({
     address: z.string().min(1, 'Please enter an address'),
-    city: z.string().min(1, 'Please enter a city'),
+    city: isCityDisabled ? z.string().optional() : z.string().min(1, 'Please enter a city'),
     country: z.string().min(1, 'Please select a country'),
   }),
   historicalTag: z
@@ -31,8 +35,7 @@ const formSchema = z.object({
         value: z.string(),
         label: z.string(),
       })
-    )
-    .min(1, 'Please select at least one historical tag'),
+    ),
   openingHours: z.object({
     weekdays: z.string().min(1, 'Please enter weekday opening hours'),
     weekends: z.string().min(1, 'Please enter weekend opening hours'),
@@ -55,6 +58,9 @@ export default function CreateHpForm() {
   const [error, setError] = useState('');
   const [showDialog, setShowDialog] = useState(false);
   const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+  const [isCityDisabled, setIsCityDisabled] = useState(true);
   const navigate = useNavigate();
 
   const {
@@ -62,8 +68,9 @@ export default function CreateHpForm() {
     handleSubmit,
     control,
     formState: { errors },
+    trigger,
   } = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createFormSchema(isCityDisabled)),
     defaultValues: {
       title: '',
       description: '',
@@ -118,6 +125,42 @@ export default function CreateHpForm() {
     };
     fetchHistoricalTags();
   }, []);
+
+  const fetchCities = async (country) => {
+    setCitiesLoading(true);
+    setIsCityDisabled(true);
+    try {
+      const response = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ country }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.msg || 'Failed to fetch cities');
+      }
+
+      const sortedCities = data.data.sort();
+      setCities(sortedCities);
+      setIsCityDisabled(sortedCities.length === 0);
+    } catch (err) {
+      console.error('Error fetching cities: ', err);
+      setCities([]);
+      setIsCityDisabled(true);
+    } finally {
+      setCitiesLoading(false);
+      trigger('location.city');
+    }
+  };
+
+  const handleCountryChange = (event) => {
+    const country = event.target.value;
+    fetchCities(country);
+  };
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -191,33 +234,51 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Country *</label>
+          <label htmlFor="country" className="block text-gray-700 mb-2">Country *</label>
           <select
             {...register('location.country')}
+            onChange={handleCountryChange}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="country"
           >
             <option value="">Select a country</option>
             {countries.map((country) => (
-              <option key={country.code} value={country.code}>
+              <option key={country.name} value={country.name}>
                 {country.name}
               </option>
             ))}
           </select>
           {errors.location?.country && <span className="text-red-500">{errors.location.country.message}</span>}
+        </div>
 
-          <label className="block text-gray-700 mb-2">City *</label>
-          <input
+        <div>
+          <label htmlFor="city" className="block text-gray-700 mb-2">City {isCityDisabled ? '' : '*'}</label>
+          <select
             {...register('location.city')}
-            placeholder="Enter city"
+            disabled={isCityDisabled}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-          />
+            id="city"
+          >
+            <option value="">Select a city</option>
+            {cities.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
           {errors.location?.city && <span className="text-red-500">{errors.location.city.message}</span>}
+          {isCityDisabled && (
+            <span className="text-blue-500">No cities available for this country. You can proceed without selecting a city.</span>
+          )}
+        </div>
 
-          <label className="block text-gray-700 mb-2">Address *</label>
+        <div>
+          <label htmlFor="address" className="block text-gray-700 mb-2">Address *</label>
           <input
             {...register('location.address')}
             placeholder="Address"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="address"
           />
           {errors.location?.address && <span className="text-red-500">{errors.location.address.message}</span>}
         </div>
@@ -244,67 +305,73 @@ export default function CreateHpForm() {
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Opening Hours (Weekdays) *</label>
+          <label htmlFor="weekdays" className="block text-gray-700 mb-2">Opening Hours (Weekdays) *</label>
           <input
             {...register('openingHours.weekdays')}
             placeholder="e.g., 9 AM - 5 PM"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="weekdays"
           />
           {errors.openingHours?.weekdays && <span className="text-red-500">{errors.openingHours.weekdays.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Opening Hours (Weekends) *</label>
+          <label htmlFor="weekends" className="block text-gray-700 mb-2">Opening Hours (Weekends) *</label>
           <input
             {...register('openingHours.weekends')}
             placeholder="e.g., 10 AM - 4 PM"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="weekends"
           />
           {errors.openingHours?.weekends && <span className="text-red-500">{errors.openingHours.weekends.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Prices (Foreigner) *</label>
+          <label htmlFor="foreigner" className="block text-gray-700 mb-2">Ticket Prices (Foreigner) *</label>
           <input
             {...register('ticketPrices.foreigner')}
             placeholder="Enter foreigner ticket price"
             type="number"
             min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="foreigner"
           />
           {errors.ticketPrices?.foreigner && <span className="text-red-500">{errors.ticketPrices.foreigner.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Prices (Native) *</label>
+          <label htmlFor="native" className="block text-gray-700 mb-2">Ticket Prices (Native) *</label>
           <input
             {...register('ticketPrices.native')}
             placeholder="Enter native ticket price"
             type="number"
             min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="native"
           />
           {errors.ticketPrices?.native && <span className="text-red-500">{errors.ticketPrices.native.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Ticket Prices (Student) *</label>
+          <label htmlFor="student" className="block text-gray-700 mb-2">Ticket Prices (Student) *</label>
           <input
             {...register('ticketPrices.student')}
             placeholder="Enter student ticket price"
             type="number"
             min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="student"
           />
           {errors.ticketPrices?.student && <span className="text-red-500">{errors.ticketPrices.student.message}</span>}
         </div>
 
         <div>
-          <label className="block text-gray-700 mb-2">Picture URLs</label>
+          <label htmlFor="pictures" className="block text-gray-700 mb-2">Picture URLs</label>
           <textarea
             {...register('pictures')}
             placeholder="Enter picture URLs (one per line)"
             className="border border-gray-300 rounded-xl p-2 w-full h-32 mb-4"
+            id="pictures"
           />
           {errors.pictures && <span className="text-red-500">{errors.pictures.message}</span>}
         </div>
@@ -330,7 +397,7 @@ export default function CreateHpForm() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4 flex justify-end space-x-4">
-            <Button colorScheme="blue" onClick={handleGoBack}>
+            <Button onClick={handleGoBack}>
               Go to All Historical Places
             </Button>
             <Button variant="outline" onClick={handleCreateNew}>
