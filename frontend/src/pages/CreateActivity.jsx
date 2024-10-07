@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+'use client'
+
+import React, { useState, useEffect } from "react"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import axios from "axios"
+import Cookies from "js-cookie"
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet"
+import "leaflet/dist/leaflet.css"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
@@ -19,9 +21,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import Select from "react-select";
-import { useNavigate } from "react-router-dom";
+} from "@/components/ui/dialog"
+import Select from "react-select"
+import { useNavigate } from "react-router-dom"
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -50,7 +52,7 @@ const schema = z.object({
     .nonnegative("Discount must be a non-negative integer"),
   isBookingOpen: z.boolean(),
   pictures: z.array(z.string()).optional(),
-});
+})
 
 export default function CreateActivity() {
   const {
@@ -70,44 +72,98 @@ export default function CreateActivity() {
       isBookingOpen: true,
       pictures: [],
     },
-  });
+  })
 
-  const [categories, setCategories] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([])
+  const [tags, setTags] = useState([])
+  const [loading, setLoading] = useState(false)
   const [location, setLocation] = useState({
     longitude: 31.1342,
     latitude: 29.9792,
-  });
-  const [showDialog, setShowDialog] = useState(false);
-  const navigate = useNavigate();
+  })
+  const [showDialog, setShowDialog] = useState(false)
+  const navigate = useNavigate()
+
+  const [countries, setCountries] = useState([])
+  const [cities, setCities] = useState([])
+  const [selectedCountry, setSelectedCountry] = useState(null)
+  const [selectedCity, setSelectedCity] = useState(null)
+  const [citiesLoading, setCitiesLoading] = useState(false)
 
   useEffect(() => {
     const fetchCategories = async () => {
       const response = await axios.get(
         "http://localhost:4000/api/getAllCategories"
-      );
+      )
       setCategories(
         response.data.map((cat) => ({ value: cat._id, label: cat.name }))
-      );
-    };
+      )
+    }
 
     const fetchTags = async () => {
-      const response = await axios.get("http://localhost:4000/api/getAllTags");
+      const response = await axios.get("http://localhost:4000/api/getAllTags")
       setTags(
         response.data.map((tag) => ({ value: tag._id, label: tag.type }))
-      );
-    };
+      )
+    }
 
-    fetchCategories();
-    fetchTags();
-  }, []);
+    fetchCategories()
+    fetchTags()
+    fetchCountries()
+  }, [])
+
+  const fetchCountries = async () => {
+    try {
+      const response = await fetch('https://restcountries.com/v3.1/all')
+      const data = await response.json()
+      const sortedCountries = data.map(country => ({
+        value: country.name.common,
+        label: country.name.common
+      })).sort((a, b) => a.label.localeCompare(b.label))
+      setCountries(sortedCountries)
+    } catch (error) {
+      console.error('Error fetching countries:', error)
+    }
+  }
+
+  const fetchCities = async (country) => {
+    setCitiesLoading(true)
+    try {
+      const response = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ country }),
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        throw new Error(data.msg || 'Failed to fetch cities')
+      }
+
+      const sortedCities = data.data.sort().map(city => ({
+        value: city,
+        label: city
+      }))
+      setCities(sortedCities)
+    } catch (err) {
+      if (err.status === 404) {
+        setCities([])
+      }
+      console.error('Error fetching cities: ', err)
+      setCities([])
+    } finally {
+      setCitiesLoading(false)
+    }
+  }
 
   const onSubmit = async (data) => {
-    console.log("Submitted data:", data);
-    setLoading(true);
-    const token = Cookies.get("jwt");
-    const role = Cookies.get("role") || "guest";
+    console.log("Submitted data:", data)
+    setLoading(true)
+    const token = Cookies.get("jwt")
+    const role = Cookies.get("role") || "guest"
 
     const activityData = {
       ...data,
@@ -121,7 +177,7 @@ export default function CreateActivity() {
       },
       category: data.category.map((cat) => cat.value),
       tags: data.tags.map((tag) => tag.value),
-    };
+    }
 
     try {
       const response = await axios.post(
@@ -130,32 +186,44 @@ export default function CreateActivity() {
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      );
-      console.log("Created activity:", response.data);
-      setShowDialog(true);
+      )
+      console.log("Created activity:", response.data)
+      setShowDialog(true)
     } catch (error) {
-      console.error("Failed to create activity:", error.message);
+      console.error("Failed to create activity:", error.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const MapClick = () => {
     useMapEvents({
       click: (e) => {
-        setLocation({ latitude: e.latlng.lat, longitude: e.latlng.lng });
+        setLocation({ latitude: e.latlng.lat, longitude: e.latlng.lng })
       },
-    });
-    return null;
-  };
+    })
+    return null
+  }
 
   const handleGoBack = () => {
-    navigate("/activity");
-  };
+    navigate("/activity")
+  }
 
   const handleCreateNew = () => {
-    window.location.reload();
-  };
+    window.location.reload()
+  }
+
+  const handleCountryChange = (selectedOption) => {
+    setSelectedCountry(selectedOption)
+    setSelectedCity(null)
+    setCities([])
+    fetchCities(selectedOption.value)
+  }
+
+  const handleCityChange = (selectedOption) => {
+    setSelectedCity(selectedOption)
+    setValue('location.address', `${selectedOption.value}, ${selectedCountry.value}`)
+  }
 
   return (
     <>
@@ -197,17 +265,27 @@ export default function CreateActivity() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
-                <Controller
-                  name="location.address"
-                  control={control}
-                  render={({ field }) => <Input id="address" {...field} />}
+                <Label htmlFor="country">Country</Label>
+                <Select
+                  options={countries}
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                 />
-                {errors.location?.address && (
-                  <p className="text-red-500 text-sm">
-                    {errors.location.address.message}
-                  </p>
-                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Select
+                  options={cities}
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  isLoading={citiesLoading}
+                  isDisabled={!selectedCountry || citiesLoading}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -247,8 +325,8 @@ export default function CreateActivity() {
                             : ""
                         }
                         onChange={(e) => {
-                          const dateValue = new Date(e.target.value);
-                          field.onChange(dateValue);
+                          const dateValue = new Date(e.target.value)
+                          field.onChange(dateValue)
                         }}
                       />
                     )}
@@ -429,5 +507,5 @@ export default function CreateActivity() {
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }
