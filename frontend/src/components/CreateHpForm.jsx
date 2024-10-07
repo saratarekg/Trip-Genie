@@ -31,8 +31,8 @@ const formSchema = z.object({
         value: z.string(),
         label: z.string(),
       })
-    )
-    .min(1, 'Please select at least one historical tag'),
+    ),
+    
   openingHours: z.object({
     weekdays: z.string().min(1, 'Please enter weekday opening hours'),
     weekends: z.string().min(1, 'Please enter weekend opening hours'),
