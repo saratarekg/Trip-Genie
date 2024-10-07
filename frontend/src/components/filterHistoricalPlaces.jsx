@@ -41,6 +41,21 @@ const FilterComponent = ({
     }
   };
 
+  const getSelectedTypesLabel = () => {
+    if (!selectedTypes || selectedTypes.length === 0) {
+      return "Select Type(s)";
+    }
+    return selectedTypes.join(', ');
+  };
+
+  const getSelectedPeriodLabel = () => {
+    if (!selectedPeriods || selectedPeriods.length === 0) {
+      return "Select Period(s)";
+    }
+    return selectedPeriods.join(', ');
+  };
+
+
   const handlePeriodChange = (period) => {
     if (selectedPeriods.includes(period)) {
       setSelectedPeriods(selectedPeriods.filter((t) => t !== period));
@@ -163,7 +178,7 @@ const FilterComponent = ({
                   onClick={() => setShowTypeDropdown(!showTypeDropdown)}
                   className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
                 >
-                  Select Type(s) <ChevronDown className={`ml-1 transform ${showTypeDropdown ? 'rotate-180' : ''}`} />
+                  {getSelectedTypesLabel()} <ChevronDown className={`ml-1 transform ${showTypeDropdown ? 'rotate-180' : ''}`} />
                 </button>
                 {showTypeDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
@@ -190,7 +205,7 @@ const FilterComponent = ({
                   onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
                   className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
                 >
-                  Select Period(s) <ChevronDown className={`ml-1 transform ${showPeriodDropdown ? 'rotate-180' : ''}`} />
+                  {getSelectedPeriodLabel()} <ChevronDown className={`ml-1 transform ${showPeriodDropdown ? 'rotate-180' : ''}`} />
                 </button>
                 {showPeriodDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
