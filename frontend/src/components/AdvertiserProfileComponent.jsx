@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Mail, User, Phone, Globe, CheckCircle } from "lucide-react";
+import PhoneInput from "react-phone-input-2";
 
 export function AdvertiserProfileComponent() {
     const [advertiser, setAdvertiser] = useState(null);
@@ -41,13 +42,17 @@ export function AdvertiserProfileComponent() {
     }, []);
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditedAdvertiser((prev) => ({ ...prev, [name]: value }));
-        setValidationMessages((prev) => ({ ...prev, [name]: "" }));
-    
-        // Validate fields on change
-        validateFields();
-    };
+        if (typeof e === 'string') {
+          // This is a phone number change
+          setEditedAdvertiser((prev) => ({ ...prev, hotline: e }));
+          setValidationMessages((prev) => ({ ...prev, hotline: "" }));
+        } else {
+          // This is a regular input change
+          const { name, value } = e.target;
+          setEditedAdvertiser((prev) => ({ ...prev, [name]: value }));
+          setValidationMessages((prev) => ({ ...prev, [name]: "" }));
+        }
+      };
     const isValidURL = (string) => {
         const res = string.match(/^(https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*$/i);
         return res !== null;
@@ -239,26 +244,33 @@ export function AdvertiserProfileComponent() {
                     </div>
 
                     <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                            <Phone className="w-4 h-4 text-gray-500" />
-                            {isEditing ? (
-                                <input
-                                    type="text"
-                                    name="hotline"
-                                    value={editedAdvertiser.hotline}
-                                    onChange={handleInputChange}
-                                    className={`border rounded px-2 py-1 flex-1 ${validationMessages.hotline ? "border-red-500" : ""
-                                        }`}
-                                    placeholder="Hotline"
-                                />
-                            ) : (
-                                <span>{advertiser.hotline}</span>
-                            )}
-                        </div>
-                        {validationMessages.hotline && (
-                            <span className="text-red-500 text-sm">{validationMessages.hotline}</span>
-                        )}
-                    </div>
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-gray-500" />
+              {isEditing ? (
+                <div className="w-full">
+                  <PhoneInput
+                    country={"eg"}
+                    value={editedAdvertiser.hotline}
+                    onChange={handleInputChange}
+                    excludeCountries={["il"]}
+                    inputProps={{
+                      name: "mobile",
+                      required: true,
+                      placeholder: advertiser.hotline,
+                      className: `w-full p-2 ${validationMessages.hotline ? "border-red-500" : "border-gray-300"}`,
+                    }}
+                    containerClass="w-full"
+                    inputStyle={{ width: '60%', marginLeft: '45px' }}
+                  />
+                </div>
+              ) : (
+                <span>{advertiser.hotline}</span>
+              )}
+            </div>
+            {validationMessages.mobile && (
+              <span className="text-red-500 text-sm">{validationMessages.hotline}</span>
+            )}
+          </div>
 
                     {advertiser.website && (
     <div className="flex flex-col mb-4">
