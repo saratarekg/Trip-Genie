@@ -1,19 +1,23 @@
-"use client"; // Ensure client-side rendering
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export function TagCRUD({ isOpen, onClose }) {
   const [tags, setTags] = useState([]);
   const [newTag, setNewTag] = useState('');
   const [editTagId, setEditTagId] = useState(null);
   const [editTagName, setEditTagName] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [tagToDelete, setTagToDelete] = useState(null);
   const [message, setMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [showCreateTag, setShowCreateTag] = useState(false);
+  const [showTags, setShowTags] = useState(false);
 
   const fetchTags = async () => {
     try {
@@ -49,9 +53,10 @@ export function TagCRUD({ isOpen, onClose }) {
         setNewTag('');
         setSuccessMessage('Tag created successfully!');
         fetchTags();
-        setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
+        setShowCreateTag(false);
+        setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
-        setMessage('Error creating tags');
+        setMessage('This tag already exists ');
       }
     } else {
       setMessage('Please enter a tag name.');
@@ -69,10 +74,10 @@ export function TagCRUD({ isOpen, onClose }) {
           },
         });
         setSuccessMessage('Tag updated successfully!');
-        setEditTagId(null); // Close the edit modal
-        setEditTagName(''); // Reset the input field
+        setEditTagId(null);
+        setEditTagName('');
         fetchTags();
-        setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
+        setTimeout(() => setSuccessMessage(''), 3000);
       } catch (error) {
         console.error('Error updating tag:', error.response?.data || error.message);
         setMessage('Error updating tag');
@@ -93,85 +98,141 @@ export function TagCRUD({ isOpen, onClose }) {
       });
       setSuccessMessage('Tag deleted successfully!');
       fetchTags();
-      setTimeout(() => setSuccessMessage(''), 3000); // Clear message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error deleting tag:', error.response?.data || error.message);
       setMessage('Error deleting tag');
     }
   };
 
+  const handleDeleteClick = (tag) => {
+    setTagToDelete(tag);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (tagToDelete) {
+      deleteTag(tagToDelete._id);
+      setShowDeleteModal(false);
+      setTagToDelete(null);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowCreateTag(false);
+    setShowTags(false);
+    setNewTag('');
+  };
+
   return (
-    <DialogContent className="sm:max-w-[425px] p-6 bg-white shadow-lg rounded-lg">
-      <DialogHeader>
-        <DialogTitle className="text-lg font-semibold">Manage Tags</DialogTitle>
-        <DialogDescription className="text-gray-500">
-          Create, edit, or delete tags.
-        </DialogDescription>
-      </DialogHeader>
+    <>
+      <DialogContent className="sm:max-w-[425px] p-6 bg-white shadow-lg rounded-lg">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold text-blue-900">Manage Tags</DialogTitle>
+        </DialogHeader>
 
-      <div className="space-y-4 pb-5">
-        {/* Create Tag Section */}
-        <div className="mb-4 ">
-          <Input
-            type="text"
-            value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-            placeholder="Enter new tag name"
-            className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <Button 
-            onClick={createTag} 
-            className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150">
-            Create Tag
-          </Button>
-        </div>
+        <div className="space-y-4 pb-5 text-blue-900">
+          {!showCreateTag && !showTags && (
+            <>
+              <Button 
+                onClick={() => setShowCreateTag(true)} 
+                className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150">
+                Create Tag
+              </Button>
+              <Button 
+                onClick={() => setShowTags(true)} 
+                className="w-full mt-2 bg-orange-500 text-white hover:bg-orange-600 transition duration-150">
+                View Tags
+              </Button>
+            </>
+          )}
 
-        {/* Tags List */}
-        <div className="max-h-64 overflow-y-auto pb-3 pr-2">
-          {tags.length > 0 ? (
+          {showCreateTag && (
             <div className="space-y-2">
-              {tags.map((tag) => (
-                <div 
-                  key={tag._id} 
-                  className="flex justify-between items-center border border-gray-300 p-3 rounded-lg hover:shadow-md transition-all duration-150">
-                  <span className="text-black font-medium">{tag.type}</span>
-                  <div className="space-x-2">
-                    {/* Edit button */}
-                    <Button
-                      onClick={() => {
-                        setEditTagId(tag._id);
-                        setEditTagName(tag.type);
-                      }}
-                      className="bg-blue-500 hover:bg-blue-600 text-white transition duration-150">
-                      Edit
-                    </Button>
-
-                    {/* Delete button */}
-                    <Button
-                      onClick={() => deleteTag(tag._id)}
-                      className="bg-red-500 hover:bg-red-600 text-white transition duration-150">
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
+              <Input
+                type="text"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Enter new tag name"
+                className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-blue-900"
+              />
+              <Button 
+                onClick={createTag} 
+                className="w-full mt-2 bg-green-500 text-white hover:bg-green-600 transition duration-150">
+                Add Tag
+              </Button>
+              <Button 
+                onClick={handleCancel} 
+                className="w-full mt-2 bg-gray-500 text-white hover:bg-gray-600 transition duration-150">
+                Cancel
+              </Button>
             </div>
-          ) : (
-            <p className="text-gray-500">No tags available.</p>
+          )}
+
+          {showTags && (
+            <div className="mt-4 max-h-[350px] overflow-y-auto">
+              {tags.length > 0 ? (
+                <div className="space-y-2">
+                  {tags.map((tag) => (
+                    <div 
+                      key={tag._id} 
+                      className="flex justify-between items-center border border-gray-300 p-3 rounded-lg hover:shadow-md transition-all duration-150">
+                      <span className="text-blue-900 font-medium">{tag.type}</span>
+                      <div className="space-x-2">
+                        <Button
+                          onClick={() => {
+                            setEditTagId(tag._id);
+                            setEditTagName(tag.type);
+                          }}
+                          className="bg-blue-500 hover:bg-blue-600 text-white transition duration-150">
+                          Edit
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteClick(tag)}
+                          className="bg-red-500 hover:bg-red-600 text-white transition duration-150">
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-blue-900">No tags available.</p>
+              )}
+              <Button
+                onClick={() => setShowTags(false)}
+                className="w-full mt-4 bg-orange-500 text-white hover:bg-gray-600 transition duration-150"
+              >
+                Hide Tags
+              </Button>
+            </div>
+          )}
+
+          {message && (
+            <div className="mt-4 p-2 bg-red-100 text-red-800 rounded">
+              {message}
+            </div>
+          )}
+          {successMessage && (
+            <div className="mt-4 p-2 bg-green-100 text-green-800 rounded">
+              {successMessage}
+            </div>
           )}
         </div>
 
         {/* Edit Tag Modal */}
         {editTagId && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-              <h3 className="font-bold mb-2">Edit Tag</h3>
+          <Dialog open={!!editTagId} onOpenChange={() => setEditTagId(null)}>
+            <DialogContent className="sm:max-w-[425px] p-6 bg-white shadow-lg rounded-lg">
+              <DialogHeader>
+                <DialogTitle className="text-lg font-semibold text-blue-900">Edit Tag</DialogTitle>
+              </DialogHeader>
               <Input
                 type="text"
                 value={editTagName}
                 onChange={(e) => setEditTagName(e.target.value)}
                 placeholder="Enter new tag name"
-                className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="mt-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-blue-900"
               />
               <div className="flex space-x-2 mt-4">
                 <Button onClick={updateTag} className="bg-orange-500 text-white hover:bg-orange-600 w-full transition duration-150">
@@ -179,30 +240,44 @@ export function TagCRUD({ isOpen, onClose }) {
                 </Button>
                 <Button
                   onClick={() => {
-                    setEditTagId(null); // Close modal
-                    setEditTagName(''); // Reset input
+                    setEditTagId(null);
+                    setEditTagName('');
                   }}
                   className="bg-gray-500 text-white hover:bg-gray-600 w-full transition duration-150"
                 >
                   Cancel
                 </Button>
               </div>
-            </div>
-          </div>
+            </DialogContent>
+          </Dialog>
         )}
+      </DialogContent>
 
-        {/* Message Display */}
-        {message && (
-          <div className="mt-4 p-2 bg-red-100 text-red-800 rounded">
-            {message}
-          </div>
-        )}
-        {successMessage && (
-          <div className="mt-4 p-2 bg-green-100 text-green-800 rounded">
-            {successMessage}
-          </div>
-        )}
-      </div>
-    </DialogContent>
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="sm:max-w-[500px] p-6 bg-white shadow-lg rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-blue-900">Confirm Deletion</DialogTitle>
+            <DialogDescription className="text-blue-700">
+              Are you sure you want to delete the tag "{tagToDelete?.type}"?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-start">
+            <Button
+              onClick={handleConfirmDelete}
+              className="bg-red-500 text-white hover:bg-red-600 transition duration-150"
+            >
+              Delete
+            </Button>
+            <Button
+              onClick={() => setShowDeleteModal(false)}
+              className="bg-gray-500 text-white hover:bg-gray-600 transition duration-150"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
