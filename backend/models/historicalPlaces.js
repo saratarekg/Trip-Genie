@@ -10,7 +10,7 @@ const historicalPlacesSchema = new Schema({
 
     location: {
         address: { type: String, required: [true, 'Please enter an address'] },
-        city: { type: String, required: [true, 'Please enter a city'] },
+        city: { type: String, required: false},
         country: { type: String, required: [true, 'Please enter a country'] },
 
     },
