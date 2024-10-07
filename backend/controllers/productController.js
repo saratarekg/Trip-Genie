@@ -2,7 +2,7 @@ const Product = require("../models/product");
 const Seller = require("../models/seller");
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, budget, searchBy, asc, myProducts } = req.query;
+  const { minPrice, budget, searchBy, asc, myproducts } = req.query;
 
   try {
     // Debugging: Log incoming query parameters
@@ -26,7 +26,7 @@ const getAllProducts = async (req, res) => {
     }
 
     // Filter by the user's products (myProducts)
-    if (myProducts) {
+    if (myproducts) {
       query.seller = res.locals.user_id;
       console.log("Filtering by user's products:", query.seller);
     }
