@@ -35,7 +35,7 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { Alert } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -206,6 +206,23 @@ const formSchema = z
           message: "Hotline is required.",
         });
       }
+
+      if (!data.hotline.match(/^\d+$/)) {
+        ctx.addIssue({
+          path: ["hotline"],
+          message: "Hotline must be a number.",
+        });
+      }
+
+      if (
+        data.website &&
+        !data.website.match(/^(https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*$/i)
+      ) {
+        ctx.addIssue({
+          path: ["website"],
+          message: "Website must be a valid URL.",
+        });
+      }
     }
   });
 
@@ -344,7 +361,14 @@ export function SignupForm() {
         </div>
         {apiError && (
           <div ref={alertRef}>
-            <Alert message={apiError} onClose={() => setApiError(null)} />
+            <Alert
+              variant="destructive"
+              className="mb-4"
+              onClose={() => setApiError(null)}
+            >
+              <AlertDescription>{apiError}</AlertDescription>
+            </Alert>
+            {/* <Alert message={apiError} onClose={() => setApiError(null)} /> */}
           </div>
         )}
         <Form {...form}>
