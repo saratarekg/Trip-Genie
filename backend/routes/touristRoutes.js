@@ -10,6 +10,9 @@ const sellerController = require("../controllers/sellerController");
 
 const router = express.Router();
 
+router.put("/", touristController.updateTouristProfile);
+router.get("/", touristController.getTouristProfile);
+
 router.get("/tour-guide/:id", tourguideController.getTourGuideByID);
 
 router.get("/itineraries", itineraryController.getAllItineraries);

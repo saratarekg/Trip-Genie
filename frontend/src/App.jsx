@@ -13,6 +13,7 @@ import UpdateProduct from "./components/UpdateProduts.jsx";
 import UpdatehistoricalPlace from "./components/UpdateHP.jsx";
 import ProductDetail from "./components/ProductDetail.jsx";
 import { TourGuideProfileComponent } from "./components/tourGuideProfile.jsx";
+import { TouristProfileComponent } from "./components/touristProfile.jsx";
 
 import ActivityList from "./components/ActivityListAdvertiser.jsx";
 import ItineraryList from "./components/ItineraryListTourGuide.jsx";
@@ -165,6 +166,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tour-guide"]}>
                 <TourGuideProfileComponent />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/tourist-profile"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <TouristProfileComponent />
               </ProtectedRoute>
             }
           />

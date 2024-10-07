@@ -90,6 +90,7 @@ export function NavbarComponent() {
                         Historical Places
                       </NavLink>
                       <NavLink to="/all-products">Products</NavLink>
+                      <NavLink to="/tourist-profile">Profile</NavLink>
                     </>
                   )}
                   {role === "advertiser" && (

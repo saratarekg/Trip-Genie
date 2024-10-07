@@ -1,5 +1,6 @@
+'use client'
+
 import React, { useEffect, useState } from "react";
-// import { ObjectId } from "mongodb";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -11,7 +12,9 @@ import {
   Briefcase,
   Flag,
   Plus,
-  Trash,
+  Calendar,
+  Wallet,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
@@ -33,12 +36,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-export function TourGuideProfileComponent() {
-  const [tourGuide, setTourGuide] = useState(null);
+export function TouristProfileComponent() {
+  const [tourist, setTourist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTourGuide, setEditedTourGuide] = useState(null);
+  const [editedTourist, setEditedTourist] = useState(null);
   const [validationMessages, setValidationMessages] = useState({});
   const [showWorkDialog, setShowWorkDialog] = useState(false);
   const [currentWork, setCurrentWork] = useState({
@@ -56,7 +59,7 @@ export function TourGuideProfileComponent() {
   };
 
   useEffect(() => {
-    const fetchTourGuideProfile = async () => {
+    const fetchTouristProfile = async () => {
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
@@ -67,8 +70,8 @@ export function TourGuideProfileComponent() {
             Authorization: `Bearer ${token}`,
           },
         });
-        setTourGuide(response.data);
-        setEditedTourGuide(response.data);
+        setTourist(response.data);
+        setEditedTourist(response.data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -76,7 +79,7 @@ export function TourGuideProfileComponent() {
       }
     };
 
-    fetchTourGuideProfile();
+    fetchTouristProfile();
   }, []);
 
   useEffect(() => {
@@ -95,26 +98,22 @@ export function TourGuideProfileComponent() {
 
   const handleInputChange = (e) => {
     const { name, value } = e && e.target ? e.target : { name: 'mobile', value: e };
-    setEditedTourGuide((prev) => ({ ...prev, [name]: value }));
+    setEditedTourist((prev) => ({ ...prev, [name]: value }));
     setValidationMessages((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleNationalityChange = (value) => {
-    console.log(value);
-      // const objectId = new ObjectId(value); // Convert string to ObjectId
-      setEditedTourGuide((prev) => ({ ...prev, nationality: value }));
-      setValidationMessages((prev) => ({ ...prev, nationality: "" }));
-    
+    setEditedTourist((prev) => ({ ...prev, nationality: value }));
+    setValidationMessages((prev) => ({ ...prev, nationality: "" }));
   };
 
   const handleDiscard = () => {
-    setEditedTourGuide(tourGuide);
+    setEditedTourist(tourist);
     setIsEditing(false);
   };
 
   const validateFields = () => {
-    const { username, email, mobile, yearsOfExperience, nationality } =
-      editedTourGuide;
+    const { username, email, mobile,nationality, dateOfBirth, jobOrStudent, wallet } = editedTourist;
     const messages = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{7,15}$/;
@@ -130,13 +129,10 @@ export function TourGuideProfileComponent() {
     } else if (!phoneRegex.test(mobile)) {
       messages.mobile = "Invalid phone number format. Include 7-15 digits.";
     }
-    if (yearsOfExperience === undefined || yearsOfExperience === null) {
-      messages.yearsOfExperience = "Years of experience is required.";
-    } else if (yearsOfExperience < 0 || yearsOfExperience > 50) {
-      messages.yearsOfExperience =
-        "Years of experience must be between 0 and 50.";
-    }
     if (!nationality) messages.nationality = "Nationality is required.";
+    if (!dateOfBirth) messages.dateOfBirth = "Date of birth is required.";
+    if (!jobOrStudent) messages.jobOrStudent = "Job or student status is required.";
+    if (wallet < 0) messages.wallet = "Wallet balance cannot be negative.";
 
     setValidationMessages(messages);
     return Object.keys(messages).length === 0;
@@ -151,14 +147,14 @@ export function TourGuideProfileComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const api = `http://localhost:4000/${role}`;
-      const response = await axios.put(api, editedTourGuide, {
+      const response = await axios.put(api, editedTourist, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (response.status === 200) {
-        setTourGuide(response.data.tourGuide);
+        setTourist(response.data.tourist);
         setIsEditing(false);
         setError("");
       }
@@ -179,19 +175,19 @@ export function TourGuideProfileComponent() {
   };
 
   const handleEditWork = (index) => {
-    setCurrentWork(editedTourGuide.previousWorks[index]);
+    setCurrentWork(editedTourist.previousWorks[index]);
     setShowWorkDialog(true);
   };
 
   const handleRemoveWork = (index) => {
-    const newWorks = [...editedTourGuide.previousWorks];
+    const newWorks = [...editedTourist.previousWorks];
     newWorks.splice(index, 1);
-    setEditedTourGuide((prev) => ({ ...prev, previousWorks: newWorks }));
+    setEditedTourist((prev) => ({ ...prev, previousWorks: newWorks }));
   };
 
   const handleSaveWork = () => {
     if (currentWork.title && currentWork.company && currentWork.duration) {
-      const newWorks = [...(editedTourGuide.previousWorks || [])];
+      const newWorks = [...(editedTourist.previousWorks || [])];
       const existingIndex = newWorks.findIndex(
         (w) =>
           w.title === currentWork.title && w.company === currentWork.company
@@ -201,7 +197,7 @@ export function TourGuideProfileComponent() {
       } else {
         newWorks.push(currentWork);
       }
-      setEditedTourGuide((prev) => ({ ...prev, previousWorks: newWorks }));
+      setEditedTourist((prev) => ({ ...prev, previousWorks: newWorks }));
       setShowWorkDialog(false);
     }
   };
@@ -222,11 +218,11 @@ export function TourGuideProfileComponent() {
     );
   }
 
-  if (!tourGuide) {
+  if (!tourist) {
     return (
       <div className="flex justify-center items-center h-screen">
         <p className="text-lg font-semibold">
-          No tour guide profile information is available.
+          No tourist profile information is available.
         </p>
       </div>
     );
@@ -240,7 +236,7 @@ export function TourGuideProfileComponent() {
             <User className="w-12 h-12 text-white" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-1">{tourGuide.username}</h2>
+            <h2 className="text-3xl font-bold mb-1">{tourist.username}</h2>
             <div className="flex items-center gap-2 mb-4">
               <AtSign className="w-4 h-4 text-gray-500" />
               {isEditing ? (
@@ -248,7 +244,7 @@ export function TourGuideProfileComponent() {
                   <Input
                     type="text"
                     name="username"
-                    value={editedTourGuide.username}
+                    value={editedTourist.username}
                     onChange={handleInputChange}
                     className={
                       validationMessages.username ? "border-red-500" : ""
@@ -262,7 +258,7 @@ export function TourGuideProfileComponent() {
                   )}
                 </div>
               ) : (
-                <p className="text-2xl font-semibold">{tourGuide.username}</p>
+                <p className="text-2xl font-semibold">{tourist.username}</p>
               )}
             </div>
           </div>
@@ -276,13 +272,13 @@ export function TourGuideProfileComponent() {
                 <Input
                   type="email"
                   name="email"
-                  value={editedTourGuide.email}
+                  value={editedTourist.email}
                   onChange={handleInputChange}
                   className={validationMessages.email ? "border-red-500" : ""}
                   placeholder="Email"
                 />
               ) : (
-                <span>{tourGuide.email}</span>
+                <span>{tourist.email}</span>
               )}
             </div>
             {validationMessages.email && (
@@ -299,13 +295,13 @@ export function TourGuideProfileComponent() {
                 <div className="w-full">
                   <PhoneInput
                     country={"eg"}
-                    value={editedTourGuide.mobile}
+                    value={editedTourist.mobile}
                     onChange={handleInputChange}
                     excludeCountries={["il"]}
                     inputProps={{
                       name: "mobile",
                       required: true,
-                      placeholder: tourGuide.mobile,
+                      placeholder: tourist.mobile,
                       className: `w-full p-2 ${validationMessages.mobile ? "border-red-500" : "border-gray-300"}`,
                     }}
                     containerClass="w-full"
@@ -313,36 +309,11 @@ export function TourGuideProfileComponent() {
                   />
                 </div>
               ) : (
-                <span>{tourGuide.mobile}</span>
+                <span>{tourist.mobile}</span>
               )}
             </div>
             {validationMessages.mobile && (
               <span className="text-red-500 text-sm">{validationMessages.mobile}</span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Briefcase className="w-4 h-4 text-gray-500" />
-            {isEditing ? (
-              <div className="flex flex-col">
-                <Input
-                  type="number"
-                  name="yearsOfExperience"
-                  value={editedTourGuide.yearsOfExperience}
-                  onChange={handleInputChange}
-                  className={
-                    validationMessages.yearsOfExperience ? "border-red-500" : ""
-                  }
-                  placeholder="Years of Experience"
-                />
-                {validationMessages.yearsOfExperience && (
-                  <span className="text-red-500 text-sm">
-                    {validationMessages.yearsOfExperience}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <span>{tourGuide.yearsOfExperience} years of experience</span>
             )}
           </div>
 
@@ -356,7 +327,7 @@ export function TourGuideProfileComponent() {
                       validationMessages.nationality ? "border-red-500" : ""
                     }
                   >
-                    <SelectValue placeholder={tourGuide.nationality.name} />
+                    <SelectValue placeholder={tourist.nationality.name} />
                   </SelectTrigger>
                   <SelectContent>
                     {nationalities.map((nat) => (
@@ -374,65 +345,89 @@ export function TourGuideProfileComponent() {
               </div>
             ) : (
               <span>
-                {tourGuide.nationality
-                  ? tourGuide.nationality.name
+                {tourist.nationality
+                  ? tourist.nationality.name
                   : "Nationality not set"}
               </span>
             )}
           </div>
 
-          <div>
-            <span
-              className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                tourGuide.isAccepted
-                  ? "bg-green-100 text-green-800 text-lg"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}
-            >
-              <CheckCircle className="inline w-4 h-4 mr-1" />
-              {tourGuide.isAccepted ? "Account Accepted" : "Account Pending"}
-            </span>
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-gray-500" />
+            {isEditing ? (
+              <div className="flex flex-col">
+                <Input
+                  type="date"
+                  name="dateOfBirth"
+                  value={editedTourist.dateOfBirth ? new Date(editedTourist.dateOfBirth).toISOString().split('T')[0] : ''}
+                  onChange={handleInputChange}
+                  className={validationMessages.dateOfBirth ? "border-red-500" : ""}
+                />
+                {validationMessages.dateOfBirth && (
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.dateOfBirth}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span>{new Date(tourist.dateOfBirth).toLocaleDateString()}</span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <GraduationCap className="w-4 h-4 text-gray-500" />
+            {isEditing ? (
+              <div className="flex flex-col w-full">
+                <Select 
+                  name="jobOrStudent" 
+                  onValueChange={(value) => handleInputChange({ target: { name: 'jobOrStudent', value } })}
+                >
+                  <SelectTrigger className={validationMessages.jobOrStudent ? "border-red-500" : ""}>
+                    <SelectValue placeholder={tourist.jobOrStudent} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Job">Job</SelectItem>
+                    <SelectItem value="Student">Student</SelectItem>
+                    <SelectItem value="Both">Both</SelectItem>
+                    <SelectItem value="None">None</SelectItem>
+                  </SelectContent>
+                </Select>
+                {validationMessages.jobOrStudent && (
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.jobOrStudent}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span>{tourist.jobOrStudent}</span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Wallet className="w-4 h-4 text-gray-500" />
+            {isEditing ? (
+              <div className="flex flex-col">
+                <Input
+                  type="number"
+                  name="wallet"
+                  value={editedTourist.wallet}
+                  onChange={handleInputChange}
+                  className={validationMessages.wallet ? "border-red-500" : ""}
+                  placeholder="Wallet Balance"
+                />
+                {validationMessages.wallet && (
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.wallet}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span>${tourist.wallet.toFixed(2)}</span>
+            )}
           </div>
         </div>
 
-        <div className="mt-6">
-          <h3 className="font-semibold mb-2">Previous Work Experience</h3>
-          {editedTourGuide.previousWorks &&
-            editedTourGuide.previousWorks.map((work, index) => (
-              <div key={index} className="mb-4 p-4 border rounded">
-                <h4 className="font-semibold">{work.title}</h4>
-                <p>{work.company}</p>
-                <p>{work.duration}</p>
-                {work.description && (
-                  <p className="text-gray-600">{work.description}</p>
-                )}
-                {isEditing && (
-                  <div className="mt-2">
-                    <Button
-                      onClick={() => handleEditWork(index)}
-                      variant="outline"
-                      size="sm"
-                      className="mr-2"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      onClick={() => handleRemoveWork(index)}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ))}
-          {isEditing && (
-            <Button onClick={handleAddWork} variant="outline" className="mt-2">
-              <Plus className="w-4 h-4 mr-2" /> Add Work Experience
-            </Button>
-          )}
-        </div>
+
 
         <div className="mt-6">
           {isEditing ? (
