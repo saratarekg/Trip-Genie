@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Mail, Phone, User, CheckCircle, AtSign } from "lucide-react";
+import PhoneInput from "react-phone-input-2";
 
 export function SellerProfileComponent() {
   const [seller, setSeller] = useState(null);
@@ -42,10 +43,11 @@ export function SellerProfileComponent() {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e && e.target ? e.target : { name: 'mobile', value: e };
     setEditedSeller((prev) => ({ ...prev, [name]: value })); // Update editedSeller state
     setValidationMessages((prev) => ({ ...prev, [name]: "" })); // Clear validation message on change
   };
+
   const handleDiscard = () => {
     setEditedSeller(seller); // Reset to the original seller data
     setIsEditing(false); // Exit editing mode
@@ -225,7 +227,7 @@ export function SellerProfileComponent() {
             )}
           </div>
 
-          <div className="flex flex-col">
+          {/* <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-gray-500" />
               {isEditing ? (
@@ -246,7 +248,79 @@ export function SellerProfileComponent() {
             {validationMessages.mobile && (
               <span className="text-red-500 text-sm">{validationMessages.mobile}</span>
             )}
+          </div> */}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-gray-500" />
+              {isEditing ? (
+                <div className="w-full">
+                  <PhoneInput
+                    country={"eg"}
+                    value={editedSeller.mobile}
+                    onChange={handleInputChange}
+                    excludeCountries={["il"]}
+                    inputProps={{
+                      name: "mobile",
+                      required: true,
+                      placeholder: seller.mobile,
+                      className: `w-full p-2 ${validationMessages.mobile ? "border-red-500" : "border-gray-300"}`,
+                    }}
+                    containerClass="w-full"
+                    inputStyle={{ width: '60%', marginLeft: '45px' }}
+                  />
+                </div>
+              ) : (
+                <span>{seller.mobile}</span>
+              )}
+            </div>
+            {validationMessages.mobile && (
+              <span className="text-red-500 text-sm">{validationMessages.mobile}</span>
+            )}
           </div>
+          {/* Mobile */}
+          {/* <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-gray-500" />
+              {isEditing ? (
+                <div className="w-full relative">
+                  <PhoneInput
+                    country={"eg"}
+                    value={seller.mobile}
+                    onChange={handleInputChange}
+                    excludeCountries={["il"]}
+                    inputProps={{
+                      name: "mobile",
+                      required: true,
+                      placeholder: seller.mobile,
+                      className: `w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-grey-500 ${
+                        validationMessages.mobile ? "border-red-500" : "border-gray-300"
+                      }`,
+                    }}
+                    containerClass="w-full"
+                    buttonClass="bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-l-md"
+                    dropdownClass="rounded-md shadow-lg"
+                    inputStyle={{
+                      border: "none",
+                      outline: "none",
+                      width: "100%",
+                      paddingLeft: "50px", // To align with the flag
+                    }}
+                    buttonStyle={{
+                      border: "none",
+                      outline: "none",
+                    }}
+                  />
+                  {validationMessages.mobile && (
+                    <span className="text-red-500 text-sm absolute top-full left-0 mt-1">
+                      {validationMessages.mobile}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span>{seller.mobile}</span>
+              )}
+            </div>
+          </div> */}
 
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-500" />
