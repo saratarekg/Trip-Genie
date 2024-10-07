@@ -32,13 +32,15 @@ const getAllItineraries = async (req, res) => {
     let query = [];
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
-    query.push({
-      availableDates: {
-        $elemMatch: {
-          date: { $gte: new Date() }, // Match any date that is upcoming
+    if (!myItineraries) {
+      query.push({
+        availableDates: {
+          $elemMatch: {
+            date: { $gte: new Date() }, // Match any date that is upcoming
+          },
         },
-      },
-    });
+      });
+    }
     if (myItineraries) {
       query.push({ tourGuide: res.locals.user_id });
     }

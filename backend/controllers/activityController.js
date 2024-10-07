@@ -32,7 +32,9 @@ const getAllActivities = async (req, res) => {
     const query = [];
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
-    query.push({ timing: { $gte: new Date() } });
+    if (!myActivities) {
+      query.push({ timing: { $gte: new Date() } });
+    }
 
     if (myActivities) {
       query.push({ advertiser: res.locals.user_id });
