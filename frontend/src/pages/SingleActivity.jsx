@@ -44,19 +44,39 @@ import {
 } from "@/components/ui/card";
 
 const ImageCarousel = ({ pictures }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndices, setCurrentIndices] = useState([0, 1, 2]);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex + 3 >= pictures.length ? 0 : prevIndex + 3
-    );
+    setCurrentIndices((prevIndices) => {
+      const lastIndex = prevIndices[2];
+      const newLastIndex = (lastIndex + 1) % pictures.length;
+      return [prevIndices[1], prevIndices[2], newLastIndex];
+    });
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex - 3 < 0 ? Math.max(pictures.length - 3, 0) : prevIndex - 3
-    );
+    setCurrentIndices((prevIndices) => {
+      const firstIndex = prevIndices[0];
+      const newFirstIndex = (firstIndex - 1 + pictures.length) % pictures.length;
+      return [newFirstIndex, prevIndices[0], prevIndices[1]];
+    });
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'ArrowLeft') {
+        prevSlide();
+      } else if (event.key === 'ArrowRight') {
+        nextSlide();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   if (!pictures || pictures.length === 0) {
     return null;
@@ -64,8 +84,7 @@ const ImageCarousel = ({ pictures }) => {
 
   return (
     <Card className="mt-8">
-      <CardHeader>
-      </CardHeader>
+      <CardHeader></CardHeader>
       <CardContent>
         <div className="relative">
           <div className="flex justify-between items-center">
@@ -75,18 +94,16 @@ const ImageCarousel = ({ pictures }) => {
             >
               <ChevronLeft size={24} />
             </button>
-            <div className="flex space-x-4 overflow-hidden">
-              {[0, 1, 2].map((offset) => {
-                const index = (currentIndex + offset) % pictures.length;
-                return (
+            <div className="w-full h-64 flex justify-between overflow-hidden">
+              {currentIndices.map((index, i) => (
+                <div key={index} className="w-1/3 h-full px-1 transition-transform duration-300 ease-in-out">
                   <img
-                    key={index}
                     src={pictures[index]}
                     alt={`Activity image ${index + 1}`}
-                    className="w-1/3 h-64 object-cover rounded-lg"
+                    className="w-full h-full object-cover rounded-lg"
                   />
-                );
-              })}
+                </div>
+              ))}
             </div>
             <button
               onClick={nextSlide}
