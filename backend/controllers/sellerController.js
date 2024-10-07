@@ -11,8 +11,9 @@ const updateSeller = async (req, res) => {
         if(!seller1.isAccepted){
             return res.status(400).json({ error: 'Seller is not accepted yet, Can not update profile' });
         }
-        const { email, username, name, description} = req.body;
-console.log("abl if", username,seller1.username)
+        const { email, username, name, description,mobile,} = req.body;
+
+console.log()
         if(username!==seller1.username && await Seller.findOne({username})){
             console.log("baad if", username,seller1.username,await Seller.find({username}))
 
@@ -21,7 +22,7 @@ console.log("abl if", username,seller1.username)
            if(email!==seller1.email && await Seller.findOne({email}) ){
              return res.status(400).json({message:"Email already exists"});
             }
-        const seller = await Seller.findByIdAndUpdate(res.locals.user_id, { email, username, name, description}, { new: true });
+        const seller = await Seller.findByIdAndUpdate(res.locals.user_id, { email, username, name, description,mobile}, { new: true });
 
 
 
