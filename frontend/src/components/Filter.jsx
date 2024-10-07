@@ -233,7 +233,10 @@ const FilterComponent = ({
 
           {/* Apply Filters Button */}
           <button
-            onClick={searchItineraries}
+             onClick={() => {
+              searchItineraries();
+              toggleFilters(); // Hide filters after applying them
+            }}
             className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
           >
             Apply Filters
