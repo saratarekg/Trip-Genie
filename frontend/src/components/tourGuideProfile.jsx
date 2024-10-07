@@ -32,6 +32,17 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import "react-phone-input-2/lib/style.css";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+
+// Custom validator for mobile number
+const phoneValidator = (value) => {
+  const phoneNumber = parsePhoneNumberFromString("+" + value);
+  if (!phoneNumber || !phoneNumber.isValid()) {
+    return false;
+  }
+  return true;
+};
 
 export function TourGuideProfileComponent() {
   const [tourGuide, setTourGuide] = useState(null);
@@ -94,17 +105,17 @@ export function TourGuideProfileComponent() {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e && e.target ? e.target : { name: 'mobile', value: e };
+    const { name, value } =
+      e && e.target ? e.target : { name: "mobile", value: e };
     setEditedTourGuide((prev) => ({ ...prev, [name]: value }));
     setValidationMessages((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleNationalityChange = (value) => {
     console.log(value);
-      // const objectId = new ObjectId(value); // Convert string to ObjectId
-      setEditedTourGuide((prev) => ({ ...prev, nationality: value }));
-      setValidationMessages((prev) => ({ ...prev, nationality: "" }));
-    
+    // const objectId = new ObjectId(value); // Convert string to ObjectId
+    setEditedTourGuide((prev) => ({ ...prev, nationality: value }));
+    setValidationMessages((prev) => ({ ...prev, nationality: "" }));
   };
 
   const handleDiscard = () => {
@@ -127,8 +138,8 @@ export function TourGuideProfileComponent() {
     }
     if (!mobile) {
       messages.mobile = "Phone number is required.";
-    } else if (!phoneRegex.test(mobile)) {
-      messages.mobile = "Invalid phone number format. Include 7-15 digits.";
+    } else if (!phoneValidator(mobile)) {
+      messages.mobile = "Invalid phone number.";
     }
     if (yearsOfExperience === undefined || yearsOfExperience === null) {
       messages.yearsOfExperience = "Years of experience is required.";
@@ -306,10 +317,14 @@ export function TourGuideProfileComponent() {
                       name: "mobile",
                       required: true,
                       placeholder: tourGuide.mobile,
-                      className: `w-full p-2 ${validationMessages.mobile ? "border-red-500" : "border-gray-300"}`,
+                      className: `w-full p-2 ${
+                        validationMessages.mobile
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`,
                     }}
                     containerClass="w-full"
-                    inputStyle={{ width: '60%', marginLeft: '45px' }}
+                    inputStyle={{ width: "60%", marginLeft: "45px" }}
                   />
                 </div>
               ) : (
@@ -317,7 +332,9 @@ export function TourGuideProfileComponent() {
               )}
             </div>
             {validationMessages.mobile && (
-              <span className="text-red-500 text-sm">{validationMessages.mobile}</span>
+              <span className="text-red-500 text-sm">
+                {validationMessages.mobile}
+              </span>
             )}
           </div>
 

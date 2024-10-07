@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
@@ -35,6 +35,17 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import "react-phone-input-2/lib/style.css";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+
+// Custom validator for mobile number
+const phoneValidator = (value) => {
+  const phoneNumber = parsePhoneNumberFromString("+" + value);
+  if (!phoneNumber || !phoneNumber.isValid()) {
+    return false;
+  }
+  return true;
+};
 
 export function TouristProfileComponent() {
   const [tourist, setTourist] = useState(null);
@@ -97,7 +108,8 @@ export function TouristProfileComponent() {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e && e.target ? e.target : { name: 'mobile', value: e };
+    const { name, value } =
+      e && e.target ? e.target : { name: "mobile", value: e };
     setEditedTourist((prev) => ({ ...prev, [name]: value }));
     setValidationMessages((prev) => ({ ...prev, [name]: "" }));
   };
@@ -113,7 +125,15 @@ export function TouristProfileComponent() {
   };
 
   const validateFields = () => {
-    const { username, email, mobile,nationality, dateOfBirth, jobOrStudent, wallet } = editedTourist;
+    const {
+      username,
+      email,
+      mobile,
+      nationality,
+      dateOfBirth,
+      jobOrStudent,
+      wallet,
+    } = editedTourist;
     const messages = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRegex = /^\d{7,15}$/;
@@ -126,12 +146,13 @@ export function TouristProfileComponent() {
     }
     if (!mobile) {
       messages.mobile = "Phone number is required.";
-    } else if (!phoneRegex.test(mobile)) {
-      messages.mobile = "Invalid phone number format. Include 7-15 digits.";
+    } else if (!phoneValidator(mobile)) {
+      messages.mobile = "Invalid phone number.";
     }
     if (!nationality) messages.nationality = "Nationality is required.";
     if (!dateOfBirth) messages.dateOfBirth = "Date of birth is required.";
-    if (!jobOrStudent) messages.jobOrStudent = "Job or student status is required.";
+    if (!jobOrStudent)
+      messages.jobOrStudent = "Job or student status is required.";
     if (wallet < 0) messages.wallet = "Wallet balance cannot be negative.";
 
     setValidationMessages(messages);
@@ -302,10 +323,14 @@ export function TouristProfileComponent() {
                       name: "mobile",
                       required: true,
                       placeholder: tourist.mobile,
-                      className: `w-full p-2 ${validationMessages.mobile ? "border-red-500" : "border-gray-300"}`,
+                      className: `w-full p-2 ${
+                        validationMessages.mobile
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`,
                     }}
                     containerClass="w-full"
-                    inputStyle={{ width: '60%', marginLeft: '45px' }}
+                    inputStyle={{ width: "60%", marginLeft: "45px" }}
                   />
                 </div>
               ) : (
@@ -313,7 +338,9 @@ export function TouristProfileComponent() {
               )}
             </div>
             {validationMessages.mobile && (
-              <span className="text-red-500 text-sm">{validationMessages.mobile}</span>
+              <span className="text-red-500 text-sm">
+                {validationMessages.mobile}
+              </span>
             )}
           </div>
 
@@ -359,9 +386,17 @@ export function TouristProfileComponent() {
                 <Input
                   type="date"
                   name="dateOfBirth"
-                  value={editedTourist.dateOfBirth ? new Date(editedTourist.dateOfBirth).toISOString().split('T')[0] : ''}
+                  value={
+                    editedTourist.dateOfBirth
+                      ? new Date(editedTourist.dateOfBirth)
+                          .toISOString()
+                          .split("T")[0]
+                      : ""
+                  }
                   onChange={handleInputChange}
-                  className={validationMessages.dateOfBirth ? "border-red-500" : ""}
+                  className={
+                    validationMessages.dateOfBirth ? "border-red-500" : ""
+                  }
                 />
                 {validationMessages.dateOfBirth && (
                   <span className="text-red-500 text-sm">
@@ -378,11 +413,19 @@ export function TouristProfileComponent() {
             <GraduationCap className="w-4 h-4 text-gray-500" />
             {isEditing ? (
               <div className="flex flex-col w-full">
-                <Select 
-                  name="jobOrStudent" 
-                  onValueChange={(value) => handleInputChange({ target: { name: 'jobOrStudent', value } })}
+                <Select
+                  name="jobOrStudent"
+                  onValueChange={(value) =>
+                    handleInputChange({
+                      target: { name: "jobOrStudent", value },
+                    })
+                  }
                 >
-                  <SelectTrigger className={validationMessages.jobOrStudent ? "border-red-500" : ""}>
+                  <SelectTrigger
+                    className={
+                      validationMessages.jobOrStudent ? "border-red-500" : ""
+                    }
+                  >
                     <SelectValue placeholder={tourist.jobOrStudent} />
                   </SelectTrigger>
                   <SelectContent>
@@ -426,8 +469,6 @@ export function TouristProfileComponent() {
             )}
           </div>
         </div>
-
-
 
         <div className="mt-6">
           {isEditing ? (
