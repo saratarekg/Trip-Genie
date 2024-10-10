@@ -100,6 +100,7 @@ const getTouristProfile = async (req, res) => {
 
 const updateTouristProfile = async (req, res) => {
   try {
+    
     const tourist1 = await Tourist.findById(res.locals.user_id);
 
     const {
@@ -112,6 +113,8 @@ const updateTouristProfile = async (req, res) => {
       wallet,
     } = req.body;
 
+   
+
     if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
     }
@@ -123,12 +126,9 @@ const updateTouristProfile = async (req, res) => {
       res.locals.user_id,
       {
         email,
-        username,
         nationality,
         mobile,
-        dateOfBirth,
         jobOrStudent,
-        wallet,
       },
       { new: true }
     )
