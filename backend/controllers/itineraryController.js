@@ -59,14 +59,14 @@ const getAllItineraries = async (req, res) => {
         $and: query,
       })
         .populate("tourGuide")
-        .populate("activities")
+        .populate({path:"activities",populate:{path:"tags category"}})
         .sort(sortBy);
     } else {
       itinerariesQuery = await Itinerary.find({
         $and: query,
       })
         .populate("tourGuide")
-        .populate("activities")
+        .populate({path:"activities",populate:{path:"tags category"}})
         .sort({ createdAt: -1 });
     }
 
