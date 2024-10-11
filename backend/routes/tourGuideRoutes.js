@@ -3,12 +3,15 @@ const router = express.Router();
 const {
   updateTourGuideProfile,
   getTourGuideProfile,
+  addCommentToTourGuide,
+  rateTourGuide,
   deleteItinerary,
   getTourGuideByID,
 } = require("../controllers/tourGuideController"); // Import the controller functions
 
 const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
+
 
 // Route for getting a single tour guide by ID
 router.get("/", getTourGuideProfile);
@@ -24,5 +27,8 @@ router.get("/itineraries/:id", itineraryController.getItineraryById);
 router.get("/activities", activityController.getAllActivities);
 router.get("/activities/:id", activityController.getActivityById);
 router.put("/activities/:id", activityController.updateActivity);
+
+
+
 
 module.exports = router;

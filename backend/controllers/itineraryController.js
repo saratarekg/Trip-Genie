@@ -245,6 +245,92 @@ const getAllLanguages = async (req, res) => {
   }
 };
 
+const addCommentToItinerary = async (req, res) => {
+  try {
+    const { username, rating, content } = req.body; // Get comment details from the request body
+
+    console.log(username, rating, content);
+
+    // Validate the input
+    if (!username || typeof username !== 'string') {
+      return res.status(400).json({ message: "Username is required and must be a string" });
+    }
+
+    if (rating === undefined || rating < 0 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+    }
+
+    // Find the activity by ID
+    const itinerary = await Itinerary.findById(req.params.id);
+      // .populate("advertiser")
+      // .populate("category")
+      // .populate("tags")
+      // .populate("attended")
+      // .exec();
+
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
+    }
+
+    // Create the new comment object
+    const newComment = {
+      username,
+      rating,
+      content,
+      date: new Date(), // Set the current date
+    };
+
+    console.log(newComment);
+
+    // Add the comment to the activity's comments array
+    itinerary.comments.push(newComment);
+
+    // If the comment includes a rating, call the rateActivity method logic
+    let newAverageRating;
+    if (rating !== undefined) {
+      newAverageRating = await itinerary.addRating(rating);
+    }
+
+    // Save the updated activity
+    await itinerary.save();
+
+    // Return the updated comments and new average rating (if applicable)
+    res.status(200).json({
+      message: "Comment added successfully",
+      comments: itinerary.comments,
+      ...(newAverageRating && { newAverageRating }), // Only include the new rating if it was updated
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "An error occurred while adding the comment", error: error.message });
+  }
+};
+
+
+const rateItinerary = async (req, res) => {
+  try {
+    
+    const { rating } = req.body; // Get rating from the request body
+
+    // Find the activity by ID
+    const itinerary = await Itinerary.findById(req.params.id);
+    // .populate("advertiser")
+    // .populate("category")
+    // .populate("tags")
+    // .populate("attended")
+    // .populate("comments")
+    //.exec();
+
+    // Add the rating and calculate the new average
+    const newAverageRating = await itinerary.addRating(rating);
+
+    // Return the new average rating
+    res.status(200).json({ message: "Rating added", newAverageRating });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAllItineraries,
   getItineraryById,
@@ -252,4 +338,6 @@ module.exports = {
   deleteItinerary,
   updateItinerary,
   getAllLanguages,
+  addCommentToItinerary,
+  rateItinerary
 };

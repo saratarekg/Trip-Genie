@@ -68,14 +68,12 @@ const itinerarySchema = new Schema(
       ref: "TourGuide",
       required: true,
     },
-    rating: {
-      type: Number,
-      min: 0,
-      max: 5,
-      default: 0,
-    },
-    
-    allRatings: [
+    attended: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Tourist",
+      },
+    ],allRatings: [
       {
         type: Number,
         min: 0,
@@ -83,7 +81,37 @@ const itinerarySchema = new Schema(
         default: 0,
       },
     ],
-  },
+    rating: {
+      type: Number,
+      min: 0,
+      max: 5,
+      default: 0,
+    },
+    comments: [{
+      username: {
+        type: String,// Assuming username is required
+      },
+      rating: {
+        type: Number,
+        min: 0,
+        max: 5,
+       // required: true, // Assuming rating is required
+      },
+      content: {
+        liked: {
+          type: String,
+          default: "", // Start with 0 likes
+        },
+        disliked: {
+          type: String,
+          default: "", // Start with 0 dislikes
+        },
+      },
+      date:{
+        type: Date
+      },
+  }],
+},
   {
     timestamps: true,
   }
@@ -206,4 +234,32 @@ itinerarySchema.statics.filter = async function (
     .exec();
 };
 
+
+itinerarySchema.methods.addRating = async function (newRating) {
+  // Add the new rating to the allRatings array
+  this.allRatings.push(newRating);
+
+  // Calculate the new average rating
+  const totalRatings = this.allRatings.length;
+  const sumOfRatings = this.allRatings.reduce((sum, rating) => sum + rating, 0);
+  const averageRating = sumOfRatings / totalRatings;
+
+  // Update the activity's rating
+  this.rating = averageRating;
+
+  // Save the updated activity document
+  await this.save();
+
+  return this.rating; // Return the new average rating
+};
+// Method to add a comment to the activity
+itinerarySchema.methods.addComment = async function (comment) {
+  // Add the new comment to the comments array
+  this.comments.push(comment);
+
+  // Save the updated activity document
+  await this.save();
+
+  return this.comments; // Return the updated comments array
+};
 module.exports = mongoose.model("Itinerary", itinerarySchema);
