@@ -169,11 +169,12 @@ export function TouristProfileComponent() {
   return (
     <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden relative">
       <div className="absolute top-4 right-4 pt-6 pr-10">
-        <Badge className={`${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}>
-          <Award className="w-6 h-6" />
-          {tourist.loyaltyBadge}
-        </Badge>
-      </div>
+          <Badge className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}>
+            <Award className="w-6 h-6" />
+            {tourist.loyaltyBadge}
+          </Badge>
+        </div>
+
       <div className="p-8">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">

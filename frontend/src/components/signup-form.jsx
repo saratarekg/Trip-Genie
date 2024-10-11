@@ -847,27 +847,32 @@ export function SignupForm() {
       </div>
 
       <Dialog open={showSignupSuccess} onOpenChange={setShowSignupSuccess}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-              Successful Signup
-            </DialogTitle>
-            <DialogDescription>
-              Your account has been created successfully! Please log in.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              className=" bg-orange-500"
-              variant="default"
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>
+        <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+        Successful Signup
+      </DialogTitle>
+      <DialogDescription>
+        Your account has been created successfully! Please log in.
+      </DialogDescription>
+    </DialogHeader>
+
+    <DialogFooter className="flex justify-center items-center w-full">
+      {/* Adding a div around the button to provide margin */}
+      <div className="flex justify-center w-full">
+        <Button
+          className="bg-orange-500 mr-4" // Add margin-right here
+          variant="default"
+          onClick={() => navigate("/login")}
+        >
+          Login
+        </Button>
+      </div>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
     </div>
   );
 }

@@ -329,23 +329,27 @@ activitySchema.methods.addRating = async function (newRating) {
   const sumOfRatings = this.allRatings.reduce((sum, rating) => sum + rating, 0);
   const averageRating = sumOfRatings / totalRatings;
 
+  // Round the average rating to 1 decimal place
+  const roundedRating = Math.round(averageRating * 10) / 10;
+
   // Update the activity's rating
-  this.rating = averageRating;
+  this.rating = roundedRating;
 
   // Save the updated activity document
   await this.save();
 
-  return this.rating; // Return the new average rating
+  return this.rating; 
 };
+
 // Method to add a comment to the activity
 activitySchema.methods.addComment = async function (comment) {
-  // Add the new comment to the comments array
+
   this.comments.push(comment);
 
-  // Save the updated activity document
+
   await this.save();
 
-  return this.comments; // Return the updated comments array
+  return this.comments; 
 };
 
 

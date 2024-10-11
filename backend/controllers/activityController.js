@@ -230,7 +230,7 @@ const addCommentToActivity = async (req, res) => {
   try {
     const { username, rating, content } = req.body; // Get comment details from the request body
 
-    console.log(username, rating,content);
+    console.log(username, rating, content);
 
     // Validate the input
     if (!username || typeof username !== 'string') {
@@ -266,16 +266,27 @@ const addCommentToActivity = async (req, res) => {
     // Add the comment to the activity's comments array
     activity.comments.push(newComment);
 
+    // If the comment includes a rating, call the rateActivity method logic
+    let newAverageRating;
+    if (rating !== undefined) {
+      newAverageRating = await activity.addRating(rating);
+    }
+
     // Save the updated activity
     await activity.save();
 
-    // Return the updated comments
-    res.status(200).json({ message: "Comment added successfully", comments: activity.comments });
+    // Return the updated comments and new average rating (if applicable)
+    res.status(200).json({
+      message: "Comment added successfully",
+      comments: activity.comments,
+      ...(newAverageRating && { newAverageRating }), // Only include the new rating if it was updated
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "An error occurred while adding the comment", error: error.message });
   }
 };
+
 
 
 

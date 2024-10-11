@@ -301,7 +301,7 @@ const ActivityDetail = () => {
       const data = await response.json();
       
       setShowAddReview(false);
-      fetchActivityDetails();
+      window.location.reload();
       setNewReview({ rating: 0, liked: '', disliked: '', visitDate: '', isAnonymous: false });
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -389,12 +389,22 @@ const ActivityDetail = () => {
               
               <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-4xl font-bold">{activity.name}</h1>
-                <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full ml-4">
-                  <Star className="w-8 h-8 text-yellow-500 mr-2" />
-                  <span className="text-2xl font-semibold">
-                    {activity.rating || "N/A"}
-                  </span>
-                </div>
+                <div className="flex items-center">
+  {/* Rating Badge */}
+  <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+    <Star className="w-8 h-8 text-yellow-500 mr-2" />
+    <span className="text-2xl font-semibold">
+      {activity.rating ? activity.rating.toFixed(1) : "N/A"}
+    </span>
+  </div>
+
+  {/* Rating Count outside the badge */}
+  <span className="text-sm font-normal ml-2">
+    {activity.allRatings ? `(${activity.allRatings.length})` : "(0)"}
+  </span>
+</div>
+
+
                
               </div>
 
