@@ -38,6 +38,10 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  sales: {
+    type: Number,
+    required: true,
+  }
 });
 
 productSchema.statics.searchByNames = async function (name) {
