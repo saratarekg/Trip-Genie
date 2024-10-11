@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -12,6 +10,8 @@ import {
   Calendar,
   Wallet,
   GraduationCap,
+  Award,
+  Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import "react-phone-input-2/lib/style.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
@@ -152,8 +153,27 @@ export function TouristProfileComponent() {
     return <div className="flex justify-center items-center h-screen"><p className="text-lg font-semibold">No tourist profile information is available.</p></div>;
   }
 
+  const getBadgeColor = () => {
+    switch (tourist.loyaltyBadge) {
+      case 'Bronze':
+        return 'bg-amber-600 text-white';
+      case 'Silver':
+        return 'bg-gray-400 text-white';
+      case 'Gold':
+        return 'bg-yellow-400 text-white';
+      default:
+        return 'bg-gray-200 text-gray-800';
+    }
+  };
+
   return (
-    <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden relative">
+      <div className="absolute top-4 right-4 pt-6 pr-10">
+        <Badge className={`${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}>
+          <Award className="w-6 h-6" />
+          {tourist.loyaltyBadge}
+        </Badge>
+      </div>
       <div className="p-8">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">
@@ -279,6 +299,11 @@ export function TouristProfileComponent() {
           <div className="flex items-center gap-2">
             <Wallet className="w-4 h-4 text-gray-500" />
             <span>${tourist.wallet.toFixed(2)}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 text-gray-500" />
+            <span>{tourist.loyaltyPoints.toLocaleString()} points</span>
           </div>
         </div>
 

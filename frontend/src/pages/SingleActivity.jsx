@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
+import { formatDistanceToNow, format } from 'date-fns';
 import Map from "../components/Map";
-import * as jwtDecode from "jwt-decode";
+import Loader from "../components/Loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   XCircle,
   CheckCircle,
@@ -22,99 +33,84 @@ import {
   Award,
   Clock,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  Send,
+  Tag,
+  Smile,
+  Frown
 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import Loader from "../components/Loader";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Tag } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
-const ImageCarousel = ({ pictures }) => {
-  const [currentIndices, setCurrentIndices] = useState([0, 1, 2]);
+const ImageGallery = ({ pictures }) => {
+  const [mainImage, setMainImage] = useState(pictures[0]);
+  const [startIndex, setStartIndex] = useState(0);
 
-  const nextSlide = () => {
-    setCurrentIndices((prevIndices) => {
-      const lastIndex = prevIndices[2];
-      const newLastIndex = (lastIndex + 1) % pictures.length;
-      return [prevIndices[1], prevIndices[2], newLastIndex];
-    });
+  const handlePrev = () => {
+    setStartIndex((prevIndex) => Math.max(0, prevIndex - 1));
   };
 
-  const prevSlide = () => {
-    setCurrentIndices((prevIndices) => {
-      const firstIndex = prevIndices[0];
-      const newFirstIndex = (firstIndex - 1 + pictures.length) % pictures.length;
-      return [newFirstIndex, prevIndices[0], prevIndices[1]];
-    });
+  const handleNext = () => {
+    setStartIndex((prevIndex) => Math.min(pictures.length - 5, prevIndex + 1));
   };
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'ArrowLeft') {
-        prevSlide();
-      } else if (event.key === 'ArrowRight') {
-        nextSlide();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []);
-
-  if (!pictures || pictures.length === 0) {
-    return null;
-  }
 
   return (
-    <Card className="mt-8">
-      <CardHeader></CardHeader>
-      <CardContent>
-        <div className="relative">
-          <div className="flex justify-between items-center">
+    <div className="flex gap-4">
+      <div className="w-1/5 relative">
+        <div className="h-full overflow-hidden">
+          {pictures.length > 5 && (
             <button
-              onClick={prevSlide}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10"
+              onClick={handlePrev}
+              className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full z-10"
+              disabled={startIndex === 0}
+              aria-label="Previous images"
             >
-              <ChevronLeft size={24} />
+              <ChevronUp size={20} />
             </button>
-            <div className="w-full h-64 flex justify-between overflow-hidden">
-              {currentIndices.map((index, i) => (
-                <div key={index} className="w-1/3 h-full px-1 transition-transform duration-300 ease-in-out">
-                  <img
-                    src={pictures[index]}
-                    alt={`Activity image ${index + 1}`}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={nextSlide}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10"
-            >
-              <ChevronRight size={24} />
-            </button>
+          )}
+          <div className="flex flex-col gap-2">
+            {pictures.slice(startIndex, startIndex + 5).map((pic, index) => (
+              <img
+                key={index}
+                src={pic}
+                alt={`Activity image ${startIndex + index + 1}`}
+                className="w-full h-[calc(20%-8px)] object-cover rounded-lg cursor-pointer"
+                onClick={() => setMainImage(pic)}
+              />
+            ))}
           </div>
+          {pictures.length > 5 && (
+            <button
+              onClick={handleNext}
+              className="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full z-10"
+              disabled={startIndex >= pictures.length - 5}
+              aria-label="Next images"
+            >
+              <ChevronDown size={20} />
+            </button>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div className="w-4/5">
+        <img src={mainImage} alt="Main activity image" className="w-full h-auto object-cover rounded-lg" />
+      </div>
+    </div>
+  );
+};
+
+const StarRating = ({ rating, setRating, readOnly = false }) => {
+  return (
+    <div className="flex items-center">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-6 h-6 ${readOnly ? '' : 'cursor-pointer'} ${
+            star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
+          }`}
+          onClick={() => !readOnly && setRating(star)}
+          aria-label={`${star} star${star !== 1 ? 's' : ''}`}
+        />
+      ))}
+    </div>
   );
 };
 
@@ -129,6 +125,16 @@ const ActivityDetail = () => {
   const [deleteError, setDeleteError] = useState(null);
   const [advertiserProfile, setAdvertiserProfile] = useState(null);
   const [canModify, setCanModify] = useState(false);
+  const [currentUser, setCurrentUser] = useState("");
+  const [activityRating, setActivityRating] = useState(0);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [hasAttended, setHasAttended] = useState(false);
+
+  // Comment Carousel State
+  const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
+  const [showFullComment, setShowFullComment] = useState(false);
+  const [showAddReview, setShowAddReview] = useState(false);
+  const [newReview, setNewReview] = useState({ rating: 0, liked: '', disliked: '', visitDate: '', isAnonymous: false });
 
   const navigate = useNavigate();
 
@@ -164,8 +170,13 @@ const ActivityDetail = () => {
           setAdvertiserProfile(data.advertiser);
         }
         if (token) {
-          const decodedToken = jwtDecode.jwtDecode(token);
+          const decodedToken = jwtDecode(token);
           setCanModify(decodedToken.id === data.advertiser._id);
+          setCurrentUser(decodedToken.id);
+
+          if (data.attended && Array.isArray(data.attended)) {
+            setHasAttended(data.attended.some(tourist => tourist._id === decodedToken.id));
+          }
         }
       } catch (err) {
         setError("Error fetching activity details. Please try again later.");
@@ -216,6 +227,129 @@ const ActivityDetail = () => {
     }
   };
 
+  const calculateDiscountedPrice = (originalPrice, discountPercentage) => {
+    return (originalPrice * (100 - discountPercentage) / 100).toFixed(2);
+  };
+
+  const handleAddComment = (newComment) => {
+    setActivity(prevActivity => ({
+      ...prevActivity,
+      comments: [...(prevActivity.comments || []), newComment]
+    }));
+  };
+
+  const handleActivityRating = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/${userRole}/activities/rate/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+        body: JSON.stringify({ rating: activityRating }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit activity rating');
+      }
+
+      const data = await response.json();
+      setActivity(prevActivity => ({
+        ...prevActivity,
+        rating: data.newRating,
+      }));
+      setShowRatingDialog(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error submitting activity rating:", error);
+    }
+  };
+
+  // Comment Carousel Functions
+  const handlePrevComment = () => setCurrentCommentIndex((prev) => Math.max(0, prev - 3));
+  const handleNextComment = () => setCurrentCommentIndex((prev) => Math.min(activity.comments.length - 3, prev + 3));
+
+  const handleAddReview = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      let username = newReview.isAnonymous ? "Anonymous" : await fetchUsername(currentUser);
+
+      const newComment = {
+        username,
+        rating: newReview.rating,
+        content: {
+          liked: newReview.liked,
+          disliked: newReview.disliked
+        },
+        date: new Date(),
+      };
+      console.log(newComment);
+
+      const response = await fetch(`http://localhost:4000/${userRole}/activities/comment/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(newComment),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit comment');
+      }
+
+      const data = await response.json();
+      
+      setShowAddReview(false);
+      fetchActivityDetails();
+      setNewReview({ rating: 0, liked: '', disliked: '', visitDate: '', isAnonymous: false });
+    } catch (error) {
+      console.error("Error submitting review:", error);
+    }
+  };
+
+  const isReviewValid = () => {
+    return newReview.liked.trim() !== '' || newReview.disliked.trim() !== '';
+  };
+
+  const fetchUsername = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:4000/${userRole}`, {
+        headers: {
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch username');
+      }
+      const data = await response.json();
+      return data.username;
+    } catch (error) {
+      console.error("Error fetching username:", error);
+      return "Unknown User";
+    }
+  };
+
+  const formatCommentDate = (date) => {
+    // Check if the date is valid
+    const commentDate = new Date(date);
+    
+    // Check if the date is valid
+    if (isNaN(commentDate.getTime())) {
+        return "Date unavailable"; // Return if the date is invalid
+    }
+    
+    const now = new Date();
+    const diffInDays = Math.floor((now - commentDate) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays < 30) {
+        return formatDistanceToNow(commentDate, { addSuffix: true });
+    } else {
+        return format(commentDate, 'MMM d, yyyy');
+    }
+};
+
+
   if (loading) {
     return <Loader />;
   }
@@ -234,22 +368,25 @@ const ActivityDetail = () => {
     );
   }
 
+  if (!activity) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <p className="text-xl font-semibold">No activity found.</p>
+    </div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-4">{activity.name}</h1>
-          <p className="text-xl md:text-2xl">{activity.description}</p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
         <div className="p-6">
-          {/* Container for Activity Details and Advertiser Profile */}
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Activity Details Card */}
             <div className="flex-[2] bg-white shadow-md rounded-lg p-8 flex flex-col justify-center h-full">
-              {/* Title and Rating */}
+              
               <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-4xl font-bold">{activity.name}</h1>
                 <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full ml-4">
@@ -258,79 +395,84 @@ const ActivityDetail = () => {
                     {activity.rating || "N/A"}
                   </span>
                 </div>
+               
               </div>
 
-              {/* Gap between Title and Details */}
-              <div className="mb-4" />
-
-              {/* Details Section Title */}
-              <h2 className="text-2xl font-semibold mb-6">Activity Details</h2>
-
-              {/* Map and Details */}
               <div className="flex gap-8">
-                {/* Map Section */}
-                <div className="flex-none">
-                  <Map
-                    position={[
-                      activity.location.coordinates.latitude,
-                      activity.location.coordinates.longitude,
-                    ]}
-                    height={"200px"}
-                    width={"200px"}
-                  />
+                <div className="flex-1 space-y-4">
+                </div>
+                <div className="lg:w-2/3">
+                  <ImageGallery pictures={activity.pictures} />
+                  <div className="h-6"></div>
+                  <p className="text-lg text-gray-600 mb-6">{activity.description}</p>
                 </div>
 
-                {/* Details Section */}
-                <div className="flex-1 space-y-4">
-                  <div className="flex items-center">
-                    <Globe className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">
-                      Location: {activity.location.address}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <DollarSign className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">Price: ${activity.price}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Accessibility className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">
-                      Booking: {activity.isBookingOpen ? "Open" : "Closed"}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">
-                      Date: {new Date(activity.timing).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Award className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">
-                      Special Discount: {activity.specialDiscount}%
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">
-                      Time:{" "}
-                      {new Date(activity.timing).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                <div className="lg:w-1/3 space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start">
+                      <div>
+                        <div className="bg-red-600 text-white text-sm font-bold px-3 py-2 rounded mb-2 inline-block">
+                          Limited time deal
+                        </div>
+                        <div className="flex flex-col items-start">
+                          <div className="flex items-baseline">
+                            <span className="text-4xl font-bold text-gray-900">
+                              ${calculateDiscountedPrice(activity.price, activity.specialDiscount)}
+                            </span>
+                            <span className="ml-3  text-xl font-semibold text-red-600">
+                              -{activity.specialDiscount}% Discount
+                            </span>
+                          </div>
+                          <div className="text-xl text-gray-500 line-through mt-2">
+                            ${activity.price.toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <Globe className="w-5 h-5 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Location: {activity.location.address}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center">
+                      <Calendar className="w-5 h-5 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Date: {new Date(activity.timing).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center">
+                      <Clock className="w-5 h-5 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Time: {new Date(activity.timing).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <Map
+                        position={[
+                          activity.location.coordinates.latitude,
+                          activity.location.coordinates.longitude,
+                        ]}
+                        height="125px"
+                        width="100%"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-col md:flex-col gap-8">
-              {/* Advertiser Profile Card */}
               <div className="flex-1 bg-white shadow-md rounded-lg p-4">
-                {/* Logo Section */}
                 <div className="flex items-center mb-6">
                   <Avatar className="w-12 h-12 mr-2">
-                    <AvatarImage src={advertiserProfile.logoUrl} />
+                    <AvatarImage src={advertiserProfile.logoUrl} alt={advertiserProfile.username} />
                     <AvatarFallback>
                       <User className="w-8 h-8" />
                     </AvatarFallback>
@@ -339,7 +481,6 @@ const ActivityDetail = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {/* Advertiser Details */}
                   <div className="flex items-center mb-4">
                     <User className="w-6 h-6 mr-2 text-orange-500" />
                     <span className="text-gray-700">
@@ -348,7 +489,6 @@ const ActivityDetail = () => {
                     </span>
                   </div>
 
-                  {/* Email Section */}
                   <div className="flex items-center">
                     <Mail className="w-6 h-6 mr-2 text-orange-500" />
                     <span className="text-gray-700">
@@ -357,7 +497,6 @@ const ActivityDetail = () => {
                     </span>
                   </div>
 
-                  {/* Hotline Section */}
                   <div className="flex items-center">
                     <Phone className="w-6 h-6 mr-2 text-orange-500" />
                     <span className="text-gray-700">
@@ -368,7 +507,6 @@ const ActivityDetail = () => {
                 </div>
               </div>
               <div className="flex-1 bg-white shadow-md rounded-lg p-4">
-                {/* Categories and Tags Section */}
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-2xl font-semibold mb-1">Categories</h2>
@@ -413,8 +551,80 @@ const ActivityDetail = () => {
             </div>
           </div>
 
-          {/* Image Carousel Card */}
-          <ImageCarousel pictures={activity.pictures} />
+          {/* Comment Carousel */}
+          <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-bold mb-4">What our customers say</h2>
+            {activity.comments && activity.comments.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
+                    <ChevronLeft />
+                  </Button>
+                  <div className="flex-1 flex justify-between px-4">
+                    {activity.comments.slice(currentCommentIndex, currentCommentIndex + 3).map((comment, index) => (
+                      <Card key={index} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                      <CardHeader className="flex items-start">
+                        <div className="flex">
+                          {/* User icon with larger first letter */}
+                          <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+                            {comment.username.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex flex-col">
+                            {/* Larger Username */}
+                            <CardTitle className="text-xl font-semibold">{comment.username}</CardTitle>
+                            {/* Date under the username */}
+                            <p className="text-sm text-gray-500">{formatCommentDate(comment.date)}</p>
+                          </div>
+                        </div>
+                        {/* Star Rating below username and date */}
+                        <div className="mt-2">
+                          <StarRating rating={comment.rating} readOnly={true} />
+                        </div>
+                      </CardHeader>
+                    
+                      <CardContent>
+                        {/* Liked content */}
+                        <p className="text-gray-700 line-clamp-3">{comment.content.liked || comment.content.disliked || "No comment provided"}</p>
+                        {/* View more link */}
+                        <a
+                          href="#"
+                          className="text-blue-500 hover:underline mt-2 inline-block"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setShowFullComment(comment);
+                          }}
+                        >
+                          View more
+                        </a>
+                      </CardContent>
+                    </Card>
+                    
+                    ))}
+                  </div>
+                  <Button
+                    onClick={handleNextComment}
+                    variant="ghost"
+                    disabled={currentCommentIndex >= activity.comments.length - 3}
+                  >
+                    <ChevronRight />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <p>No comments yet.</p>
+            )}
+          {hasAttended && (
+  <>
+    <Button onClick={() => setShowAddReview(true)} className="mt-4">
+      Write a review
+    </Button>
+    <Button onClick={() => setShowRatingDialog(true)} className="mt-2 ml-3">
+      Rate Activity
+    </Button>
+  </>
+)}
+          </div>
+
         </div>
 
         <div className="p-6 border-t border-gray-200">
@@ -436,7 +646,127 @@ const ActivityDetail = () => {
         </div>
       </div>
 
-      {/* Dialogs for Deletion */}
+      {/* Full Comment Dialog */}
+      <Dialog open={!!showFullComment} onOpenChange={() => setShowFullComment(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{showFullComment?.username}'s Review</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] overflow-auto">
+            <div className="space-y-4">
+              <div>
+                <StarRating rating={showFullComment?.rating} readOnly={true} />
+                <p className="text-sm text-gray-500 mt-1">
+                  {showFullComment && formatCommentDate(showFullComment.date)}
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold flex items-center">
+                  <Smile className="w-5 h-5 mr-2 text-green-500" />
+                  Liked:
+                </h4>
+                <p>{showFullComment?.content?.liked || "Nothing mentioned"}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold flex items-center">
+                  <Frown className="w-5 h-5 mr-2 text-red-500" />
+                  Disliked:
+                </h4>
+                <p>{showFullComment?.content?.disliked || "Nothing mentioned"}</p>
+              </div>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Review Dialog */}
+      <Dialog open={showAddReview} onOpenChange={setShowAddReview}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Write a Review</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+            <StarRating rating={newReview.rating} setRating={(rating) => setNewReview(prev => ({ ...prev, rating }))} />
+          </div>
+          <div>
+            <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
+              <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+              Something you liked
+            </label>
+            <Textarea
+              id="liked"
+              value={newReview.liked}
+              onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
+              rows={3}
+              className="mt-2"
+            />
+          </div>
+          <div>
+            <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
+              <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+              Something you didn't like
+            </label>
+            <Textarea
+              id="disliked"
+              value={newReview.disliked}
+              onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
+              rows={3}
+              className="mt-2"
+            />
+          </div>
+          <div>
+            <label htmlFor="visitDate" className="block text-sm font-medium text-gray-700">When did you visit?</label>
+            <select
+              id="visitDate"
+              value={newReview.visitDate}
+              onChange={(e) => setNewReview(prev => ({ ...prev, visitDate: e.target.value }))}
+              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            >
+              <option value="">Select a time</option>
+              <option value="weekday">Weekday</option>
+              <option value="weekend">Weekend</option>
+              <option value="holiday">Public holiday</option>
+            </select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="anonymous-mode"
+              checked={newReview.isAnonymous}
+              onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
+            />
+            <Label htmlFor="anonymous-mode">Post anonymously</Label>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button 
+            onClick={() => setShowAddReview(false)}
+            style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
+          >
+            Cancel
+          </Button>
+          <Button onClick={handleAddReview} disabled={!isReviewValid()}>Post Review</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+      {/* Rate Activity Dialog */}
+      <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Rate this Activity</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+            <StarRating rating={activityRating} setRating={setActivityRating} />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleActivityRating}>Submit My Rating</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>

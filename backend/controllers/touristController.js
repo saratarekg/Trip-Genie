@@ -178,6 +178,43 @@ const usernameExists = async (username) => {
   }
 };
 
+const updateLoyaltyPointsAndBadge = async (req, res) => {
+  try {
+    const tourist1 = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist1) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const { loyaltyPoints } = req.body;
+
+    // Calculate the new loyalty points
+    const newLoyaltyPoints = tourist1.loyaltyPoints + loyaltyPoints;
+
+    // Find the Tourist by their ID and update their loyalty points
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      res.locals.user_id,
+      {
+        loyaltyPoints: newLoyaltyPoints // Correctly updating loyaltyPoints field
+      },
+      { new: true } // Return the updated document
+    )
+      .populate("nationality")
+      .exec();
+
+    if (!updatedTourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Respond with the updated profile
+    res.status(200).json({ message: "Profile updated successfully", tourist: updatedTourist });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+
 module.exports = {
   deleteTouristAccount,
   getAllTourists,
@@ -186,4 +223,5 @@ module.exports = {
   updateTourist,
   getTouristProfile,
   updateTouristProfile,
+  updateLoyaltyPointsAndBadge,
 };

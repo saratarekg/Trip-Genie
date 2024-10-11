@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Tag = require("./tag");
 const Category = require("./category");
+//const Comment = require("./comment");
 
 const Schema = mongoose.Schema;
 
@@ -58,6 +59,12 @@ const activitySchema = new Schema(
         ref: "Tag",
       },
     ],
+    attended: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Tourist",
+      },
+    ],
     specialDiscount: {
       type: Number,
       default: 0,
@@ -90,6 +97,31 @@ const activitySchema = new Schema(
       ref: "Advertiser", // Replace 'User' with the appropriate model name for makers
       required: true, // Assuming it's required, you can set this to false if it's optional
     },
+    comments: [{
+      username: {
+        type: String,// Assuming username is required
+      },
+      rating: {
+        type: Number,
+        min: 0,
+        max: 5,
+       // required: true, // Assuming rating is required
+      },
+      content: {
+        liked: {
+          type: String,
+          default: "", // Start with 0 likes
+        },
+        disliked: {
+          type: String,
+          default: "", // Start with 0 dislikes
+        },
+      },
+      date:{
+        type: Date
+      },
+  }],
+    
   },
   {
     timestamps: true,
@@ -110,6 +142,7 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
       .populate("category")
       .populate("tags")
       .populate("advertiser")
+      .populate("attended")
       .exec();
   }
   const query = [];
@@ -151,6 +184,7 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
     .populate("category")
     .populate("tags")
     .populate("advertiser")
+    .populate("attended")
     .exec(); // Perform a search with the regex query
 };
 
@@ -191,6 +225,7 @@ activitySchema.statics.findByTagTypes = async function (types) {
       .populate("category")
       .populate("tags")
       .populate("advertiser")
+      .populate("attended")
       .exec();
   }
 
@@ -205,6 +240,7 @@ activitySchema.statics.findByTagTypes = async function (types) {
     .populate("category")
     .populate("tags")
     .populate("advertiser")
+    .populate("attended")
     .exec();
 };
 
@@ -214,6 +250,7 @@ activitySchema.statics.findByCategoryNames = async function (names) {
       .populate("category")
       .populate("tags")
       .populate("advertiser")
+      .populate("attended")
       .exec(); // Perform a search with the regex query
   }
 
@@ -238,6 +275,7 @@ activitySchema.statics.findByCategoryNames = async function (names) {
     .populate("category")
     .populate("tags")
     .populate("advertiser")
+    .populate("attended")
     .exec(); // Perform a search with the regex query
 };
 
@@ -276,9 +314,39 @@ activitySchema.statics.filter = async function (
     query.push({ ["rating"]: { $gte: minRating } });
   }
   if (query.length === 0) {
-    return this.find().populate("category tags advertiser").exec();
+    return this.find().populate("category tags advertiser attended").exec();
   }
-  return this.find({ $and: query }).populate("category tags advertiser").exec();
+  return this.find({ $and: query }).populate("category tags advertiser attended").exec();
 };
+
+// Method to rate an activity and calculate the new average rating
+activitySchema.methods.addRating = async function (newRating) {
+  // Add the new rating to the allRatings array
+  this.allRatings.push(newRating);
+
+  // Calculate the new average rating
+  const totalRatings = this.allRatings.length;
+  const sumOfRatings = this.allRatings.reduce((sum, rating) => sum + rating, 0);
+  const averageRating = sumOfRatings / totalRatings;
+
+  // Update the activity's rating
+  this.rating = averageRating;
+
+  // Save the updated activity document
+  await this.save();
+
+  return this.rating; // Return the new average rating
+};
+// Method to add a comment to the activity
+activitySchema.methods.addComment = async function (comment) {
+  // Add the new comment to the comments array
+  this.comments.push(comment);
+
+  // Save the updated activity document
+  await this.save();
+
+  return this.comments; // Return the updated comments array
+};
+
 
 module.exports = mongoose.model("Activity", activitySchema);

@@ -53,6 +53,14 @@ const touristSchema = new Schema({
     wallet: {
         type: Number,
         default: 0
+    },
+    loyaltyPoints: {
+        type: Number,
+        default: 0
+    },
+    loyaltyBadge: {
+        type: String,
+        enum: ['Bronze', 'Silver', 'Gold'],
     }
 }, { timestamps: true });
 

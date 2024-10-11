@@ -1,4 +1,6 @@
 const Booking = require('../models/booking'); 
+const Tourist = require("../models/tourist");
+
 
 // Method to get the logged-in user's bookings
 const getUserBookings = async (req, res) => {
@@ -36,11 +38,35 @@ const deleteBooking = async (req, res) => {
 };
 
 // Method to create a new booking
+// const createBooking = async (req, res) => {
+//     try {
+//         const userId = res.locals.user_id; 
+//         const { bookingType, activity, itinerary, historicalPlace, paymentType , paymentAmount} = req.body;
+
+//         // Create a new booking
+//         const newBooking = new Booking({
+//             bookingType,
+//             activity,
+//             itinerary,
+//             historicalPlace,
+//             paymentType,
+//             paymentAmount,
+//             user: userId // Link the booking to the logged-in user
+//         });
+
+//         // Save the booking
+//         await newBooking.save();
+
+//         res.status(201).json({ message: 'Booking created successfully', booking: newBooking });
+//     } catch (err) {
+//         res.status(500).json({ error: err.message });
+//     }
+// }
+
 const createBooking = async (req, res) => {
     try {
-        const userId = res.locals.user_id; 
-        const { bookingType, activity, itinerary, historicalPlace, paymentType } = req.body;
-
+        const touristId = res.locals.user_id;
+        const { bookingType, activity, itinerary, historicalPlace, paymentType, paymentAmount } = req.body;
         // Create a new booking
         const newBooking = new Booking({
             bookingType,
@@ -48,17 +74,62 @@ const createBooking = async (req, res) => {
             itinerary,
             historicalPlace,
             paymentType,
-            user: userId // Link the booking to the logged-in user
+            paymentAmount,
+            user: touristId // Link the booking to the logged-in user
         });
-
         // Save the booking
         await newBooking.save();
+        // Update user's loyalty points and badge
+        const touristUpdate = await Tourist.findById(touristId);
+        if (!touristUpdate) {
+            return res.status(404).json({ error: 'Tourist not found' });
+        }
+        // Calculate points based on current level
+        let pointsEarned = 0;
+        if (touristUpdate.loyaltyPoints <= 100000) {
+            pointsEarned = paymentAmount * 0.5;
+        } else if (touristUpdate.loyaltyPoints <= 500000) {
+            pointsEarned = paymentAmount * 1;
+        } else {
+            pointsEarned = paymentAmount * 1.5;
+        }
+        // Update user's total points
+        const newLoyaltyPoints = touristUpdate.loyaltyPoints + pointsEarned;
 
-        res.status(201).json({ message: 'Booking created successfully', booking: newBooking });
+        let badge = "";
+        if (newLoyaltyPoints <= 100000) {
+            badge = 'Bronze';
+        } else if (newLoyaltyPoints <= 500000) {
+            badge = 'Silver';
+        } else {
+            badge = 'Gold';
+        }
+
+        // Save updated user information
+        const updatedTourist = await Tourist.findByIdAndUpdate(
+            res.locals.user_id,
+            {
+              loyaltyPoints: newLoyaltyPoints,
+              loyaltyBadge : badge
+            },
+            { new: true } // Return the updated document
+          )
+            .exec();
+      
+          if (!updatedTourist) {
+            return res.status(404).json({ message: "Tourist not found" });
+          }
+
+
+        res.status(201).json({ 
+            message: 'Booking created successfully', 
+            booking: newBooking,
+            tourist : updatedTourist,
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-}
+};
 
 module.exports = {
     createBooking,

@@ -27,6 +27,10 @@ const bookingSchema = new Schema({
         enum: ['CreditCard', 'DebitCard', 'PayPal', 'BankTransfer', 'Cash'],
         required: true
     },
+    paymentAmount: {
+        type: Number,
+        required: true
+    },
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tourist',

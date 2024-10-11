@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight , Edit, Trash2, CheckCircle, XCircle} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import ItineraryDetail from "./ItineraryDetail.jsx";
 import FilterComponent from "./Filter.jsx";
@@ -8,10 +8,21 @@ import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "./Loader.jsx";
+import { Button } from "@/components/ui/button";
+import * as jwtDecode from "jwt-decode";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 import { set } from "date-fns";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-const ItineraryCard = ({ itinerary, onSelect }) => (
+const ItineraryCard = ({ itinerary, onSelect, role, canModify }) => (
   <div
     className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
     onClick={() => onSelect(itinerary._id)}
@@ -65,7 +76,26 @@ const ItineraryCard = ({ itinerary, onSelect }) => (
     </div>
   ))}
 </div>
-
+{role === "tour-guide" && canModify &&(
+              <div className="mt-6 flex justify-end space-x-4">
+                <Button
+                  onClick={() => navigate(`/update-itinerary/${itinerary.id}`)}
+                  variant="default"
+                  className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Update 
+                </Button>
+                <Button
+                   onClick={() => setShowDeleteConfirm(true)}
+                  variant="destructive"
+                  className="flex items-center"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+             )}
     </div>
   </div>
 );
@@ -96,6 +126,11 @@ export function AllItinerariesComponent() {
   const [languagesOptions, setLanguagesOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isBooked, setIsBooked] = useState(false);
+  const [canModify, setCanModify] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+
 
   const navigate = useNavigate();
 
@@ -219,6 +254,13 @@ export function AllItinerariesComponent() {
       setItineraries(data);
       setError(null);
       setCurrentPage(1);
+      // if (token) {
+      //   const decodedToken = jwtDecode.jwtDecode(token);
+      //   console.log(data.tourGuide);
+      //   setCanModify(decodedToken.id === data.tourGuide._id);
+      // }
+      // data.tourguide wont work 3shan dool list of itineraries, mesh itinerary wahda
+      setCanModify(true);
     } catch (error) {
       console.error("Error fetching itineraries:", error);
       setError("Error fetching itineraries");
@@ -328,6 +370,46 @@ export function AllItinerariesComponent() {
     );
   };
 
+
+
+  const handleDelete = async () => {
+    setShowDeleteConfirm(false);
+    setLoading(true);
+    setDeleteError(null);
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/itineraries/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400) {
+          setDeleteError(errorData.message);
+          return;
+        }
+        if (response.status === 403) {
+          setDeleteError(errorData.message);
+          return;
+        }
+        throw new Error("Failed to delete itinerary");
+      }
+
+      setShowDeleteSuccess(true);
+    } catch (err) {
+      setError("Error deleting itinerary. Please try again later.");
+      console.error("Error deleting itinerary:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div>
       {isLoading ? (
@@ -394,6 +476,8 @@ export function AllItinerariesComponent() {
                       key={itinerary._id} // Use the unique _id as the key
                       itinerary={itinerary}
                       onSelect={handleItinerarySelect}
+                      role={getUserRole()}
+                      canModify = {canModify}
                     />
                   ))}
               </div>
@@ -444,6 +528,73 @@ export function AllItinerariesComponent() {
           </div>
         </div>
       )}
+       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Itinerary</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this itinerary?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Itinerary Deleted
+            </DialogTitle>
+            <DialogDescription>
+              The itinerary has been successfully deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="default"
+              onClick={() => navigate("/all-itineraries")}
+            >
+              Back to All Itineraries
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog
+        open={deleteError !== null}
+        onOpenChange={() => setDeleteError(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Failed to Delete Itinerary
+            </DialogTitle>
+            <DialogDescription>
+              {deleteError || "Itinerary is already booked!"}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="default" onClick={() => setDeleteError(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+    
   );
 }

@@ -39,6 +39,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -61,6 +62,59 @@ const LoadingSpinner = () => (
     </svg>
   </div>
 );
+
+const TourguideProfileCard = ({ profile }) => {
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-center">Tourguide Profile</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col items-center">
+          <Avatar className="w-24 h-24">
+            <AvatarImage src={profile.avatarUrl} alt={profile.username} />
+            <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <h3 className="mt-2 text-xl font-semibold">{profile.username}</h3>
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center">
+            <Mail className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
+            <span>{profile.email}</span>
+          </div>
+          <div className="flex items-center">
+            <Phone className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
+            <span>{profile.mobile}</span>
+          </div>
+          <div className="flex items-center">
+            <Award className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
+            <span>{profile.yearsOfExperience} years of experience</span>
+          </div>
+          <div className="flex items-center">
+            <Star className="w-5 h-5 mr-2 text-yellow-500" aria-hidden="true" />
+            <span>{profile.rating.toFixed(1)} / 5.0</span>
+          </div>
+        </div>
+        <div>
+          <h4 className="font-semibold mb-2">Languages</h4>
+          <div className="flex flex-wrap gap-2">
+            {profile.languages.map((lang, index) => (
+              <Badge key={index} variant="secondary">{lang}</Badge>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h4 className="font-semibold mb-2">Specialties</h4>
+          <div className="flex flex-wrap gap-2">
+            {profile.specialties.map((specialty, index) => (
+              <Badge key={index} variant="outline">{specialty}</Badge>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const ItineraryDetail = () => {
   const { id } = useParams();
@@ -107,7 +161,12 @@ const ItineraryDetail = () => {
         setError(null);
 
         if (data.tourGuide) {
-          setTourGuideProfile(data.tourGuide);
+          setTourGuideProfile({
+            ...data.tourGuide,
+            languages: ['English', 'Spanish', 'French'], // Example data, replace with actual data
+            specialties: ['Historical Tours', 'Food Tours', 'Adventure Tours'], // Example data, replace with actual data
+            rating: 4.8, // Example data, replace with actual data
+          });
         }
 
         setActivities(data.activities);
@@ -205,221 +264,212 @@ const ItineraryDetail = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-4xl font-bold">Itinerary Details</h1>
-              <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                <Star className="w-8 h-8 text-yellow-500 mr-2" />
-                <span className="text-2xl font-semibold">
-                  {itinerary.rating || "N/A"}
-                </span>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <Globe className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Language: {itinerary.language}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <DollarSign className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Price: ${itinerary.price}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <Accessibility className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Accessibility: {itinerary.accessibility ? "Yes" : "No"}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Pick-up: {itinerary.pickUpLocation}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Drop-off: {itinerary.dropOffLocation}
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <Users className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Tour Guide:{" "}
-                    {tourGuideProfile
-                      ? tourGuideProfile.username
-                      : "Loading..."}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <Mail className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Email:{" "}
-                    {tourGuideProfile ? tourGuideProfile.email : "Loading..."}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <Phone className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Phone:{" +"}
-                    {tourGuideProfile ? tourGuideProfile.mobile : "Loading..."}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <Award className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Years of Experience:{" "}
-                    {tourGuideProfile
-                      ? tourGuideProfile.yearsOfExperience
-                      : "Loading..."}
-                  </span>
-                </div>
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="lg:w-2/3">
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-4xl font-bold">Itinerary Details</h1>
 
-
-                <div className="flex items-center">
-                  <Clock className="w-6 h-6 mr-2 text-orange-500" />
-                  <span className="text-gray-700">
-                    Timeline: {""}
-                    {itinerary.timeline}
-                  </span>
-                </div>
-
-              </div>
-            </div>
-
-            <div className="p-6 border-t border-gray-200">
-              <h3 className="text-2xl font-semibold mb-4">Available Dates</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {itinerary.availableDates.map((dateInfo, index) => (
-                  <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                    <div className="flex items-center mb-2">
-                      <Calendar className="w-5 h-5 mr-2 text-orange-500" />
-                      <span className="font-semibold">
-                        {new Date(dateInfo.date).toLocaleDateString()}
+                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
+                      <DollarSign className="w-8 h-8 text-blue-500 mr-2" />
+                      <span className="text-2xl font-semibold">
+                        {itinerary.price || "N/A"}
                       </span>
                     </div>
-                    <ul className="space-y-1">
-                      {dateInfo.times.map((time, timeIndex) => (
-                        <li key={timeIndex} className="text-sm text-gray-600">
-                          {time.startTime} - {time.endTime}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                      <Star className="w-8 h-8 text-yellow-500 mr-2" />
+                      <span className="text-2xl font-semibold">
+                        {itinerary.rating || "N/A"}
+                      </span>
+                    </div>
+
+                   
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <h2 className="text-2xl font-semibold mb-4">Activities</h2>
-              {activities.length === 0 ? (
-                <p>No activities found.</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {activities.map((activity, index) => (
-                    <Card key={index}>
-                      <CardHeader>
-                        <CardTitle>{activity.name}</CardTitle>
-                        <CardDescription>
-                          {activity.description}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-                            <span className="text-sm">{activity.location.address}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="w-4 h-4 mr-2 text-gray-500" />
-                            <span className="text-sm">
-                              Duration: {activity.duration} hours
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                            <span className="text-sm">
-                              {new Date(activity.timing).toLocaleString()}
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <DollarSign className="w-4 h-4 mr-2 text-gray-500" />
-                            <span className="text-sm">
-                              Price: ${activity.price}
-                            </span>
-                          </div>
-                          {activity.specialDiscount > 0 && (
-                            <div className="flex items-center">
-                              <Info className="w-4 h-4 mr-2 text-green-500" />
-                              <span className="text-sm text-green-500">
-                                Special Discount: {activity.specialDiscount}%
-                                off
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex items-center">
-                            <Star className="w-4 h-4 mr-2 text-yellow-500" />
-                            <span className="text-sm">
-                              Rating: {activity.rating || "N/A"}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {activity.category &&
-                              activity.category.map((cat, catIndex) => (
-                                <Badge key={catIndex} variant="secondary">
-                                  {cat.name}
-                                </Badge>
-                              ))}
-                          </div>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {activity.tags &&
-                              activity.tags.map((tag, tagIndex) => (
-                                <Badge key={tagIndex} variant="outline">
-                                  {tag.type}
-                                </Badge>
-                              ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
                 </div>
-              )}
-            </div>
 
-              {/* testing something */}
-              {itinerary.location && (
-            <div className="mt-8">
-              <TimelinePreviewComponent  />
-            </div>) }
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <Globe className="w-6 h-6 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Language: {itinerary.language}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <DollarSign className="w-6 h-6 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Price: ${itinerary.price}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <Accessibility className="w-6 h-6 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Accessibility: {itinerary.accessibility ? "Yes" : "No"}
+                      </span>
+                    </div>
+                    
+                  </div>
+                  <div className="space-y-4">
+                  <div className="flex items-center">
+                      <MapPin className="w-6 h-6 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Pick-up: {itinerary.pickUpLocation}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <MapPin className="w-6 h-6 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Drop-off: {itinerary.dropOffLocation}
+                      </span>
+                    </div>
+                   
+                   
+                    <div className="flex items-center">
+                      <Clock className="w-6 h-6 mr-2 text-orange-500" />
+                      <span className="text-gray-700">
+                        Timeline: {""}
+                        {itinerary.timeline}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-            {userRole === "tour-guide" && canModify && (
-              <div className="mt-6 flex justify-end space-x-4">
-                <Button
-                  onClick={handleUpdate}
-                  variant="default"
-                  className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Update
-                </Button>
-                <Button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="destructive"
-                  className="flex items-center"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
+                <div className="p-6 border-t border-gray-200 mt-6">
+                  <h3 className="text-2xl font-semibold mb-4">Available Dates</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {itinerary.availableDates.map((dateInfo, index) => (
+                      <div key={index} className="bg-gray-100 p-4 rounded-lg">
+                        <div className="flex items-center mb-2">
+                          <Calendar className="w-5 h-5 mr-2 text-orange-500" />
+                          <span className="font-semibold">
+                            {new Date(dateInfo.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <ul className="space-y-1">
+                          {dateInfo.times.map((time, timeIndex) => (
+                            <li key={timeIndex} className="text-sm text-gray-600">
+                              {time.startTime} - {time.endTime}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-8">
+                  <h2 className="text-2xl font-semibold mb-4">Activities</h2>
+                  {activities.length === 0 ? (
+                    <p>No activities found.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {activities.map((activity, index) => (
+                        <Card key={index}>
+                          <CardHeader>
+                            <CardTitle>{activity.name}</CardTitle>
+                            <CardDescription>
+                              {activity.description}
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-2">
+                              <div className="flex items-center">
+                                <MapPin className="w-4 h-4 mr-2 text-gray-500" />
+                                <span className="text-sm">{activity.location.address}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                                <span className="text-sm">
+                                  Duration: {activity.duration} hours
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                                <span className="text-sm">
+                                  {new Date(activity.timing).toLocaleString()}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <DollarSign className="w-4 h-4 mr-2 text-gray-500" />
+                                <span className="text-sm">
+                                  Price: ${activity.price}
+                                </span>
+                              </div>
+                              {activity.specialDiscount > 0 && (
+                                <div className="flex items-center">
+                                  <Info className="w-4 h-4 mr-2 text-green-500" />
+                                  <span className="text-sm text-green-500">
+                                    Special Discount: {activity.specialDiscount}%
+                                    off
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex items-center">
+                                <Star className="w-4 h-4 mr-2 text-yellow-500" />
+                                <span className="text-sm">
+                                  Rating: {activity.rating || "N/A"}
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {activity.category &&
+                                  activity.category.map((cat, catIndex) => (
+                                    <Badge key={catIndex} variant="secondary">
+                                      {cat.name}
+                                    </Badge>
+                                  ))}
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {activity.tags &&
+                                  activity.tags.map((tag, tagIndex) => (
+                                    <Badge key={tagIndex} variant="outline">
+                                      {tag.type}
+                                    </Badge>
+                                  ))}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {itinerary.location && (
+                  <div className="mt-8">
+                    <TimelinePreviewComponent  />
+                  </div>
+                )}
+
+                {userRole === "tour-guide" && canModify && (
+                  <div className="mt-6 flex justify-end space-x-4">
+                    <Button
+                      onClick={handleUpdate}
+                      variant="default"
+                      className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Update
+                    </Button>
+                    <Button
+                      onClick={() => setShowDeleteConfirm(true)}
+                      variant="destructive"
+                      className="flex items-center"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
+                )}
               </div>
+            </div>
+          </div>
+          
+          <div className="lg:w-1/3">
+            {tourGuideProfile && (
+              <TourguideProfileCard profile={tourGuideProfile} />
             )}
           </div>
         </div>
@@ -469,7 +519,6 @@ const ItineraryDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Error Dialog */}
       <Dialog
         open={deleteError !== null}
         onOpenChange={() => setDeleteError(null)}

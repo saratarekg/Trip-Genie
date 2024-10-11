@@ -7,10 +7,12 @@ const bookingController = require("../controllers/bookingController.js");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
 const tourguideController = require("../controllers/tourGuideController");
 const sellerController = require("../controllers/sellerController");
+const commentController = require("../controllers/commentController");
 
 const router = express.Router();
 
 router.put("/", touristController.updateTouristProfile);
+router.post("/loyalty", touristController.updateLoyaltyPointsAndBadge);
 router.get("/", touristController.getTouristProfile);
 
 router.get("/tour-guide/:id", tourguideController.getTourGuideByID);
@@ -25,6 +27,10 @@ router.get("/seller/:id", sellerController.getSellerByID);
 
 router.get("/activities", activityController.getAllActivities);
 router.get("/activities/:id", activityController.getActivityById);
+
+router.post("/activities/rate/:id", activityController.rateActivity);
+router.post("/activities/comment/:id", activityController.addCommentToActivity);
+
 
 router.get(
   "/historical-places",
