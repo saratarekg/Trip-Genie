@@ -225,11 +225,26 @@ const ProductDetail = () => {
                       ${product.price.toFixed(2)}
                     </span>
                   </div>
+                  <div className="flex items-center mt-4">
+                  {product.sales > 0 ? (
+    <>
+      <CheckCircle className="w-6 h-6 mr-2 text-green-500" />
+      <span className="text-lg font-semibold text-green-500">{product.sales} sold</span>
+    </>
+  ) : (
+    <>
+      <XCircle className="w-6 h-6 mr-2 text-red-500" />
+      <span className="text-lg font-semibold text-red-500">No sales yet</span>
+    </>
+  )}
+</div>
                   <div className="flex items-center">
                     <Package className="w-6 h-6 mr-2 text-blue-500" />
-                    <span className="text-lg">
-                      Quantity: {product.quantity}
-                    </span>
+                    <span
+    className={`text-lg font-semibold ${product.quantity === 0 ? 'text-blue-500' : 'text-blue-500'}`}
+  >
+    {product.quantity === 0 ? "All products sold" : `${product.quantity} still in stock`}
+  </span>
                   </div>
                   <p className="text-gray-700">{product.description}</p>
                 </div>
