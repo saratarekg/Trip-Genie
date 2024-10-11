@@ -1,120 +1,76 @@
-import React, { useState, useEffect } from "react";
-import Cookies from "js-cookie";
-import * as jwtDecode from "jwt-decode";
-import { TimelinePreviewComponent } from "@/components/timeline-preview";
-import {
-  XCircle,
-  CheckCircle,
-  ChevronLeft,
-  Calendar,
-  MapPin,
-  Users,
-  DollarSign,
-  Globe,
-  Accessibility,
-  Star,
-  Edit,
-  Trash2,
-  Mail,
-  Phone,
-  Award,
-  Clock,
-  Info,
-} from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
+import * as jwtDecode from 'jwt-decode';
+import {CheckCircle,XCircle, Star, Edit, Trash2, Mail, Phone, Award, Globe, Accessibility, MapPin, Calendar, Clock, DollarSign, Info, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+//import { Progress } from "@/components/ui/progress";
+//import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { TimelinePreviewComponent } from "@/components/timeline-preview";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
-    <svg
-      className="spinner"
-      width="65px"
-      height="65px"
-      viewBox="0 0 66 66"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle
-        className="path"
-        fill="none"
-        strokeWidth="6"
-        strokeLinecap="round"
-        cx="33"
-        cy="33"
-        r="30"
-      ></circle>
+    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
     </svg>
   </div>
 );
 
-const TourguideProfileCard = ({ profile }) => {
-  return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Tourguide Profile</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col items-center">
-          <Avatar className="w-24 h-24">
-            <AvatarImage src={profile.avatarUrl} alt={profile.username} />
-            <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <h3 className="mt-2 text-xl font-semibold">{profile.username}</h3>
+const TourguideProfileCard = ({ profile }) => (
+  <Card className="w-full max-w-sm">
+    <CardHeader>
+      <CardTitle className="text-2xl font-bold text-center">Tourguide Profile</CardTitle>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      <div className="flex flex-col items-center">
+        <Avatar className="w-24 h-24">
+          <AvatarImage src={profile.avatarUrl} alt={profile.username} />
+          <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+        </Avatar>
+        <h3 className="mt-2 text-xl font-semibold">{profile.username}</h3>
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center">
+          <Mail className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
+          <span>{profile.email}</span>
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center">
-            <Mail className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
-            <span>{profile.email}</span>
-          </div>
-          <div className="flex items-center">
-            <Phone className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
-            <span>{profile.mobile}</span>
-          </div>
-          <div className="flex items-center">
-            <Award className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
-            <span>{profile.yearsOfExperience} years of experience</span>
-          </div>
-          <div className="flex items-center">
-            <Star className="w-5 h-5 mr-2 text-yellow-500" aria-hidden="true" />
-            <span>{profile.rating.toFixed(1)} / 5.0</span>
-          </div>
+        <div className="flex items-center">
+          <Phone className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
+          <span>{profile.mobile}</span>
         </div>
-        <div>
-          <h4 className="font-semibold mb-2">Languages</h4>
-          <div className="flex flex-wrap gap-2">
-            {profile.languages.map((lang, index) => (
-              <Badge key={index} variant="secondary">{lang}</Badge>
-            ))}
-          </div>
+        <div className="flex items-center">
+          <Award className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
+          <span>{profile.yearsOfExperience} years of experience</span>
         </div>
-        <div>
-          <h4 className="font-semibold mb-2">Specialties</h4>
-          <div className="flex flex-wrap gap-2">
-            {profile.specialties.map((specialty, index) => (
-              <Badge key={index} variant="outline">{specialty}</Badge>
-            ))}
-          </div>
+        <div className="flex items-center">
+          <Star className="w-5 h-5 mr-2 text-yellow-500" aria-hidden="true" />
+          <span>{profile.rating.toFixed(1)} / 5.0</span>
         </div>
-      </CardContent>
-    </Card>
-  );
-};
+      </div>
+      <div>
+        <h4 className="font-semibold mb-2">Languages</h4>
+        <div className="flex flex-wrap gap-2">
+          {profile.languages.map((lang, index) => (
+            <Badge key={index} variant="secondary">{lang}</Badge>
+          ))}
+        </div>
+      </div>
+      <div>
+        <h4 className="font-semibold mb-2">Specialties</h4>
+        <div className="flex flex-wrap gap-2">
+          {profile.specialties.map((specialty, index) => (
+            <Badge key={index} variant="outline">{specialty}</Badge>
+          ))}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
 
 const ItineraryDetail = () => {
   const { id } = useParams();
@@ -128,6 +84,10 @@ const ItineraryDetail = () => {
   const [deleteError, setDeleteError] = useState(null);
   const [tourGuideProfile, setTourGuideProfile] = useState(null);
   const [canModify, setCanModify] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
 
   const navigate = useNavigate();
 
@@ -150,7 +110,6 @@ const ItineraryDetail = () => {
             },
           }
         );
-        
 
         if (!response.ok) {
           throw new Error("Failed to fetch itinerary details");
@@ -163,9 +122,9 @@ const ItineraryDetail = () => {
         if (data.tourGuide) {
           setTourGuideProfile({
             ...data.tourGuide,
-            languages: ['English', 'Spanish', 'French'], // Example data, replace with actual data
-            specialties: ['Historical Tours', 'Food Tours', 'Adventure Tours'], // Example data, replace with actual data
-            rating: 4.8, // Example data, replace with actual data
+            languages: ['English', 'Spanish', 'French'],
+            specialties: ['Historical Tours', 'Food Tours', 'Adventure Tours'],
+            rating: 4.8,
           });
         }
 
@@ -207,11 +166,7 @@ const ItineraryDetail = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        if (response.status === 400) {
-          setDeleteError(errorData.message);
-          return;
-        }
-        if (response.status === 403) {
+        if (response.status === 400 || response.status === 403) {
           setDeleteError(errorData.message);
           return;
         }
@@ -227,6 +182,55 @@ const ItineraryDetail = () => {
     }
   };
 
+  const handleRating = async (newRating) => {
+    setRating(newRating);
+    try {
+      const response = await fetch(`http://localhost:4000/${userRole}/tourguide/rate/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rating: newRating }),
+      });
+      if (!response.ok) throw new Error('Failed to submit rating');
+      // Handle success (e.g., show a success message)
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      // Handle error (e.g., show an error message)
+    }
+  };
+
+  const handleCommentSubmit = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/${userRole}/tourguide/rate/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment }),
+      });
+      if (!response.ok) throw new Error('Failed to submit comment');
+      setShowCommentDialog(false);
+      setComment('');
+      // Handle success (e.g., show a success message, refresh comments)
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+      // Handle error (e.g., show an error message)
+    }
+  };
+
+  const handlePrevComment = () => {
+    setCurrentCommentIndex(Math.max(0, currentCommentIndex - 3));
+  };
+
+  const handleNextComment = () => {
+    setCurrentCommentIndex(Math.min(itinerary.comments.length - 3, currentCommentIndex + 3));
+  };
+
+  const formatCommentDate = (date) => {
+    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -234,10 +238,7 @@ const ItineraryDetail = () => {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-          role="alert"
-        >
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Error!</strong>
           <span className="block sm:inline"> {error}</span>
         </div>
@@ -272,7 +273,7 @@ const ItineraryDetail = () => {
                   <h1 className="text-4xl font-bold">Itinerary Details</h1>
 
                   <div className="flex items-center space-x-4">
-                  <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
+                    <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
                       <DollarSign className="w-8 h-8 text-blue-500 mr-2" />
                       <span className="text-2xl font-semibold">
                         {itinerary.price || "N/A"}
@@ -284,8 +285,6 @@ const ItineraryDetail = () => {
                         {itinerary.rating || "N/A"}
                       </span>
                     </div>
-
-                   
                   </div>
                 </div>
 
@@ -309,10 +308,9 @@ const ItineraryDetail = () => {
                         Accessibility: {itinerary.accessibility ? "Yes" : "No"}
                       </span>
                     </div>
-                    
                   </div>
                   <div className="space-y-4">
-                  <div className="flex items-center">
+                    <div className="flex items-center">
                       <MapPin className="w-6 h-6 mr-2 text-orange-500" />
                       <span className="text-gray-700">
                         Pick-up: {itinerary.pickUpLocation}
@@ -324,13 +322,10 @@ const ItineraryDetail = () => {
                         Drop-off: {itinerary.dropOffLocation}
                       </span>
                     </div>
-                   
-                   
                     <div className="flex items-center">
                       <Clock className="w-6 h-6 mr-2 text-orange-500" />
                       <span className="text-gray-700">
-                        Timeline: {""}
-                        {itinerary.timeline}
+                        Timeline: {itinerary.timeline}
                       </span>
                     </div>
                   </div>
@@ -342,6 +337,7 @@ const ItineraryDetail = () => {
                     {itinerary.availableDates.map((dateInfo, index) => (
                       <div key={index} className="bg-gray-100 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
+                
                           <Calendar className="w-5 h-5 mr-2 text-orange-500" />
                           <span className="font-semibold">
                             {new Date(dateInfo.date).toLocaleDateString()}
@@ -355,7 +351,6 @@ const ItineraryDetail = () => {
                           ))}
                         </ul>
                       </div>
-                
                     ))}
                   </div>
                 </div>
@@ -439,7 +434,7 @@ const ItineraryDetail = () => {
 
                 {itinerary.location && (
                   <div className="mt-8">
-                    <TimelinePreviewComponent  />
+                    <TimelinePreviewComponent />
                   </div>
                 )}
 
@@ -471,7 +466,93 @@ const ItineraryDetail = () => {
             {tourGuideProfile && (
               <TourguideProfileCard profile={tourGuideProfile} />
             )}
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Rate Tour Guide</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center space-x-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-6 h-6 cursor-pointer ${
+                        star <= rating ? 'fill-yellow-400' : 'fill-gray-300'
+                      }`}
+                      onClick={() => handleRating(star)}
+                    />
+                  ))}
+                </div>
+                <Button onClick={() => setShowCommentDialog(true)} className="mt-4">
+                  Add a Comment
+                </Button>
+              </CardContent>
+            </Card>
           </div>
+        </div>
+
+        <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold mb-4">What our customers say</h2>
+          {itinerary.comments && itinerary.comments.length > 0 ? (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
+                  <ChevronLeft />
+                </Button>
+                <div className="flex-1 flex justify-between px-4">
+                  {itinerary.comments.slice(currentCommentIndex, currentCommentIndex + 3).map((comment, index) => (
+                    <Card key={index} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                      <CardHeader className="flex items-start">
+                        <div className="flex">
+                          <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+                            {comment.username.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex flex-col">
+                            <CardTitle className="text-xl font-semibold">{comment.username}</CardTitle>
+                            <p className="text-sm text-gray-500">{formatCommentDate(comment.date)}</p>
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="flex">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-4 h-4 ${
+                                  star <= comment.rating ? 'fill-yellow-400' : 'fill-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </CardHeader>
+                    
+                      <CardContent>
+                        <p className="text-gray-700 line-clamp-3">{comment.content.liked || comment.content.disliked || "No comment provided"}</p>
+                        <a
+                          href="#"
+                          className="text-blue-500 hover:underline mt-2 inline-block"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            // Implement view more functionality
+                          }}
+                        >
+                          View more
+                        </a>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <Button
+                  onClick={handleNextComment}
+                  variant="ghost"
+                  disabled={currentCommentIndex >= itinerary.comments.length - 3}
+                >
+                  <ChevronRight />
+                </Button>
+              </div>
+            </>
+          ) : (
+            <p>No comments yet.</p>
+          )}
         </div>
       </div>
 
@@ -537,6 +618,25 @@ const ItineraryDetail = () => {
             <Button variant="default" onClick={() => setDeleteError(null)}>
               Close
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add a Comment</DialogTitle>
+          </DialogHeader>
+          <Textarea
+            placeholder="Write your comment here..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCommentDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCommentSubmit}>Post Comment</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
