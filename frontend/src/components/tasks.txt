@@ -1,0 +1,65 @@
+Member 1: Abdelrahman Elaby
+2: Change my password
+15: Request my account to be deleted off the system
+6: Upload required documents
+10: Upload picture
+
+
+Member 2: Houba
+12: View the documents uploaded by tour guides/ advertisers/ sellers that are trying to register on the system
+13: Accept/ Reject tour guides and advertisers and sellers based on uploaded documents
+14: Accept the terms and conditions if accepted on the system
+33: Flag an event/ itinerary I deem inappropriate
+
+Member 3: Samalouty
+39: Select my preferences for my vacation in terms of historic areas, beaches, family-friendly, shopping, budget, etc.
+40: Book a flight using a 3rd party application (not using a link)
+41: Book a hotel using a 3rd party application (not using a link)
+42: Book transportation through transportation advertisers
+
+Member 4: Radwa 
+50: Share an activity, museums, and historical places or itinerary via copy link or email
+51: Choose the currency I want to view the prices in
+58: Book a ticket to an event/activity or itinerary
+61: Cancel a booking at an event/activity or itinerary 48 hours before the start
+
+Member 5: Jana 
+52: Rate a tour guide I completed a tour with
+53: Comment on a tour guide I completed a tour with
+54: Rate an itinerary made by a tour guide which I followed with that tour guide
+55: Comment on an itinerary made by a tour guide which I followed with that tour guide
+
+Member 6: Amy
+56: Rate an event/activity that I attended
+57: Comment on an event/activity that I attended
+70: Receive loyalty points upon payment for any event/ itinerary
+71: Receive a badge based on my level
+
+
+Member 7: Zeina 
+72: Redeem my points to cash in my wallet
+73: File a complaint with title, body (problem), and date
+74: View my list of issued complaints and its status (pending/resolved)
+25: Activate/ deactivate an itinerary with bookings
+
+
+Member 8: Alaa
+80: View a list of all complaints issued and their statuses (pending/resolved)
+75: View the details of a selected complaint
+76: Mark complaint as pending/resolved
+77: Reply to any complaints issued
+
+
+
+Member 9: Hazem
+78: Sort complaints by date
+79: Filter complaints by status
+82: View the available quantity, and sales of each product
+87: Upload product image
+
+
+Member 10: Habiba
+89: Archive/ Unarchive a product
+102: Rate a product that I purchased
+103: Review a product that I purchased
+43: Choose a category of activities
