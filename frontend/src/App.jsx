@@ -35,6 +35,7 @@ import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
+import FileComplaint from "./pages/FileComplaint.jsx";
 
 import UpdateActivity from "./components/UpdateActivity.jsx";
 import CreateActivity from "./pages/CreateActivity.jsx";
@@ -105,6 +106,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tour-guide"]}>
                 <CreateItineraryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/file-complaint"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <FileComplaint />
               </ProtectedRoute>
             }
           />

@@ -89,6 +89,31 @@ const getSeller = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const seller = await Seller.findById(res.locals.user_id);
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await seller.comparePassword(oldPassword, seller.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    if (oldPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Old password and new password are the same" });
+    }
+    seller.password = newPassword;
+    await seller.save();
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
     return true;
@@ -127,4 +152,5 @@ module.exports = {
   getSellerByID,
   updateSeller,
   getSeller,
+  changePassword,
 };

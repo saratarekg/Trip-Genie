@@ -81,5 +81,13 @@ advertiserSchema.statics.login = async function (username, password) {
   throw Error("Email/Username is not registered");
 };
 
+advertiserSchema.methods.comparePassword = async function (password, hash) {
+  const auth = await bcrypt.compare(password, hash);
+  if (auth) {
+    return true;
+  }
+  return false;
+};
+
 const Advertiser = mongoose.model("Advertiser", advertiserSchema);
 module.exports = Advertiser;
