@@ -2,17 +2,41 @@ import React, { useEffect, useState } from "react";
 // import { ObjectId } from "mongodb";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDistanceToNow, format } from 'date-fns';
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 import {
+  XCircle,
+  CheckCircle,
+  ChevronLeft,
+  Calendar,
+  MapPin,
+  Users,
+  User,
   Mail,
   Phone,
-  User,
-  CheckCircle,
   AtSign,
   Briefcase,
   Flag,
   Plus,
-  Trash,
+  DollarSign,
+  Globe,
+  Accessibility,
+  Star,
+  Edit,
+  Trash2,
+  Award,
+  Clock,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  Send,
+  Tag,
+  Smile,
+  Frown
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
 import { Input } from "@/components/ui/input";
@@ -44,6 +68,23 @@ const phoneValidator = (value) => {
   return true;
 };
 
+const StarRating = ({ rating, setRating, readOnly = false }) => {
+  return (
+    <div className="flex items-center">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-6 h-6 ${readOnly ? '' : 'cursor-pointer'} ${
+            star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
+          }`}
+          onClick={() => !readOnly && setRating(star)}
+          aria-label={`${star} star${star !== 1 ? 's' : ''}`}
+        />
+      ))}
+    </div>
+  );
+};
+
 export function TourGuideProfileComponent() {
   const [tourGuide, setTourGuide] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +100,31 @@ export function TourGuideProfileComponent() {
     description: "",
   });
   const [nationalities, setNationalities] = useState([]);
+
+  const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
+  const [showFullComment, setShowFullComment] = useState(false);
+  const handlePrevComment = () => setCurrentCommentIndex((prev) => Math.max(0, prev - 3));
+  const handleNextComment = () => setCurrentCommentIndex((prev) => Math.min(tourGuide.comments.length - 3, prev + 3));
+  const formatCommentDate = (date) => {
+    // Check if the date is valid
+    const commentDate = new Date(date);
+    
+    // Check if the date is valid
+    if (isNaN(commentDate.getTime())) {
+        return "Date unavailable"; // Return if the date is invalid
+    }
+
+    
+    
+    const now = new Date();
+    const diffInDays = Math.floor((now - commentDate) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays < 30) {
+        return formatDistanceToNow(commentDate, { addSuffix: true });
+    } else {
+        return format(commentDate, 'MMM d, yyyy');
+    }
+};
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -244,8 +310,9 @@ export function TourGuideProfileComponent() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="w-full max-w-6xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden"> {/* Changed max-w-3xl to max-w-4xl */}
       <div className="p-8">
+        {/* Profile Section */}
         <div className="flex items-center gap-4 mb-6">
           <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">
             <User className="w-12 h-12 text-white" />
@@ -278,8 +345,9 @@ export function TourGuideProfileComponent() {
             </div>
           </div>
         </div>
-
+  
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {/* Email Section */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-gray-500" />
@@ -302,7 +370,8 @@ export function TourGuideProfileComponent() {
               </span>
             )}
           </div>
-
+  
+          {/* Mobile Section */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-gray-500" />
@@ -337,7 +406,8 @@ export function TourGuideProfileComponent() {
               </span>
             )}
           </div>
-
+  
+          {/* Years of Experience Section */}
           <div className="flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-gray-500" />
             {isEditing ? (
@@ -362,7 +432,8 @@ export function TourGuideProfileComponent() {
               <span>{tourGuide.yearsOfExperience} years of experience</span>
             )}
           </div>
-
+  
+          {/* Nationality Section */}
           <div className="flex items-center gap-2">
             <Flag className="w-4 h-4 text-gray-500" />
             {isEditing ? (
@@ -397,7 +468,12 @@ export function TourGuideProfileComponent() {
               </span>
             )}
           </div>
-
+          <div className="flex items-center">
+        <Star className="w-6 h-6 text-yellow-500 " />
+        <span className="ml-2">{tourGuide.rating.toFixed(1)} / 5.0</span>
+        </div>
+  
+          {/* Account Status Section */}
           <div>
             <span
               className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -411,7 +487,8 @@ export function TourGuideProfileComponent() {
             </span>
           </div>
         </div>
-
+  
+        {/* Previous Work Experience Section */}
         <div className="mt-6">
           <h3 className="font-semibold mb-2">Previous Work Experience</h3>
           {editedTourGuide.previousWorks &&
@@ -450,7 +527,8 @@ export function TourGuideProfileComponent() {
             </Button>
           )}
         </div>
-
+  
+        {/* Buttons for Saving and Discarding Changes */}
         <div className="mt-6">
           {isEditing ? (
             <div className="flex gap-2">
@@ -468,93 +546,105 @@ export function TourGuideProfileComponent() {
           )}
         </div>
       </div>
-
-      <Dialog open={showWorkDialog} onOpenChange={setShowWorkDialog}>
-        <DialogContent>
+      <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-bold mb-4">What our customers say</h2>
+            {tourGuide.comments && tourGuide.comments.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
+                    <ChevronLeft />
+                  </Button>
+                  <div className="flex-1 flex justify-between px-4">
+                    {tourGuide.comments.slice(currentCommentIndex, currentCommentIndex + 3).map((comment, index) => (
+                      <Card key={index} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                      <CardHeader className="flex items-start">
+                        <div className="flex">
+                          {/* User icon with larger first letter */}
+                          <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+                            {comment.username.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex flex-col">
+                            {/* Larger Username */}
+                            <CardTitle className="text-xl font-semibold">{comment.username}</CardTitle>
+                            {/* Date under the username */}
+                            <p className="text-sm text-gray-500">{formatCommentDate(comment.date)}</p>
+                          </div>
+                        </div>
+                        {/* Star Rating below username and date */}
+                        <div className="mt-2">
+                          <StarRating rating={comment.rating} readOnly={true} />
+                        </div>
+                      </CardHeader>
+                    
+                      <CardContent>
+                        {/* Liked content */}
+                        <p className="text-gray-700 line-clamp-3">{comment.content.liked || comment.content.disliked || "No comment provided"}</p>
+                        {/* View more link */}
+                        <a
+                          href="#"
+                          className="text-blue-500 hover:underline mt-2 inline-block"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setShowFullComment(comment);
+                          }}
+                        >
+                          View more
+                        </a>
+                      </CardContent>
+                    </Card>
+                    
+                    ))}
+                  </div>
+                  <Button
+                    onClick={handleNextComment}
+                    variant="ghost"
+                    disabled={currentCommentIndex >= tourGuide.comments.length - 3}
+                  >
+                    <ChevronRight />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <p>No comments yet.</p>
+            )}
+             <Dialog open={!!showFullComment} onOpenChange={() => setShowFullComment(null)}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
-              {currentWork.title
-                ? "Edit Work Experience"
-                : "Add Work Experience"}
-            </DialogTitle>
+            <DialogTitle>{showFullComment?.username}'s Review</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
-                Title
-              </Label>
-              <Input
-                id="title"
-                value={currentWork.title}
-                onChange={(e) =>
-                  setCurrentWork((prev) => ({ ...prev, title: e.target.value }))
-                }
-                className="col-span-3"
-              />
+          <ScrollArea className="max-h-[60vh] overflow-auto">
+            <div className="space-y-4">
+              <div>
+                <StarRating rating={showFullComment?.rating} readOnly={true} />
+                <p className="text-sm text-gray-500 mt-1">
+                  {showFullComment && formatCommentDate(showFullComment.date)}
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold flex items-center">
+                  <Smile className="w-5 h-5 mr-2 text-green-500" />
+                  Liked:
+                </h4>
+                <p>{showFullComment?.content?.liked || "Nothing mentioned"}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold flex items-center">
+                  <Frown className="w-5 h-5 mr-2 text-red-500" />
+                  Disliked:
+                </h4>
+                <p>{showFullComment?.content?.disliked || "Nothing mentioned"}</p>
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="company" className="text-right">
-                Company
-              </Label>
-              <Input
-                id="company"
-                value={currentWork.company}
-                onChange={(e) =>
-                  setCurrentWork((prev) => ({
-                    ...prev,
-                    company: e.target.value,
-                  }))
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="duration" className="text-right">
-                Duration
-              </Label>
-              <Input
-                id="duration"
-                value={currentWork.duration}
-                onChange={(e) =>
-                  setCurrentWork((prev) => ({
-                    ...prev,
-                    duration: e.target.value,
-                  }))
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="description" className="text-right">
-                Description
-              </Label>
-              <Textarea
-                id="description"
-                value={currentWork.description}
-                onChange={(e) =>
-                  setCurrentWork((prev) => ({
-                    ...prev,
-                    description: e.target.value,
-                  }))
-                }
-                className="col-span-3"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={handleSaveWork}
-              disabled={
-                !currentWork.title ||
-                !currentWork.company ||
-                !currentWork.duration
-              }
-            >
-              Save
-            </Button>
-          </DialogFooter>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
+         
+          </div>
+
     </div>
+  
+    
+    
   );
+  
 }
