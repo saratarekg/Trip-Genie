@@ -6,7 +6,6 @@ const Admin = require("../models/admin");
 const TourismGovernor = require("../models/tourismGovernor");
 const Activity = require("../models/activity");
 const { deleteActivity } = require("./activityController");
-const authController = require("./authController");
 
 const deleteAdvertiserAccount = async (req, res) => {
   try {
@@ -101,6 +100,34 @@ const getAdvertiser = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const advertiser = await Advertiser.findById(res.locals.user_id);
+    if (!advertiser) {
+      return res.status(404).json({ message: "Advertiser not found" });
+    }
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await advertiser.comparePassword(
+      oldPassword,
+      advertiser.password
+    );
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    if (oldPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Old password and new password are the same" });
+    }
+    advertiser.password = newPassword;
+    await advertiser.save();
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
     return true;
@@ -139,4 +166,5 @@ module.exports = {
   getAdvertiserByID,
   updateAdvertiser,
   getAdvertiser,
+  changePassword,
 };

@@ -8,7 +8,6 @@ const historicalPlacesController = require("../controllers/historicalPlacesContr
 const tourguideController = require("../controllers/tourGuideController");
 const sellerController = require("../controllers/sellerController");
 
-
 const router = express.Router();
 
 router.put("/", touristController.updateTouristProfile);
@@ -32,12 +31,16 @@ router.post("/activities/rate/:id", activityController.rateActivity);
 router.post("/activities/comment/:id", activityController.addCommentToActivity);
 
 router.post("/tourguide/rate/:id", tourguideController.rateTourGuide);
-router.post("/tourguide/comment/:id", tourguideController.addCommentToTourGuide);
-
+router.post(
+  "/tourguide/comment/:id",
+  tourguideController.addCommentToTourGuide
+);
 
 router.post("/itinerary/rate/:id", itineraryController.rateItinerary);
-router.post("/itinerary/comment/:id", itineraryController.addCommentToItinerary);
-
+router.post(
+  "/itinerary/comment/:id",
+  itineraryController.addCommentToItinerary
+);
 
 router.get(
   "/historical-places",
@@ -48,5 +51,7 @@ router.get(
 router.get("/bookings", bookingController.getUserBookings);
 router.delete("/bookings/:id", bookingController.deleteBooking);
 router.post("/bookings", bookingController.createBooking);
+
+router.post("/password", touristController.changePassword);
 
 module.exports = router;

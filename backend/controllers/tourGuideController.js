@@ -189,13 +189,17 @@ const usernameExists = async (username) => {
 
 const addCommentToTourGuide = async (req, res) => {
   try {
-    const { username, rating, content } = req.body; 
-    if (!username || typeof username !== 'string') {
-      return res.status(400).json({ message: "Username is required and must be a string" });
+    const { username, rating, content } = req.body;
+    if (!username || typeof username !== "string") {
+      return res
+        .status(400)
+        .json({ message: "Username is required and must be a string" });
     }
 
     if (rating === undefined || rating < 0 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 0 and 5" });
     }
 
     // const tourguide = await TourGuide.findById(req.params.id);
@@ -210,13 +214,13 @@ const addCommentToTourGuide = async (req, res) => {
       content,
       date: new Date(),
     };
-    
+
     const tourguide = await TourGuide.findByIdAndUpdate(
       req.params.id,
-      { 
-        $push: { comments: newComment }  // Push the new comment to the comments array
+      {
+        $push: { comments: newComment }, // Push the new comment to the comments array
       },
-      { new: true, runValidators: true }  // Return the updated document, disable validators if needed
+      { new: true, runValidators: true } // Return the updated document, disable validators if needed
     );
 
     let newAverageRating;
@@ -226,22 +230,24 @@ const addCommentToTourGuide = async (req, res) => {
 
     // await tourguide.save({ validateBeforeSave: false });
 
-
     res.status(200).json({
       message: "Comment added successfully",
       comments: tourguide.comments,
-      ...(newAverageRating && { newAverageRating }), 
+      ...(newAverageRating && { newAverageRating }),
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "An error occurred while adding the comment", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "An error occurred while adding the comment",
+        error: error.message,
+      });
   }
 };
 
-
 const rateTourGuide = async (req, res) => {
   try {
-    
     const { rating } = req.body; // Get rating from the request body
 
     // Find the activity by ID
@@ -257,15 +263,41 @@ const rateTourGuide = async (req, res) => {
     // Add the rating and calculate the new average
     const newAverageRating = await tourguide.addRating(rating);
 
-
     // Return the new average rating
     res.status(200).json({ message: "Rating added", newAverageRating });
-} catch (error) {
-  console.error("Error adding rating: ", error);
-  res.status(500).json({ message: error.message });
-}
+  } catch (error) {
+    console.error("Error adding rating: ", error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const tourGuide = await TourGuide.findById(res.locals.user_id);
+    if (!tourGuide) {
+      return res.status(404).json({ message: "Tour Guide not found" });
+    }
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await tourGuide.comparePassword(
+      oldPassword,
+      tourGuide.password
+    );
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    if (oldPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Old password and new password are the same" });
+    }
+    tourGuide.password = newPassword;
+    await tourGuide.save();
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 module.exports = {
   updateTourGuide,
@@ -276,5 +308,6 @@ module.exports = {
   getAllTourGuides,
   getTourGuideByID,
   rateTourGuide,
-  addCommentToTourGuide
+  addCommentToTourGuide,
+  changePassword,
 };
