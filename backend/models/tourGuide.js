@@ -147,29 +147,25 @@ tourGuideSchema.statics.login = async function(username,password){
 
 
 tourGuideSchema.methods.addRating = async function (newRating) {
-    // Add the new rating to the allRatings array
+
     this.allRatings.push(newRating);
   
-    // Calculate the new average rating
     const totalRatings = this.allRatings.length;
     const sumOfRatings = this.allRatings.reduce((sum, rating) => sum + rating, 0);
     const averageRating = sumOfRatings / totalRatings;
-  
-    // Update the activity's rating
+
     this.rating = averageRating;
-  
-    // Save the updated activity document
-    await this.save();
-  
+    await this.save({ validateBeforeSave: false });
+
     return this.rating; // Return the new average rating
   };
-  // Method to add a comment to the activity
+ 
   tourGuideSchema.methods.addComment = async function (comment) {
     // Add the new comment to the comments array
     this.comments.push(comment);
   
     // Save the updated activity document
-    await this.save();
+    await this.save({ validateBeforeSave: false });
   
     return this.comments; // Return the updated comments array
   };

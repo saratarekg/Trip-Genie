@@ -191,12 +191,13 @@ const addCommentToTourGuide = async (req, res) => {
   try {
     const { username, rating, content } = req.body; // Get comment details from the request body
 
-    console.log(username, rating, content);
+
 
     // Validate the input
     if (!username || typeof username !== 'string') {
       return res.status(400).json({ message: "Username is required and must be a string" });
     }
+    console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
 
     if (rating === undefined || rating < 0 || rating > 5) {
       return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
@@ -209,6 +210,7 @@ const addCommentToTourGuide = async (req, res) => {
       // .populate("tags")
       // .populate("attended")
       // .exec();
+      console.log("11111111111111111111111111111111111111111111111111111111111");
 
     if (!tourguide) {
       return res.status(404).json({ message: "TourGuide not found" });
@@ -226,15 +228,16 @@ const addCommentToTourGuide = async (req, res) => {
 
     // Add the comment to the activity's comments array
     tourguide.comments.push(newComment);
+    console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
 
     // If the comment includes a rating, call the rateActivity method logic
     let newAverageRating;
-    if (rating !== undefined) {
-      newAverageRating = await tourguide.addRating(rating);
-    }
+    // if (rating !== undefined) {
+    //   newAverageRating = await tourguide.addRating(rating);
+    // }
 
     // Save the updated activity
-    await tourguide.save();
+    await tourguide.save({ validateBeforeSave: false });
 
     // Return the updated comments and new average rating (if applicable)
     res.status(200).json({
@@ -256,6 +259,7 @@ const rateTourGuide = async (req, res) => {
 
     // Find the activity by ID
     const tourguide = await TourGuide.findById(req.params.id);
+
     // .populate("advertiser")
     // .populate("category")
     // .populate("tags")
@@ -266,11 +270,13 @@ const rateTourGuide = async (req, res) => {
     // Add the rating and calculate the new average
     const newAverageRating = await tourguide.addRating(rating);
 
+
     // Return the new average rating
     res.status(200).json({ message: "Rating added", newAverageRating });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+} catch (error) {
+  console.error("Error adding rating: ", error);
+  res.status(500).json({ message: error.message });
+}
 };
 
 

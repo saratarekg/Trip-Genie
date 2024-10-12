@@ -2,15 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import * as jwtDecode from 'jwt-decode';
-import {CheckCircle,XCircle, Star, Edit, Trash2, Mail, Phone, Award, Globe, Accessibility, MapPin, Calendar, Clock, DollarSign, Info, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
+import {
+  CheckCircle,
+  XCircle,
+  Star,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  Award,
+  Globe,
+  Accessibility,
+  MapPin,
+  Calendar,
+  Clock,
+  DollarSign,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+  MessageSquare,
+  Smile,
+  Frown
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-//import { Progress } from "@/components/ui/progress";
-//import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimelinePreviewComponent } from "@/components/timeline-preview";
 
 const LoadingSpinner = () => (
@@ -20,6 +42,23 @@ const LoadingSpinner = () => (
     </svg>
   </div>
 );
+
+const StarRating = ({ rating, setRating, readOnly = false }) => {
+  return (
+    <div className="flex items-center">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-6 h-6 ${readOnly ? '' : 'cursor-pointer'} ${
+            star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
+          }`}
+          onClick={() => !readOnly && setRating(star)}
+          aria-label={`${star} star${star !== 1 ? 's' : ''}`}
+        />
+      ))}
+    </div>
+  );
+};
 
 const TourguideProfileCard = ({ profile }) => (
   <Card className="w-full max-w-sm">
@@ -48,8 +87,8 @@ const TourguideProfileCard = ({ profile }) => (
           <span>{profile.yearsOfExperience} years of experience</span>
         </div>
         <div className="flex items-center">
-          <Star className="w-5 h-5 mr-2 text-yellow-500" aria-hidden="true" />
-          <span>{profile.rating.toFixed(1)} / 5.0</span>
+        <Star className="w-6 h-6 text-yellow-500 " />
+        <span className="ml-2">{profile.rating.toFixed(1)} / 5.0</span>
         </div>
       </div>
       <div>
@@ -85,11 +124,43 @@ const ItineraryDetail = () => {
   const [tourGuideProfile, setTourGuideProfile] = useState(null);
   const [canModify, setCanModify] = useState(false);
   const [rating, setRating] = useState(0);
-  const [comment, setComment] = useState('');
-  const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [showRatingSubmit, setShowRatingSubmit] = useState(false);
+  const [showAddReview, setShowAddReview] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
+  const [newReview, setNewReview] = useState({
+    rating: 0,
+    liked: '',
+    disliked: '',
+    visitDate: '',
+    isAnonymous: false
+  });
+  const [username, setUsername] = useState('');
+  const [showRateItineraryDialog, setShowRateItineraryDialog] = useState(false);
+  const [itineraryRating, setItineraryRating] = useState(0);
+  const [itineraryReview, setItineraryReview] = useState('');
+  const [showFullComment, setShowFullComment] = useState(null);
+  const [activityRating, setActivityRating] = useState(0);
 
   const navigate = useNavigate();
+
+  const fetchUsername = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:4000/${userRole}`, {
+        headers: {
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch username');
+      }
+      const data = await response.json();
+      return data.username;
+    } catch (error) {
+      console.error("Error fetching username:", error);
+      return "Unknown User";
+    }
+  };
 
   useEffect(() => {
     const fetchItineraryDetails = async () => {
@@ -124,7 +195,6 @@ const ItineraryDetail = () => {
             ...data.tourGuide,
             languages: ['English', 'Spanish', 'French'],
             specialties: ['Historical Tours', 'Food Tours', 'Adventure Tours'],
-            rating: 4.8,
           });
         }
 
@@ -132,6 +202,8 @@ const ItineraryDetail = () => {
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
           setCanModify(decodedToken.id === data.tourGuide._id);
+          const fetchedUsername = await fetchUsername(decodedToken.id);
+          setUsername(fetchedUsername);
         }
       } catch (err) {
         setError("Error fetching itinerary details. Please try again later.");
@@ -182,17 +254,23 @@ const ItineraryDetail = () => {
     }
   };
 
-  const handleRating = async (newRating) => {
+  const handleRating = (newRating) => {
     setRating(newRating);
+    setShowRatingSubmit(true);
+  };
+
+  const submitRating = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/${userRole}/tourguide/rate/${id}`, {
+      const response = await fetch(`http://localhost:4000/${userRole}/tourguide/rate/${tourGuideProfile._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
         },
-        body: JSON.stringify({ rating: newRating }),
+        body: JSON.stringify({ rating }),
       });
       if (!response.ok) throw new Error('Failed to submit rating');
+      setShowRatingSubmit(false);
       // Handle success (e.g., show a success message)
     } catch (error) {
       console.error('Error submitting rating:', error);
@@ -200,23 +278,37 @@ const ItineraryDetail = () => {
     }
   };
 
-  const handleCommentSubmit = async () => {
+  const handleAddReview = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/${userRole}/tourguide/rate/${id}`, {
+      const response = await fetch(`http://localhost:4000/${userRole}/tourguide/comment/${tourGuideProfile._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
         },
-        body: JSON.stringify({ comment }),
+        body: JSON.stringify({
+          ...newReview,
+          username: newReview.isAnonymous ? 'Anonymous' : username
+        }),
       });
-      if (!response.ok) throw new Error('Failed to submit comment');
-      setShowCommentDialog(false);
-      setComment('');
+      if (!response.ok) throw new Error('Failed to submit review');
+      setShowAddReview(false);
+      setNewReview({
+        rating: 0,
+        liked: "",
+        disliked: "",
+        visitDate: '',
+        isAnonymous: false
+      });
       // Handle success (e.g., show a success message, refresh comments)
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      console.error('Error submitting review:', error);
       // Handle error (e.g., show an error message)
     }
+  };
+
+  const isReviewValid = () => {
+    return (newReview.liked.trim() !== '' || newReview.disliked.trim() !== '');
   };
 
   const handlePrevComment = () => {
@@ -231,10 +323,65 @@ const ItineraryDetail = () => {
     return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  const handleRateItinerary = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/${userRole}/itinerary/comment/${itinerary._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+        body: JSON.stringify({
+          rating: itineraryRating,
+          content: {
+            liked: newReview.liked,
+            disliked: newReview.disliked
+          },
+          isAnonymous: newReview.isAnonymous,
+          date: new Date().toISOString(),
+          username: newReview.isAnonymous ? 'Anonymous' : username
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to submit itinerary rating');
+      setShowRateItineraryDialog(false);
+      setNewReview({
+        rating: 0,
+        liked: '',
+        disliked: '',
+        isAnonymous: false
+      });
+      // Handle success (e.g., show a success message, refresh itinerary details)
+    } catch (error) {
+      console.error('Error submitting itinerary rating:', error);
+      // Handle error (e.g., show an error message)
+    }
+  };
 
+  const handleActivityRating = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/${userRole}/itinerary/rate/${itinerary._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+        body: JSON.stringify({
+          rating: activityRating,
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to submit activity rating');
+      setShowRatingDialog(false);
+      setActivityRating(0);
+      // Handle success (e.g., show a success message, refresh activity details)
+    } catch (error) {
+      console.error('Error submitting activity rating:', error);
+      // Handle error (e.g., show an error message)
+    }
+  };
+
+  
+
+  if (loading) return <LoadingSpinner />;
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -279,16 +426,23 @@ const ItineraryDetail = () => {
                         {itinerary.price || "N/A"}
                       </span>
                     </div>
+                    
                     <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
                       <Star className="w-8 h-8 text-yellow-500 mr-2" />
                       <span className="text-2xl font-semibold">
-                        {itinerary.rating || "N/A"}
+                        {itinerary.rating ? itinerary.rating.toFixed(1) : "N/A"}
                       </span>
                     </div>
+                    <span className="text-sm font-normal ml-2">
+                      {itinerary.allRatings ? `(${itinerary.allRatings.length})` : "(0)"}
+                    </span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
                     <div className="flex items-center">
                       <Globe className="w-6 h-6 mr-2 text-orange-500" />
@@ -337,7 +491,6 @@ const ItineraryDetail = () => {
                     {itinerary.availableDates.map((dateInfo, index) => (
                       <div key={index} className="bg-gray-100 p-4 rounded-lg">
                         <div className="flex items-center mb-2">
-                
                           <Calendar className="w-5 h-5 mr-2 text-orange-500" />
                           <span className="font-semibold">
                             {new Date(dateInfo.date).toLocaleDateString()}
@@ -471,19 +624,14 @@ const ItineraryDetail = () => {
                 <CardTitle>Rate Tour Guide</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-6 h-6 cursor-pointer ${
-                        star <= rating ? 'fill-yellow-400' : 'fill-gray-300'
-                      }`}
-                      onClick={() => handleRating(star)}
-                    />
-                  ))}
-                </div>
-                <Button onClick={() => setShowCommentDialog(true)} className="mt-4">
-                  Add a Comment
+                <StarRating rating={rating} setRating={handleRating} />
+                {showRatingSubmit && (
+                  <Button onClick={submitRating} className="mt-4 mr-4">
+                    Submit Rating
+                  </Button>
+                )}
+                <Button onClick={() => setShowAddReview(true)} className="mt-4 ml-4">
+                  Write a Review
                 </Button>
               </CardContent>
             </Card>
@@ -512,19 +660,9 @@ const ItineraryDetail = () => {
                           </div>
                         </div>
                         <div className="mt-2">
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`w-4 h-4 ${
-                                  star <= comment.rating ? 'fill-yellow-400' : 'fill-gray-300'
-                                }`}
-                              />
-                            ))}
-                          </div>
+                          <StarRating rating={comment.rating} readOnly={true} />
                         </div>
                       </CardHeader>
-                    
                       <CardContent>
                         <p className="text-gray-700 line-clamp-3">{comment.content.liked || comment.content.disliked || "No comment provided"}</p>
                         <a
@@ -532,7 +670,7 @@ const ItineraryDetail = () => {
                           className="text-blue-500 hover:underline mt-2 inline-block"
                           onClick={(e) => {
                             e.preventDefault();
-                            // Implement view more functionality
+                            setShowFullComment(comment);
                           }}
                         >
                           View more
@@ -553,91 +691,171 @@ const ItineraryDetail = () => {
           ) : (
             <p>No comments yet.</p>
           )}
+
+          <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
+            Add a Review
+          </Button>
+          <Button onClick={() => setShowRatingDialog(true)} className="mt-4">
+            Add a Rating
+          </Button>
         </div>
       </div>
 
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
+      <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Delete Itinerary</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this itinerary?
-            </DialogDescription>
+            <DialogTitle>Rate this Itinerary</DialogTitle>
           </DialogHeader>
+          <div className="space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+            <StarRating rating={activityRating} setRating={setActivityRating} />
+          </div>
           <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowDeleteConfirm(false)}
+            <Button onClick={handleActivityRating}>Submit My Rating</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showAddReview} onOpenChange={setShowAddReview}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Write a Review for Tour Guide</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+              <StarRating rating={newReview.rating} setRating={(rating) => setNewReview(prev => ({ ...prev, rating }))} />
+            </div>
+            <div>
+              <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
+                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                Something you liked
+              </label>
+              <Textarea
+                id="liked"
+                value={newReview.liked}
+                onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
+                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                Something you didn't like
+              </label>
+              <Textarea
+                id="disliked"
+                value={newReview.disliked}
+                onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="anonymous-mode"
+                checked={newReview.isAnonymous}
+                onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
+              />
+              <Label htmlFor="anonymous-mode">Post anonymously</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={() => setShowAddReview(false)}
+              style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
+            <Button onClick={handleAddReview} disabled={!isReviewValid()}>Post Review</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
-        <DialogContent>
+      <Dialog open={showRateItineraryDialog} onOpenChange={setShowRateItineraryDialog}>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
-              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-              Itinerary Deleted
-            </DialogTitle>
-            <DialogDescription>
-              The itinerary has been successfully deleted.
-            </DialogDescription>
+            <DialogTitle>Write a Review for Itinerary</DialogTitle>
           </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+              <StarRating rating={itineraryRating} setRating={setItineraryRating} />
+            </div>
+            <div>
+              <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
+                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                Something you liked
+              </label>
+              <Textarea
+                id="liked"
+                value={newReview.liked}
+                onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
+                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                Something you didn't like
+              </label>
+              <Textarea
+                id="disliked"
+                value={newReview.disliked}
+                onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="anonymous-mode"
+                checked={newReview.isAnonymous}
+                onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
+              />
+              <Label htmlFor="anonymous-mode">Post anonymously</Label>
+            </div>
+          </div>
           <DialogFooter>
-            <Button
-              variant="default"
-              onClick={() => navigate("/all-itineraries")}
-            >
-              Back to All Itineraries
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={deleteError !== null}
-        onOpenChange={() => setDeleteError(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
-              Failed to Delete Itinerary
-            </DialogTitle>
-            <DialogDescription>
-              {deleteError || "Itinerary is already booked!"}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="default" onClick={() => setDeleteError(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add a Comment</DialogTitle>
-          </DialogHeader>
-          <Textarea
-            placeholder="Write your comment here..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCommentDialog(false)}>
+            <Button onClick={() => setShowRateItineraryDialog(false)} variant="outline">
               Cancel
             </Button>
-            <Button onClick={handleCommentSubmit}>Post Comment</Button>
+            <Button onClick={handleRateItinerary}>Submit Review</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!showFullComment} onOpenChange={() => setShowFullComment(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{showFullComment?.username}'s Review</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh] overflow-auto">
+            <div className="space-y-4">
+              <div>
+                <StarRating rating={showFullComment?.rating} readOnly={true} />
+                <p className="text-sm text-gray-500 mt-1">
+                  {showFullComment && formatCommentDate(showFullComment.date)}
+                </p>
+              </div>
+              <div>
+                <h4 className="font-semibold flex items-center">
+                  <Smile className="w-5 h-5 mr-2 text-green-500" />
+                  Liked:
+                </h4>
+                <p>{showFullComment?.content?.liked || "Nothing mentioned"}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold flex items-center">
+                  <Frown className="w-5 h-5 mr-2 text-red-500" />
+                  Disliked:
+                </h4>
+                <p>{showFullComment?.content?.disliked || "Nothing mentioned"}</p>
+              </div>
+            </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>

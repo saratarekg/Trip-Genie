@@ -323,7 +323,6 @@ const rateItinerary = async (req, res) => {
 
     // Add the rating and calculate the new average
     const newAverageRating = await itinerary.addRating(rating);
-
     // Return the new average rating
     res.status(200).json({ message: "Rating added", newAverageRating });
   } catch (error) {
