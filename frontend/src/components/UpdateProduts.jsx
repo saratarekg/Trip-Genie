@@ -23,6 +23,7 @@ const UpdateProduct = () => {
     name: '',
     price: '',
     description: '',
+    quantity: '',
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,6 +49,7 @@ const UpdateProduct = () => {
           name: productData.name,
           price: productData.price.toString(),
           description: productData.description,
+          quantity: productData.quantity.toString(),
         });
         setError(null);
       } catch (err) {
@@ -71,6 +73,7 @@ const UpdateProduct = () => {
       product.name.trim() !== '' &&
       product.description.trim() !== '' &&
       product.price !== '' &&
+      product.quantity !== '' &&
       !isNaN(parseFloat(product.price)) &&
       parseFloat(product.price) >= 0
     );
@@ -168,6 +171,27 @@ const UpdateProduct = () => {
                   <p className="text-red-500 text-sm mt-1">Description is required</p>
                 )}
               </div>
+              <div>
+                <Label htmlFor="quantity">Quantity</Label>
+                <Input
+                  id="quantity"
+                  name="quantity"
+                  type="number"
+                  value={product.quantity}
+                  onChange={handleChange}
+                  className={product.quantity === '' ? 'border-red-500' : ''}
+                />
+                {product.quantity === '' && (
+                  <p className="text-red-500 text-sm mt-1">Quantity is required</p>
+                )}
+
+                {product.quantity !== '' && parseInt(product.quantity) < 0 && (
+                  <p className="text-red-500 text-sm mt-1">Quantity must be a non-negative number</p>
+                )}
+
+                </div>
+
+
             </div>
 
             <div className="mt-8 flex justify-end"> {/* Use justify-end to align items to the right */}
