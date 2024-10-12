@@ -213,6 +213,49 @@ const updateLoyaltyPointsAndBadge = async (req, res) => {
   }
 };
 
+const redeemPoints = async (req, res) => {
+  try {
+    const conversionRate = 10000; // 10,000 points = 100 EGP
+    const cashEquivalent = 100; // 100 EGP for 10,000 points
+
+    // Fetch the tourist based on user ID (assuming tourist is the logged-in user)
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Check if the tourist has any loyalty points to redeem
+    if (tourist.loyaltyPoints === 0) {
+      return res.status(400).json({ error: "No loyalty points available for redemption" });
+    }
+
+    // Redeem all loyalty points
+    const pointsToRedeem = tourist.loyaltyPoints;
+
+    // Calculate the redeemable cash based on all loyalty points
+    const redeemableCash = (pointsToRedeem / conversionRate) * cashEquivalent;
+
+    // Update the wallet and set loyalty points to 0
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      res.locals.user_id,
+      {
+        $set: { loyaltyPoints: 0 },
+        $inc: { wallet: redeemableCash }
+      },
+      { new: true } // Return the updated document
+    );
+
+    res.status(200).json({
+      message: `Successfully redeemed ${pointsToRedeem} points for ${redeemableCash} EGP`,
+      walletBalance: updatedTourist.wallet,
+      remainingPoints: updatedTourist.loyaltyPoints
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 
 module.exports = {
@@ -224,4 +267,5 @@ module.exports = {
   getTouristProfile,
   updateTouristProfile,
   updateLoyaltyPointsAndBadge,
+  redeemPoints
 };

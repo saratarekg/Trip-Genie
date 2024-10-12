@@ -51,5 +51,6 @@ router.delete("/bookings/:id", bookingController.deleteBooking);
 router.post("/bookings", bookingController.createBooking);
 
 router.post("/complaint", complaintsController.addComplaint);
+router.post("/redeem-points", touristController.redeemPoints);
 
 module.exports = router;
