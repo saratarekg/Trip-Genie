@@ -47,13 +47,65 @@ const addComplaint = async (req, res) => {
 
 
 
+const markComplaintStatus = async (req, res) => {
+    try {
+        const { id } = req.params;  // Extract the complaint ID from the request parameters
+        const { status } = req.body;  // Get the status from the request body
+
+        // Validate the status
+        if (status !== 'pending' && status !== 'resolved') {
+            return res.status(400).json({ error: 'Invalid status. Must be "pending" or "resolved".' });
+        }
+
+        // Update the complaint status
+        const updatedComplaint = await Complaint.findByIdAndUpdate(
+            id,
+            { status },  // Update with the new status
+            { new: true } // Return the updated document
+        );
+
+        // Check if the complaint was found
+        if (!updatedComplaint) {
+            return res.status(404).json({ error: 'Complaint not found' });
+        }
+
+        // Return the updated complaint
+        res.status(200).json(updatedComplaint);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+const getComplaintDetails = async (req, res) => {
+    try {
+        const { id } = req.params; // Extract the complaint ID from the request parameters
+
+        // Find the complaint by ID and populate the 'tourist' field
+        const complaint = await Complaint.findById(id).populate('tourist');
+
+        // Check if the complaint was found
+        if (!complaint) {
+            return res.status(404).json({ error: 'Complaint not found' });
+        }
+
+        // Return the complaint details
+        res.status(200).json(complaint);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+
+
+
+
+
 module.exports = {
     addComplaint,
     getAllComplaints,
-
-
-
-
+    markComplaintStatus,
+    getComplaintDetails
 }
-
 
