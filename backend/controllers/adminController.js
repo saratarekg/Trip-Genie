@@ -132,6 +132,31 @@ const getAdminByID = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const admin = await Admin.findById(res.locals.user_id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await admin.comparePassword(oldPassword, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
+
+    if (oldPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Old password and new password are the same" });
+    }
+    admin.password = newPassword;
+    await admin.save();
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 const usernameExists = async (username) => {
   if (
     (await Tourist.findOne({ username })) ||
@@ -154,4 +179,5 @@ module.exports = {
   deleteAdminAccount,
   getAllUsers,
   getUsersByRoles,
+  changePassword,
 };

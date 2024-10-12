@@ -100,7 +100,6 @@ const getTouristProfile = async (req, res) => {
 
 const updateTouristProfile = async (req, res) => {
   try {
-    
     const tourist1 = await Tourist.findById(res.locals.user_id);
 
     const {
@@ -112,8 +111,6 @@ const updateTouristProfile = async (req, res) => {
       jobOrStudent,
       wallet,
     } = req.body;
-
-   
 
     if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
@@ -195,7 +192,7 @@ const updateLoyaltyPointsAndBadge = async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       res.locals.user_id,
       {
-        loyaltyPoints: newLoyaltyPoints // Correctly updating loyaltyPoints field
+        loyaltyPoints: newLoyaltyPoints, // Correctly updating loyaltyPoints field
       },
       { new: true } // Return the updated document
     )
@@ -207,7 +204,10 @@ const updateLoyaltyPointsAndBadge = async (req, res) => {
     }
 
     // Respond with the updated profile
-    res.status(200).json({ message: "Profile updated successfully", tourist: updatedTourist });
+    res.status(200).json({
+      message: "Profile updated successfully",
+      tourist: updatedTourist,
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -227,7 +227,9 @@ const redeemPoints = async (req, res) => {
 
     // Check if the tourist has any loyalty points to redeem
     if (tourist.loyaltyPoints === 0) {
-      return res.status(400).json({ error: "No loyalty points available for redemption" });
+      return res
+        .status(400)
+        .json({ error: "No loyalty points available for redemption" });
     }
 
     // Redeem all loyalty points
@@ -241,7 +243,7 @@ const redeemPoints = async (req, res) => {
       res.locals.user_id,
       {
         $set: { loyaltyPoints: 0 },
-        $inc: { wallet: redeemableCash }
+        $inc: { wallet: redeemableCash },
       },
       { new: true } // Return the updated document
     );
@@ -249,14 +251,40 @@ const redeemPoints = async (req, res) => {
     res.status(200).json({
       message: `Successfully redeemed ${pointsToRedeem} points for ${redeemableCash} EGP`,
       walletBalance: updatedTourist.wallet,
-      remainingPoints: updatedTourist.loyaltyPoints
+      remainingPoints: updatedTourist.loyaltyPoints,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const tourist = await Tourist.findById(res.locals.user_id);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+    const { oldPassword, newPassword } = req.body;
+    const isMatch = await tourist.comparePassword(
+      oldPassword,
+      tourist.password
+    );
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect old password" });
+    }
 
+    if (oldPassword === newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Old password and new password are the same" });
+    }
+    tourist.password = newPassword;
+    await tourist.save();
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 module.exports = {
   deleteTouristAccount,
@@ -267,5 +295,6 @@ module.exports = {
   getTouristProfile,
   updateTouristProfile,
   updateLoyaltyPointsAndBadge,
-  redeemPoints
+  redeemPoints,
+  changePassword,
 };
