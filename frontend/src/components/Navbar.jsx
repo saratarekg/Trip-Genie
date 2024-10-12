@@ -91,6 +91,8 @@ export function NavbarComponent() {
                       </NavLink>
                       <NavLink to="/all-products">Products</NavLink>
                       <NavLink to="/tourist-profile">Profile</NavLink>
+                      <NavLink to="/file-complaint">Complaint</NavLink>
+
                     </>
                   )}
                   {role === "advertiser" && (
