@@ -7,6 +7,7 @@ const bookingController = require("../controllers/bookingController.js");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
 const tourguideController = require("../controllers/tourGuideController");
 const sellerController = require("../controllers/sellerController");
+const complaintsController = require("../controllers/complaintsController.js");
 
 
 const router = express.Router();
@@ -48,5 +49,7 @@ router.get(
 router.get("/bookings", bookingController.getUserBookings);
 router.delete("/bookings/:id", bookingController.deleteBooking);
 router.post("/bookings", bookingController.createBooking);
+
+router.post("/complaint", complaintsController.addComplaint);
 
 module.exports = router;

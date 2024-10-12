@@ -9,6 +9,7 @@ const tagController = require('../controllers/tagController');
 const categoryController = require('../controllers/categoryController');
 const productController = require('../controllers/productController');
 const historicalTagController = require('../controllers/historicalTagController');
+const complaintsController = require("../controllers/complaintsController.js");
 
 
 const router = express.Router();
@@ -97,6 +98,9 @@ router.post('/products', productController.addProductByAdmin);
 router.get('/products/:id', productController.getProductById);
 router.put('/products/:id',productController.editProduct);
 router.delete('/products/:id',productController.deleteProduct);
+
+router.get("/complaint", complaintsController.getAllComplaints);
+
 
 
 module.exports = router;
