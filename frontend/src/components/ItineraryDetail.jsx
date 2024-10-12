@@ -49,9 +49,8 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? '' : 'cursor-pointer'} ${
-            star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
-          }`}
+          className={`w-6 h-6 ${readOnly ? '' : 'cursor-pointer'} ${star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
+            }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? 's' : ''}`}
         />
@@ -87,8 +86,8 @@ const TourguideProfileCard = ({ profile }) => (
           <span>{profile.yearsOfExperience} years of experience</span>
         </div>
         <div className="flex items-center">
-        <Star className="w-6 h-6 text-yellow-500 " />
-        <span className="ml-2">{profile.rating.toFixed(1)} / 5.0</span>
+          <Star className="w-6 h-6 text-yellow-500 " />
+          <span className="ml-2">{profile.rating.toFixed(1)} / 5.0</span>
         </div>
       </div>
       <div>
@@ -279,7 +278,7 @@ const ItineraryDetail = () => {
   };
 
   const handleAddReview = async () => {
-    try { 
+    try {
       const newComment = {
         username: newReview.isAnonymous ? 'Anonymous' : username,
         rating: newReview.rating,
@@ -296,7 +295,7 @@ const ItineraryDetail = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${Cookies.get('jwt')}`,
         },
-        body: JSON.stringify(newComment ),
+        body: JSON.stringify(newComment),
       });
       if (!response.ok) throw new Error('Failed to submit review');
       setShowAddReview(false);
@@ -387,7 +386,7 @@ const ItineraryDetail = () => {
     }
   };
 
-  
+
 
   if (loading) return <LoadingSpinner />;
   if (error) {
@@ -434,7 +433,7 @@ const ItineraryDetail = () => {
                         {itinerary.price || "N/A"}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
                       <Star className="w-8 h-8 text-yellow-500 mr-2" />
                       <span className="text-2xl font-semibold">
@@ -447,10 +446,10 @@ const ItineraryDetail = () => {
                   </div>
                 </div>
 
-                
 
 
-<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
                     <div className="flex items-center">
                       <Globe className="w-6 h-6 mr-2 text-orange-500" />
@@ -622,27 +621,42 @@ const ItineraryDetail = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="lg:w-1/3">
             {tourGuideProfile && (
               <TourguideProfileCard profile={tourGuideProfile} />
             )}
-            <Card className="mt-4">
-              <CardHeader>
-                <CardTitle>Rate Tour Guide</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <StarRating rating={rating} setRating={handleRating} />
-                {showRatingSubmit && (
-                  <Button onClick={submitRating} className="mt-4 mr-4">
-                    Submit Rating
-                  </Button>
-                )}
-                <Button onClick={() => setShowAddReview(true)} className="mt-4 ml-4">
-                  Write a Review
+            {userRole !== "admin" && (
+              <>
+                <Card className="mt-4">
+                  <CardHeader>
+                    <CardTitle>Rate Tour Guide</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <StarRating rating={rating} setRating={handleRating} />
+                    {showRatingSubmit && (
+                      <Button onClick={submitRating} className="mt-4 mr-4">
+                        Submit Rating
+                      </Button>
+                    )}
+                    <Button onClick={() => setShowAddReview(true)} className="mt-4 ml-4">
+                      Write a Review
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
+
+            )}
+            {userRole === "admin" && (
+              <>
+                <Button
+                  className=" bg-red-500 hover:bg-red-600 text-white mt-2 w-4/5 "
+                  onClick={() => alert("Flagged as Inappropriate")}
+                >
+                  Flag As Inappropriate Itinerary/Event
                 </Button>
-              </CardContent>
-            </Card>
+              </>
+            )}
           </div>
         </div>
 
@@ -699,13 +713,16 @@ const ItineraryDetail = () => {
           ) : (
             <p>No comments yet.</p>
           )}
-
-          <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
-            Add a Review
-          </Button>
-          <Button onClick={() => setShowRatingDialog(true)} className="mt-4">
-            Add a Rating
-          </Button>
+          {userRole !== "admin" && (
+            <>
+              <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
+                Add a Review
+              </Button>
+              <Button onClick={() => setShowRatingDialog(true)} className="mt-4">
+                Add a Rating
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -770,7 +787,7 @@ const ItineraryDetail = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button 
+            <Button
               onClick={() => setShowAddReview(false)}
               style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
             >
@@ -835,7 +852,7 @@ const ItineraryDetail = () => {
         </DialogContent>
       </Dialog>
 
-   
+
 
       <Dialog open={!!showFullComment} onOpenChange={() => setShowFullComment(null)}>
         <DialogContent className="sm:max-w-[425px]">

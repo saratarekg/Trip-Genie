@@ -196,7 +196,7 @@ export function Dashboard() {
             </div>
           </TabsContent>
           <TabsContent value="activities" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-3">
               <Card className="bg-white border-[#808080] border">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-[#003f66]">
@@ -227,6 +227,20 @@ export function Dashboard() {
                   </Button>
                 </CardContent>
               </Card>
+              <Card className="bg-white border-[#808080] border">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#003f66]">
+                    Manage Itineraries
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/all-itineraries">
+                    <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
+                      Manage
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
           <TabsContent value="giftshop" className="space-y-4">
@@ -238,10 +252,10 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Link to ="/all-products">
-                  <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
-                    Manage
-                  </Button>
+                  <Link to="/all-products">
+                    <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
+                      Manage
+                    </Button>
                   </Link>
                 </CardContent>
               </Card>

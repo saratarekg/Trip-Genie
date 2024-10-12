@@ -180,7 +180,7 @@ function AppContent() {
           <Route
             path="/all-itineraries"
             element={
-              <ProtectedRoute allowedRoles={["tour-guide", "guest", "tourist"]}>
+              <ProtectedRoute allowedRoles={["tour-guide", "guest", "tourist","admin"]}>
                 <AllItinerariesComponent />
               </ProtectedRoute>
             }
@@ -207,7 +207,7 @@ function AppContent() {
           <Route
             path="/itinerary/:id"
             element={
-              <ProtectedRoute allowedRoles={["tour-guide", "guest", "tourist"]}>
+              <ProtectedRoute allowedRoles={["tour-guide", "guest", "tourist","admin"]}>
                 <ItineraryDetail />
               </ProtectedRoute>
             }
