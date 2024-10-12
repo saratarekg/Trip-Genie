@@ -14,11 +14,16 @@ const complaintSchema = new mongoose.Schema({
     enum: ["pending", "resolved"],
     default: "pending",
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: Date,
-});
+  tourist: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Tourist", 
+    required: true,
+  }
+  
+},
+{
+  timestamps: true,
+}
+);
 
 module.exports = mongoose.model("Complaint", complaintSchema);
