@@ -283,7 +283,7 @@ const ActivityDetail = () => {
         },
         date: new Date(),
       };
-      console.log(newComment);
+    
 
       const response = await fetch(`http://localhost:4000/${userRole}/activities/comment/${id}`, {
         method: 'POST',

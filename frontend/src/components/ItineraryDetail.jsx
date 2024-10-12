@@ -279,17 +279,24 @@ const ItineraryDetail = () => {
   };
 
   const handleAddReview = async () => {
-    try {
+    try { 
+      const newComment = {
+        username: newReview.isAnonymous ? 'Anonymous' : username,
+        rating: newReview.rating,
+        content: {
+          liked: newReview.liked,
+          disliked: newReview.disliked
+        },
+        date: new Date(),
+      };
+      console.log(newComment);
       const response = await fetch(`http://localhost:4000/${userRole}/tourguide/comment/${tourGuideProfile._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${Cookies.get('jwt')}`,
         },
-        body: JSON.stringify({
-          ...newReview,
-          username: newReview.isAnonymous ? 'Anonymous' : username
-        }),
+        body: JSON.stringify(newComment ),
       });
       if (!response.ok) throw new Error('Failed to submit review');
       setShowAddReview(false);
@@ -350,6 +357,7 @@ const ItineraryDetail = () => {
         disliked: '',
         isAnonymous: false
       });
+      setItineraryRating(0);
       // Handle success (e.g., show a success message, refresh itinerary details)
     } catch (error) {
       console.error('Error submitting itinerary rating:', error);
@@ -826,6 +834,8 @@ const ItineraryDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+   
 
       <Dialog open={!!showFullComment} onOpenChange={() => setShowFullComment(null)}>
         <DialogContent className="sm:max-w-[425px]">

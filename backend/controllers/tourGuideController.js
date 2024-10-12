@@ -189,61 +189,48 @@ const usernameExists = async (username) => {
 
 const addCommentToTourGuide = async (req, res) => {
   try {
-    const { username, rating, content } = req.body; // Get comment details from the request body
-
-
-
-    // Validate the input
+    const { username, rating, content } = req.body; 
     if (!username || typeof username !== 'string') {
       return res.status(400).json({ message: "Username is required and must be a string" });
     }
-    console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
 
     if (rating === undefined || rating < 0 || rating > 5) {
       return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
     }
 
-    // Find the activity by ID
-    const tourguide = await TourGuide.findById(req.params.id);
-      // .populate("advertiser")
-      // .populate("category")
-      // .populate("tags")
-      // .populate("attended")
-      // .exec();
-      console.log("11111111111111111111111111111111111111111111111111111111111");
+    // const tourguide = await TourGuide.findById(req.params.id);
 
-    if (!tourguide) {
-      return res.status(404).json({ message: "TourGuide not found" });
-    }
+    // if (!tourguide) {
+    //   return res.status(404).json({ message: "TourGuide not found" });
+    // }
 
-    // Create the new comment object
     const newComment = {
       username,
       rating,
       content,
-      date: new Date(), // Set the current date
+      date: new Date(),
     };
+    
+    const tourguide = await TourGuide.findByIdAndUpdate(
+      req.params.id,
+      { 
+        $push: { comments: newComment }  // Push the new comment to the comments array
+      },
+      { new: true, runValidators: true }  // Return the updated document, disable validators if needed
+    );
 
-    console.log(newComment);
-
-    // Add the comment to the activity's comments array
-    tourguide.comments.push(newComment);
-    console.log("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww");
-
-    // If the comment includes a rating, call the rateActivity method logic
     let newAverageRating;
-    // if (rating !== undefined) {
-    //   newAverageRating = await tourguide.addRating(rating);
-    // }
+    if (rating !== undefined) {
+      newAverageRating = await tourguide.addRating(rating);
+    }
 
-    // Save the updated activity
-    await tourguide.save({ validateBeforeSave: false });
+    // await tourguide.save({ validateBeforeSave: false });
 
-    // Return the updated comments and new average rating (if applicable)
+
     res.status(200).json({
       message: "Comment added successfully",
       comments: tourguide.comments,
-      ...(newAverageRating && { newAverageRating }), // Only include the new rating if it was updated
+      ...(newAverageRating && { newAverageRating }), 
     });
   } catch (error) {
     console.error(error);

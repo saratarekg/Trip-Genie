@@ -206,14 +206,11 @@ const rateActivity = async (req, res) => {
   try {
     
     const { rating } = req.body; // Get rating from the request body
-
-    // Find the activity by ID
     const activity = await Activity.findById(req.params.id)
     .populate("advertiser")
     .populate("category")
     .populate("tags")
-    .populate("attended")
-    .populate("comments")
+    // .populate("attended")
     .exec();
 
     // Add the rating and calculate the new average
@@ -230,7 +227,6 @@ const addCommentToActivity = async (req, res) => {
   try {
     const { username, rating, content } = req.body; // Get comment details from the request body
 
-    console.log(username, rating, content);
 
     // Validate the input
     if (!username || typeof username !== 'string') {
@@ -261,7 +257,6 @@ const addCommentToActivity = async (req, res) => {
       date: new Date(), // Set the current date
     };
 
-    console.log(newComment);
 
     // Add the comment to the activity's comments array
     activity.comments.push(newComment);
