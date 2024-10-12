@@ -19,6 +19,11 @@ const complaintSchema = new mongoose.Schema({
     default: Date.now,
   },
   updatedAt: Date,
+  tourist: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'tourist', // Assuming Tourist is the name of your tourist/user model
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Complaint", complaintSchema);
