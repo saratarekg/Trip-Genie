@@ -6,12 +6,12 @@ const {
   addCommentToTourGuide,
   rateTourGuide,
   deleteItinerary,
+  changePassword,
   getTourGuideByID,
 } = require("../controllers/tourGuideController"); // Import the controller functions
 
 const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
-
 
 // Route for getting a single tour guide by ID
 router.get("/", getTourGuideProfile);
@@ -28,7 +28,6 @@ router.get("/activities", activityController.getAllActivities);
 router.get("/activities/:id", activityController.getActivityById);
 router.put("/activities/:id", activityController.updateActivity);
 
-
-
+router.post("password", changePassword);
 
 module.exports = router;
