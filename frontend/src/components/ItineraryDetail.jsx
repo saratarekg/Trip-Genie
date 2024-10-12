@@ -141,6 +141,9 @@ const ItineraryDetail = () => {
   const [itineraryReview, setItineraryReview] = useState('');
   const [showFullComment, setShowFullComment] = useState(null);
   const [activityRating, setActivityRating] = useState(0);
+  const [hasAttendedTourGuide, setHasAttendedTourGuide] = useState(false);
+  const [hasAttendedItinerary, setHasAttendedItinerary] = useState(false);
+
 
   const navigate = useNavigate();
 
@@ -198,13 +201,34 @@ const ItineraryDetail = () => {
           });
         }
 
+       
+
         setActivities(data.activities);
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
           setCanModify(decodedToken.id === data.tourGuide._id);
           const fetchedUsername = await fetchUsername(decodedToken.id);
           setUsername(fetchedUsername);
+
+          if (data.attended && Array.isArray(data.attended)) {
+            data.attended.forEach(tourist => {
+              console.log("Tourist:", tourist, "Tourist ID:", tourist._id);
+            });
+          
+            setHasAttendedItinerary(data.attended.some(tourist => tourist === decodedToken.id));
+          }
+          
+
+          if (data.tourGuide.attended && Array.isArray(data.tourGuide.attended)) {
+            setHasAttendedTourGuide(data.tourGuide.attended.some(tourist => tourist === decodedToken.id));
+          }
         }
+
+        
+
+
+        
+
       } catch (err) {
         setError("Error fetching itinerary details. Please try again later.");
         console.error("Error fetching itinerary details:", err);
@@ -627,22 +651,30 @@ const ItineraryDetail = () => {
             {tourGuideProfile && (
               <TourguideProfileCard profile={tourGuideProfile} />
             )}
+            {hasAttendedTourGuide && (
             <Card className="mt-4">
               <CardHeader>
                 <CardTitle>Rate Tour Guide</CardTitle>
               </CardHeader>
               <CardContent>
-                <StarRating rating={rating} setRating={handleRating} />
-                {showRatingSubmit && (
-                  <Button onClick={submitRating} className="mt-4 mr-4">
-                    Submit Rating
-                  </Button>
-                )}
-                <Button onClick={() => setShowAddReview(true)} className="mt-4 ml-4">
-                  Write a Review
-                </Button>
-              </CardContent>
+  <div style={{ display: 'flex', alignItems: 'center' }}>
+    <StarRating rating={rating} setRating={handleRating}  /> {/* Increase star size */}
+    
+    {showRatingSubmit && (
+      <Button onClick={submitRating} style={{ marginLeft: '30px' }}> {/* Increase margin */}
+        Submit Rating
+      </Button>
+    )}
+  </div>
+
+  <Button onClick={() => setShowAddReview(true)} className="mt-4 ml-4">
+    Write a Review
+  </Button>
+</CardContent>
+
+
             </Card>
+            )}
           </div>
         </div>
 
@@ -699,13 +731,16 @@ const ItineraryDetail = () => {
           ) : (
             <p>No comments yet.</p>
           )}
-
+ {hasAttendedItinerary && (
+  <>
           <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
             Add a Review
           </Button>
           <Button onClick={() => setShowRatingDialog(true)} className="mt-4">
             Add a Rating
           </Button>
+          </>
+ )}
         </div>
       </div>
 
@@ -770,12 +805,22 @@ const ItineraryDetail = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button 
-              onClick={() => setShowAddReview(false)}
-              style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
-            >
-              Cancel
-            </Button>
+          <Button 
+  onClick={() => {
+    setShowAddReview(false); // Hide the Add Review form
+    setNewReview({
+      rating: 0,
+      liked: "",
+      disliked: "",
+      visitDate: '',
+      isAnonymous: false
+    }); // Reset the new review form
+  }}
+  style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
+>
+  Cancel
+</Button>
+
             <Button onClick={handleAddReview} disabled={!isReviewValid()}>Post Review</Button>
           </DialogFooter>
         </DialogContent>
@@ -827,9 +872,22 @@ const ItineraryDetail = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => setShowRateItineraryDialog(false)} variant="outline">
-              Cancel
-            </Button>
+          <Button 
+  onClick={() => {
+    setShowRateItineraryDialog(false); // Hide the Add Review form
+    setNewReview({
+      rating: 0,
+      liked: "",
+      disliked: "",
+      visitDate: '',
+      isAnonymous: false
+    }); // Reset the new review form
+  }}
+  style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
+>
+  Cancel
+</Button>
+
             <Button onClick={handleRateItinerary}>Submit Review</Button>
           </DialogFooter>
         </DialogContent>
