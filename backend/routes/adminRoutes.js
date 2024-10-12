@@ -90,6 +90,8 @@ router.put("/products/:id", productController.editProduct);
 router.delete("/products/:id", productController.deleteProduct);
 
 router.get("/complaint", complaintsController.getAllComplaints);
+router.get("/itineraries", itineraryController.getAllItineraries);
+router.get("/itineraries/:id", itineraryController.getItineraryById);
 
 
 
