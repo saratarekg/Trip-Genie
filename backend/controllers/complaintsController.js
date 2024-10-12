@@ -76,7 +76,24 @@ const markComplaintStatus = async (req, res) => {
     }
 }
 
+const getComplaintDetails = async (req, res) => {
+    try {
+        const { id } = req.params; // Extract the complaint ID from the request parameters
 
+        // Find the complaint by ID and populate the 'tourist' field
+        const complaint = await Complaint.findById(id).populate('tourist');
+
+        // Check if the complaint was found
+        if (!complaint) {
+            return res.status(404).json({ error: 'Complaint not found' });
+        }
+
+        // Return the complaint details
+        res.status(200).json(complaint);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 
 
@@ -88,6 +105,7 @@ const markComplaintStatus = async (req, res) => {
 module.exports = {
     addComplaint,
     getAllComplaints,
-    markComplaintStatus
+    markComplaintStatus,
+    getComplaintDetails
 }
 

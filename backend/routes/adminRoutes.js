@@ -89,6 +89,7 @@ router.delete("/products/:id", productController.deleteProduct);
 
 router.get("/complaint", complaintsController.getAllComplaints);
 router.put("/complaint/:id", complaintsController.markComplaintStatus);
+router.get("/complaint/:id", complaintsController.getComplaintDetails);
 
 router.post("password", adminController.changePassword);
 
