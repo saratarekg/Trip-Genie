@@ -1,6 +1,7 @@
 const Activity = require("../models/activity");
 const Category = require("../models/category");
 const Itinerary = require("../models/itinerary");
+const Tourist = require("../models/tourist");
 
 const getAllActivities = async (req, res) => {
   try {
@@ -225,17 +226,34 @@ const rateActivity = async (req, res) => {
 
 const addCommentToActivity = async (req, res) => {
   try {
+    
     const { username, rating, content } = req.body; // Get comment details from the request body
 
-
-    // Validate the input
-    if (!username || typeof username !== 'string') {
-      return res.status(400).json({ message: "Username is required and must be a string" });
+    if (rating === undefined) {
+      rating = 0; // Default rating
     }
-
-    if (rating === undefined || rating < 0 || rating > 5) {
+    
+    if ( rating < 0 || rating > 5) {
       return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
     }
+
+    const tourist = await Tourist.findById(res.locals.user_id);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Determine the username to use
+    let finalUsername;
+
+    if (username && username === "Anonymous") {
+      finalUsername = "Anonymous"; // Use 'anonymous' as the username
+    } else if (tourist.username) {
+      finalUsername = tourist.username;
+       // Use the authenticated user's username
+    } else {
+      return res.status(400).json({ message: "Valid username is required" });
+    }
+
 
     // Find the activity by ID
     const activity = await Activity.findById(req.params.id)
@@ -249,9 +267,11 @@ const addCommentToActivity = async (req, res) => {
       return res.status(404).json({ message: "Activity not found" });
     }
 
+    console.log(tourist.username);
+
     // Create the new comment object
     const newComment = {
-      username,
+      username: finalUsername,
       rating,
       content,
       date: new Date(), // Set the current date

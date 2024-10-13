@@ -190,26 +190,35 @@ const usernameExists = async (username) => {
 const addCommentToTourGuide = async (req, res) => {
   try {
     const { username, rating, content } = req.body;
-    if (!username || typeof username !== "string") {
-      return res
-        .status(400)
-        .json({ message: "Username is required and must be a string" });
+    
+    if (rating === undefined) {
+      rating = 0; // Default rating
     }
 
-    if (rating === undefined || rating < 0 || rating > 5) {
-      return res
-        .status(400)
-        .json({ message: "Rating must be a number between 0 and 5" });
+    if ( rating < 0 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
     }
 
-    // const tourguide = await TourGuide.findById(req.params.id);
+    const tourist = await Tourist.findById(res.locals.user_id);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
 
-    // if (!tourguide) {
-    //   return res.status(404).json({ message: "TourGuide not found" });
-    // }
+    // Determine the username to use
+    let finalUsername;
+
+    if (username && username === "Anonymous") {
+      finalUsername = "Anonymous"; // Use 'anonymous' as the username
+    } else if (tourist.username) {
+      finalUsername = tourist.username;
+       // Use the authenticated user's username
+    } else {
+      return res.status(400).json({ message: "Valid username is required" });
+    }
+    
 
     const newComment = {
-      username,
+      username : finalUsername,
       rating,
       content,
       date: new Date(),

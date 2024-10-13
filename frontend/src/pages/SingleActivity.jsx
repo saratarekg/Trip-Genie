@@ -259,6 +259,7 @@ const ActivityDetail = () => {
         rating: data.newRating,
       }));
       setShowRatingDialog(false);
+
       window.location.reload();
     } catch (error) {
       console.error("Error submitting activity rating:", error);
@@ -272,7 +273,7 @@ const ActivityDetail = () => {
   const handleAddReview = async () => {
     try {
       const token = Cookies.get("jwt");
-      let username = newReview.isAnonymous ? "Anonymous" : await fetchUsername(currentUser);
+      let username = newReview.isAnonymous ? "Anonymous" : "User";
 
       const newComment = {
         username,
@@ -312,23 +313,7 @@ const ActivityDetail = () => {
     return newReview.liked.trim() !== '' || newReview.disliked.trim() !== '';
   };
 
-  const fetchUsername = async (userId) => {
-    try {
-      const response = await fetch(`http://localhost:4000/${userRole}`, {
-        headers: {
-          'Authorization': `Bearer ${Cookies.get('jwt')}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch username');
-      }
-      const data = await response.json();
-      return data.username;
-    } catch (error) {
-      console.error("Error fetching username:", error);
-      return "Unknown User";
-    }
-  };
+  
 
   const formatCommentDate = (date) => {
     // Check if the date is valid
@@ -751,7 +736,15 @@ const ActivityDetail = () => {
         </div>
         <DialogFooter>
           <Button 
-            onClick={() => setShowAddReview(false)}
+            onClick={() =>{ setShowAddReview(false)
+              setNewReview({
+                rating: 0,
+                liked: "",
+                disliked: "",
+                visitDate: '',
+                isAnonymous: false
+              })
+            }}
             style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
           >
             Cancel

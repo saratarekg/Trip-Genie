@@ -147,23 +147,7 @@ const ItineraryDetail = () => {
 
   const navigate = useNavigate();
 
-  const fetchUsername = async (userId) => {
-    try {
-      const response = await fetch(`http://localhost:4000/${userRole}`, {
-        headers: {
-          'Authorization': `Bearer ${Cookies.get('jwt')}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch username');
-      }
-      const data = await response.json();
-      return data.username;
-    } catch (error) {
-      console.error("Error fetching username:", error);
-      return "Unknown User";
-    }
-  };
+ 
 
   useEffect(() => {
     const fetchItineraryDetails = async () => {
@@ -207,8 +191,7 @@ const ItineraryDetail = () => {
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
           setCanModify(decodedToken.id === data.tourGuide._id);
-          const fetchedUsername = await fetchUsername(decodedToken.id);
-          setUsername(fetchedUsername);
+         
 
           if (data.attended && Array.isArray(data.attended)) {
             data.attended.forEach(tourist => {
@@ -306,7 +289,7 @@ const ItineraryDetail = () => {
   const handleAddReview = async () => {
     try {
       const newComment = {
-        username: newReview.isAnonymous ? 'Anonymous' : username,
+        username: newReview.isAnonymous ? 'Anonymous' : 'User',
         rating: newReview.rating,
         content: {
           liked: newReview.liked,
@@ -387,7 +370,7 @@ const ItineraryDetail = () => {
           },
           isAnonymous: newReview.isAnonymous,
           date: new Date().toISOString(),
-          username: newReview.isAnonymous ? 'Anonymous' : username
+          username: newReview.isAnonymous ? 'Anonymous' : 'User'
         }),
       });
       if (!response.ok) throw new Error('Failed to submit itinerary rating');
