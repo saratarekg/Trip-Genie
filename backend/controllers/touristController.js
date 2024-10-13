@@ -98,6 +98,47 @@ const getTouristProfile = async (req, res) => {
   }
 };
 
+
+const updatePreferences = async (req, res) => {
+  try {
+    const tourist1 = await Tourist.findById(res.locals.user_id);
+
+    const {
+      budget,
+      price,
+      categories,
+      tourLanguages,
+      tourType,
+      historicalPlaceType,
+      historicalPlacePeriod
+    } = req.body; // Preferences to update
+
+    // Update preferences
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      res.locals.user_id,
+      {
+        "preference.budget": budget ?? tourist1.preference.budget, // Use the existing value if not provided
+        "preference.price": price ?? tourist1.preference.price, // Use the existing value if not provided
+        "preference.categories": categories ?? tourist1.preference.categories, // Use the existing value if not provided
+        "preference.tourLanguages": tourLanguages ?? tourist1.preference.tourLanguages,
+        "preference.tourType": tourType ?? tourist1.preference.tourType,
+        "preference.historicalPlaceType": historicalPlaceType ?? tourist1.preference.historicalPlaceType,
+        "preference.historicalPlacePeriod": historicalPlacePeriod ?? tourist1.preference.historicalPlacePeriod
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    res.status(200).json(updatedTourist);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 const updateTouristProfile = async (req, res) => {
   try {
     const tourist1 = await Tourist.findById(res.locals.user_id);
@@ -297,4 +338,5 @@ module.exports = {
   updateLoyaltyPointsAndBadge,
   redeemPoints,
   changePassword,
+  updatePreferences,
 };
