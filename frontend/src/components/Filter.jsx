@@ -1,6 +1,12 @@
-import React, { useState } from 'react';
-import { Filter, ChevronDown, ArrowUpDown, Plus, ContactRound } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import {
+  Filter,
+  ChevronDown,
+  ArrowUpDown,
+  Plus,
+  ContactRound,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
 const FilterComponent = ({
   filtersVisible,
@@ -21,10 +27,10 @@ const FilterComponent = ({
   setSelectedLanguages,
   searchItineraries,
   typesOptions = [],
-  languagesOptions = [], 
+  languagesOptions = [],
   role,
   isBooked,
-  setIsBooked
+  setIsBooked,
 }) => {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
@@ -65,14 +71,14 @@ const FilterComponent = ({
     if (!selectedTypes || selectedTypes.length === 0) {
       return "Select Type(s)";
     }
-    return selectedTypes.join(', ');
+    return selectedTypes.join(", ");
   };
 
   const getSelectedLanguagesLabel = () => {
     if (!selectedLanguages || selectedLanguages.length === 0) {
       return "Select Language(s)";
     }
-    return selectedLanguages.join(', ');
+    return selectedLanguages.join(", ");
   };
 
   const handleIsBookedChange = () => {
@@ -83,38 +89,70 @@ const FilterComponent = ({
     <>
       <div className="flex mb-4">
         <div className="flex space-x-4">
-          <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+          <button
+            onClick={toggleFilters}
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow"
+          >
             <Filter className="mr-2" size={18} />
-            Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
+            Filters{" "}
+            <ChevronDown
+              className={`ml-1 transform ${filtersVisible ? "rotate-180" : ""}`}
+            />
           </button>
 
-          <button onClick={() => handleSort('price')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+          <button
+            onClick={() => handleSort("price")}
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow"
+          >
             <ArrowUpDown className="mr-2" size={18} />
-            Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+            Sort by Price{" "}
+            {sortBy === "price"
+              ? sortOrder === 1
+                ? "(Low to High)"
+                : "(High to Low)"
+              : ""}
           </button>
 
-          <button onClick={() => handleSort('rating')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+          <button
+            onClick={() => handleSort("rating")}
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow"
+          >
             <ArrowUpDown className="mr-2" size={18} />
-            Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
+            Sort by Ratings{" "}
+            {sortBy === "rating"
+              ? sortOrder === 1
+                ? "(Low to High)"
+                : "(High to Low)"
+              : ""}
           </button>
 
           {role === "tour-guide" && (
             <button
               onClick={() => handlemyItineraries(!myItineraries)}
-              className={`flex items-center px-4 py-2 rounded-full shadow ${myItineraries ? "bg-orange-500 text-white" : "bg-white text-black"}`}
+              className={`flex items-center px-4 py-2 rounded-full shadow ${
+                myItineraries
+                  ? "bg-orange-500 text-white"
+                  : "bg-white text-black"
+              }`}
             >
               <ContactRound strokeWidth={1.25} />
               My Itineraries
             </button>
           )}
 
-          <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
+          <button
+            onClick={clearFilters}
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow"
+          >
             Clear Filters
           </button>
         </div>
 
-        {role === 'tour-guide' ? (
-          <Link to="/create-itinerary" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
+        {role === "tour-guide" ? (
+          <Link
+            to="/create-itinerary"
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
+          >
             <Plus className="mr-2" size={18} />
             Create
           </Link>
@@ -164,7 +202,12 @@ const FilterComponent = ({
                   onClick={() => setShowTypeDropdown(!showTypeDropdown)}
                   className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
                 >
-                  {getSelectedTypesLabel()} <ChevronDown className={`ml-1 transform ${showTypeDropdown ? 'rotate-180' : ''}`} />
+                  {getSelectedTypesLabel()}{" "}
+                  <ChevronDown
+                    className={`ml-1 transform ${
+                      showTypeDropdown ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
                 {showTypeDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
@@ -192,12 +235,20 @@ const FilterComponent = ({
                   onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
                   className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
                 >
-                  {getSelectedLanguagesLabel()} <ChevronDown className={`ml-1 transform ${showLanguageDropdown ? 'rotate-180' : ''}`} />
+                  {getSelectedLanguagesLabel()}{" "}
+                  <ChevronDown
+                    className={`ml-1 transform ${
+                      showLanguageDropdown ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
                 {showLanguageDropdown && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
                     {languagesOptions.map((language) => (
-                      <label key={language} className="flex items-center px-4 py-2">
+                      <label
+                        key={language}
+                        className="flex items-center px-4 py-2"
+                      >
                         <input
                           type="checkbox"
                           checked={selectedLanguages.includes(language)}
@@ -212,28 +263,29 @@ const FilterComponent = ({
               </div>
             </div>
 
-    <div>     
-  <div><label className="block text-gray-700">Booking Status</label></div>
-<div className="mt-2 pl-1">  
-  <label className="flex items-center space-x-3"> 
-    <input
-      type="checkbox"
-      checked={isBooked}
-      onChange={handleIsBookedChange}
-     
-      className="form-checkbox w-5 h-5"
-    />
-    <span className="text-gray-700 text-l">Booked Only</span> 
-  </label>
-</div>
-</div> 
-
-
+                {role === "tour-guide" && (
+            <div>
+              <div>
+                <label className="block text-gray-700">Booking Status</label>
+              </div>
+              <div className="mt-2 pl-1">
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={isBooked}
+                    onChange={handleIsBookedChange}
+                    className="form-checkbox w-5 h-5"
+                  />
+                  <span className="text-gray-700 text-l">Booked Only</span>
+                </label>
+              </div>
+            </div>
+  )}
           </div>
 
           {/* Apply Filters Button */}
           <button
-             onClick={() => {
+            onClick={() => {
               searchItineraries();
               toggleFilters(); // Hide filters after applying them
             }}
