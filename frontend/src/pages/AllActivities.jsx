@@ -49,12 +49,12 @@ const ActivityCard = ({ activity, onSelect }) => (
     <CardFooter className="p-4 pt-0">
       <div className="flex flex-wrap gap-2">
         {activity.tags.map((tag, index) => (
-          <Badge key={index} variant="secondary">
+          <Badge key={index} variant="outline">
             {tag.type}
           </Badge>
         ))}
         {activity.category.map((cat, index) => (
-          <Badge key={index} variant="secondary">
+          <Badge  key={index} variant="secondary">
             {cat.name}
           </Badge>
         ))}
@@ -88,11 +88,6 @@ export function AllActivitiesComponent() {
     if (!role) role = "guest";
     return role;
   };
-
-  useEffect(() => {
-    fetchActivities();
-    setIsLoading(false);
-  }, []);
 
   const handleActivitySelect = (id) => {
     setIsLoading(true);
