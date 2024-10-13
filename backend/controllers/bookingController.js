@@ -67,6 +67,7 @@ const createBooking = async (req, res) => {
     try {
         const touristId = res.locals.user_id;
         const { bookingType, activity, itinerary, historicalPlace, paymentType, paymentAmount } = req.body;
+
         // Create a new booking
         const newBooking = new Booking({
             bookingType,
@@ -77,13 +78,16 @@ const createBooking = async (req, res) => {
             paymentAmount,
             user: touristId // Link the booking to the logged-in user
         });
+
         // Save the booking
         await newBooking.save();
+
         // Update user's loyalty points and badge
         const touristUpdate = await Tourist.findById(touristId);
         if (!touristUpdate) {
             return res.status(404).json({ error: 'Tourist not found' });
         }
+
         // Calculate points based on current level
         let pointsEarned = 0;
         if (touristUpdate.loyaltyPoints <= 100000) {
@@ -93,7 +97,8 @@ const createBooking = async (req, res) => {
         } else {
             pointsEarned = paymentAmount * 1.5;
         }
-        // Update user's total points
+
+        // Update user's total points and determine badge
         const newLoyaltyPoints = touristUpdate.loyaltyPoints + pointsEarned;
 
         let badge = "";
@@ -109,27 +114,41 @@ const createBooking = async (req, res) => {
         const updatedTourist = await Tourist.findByIdAndUpdate(
             res.locals.user_id,
             {
-              loyaltyPoints: newLoyaltyPoints,
-              loyaltyBadge : badge
+                loyaltyPoints: newLoyaltyPoints,
+                loyaltyBadge: badge
             },
             { new: true } // Return the updated document
-          )
-            .exec();
-      
-          if (!updatedTourist) {
+        ).exec();
+
+        if (!updatedTourist) {
             return res.status(404).json({ message: "Tourist not found" });
-          }
+        }
 
+        // Add tourist to the attended array based on booking type
+        if (bookingType === 'Activity' && activity) {
+            await Activity.findByIdAndUpdate(
+                activity,
+                { $addToSet: { attended: touristId } } // Ensure no duplicates
+            );
+        } else if (bookingType === 'Itinerary' && itinerary) {
+            await Itinerary.findByIdAndUpdate(
+                itinerary,
+                { $addToSet: { attended: touristId } } // Ensure no duplicates
+            );
+        }
 
-        res.status(201).json({ 
-            message: 'Booking created successfully', 
+        // Send the response
+        res.status(201).json({
+            message: 'Booking created successfully',
             booking: newBooking,
-            tourist : updatedTourist,
+            tourist: updatedTourist,
         });
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 module.exports = {
     createBooking,
