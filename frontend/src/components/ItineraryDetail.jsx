@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDistanceToNow, format } from 'date-fns';
 import { useParams, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import * as jwtDecode from 'jwt-decode';
@@ -294,6 +295,7 @@ const ItineraryDetail = () => {
       });
       if (!response.ok) throw new Error('Failed to submit rating');
       setShowRatingSubmit(false);
+      window.location.reload();
       // Handle success (e.g., show a success message)
     } catch (error) {
       console.error('Error submitting rating:', error);
@@ -330,6 +332,7 @@ const ItineraryDetail = () => {
         visitDate: '',
         isAnonymous: false
       });
+      window.location.reload();
       // Handle success (e.g., show a success message, refresh comments)
     } catch (error) {
       console.error('Error submitting review:', error);
@@ -350,8 +353,23 @@ const ItineraryDetail = () => {
   };
 
   const formatCommentDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  };
+    // Check if the date is valid
+    const commentDate = new Date(date);
+    
+    // Check if the date is valid
+    if (isNaN(commentDate.getTime())) {
+        return "Date unavailable"; // Return if the date is invalid
+    }
+    
+    const now = new Date();
+    const diffInDays = Math.floor((now - commentDate) / (1000 * 60 * 60 * 24));
+
+    if (diffInDays < 30) {
+        return formatDistanceToNow(commentDate, { addSuffix: true });
+    } else {
+        return format(commentDate, 'MMM d, yyyy');
+    }
+};
 
   const handleRateItinerary = async () => {
     try {
@@ -381,6 +399,8 @@ const ItineraryDetail = () => {
         isAnonymous: false
       });
       setItineraryRating(0);
+      window.location.reload();
+
       // Handle success (e.g., show a success message, refresh itinerary details)
     } catch (error) {
       console.error('Error submitting itinerary rating:', error);
@@ -403,6 +423,7 @@ const ItineraryDetail = () => {
       if (!response.ok) throw new Error('Failed to submit activity rating');
       setShowRatingDialog(false);
       setActivityRating(0);
+      window.location.reload();
       // Handle success (e.g., show a success message, refresh activity details)
     } catch (error) {
       console.error('Error submitting activity rating:', error);
@@ -650,7 +671,7 @@ const ItineraryDetail = () => {
             {tourGuideProfile && (
               <TourguideProfileCard profile={tourGuideProfile} />
             )}
-            {userRole !== "admin" && (
+            {userRole !== "admin" && hasAttendedTourGuide && hasAttendedItinerary &&(
               <>
                 <Card className="mt-4">
                   <CardHeader>
@@ -671,7 +692,7 @@ const ItineraryDetail = () => {
               </>
 
             )}
-            {userRole === "admin" && (
+            {userRole === "admin" &&  (
               <>
                 <Button
                   className="w-4/5 mx-auto bg-red-500 hover:bg-red-600 text-white mt-2"
@@ -740,7 +761,7 @@ const ItineraryDetail = () => {
             <p>No comments yet.</p>
           )}
 
-          {userRole !== "admin" && (
+          {userRole !== "admin" && hasAttendedItinerary && hasAttendedTourGuide &&(
             <>
               <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
                 Add a Review
