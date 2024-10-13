@@ -98,6 +98,20 @@ const getTouristProfile = async (req, res) => {
   }
 };
 
+const getTouristPreferences = async (req, res) => {
+  try {
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Return the preferences
+    res.status(200).json(tourist.preference);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const updatePreferences = async (req, res) => {
   try {
@@ -348,4 +362,5 @@ module.exports = {
   redeemPoints,
   changePassword,
   updatePreferences,
+  getTouristPreferences,
 };

@@ -13,6 +13,8 @@ const router = express.Router();
 
 router.put("/", touristController.updateTouristProfile);
 router.put("/preferences", touristController.updatePreferences);
+router.get("/preferences", touristController.getTouristPreferences);
+
 router.post("/loyalty", touristController.updateLoyaltyPointsAndBadge);
 router.get("/", touristController.getTouristProfile);
 
