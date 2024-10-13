@@ -10,8 +10,7 @@ const categoryController = require("../controllers/categoryController");
 const productController = require("../controllers/productController");
 const historicalTagController = require("../controllers/historicalTagController");
 const complaintsController = require("../controllers/complaintsController.js");
-const itineraryController = require("../controllers/itineraryController.js"); 
-
+const itineraryController = require("../controllers/itineraryController.js");
 
 const router = express.Router();
 
@@ -92,7 +91,6 @@ router.delete("/products/:id", productController.deleteProduct);
 router.get("/complaint", complaintsController.getAllComplaints);
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
-
-
+router.post("/password", adminController.changePassword);
 
 module.exports = router;

@@ -1,6 +1,8 @@
 "use client";
 
 import keyNavbar from "../assets/images/keyNavbar.svg";
+import settingsIcon from "../assets/settings-svgrepo-com.svg";
+import gearIcon from "../assets/gear-fill.svg";
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom"; // Import Link from React Router
@@ -92,7 +94,6 @@ export function NavbarComponent() {
                       <NavLink to="/all-products">Products</NavLink>
                       <NavLink to="/tourist-profile">Profile</NavLink>
                       <NavLink to="/file-complaint">Complaint</NavLink>
-
                     </>
                   )}
                   {role === "advertiser" && (
@@ -154,10 +155,9 @@ export function NavbarComponent() {
                   )}
                 </div>
               </div>
-
               {/* Login, Sign Up */}
               <div className="hidden md:block">
-                <div className="ml-4 flex items-center md:ml-6">
+                <div className="ml-4 flex items-center md:ml-6 space-x-4">
                   {role === undefined ? (
                     <>
                       <NavLink
@@ -180,6 +180,18 @@ export function NavbarComponent() {
                     >
                       Logout
                     </button>
+                  )}
+
+                  {role !== undefined && role !== "guest" && (
+                    <>
+                      <NavLink to="/settings">
+                        <img
+                          src={gearIcon}
+                          alt="Settings"
+                          className="h-6 w-6 rounded-full"
+                        />
+                      </NavLink>
+                    </>
                   )}
                 </div>
               </div>

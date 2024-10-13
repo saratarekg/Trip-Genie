@@ -14,6 +14,6 @@ router.get("/", advertiserController.getAdvertiser);
 router.put("/", advertiserController.updateAdvertiser);
 
 router.get("/advertisers/:id", advertiserController.getAdvertiserByID);
-router.post("password", advertiserController.changePassword);
+router.post("/password", advertiserController.changePassword);
 
 module.exports = router;

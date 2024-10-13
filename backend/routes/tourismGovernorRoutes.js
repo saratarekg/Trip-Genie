@@ -33,5 +33,5 @@ router.get(
   "/my-historical-places",
   historicalPlacesController.getHistoricalPlacesByGovernor
 );
-router.post("password", tourismGovernorController.changePassword);
+router.post("/password", tourismGovernorController.changePassword);
 module.exports = router;

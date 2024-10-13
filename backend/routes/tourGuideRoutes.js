@@ -28,6 +28,6 @@ router.get("/activities", activityController.getAllActivities);
 router.get("/activities/:id", activityController.getActivityById);
 router.put("/activities/:id", activityController.updateActivity);
 
-router.post("password", changePassword);
+router.post("/password", changePassword);
 
 module.exports = router;

@@ -7,10 +7,9 @@ const Advertiser = require("../models/advertiser");
 const TourGuide = require("../models/tourGuide");
 const { deleteHistoricalPlace } = require("./historicalPlacesController");
 
-
 const addTourismGovernor = async (req, res) => {
-  try{
-    if(await usernameExists(req.body.username)){
+  try {
+    if (await usernameExists(req.body.username)) {
       throw new Error("Username already exists");
     }
 
@@ -22,12 +21,11 @@ const addTourismGovernor = async (req, res) => {
         res.status(201).json({ tourismGovernor: result });
       })
       .catch((err) => {
-        res.status(400).json({message: err.message})
+        res.status(400).json({ message: err.message });
         console.log(err);
       });
-  }
-    catch(err){
-    res.status(400).json({message: err.message});
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 };
 
@@ -107,12 +105,21 @@ const changePassword = async (req, res) => {
     if (oldPassword === newPassword) {
       return res
         .status(400)
-        .json({ message: "Old password and new password are the same" });
+        .json({ message: "Old password and new password cannot be the same" });
     }
     tourismGovernor.password = newPassword;
     await tourismGovernor.save();
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
+    if (error.name === "ValidationError") {
+      // Gather all validation error messages
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res
+        .status(400)
+        .json({ message: "Validation error", errors: validationErrors });
+    }
     res.status(400).json({ error: error.message });
   }
 };

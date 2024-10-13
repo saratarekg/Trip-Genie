@@ -237,12 +237,10 @@ const addCommentToTourGuide = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        message: "An error occurred while adding the comment",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "An error occurred while adding the comment",
+      error: error.message,
+    });
   }
 };
 
@@ -289,12 +287,21 @@ const changePassword = async (req, res) => {
     if (oldPassword === newPassword) {
       return res
         .status(400)
-        .json({ message: "Old password and new password are the same" });
+        .json({ message: "Old password and new password cannot be the same" });
     }
     tourGuide.password = newPassword;
     await tourGuide.save();
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
+    if (error.name === "ValidationError") {
+      // Gather all validation error messages
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res
+        .status(400)
+        .json({ message: "Validation error", errors: validationErrors });
+    }
     res.status(400).json({ error: error.message });
   }
 };

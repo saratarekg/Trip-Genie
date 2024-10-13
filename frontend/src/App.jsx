@@ -44,6 +44,7 @@ import AdvertiserProfile from "./pages/AdvertiserProfile.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
 import CreateHtpage from "./pages/CreateHtpage.jsx";
 import NotFound from "./components/NotFound.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -178,7 +179,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/tourist-profile"
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
@@ -189,7 +190,9 @@ function AppContent() {
           <Route
             path="/all-itineraries"
             element={
-              <ProtectedRoute allowedRoles={["tour-guide", "guest", "tourist","admin"]}>
+              <ProtectedRoute
+                allowedRoles={["tour-guide", "guest", "tourist", "admin"]}
+              >
                 <AllItinerariesComponent />
               </ProtectedRoute>
             }
@@ -216,7 +219,9 @@ function AppContent() {
           <Route
             path="/itinerary/:id"
             element={
-              <ProtectedRoute allowedRoles={["tour-guide", "guest", "tourist","admin"]}>
+              <ProtectedRoute
+                allowedRoles={["tour-guide", "guest", "tourist", "admin"]}
+              >
                 <ItineraryDetail />
               </ProtectedRoute>
             }
@@ -280,6 +285,23 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tourism-governor"]}>
                 <CreateHtpage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "tourist",
+                  "seller",
+                  "tour-guide",
+                  "advertiser",
+                  "tourism-governor",
+                  "admin",
+                ]}
+              >
+                <SettingsPage />
               </ProtectedRoute>
             }
           />
