@@ -89,8 +89,10 @@ router.put("/products/:id", productController.editProduct);
 router.delete("/products/:id", productController.deleteProduct);
 
 router.get("/complaint", complaintsController.getAllComplaints);
+router.put("/itineraries/:id", itineraryController.flagItinerary);
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 router.post("/password", adminController.changePassword);
+
 
 module.exports = router;

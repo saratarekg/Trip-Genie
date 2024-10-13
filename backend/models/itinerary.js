@@ -63,6 +63,12 @@ const itinerarySchema = new Schema(
       required: true,
       default: false,
     },
+    appropriate: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
+
     tourGuide: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "TourGuide",

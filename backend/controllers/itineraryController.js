@@ -167,6 +167,8 @@ const updateItinerary = async (req, res) => {
       });
     }
 
+    
+
     // Check if the itinerary is booked
 
     // If all checks pass, delete the itinerary
@@ -180,6 +182,7 @@ const updateItinerary = async (req, res) => {
       accessibility,
       pickUpLocation,
       dropOffLocation,
+      appropriate,
     } = req.body;
 
     await Itinerary.findByIdAndUpdate(req.params.id, {
@@ -192,6 +195,7 @@ const updateItinerary = async (req, res) => {
       accessibility,
       pickUpLocation,
       dropOffLocation,
+      appropriate,
     });
 
     res.status(200).json({ message: "Itinerary updated successfully" });
@@ -199,6 +203,35 @@ const updateItinerary = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const flagItinerary = async (req, res) => {
+  try {
+   
+    // Find the itinerary by ID
+    const itinerary = await Itinerary.findById(req.params.id);
+
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
+    }
+
+    // Check if the itinerary is booked
+
+    // If all checks pass, delete the itinerary
+    const {
+      appropriate,
+    } = req.body;
+
+    await Itinerary.findByIdAndUpdate(req.params.id, {
+      appropriate,
+    });
+
+    res.status(200).json({ message: "Itinerary updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
 
 const deleteItinerary = async (req, res) => {
   try {
@@ -354,5 +387,6 @@ module.exports = {
   updateItinerary,
   getAllLanguages,
   addCommentToItinerary,
-  rateItinerary
+  rateItinerary,
+  flagItinerary,
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useParams, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import axios from "axios"; // Ensure axios is installed
 import * as jwtDecode from 'jwt-decode';
 import {
   CheckCircle,
@@ -143,11 +144,59 @@ const ItineraryDetail = () => {
   const [activityRating, setActivityRating] = useState(0);
   const [hasAttendedTourGuide, setHasAttendedTourGuide] = useState(false);
   const [hasAttendedItinerary, setHasAttendedItinerary] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isAppropriate, setIsAppropriate] = useState(true); // Track the current status
+
 
 
   const navigate = useNavigate();
 
- 
+
+  const fetchUsername = async (userId) => {
+    try {
+      const response = await fetch(`http://localhost:4000/${userRole}`, {
+        headers: {
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch username');
+      }
+      const data = await response.json();
+      return data.username;
+    } catch (error) {
+      console.error("Error fetching username:", error);
+      return "Unknown User";
+    }
+  };
+  const handleOpenDialog = () => setDialogOpen(true);
+  const handleCloseDialog = () => setDialogOpen(false);
+
+  const handleConfirmFlag = async () => {
+    try {
+      const updatedStatus = !isAppropriate; // Toggle status
+
+      // Update the backend
+      
+      const token = Cookies.get("jwt");
+      
+      const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${itinerary._id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({  appropriate: updatedStatus, }),
+      });
+      
+
+      setIsAppropriate(updatedStatus); // Update state to reflect the new status
+      setDialogOpen(false); // Close the dialog
+
+    } catch (error) {
+      console.error("Failed to update itinerary status:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchItineraryDetails = async () => {
@@ -184,6 +233,7 @@ const ItineraryDetail = () => {
             specialties: ['Historical Tours', 'Food Tours', 'Adventure Tours'],
           });
         }
+        setIsAppropriate(data.appropriate);
 
 
 
@@ -338,21 +388,21 @@ const ItineraryDetail = () => {
   const formatCommentDate = (date) => {
     // Check if the date is valid
     const commentDate = new Date(date);
-    
+
     // Check if the date is valid
     if (isNaN(commentDate.getTime())) {
-        return "Date unavailable"; // Return if the date is invalid
+      return "Date unavailable"; // Return if the date is invalid
     }
-    
+
     const now = new Date();
     const diffInDays = Math.floor((now - commentDate) / (1000 * 60 * 60 * 24));
 
     if (diffInDays < 30) {
-        return formatDistanceToNow(commentDate, { addSuffix: true });
+      return formatDistanceToNow(commentDate, { addSuffix: true });
     } else {
-        return format(commentDate, 'MMM d, yyyy');
+      return format(commentDate, 'MMM d, yyyy');
     }
-};
+  };
 
   const handleRateItinerary = async () => {
     try {
@@ -654,7 +704,7 @@ const ItineraryDetail = () => {
             {tourGuideProfile && (
               <TourguideProfileCard profile={tourGuideProfile} />
             )}
-            {userRole !== "admin" && hasAttendedTourGuide && hasAttendedItinerary &&(
+            {userRole === "tourist" && hasAttendedTourGuide && hasAttendedItinerary && (
               <>
                 <Card className="mt-4">
                   <CardHeader>
@@ -675,15 +725,48 @@ const ItineraryDetail = () => {
               </>
 
             )}
-            {userRole === "admin" &&  (
+            {userRole === "admin" && (
               <>
-                <Button
-                  className="w-4/5 mx-auto bg-red-500 hover:bg-red-600 text-white mt-2"
-                  onClick={() => alert("Flagged as Inappropriate")}
-                >
-                  Flag as Inappropriate
-                </Button>
-              </>
+              <Button
+                className={`w-4/5 mx-auto mt-2 text-white ${
+                  isAppropriate
+                    ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                    : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                }`}
+                onClick={handleOpenDialog}
+              >
+                {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
+              </Button>
+        
+              {dialogOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                  <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                    <div className="mb-4">
+                      <h2 className="text-lg font-semibold">Confirm Action</h2>
+                      <p className="text-gray-600 mt-2">
+                        Are you sure you want to change the status of this itinerary/event?
+                      </p>
+                    </div>
+                    <div className="flex justify-end space-x-4">
+                      <Button
+                        variant="outlined"
+                        onClick={handleCloseDialog}
+                        className="border-gray-300"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        color="secondary"
+                        onClick={handleConfirmFlag}
+                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                      >
+                        Confirm
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
 
             )}
 
@@ -744,7 +827,7 @@ const ItineraryDetail = () => {
             <p>No comments yet.</p>
           )}
 
-          {userRole !== "admin" && hasAttendedItinerary && hasAttendedTourGuide &&(
+          {userRole !== "admin" && hasAttendedItinerary && hasAttendedTourGuide && (
             <>
               <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
                 Add a Review
