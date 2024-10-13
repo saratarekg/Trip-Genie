@@ -27,11 +27,28 @@ const addComplaint = async (req, res) => {
 
   const getAllComplaints = async (req, res) => {
     try {
-      // Fetch all complaints from the database and populate the 'tourist' field
-      const complaints = await Complaint.find().populate('tourist');
       
-      // Return all complaints with populated tourist data
-      res.status(200).json(complaints);
+      const {status,asc} = req.query;
+      asc = parseInt(asc);
+      let complaints = []; 
+      if (status) {
+        // Fetch all complaints with the specified status
+         complaints =  Complaint.find({ status }).populate('tourist');
+      }
+      else{
+        complaints =  Complaint.find().populate('tourist');
+      }
+      if(asc){
+        complaints = await complaints.sort({createdAt: asc});
+      }else{
+        complaints = await complaints.sort({createdAt: -1});
+      }
+      return res.status(200).json(complaints);
+      
+      // Fetch all complaints from the database and populate the 'tourist' field
+     
+      
+      
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
