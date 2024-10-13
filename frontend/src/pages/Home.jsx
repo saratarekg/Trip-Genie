@@ -5,6 +5,7 @@ import { Activities } from "../components/ActivitiesSlider.jsx";
 import { ItineraryCards } from "../components/ItineraryCards.jsx";
 import Cookies from "js-cookie";
 import { ProductViewer } from "../components/ProductView.jsx";
+import TravelPreferences from "@/components/TouristPreferences.jsx";
 
 const Home = () => {
   let role = Cookies.get("role");
@@ -26,6 +27,7 @@ const Home = () => {
 
       {role === "tourist" && (
          <>
+         {/* <TravelPreferences /> */}
          <HistoricalPlaces />
          <Activities />
          <ItineraryCards />

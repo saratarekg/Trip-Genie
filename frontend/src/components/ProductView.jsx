@@ -86,7 +86,7 @@ export function ProductViewer() {
       <div className="w-full md:w-2/3 grid grid-cols-2 md:grid-cols-4 gap-4">
         {products.map((product) => (
           <div 
-            key={product.id} 
+            key={product._id} 
             className="relative overflow-hidden rounded-lg cursor-pointer group h-72" 
             onClick={() => handleProductClick(product._id)}
           >
