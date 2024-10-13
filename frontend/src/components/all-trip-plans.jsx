@@ -140,10 +140,7 @@ export function AllItinerariesComponent() {
     return role;
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetchItineraries();
-  }, []);
+
 
   const handleItinerarySelect = (id) => {
     setIsLoading(true); // Start the loader
@@ -151,58 +148,39 @@ export function AllItinerariesComponent() {
       setIsLoading(false); // End the loader after navigation is complete
     });
   };
-  useEffect(() => {
-    const fetchLanguages = async () => {
-      setIsLoading(true);
-      console.log("Fetching Languages");
-      try {
-        const response = await axios.get(
-          "http://localhost:4000/api/getAllLanguages"
-        );
-        console.log("Languages:", response.data);
-        setLanguagesOptions(response.data);
-      } catch (error) {
-        console.error("Error fetching Languages:", error);
-      }
-    };
-    fetchLanguages();
-    setIsLoading(false);
-  }, []);
 
   useEffect(() => {
-    setIsLoading(true);
-    // Fetch types from the backend
-    const fetchType = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:4000/api/getAllTypes"
-        );
-        setTypesOptions(response.data);
+        setIsLoading(true);
+        const [typesResponse, languagesResponse] = await Promise.all([
+          axios.get("http://localhost:4000/api/getAllTypes"),
+          axios.get("http://localhost:4000/api/getAllLanguages")
+        ]);
+        setTypesOptions(typesResponse.data);
+        setLanguagesOptions(languagesResponse.data);
       } catch (error) {
-        console.error("Error fetching Type:", error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchType();
-    setIsLoading(false);
+  
+    fetchData();
   }, []);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchTerm) {
-        searchItineraries();
+        searchItineraries();  // Only search if a term is provided
       } else {
-        fetchItineraries();
+        fetchItineraries();  // Fetch all itineraries if search is empty
       }
     }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
+  
+    return () => clearTimeout(delayDebounceFn);  // Clean up the timeout
   }, [searchTerm]);
-
-  useEffect(() => {
-    if (sortBy) {
-      searchItineraries();
-    }
-  }, [sortBy, sortOrder]);
+  
 
   useEffect(() => {
     searchItineraries();
@@ -215,6 +193,12 @@ export function AllItinerariesComponent() {
     setSortBy(attribute);
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (sortBy || currentPage || sortOrder) {
+      searchItineraries();
+    }
+  }, [sortBy, sortOrder]);
 
   useEffect(() => {
     scrollToTop();

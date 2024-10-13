@@ -66,6 +66,36 @@ const touristSchema = new Schema(
       type: String,
       enum: ["Bronze", "Silver", "Gold"],
     },
+    preference: {
+      budget: {
+        type: Number,
+        default: Infinity, // Default value set to Infinity
+      },
+      price: {
+        type: Number,
+        default: Infinity, // Default value set to Infinity
+      },
+      categories: {
+        type: [String],
+        default: [], // Default to an empty array for categories
+      },
+      tourLanguages: {
+        type: [String],
+        default: [], // Default to an empty array for tour languages
+      },
+      tourType: {
+        type: [String],
+        default: [], // Default to an empty array for tour types
+      },
+      historicalPlaceType: {
+        type: [String],
+        default: [], // Default to an empty array for historical place types
+      },
+      historicalPlacePeriod: {
+        type: [String],
+        default: [], // Default to an empty array for historical place periods
+      },
+    },
   },
   { timestamps: true }
 );

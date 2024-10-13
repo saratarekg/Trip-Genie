@@ -12,6 +12,7 @@ const complaintsController = require("../controllers/complaintsController.js");
 const router = express.Router();
 
 router.put("/", touristController.updateTouristProfile);
+router.put("/preferences", touristController.updatePreferences);
 router.post("/loyalty", touristController.updateLoyaltyPointsAndBadge);
 router.get("/", touristController.getTouristProfile);
 
