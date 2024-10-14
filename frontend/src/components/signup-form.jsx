@@ -102,11 +102,6 @@ const formSchema = z
     website: z.string().trim().optional(),
     hotline: z.string().trim().optional(),
     logoUrl: z.string().trim().optional(),
-    sellerType: z
-      .enum(["VTP", "External Seller"], {
-        required_error: "Please select a seller type.",
-      })
-      .optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -183,14 +178,6 @@ const formSchema = z
         });
       }
     }
-    if (data.userType === "seller") {
-      if (!data.sellerType) {
-        ctx.addIssue({
-          path: ["sellerType"],
-          message: "Seller type is required.",
-        });
-      }
-    }
     if (data.userType === "advertiser" || data.userType === "seller") {
       if (!data.name) {
         ctx.addIssue({
@@ -250,7 +237,6 @@ export function SignupForm() {
     website: useRef(null),
     hotline: useRef(null),
     logoUrl: useRef(null),
-    sellerType: useRef(null),
   };
 
   const form = useForm({
@@ -739,36 +725,6 @@ export function SignupForm() {
                 />
               </>
             )}
-            {userType === "seller" && (
-              <>
-                <FormField
-                  control={control}
-                  name="sellerType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Seller type*</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger ref={formRefs.sellerType}>
-                            <SelectValue placeholder="Please choose your seller type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="VTP">VTP</SelectItem>
-                          <SelectItem value="External Seller">
-                            External Seller
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
             {userType === "advertiser" && (
               <>
                 <FormField
@@ -847,32 +803,31 @@ export function SignupForm() {
       </div>
 
       <Dialog open={showSignupSuccess} onOpenChange={setShowSignupSuccess}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>
-        <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-        Successful Signup
-      </DialogTitle>
-      <DialogDescription>
-        Your account has been created successfully! Please log in.
-      </DialogDescription>
-    </DialogHeader>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Successful Signup
+            </DialogTitle>
+            <DialogDescription>
+              Your account has been created successfully! Please log in.
+            </DialogDescription>
+          </DialogHeader>
 
-    <DialogFooter className="flex justify-center items-center w-full">
-      {/* Adding a div around the button to provide margin */}
-      <div className="flex justify-center w-full">
-        <Button
-          className="bg-orange-500 mr-4" // Add margin-right here
-          variant="default"
-          onClick={() => navigate("/login")}
-        >
-          Login
-        </Button>
-      </div>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
+          <DialogFooter className="flex justify-center items-center w-full">
+            {/* Adding a div around the button to provide margin */}
+            <div className="flex justify-center w-full">
+              <Button
+                className="bg-orange-500 mr-4" // Add margin-right here
+                variant="default"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

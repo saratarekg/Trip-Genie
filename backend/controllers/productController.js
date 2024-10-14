@@ -58,10 +58,6 @@ const addProduct = async (req, res) => {
     req.body; // Extract the data from request
 
   try {
-    // Use the sellerType from the Seller document
-    //   const sellerType = seller.seller;
-
-    // Create the product with the fetched sellerType
     const product = new Product({
       name,
       picture,
@@ -84,10 +80,6 @@ const addProductByAdmin = async (req, res) => {
     req.body; // Extract the data from request
 
   try {
-    // Use the sellerType from the Seller document
-    //   const sellerType = seller.seller;
-
-    // Create the product with the fetched sellerType
     const product = new Product({
       name,
       picture,

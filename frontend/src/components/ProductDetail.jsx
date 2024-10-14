@@ -115,11 +115,10 @@ const ProductDetail = () => {
 
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
-          if(data.seller===undefined){
+          if (data.seller === undefined) {
             setCanModify(true);
-          }
-          else{
-          setCanModify(decodedToken.id === data.seller._id);
+          } else {
+            setCanModify(decodedToken.id === data.seller._id);
           }
         }
       } catch (err) {
@@ -231,12 +230,16 @@ const ProductDetail = () => {
                         {product.sales > 0 ? (
                           <>
                             <CheckCircle className="w-6 h-6 mr-2 text-green-500" />
-                            <span className="text-lg font-semibold text-green-500">{product.sales} sold</span>
+                            <span className="text-lg font-semibold text-green-500">
+                              {product.sales} sold
+                            </span>
                           </>
                         ) : (
                           <>
                             <XCircle className="w-6 h-6 mr-2 text-red-500" />
-                            <span className="text-lg font-semibold text-red-500">No sales yet</span>
+                            <span className="text-lg font-semibold text-red-500">
+                              No sales yet
+                            </span>
                           </>
                         )}
                       </div>
@@ -244,9 +247,15 @@ const ProductDetail = () => {
                       <div className="flex items-center">
                         <Package className="w-6 h-6 mr-2 text-blue-500" />
                         <span
-                          className={`text-lg font-semibold ${product.quantity === 0 ? 'text-blue-500' : 'text-blue-500'}`}
+                          className={`text-lg font-semibold ${
+                            product.quantity === 0
+                              ? "text-blue-500"
+                              : "text-blue-500"
+                          }`}
                         >
-                          {product.quantity === 0 ? "All products sold" : `${product.quantity} still in stock`}
+                          {product.quantity === 0
+                            ? "All products sold"
+                            : `${product.quantity} still in stock`}
                         </span>
                       </div>
                     </>
@@ -289,45 +298,41 @@ const ProductDetail = () => {
           </div>
 
           <div>
-            {product.seller &&(
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-bold">
-                  Seller Profile
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-4 mb-4">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage src={product.seller.avatar} />
-                    <AvatarFallback>
-                      <User className="w-8 h-8" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h3 className="text-lg font-semibold">
-                      {product.seller.name}
-                    </h3>
-                    <Badge variant="secondary">Verified Seller</Badge>
+            {product.seller && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl font-bold">
+                    Seller Profile
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-4 mb-4">
+                    <Avatar className="w-16 h-16">
+                      <AvatarImage src={product.seller.avatar} />
+                      <AvatarFallback>
+                        <User className="w-8 h-8" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="text-lg font-semibold">
+                        {product.seller.name}
+                      </h3>
+                      <Badge variant="secondary">Verified Seller</Badge>
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <Mail className="w-5 h-5 mr-2 text-gray-500" />
-                    <span>{product.seller.email}</span>
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <Mail className="w-5 h-5 mr-2 text-gray-500" />
+                      <span>{product.seller.email}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Phone className="w-5 h-5 mr-2 text-gray-500" />
+                      <span>{product.seller.mobile}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <Phone className="w-5 h-5 mr-2 text-gray-500" />
-                    <span>{product.seller.mobile}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Award className="w-5 h-5 mr-2 text-gray-500" />
-                    <span>{product.seller.sellerType} Seller</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-)}
+                </CardContent>
+              </Card>
+            )}
 
             <div className="mt-8 space-y-4">
               {(userRole === "admin" ||
@@ -340,7 +345,7 @@ const ProductDetail = () => {
                   <Edit className="w-4 h-4 mr-2" /> Update Product
                 </Button>
               )}
-             {(userRole === "admin" ||
+              {(userRole === "admin" ||
                 (userRole === "seller" && canModify)) && (
                 <Button
                   className="w-full"

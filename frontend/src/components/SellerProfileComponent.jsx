@@ -340,11 +340,6 @@ export function SellerProfileComponent() {
             </div>
           </div> */}
 
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-500" />
-            <span>{seller.sellerType}</span>
-          </div>
-
           <div>
             <span
               className={`px-2 py-1 rounded-full text-xs font-semibold ${
