@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
  * @returns {import('zod').ZodObject}
  */
 const createFormSchema = () => z.object({
-  title: z.string().min(1, 'Please enter a name'),
+  title: z.string().min(1, 'Please enter a title'),
   body: z.string().min(1, 'Please enter a description')
 });
 
