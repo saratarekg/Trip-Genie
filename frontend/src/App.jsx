@@ -30,6 +30,10 @@ import CreateHpPage from "./pages/CreateHpPage.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
+// import {Cart} from "./pages/AccountTourist.jsx";
+// import {RedeemPoints} from "./pages/AccountTourist.jsx";
+// import {AccountInfo} from "./pages/AccountTourist.jsx";
+ import AccountTourist from "./pages/AccountTourist.jsx";
 
 import UpdateActivity from "./components/UpdateActivity.jsx";
 import CreateActivity from "./pages/CreateActivity.jsx";
@@ -112,6 +116,16 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+           <Route
+            path="/account/*"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <AccountTourist />
+              </ProtectedRoute>
+            }
+          />
+
+
           <Route
             path="/create-activity"
             element={
