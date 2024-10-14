@@ -60,7 +60,8 @@ const updateAdvertiser = async (req, res) => {
       });
     }
 
-    const { email, username, name, description, hotline, website } = req.body;
+    const { email, username, name, description, hotline, website, logo } =
+      req.body;
     if (username !== advertiser1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
     }
@@ -69,7 +70,7 @@ const updateAdvertiser = async (req, res) => {
     }
     const advertiser = await Advertiser.findByIdAndUpdate(
       res.locals.user_id,
-      { email, username, name, description, hotline, website },
+      { email, username, name, description, hotline, website, logo },
       { new: true, runValidators: true }
     );
 

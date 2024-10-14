@@ -101,7 +101,6 @@ const formSchema = z
     description: z.string().trim().optional(),
     website: z.string().trim().optional(),
     hotline: z.string().trim().optional(),
-    logoUrl: z.string().trim().optional(),
   })
   .superRefine((data, ctx) => {
     if (
@@ -178,7 +177,11 @@ const formSchema = z
         });
       }
     }
-    if (data.userType === "advertiser" || data.userType === "seller") {
+    if (
+      data.userType === "advertiser" ||
+      data.userType === "seller" ||
+      data.userType === "tour-guide"
+    ) {
       if (!data.name) {
         ctx.addIssue({
           path: ["name"],
@@ -236,7 +239,6 @@ export function SignupForm() {
     description: useRef(null),
     website: useRef(null),
     hotline: useRef(null),
-    logoUrl: useRef(null),
   };
 
   const form = useForm({
@@ -568,6 +570,29 @@ export function SignupForm() {
                 />
               </>
             )}
+            {(userType === "seller" ||
+              userType === "advertiser" ||
+              userType === "tour-guide") && (
+              <>
+                <FormField
+                  control={control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name*</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Name"
+                          {...field}
+                          ref={formRefs.name}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             {userType === "tour-guide" && (
               <>
                 <FormField
@@ -691,23 +716,6 @@ export function SignupForm() {
               <>
                 <FormField
                   control={control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name*</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Name"
-                          {...field}
-                          ref={formRefs.name}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
@@ -755,23 +763,6 @@ export function SignupForm() {
                           placeholder="Hotline"
                           {...field}
                           ref={formRefs.hotline}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="logoUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Logo URL</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Logo URL"
-                          {...field}
-                          ref={formRefs.logoUrl}
                         />
                       </FormControl>
                       <FormMessage />

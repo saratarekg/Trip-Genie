@@ -2,13 +2,20 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow, format } from "date-fns";
 import Map from "../components/Map";
 import Loader from "../components/Loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -38,7 +45,7 @@ import {
   Send,
   Tag,
   Smile,
-  Frown
+  Frown,
 } from "lucide-react";
 
 const ImageGallery = ({ pictures }) => {
@@ -91,7 +98,11 @@ const ImageGallery = ({ pictures }) => {
         </div>
       </div>
       <div className="w-4/5">
-        <img src={mainImage} alt="Main activity image" className="w-full h-auto object-cover rounded-lg" />
+        <img
+          src={mainImage}
+          alt="Main activity image"
+          className="w-full h-auto object-cover rounded-lg"
+        />
       </div>
     </div>
   );
@@ -103,11 +114,11 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? '' : 'cursor-pointer'} ${
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
             star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
           }`}
           onClick={() => !readOnly && setRating(star)}
-          aria-label={`${star} star${star !== 1 ? 's' : ''}`}
+          aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
       ))}
     </div>
@@ -134,7 +145,13 @@ const ActivityDetail = () => {
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
   const [showFullComment, setShowFullComment] = useState(false);
   const [showAddReview, setShowAddReview] = useState(false);
-  const [newReview, setNewReview] = useState({ rating: 0, liked: '', disliked: '', visitDate: '', isAnonymous: false });
+  const [newReview, setNewReview] = useState({
+    rating: 0,
+    liked: "",
+    disliked: "",
+    visitDate: "",
+    isAnonymous: false,
+  });
 
   const navigate = useNavigate();
 
@@ -175,7 +192,9 @@ const ActivityDetail = () => {
           setCurrentUser(decodedToken.id);
 
           if (data.attended && Array.isArray(data.attended)) {
-            setHasAttended(data.attended.some(tourist => tourist._id === decodedToken.id));
+            setHasAttended(
+              data.attended.some((tourist) => tourist._id === decodedToken.id)
+            );
           }
         }
       } catch (err) {
@@ -228,33 +247,36 @@ const ActivityDetail = () => {
   };
 
   const calculateDiscountedPrice = (originalPrice, discountPercentage) => {
-    return (originalPrice * (100 - discountPercentage) / 100).toFixed(2);
+    return ((originalPrice * (100 - discountPercentage)) / 100).toFixed(2);
   };
 
   const handleAddComment = (newComment) => {
-    setActivity(prevActivity => ({
+    setActivity((prevActivity) => ({
       ...prevActivity,
-      comments: [...(prevActivity.comments || []), newComment]
+      comments: [...(prevActivity.comments || []), newComment],
     }));
   };
 
   const handleActivityRating = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/${userRole}/activities/rate/${id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Cookies.get('jwt')}`,
-        },
-        body: JSON.stringify({ rating: activityRating }),
-      });
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/activities/rate/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Cookies.get("jwt")}`,
+          },
+          body: JSON.stringify({ rating: activityRating }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to submit activity rating');
+        throw new Error("Failed to submit activity rating");
       }
 
       const data = await response.json();
-      setActivity(prevActivity => ({
+      setActivity((prevActivity) => ({
         ...prevActivity,
         rating: data.newRating,
       }));
@@ -267,8 +289,12 @@ const ActivityDetail = () => {
   };
 
   // Comment Carousel Functions
-  const handlePrevComment = () => setCurrentCommentIndex((prev) => Math.max(0, prev - 3));
-  const handleNextComment = () => setCurrentCommentIndex((prev) => Math.min(activity.comments.length - 3, prev + 3));
+  const handlePrevComment = () =>
+    setCurrentCommentIndex((prev) => Math.max(0, prev - 3));
+  const handleNextComment = () =>
+    setCurrentCommentIndex((prev) =>
+      Math.min(activity.comments.length - 3, prev + 3)
+    );
 
   const handleAddReview = async () => {
     try {
@@ -280,60 +306,65 @@ const ActivityDetail = () => {
         rating: newReview.rating,
         content: {
           liked: newReview.liked,
-          disliked: newReview.disliked
+          disliked: newReview.disliked,
         },
         date: new Date(),
       };
-    
 
-      const response = await fetch(`http://localhost:4000/${userRole}/activities/comment/${id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(newComment),
-      });
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/activities/comment/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newComment),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to submit comment');
+        throw new Error("Failed to submit comment");
       }
 
       const data = await response.json();
-      
+
       setShowAddReview(false);
       window.location.reload();
-      setNewReview({ rating: 0, liked: '', disliked: '', visitDate: '', isAnonymous: false });
+      setNewReview({
+        rating: 0,
+        liked: "",
+        disliked: "",
+        visitDate: "",
+        isAnonymous: false,
+      });
     } catch (error) {
       console.error("Error submitting review:", error);
     }
   };
 
   const isReviewValid = () => {
-    return newReview.liked.trim() !== '' || newReview.disliked.trim() !== '';
+    return newReview.liked.trim() !== "" || newReview.disliked.trim() !== "";
   };
-
-  
 
   const formatCommentDate = (date) => {
     // Check if the date is valid
     const commentDate = new Date(date);
-    
+
     // Check if the date is valid
     if (isNaN(commentDate.getTime())) {
-        return "Date unavailable"; // Return if the date is invalid
+      return "Date unavailable"; // Return if the date is invalid
     }
-    
+
     const now = new Date();
     const diffInDays = Math.floor((now - commentDate) / (1000 * 60 * 60 * 24));
 
     if (diffInDays < 30) {
-        return formatDistanceToNow(commentDate, { addSuffix: true });
+      return formatDistanceToNow(commentDate, { addSuffix: true });
     } else {
-        return format(commentDate, 'MMM d, yyyy');
+      return format(commentDate, "MMM d, yyyy");
     }
-};
-
+  };
 
   if (loading) {
     return <Loader />;
@@ -354,16 +385,20 @@ const ActivityDetail = () => {
   }
 
   if (!activity) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <p className="text-xl font-semibold">No activity found.</p>
-    </div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl font-semibold">No activity found.</p>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">{activity.name}</h1>
+          <h1 className="text-4xl md:text-6xl font-bold mb-4">
+            {activity.name}
+          </h1>
         </div>
       </div>
 
@@ -371,35 +406,34 @@ const ActivityDetail = () => {
         <div className="p-6">
           <div className="flex flex-col md:flex-row gap-8">
             <div className="flex-[2] bg-white shadow-md rounded-lg p-8 flex flex-col justify-center h-full">
-              
               <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-4xl font-bold">{activity.name}</h1>
                 <div className="flex items-center">
-  {/* Rating Badge */}
-  <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-    <Star className="w-8 h-8 text-yellow-500 mr-2" />
-    <span className="text-2xl font-semibold">
-      {activity.rating ? activity.rating.toFixed(1) : "N/A"}
-    </span>
-  </div>
+                  {/* Rating Badge */}
+                  <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                    <Star className="w-8 h-8 text-yellow-500 mr-2" />
+                    <span className="text-2xl font-semibold">
+                      {activity.rating ? activity.rating.toFixed(1) : "N/A"}
+                    </span>
+                  </div>
 
-  {/* Rating Count outside the badge */}
-  <span className="text-sm font-normal ml-2">
-    {activity.allRatings ? `(${activity.allRatings.length})` : "(0)"}
-  </span>
-</div>
-
-
-               
+                  {/* Rating Count outside the badge */}
+                  <span className="text-sm font-normal ml-2">
+                    {activity.allRatings
+                      ? `(${activity.allRatings.length})`
+                      : "(0)"}
+                  </span>
+                </div>
               </div>
 
               <div className="flex gap-8">
-                <div className="flex-1 space-y-4">
-                </div>
+                <div className="flex-1 space-y-4"></div>
                 <div className="lg:w-2/3">
                   <ImageGallery pictures={activity.pictures} />
                   <div className="h-6"></div>
-                  <p className="text-lg text-gray-600 mb-6">{activity.description}</p>
+                  <p className="text-lg text-gray-600 mb-6">
+                    {activity.description}
+                  </p>
                 </div>
 
                 <div className="lg:w-1/3 space-y-6">
@@ -412,7 +446,11 @@ const ActivityDetail = () => {
                         <div className="flex flex-col items-start">
                           <div className="flex items-baseline">
                             <span className="text-4xl font-bold text-gray-900">
-                              ${calculateDiscountedPrice(activity.price, activity.specialDiscount)}
+                              $
+                              {calculateDiscountedPrice(
+                                activity.price,
+                                activity.specialDiscount
+                              )}
                             </span>
                             <span className="ml-3  text-xl font-semibold text-red-600">
                               -{activity.specialDiscount}% Discount
@@ -442,7 +480,8 @@ const ActivityDetail = () => {
                     <div className="flex items-center">
                       <Clock className="w-5 h-5 mr-2 text-orange-500" />
                       <span className="text-gray-700">
-                        Time: {new Date(activity.timing).toLocaleTimeString([], {
+                        Time:{" "}
+                        {new Date(activity.timing).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
@@ -467,7 +506,10 @@ const ActivityDetail = () => {
               <div className="flex-1 bg-white shadow-md rounded-lg p-4">
                 <div className="flex items-center mb-6">
                   <Avatar className="w-12 h-12 mr-2">
-                    <AvatarImage src={advertiserProfile.logoUrl} alt={advertiserProfile.username} />
+                    <AvatarImage
+                      src={advertiserProfile.logo}
+                      alt={advertiserProfile.username}
+                    />
                     <AvatarFallback>
                       <User className="w-8 h-8" />
                     </AvatarFallback>
@@ -480,7 +522,9 @@ const ActivityDetail = () => {
                     <User className="w-6 h-6 mr-2 text-orange-500" />
                     <span className="text-gray-700">
                       Advertiser:{" "}
-                      {advertiserProfile ? advertiserProfile.username : "Loading..."}
+                      {advertiserProfile
+                        ? advertiserProfile.username
+                        : "Loading..."}
                     </span>
                   </div>
 
@@ -488,7 +532,9 @@ const ActivityDetail = () => {
                     <Mail className="w-6 h-6 mr-2 text-orange-500" />
                     <span className="text-gray-700">
                       Email:{" "}
-                      {advertiserProfile ? advertiserProfile.email : "Loading..."}
+                      {advertiserProfile
+                        ? advertiserProfile.email
+                        : "Loading..."}
                     </span>
                   </div>
 
@@ -496,7 +542,9 @@ const ActivityDetail = () => {
                     <Phone className="w-6 h-6 mr-2 text-orange-500" />
                     <span className="text-gray-700">
                       Hotline:{" "}
-                      {advertiserProfile ? advertiserProfile.hotline : "Loading..."}
+                      {advertiserProfile
+                        ? advertiserProfile.hotline
+                        : "Loading..."}
                     </span>
                   </div>
                 </div>
@@ -537,7 +585,9 @@ const ActivityDetail = () => {
                           </span>
                         ))
                       ) : (
-                        <span className="text-gray-500 italic">No tags available</span>
+                        <span className="text-gray-500 italic">
+                          No tags available
+                        </span>
                       )}
                     </div>
                   </div>
@@ -552,54 +602,75 @@ const ActivityDetail = () => {
             {activity.comments && activity.comments.length > 0 ? (
               <>
                 <div className="flex items-center justify-between mb-4">
-                  <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
+                  <Button
+                    onClick={handlePrevComment}
+                    variant="ghost"
+                    disabled={currentCommentIndex === 0}
+                  >
                     <ChevronLeft />
                   </Button>
                   <div className="flex-1 flex justify-between px-4">
-                    {activity.comments.slice(currentCommentIndex, currentCommentIndex + 3).map((comment, index) => (
-                      <Card key={index} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
-                      <CardHeader className="flex items-start">
-                        <div className="flex">
-                          {/* User icon with larger first letter */}
-                          <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
-                            {comment.username.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="flex flex-col">
-                            {/* Larger Username */}
-                            <CardTitle className="text-xl font-semibold">{comment.username}</CardTitle>
-                            {/* Date under the username */}
-                            <p className="text-sm text-gray-500">{formatCommentDate(comment.date)}</p>
-                          </div>
-                        </div>
-                        {/* Star Rating below username and date */}
-                        <div className="mt-2">
-                          <StarRating rating={comment.rating} readOnly={true} />
-                        </div>
-                      </CardHeader>
-                    
-                      <CardContent>
-                        {/* Liked content */}
-                        <p className="text-gray-700 line-clamp-3">{comment.content.liked || comment.content.disliked || "No comment provided"}</p>
-                        {/* View more link */}
-                        <a
-                          href="#"
-                          className="text-blue-500 hover:underline mt-2 inline-block"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setShowFullComment(comment);
-                          }}
+                    {activity.comments
+                      .slice(currentCommentIndex, currentCommentIndex + 3)
+                      .map((comment, index) => (
+                        <Card
+                          key={index}
+                          className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
                         >
-                          View more
-                        </a>
-                      </CardContent>
-                    </Card>
-                    
-                    ))}
+                          <CardHeader className="flex items-start">
+                            <div className="flex">
+                              {/* User icon with larger first letter */}
+                              <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+                                {comment.username.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                {/* Larger Username */}
+                                <CardTitle className="text-xl font-semibold">
+                                  {comment.username}
+                                </CardTitle>
+                                {/* Date under the username */}
+                                <p className="text-sm text-gray-500">
+                                  {formatCommentDate(comment.date)}
+                                </p>
+                              </div>
+                            </div>
+                            {/* Star Rating below username and date */}
+                            <div className="mt-2">
+                              <StarRating
+                                rating={comment.rating}
+                                readOnly={true}
+                              />
+                            </div>
+                          </CardHeader>
+
+                          <CardContent>
+                            {/* Liked content */}
+                            <p className="text-gray-700 line-clamp-3">
+                              {comment.content.liked ||
+                                comment.content.disliked ||
+                                "No comment provided"}
+                            </p>
+                            {/* View more link */}
+                            <a
+                              href="#"
+                              className="text-blue-500 hover:underline mt-2 inline-block"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowFullComment(comment);
+                              }}
+                            >
+                              View more
+                            </a>
+                          </CardContent>
+                        </Card>
+                      ))}
                   </div>
                   <Button
                     onClick={handleNextComment}
                     variant="ghost"
-                    disabled={currentCommentIndex >= activity.comments.length - 3}
+                    disabled={
+                      currentCommentIndex >= activity.comments.length - 3
+                    }
                   >
                     <ChevronRight />
                   </Button>
@@ -608,18 +679,20 @@ const ActivityDetail = () => {
             ) : (
               <p>No comments yet.</p>
             )}
-          {hasAttended && (
-  <>
-    <Button onClick={() => setShowAddReview(true)} className="mt-4">
-      Write a review
-    </Button>
-    <Button onClick={() => setShowRatingDialog(true)} className="mt-2 ml-3">
-      Rate Activity
-    </Button>
-  </>
-)}
+            {hasAttended && (
+              <>
+                <Button onClick={() => setShowAddReview(true)} className="mt-4">
+                  Write a review
+                </Button>
+                <Button
+                  onClick={() => setShowRatingDialog(true)}
+                  className="mt-2 ml-3"
+                >
+                  Rate Activity
+                </Button>
+              </>
+            )}
           </div>
-
         </div>
 
         <div className="p-6 border-t border-gray-200">
@@ -642,7 +715,10 @@ const ActivityDetail = () => {
       </div>
 
       {/* Full Comment Dialog */}
-      <Dialog open={!!showFullComment} onOpenChange={() => setShowFullComment(null)}>
+      <Dialog
+        open={!!showFullComment}
+        onOpenChange={() => setShowFullComment(null)}
+      >
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>{showFullComment?.username}'s Review</DialogTitle>
@@ -667,7 +743,9 @@ const ActivityDetail = () => {
                   <Frown className="w-5 h-5 mr-2 text-red-500" />
                   Disliked:
                 </h4>
-                <p>{showFullComment?.content?.disliked || "Nothing mentioned"}</p>
+                <p>
+                  {showFullComment?.content?.disliked || "Nothing mentioned"}
+                </p>
               </div>
             </div>
           </ScrollArea>
@@ -676,83 +754,122 @@ const ActivityDetail = () => {
 
       {/* Add Review Dialog */}
       <Dialog open={showAddReview} onOpenChange={setShowAddReview}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Write a Review</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Your Rating</label>
-            <StarRating rating={newReview.rating} setRating={(rating) => setNewReview(prev => ({ ...prev, rating }))} />
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Write a Review</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Your Rating
+              </label>
+              <StarRating
+                rating={newReview.rating}
+                setRating={(rating) =>
+                  setNewReview((prev) => ({ ...prev, rating }))
+                }
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="liked"
+                className="block text-sm font-medium text-gray-700"
+              >
+                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                Something you liked
+              </label>
+              <Textarea
+                id="liked"
+                value={newReview.liked}
+                onChange={(e) =>
+                  setNewReview((prev) => ({ ...prev, liked: e.target.value }))
+                }
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="disliked"
+                className="block text-sm font-medium text-gray-700"
+              >
+                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                Something you didn't like
+              </label>
+              <Textarea
+                id="disliked"
+                value={newReview.disliked}
+                onChange={(e) =>
+                  setNewReview((prev) => ({
+                    ...prev,
+                    disliked: e.target.value,
+                  }))
+                }
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="visitDate"
+                className="block text-sm font-medium text-gray-700"
+              >
+                When did you visit?
+              </label>
+              <select
+                id="visitDate"
+                value={newReview.visitDate}
+                onChange={(e) =>
+                  setNewReview((prev) => ({
+                    ...prev,
+                    visitDate: e.target.value,
+                  }))
+                }
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              >
+                <option value="">Select a time</option>
+                <option value="weekday">Weekday</option>
+                <option value="weekend">Weekend</option>
+                <option value="holiday">Public holiday</option>
+              </select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="anonymous-mode"
+                checked={newReview.isAnonymous}
+                onCheckedChange={(checked) =>
+                  setNewReview((prev) => ({ ...prev, isAnonymous: checked }))
+                }
+              />
+              <Label htmlFor="anonymous-mode">Post anonymously</Label>
+            </div>
           </div>
-          <div>
-            <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
-              <Smile className="w-5 h-5 inline mr-2 text-green-500" />
-              Something you liked
-            </label>
-            <Textarea
-              id="liked"
-              value={newReview.liked}
-              onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
-              rows={3}
-              className="mt-2"
-            />
-          </div>
-          <div>
-            <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
-              <Frown className="w-5 h-5 inline mr-2 text-red-500" />
-              Something you didn't like
-            </label>
-            <Textarea
-              id="disliked"
-              value={newReview.disliked}
-              onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
-              rows={3}
-              className="mt-2"
-            />
-          </div>
-          <div>
-            <label htmlFor="visitDate" className="block text-sm font-medium text-gray-700">When did you visit?</label>
-            <select
-              id="visitDate"
-              value={newReview.visitDate}
-              onChange={(e) => setNewReview(prev => ({ ...prev, visitDate: e.target.value }))}
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setShowAddReview(false);
+                setNewReview({
+                  rating: 0,
+                  liked: "",
+                  disliked: "",
+                  visitDate: "",
+                  isAnonymous: false,
+                });
+              }}
+              style={{
+                marginLeft: "10px",
+                backgroundColor: "#D3D3D3",
+                color: "black",
+              }}
             >
-              <option value="">Select a time</option>
-              <option value="weekday">Weekday</option>
-              <option value="weekend">Weekend</option>
-              <option value="holiday">Public holiday</option>
-            </select>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="anonymous-mode"
-              checked={newReview.isAnonymous}
-              onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
-            />
-            <Label htmlFor="anonymous-mode">Post anonymously</Label>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button 
-            onClick={() =>{ setShowAddReview(false)
-              setNewReview({
-                rating: 0,
-                liked: "",
-                disliked: "",
-                visitDate: '',
-                isAnonymous: false
-              })
-            }}
-            style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleAddReview} disabled={!isReviewValid()}>Post Review</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+              Cancel
+            </Button>
+            <Button onClick={handleAddReview} disabled={!isReviewValid()}>
+              Post Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Rate Activity Dialog */}
       <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
@@ -761,7 +878,9 @@ const ActivityDetail = () => {
             <DialogTitle>Rate this Activity</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+            <label className="block text-sm font-medium text-gray-700">
+              Your Rating
+            </label>
             <StarRating rating={activityRating} setRating={setActivityRating} />
           </div>
           <DialogFooter>
@@ -775,11 +894,15 @@ const ActivityDetail = () => {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this activity? This action cannot be undone.
+              Are you sure you want to delete this activity? This action cannot
+              be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(false)}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
@@ -809,5 +932,3 @@ const ActivityDetail = () => {
 };
 
 export default ActivityDetail;
-
-

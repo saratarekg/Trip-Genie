@@ -29,6 +29,11 @@ const tourGuideSchema = new Schema(
       trim: true,
       minlength: [3, "Username must be at least 3 characters long"],
     },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     nationality: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Nationality",
@@ -43,6 +48,11 @@ const tourGuideSchema = new Schema(
         /^\+\d{1,3}\d{7,15}$/,
         "Please enter a valid phone number with a country code and 7 to 15 digits.",
       ],
+    },
+    profilePicture: {
+      type: String,
+      default: null,
+      required: false,
     },
     yearsOfExperience: {
       type: Number,

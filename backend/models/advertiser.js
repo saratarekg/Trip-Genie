@@ -45,8 +45,9 @@ const advertiserSchema = new Schema(
       type: String,
       required: true,
     },
-    logoUrl: {
+    logo: {
       type: String,
+      default: null,
       required: false,
     },
     isAccepted: {

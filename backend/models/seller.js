@@ -43,6 +43,11 @@ const sellerSchema = new mongoose.Schema({
       "Please enter a valid phone number with a country code and 7 to 15 digits.",
     ],
   },
+  logo: {
+    type: String,
+    default: null,
+    required: false,
+  },
   isAccepted: {
     type: Boolean,
     default: false,
