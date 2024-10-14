@@ -11,7 +11,7 @@ import {
   Wallet,
   GraduationCap,
   Award,
-  Star
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
@@ -30,7 +30,7 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
-  const phoneNumber = parsePhoneNumberFromString("+" + value);
+  const phoneNumber = parsePhoneNumberFromString(value);
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
@@ -69,7 +69,9 @@ export function TouristProfileComponent() {
   useEffect(() => {
     const fetchNationalities = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/api/nationalities");
+        const response = await axios.get(
+          "http://localhost:4000/api/nationalities"
+        );
         setNationalities(response.data);
       } catch (error) {
         console.error("Error fetching nationalities:", error);
@@ -79,7 +81,8 @@ export function TouristProfileComponent() {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e && e.target ? e.target : { name: "mobile", value: e };
+    const { name, value } =
+      e && e.target ? e.target : { name: "mobile", value: e };
     setEditedTourist((prev) => ({ ...prev, [name]: value }));
     setValidationMessages((prev) => ({ ...prev, [name]: "" }));
   };
@@ -110,7 +113,8 @@ export function TouristProfileComponent() {
       messages.mobile = "Invalid phone number.";
     }
     if (!nationality) messages.nationality = "Nationality is required.";
-    if (!jobOrStudent) messages.jobOrStudent = "Job or student status is required.";
+    if (!jobOrStudent)
+      messages.jobOrStudent = "Job or student status is required.";
 
     setValidationMessages(messages);
     return Object.keys(messages).length === 0;
@@ -142,38 +146,54 @@ export function TouristProfileComponent() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen"><p className="text-lg font-semibold">Loading profile...</p></div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-lg font-semibold">Loading profile...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="flex justify-center items-center h-screen"><p className="text-lg font-semibold text-red-500">Error: {error}</p></div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-lg font-semibold text-red-500">Error: {error}</p>
+      </div>
+    );
   }
 
   if (!tourist) {
-    return <div className="flex justify-center items-center h-screen"><p className="text-lg font-semibold">No tourist profile information is available.</p></div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-lg font-semibold">
+          No tourist profile information is available.
+        </p>
+      </div>
+    );
   }
 
   const getBadgeColor = () => {
     switch (tourist.loyaltyBadge) {
-      case 'Bronze':
-        return 'bg-amber-600 text-white';
-      case 'Silver':
-        return 'bg-gray-400 text-white';
-      case 'Gold':
-        return 'bg-yellow-400 text-white';
+      case "Bronze":
+        return "bg-amber-600 text-white";
+      case "Silver":
+        return "bg-gray-400 text-white";
+      case "Gold":
+        return "bg-yellow-400 text-white";
       default:
-        return 'bg-gray-200 text-gray-800';
+        return "bg-gray-200 text-gray-800";
     }
   };
 
   return (
     <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden relative">
       <div className="absolute top-4 right-4 pt-6 pr-10">
-          <Badge className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}>
-            <Award className="w-6 h-6" />
-            {tourist.loyaltyBadge}
-          </Badge>
-        </div>
+        <Badge
+          className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}
+        >
+          <Award className="w-6 h-6" />
+          {tourist.loyaltyBadge}
+        </Badge>
+      </div>
 
       <div className="p-8">
         <div className="flex items-center gap-4 mb-6">
@@ -207,7 +227,9 @@ export function TouristProfileComponent() {
               )}
             </div>
             {validationMessages.email && (
-              <span className="text-red-500 text-sm">{validationMessages.email}</span>
+              <span className="text-red-500 text-sm">
+                {validationMessages.email}
+              </span>
             )}
           </div>
 
@@ -225,7 +247,11 @@ export function TouristProfileComponent() {
                       name: "mobile",
                       required: true,
                       placeholder: tourist.mobile,
-                      className: `w-full p-2 ${validationMessages.mobile ? "border-red-500" : "border-gray-300"}`,
+                      className: `w-full p-2 ${
+                        validationMessages.mobile
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`,
                     }}
                     containerClass="w-full"
                     inputStyle={{ width: "60%", marginLeft: "45px" }}
@@ -236,7 +262,9 @@ export function TouristProfileComponent() {
               )}
             </div>
             {validationMessages.mobile && (
-              <span className="text-red-500 text-sm">{validationMessages.mobile}</span>
+              <span className="text-red-500 text-sm">
+                {validationMessages.mobile}
+              </span>
             )}
           </div>
 
@@ -245,7 +273,11 @@ export function TouristProfileComponent() {
             {isEditing ? (
               <div className="flex flex-col w-full">
                 <Select onValueChange={handleNationalityChange}>
-                  <SelectTrigger className={validationMessages.nationality ? "border-red-500" : ""}>
+                  <SelectTrigger
+                    className={
+                      validationMessages.nationality ? "border-red-500" : ""
+                    }
+                  >
                     <SelectValue placeholder={tourist.nationality.name} />
                   </SelectTrigger>
                   <SelectContent>
@@ -257,11 +289,17 @@ export function TouristProfileComponent() {
                   </SelectContent>
                 </Select>
                 {validationMessages.nationality && (
-                  <span className="text-red-500 text-sm">{validationMessages.nationality}</span>
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.nationality}
+                  </span>
                 )}
               </div>
             ) : (
-              <span>{tourist.nationality ? tourist.nationality.name : "Nationality not set"}</span>
+              <span>
+                {tourist.nationality
+                  ? tourist.nationality.name
+                  : "Nationality not set"}
+              </span>
             )}
           </div>
 
@@ -276,9 +314,17 @@ export function TouristProfileComponent() {
               <div className="flex flex-col w-full">
                 <Select
                   name="jobOrStudent"
-                  onValueChange={(value) => handleInputChange({ target: { name: "jobOrStudent", value } })}
+                  onValueChange={(value) =>
+                    handleInputChange({
+                      target: { name: "jobOrStudent", value },
+                    })
+                  }
                 >
-                  <SelectTrigger className={validationMessages.jobOrStudent ? "border-red-500" : ""}>
+                  <SelectTrigger
+                    className={
+                      validationMessages.jobOrStudent ? "border-red-500" : ""
+                    }
+                  >
                     <SelectValue placeholder={tourist.jobOrStudent} />
                   </SelectTrigger>
                   <SelectContent>
@@ -289,7 +335,9 @@ export function TouristProfileComponent() {
                   </SelectContent>
                 </Select>
                 {validationMessages.jobOrStudent && (
-                  <span className="text-red-500 text-sm">{validationMessages.jobOrStudent}</span>
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.jobOrStudent}
+                  </span>
                 )}
               </div>
             ) : (
@@ -311,11 +359,17 @@ export function TouristProfileComponent() {
         <div className="mt-6">
           {isEditing ? (
             <div className="flex gap-2">
-              <Button onClick={handleUpdate} variant="default">Save Changes</Button>
-              <Button onClick={handleDiscard} variant="destructive">Discard Changes</Button>
+              <Button onClick={handleUpdate} variant="default">
+                Save Changes
+              </Button>
+              <Button onClick={handleDiscard} variant="destructive">
+                Discard Changes
+              </Button>
             </div>
           ) : (
-            <Button onClick={() => setIsEditing(true)} variant="default">Edit Profile</Button>
+            <Button onClick={() => setIsEditing(true)} variant="default">
+              Edit Profile
+            </Button>
           )}
         </div>
       </div>

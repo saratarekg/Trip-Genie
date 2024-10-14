@@ -2,8 +2,11 @@ const express = require("express");
 const router = express.Router();
 const sellerController = require("../controllers/sellerController");
 const productController = require("../controllers/productController");
+const multer = require("multer");
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage });
 
-router.put("/", sellerController.updateSeller);
+router.put("/", upload.single("logo"), sellerController.updateSeller);
 router.get("/", sellerController.getSeller);
 router.get("/seller/:id", sellerController.getSellerByID);
 

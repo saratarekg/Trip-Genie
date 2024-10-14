@@ -9,6 +9,9 @@ const {
   changePassword,
   getTourGuideByID,
 } = require("../controllers/tourGuideController"); // Import the controller functions
+const multer = require("multer");
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage });
 
 const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
@@ -16,7 +19,7 @@ const activityController = require("../controllers/activityController.js");
 // Route for getting a single tour guide by ID
 router.get("/", getTourGuideProfile);
 // Route for updating a tour guide by ID
-router.put("/", updateTourGuideProfile);
+router.put("/", upload.single("profilePicture"), updateTourGuideProfile);
 router.get("/tour-guide/:id", getTourGuideByID);
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.post("/itineraries", itineraryController.createItinerary);

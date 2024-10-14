@@ -268,7 +268,7 @@ const ProductDetail = () => {
             <Card className="mt-8">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold">
-                  Traveler's Experiences
+                  Travelers' Experiences
                 </CardTitle>
                 <CardDescription>
                   Here's some awesome feedback from our travelers

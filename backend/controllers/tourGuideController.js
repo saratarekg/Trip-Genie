@@ -34,6 +34,7 @@ const getTourGuideProfile = async (req, res) => {
 const updateTourGuide = async (req, res) => {
   try {
     const {
+      name,
       email,
       username,
       nationality,
@@ -47,6 +48,7 @@ const updateTourGuide = async (req, res) => {
     const tourGuide = await TourGuide.findByIdAndUpdate(
       id,
       {
+        name,
         email,
         username,
         nationality,
@@ -74,12 +76,14 @@ const updateTourGuideProfile = async (req, res) => {
     const tourGuide1 = await TourGuide.findById(res.locals.user_id);
 
     const {
+      name,
       email,
       username,
       nationality,
       mobile,
       yearsOfExperience,
       previousWorks,
+      profilePicture,
     } = req.body;
 
     const nat = await Nationality.findOne({ _id: nationality });
@@ -94,12 +98,14 @@ const updateTourGuideProfile = async (req, res) => {
     const tourGuide = await TourGuide.findByIdAndUpdate(
       res.locals.user_id,
       {
+        name,
         email,
         username,
         mobile,
         yearsOfExperience,
         nationality: nat._id,
         previousWorks,
+        profilePicture,
       },
       { new: true }
     )
@@ -190,13 +196,15 @@ const usernameExists = async (username) => {
 const addCommentToTourGuide = async (req, res) => {
   try {
     const { username, rating, content } = req.body;
-    
+
     if (rating === undefined) {
       rating = 0; // Default rating
     }
 
-    if ( rating < 0 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+    if (rating < 0 || rating > 5) {
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 0 and 5" });
     }
 
     const tourist = await Tourist.findById(res.locals.user_id);
@@ -211,14 +219,13 @@ const addCommentToTourGuide = async (req, res) => {
       finalUsername = "Anonymous"; // Use 'anonymous' as the username
     } else if (tourist.username) {
       finalUsername = tourist.username;
-       // Use the authenticated user's username
+      // Use the authenticated user's username
     } else {
       return res.status(400).json({ message: "Valid username is required" });
     }
-    
 
     const newComment = {
-      username : finalUsername,
+      username: finalUsername,
       rating,
       content,
       date: new Date(),

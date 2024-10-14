@@ -16,7 +16,7 @@ const updateSeller = async (req, res) => {
         .status(400)
         .json({ error: "Seller is not accepted yet, Can not update profile" });
     }
-    const { email, username, name, description, mobile } = req.body;
+    const { email, username, name, description, mobile, logo } = req.body;
 
     if (username !== seller1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
@@ -26,7 +26,7 @@ const updateSeller = async (req, res) => {
     }
     const seller = await Seller.findByIdAndUpdate(
       res.locals.user_id,
-      { email, username, name, description, mobile },
+      { email, username, name, description, mobile, logo },
       { new: true }
     );
 
@@ -36,7 +36,9 @@ const updateSeller = async (req, res) => {
     res.status(200).json({ message: "Seller profile updated", seller });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ error: "Error updating seller profile" });
+    res
+      .status(400)
+      .json({ error: "Error updating seller profile", message: error.message });
   }
 };
 

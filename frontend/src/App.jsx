@@ -15,12 +15,6 @@ import ProductDetail from "./components/ProductDetail.jsx";
 import { TourGuideProfileComponent } from "./components/tourGuideProfile.jsx";
 import { TouristProfileComponent } from "./components/touristProfile.jsx";
 
-import ActivityList from "./components/ActivityListAdvertiser.jsx";
-import ItineraryList from "./components/ItineraryListTourGuide.jsx";
-import HistoricalPlaceList from "./components/HistoricalPlaceListGovernor.jsx";
-import Tghome from "./components/TourGuideHome.jsx";
-import Hero from "./components/Hero.jsx";
-
 import CreateItineraryPage from "./pages/CreateItineraryPage.jsx";
 import CreateProduct from "./components/CreateProduct.jsx";
 import { NavbarComponent } from "./components/navbar.jsx";

@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Mail, Phone, User, CheckCircle, AtSign } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Image as ImageIcon,
+  CheckCircle,
+  AtSign,
+} from "lucide-react";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
-  const phoneNumber = parsePhoneNumberFromString("+" + value);
+  const phoneNumber = parsePhoneNumberFromString(value);
   if (!phoneNumber || !phoneNumber.isValid()) {
     return false;
   }
@@ -22,6 +28,7 @@ export function SellerProfileComponent() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedSeller, setEditedSeller] = useState(null);
   const [validationMessages, setValidationMessages] = useState({});
+  const [logo, setLogo] = useState(null);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -43,6 +50,7 @@ export function SellerProfileComponent() {
         });
         setSeller(response.data);
         setEditedSeller(response.data);
+        setLogo(response.data.logo);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -60,8 +68,21 @@ export function SellerProfileComponent() {
     setValidationMessages((prev) => ({ ...prev, [name]: "" })); // Clear validation message on change
   };
 
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogo(reader.result);
+        setEditedSeller((prev) => ({ ...prev, logo: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleDiscard = () => {
     setEditedSeller(seller); // Reset to the original seller data
+    setLogo(seller.logo);
     setIsEditing(false); // Exit editing mode
   };
   const validateFields = () => {
@@ -95,16 +116,20 @@ export function SellerProfileComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
 
-      const api = `http://localhost:4000/${role}`;
-      // Ensure description is either the user's input or an empty string
-      const dataToUpdate = {
-        ...editedSeller,
-        description: editedSeller.description || "", // Default to an empty string if description is null
-      };
+      const { name, username, email, mobile, description } = editedSeller;
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("logo", logo);
+      formData.append("username", username);
+      formData.append("email", email);
+      formData.append("mobile", mobile);
+      formData.append("description", description || "");
 
-      const response = await axios.put(api, dataToUpdate, {
+      const api = `http://localhost:4000/${role}`;
+      const response = await axios.put(api, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -156,9 +181,16 @@ export function SellerProfileComponent() {
     <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="p-8">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">
-            <User className="w-12 h-12 text-white" />{" "}
-            {/* Adjust the size of the icon here */}
+          <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
+            {logo ? (
+              <img
+                src={logo}
+                alt="Logo"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <ImageIcon className="w-12 h-12 text-white" />
+            )}
           </div>
 
           <div>
@@ -376,19 +408,36 @@ export function SellerProfileComponent() {
 
         <div className="mt-6">
           {isEditing ? (
-            <div className="flex gap-2">
-              <button
-                onClick={handleUpdate}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-              >
-                Save Changes
-              </button>
-              <button
-                onClick={handleDiscard}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-              >
-                Discard Changes
-              </button>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label
+                  htmlFor="logo-upload"
+                  className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                >
+                  Upload Logo
+                </label>
+                <input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleUpdate}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={handleDiscard}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                >
+                  Discard Changes
+                </button>
+              </div>
             </div>
           ) : (
             <button
