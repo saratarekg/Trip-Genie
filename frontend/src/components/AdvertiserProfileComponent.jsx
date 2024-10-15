@@ -138,7 +138,7 @@ export function AdvertiserProfileComponent() {
         editedAdvertiser;
       const formData = new FormData();
       formData.append("name", name);
-      formData.append("logo", logo);
+      logo && formData.append("logo", logo);
       formData.append("username", username);
       formData.append("email", email);
       formData.append("hotline", hotline);

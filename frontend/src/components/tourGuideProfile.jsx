@@ -59,8 +59,6 @@ import {
 import "react-phone-input-2/lib/style.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
-
-
 const phoneValidator = (value) => {
   // Check if the input starts with a "+"
   const phoneNumberStr = value.startsWith("+") ? value : "+" + value;
@@ -73,7 +71,6 @@ const phoneValidator = (value) => {
   }
   return true;
 };
-
 
 const StarRating = ({ rating, setRating, readOnly = false }) => {
   return (
@@ -264,31 +261,22 @@ export function TourGuideProfileComponent() {
         name,
         previousWorks,
       } = editedTourGuide;
-      
+
       // Modify the mobile field in the editedTourGuide object directly
       editedTourGuide.mobile = mobile.startsWith("+") ? mobile : "+" + mobile;
-      
 
-      // const formData = new FormData();
-      // formData.append("name", name);
-      // formData.append("profilePicture", profilePicture);
-      // formData.append("username", username);
-      // formData.append("email", email);
-      
-      // // Check if the mobile number starts with a "+" before appending
-      // //formData.append("mobile", formattedMobile);
-      
-      // formData.append("yearsOfExperience", yearsOfExperience);
-      // formData.append("nationality", nationality._id);
-      // formData.append("previousWorks", previousWorks);
-      
-      // // Print the formData contents
-      // for (let pair of formData.entries()) {
-      //   console.log(pair[0] + ': ' + pair[1]);
-      // }
-      
+      const formData = new FormData();
+      formData.append("name", name);
+      profilePicture && formData.append("profilePicture", profilePicture);
+      formData.append("username", username);
+      formData.append("email", email);
+      formData.append("mobile", mobile);
+      formData.append("yearsOfExperience", yearsOfExperience);
+      formData.append("nationality", nationality._id);
+      formData.append("previousWorks", JSON.stringify(previousWorks));
+
       const api = `http://localhost:4000/${role}`;
-      const response = await axios.put(api, editedTourGuide, {
+      const response = await axios.put(api, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -776,60 +764,63 @@ export function TourGuideProfileComponent() {
         </Dialog>
 
         <Dialog open={showWorkDialog} onOpenChange={setShowWorkDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {currentWork.title
-                ? "Edit Work Experience"
-                : "Add Work Experience"}
-            </DialogTitle>
- </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
-                Title
-              </Label>
-              <Input
-                id="title"
-                value={currentWork.title}
-                onChange={(e) =>
-                  setCurrentWork((prev) => ({ ...prev, title: e.target.value }))
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="company" className="text-right">
-                Company
-              </Label>
-              <Input
-                id="company"
-                value={currentWork.company}
-                onChange={(e) =>
-                  setCurrentWork((prev) => ({
-                    ...prev,
-                    company: e.target.value,
-                  }))
-                }
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="duration" className="text-right">
-                Duration
-              </Label>
-              <Input
-                id="duration"
-                value={currentWork.duration}
-                onChange={(e) =>
-                  setCurrentWork((prev) => ({
-                    ...prev,
-                    duration: e.target.value,
-                  }))
-                }
-                className="col-span-3"
-              />
-            </div>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {currentWork.title
+                  ? "Edit Work Experience"
+                  : "Add Work Experience"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="title" className="text-right">
+                  Title
+                </Label>
+                <Input
+                  id="title"
+                  value={currentWork.title}
+                  onChange={(e) =>
+                    setCurrentWork((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="company" className="text-right">
+                  Company
+                </Label>
+                <Input
+                  id="company"
+                  value={currentWork.company}
+                  onChange={(e) =>
+                    setCurrentWork((prev) => ({
+                      ...prev,
+                      company: e.target.value,
+                    }))
+                  }
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="duration" className="text-right">
+                  Duration
+                </Label>
+                <Input
+                  id="duration"
+                  value={currentWork.duration}
+                  onChange={(e) =>
+                    setCurrentWork((prev) => ({
+                      ...prev,
+                      duration: e.target.value,
+                    }))
+                  }
+                  className="col-span-3"
+                />
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">
@@ -846,21 +837,21 @@ export function TourGuideProfileComponent() {
                 }
                 className="col-span-3"
               />
-  </div>
-          <DialogFooter>
-            <Button
-              onClick={handleSaveWork}
-              disabled={
-                !currentWork.title ||
-                !currentWork.company ||
-                !currentWork.duration
-              }
-            >
-              Save
-            </Button>
-          </DialogFooter>
-   </DialogContent>
-      </Dialog>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={handleSaveWork}
+                disabled={
+                  !currentWork.title ||
+                  !currentWork.company ||
+                  !currentWork.duration
+                }
+              >
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

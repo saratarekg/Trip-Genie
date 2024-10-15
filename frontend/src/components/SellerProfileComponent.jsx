@@ -119,7 +119,7 @@ export function SellerProfileComponent() {
       const { name, username, email, mobile, description } = editedSeller;
       const formData = new FormData();
       formData.append("name", name);
-      formData.append("logo", logo);
+      logo && formData.append("logo", logo);
       formData.append("username", username);
       formData.append("email", email);
       formData.append("mobile", mobile);
