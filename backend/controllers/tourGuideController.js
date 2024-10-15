@@ -85,7 +85,8 @@ const updateTourGuideProfile = async (req, res) => {
       previousWorks,
       profilePicture,
     } = req.body;
-
+    console.log("hiiiiiiiiiiiiiii");
+console.log(previousWorks);
     const nat = await Nationality.findOne({ _id: nationality });
 
     if (username !== tourGuide1.username && (await usernameExists(username))) {
@@ -120,9 +121,11 @@ const updateTourGuideProfile = async (req, res) => {
     res
       .status(200)
       .json({ message: "Profile updated successfully", tourGuide });
-  } catch (error) {
+  }catch (error) {
+    console.error(error);  // This will print the full error object with stack trace
     res.status(500).json({ error: error.message });
-  }
+}
+
 };
 
 const getAllTourGuides = async (req, res) => {

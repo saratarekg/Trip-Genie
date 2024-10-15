@@ -59,14 +59,21 @@ import {
 import "react-phone-input-2/lib/style.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
-// Custom validator for mobile number
+
+
 const phoneValidator = (value) => {
-  const phoneNumber = parsePhoneNumberFromString(value);
+  // Check if the input starts with a "+"
+  const phoneNumberStr = value.startsWith("+") ? value : "+" + value;
+  console.log(phoneNumberStr);
+
+  const phoneNumber = parsePhoneNumberFromString(phoneNumberStr);
+
   if (!phoneNumber || !phoneNumber.isValid()) {
     return false;
   }
   return true;
 };
+
 
 const StarRating = ({ rating, setRating, readOnly = false }) => {
   return (
@@ -247,29 +254,41 @@ export function TourGuideProfileComponent() {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-
+      //const formattedMobile = mobile.startsWith("+") ? mobile : "+" + mobile;
       const {
         username,
         email,
-        mobile,
+        mobile, // Destructure mobile as it is
         yearsOfExperience,
         nationality,
         name,
         previousWorks,
       } = editedTourGuide;
+      
+      // Modify the mobile field in the editedTourGuide object directly
+      editedTourGuide.mobile = mobile.startsWith("+") ? mobile : "+" + mobile;
+      
 
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("profilePicture", profilePicture);
-      formData.append("username", username);
-      formData.append("email", email);
-      formData.append("mobile", mobile);
-      formData.append("yearsOfExperience", yearsOfExperience);
-      formData.append("nationality", nationality._id);
-      formData.append("previousWorks", previousWorks);
-
+      // const formData = new FormData();
+      // formData.append("name", name);
+      // formData.append("profilePicture", profilePicture);
+      // formData.append("username", username);
+      // formData.append("email", email);
+      
+      // // Check if the mobile number starts with a "+" before appending
+      // //formData.append("mobile", formattedMobile);
+      
+      // formData.append("yearsOfExperience", yearsOfExperience);
+      // formData.append("nationality", nationality._id);
+      // formData.append("previousWorks", previousWorks);
+      
+      // // Print the formData contents
+      // for (let pair of formData.entries()) {
+      //   console.log(pair[0] + ': ' + pair[1]);
+      // }
+      
       const api = `http://localhost:4000/${role}`;
-      const response = await axios.put(api, formData, {
+      const response = await axios.put(api, editedTourGuide, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -638,7 +657,7 @@ export function TourGuideProfileComponent() {
         </div>
       </div>
       <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4">What our customers say</h2>
+        <h2 className="text-2xl font-bold mb-4">Reviews</h2>
         {tourGuide.comments && tourGuide.comments.length > 0 ? (
           <>
             <div className="flex items-center justify-between mb-4">
@@ -755,6 +774,93 @@ export function TourGuideProfileComponent() {
             </ScrollArea>
           </DialogContent>
         </Dialog>
+
+        <Dialog open={showWorkDialog} onOpenChange={setShowWorkDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {currentWork.title
+                ? "Edit Work Experience"
+                : "Add Work Experience"}
+            </DialogTitle>
+ </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="title"
+                value={currentWork.title}
+                onChange={(e) =>
+                  setCurrentWork((prev) => ({ ...prev, title: e.target.value }))
+                }
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="company" className="text-right">
+                Company
+              </Label>
+              <Input
+                id="company"
+                value={currentWork.company}
+                onChange={(e) =>
+                  setCurrentWork((prev) => ({
+                    ...prev,
+                    company: e.target.value,
+                  }))
+                }
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="duration" className="text-right">
+                Duration
+              </Label>
+              <Input
+                id="duration"
+                value={currentWork.duration}
+                onChange={(e) =>
+                  setCurrentWork((prev) => ({
+                    ...prev,
+                    duration: e.target.value,
+                  }))
+                }
+                className="col-span-3"
+              />
+            </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={currentWork.description}
+                onChange={(e) =>
+                  setCurrentWork((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                className="col-span-3"
+              />
+  </div>
+          <DialogFooter>
+            <Button
+              onClick={handleSaveWork}
+              disabled={
+                !currentWork.title ||
+                !currentWork.company ||
+                !currentWork.duration
+              }
+            >
+              Save
+            </Button>
+          </DialogFooter>
+   </DialogContent>
+      </Dialog>
       </div>
     </div>
   );
