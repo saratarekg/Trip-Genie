@@ -11,8 +11,15 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import bellAnimation from "../assets/images/bell.json";
-import { ChevronDown, ShoppingBag, User, MapPin, LogOut , Wallet  } from 'lucide-react';
-
+import {
+  ChevronDown,
+  ShoppingBag,
+  User,
+  MapPin,
+  LogOut,
+  Wallet,
+  Lock,
+} from "lucide-react";
 
 const NavLink = ({ to, children }) => (
   <Link
@@ -98,33 +105,6 @@ export function NavbarComponent() {
                       <NavLink to="/all-products">Products</NavLink>
                       <NavLink to="/tourist-profile">Profile</NavLink>
                       <NavLink to="/file-complaint">Complaint</NavLink>
-
-                      <div className="relative">
-                        <button
-                          onClick={toggleDropdown}
-                          className="flex items-center text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium focus:outline-none"
-                        >
-                          My Account <ChevronDown className="ml-1" />
-                        </button>
-                        {isDropdownOpen && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                            <Link to="/account/info" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-                              <User className="mr-2 h-4 w-4" />
-                              Account Info
-                            </Link>
-                            <Link to="/account/cart" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-                              <ShoppingBag className="mr-2 h-4 w-4" />
-                              My Cart
-                            </Link>
-                            
-                            <Link to="/account/redeem-points" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-                              <Wallet className="mr-2 h-4 w-4" />
-                              Points and Wallet
-                            </Link>
-                            
-                          </div>
-                        )}
-                      </div>
                     </>
                   )}
                   {role === "advertiser" && (
@@ -184,6 +164,54 @@ export function NavbarComponent() {
                       <NavLink to="/all-products">Products</NavLink>
                     </>
                   )}
+                  {role !== "guest" && role !== undefined && (
+                    <div className="relative">
+                      <button
+                        onClick={toggleDropdown}
+                        className="flex items-center text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium focus:outline-none"
+                      >
+                        My Account <ChevronDown className="ml-1" />
+                      </button>
+                      {isDropdownOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
+                          <Link
+                            to="/account/info"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                          >
+                            <User className="mr-2 h-4 w-4" />
+                            Account Info
+                          </Link>
+                          {role === "tourist" && (
+                            <>
+                              <Link
+                                to="/account/cart"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                              >
+                                <ShoppingBag className="mr-2 h-4 w-4" />
+                                My Cart
+                              </Link>
+
+                              <Link
+                                to="/account/redeem-points"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                              >
+                                <Wallet className="mr-2 h-4 w-4" />
+                                Points and Wallet
+                              </Link>
+                            </>
+                          )}
+
+                          <Link
+                            to="/account/security"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                          >
+                            <Lock className="h-4 w-4 mr-2" />
+                            Security
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               {/* Login, Sign Up */}
@@ -211,18 +239,6 @@ export function NavbarComponent() {
                     >
                       Logout
                     </button>
-                  )}
-
-                  {role !== undefined && role !== "guest" && (
-                    <>
-                      <NavLink to="/settings">
-                        <img
-                          src={gearIcon}
-                          alt="Settings"
-                          className="h-6 w-6 rounded-full"
-                        />
-                      </NavLink>
-                    </>
                   )}
                 </div>
               </div>
