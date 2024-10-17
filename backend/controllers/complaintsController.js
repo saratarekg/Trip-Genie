@@ -28,7 +28,7 @@ const addComplaint = async (req, res) => {
   const getAllComplaints = async (req, res) => {
     try {
       
-      const {status,asc} = req.query;
+      let {status,asc} = req.query;
       asc = parseInt(asc);
       let complaints = []; 
       if (status) {
@@ -94,23 +94,30 @@ const markComplaintStatus = async (req, res) => {
 }
 
 const getComplaintDetails = async (req, res) => {
-    try {
-        const { id } = req.params; // Extract the complaint ID from the request parameters
+  try {
+    const { id } = req.params; // Extract the complaint ID from the request parameters
 
-        // Find the complaint by ID and populate the 'tourist' field
-        const complaint = await Complaint.findById(id).populate('tourist');
+    // Find the complaint by ID and populate the 'tourist' field along with 'nationality' within the tourist
+    const complaint = await Complaint.findById(id).populate({
+      path: 'tourist',
+      populate: {
+        path: 'nationality', // Populate nationality within tourist
+        select: 'name',      // Optionally select only the 'name' field from the Nationality schema
+      },
+    });
 
-        // Check if the complaint was found
-        if (!complaint) {
-            return res.status(404).json({ error: 'Complaint not found' });
-        }
-
-        // Return the complaint details
-        res.status(200).json(complaint);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    // Check if the complaint was found
+    if (!complaint) {
+      return res.status(404).json({ error: 'Complaint not found' });
     }
+
+    // Return the complaint details
+    res.status(200).json(complaint);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
+
 
 
 

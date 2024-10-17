@@ -150,7 +150,7 @@ export function Dashboard() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="accounts" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4">
               <Card className="bg-white border-[#808080] border">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-[#003f66]">
@@ -191,6 +191,22 @@ export function Dashboard() {
                   >
                     Add
                   </Button>
+                </CardContent>
+              </Card>
+              <Card className="bg-white border-[#808080] border">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#003f66]">
+                    Complaints
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Link to="/complaints">
+                  <Button
+                    className="w-full bg-[#ED8936] hover:bg-[#003f66]"
+                  >
+                    View
+                  </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>

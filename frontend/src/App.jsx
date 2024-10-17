@@ -22,6 +22,8 @@ import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./components/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
+import {ViewComplaints} from "./components/ViewComplaints.jsx";
+import {ViewComplaintDetails} from "./components/ViewComplaintDetails.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./components/signup-form.jsx";
@@ -221,6 +223,22 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/complaints"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ViewComplaints />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/complaint/:id"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ViewComplaintDetails />
               </ProtectedRoute>
             }
           />
