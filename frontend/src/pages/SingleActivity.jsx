@@ -7,6 +7,8 @@ import Map from "../components/Map";
 import Loader from "../components/Loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Toast } from "@/components/ui/toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -140,6 +142,64 @@ const ActivityDetail = () => {
   const [activityRating, setActivityRating] = useState(0);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [hasAttended, setHasAttended] = useState(false);
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [numberOfTickets, setNumberOfTickets] = useState(1);
+  const [paymentType, setPaymentType] = useState("CreditCard");
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+
+  const handleBookNowClick = () => {
+    setShowBookingDialog(true);
+    setBookingError("");
+  };
+
+  const calculateTotalPrice = () => {
+    const discountedPrice = calculateDiscountedPrice(activity.price, activity.specialDiscount);
+    return (discountedPrice * numberOfTickets).toFixed(2);
+  };
+
+  const handleBooking = async () => {
+    setIsBooking(true);
+    setBookingError("");
+    try {
+      const token = Cookies.get("jwt");
+      const totalPrice = calculateTotalPrice();
+
+      const response = await fetch(`http://localhost:4000/${userRole}/activityBooking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          activity: id,
+          paymentType,
+          paymentAmount: totalPrice,
+          numberOfTickets,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.message === "Insufficient funds in wallet") {
+          setBookingError("Insufficient funds, please choose a different payment method or update your wallet.");
+        } else {
+          throw new Error(errorData.message || "Failed to book activity");
+        }
+      } else {
+        const data = await response.json();
+        setShowBookingDialog(false);
+        setShowSuccessDialog(true);
+      }
+    } catch (error) {
+      console.error("Error booking activity:", error);
+      setBookingError(error.message || "An error occurred while booking. Please try again.");
+    } finally {
+      setIsBooking(false);
+    }
+  };
+
 
   // Comment Carousel State
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
@@ -712,6 +772,95 @@ const ActivityDetail = () => {
             )}
           </div>
         </div>
+
+        {userRole === 'tourist'  && activity.isBookingOpen && (<Button
+        onClick={handleBookNowClick}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+      >
+        Book Now
+      </Button>
+        )}
+
+      <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Book Activity: {activity.name}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tickets" className="text-right">
+                Tickets
+              </Label>
+              <Input
+                id="tickets"
+                type="number"
+                value={numberOfTickets}
+                onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Total Price</Label>
+              <div className="col-span-3">${calculateTotalPrice()}</div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Payment Type</Label>
+              <RadioGroup
+                value={paymentType}
+                onValueChange={setPaymentType}
+                className="col-span-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="CreditCard" id="CreditCard" />
+                  <Label htmlFor="CreditCard">Credit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="DebitCard" id="DebitCard" />
+                  <Label htmlFor="DebitCard">Debit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Wallet" id="Wallet" />
+                  <Label htmlFor="Wallet">Wallet</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            {bookingError && (
+              <div className="text-red-500 text-sm">{bookingError}</div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowBookingDialog(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={handleBooking} disabled={isBooking}>
+              {isBooking ? "Booking..." : "Confirm Booking"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader>
+      {/* Flexbox container to align icon and title horizontally */}
+      <div className="flex items-center">
+        {/* Check Circle Icon */}
+        <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+        {/* Title */}
+        <DialogTitle>Booking Successful</DialogTitle>
+      </div>
+    </DialogHeader>
+    
+    <div className="py-4">
+      <p>You have successfully booked {numberOfTickets} ticket(s) for {activity.name}.</p>
+    </div>
+    
+    <DialogFooter>
+      <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
       </div>
 
       {/* Full Comment Dialog */}
