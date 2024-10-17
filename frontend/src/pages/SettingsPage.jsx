@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Globe, Lock, Bell, Shield, Plane } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Cookies from "js-cookie";
+import TravelPreferences from "@/components/TouristPreferences";
 
 const validatePassword = (password) => {
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -142,10 +143,10 @@ export default function SettingsPage() {
             </TabsList>
             <TabsContent value="general">
               <h3 className="text-xl font-semibold mb-4">General Settings</h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-6">
                 Manage your account preferences and general settings here.
               </p>
-              {/* Add more general settings fields here */}
+              <TravelPreferences  />
             </TabsContent>
             <TabsContent value="security">
               <h3 className="text-xl font-semibold mb-4">Security Settings</h3>
