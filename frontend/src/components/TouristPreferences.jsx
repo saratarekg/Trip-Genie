@@ -181,7 +181,7 @@ const TravelPreferences = () => {
   if (!preferences) return <div>Loading...</div>;
 
   return (
-    <div className="max-w-2xl p-6">
+    <div className="max-w-2xl">
       <h1 className="text-xl font-semibold mb-4 text-left">
         Travel Preferences
       </h1>
@@ -366,7 +366,7 @@ const TravelPreferences = () => {
         </div>
         <Button
           type="submit"
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+          className="bg-orange-500 hover:bg-orange-600 text-white"
         >
           Update Preferences
         </Button>
@@ -375,7 +375,7 @@ const TravelPreferences = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Notification</DialogTitle>
+            <DialogTitle>Preferences Updated</DialogTitle>
           </DialogHeader>
           <p>{dialogMessage}</p>
           <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
