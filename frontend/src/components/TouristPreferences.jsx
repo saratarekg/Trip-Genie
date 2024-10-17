@@ -7,13 +7,13 @@ import Select from 'react-select';
 import Cookies from 'js-cookie';
 
 const schema = z.object({
-  budget: z.number().positive().optional(),
-  price: z.number().positive().optional(),
-  categories: z.array(z.string()).optional(),
-  tourLanguages: z.array(z.string()).optional(),
-  tourType: z.array(z.string()).optional(),
-  historicalPlaceType: z.array(z.string()).optional(),
-  historicalPlacePeriod: z.array(z.string()).optional(),
+  budget: z.number().nullable(),
+  price: z.number().nullable(),
+  categories: z.array(z.object({ value: z.string(), label: z.string() })).nullable(),
+  tourLanguages: z.array(z.object({ value: z.string(), label: z.string() })).nullable(),
+  tourType: z.array(z.object({ value: z.string(), label: z.string() })).nullable(),
+  historicalPlaceType: z.array(z.object({ value: z.string(), label: z.string() })).nullable(),
+  historicalPlacePeriod: z.array(z.object({ value: z.string(), label: z.string() })).nullable(),
 });
 
 const TravelPreferences = () => {
@@ -28,13 +28,21 @@ const TravelPreferences = () => {
 
   const { control, handleSubmit, reset } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: preferences || {},
+    defaultValues: {
+      budget: null,
+      price: null,
+      categories: null,
+      tourLanguages: null,
+      tourType: null,
+      historicalPlaceType: null,
+      historicalPlacePeriod: null,
+    },
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = Cookies.get("jwt"); 
+        const token = Cookies.get('jwt');
         const headers = { Authorization: `Bearer ${token}` };
 
         const [prefsRes, langsRes, catsRes, typesRes, histTypesRes, histPeriodsRes] = await Promise.all([
@@ -47,15 +55,28 @@ const TravelPreferences = () => {
         ]);
 
         setPreferences(prefsRes.data);
-        reset(prefsRes.data);
 
-        setOptions({
+        const optionsData = {
           languages: langsRes.data.map(lang => ({ value: lang, label: lang })),
           categories: catsRes.data.map(cat => ({ value: cat.name, label: cat.name })),
           tourTypes: typesRes.data.map(type => ({ value: type, label: type })),
           historicalTypes: histTypesRes.data.map(type => ({ value: type, label: type })),
           historicalPeriods: histPeriodsRes.data.map(period => ({ value: period, label: period })),
-        });
+        };
+
+        setOptions(optionsData);
+
+        // Convert preference data to match react-select format
+        const formattedPrefs = {
+          ...prefsRes.data,
+          categories: prefsRes.data.categories?.map(cat => optionsData.categories.find(o => o.value === cat)) || null,
+          tourLanguages: prefsRes.data.tourLanguages?.map(lang => optionsData.languages.find(o => o.value === lang)) || null,
+          tourType: prefsRes.data.tourType?.map(type => optionsData.tourTypes.find(o => o.value === type)) || null,
+          historicalPlaceType: prefsRes.data.historicalPlaceType?.map(type => optionsData.historicalTypes.find(o => o.value === type)) || null,
+          historicalPlacePeriod: prefsRes.data.historicalPlacePeriod?.map(period => optionsData.historicalPeriods.find(o => o.value === period)) || null,
+        };
+
+        reset(formattedPrefs);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -66,9 +87,21 @@ const TravelPreferences = () => {
 
   const onSubmit = async (data) => {
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get('jwt');
       const headers = { Authorization: `Bearer ${token}` };
-      await axios.put('http://localhost:4000/tourist/preferences', data, { headers });
+      
+      // Apply default values and extract only the values from multi-select fields
+      const updatedData = {
+        budget: data.budget === null ? Infinity : data.budget,
+        price: data.price === null ? Infinity : data.price,
+        categories: data.categories?.map(item => item.value) || [],
+        tourLanguages: data.tourLanguages?.map(item => item.value) || [],
+        tourType: data.tourType?.map(item => item.value) || [],
+        historicalPlaceType: data.historicalPlaceType?.map(item => item.value) || [],
+        historicalPlacePeriod: data.historicalPlacePeriod?.map(item => item.value) || [],
+      };
+
+      await axios.put('http://localhost:4000/tourist/preferences', updatedData, { headers });
       alert('Preferences updated successfully!');
     } catch (error) {
       console.error('Error updating preferences:', error);
@@ -79,7 +112,7 @@ const TravelPreferences = () => {
   if (!preferences) return <div>Loading...</div>;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-2xl p-6">
       <h1 className="text-3xl font-bold mb-6">Travel Preferences</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
@@ -127,6 +160,8 @@ const TravelPreferences = () => {
                   {...field}
                   isMulti
                   options={options.categories}
+                  value={field.value || []}
+                  onChange={(newValue) => field.onChange(newValue)}
                   className="mt-1"
                 />
               </div>
@@ -142,6 +177,8 @@ const TravelPreferences = () => {
                   {...field}
                   isMulti
                   options={options.languages}
+                  value={field.value || []}
+                  onChange={(newValue) => field.onChange(newValue)}
                   className="mt-1"
                 />
               </div>
@@ -157,6 +194,8 @@ const TravelPreferences = () => {
                   {...field}
                   isMulti
                   options={options.tourTypes}
+                  value={field.value || []}
+                  onChange={(newValue) => field.onChange(newValue)}
                   className="mt-1"
                 />
               </div>
@@ -172,6 +211,8 @@ const TravelPreferences = () => {
                   {...field}
                   isMulti
                   options={options.historicalTypes}
+                  value={field.value || []}
+                  onChange={(newValue) => field.onChange(newValue)}
                   className="mt-1"
                 />
               </div>
@@ -187,6 +228,8 @@ const TravelPreferences = () => {
                   {...field}
                   isMulti
                   options={options.historicalPeriods}
+                  value={field.value || []}
+                  onChange={(newValue) => field.onChange(newValue)}
                   className="mt-1"
                 />
               </div>
