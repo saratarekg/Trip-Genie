@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { Search, ChevronLeft, ChevronRight , Edit, Trash2, CheckCircle, XCircle} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import ItineraryDetail from "./ItineraryDetail.jsx";
 import FilterComponent from "./Filter.jsx";
@@ -31,9 +31,9 @@ const ItineraryCard = ({ itinerary, onSelect, role, canModify }) => (
       <img
         src={
           itinerary.activities &&
-          itinerary.activities.length > 0 &&
-          itinerary.activities[0].pictures &&
-          itinerary.activities[0].pictures.length > 0
+            itinerary.activities.length > 0 &&
+            itinerary.activities[0].pictures &&
+            itinerary.activities[0].pictures.length > 0
             ? itinerary.activities[0].pictures[0]
             : defaultImage
         }
@@ -42,7 +42,16 @@ const ItineraryCard = ({ itinerary, onSelect, role, canModify }) => (
       />
     </div>
     <div className="p-4 ">
-      <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-semibold mt-2">{itinerary.title}</h3>
+        {!itinerary.isActivated && role === "tour-guide" && (
+          <Badge className="bg-red-500 text-white hover:bg-red-500 hover:text-white">Deactivated</Badge>
+        )}
+
+        {!itinerary.isActivated && role === "tourist" && (
+          <Badge className="bg-red-500 text-white hover:bg-red-500 hover:text-white">Currently Unavailable</Badge>
+        )}
+      </div>
       <h3 className="text-sm mt-2 text-gray-700">{itinerary.timeline}</h3>
       <div className="flex justify-between items-center mt-4">
         <span className="text-lg font-bold text-blue-600">
@@ -51,57 +60,57 @@ const ItineraryCard = ({ itinerary, onSelect, role, canModify }) => (
         <span className="text-sm text-gray-500">{itinerary.language}</span>
       </div>
       <div className="flex flex-wrap gap-2 mt-3">
-  {Array.isArray(itinerary.activities) && itinerary.activities.map((activity, index) => (
-    <div key={index} className="w-full">
-      {Array.isArray(activity.category) && activity.category.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
-          {activity.category.map((cat) => (
-            <Badge key={cat.id || cat.name} variant="secondary">
-              {cat.name}
-            </Badge>
-          ))}
-        </div>
-      )}
-      {Array.isArray(activity.tags) && activity.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-2">
-          {activity.tags.map((tag) => (
-            <Badge key={tag.id || tag.type} variant="outline">
-              {tag.type}
-          </Badge>
-            
-          ))}
-          
-        </div>
-      )}
-    </div>
-  ))}
-</div>
-{role === "tour-guide" && canModify &&(
-              <div className="mt-6 flex justify-end space-x-4">
-                <Button
-                  onClick={() => navigate(`/update-itinerary/${itinerary.id}`)}
-                  variant="default"
-                  className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Update 
-                </Button>
-                <Button
-                   onClick={() => setShowDeleteConfirm(true)}
-                  variant="destructive"
-                  className="flex items-center"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
+        {Array.isArray(itinerary.activities) && itinerary.activities.map((activity, index) => (
+          <div key={index} className="w-full">
+            {Array.isArray(activity.category) && activity.category.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {activity.category.map((cat) => (
+                  <Badge key={cat.id || cat.name} variant="secondary">
+                    {cat.name}
+                  </Badge>
+                ))}
               </div>
-             )}
+            )}
+            {Array.isArray(activity.tags) && activity.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {activity.tags.map((tag) => (
+                  <Badge key={tag.id || tag.type} variant="outline">
+                    {tag.type}
+                  </Badge>
+
+                ))}
+
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      {role === "tour-guide" && canModify && (
+        <div className="mt-6 flex justify-end space-x-4">
+          <Button
+            onClick={() => navigate(`/update-itinerary/${itinerary.id}`)}
+            variant="default"
+            className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
+          >
+            <Edit className="w-4 h-4 mr-2" />
+            Update
+          </Button>
+          <Button
+            onClick={() => setShowDeleteConfirm(true)}
+            variant="destructive"
+            className="flex items-center"
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete
+          </Button>
+        </div>
+      )}
     </div>
   </div>
 );
 
 const getUniqueTags = (itinerary) => {
-  const allTags = itinerary.activities.flatMap(activity => 
+  const allTags = itinerary.activities.flatMap(activity =>
     activity.tags.map(tag => tag.type)
   );
   return [...new Set(allTags)];
@@ -165,7 +174,7 @@ export function AllItinerariesComponent() {
         setIsLoading(false);
       }
     };
-  
+
     fetchData();
   }, []);
 
@@ -177,10 +186,10 @@ export function AllItinerariesComponent() {
         fetchItineraries();  // Fetch all itineraries if search is empty
       }
     }, 300);
-  
+
     return () => clearTimeout(delayDebounceFn);  // Clean up the timeout
   }, [searchTerm]);
-  
+
 
   useEffect(() => {
     searchItineraries();
@@ -298,7 +307,7 @@ export function AllItinerariesComponent() {
       if (selectedLanguages.length > 0) {
         url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
       }
-      if(isBooked){
+      if (isBooked) {
         url.searchParams.append("isBooked", isBooked);
       }
 
@@ -461,7 +470,7 @@ export function AllItinerariesComponent() {
                       itinerary={itinerary}
                       onSelect={handleItinerarySelect}
                       role={getUserRole()}
-                      canModify = {canModify}
+                      canModify={canModify}
                     />
                   ))}
               </div>
@@ -473,9 +482,8 @@ export function AllItinerariesComponent() {
                     handlePageChange(currentPage - 1);
                   }}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                  }`}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                    }`}
                 >
                   <ChevronLeft />
                 </button>
@@ -485,8 +493,8 @@ export function AllItinerariesComponent() {
                   {/* {setIsLoading(false)} */}
                   {itineraries.length > 0
                     ? `Page ${currentPage} of ${Math.ceil(
-                        itineraries.length / tripsPerPage
-                      )}`
+                      itineraries.length / tripsPerPage
+                    )}`
                     : "No pages available"}
                 </span>
 
@@ -496,14 +504,13 @@ export function AllItinerariesComponent() {
                   }}
                   disabled={
                     currentPage ===
-                      Math.ceil(itineraries.length / tripsPerPage) ||
+                    Math.ceil(itineraries.length / tripsPerPage) ||
                     itineraries.length === 0
                   }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                      ? "text-gray-300"
-                      : "text-blue-600"
-                  }`}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                    ? "text-gray-300"
+                    : "text-blue-600"
+                    }`}
                 >
                   <ChevronRight />
                 </button>
@@ -512,7 +519,7 @@ export function AllItinerariesComponent() {
           </div>
         </div>
       )}
-       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Itinerary</DialogTitle>
@@ -579,6 +586,6 @@ export function AllItinerariesComponent() {
         </DialogContent>
       </Dialog>
     </div>
-    
+
   );
 }

@@ -158,6 +158,8 @@ const ItineraryDetail = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState("");
+  const [isActivated, setIsActivated] = useState(true);
+
   const [open, setOpen] = useState(false); // Added state for popover
   const [isToastOpen, setIsToastOpen] = useState(false);
 
@@ -227,7 +229,12 @@ const ItineraryDetail = () => {
 
   const navigate = useNavigate();
 
-
+  useEffect(() => {
+    scrollToTop();
+  }, [isActivated]);
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const fetchUsername = async (userId) => {
     try {
       const response = await fetch(`http://localhost:4000/${userRole}`, {
@@ -253,18 +260,18 @@ const ItineraryDetail = () => {
       const updatedStatus = !isAppropriate; // Toggle status
 
       // Update the backend
-      
+
       const token = Cookies.get("jwt");
-      
+
       const response = await fetch(`http://localhost:4000/${userRole}/itineraries/${itinerary._id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({  appropriate: updatedStatus, }),
+        body: JSON.stringify({ appropriate: updatedStatus, }),
       });
-      
+
 
       setIsAppropriate(updatedStatus); // Update state to reflect the new status
       setDialogOpen(false); // Close the dialog
@@ -311,13 +318,14 @@ const ItineraryDetail = () => {
         }
         setIsAppropriate(data.appropriate);
 
+        setIsActivated(data.isActivated);
 
 
         setActivities(data.activities);
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
           setCanModify(decodedToken.id === data.tourGuide._id);
-         
+
 
           if (data.attended && Array.isArray(data.attended)) {
             data.attended.forEach(tourist => {
@@ -348,6 +356,34 @@ const ItineraryDetail = () => {
 
     fetchItineraryDetails();
   }, [id, userRole]);
+
+  const handleActivationToggle = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      setIsActivated(prevState => !prevState); // Immediately update the state
+      const response = await fetch(`http://localhost:4000/${userRole}/itineraries-activation/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle activation');
+      }
+
+      const updatedItinerary = await response.json();
+      // Only update if the server response is different from our optimistic update
+      if (updatedItinerary.isActivated !== isActivated) {
+        setIsActivated(updatedItinerary.isActivated);
+      }
+    } catch (error) {
+      console.error('Error toggling activation:', error);
+      setIsActivated(prevState => !prevState); // Revert the state if there's an error
+      // Optionally, show an error message to the user
+    }
+  };
 
   const handleUpdate = () => {
     navigate(`/update-itinerary/${id}`);
@@ -566,6 +602,7 @@ const ItineraryDetail = () => {
 
       <div className="bg-[#1a202c] text-white py-20 px-4">
         <div className="container mx-auto text-center">
+
           <h1 className="text-4xl md:text-6xl font-bold mb-4">
             {itinerary.title}
           </h1>
@@ -577,7 +614,9 @@ const ItineraryDetail = () => {
           <div className="lg:w-2/3">
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
               <div className="p-6">
+
                 <div className="flex justify-between items-center mb-6">
+
                   <h1 className="text-4xl font-bold">Itinerary Details</h1>
 
                   <div>
@@ -626,6 +665,16 @@ const ItineraryDetail = () => {
 
 
                   <div className="flex items-center space-x-4">
+
+                    {!isActivated && userRole === "tour-guide" && (
+                      <div className="flex items-center bg-red-500 px-3 py-1 rounded-full">
+                        <span className="text-2xl font-semibold">
+
+                          <>Deactivated</>
+                        </span>
+                      </div>
+                    )}
+
                     <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
                       <DollarSign className="w-8 h-8 text-blue-500 mr-2" />
                       <span className="text-2xl font-semibold">
@@ -815,6 +864,14 @@ const ItineraryDetail = () => {
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete
                     </Button>
+
+                    <Button
+                      onClick={() => handleActivationToggle()}
+                      variant={isActivated ? "destructive" : "default"}
+                      className={`flex items-center ${isActivated ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+                    >
+                      {isActivated ? 'Deactivate' : 'Activate'}
+                    </Button>
                   </div>
                 )}
               </div>
@@ -848,46 +905,45 @@ const ItineraryDetail = () => {
             )}
             {userRole === "admin" && (
               <>
-              <Button
-                className={`w-4/5 mx-auto mt-2 text-white ${
-                  isAppropriate
+                <Button
+                  className={`w-4/5 mx-auto mt-2 text-white ${isAppropriate
                     ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
                     : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                }`}
-                onClick={handleOpenDialog}
-              >
-                {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
-              </Button>
-        
-              {dialogOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                  <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                    <div className="mb-4">
-                      <h2 className="text-lg font-semibold">Confirm Action</h2>
-                      <p className="text-gray-600 mt-2">
-                        Are you sure you want to change the status of this itinerary/event?
-                      </p>
-                    </div>
-                    <div className="flex justify-end space-x-4">
-                      <Button
-                        variant="outlined"
-                        onClick={handleCloseDialog}
-                        className="border-gray-300"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        color="secondary"
-                        onClick={handleConfirmFlag}
-                        className="bg-blue-500 hover:bg-blue-600 text-white"
-                      >
-                        Confirm
-                      </Button>
+                    }`}
+                  onClick={handleOpenDialog}
+                >
+                  {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
+                </Button>
+
+                {dialogOpen && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                      <div className="mb-4">
+                        <h2 className="text-lg font-semibold">Confirm Action</h2>
+                        <p className="text-gray-600 mt-2">
+                          Are you sure you want to change the status of this itinerary/event?
+                        </p>
+                      </div>
+                      <div className="flex justify-end space-x-4">
+                        <Button
+                          variant="outlined"
+                          onClick={handleCloseDialog}
+                          className="border-gray-300"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          color="secondary"
+                          onClick={handleConfirmFlag}
+                          className="bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          Confirm
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </>
+                )}
+              </>
 
             )}
 
@@ -961,15 +1017,31 @@ const ItineraryDetail = () => {
         </div>
       </div>
 
-      
 
-      {userRole === 'tourist'  && (<Button
+
+      {/* {userRole === 'tourist' && (<Button
         onClick={handleBookNowClick}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
       >
         Book Now
       </Button>
-        )}
+      )} */}
+
+      {userRole === 'tourist' && (
+        isActivated ? (
+          <Button
+            onClick={handleBookNowClick}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+          >
+            Book Now
+          </Button>
+        ) : (
+          <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
+            Currently Unavailable
+          </div>
+        )
+      )}
+
 
       <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
         <DialogContent className="sm:max-w-[425px]">
@@ -1030,26 +1102,26 @@ const ItineraryDetail = () => {
       </Dialog>
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-  <DialogContent className="sm:max-w-[425px]">
-    <DialogHeader>
-      {/* Flexbox container to align icon and title horizontally */}
-      <div className="flex items-center">
-        {/* Check Circle Icon */}
-        <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-        {/* Title */}
-        <DialogTitle>Booking Successful</DialogTitle>
-      </div>
-    </DialogHeader>
-    
-    <div className="py-4">
-      <p>You have successfully booked {numberOfTickets} ticket(s) for {itinerary.title}.</p>
-    </div>
-    
-    <DialogFooter>
-      <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            {/* Flexbox container to align icon and title horizontally */}
+            <div className="flex items-center">
+              {/* Check Circle Icon */}
+              <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+              {/* Title */}
+              <DialogTitle>Booking Successful</DialogTitle>
+            </div>
+          </DialogHeader>
+
+          <div className="py-4">
+            <p>You have successfully booked {numberOfTickets} ticket(s) for {itinerary.title}.</p>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
 
 
