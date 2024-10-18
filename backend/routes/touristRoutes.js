@@ -58,6 +58,7 @@ router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlac
 router.get("/activityBooking", activityBookingController.getAllBookings);
 router.delete("/activityBooking/:id", activityBookingController.deleteBooking);
 router.post("/activityBooking", activityBookingController.createBooking);
+router.get('/touristActivityBookings', activityBookingController.getTouristBookings);
 
 router.post("/password", touristController.changePassword);
 router.post("/complaint", complaintsController.addComplaint);
