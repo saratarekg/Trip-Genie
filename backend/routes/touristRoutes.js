@@ -60,6 +60,7 @@ router.get("/activityBooking", activityBookingController.getAllBookings);
 router.delete("/activityBooking/:id", activityBookingController.deleteBooking);
 router.post("/activityBooking", activityBookingController.createBooking);
 router.get('/touristActivityBookings', activityBookingController.getTouristBookings);
+router.put('/activityBooking/:id', activityBookingController.updateBooking);
 
 router.get("/itineraryBooking", itineraryBookingController.getAllBookings);
 router.delete("/irineraryBooking/:id", itineraryBookingController.deleteBooking);

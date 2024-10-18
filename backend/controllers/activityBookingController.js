@@ -154,7 +154,7 @@ exports.updateBooking = async (req, res) => {
         ).populate('activity').populate('user');
 
         if (!updatedBooking) {
-            return res.status(404).json({ message: 'Booking not found' });
+            return res.status(400).json({ message: 'Booking not found' });
         }
 
         res.status(200).json(updatedBooking);
@@ -169,7 +169,7 @@ exports.deleteBooking = async (req, res) => {
         const deletedBooking = await ActivityBooking.findByIdAndDelete(req.params.id);
 
         if (!deletedBooking) {
-            return res.status(404).json({ message: 'Booking not found' });
+            return res.status(400).json({ message: 'Booking not found' });
         }
 
         res.status(200).json({ message: 'Booking deleted successfully' });

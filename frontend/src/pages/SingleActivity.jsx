@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { formatDistanceToNow, format } from "date-fns";
 import Map from "../components/Map";
+import axios from "axios";
 import Loader from "../components/Loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -139,6 +140,9 @@ const ActivityDetail = () => {
   const [advertiserProfile, setAdvertiserProfile] = useState(null);
   const [canModify, setCanModify] = useState(false);
   const [currentUser, setCurrentUser] = useState("");
+  const [userBooking, setUserBooking] = useState([]);
+  const [booked, setBooked] = useState([]);
+  const [showUpdateBookingDialog, setShowUpdateBookingDialog] = useState(false);
   const [activityRating, setActivityRating] = useState(0);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [hasAttended, setHasAttended] = useState(false);
@@ -151,6 +155,11 @@ const ActivityDetail = () => {
 
   const handleBookNowClick = () => {
     setShowBookingDialog(true);
+    setBookingError("");
+  };
+
+  const handleUpdateNowClick = () => {
+    setShowUpdateBookingDialog(true);
     setBookingError("");
   };
 
@@ -265,12 +274,91 @@ const ActivityDetail = () => {
       }
     };
 
+    const fetchUserBooking = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.id;
+        const response = await axios.get(`http://localhost:4000/${userRole}/touristActivityBookings`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const userBookings = response.data;
+        
+    const existingBooking = userBookings.find(booking => {
+      console.log(`Checking booking for activity: ${booking.activity._id}`);
+      console.log(`Comparing with id: ${id}`);
+      console.log(`Are they equal? ${booking.activity._id === id}`);
+
+      // Check if the activity ID matches the provided ID
+      return booking.activity._id === id;
+    });
+
+    if (existingBooking) {
+      setUserBooking(existingBooking);
+      setBooked(true);
+      console.log('Existing Booking:', existingBooking);
+    } else {
+      // If no booking matches, set userBooking to an empty array or handle it as needed
+      setUserBooking([]);
+      setBooked(false);
+      console.log('No matching booking found, setting userBooking to an empty array.');
+    }
+
+      } catch (error) {
+        console.error("Error fetching user booking:", error);
+      }
+    };
+
+    fetchActivityDetails();
+    if (userRole === 'tourist') {
+      fetchUserBooking();
+    }
     fetchActivityDetails();
   }, [id, userRole]);
+
+  
+  const isActivityPassed = () => {
+    return new Date(activity.timing) < new Date();
+  };
+
+  useEffect(() => {
+    console.log(userBooking, "final booking list after state update");
+  }, [userBooking]);
+
+
+  const handleUpdateBooking = async () => {
+    setIsBooking(true);
+    setBookingError("");
+    try {
+      const token = Cookies.get("jwt");
+      const additionalTickets = numberOfTickets + userBooking.numberOfTickets;
+      const additionalPrice = userBooking.paymentAmount + calculateDiscountedPrice(activity.price, activity.specialDiscount) * additionalTickets;
+
+      const response = await axios.put(`http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`, {
+        numberOfTickets,
+        paymentAmount: additionalPrice,
+        paymentType,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setShowUpdateBookingDialog(false);
+      setShowSuccessDialog(true);
+      setUserBooking(response.data);
+    } catch (error) {
+      console.error("Error updating booking:", error);
+      setBookingError(error.response?.data?.message || "An error occurred while updating the booking.");
+    } finally {
+      setIsBooking(false);
+    }
+  };
+
 
   const handleUpdate = () => {
     navigate(`/update-activity/${id}`);
   };
+
+  
 
   const handleDelete = async () => {
     setShowDeleteConfirm(false);
@@ -773,15 +861,26 @@ const ActivityDetail = () => {
           </div>
         </div>
 
-        {userRole === 'tourist'  && activity.isBookingOpen && (<Button
-        onClick={handleBookNowClick}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-      >
-        Book Now
-      </Button>
-        )}
+        {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
+          <Button
+          onClick={handleUpdateNowClick}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+          >
+          {"Update Booking"}
+          </Button>
+          )} */}
+          {userRole === 'tourist' && !isActivityPassed() &&(
+          <Button
+          onClick={handleBookNowClick}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+          >
+          {"Book Now"}
+          </Button>
+          )}
 
-      <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+
+
+<Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Book Activity: {activity.name}</DialogTitle>
@@ -834,6 +933,66 @@ const ActivityDetail = () => {
             </Button>
             <Button onClick={handleBooking} disabled={isBooking}>
               {isBooking ? "Booking..." : "Confirm Booking"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showUpdateBookingDialog} onOpenChange={setShowUpdateBookingDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Update Booking: {activity.name}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tickets" className="text-right">
+                Tickets
+              </Label>
+              <Input
+                id="tickets"
+                type="number"
+                value={numberOfTickets}
+                onChange={(e) => setNumberOfTickets(Math.max(userBooking.numberOfTickets, parseInt(e.target.value)))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Additional Price</Label>
+              <div className="col-span-3">
+                ${(calculateDiscountedPrice(activity.price, activity.specialDiscount) * (numberOfTickets - userBooking.numberOfTickets)).toFixed(2)}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Payment Type</Label>
+              <RadioGroup
+                value={paymentType}
+                onValueChange={setPaymentType}
+                className="col-span-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="CreditCard" id="CreditCard" />
+                  <Label htmlFor="CreditCard">Credit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="DebitCard" id="DebitCard" />
+                  <Label htmlFor="DebitCard">Debit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Wallet" id="Wallet" />
+                  <Label htmlFor="Wallet">Wallet</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            {bookingError && (
+              <div className="text-red-500 text-sm">{bookingError}</div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowUpdateBookingDialog(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateBooking} disabled={isBooking}>
+              {isBooking ? "Updating..." : "Confirm Update"}
             </Button>
           </DialogFooter>
         </DialogContent>
