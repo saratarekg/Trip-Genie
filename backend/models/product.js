@@ -1,48 +1,52 @@
 const mongoose = require("mongoose");
 
-const productSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  picture: {
-    type: String,
-    required: true,
-  },
-  price: {
-    type: Number,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  seller: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Seller", // Reference to the Seller schema
-  },
-  rating: {
-    type: Number,
-    default: 0,
-    min: 0,
-    max: 5,
-  },
-  reviews: [
-    {
-      user: { type: String, required: true },
-      rating: { type: Number, required: true, min: 1, max: 5 },
-      comment: { type: String, required: true },
+const productSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
     },
-  ],
-  quantity: {
-    type: Number,
-    required: true,
+    pictures: {
+      type: [String],
+      required: false,
+      default: [],
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    seller: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Seller", // Reference to the Seller schema
+    },
+    rating: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 5,
+    },
+    reviews: [
+      {
+        user: { type: String, required: true },
+        rating: { type: Number, required: true, min: 1, max: 5 },
+        comment: { type: String, required: true },
+      },
+    ],
+    quantity: {
+      type: Number,
+      required: true,
+    },
+    sales: {
+      type: Number,
+      default: 0,
+    },
   },
-  sales: {
-    type: Number,
-    default : 0
-  }
-});
+  { timestamps: true }
+);
 
 productSchema.statics.searchByNames = async function (name) {
   try {

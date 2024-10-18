@@ -1,21 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import * as jwtDecode from "jwt-decode";
-import {
-  ChevronLeft,
-  Star,
-  Edit,
-  Trash2,
-  Mail,
-  Phone,
-  Award,
-  User,
-  DollarSign,
-  Package,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate, useParams } from "react-router-dom";
+import EnhancedCarousel from "./enhanced-carousel";
 import {
   Dialog,
   DialogContent,
@@ -34,28 +21,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const LoadingSpinner = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
-    <svg
-      className="spinner"
-      width="65px"
-      height="65px"
-      viewBox="0 0 66 66"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle
-        className="path"
-        fill="none"
-        strokeWidth="6"
-        strokeLinecap="round"
-        cx="33"
-        cy="33"
-        r="30"
-      ></circle>
-    </svg>
-  </div>
-);
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
+  Star,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  User,
+  DollarSign,
+  Package,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 
 const StarRating = ({ rating }) => {
   return (
@@ -114,7 +98,7 @@ const ProductDetail = () => {
         setError(null);
 
         if (token) {
-          const decodedToken = jwtDecode.jwtDecode(token);
+          const decodedToken = jwtDecode(token);
           if (data.seller === undefined) {
             setCanModify(true);
           } else {
@@ -171,7 +155,7 @@ const ProductDetail = () => {
   };
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <div>Loading...</div>;
   }
 
   if (error) {
@@ -212,12 +196,8 @@ const ProductDetail = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <img
-                  src={product.picture}
-                  alt={product.name}
-                  className="w-full h-64 object-cover rounded-lg mb-4"
-                />
-                <div className="space-y-4">
+                <EnhancedCarousel images={product.pictures} />
+                <div className="space-y-4 mt-4">
                   <div className="flex items-center">
                     <DollarSign className="w-6 h-6 mr-2 text-green-500" />
                     <span className="text-2xl font-bold">
