@@ -30,7 +30,8 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
-  const phoneNumber = parsePhoneNumberFromString(value);
+  console.log(value);
+  const phoneNumber = parsePhoneNumberFromString("+" + value);
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
@@ -124,6 +125,7 @@ export function TouristProfileComponent() {
     if (!validateFields()) return;
 
     try {
+      editedTourist.mobile = "+" + editedTourist.mobile;
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const api = `http://localhost:4000/${role}`;
