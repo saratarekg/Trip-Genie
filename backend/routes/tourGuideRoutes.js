@@ -31,6 +31,9 @@ router.get("/activities", activityController.getAllActivities);
 router.get("/activities/:id", activityController.getActivityById);
 router.put("/activities/:id", activityController.updateActivity);
 
+
+router.put("/itineraries-activation/:id", itineraryController.toggleActivationStatus);
+
 router.post("/password", changePassword);
 
 module.exports = router;

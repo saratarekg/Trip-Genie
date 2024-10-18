@@ -131,8 +131,8 @@ const updatePreferences = async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       res.locals.user_id,
       {
-        "preference.budget": budget ?? tourist1.preference.budget, // Use the existing value if not provided
-        "preference.price": price ?? tourist1.preference.price, // Use the existing value if not provided
+        "preference.budget": budget ?? Infinity, // Use the existing value if not provided
+        "preference.price": price ?? Infinity, // Use the existing value if not provided
         "preference.categories": categories ?? tourist1.preference.categories, // Use the existing value if not provided
         "preference.tourLanguages": tourLanguages ?? tourist1.preference.tourLanguages,
         "preference.tourType": tourType ?? tourist1.preference.tourType,

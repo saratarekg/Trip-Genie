@@ -86,17 +86,23 @@ router.delete("/categories/:id", categoryController.deleteCategory);
 router.put("/categories/:id", categoryController.updateCategory);
 
 router.get("/products", productController.getAllProducts);
-router.post("/products", productController.addProductByAdmin);
+router.post(
+  "/products",
+  upload.array("pictures", 5),
+  productController.addProductByAdmin
+);
 router.get(
   "/products/:id",
   upload.array("pictures", 5),
   productController.getProductById
 );
+router.get("/productsarchive", productController.getAllProductsArchive);
 router.put(
   "/products/:id",
   upload.array("pictures", 5),
   productController.editProduct
 );
+router.put("/archiveproducts/:id", productController.archiveProduct);
 router.delete("/products/:id", productController.deleteProduct);
 
 router.get("/complaints", complaintsController.getAllComplaints);

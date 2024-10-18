@@ -186,11 +186,11 @@ export function NavbarComponent() {
                           {role === "tourist" && (
                             <>
                               <Link
-                                to="/account/cart"
+                                to="/account/history"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                               >
-                                <ShoppingBag className="mr-2 h-4 w-4" />
-                                My Cart
+                                <HistoryIcon className="mr-2 h-4 w-4" />
+                                History
                               </Link>
                               <Link
                                 to="/account/complain"
@@ -199,6 +199,13 @@ export function NavbarComponent() {
                                 <AlertTriangle className="mr-2 h-4 w-4" />
                                 Complain
                               </Link>
+                              <Link
+                                to="/account/cart"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                              >
+                                <ShoppingBag className="mr-2 h-4 w-4" />
+                                My Cart
+                              </Link>
 
                               <Link
                                 to="/account/redeem-points"
@@ -206,13 +213,6 @@ export function NavbarComponent() {
                               >
                                 <Wallet className="mr-2 h-4 w-4" />
                                 Points and Wallet
-                              </Link>
-                              <Link
-                                to="/account/history"
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                              >
-                                <HistoryIcon className="mr-2 h-4 w-4" />
-                                History
                               </Link>
                             </>
                           )}

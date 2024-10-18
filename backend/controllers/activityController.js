@@ -65,6 +65,96 @@ const getAllActivities = async (req, res) => {
   }
 };
 
+const getActivitiesByPreferences = async (req, res) => {
+  try {
+    // Fetch tourist preferences
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const {
+      budget,
+      categories,
+      historicalPlacePeriod,
+      historicalPlaceType,
+      price,
+      tourLanguages,
+      tourType,
+    } = tourist.preference;
+
+    // Apply filters based on preferences and query params
+    const {
+      startDate,
+      endDate,
+      minRating,
+      searchBy,
+      sort,
+      asc,
+      myActivities,
+    } = req.query;
+
+    const filterResult = await Activity.filter(
+      budget || price,
+      startDate,
+      endDate,
+      categories,
+      minRating
+    );
+
+    const searchResult = await Activity.findByFields(searchBy);
+
+    const searchResultIds = searchResult.map((activity) => activity._id);
+    const filterResultIds = filterResult.map((activity) => activity._id);
+
+    const query = [];
+    query.push({ _id: { $in: searchResultIds } });
+    query.push({ _id: { $in: filterResultIds } });
+
+    // Filter based on tour languages and tour type preferences
+    if (tourLanguages.length > 0) {
+      query.push({ languages: { $in: tourLanguages } });
+    }
+    if (tourType.length > 0) {
+      query.push({ type: { $in: tourType } });
+    }
+
+    // Only show future activities if 'myActivities' is not specified
+    if (!myActivities) {
+      query.push({ timing: { $gte: new Date() } });
+    }
+
+    // Filter by user activities if 'myActivities' is specified
+    if (myActivities) {
+      query.push({ advertiser: res.locals.user_id });
+    }
+
+    let activitiesQuery = Activity.find({
+      $and: query,
+    })
+      .populate("tags")
+      .populate("category")
+      .populate("attended");
+
+    // Apply sorting
+    if (sort) {
+      const sortBy = {};
+      sortBy[sort] = parseInt(asc); // Ascending (1) or Descending (-1)
+      activitiesQuery = activitiesQuery.sort(sortBy);
+    } else {
+      activitiesQuery = activitiesQuery.sort({ createdAt: -1 });
+    }
+
+    const activities = await activitiesQuery;
+
+    res.status(200).json(activities);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 const getActivityById = async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.id)
@@ -316,5 +406,6 @@ module.exports = {
   updateActivity,
   addCommentToActivity,
   rateActivity,
+  getActivitiesByPreferences,
 };
 

@@ -28,6 +28,60 @@ const getAllProducts = async (req, res) => {
     }
 
     // Perform the query
+    query.isArchived = false;
+    let productsQuery = Product.find(query);
+
+    // Apply sorting if 'asc' is defined (for sorting by rating)
+    if (asc !== undefined) {
+      const sortOrder = parseInt(asc, 10);
+      productsQuery = productsQuery.sort({ rating: sortOrder });
+    } else {
+      productsQuery = productsQuery.sort({ createdAt: -1 });
+    }
+
+    // Execute the query and get the products
+    const products = await productsQuery;
+
+    // Check if no products match the filters
+    if (!products.length) {
+      return res.status(200).json([]);
+    }
+
+    // Return filtered products
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAllProductsArchive = async (req, res) => {
+  const { minPrice, budget, searchBy, asc, myproducts } = req.query;
+
+  try {
+    // Debugging: Log incoming query parameters
+
+    // Build the query object dynamically
+    const query = {};
+
+    // Apply search filter (by name) if provided
+    if (searchBy) {
+      query.name = { $regex: searchBy, $options: "i" }; // Case-insensitive regex search
+    }
+
+    // Apply price range filter if provided
+    if (minPrice || budget) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice); // Apply minPrice if given
+      if (budget) query.price.$lte = parseFloat(budget); // Apply budget if given
+    }
+
+    // Filter by the user's products (myProducts)
+    if (myproducts) {
+      query.seller = res.locals.user_id;
+    }
+
+    // Perform the query
+    query.isArchived = true;
     let productsQuery = Product.find(query);
 
     // Apply sorting if 'asc' is defined (for sorting by rating)
@@ -200,6 +254,23 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+const archiveProduct = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(400).json({ message: "Product not found" });
+    }
+    product.isArchived = !product.isArchived;
+    await product.save();
+    res
+      .status(200)
+      .json({ message: "Product archived status toggled successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const deleteProductOfSeller = async (req, res) => {
   const { id } = req.params;
   const product = await Product.findById(id);
@@ -228,4 +299,6 @@ module.exports = {
   deleteProduct,
   deleteProductOfSeller,
   addProductByAdmin,
+  archiveProduct,
+  getAllProductsArchive,
 };

@@ -25,23 +25,13 @@ import {
 import { Button } from "@/components/ui/button";
 import PasswordChanger from "@/components/Passwords";
 import { TouristProfileComponent } from "@/components/touristProfile";
-import  FileComplaintForm  from '@/components/FileComplaintForm'
+import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from '@/pages/TouristActivities'
 // Sub-components for each section
-const AccountInfo = ({ tourist }) => (
-    <TouristProfileComponent />
-);
+const AccountInfo = ({ tourist }) => <TouristProfileComponent />;
 
-const History = ({ tourist }) => (
-  <TouristActivities />
-);
-
-const Complaint = ({ tourist }) => (
-  <div>
-  <FileComplaintForm />
-</div>
-);
+const Complaint = () => <FileComplaintForm />;
 
 const Cart = ({ tourist }) => (
   <div>
@@ -79,45 +69,39 @@ const RedeemPoints = ({ tourist, onRedeemPoints }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Redeem Loyalty Points</CardTitle>
-        <CardDescription>
-          Convert your loyalty points to wallet balance
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <p className="text-sm font-medium">
-            Available Wallet Balance:{" "}
-            <span className="text-green-600">{tourist.wallet} EGP</span>
-          </p>
-          <p className="text-sm font-medium">
-            Loyalty Points:{" "}
-            <span className="text-blue-600">
-              {tourist.loyaltyPoints} points
-            </span>
-          </p>
-        </div>
-      </CardContent>
-      <CardFooter className="flex flex-col items-stretch gap-4">
-        <Button
-          onClick={handleRedeemClick}
-          disabled={isRedeeming || tourist.loyaltyPoints === 0}
-          className="w-full"
-        >
-          {isRedeeming
-            ? "Redeeming..."
-            : `Redeem Points for ${tourist.loyaltyPoints / 100} EGP`}
-        </Button>
-        {redeemError && (
-          <p className="text-red-500 text-sm text-center">{redeemError}</p>
-        )}
-        {redeemSuccess && (
-          <p className="text-green-500 text-sm text-center">{redeemSuccess}</p>
-        )}
-      </CardFooter>
-    </Card>
+    <div className="w-full max-w-md mx-auto">
+      <h2 className="text-2xl font-semibold mb-4">Redeem Loyalty Points</h2>
+      <p className="text-sm text-gray-600 mb-4">
+        Convert your loyalty points to wallet balance
+      </p>
+      <div className="space-y-2 mb-4">
+        <p className="text-sm font-medium">
+          Available Wallet Balance:{" "}
+          <span className="text-green-600">{tourist.wallet} EGP</span>
+        </p>
+        <p className="text-sm font-medium">
+          Loyalty Points:{" "}
+          <span className="text-blue-600">{tourist.loyaltyPoints} points</span>
+        </p>
+      </div>
+      <Button
+        onClick={handleRedeemClick}
+        disabled={isRedeeming || tourist.loyaltyPoints === 0}
+        className="w-full"
+      >
+        {isRedeeming
+          ? "Redeeming..."
+          : `Redeem Points for ${tourist.loyaltyPoints / 100} EGP`}
+      </Button>
+      {redeemError && (
+        <p className="text-red-500 text-sm text-center mt-2">{redeemError}</p>
+      )}
+      {redeemSuccess && (
+        <p className="text-green-500 text-sm text-center mt-2">
+          {redeemSuccess}
+        </p>
+      )}
+    </div>
   );
 };
 
@@ -128,7 +112,6 @@ export default function AccountTourist() {
   const [tourist, setTourist] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
@@ -208,8 +191,8 @@ export default function AccountTourist() {
     switch (activeTab) {
       case "info":
         return <AccountInfo tourist={tourist} />;
-        case "complain":
-        return <Complaint tourist={tourist} />;
+      case "complain":
+        return <Complaint />;
       case "cart":
         return <Cart tourist={tourist} />;
         case "history":
@@ -221,7 +204,7 @@ export default function AccountTourist() {
       case "security":
         return <PasswordChanger />;
       case "preferences":
-        return <Preferences />;  
+        return <Preferences />;
       default:
         return <AccountInfo tourist={tourist} />;
     }

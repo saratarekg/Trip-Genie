@@ -65,6 +65,9 @@ const ProductDetail = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false); // Archive confirmation state
+  const [showArchiveSuccess, setShowArchiveSuccess] = useState(false); // Archive success state
+  const [archiveError, setArchiveError] = useState(null); // Archive error state
   const [canModify, setCanModify] = useState(false);
 
   const navigate = useNavigate();
@@ -118,6 +121,40 @@ const ProductDetail = () => {
 
   const handleUpdate = () => {
     navigate(`/update-product/${id}`);
+  };
+
+  const handleArchive = async () => {
+    setShowArchiveConfirm(false);
+    setLoading(true);
+    setArchiveError(null);
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/archiveproducts/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400) {
+          setArchiveError(errorData.message);
+          return;
+        }
+        throw new Error("Failed to archive product");
+      }
+
+      setShowArchiveSuccess(true);
+    } catch (err) {
+      setError("Error archiving product. Please try again later.");
+      console.error("Error archiving product:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -325,6 +362,18 @@ const ProductDetail = () => {
                   <Edit className="w-4 h-4 mr-2" /> Update Product
                 </Button>
               )}
+
+              {((userRole === "admin" && product.seller == null) ||
+                (userRole === "seller" && canModify)) && (
+                <Button
+                  className="w-full"
+                  variant="default"
+                  onClick={() => setShowArchiveConfirm(true)}
+                >
+                  <Edit className="w-4 h-4 mr-2" /> Archive Product
+                </Button>
+              )}
+
               {(userRole === "admin" ||
                 (userRole === "seller" && canModify)) && (
                 <Button
@@ -340,6 +389,74 @@ const ProductDetail = () => {
         </div>
       </div>
 
+      {/* Archive Confirmation Dialog */}
+      <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Archive Product</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to archive this product?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowArchiveConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="default" onClick={handleArchive}>
+              Archive
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Success Dialog */}
+      <Dialog open={showArchiveSuccess} onOpenChange={setShowArchiveSuccess}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Product Archived
+            </DialogTitle>
+            <DialogDescription>
+              The product has been successfully archived.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="default"
+              onClick={() => navigate("/product-archive")}
+            >
+              Go to archived
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Error Dialog */}
+      <Dialog
+        open={archiveError !== null}
+        onOpenChange={() => setArchiveError(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Failed to Archive Product
+            </DialogTitle>
+            <DialogDescription>{archiveError}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="default" onClick={() => setArchiveError(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
@@ -363,6 +480,7 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Success Dialog */}
       <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
         <DialogContent>
           <DialogHeader>
@@ -382,6 +500,7 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Error Dialog */}
       <Dialog
         open={deleteError !== null}
         onOpenChange={() => setDeleteError(null)}
