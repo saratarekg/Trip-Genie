@@ -8,6 +8,7 @@ import {
   Wallet,
   Lock,
   AlertTriangle,
+  HistoryIcon ,
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -24,9 +25,14 @@ import { Button } from "@/components/ui/button";
 import PasswordChanger from "@/components/Passwords";
 import { TouristProfileComponent } from "@/components/touristProfile";
 import  FileComplaintForm  from '@/components/FileComplaintForm'
+import TouristActivities from '@/pages/TouristActivities'
 // Sub-components for each section
 const AccountInfo = ({ tourist }) => (
     <TouristProfileComponent />
+);
+
+const History = ({ tourist }) => (
+  <TouristActivities />
 );
 
 const Complaint = ({ tourist }) => (
@@ -198,6 +204,8 @@ export default function AccountTourist() {
         return <Complaint tourist={tourist} />;
       case "cart":
         return <Cart tourist={tourist} />;
+        case "history":
+        return <TouristActivities tourist={tourist} />;
       case "redeem-points":
         return (
           <RedeemPoints tourist={tourist} onRedeemPoints={handleRedeemPoints} />
@@ -233,6 +241,19 @@ export default function AccountTourist() {
                 >
                   <User className="h-5 w-5 mr-3" />
                   Account
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleTabClick("history")}
+                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
+                    activeTab === "history"
+                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
+                      : ""
+                  }`}
+                >
+                  <HistoryIcon  className="h-5 w-5 mr-3" />
+                  History
                 </button>
               </li>
              
