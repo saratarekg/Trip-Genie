@@ -16,7 +16,7 @@ const getAllItineraries = async (req, res) => {
       isBooked,
     } = req.query;
 
-   // const userRole = res.locals.role; 
+  const userRole = res.locals.role; 
 
     const filterResult = await Itinerary.filter(
       budget,
