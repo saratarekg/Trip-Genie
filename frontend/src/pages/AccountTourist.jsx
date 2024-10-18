@@ -7,6 +7,7 @@ import {
   User,
   Wallet,
   Lock,
+  AlertTriangle,
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -21,13 +22,17 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import PasswordChanger from "@/components/Passwords";
-
+import { TouristProfileComponent } from "@/components/touristProfile";
+import  FileComplaintForm  from '@/components/FileComplaintForm'
 // Sub-components for each section
 const AccountInfo = ({ tourist }) => (
+    <TouristProfileComponent />
+);
+
+const Complaint = ({ tourist }) => (
   <div>
-    <h2 className="text-2xl font-semibold mb-4">Account Info</h2>
-    <p>Your account information goes here.</p>
-  </div>
+  <FileComplaintForm />
+</div>
 );
 
 const Cart = ({ tourist }) => (
@@ -110,6 +115,7 @@ export default function AccountTourist() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   const getUserRole = () => Cookies.get("role") || "guest";
 
   useEffect(() => {
@@ -188,6 +194,8 @@ export default function AccountTourist() {
     switch (activeTab) {
       case "info":
         return <AccountInfo tourist={tourist} />;
+        case "complain":
+        return <Complaint tourist={tourist} />;
       case "cart":
         return <Cart tourist={tourist} />;
       case "redeem-points":
@@ -224,7 +232,21 @@ export default function AccountTourist() {
                   }`}
                 >
                   <User className="h-5 w-5 mr-3" />
-                  Account Info
+                  Account
+                </button>
+              </li>
+             
+              <li>
+                <button
+                  onClick={() => handleTabClick("complain")}
+                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
+                    activeTab === "complain"
+                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
+                      : ""
+                  }`}
+                >
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  File a Complaint
                 </button>
               </li>
 
