@@ -20,6 +20,7 @@ import {
   Wallet,
   Lock,
   AlertTriangle,
+  Settings,
 } from "lucide-react";
 
 const NavLink = ({ to, children }) => (
@@ -215,6 +216,14 @@ export function NavbarComponent() {
                           >
                             <Lock className="h-4 w-4 mr-2" />
                             Security
+                          </Link>
+
+                          <Link
+                            to="/account/preferences"
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                          >
+                            <Settings className="h-4 w-4 mr-2" />
+                            Preferences
                           </Link>
                         </div>
                       )}

@@ -8,6 +8,7 @@ import {
   Wallet,
   Lock,
   AlertTriangle,
+  Settings,
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -24,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import PasswordChanger from "@/components/Passwords";
 import { TouristProfileComponent } from "@/components/touristProfile";
 import  FileComplaintForm  from '@/components/FileComplaintForm'
+import TravelPreferences from "@/components/TouristPreferences";
 // Sub-components for each section
 const AccountInfo = ({ tourist }) => (
     <TouristProfileComponent />
@@ -39,6 +41,12 @@ const Cart = ({ tourist }) => (
   <div>
     <h2 className="text-2xl font-semibold mb-4">My Orders</h2>
     <p>Your cart and order history goes here.</p>
+  </div>
+);
+
+const Preferences = () => (
+  <div>
+    <TravelPreferences />
   </div>
 );
 
@@ -204,6 +212,8 @@ export default function AccountTourist() {
         );
       case "security":
         return <PasswordChanger />;
+      case "preferences":
+        return <Preferences />;  
       default:
         return <AccountInfo tourist={tourist} />;
     }
@@ -289,6 +299,20 @@ export default function AccountTourist() {
                 >
                   <Lock className="h-4 w-4 mr-2" />
                   Security
+                </button>
+              </li>
+
+              <li>
+                <button
+                  onClick={() => handleTabClick("preferences")}
+                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
+                    activeTab === "preferences"
+                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
+                      : ""
+                  }`}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Preferences
                 </button>
               </li>
             </ul>
