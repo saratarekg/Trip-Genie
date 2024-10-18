@@ -94,7 +94,7 @@ export default function TouristActivities() {
               <ScrollArea className="h-[400px]">
                 {itineraries.length > 0 ? (
                   itineraries.map((booking) => (
-                    <div key={booking.id} className="mb-4">
+                    <div key={booking._id} className="mb-4">
                       <Button
                         variant="ghost"
                         className="w-full justify-start"
@@ -123,7 +123,7 @@ export default function TouristActivities() {
               <ScrollArea className="h-[400px]">
                 {activities.length > 0 ? (
                   activities.map((booking) => (
-                    <div key={booking.id} className="mb-4">
+                    <div key={booking._id} className="mb-4">
                       <Button
                         variant="ghost"
                         className="w-full justify-start"

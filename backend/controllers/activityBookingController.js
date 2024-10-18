@@ -184,7 +184,7 @@ exports.getTouristBookings = async (req, res) => {
         const bookings = await ActivityBooking.getBookingsForTourist(touristId);
 
         if (!bookings || bookings.length === 0) {
-            return res.status(400).json({ message: 'No bookings found for this tourist.' });
+            return res.status(200).json([]);
         }
 
         res.status(200).json(bookings);

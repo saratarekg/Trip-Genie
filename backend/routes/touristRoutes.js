@@ -29,6 +29,8 @@ router.get("/products/:id", productController.getProductById);
 router.get("/seller/:id", sellerController.getSellerByID);
 
 router.get("/activities", activityController.getAllActivities);
+router.get("/activities-preference", activityController.getActivitiesByPreferences);
+
 router.get("/activities/:id", activityController.getActivityById);
 
 router.post("/activities/rate/:id", activityController.rateActivity);

@@ -95,6 +95,7 @@ const TravelPreferences = () => {
       const token = Cookies.get('jwt');
       const headers = { Authorization: `Bearer ${token}` };
       
+      console.log(data.price);  
       const updatedData = {
         budget: data.budget === null ? Infinity : data.budget,
         price: data.price === null ? Infinity : data.price,
@@ -104,6 +105,8 @@ const TravelPreferences = () => {
         historicalPlaceType: data.historicalPlaceType?.map(item => item.value) || [],
         historicalPlacePeriod: data.historicalPlacePeriod?.map(item => item.value) || [],
       };
+      console.log(updatedData);
+
 
       await axios.put('http://localhost:4000/tourist/preferences', updatedData, { headers });
       setDialogMessage('Preferences updated successfully!');
@@ -266,7 +269,7 @@ const TravelPreferences = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Notification</DialogTitle>
+            <DialogTitle>Success</DialogTitle>
           </DialogHeader>
           <p>{dialogMessage}</p>
           <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
