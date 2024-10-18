@@ -22,8 +22,8 @@ import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./components/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
-import {ViewComplaints} from "./components/ViewComplaints.jsx";
-import {ViewComplaintDetails} from "./components/ViewComplaintDetails.jsx";
+import ViewComplaints from "./components/ViewComplaints.jsx";
+import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./components/signup-form.jsx";
@@ -35,7 +35,7 @@ import FileComplaint from "./pages/FileComplaint.jsx";
 // import {Cart} from "./pages/AccountTourist.jsx";
 // import {RedeemPoints} from "./pages/AccountTourist.jsx";
 // import {AccountInfo} from "./pages/AccountTourist.jsx";
- import AccountTourist from "./pages/AccountTourist.jsx";
+import AccountTourist from "./pages/AccountTourist.jsx";
 
 import UpdateActivity from "./components/UpdateActivity.jsx";
 import CreateActivity from "./pages/CreateActivity.jsx";
@@ -118,7 +118,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/account/*"
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
@@ -126,7 +126,6 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
 
           <Route
             path="/create-activity"
@@ -234,7 +233,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-            <Route
+          <Route
             path="/complaint/:id"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
