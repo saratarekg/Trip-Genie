@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import * as jwtDecode from 'jwt-decode';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
 import {
   CheckCircle,
   XCircle,
@@ -159,6 +161,9 @@ const ItineraryDetail = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [isActivated, setIsActivated] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [userBookings, setUserBookings] = useState([]);
 
   const [open, setOpen] = useState(false); // Added state for popover
   const [isToastOpen, setIsToastOpen] = useState(false);
@@ -167,6 +172,10 @@ const ItineraryDetail = () => {
     navigator.clipboard.writeText(window.location.href);
     setIsToastOpen(true);
     setOpen(false);
+  };
+
+  const calculateTotalPrice = () => {
+    return (itinerary.price * numberOfTickets).toFixed(2);
   };
 
   const handleEmailShare = () => {
@@ -181,30 +190,29 @@ const ItineraryDetail = () => {
     setBookingError("");
   };
 
-  const calculateTotalPrice = () => {
-    return (itinerary.price).toFixed(2);
-  };
 
   const handleBooking = async () => {
     setIsBooking(true);
     setBookingError("");
     try {
-      const token = Cookies.get("jwt");
-      const totalPrice = calculateTotalPrice();
-
-      const response = await fetch(`http://localhost:4000/${userRole}/itineraryBooking`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          itinerary: id,
-          paymentType,
-          paymentAmount: totalPrice,
-          numberOfTickets,
-        }),
-      });
+    const token = Cookies.get("jwt");
+    const totalPrice = calculateTotalPrice();
+    console.log(selectedTime)
+    const response = await fetch(`http://localhost:4000/${userRole}/itineraryBooking`, {
+    method: "POST",
+    headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+    itinerary: id,
+    paymentType,
+    paymentAmount: totalPrice,
+    numberOfTickets,
+    date: selectedDate,
+    time: selectedTime
+    }),
+    });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -1043,63 +1051,101 @@ const ItineraryDetail = () => {
       )}
 
 
-      <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="tickets" className="text-right">
-                Tickets
-              </Label>
-              <Input
-                id="tickets"
-                type="number"
-                value={numberOfTickets}
-                onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Total Price</Label>
-              <div className="col-span-3">${calculateTotalPrice()}</div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Payment Type</Label>
-              <RadioGroup
-                value={paymentType}
-                onValueChange={setPaymentType}
-                className="col-span-3"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="CreditCard" id="CreditCard" />
-                  <Label htmlFor="CreditCard">Credit Card</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="DebitCard" id="DebitCard" />
-                  <Label htmlFor="DebitCard">Debit Card</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Wallet" id="Wallet" />
-                  <Label htmlFor="Wallet">Wallet</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            {bookingError && (
-              <div className="text-red-500 text-sm">{bookingError}</div>
-            )}
+<Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="date" className="text-right">
+              Date
+            </Label>
+            <Select onValueChange={setSelectedDate} value={selectedDate || undefined}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select a date" />
+              </SelectTrigger>
+              <SelectContent>
+                {itinerary.availableDates.map((dateInfo, index) => (
+                  <SelectItem key={index} value={dateInfo.date}>
+                    {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <DialogFooter>
-            <Button onClick={() => setShowBookingDialog(false)} variant="outline">
-              Cancel
-            </Button>
-            <Button onClick={handleBooking} disabled={isBooking}>
-              {isBooking ? "Booking..." : "Confirm Booking"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          {selectedDate && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="time" className="text-right">
+                Time
+              </Label>
+              <Select onValueChange={setSelectedTime} value={selectedTime || undefined}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select a time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {itinerary.availableDates
+                    .find(dateInfo => dateInfo.date === selectedDate)
+                    ?.times.map((time, index) => (
+                      <SelectItem key={index} value={`${time.startTime}-${time.endTime}`}>
+                        {time.startTime} - {time.endTime}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="tickets" className="text-right">
+              Tickets
+            </Label>
+            <Input
+              id="tickets"
+              type="number"
+              value={numberOfTickets}
+              onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Total Price</Label>
+            <div className="col-span-3">${calculateTotalPrice()}</div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Payment Type</Label>
+            <RadioGroup
+              value={paymentType}
+              onValueChange={setPaymentType}
+              className="col-span-3"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="CreditCard" id="CreditCard" />
+                <Label htmlFor="CreditCard">Credit Card</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="DebitCard" id="DebitCard" />
+                <Label htmlFor="DebitCard">Debit Card</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Wallet" id="Wallet" />
+                <Label htmlFor="Wallet">Wallet</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          {bookingError && (
+            <div className="text-red-500 text-sm">{bookingError}</div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button onClick={() => setShowBookingDialog(false)} variant="outline">
+            Cancel
+          </Button>
+          <Button onClick={handleBooking} disabled={isBooking || !selectedDate || !selectedTime}>
+            {isBooking ? "Booking..." : "Confirm Booking"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-[425px]">

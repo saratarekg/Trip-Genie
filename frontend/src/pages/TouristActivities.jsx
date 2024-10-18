@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { Calendar, ChevronRight, Eye, Trash2 } from 'lucide-react'
+import { Calendar, ChevronRight, Eye, Trash2 , Clock} from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -262,16 +262,38 @@ export default function Component() {
           <h3 className="text-xl font-semibold text-gray-800">Booking Details</h3>
 
           {/* Date Row */}
-          <div className="flex items-center gap-4">
-            <Calendar className="w-5 h-5 text-gray-600" /> {/* Icon */}
-            <span className="font-medium text-lg text-gray-700">Date:</span>
-            <span className="text-gray-800 text-base">
-              {new Date(selectedBooking.activity ? selectedBooking.activity.timing : selectedBooking.itinerary.startDate).toLocaleDateString()}
-            </span>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-4">
+              <Calendar className="w-5 h-5 text-gray-600" /> {/* Icon */}
+              <span className="font-medium text-lg text-gray-700">Date:</span>
+              <span className="text-gray-800 text-base">
+                {/* Format Date */}
+                {new Date(selectedBooking.date).toLocaleDateString()}
+              </span>
+            </div>
+
+            {/* Time Row (only for itinerary) */}
+            {selectedBooking.itinerary && (
+              <div className="flex items-center gap-4">
+                <Clock className="w-5 h-5 text-gray-600" /> {/* Clock Icon */}
+                <span className="font-medium text-lg text-gray-700">Time:</span>
+                <span className="text-gray-800 text-base">
+                  {selectedBooking.time} {/* Display time on a new line */}
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Tickets Row (for Activity) */}
+          {/* Tickets Row (for both Activity and Itinerary) */}
           {selectedBooking.activity && (
+            <div className="flex items-center gap-4">
+              <Ticket className="w-5 h-5 text-gray-600" /> {/* Icon */}
+              <span className="font-medium text-lg text-gray-700">Tickets:</span>
+              <span className="text-gray-800 text-base">{selectedBooking.numberOfTickets}</span>
+            </div>
+          )}
+
+           {selectedBooking.itinerary && (
             <div className="flex items-center gap-4">
               <Ticket className="w-5 h-5 text-gray-600" /> {/* Icon */}
               <span className="font-medium text-lg text-gray-700">Tickets:</span>
@@ -297,20 +319,15 @@ export default function Component() {
             <span className="font-medium text-lg text-gray-700">Payment Type:</span>
             <span className="text-gray-800 text-base">{selectedBooking.paymentType}</span>
           </div>
-
-          {/* End Date Row (for Itinerary) */}
-          {selectedBooking.itinerary && (
-            <div className="flex items-center gap-4">
-              <Calendar className="w-5 h-5 text-gray-600" /> {/* Icon */}
-              <span className="font-medium text-lg text-gray-700">End Date:</span>
-              <span className="text-gray-800 text-base">{new Date(selectedBooking.itinerary.endDate).toLocaleDateString()}</span>
-            </div>
-          )}
         </div>
       </>
     )}
   </DialogContent>
 </Dialog>
+
+
+
+
 
 
 

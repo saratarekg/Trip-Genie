@@ -24,7 +24,7 @@ const fetchData = async (userRole, dataType) => {
   }
 }
 
-export default function TouristActivities() {
+export default function TouristAttendedActivities() {
   const [userRole, setUserRole] = useState(Cookies.get("role") || "guest")
   const [activities, setActivities] = useState([])
   const [itineraries, setItineraries] = useState([])
@@ -54,8 +54,8 @@ export default function TouristActivities() {
       setError(null)
       try {
         const [activitiesData, itinerariesData] = await Promise.all([
-          fetchData(role, 'touristActivityBookings'),
-          fetchData(role, 'touristItineraryBookings')
+          fetchData(role, 'touristActivityAttendedBookings'),
+          fetchData(role, 'touristItineraryAttendedBookings')
         ])
         setActivities(activitiesData)
         console.log(activitiesData);
