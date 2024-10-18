@@ -6,7 +6,7 @@ const Tourist = require('../models/tourist');
 exports.createBooking = async (req, res) => {
     try {
         const userId = res.locals.user_id;
-        const { itinerary, paymentType, paymentAmount, numberOfTickets } = req.body;
+        const { itinerary, paymentType, paymentAmount, numberOfTickets,date,time } = req.body;
 
         // Check if the itinerary exists
         const itineraryExists = await Itinerary.findById(itinerary);
@@ -40,7 +40,9 @@ exports.createBooking = async (req, res) => {
             paymentType,
             paymentAmount,
             user: userId,
-            numberOfTickets
+            numberOfTickets,
+            date,
+            time
         });
 
          // Calculate loyalty points based on the user's badge level
@@ -168,12 +170,34 @@ exports.getTouristBookings = async (req, res) => {
         const touristId = res.locals.user_id; // Get the user's ID from response locals
         const bookings = await ItineraryBooking.getBookingsForTourist(touristId);
 
-        if (!bookings || bookings.length === 0) {
-            return res.status(200).json([]);
+        // Filter bookings to include only upcoming ones
+        const upcomingBookings = bookings.filter(booking => new Date(booking.date) > new Date());
+
+        if (!upcomingBookings || upcomingBookings.length === 0) {
+            return res.status(200).json([]); // Return empty array if no upcoming bookings
         }
 
-        res.status(200).json(bookings);
+        res.status(200).json(upcomingBookings); // Respond with upcoming bookings
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message }); // Handle errors
     }
 };
+
+exports.getTouristAttendedItineraries = async (req, res) => {
+    try {
+        const touristId = res.locals.user_id; // Get the user's ID from response locals
+        const itineraries = await ItineraryBooking.getBookingsForTourist(touristId); // Fetch all bookings
+
+        // Filter itineraries to include only those with past dates
+        const attendedItineraries = itineraries.filter(itinerary => new Date(itinerary.date) < new Date());
+
+        if (!attendedItineraries || attendedItineraries.length === 0) {
+            return res.status(200).json([]); // Return empty array if no attended itineraries
+        }
+
+        res.status(200).json(attendedItineraries); // Respond with attended itineraries
+    } catch (error) {
+        res.status(500).json({ message: error.message }); // Handle errors
+    }
+};
+

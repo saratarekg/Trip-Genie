@@ -157,6 +157,7 @@ const ActivityDetail = () => {
   const [bookingError, setBookingError] = useState("");
   const [open, setOpen] = useState(false); // Added state for popover
   const [isToastOpen, setIsToastOpen] = useState(false);
+  const [userBookings, setUserBookings] = useState([]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -292,45 +293,57 @@ const ActivityDetail = () => {
       }
     };
 
-    const fetchUserBooking = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const decodedToken = jwtDecode(token);
-        const userId = decodedToken.id;
-        const response = await axios.get(`http://localhost:4000/${userRole}/touristActivityBookings`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const userBookings = response.data;
+    // const fetchUserBooking = async () => {
+    //   try {
+    //     const token = Cookies.get("jwt");
+    //     const decodedToken = jwtDecode(token);
+    //     const userId = decodedToken.id;
+    //     const response = await axios.get(`http://localhost:4000/${userRole}/touristActivityBookings`, {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     });
+    //     const userBookings = response.data;
         
-    const existingBooking = userBookings.find(booking => {
-      console.log(`Checking booking for activity: ${booking.activity._id}`);
-      console.log(`Comparing with id: ${id}`);
-      console.log(`Are they equal? ${booking.activity._id === id}`);
+    // const existingBooking = userBookings.find(booking => {
+    //   console.log(`Checking booking for activity: ${booking.activity._id}`);
+    //   console.log(`Comparing with id: ${id}`);
+    //   console.log(`Are they equal? ${booking.activity._id === id}`);
 
-      // Check if the activity ID matches the provided ID
-      return booking.activity._id === id;
-    });
+    //   // Check if the activity ID matches the provided ID
+    //   return booking.activity._id === id;
+    // });
 
-    if (existingBooking) {
-      setUserBooking(existingBooking);
-      setBooked(true);
-      console.log('Existing Booking:', existingBooking);
-    } else {
-      // If no booking matches, set userBooking to an empty array or handle it as needed
-      setUserBooking([]);
-      setBooked(false);
-      console.log('No matching booking found, setting userBooking to an empty array.');
-    }
+    // if (existingBooking) {
+    //   setUserBooking(existingBooking);
+    //   setBooked(true);
+    //   console.log('Existing Booking:', existingBooking);
+    // } else {
+    //   // If no booking matches, set userBooking to an empty array or handle it as needed
+    //   setUserBooking([]);
+    //   setBooked(false);
+    //   console.log('No matching booking found, setting userBooking to an empty array.');
+    // }
 
+    //   } catch (error) {
+    //     console.error("Error fetching user booking:", error);
+    //   }
+    // };
+    const fetchUserBookings = async () => {
+      try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/touristActivityAttendedBookings`, {
+      headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserBookings(response.data);
       } catch (error) {
-        console.error("Error fetching user booking:", error);
+      console.error("Error fetching user bookings:", error);
       }
-    };
+      };
+
 
     fetchActivityDetails();
     if (userRole === 'tourist') {
-      fetchUserBooking();
-    }
+      fetchUserBookings();
+      }
     fetchActivityDetails();
   }, [id, userRole]);
 
@@ -894,19 +907,17 @@ const ActivityDetail = () => {
             ) : (
               <p>No comments yet.</p>
             )}
-            {hasAttended && (
-              <>
-                <Button onClick={() => setShowAddReview(true)} className="mt-4">
-                  Write a review
-                </Button>
-                <Button
-                  onClick={() => setShowRatingDialog(true)}
-                  className="mt-2 ml-3"
-                >
-                  Rate Activity
-                </Button>
-              </>
-            )}
+          {userBookings.some(booking => booking.activity._id === activity._id) && (
+  <>
+    <Button onClick={() => setShowAddReview(true)} className="mt-4">
+      Write a review
+    </Button>
+    <Button onClick={() => setShowRatingDialog(true)} className="mt-2 ml-3">
+      Rate Activity
+    </Button>
+  </>
+)}
+
           </div>
         </div>
 

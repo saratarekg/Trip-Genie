@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   Settings,
   HistoryIcon ,
+  Calendar,
 } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -28,9 +29,12 @@ import { TouristProfileComponent } from "@/components/touristProfile";
 import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from '@/pages/TouristActivities'
+import TouristAttendedActivities from '@/pages/TouristAttended'
 // Sub-components for each section
 const AccountInfo = ({ tourist }) => <TouristProfileComponent />;
 
+const Upcoming = ({ tourist }) => <TouristActivities />;
+const History = ({ tourist }) => <TouristAttendedActivities />;
 const Complaint = () => <FileComplaintForm />;
 
 const Cart = ({ tourist }) => (
@@ -196,7 +200,9 @@ export default function AccountTourist() {
       case "cart":
         return <Cart tourist={tourist} />;
         case "history":
-        return <TouristActivities tourist={tourist} />;
+        return <TouristAttendedActivities tourist={tourist} />;
+        case "upcoming":
+          return <TouristActivities tourist={tourist} />;
       case "redeem-points":
         return (
           <RedeemPoints tourist={tourist} onRedeemPoints={handleRedeemPoints} />
@@ -247,6 +253,20 @@ export default function AccountTourist() {
                 >
                   <HistoryIcon  className="h-5 w-5 mr-3" />
                   History
+                </button>
+              </li>
+
+              <li>
+                <button
+                  onClick={() => handleTabClick("upcoming")}
+                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
+                    activeTab === "upcoming"
+                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
+                      : ""
+                  }`}
+                >
+                  <Calendar   className="h-5 w-5 mr-3" />
+                  Upcoming Bookings
                 </button>
               </li>
              

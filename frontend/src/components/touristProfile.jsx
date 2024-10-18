@@ -316,41 +316,22 @@ export function TouristProfileComponent() {
             <span>{new Date(tourist.dateOfBirth).toLocaleDateString()}</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <GraduationCap className="w-4 h-4 text-gray-500" />
-            {isEditing ? (
-              <div className="flex flex-col w-full">
-                <Select
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-gray-500" />
+              {isEditing ? (
+                <Input
+                  type="jobOrStudent"
                   name="jobOrStudent"
-                  onValueChange={(value) =>
-                    handleInputChange({
-                      target: { name: "jobOrStudent", value },
-                    })
-                  }
-                >
-                  <SelectTrigger
-                    className={
-                      validationMessages.jobOrStudent ? "border-red-500" : ""
-                    }
-                  >
-                    <SelectValue placeholder={tourist.jobOrStudent} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Job">Job</SelectItem>
-                    <SelectItem value="Student">Student</SelectItem>
-                    <SelectItem value="Both">Both</SelectItem>
-                    <SelectItem value="None">None</SelectItem>
-                  </SelectContent>
-                </Select>
-                {validationMessages.jobOrStudent && (
-                  <span className="text-red-500 text-sm">
-                    {validationMessages.jobOrStudent}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <span>{tourist.jobOrStudent}</span>
-            )}
+                  value={editedTourist.jobOrStudent}
+                  onChange={handleInputChange}
+                  // className={validationMessages.email ? "border-red-500" : ""}
+                  placeholder="Occupation/Student"
+                />
+              ) : (
+                <span>{tourist.jobOrStudent}</span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">

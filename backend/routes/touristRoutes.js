@@ -62,12 +62,14 @@ router.get("/activityBooking", activityBookingController.getAllBookings);
 router.delete("/activityBooking/:id", activityBookingController.deleteBooking);
 router.post("/activityBooking", activityBookingController.createBooking);
 router.get('/touristActivityBookings', activityBookingController.getTouristBookings);
+router.get('/touristActivityAttendedBookings', activityBookingController.getTouristAttendedBookings);
 router.put('/activityBooking/:id', activityBookingController.updateBooking);
 
 router.get("/itineraryBooking", itineraryBookingController.getAllBookings);
 router.delete("/irineraryBooking/:id", itineraryBookingController.deleteBooking);
 router.post("/itineraryBooking", itineraryBookingController.createBooking);
 router.get('/touristItineraryBookings', itineraryBookingController.getTouristBookings);
+router.get('/touristItineraryAttendedBookings', itineraryBookingController.getTouristAttendedItineraries);
 
 router.post("/password", touristController.changePassword);
 router.post("/complaint", complaintsController.addComplaint);
