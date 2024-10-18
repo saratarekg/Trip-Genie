@@ -43,41 +43,74 @@ exports.createBooking = async (req, res) => {
             numberOfTickets
         });
 
+         // Calculate loyalty points based on the user's badge level
+         const loyaltyPoints = calculateLoyaltyPoints(paymentAmount, user.loyaltyBadge); 
+
+         // Update total points and loyalty points using findByIdAndUpdate
+         const totalPoints = user.totalPoints + loyaltyPoints; // Calculate total points
+         
+         // Update the tourist's record in the database
+         const updatedTourist = await Tourist.findByIdAndUpdate(
+             userId,
+             {
+                 $inc: {
+                     totalPoints: loyaltyPoints,   // Increment total points
+                     loyaltyPoints: loyaltyPoints   // Increment current loyalty points
+                 },
+                 loyaltyBadge: determineBadgeLevel(totalPoints) ,
+                 wallet: walletBalance
+             },
+             { new: true, runValidators: true }
+         );
+ 
+         if (!updatedTourist) {
+             return res.status(400).json({ message: "Tourist not found" });
+         }
+
         await newBooking.save();
         res.status(201).json({ message: 'Booking created successfully', booking: newBooking });
 
-        // Calculate loyalty points based on the user's badge level
-        const loyaltyPoints = calculateLoyaltyPoints(paymentAmount, user.loyaltyBadge); 
+       
 
-        // Update total points and loyalty points using findByIdAndUpdate
-        const totalPoints = user.totalPoints + loyaltyPoints; // Calculate total points
-        
-        // Update the tourist's record in the database
-        const updatedTourist = await Tourist.findByIdAndUpdate(
-            userId,
-            {
-                $inc: {
-                    totalPoints: loyaltyPoints,   // Increment total points
-                    loyaltyPoints: loyaltyPoints   // Increment current loyalty points
-                },
-                loyaltyBadge: determineBadgeLevel(totalPoints) ,
-                wallet: walletBalance
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedTourist) {
-            return res.status(404).json({ message: "Tourist not found" });
-        }
-
-        // Respond with the updated booking and tourist profile
-        res.status(201).json({
-            message: "Booking created successfully",
-            booking: newBooking,
-            tourist: updatedTourist,
-        });
+       
+     
     } catch (error) {
+        console.log(error.message);
         res.status(500).json({ message: 'Failed to create booking', error: error.message });
+    }
+};
+
+const calculateLoyaltyPoints = (paymentAmount, badgeLevel) => {
+    let pointsMultiplier = 0;
+
+    // Determine points multiplier based on badge level
+    switch (badgeLevel) {
+        case 'Bronze':
+            pointsMultiplier = 0.5; // 50% of amount paid
+            break;
+        case 'Silver':
+            pointsMultiplier = 1.0; // 100% of amount paid
+            break;
+        case 'Gold':
+            pointsMultiplier = 1.5; // 150% of amount paid
+            break;
+        default:
+            pointsMultiplier = 0; // No points if badge level is unrecognized
+            break;
+    }
+
+    // Calculate and return the loyalty points
+    return paymentAmount * pointsMultiplier;
+};
+
+// Function to determine badge level based on total points
+const determineBadgeLevel = (totalPoints) => {
+    if (totalPoints <= 100000) {
+        return 'Bronze';
+    } else if (totalPoints <= 500000) {
+        return 'Silver';
+    } else {
+        return 'Gold';
     }
 };
 

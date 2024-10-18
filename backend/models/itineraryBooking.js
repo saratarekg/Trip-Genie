@@ -27,14 +27,14 @@ const itineraryBookingSchema = new Schema({
     }
 }, { timestamps: true });
 
-// itineraryBookingSchema.statics.getBookingsForTourist = async function(touristId) {
-//     try {
-//         const bookings = await this.find({ user: touristId });
-//         return bookings;
-//     } catch (err) {
-//         throw new Error('Error fetching bookings for tourist: ' + err.message);
-//     }
-// };
+itineraryBookingSchema.statics.getBookingsForTourist = async function(touristId) {
+    try {
+        const bookings = await this.find({ user: touristId });
+        return bookings;
+    } catch (err) {
+        throw new Error('Error fetching bookings for tourist: ' + err.message);
+    }
+};
 
 
 module.exports = mongoose.model('Itinerary Booking', itineraryBookingSchema);
