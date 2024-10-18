@@ -29,7 +29,7 @@ const itineraryBookingSchema = new Schema({
 
 itineraryBookingSchema.statics.getBookingsForTourist = async function(touristId) {
     try {
-        const bookings = await this.find({ user: touristId });
+        const bookings = await this.find({ user: touristId }).populate('itinerary');
         return bookings;
     } catch (err) {
         throw new Error('Error fetching bookings for tourist: ' + err.message);

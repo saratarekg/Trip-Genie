@@ -41,7 +41,7 @@ export default function TouristActivities() {
   };
   const handleItineraryClick = (id) => {
    
-    navigate(`/itineraries/${id}`);
+    navigate(`/itinerary/${id}`);
   
   };
 
@@ -94,14 +94,14 @@ export default function TouristActivities() {
               <ScrollArea className="h-[400px]">
                 {itineraries.length > 0 ? (
                   itineraries.map((booking) => (
-                    <div key={booking.itinerary.id} className="mb-4">
+                    <div key={booking.id} className="mb-4">
                       <Button
                         variant="ghost"
                         className="w-full justify-start"
                         onClick={() => handleItineraryClick(booking.itinerary._id)}
                       >
                         <Calendar className="mr-2 h-4 w-4" />
-                        {booking.itinerary.name}
+                        {booking.itinerary.title}
                       </Button>
                       <Separator className="my-2" />
                     </div>
