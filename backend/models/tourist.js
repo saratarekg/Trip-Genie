@@ -62,6 +62,10 @@ const touristSchema = new Schema(
       type: Number,
       default: 0,
     },
+    totalPoints: {
+      type: Number,
+      default: 0,
+    },
     loyaltyBadge: {
       type: String,
       enum: ["Bronze", "Silver", "Gold"],
