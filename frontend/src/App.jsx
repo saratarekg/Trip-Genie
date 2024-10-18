@@ -46,6 +46,8 @@ import CreateHtpage from "./pages/CreateHtpage.jsx";
 import NotFound from "./components/NotFound.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import TouristActivities from "./pages/TouristActivities.jsx";
+import { ProductArchive } from "./components/product-archive.jsx";
+
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -94,7 +96,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/touristActivity"
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
@@ -214,6 +216,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/all-historical-places"
             element={
@@ -338,7 +341,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/product-archive"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "seller"]}>
+                <ProductArchive />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
 
           {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}

@@ -23,7 +23,7 @@ router.put(
   upload.array("pictures", 5),
   productController.editProductOfSeller
 );
-
+router.put("/archiveproducts/:id", productController.archiveProduct);
 router.post("/password", sellerController.changePassword);
 
 module.exports = router;
