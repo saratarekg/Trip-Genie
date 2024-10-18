@@ -88,7 +88,6 @@ export default function FileComplaintForm() {
   return (
     <div className="flex justify-center items-start h-screen">
       <form
-        className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-20 mb-20 space-y-4"
         onSubmit={handleSubmit(onSubmit)}
       >
         <h2 className="text-xl font-semibold mb-4 text-center">File Complaint</h2>
