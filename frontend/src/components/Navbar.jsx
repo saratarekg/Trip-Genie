@@ -19,6 +19,7 @@ import {
   LogOut,
   Wallet,
   Lock,
+  AlertTriangle,
 } from "lucide-react";
 
 const NavLink = ({ to, children }) => (
@@ -103,8 +104,8 @@ export function NavbarComponent() {
                         Historical Places
                       </NavLink>
                       <NavLink to="/all-products">Products</NavLink>
-                      <NavLink to="/tourist-profile">Profile</NavLink>
-                      <NavLink to="/file-complaint">Complaint</NavLink>
+                      {/* <NavLink to="/tourist-profile">Profile</NavLink>
+                      <NavLink to="/file-complaint">Complaint</NavLink> */}
                     </>
                   )}
                   {role === "advertiser" && (
@@ -189,6 +190,13 @@ export function NavbarComponent() {
                               >
                                 <ShoppingBag className="mr-2 h-4 w-4" />
                                 My Cart
+                              </Link>
+                              <Link
+                                to="/account/complain"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                              >
+                                <AlertTriangle className="mr-2 h-4 w-4" />
+                                Complain
                               </Link>
 
                               <Link

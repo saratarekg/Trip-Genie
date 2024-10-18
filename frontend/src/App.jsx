@@ -45,7 +45,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
 import CreateHtpage from "./pages/CreateHtpage.jsx";
 import NotFound from "./components/NotFound.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
-
+import TouristActivities from "./pages/TouristActivities.jsx";
 function ScrollToTop() {
   const { pathname } = useLocation();
 
@@ -91,6 +91,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tourism-governor"]}>
                 <CreateHpPage />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/touristActivity"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <TouristActivities />
               </ProtectedRoute>
             }
           />

@@ -100,18 +100,6 @@ const touristSchema = new Schema(
         default: [], // Default to an empty array for historical place periods
       },
     },
-    activitiesBooked: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Activity",
-      },
-    ],
-      itinerariesBooked: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Itinerary",
-        },
-      ]
   },
   { timestamps: true }
 );

@@ -30,7 +30,8 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
-  const phoneNumber = parsePhoneNumberFromString(value);
+  console.log(value);
+  const phoneNumber = parsePhoneNumberFromString("+" + value);
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
@@ -124,6 +125,7 @@ export function TouristProfileComponent() {
     if (!validateFields()) return;
 
     try {
+      editedTourist.mobile = "+" + editedTourist.mobile;
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const api = `http://localhost:4000/${role}`;
@@ -185,29 +187,35 @@ export function TouristProfileComponent() {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden relative">
-      <div className="absolute top-4 right-4 pt-6 pr-10">
-        <Badge
-          className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}
-        >
-          <Award className="w-6 h-6" />
-          {tourist.loyaltyBadge}
-        </Badge>
-      </div>
+    <div >
+      
 
       <div className="p-8">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">
+      <div className="flex items-center gap-4 mb-6">
+    <div className="flex-shrink-0">
+        <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">
             <User className="w-12 h-12 text-white" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold mb-1">{tourist.username}</h2>
-            <div className="flex items-center gap-2 mb-4">
-              <AtSign className="w-4 h-4 text-gray-500" />
-              <p className="text-2xl font-semibold">{tourist.username}</p>
-            </div>
-          </div>
         </div>
+    </div>
+
+    <div className="flex flex-col flex-grow">
+        <h2 className="text-3xl font-bold mb-1">{tourist.username}</h2>
+        <div className="flex items-center gap-2 mb-4">
+            <AtSign className="w-4 h-4 text-gray-500" />
+            <p className="text-2xl font-semibold">{tourist.username}</p>
+        </div>
+    </div>
+
+    <div className="flex-shrink-0">
+        <Badge
+            className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}
+        >
+            <Award className="w-6 h-6" />
+            {tourist.loyaltyBadge}
+        </Badge>
+    </div>
+</div>
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="flex flex-col">

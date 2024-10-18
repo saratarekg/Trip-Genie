@@ -27,4 +27,13 @@ const activityBookingSchema = new Schema({
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Activity Booking', activityBookingSchema);
+activityBookingSchema.statics.getBookingsForTourist = async function(touristId) {
+    try {
+        const bookings = await this.find({ user: touristId }).populate('activity');
+        return bookings;
+    } catch (err) {
+        throw new Error('Error fetching bookings for tourist: ' + err.message);
+    }
+};
+
+module.exports = mongoose.model('ActivityBooking', activityBookingSchema);
