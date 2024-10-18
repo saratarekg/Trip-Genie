@@ -8,7 +8,8 @@ import Loader from "../components/Loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Toast } from "@/components/ui/toast";
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -46,6 +47,8 @@ import {
   ChevronDown,
   Send,
   Tag,
+  Share2,
+  Link,
   Smile,
   Frown,
 } from "lucide-react";
@@ -148,6 +151,21 @@ const ActivityDetail = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState("");
+  const [open, setOpen] = useState(false); // Added state for popover
+  const [isToastOpen, setIsToastOpen] = useState(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsToastOpen(true);
+    setOpen(false);
+  };
+
+  const handleEmailShare = () => {
+    const subject = encodeURIComponent(`Check out this activity: ${activity.name}`);
+    const body = encodeURIComponent(`I thought you might be interested in this activity:\n\n${activity.name}\n\n${window.location.href}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    setOpen(false); // Close the popover
+  };
 
   const handleBookNowClick = () => {
     setShowBookingDialog(true);
@@ -547,6 +565,55 @@ const ActivityDetail = () => {
                         })}
                       </span>
                     </div>
+
+
+
+                    <div>
+                    <ToastProvider>
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="ml-auto">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <div className="flex flex-col">
+                      <Button
+                        variant="ghost"
+                        onClick={handleCopyLink}
+                        className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                      >
+                        <Link className="mr-2 h-4 w-4" />
+                        Copy Link
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={handleEmailShare}
+                        className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                      >
+                        <Mail className="mr-2 h-4 w-4" />
+                        Share by Email
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                <ToastViewport />
+
+                {isToastOpen && (
+                  <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
+                    <ToastTitle>Link Copied</ToastTitle>
+                    <ToastDescription>
+                      The link has been copied to your clipboard.
+                    </ToastDescription>
+                    <ToastClose />
+                  </Toast>
+                )}
+              </ToastProvider>
+                    </div>
+
+
+
                     <div className="flex items-center">
                       <Map
                         position={[
