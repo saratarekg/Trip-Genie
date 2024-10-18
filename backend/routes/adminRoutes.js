@@ -11,6 +11,9 @@ const productController = require("../controllers/productController");
 const historicalTagController = require("../controllers/historicalTagController");
 const complaintsController = require("../controllers/complaintsController.js");
 const itineraryController = require("../controllers/itineraryController.js");
+const multer = require("multer");
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 
@@ -84,12 +87,19 @@ router.put("/categories/:id", categoryController.updateCategory);
 
 router.get("/products", productController.getAllProducts);
 router.post("/products", productController.addProductByAdmin);
-router.get("/products/:id", productController.getProductById);
-router.put("/products/:id", productController.editProduct);
+router.get(
+  "/products/:id",
+  upload.array("pictures", 5),
+  productController.getProductById
+);
+router.put(
+  "/products/:id",
+  upload.array("pictures", 5),
+  productController.editProduct
+);
 router.delete("/products/:id", productController.deleteProduct);
 
 router.get("/complaints", complaintsController.getAllComplaints);
-
 
 router.get("/complaint/:id", complaintsController.getComplaintDetails);
 
@@ -97,6 +107,5 @@ router.put("/itineraries/:id", itineraryController.flagItinerary);
 router.get("/itineraries", itineraryController.getAllItinerariesAdmin);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 router.post("/password", adminController.changePassword);
-
 
 module.exports = router;

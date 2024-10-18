@@ -1,18 +1,39 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import Cookies from 'js-cookie';
-import { ChevronLeft, Check } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from "react";
+import Cookies from "js-cookie";
+import { ChevronLeft, Check, X } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
-    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
+    <svg
+      className="spinner"
+      width="65px"
+      height="65px"
+      viewBox="0 0 66 66"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        className="path"
+        fill="none"
+        strokeWidth="6"
+        strokeLinecap="round"
+        cx="33"
+        cy="33"
+        r="30"
+      ></circle>
     </svg>
   </div>
 );
@@ -20,28 +41,34 @@ const LoadingSpinner = () => (
 const UpdateProduct = () => {
   const { id } = useParams();
   const [product, setProduct] = useState({
-    name: '',
-    price: '',
-    description: '',
-    quantity: '',
+    name: "",
+    price: "",
+    description: "",
+    quantity: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [pictures, setPictures] = useState([]);
+  const [newPictures, setNewPictures] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProductDetails = async () => {
       setLoading(true);
       try {
-        const token = Cookies.get('jwt');
-        const response = await fetch(`http://localhost:4000/${userRole}/products/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/products/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch data');
+          throw new Error("Failed to fetch data");
         }
 
         const productData = await response.json();
@@ -51,10 +78,11 @@ const UpdateProduct = () => {
           description: productData.description,
           quantity: productData.quantity.toString(),
         });
+        setPictures(productData.pictures || []);
         setError(null);
       } catch (err) {
-        setError('Error fetching data. Please try again later.');
-        console.error('Error fetching data:', err);
+        setError("Error fetching data. Please try again later.");
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
@@ -68,12 +96,46 @@ const UpdateProduct = () => {
     setProduct((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePicturesUpload = (e) => {
+    const files = e.target.files;
+    if (files) {
+      const readers = [];
+      const newPicturesArray = [];
+
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        readers.push(
+          new Promise((resolve) => {
+            reader.onloadend = () => {
+              newPicturesArray.push(reader.result);
+              resolve();
+            };
+            reader.readAsDataURL(file);
+          })
+        );
+      });
+
+      Promise.all(readers).then(() => {
+        setNewPictures([...newPictures, ...newPicturesArray]);
+      });
+    }
+  };
+
+  const removePicture = (index, isNewPicture) => {
+    if (isNewPicture) {
+      setNewPictures(newPictures.filter((_, i) => i !== index));
+    } else {
+      setPictures(pictures.filter((_, i) => i !== index));
+    }
+    setSelectedImage(null);
+  };
+
   const isFormValid = useMemo(() => {
     return (
-      product.name.trim() !== '' &&
-      product.description.trim() !== '' &&
-      product.price !== '' &&
-      product.quantity !== '' &&
+      product.name.trim() !== "" &&
+      product.description.trim() !== "" &&
+      product.price !== "" &&
+      product.quantity !== "" &&
       !isNaN(parseFloat(product.price)) &&
       parseFloat(product.price) >= 0
     );
@@ -81,34 +143,43 @@ const UpdateProduct = () => {
 
   const handleUpdate = async () => {
     if (!isFormValid) {
-      setError('Please fill in all fields correctly before updating.');
+      setError("Please fill in all fields correctly before updating.");
       return;
     }
 
     setLoading(true);
     try {
-      const token = Cookies.get('jwt');
-      const response = await fetch(`http://localhost:4000/${userRole}/products/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...product,
-          price: parseFloat(product.price),
-        }),
+      const token = Cookies.get("jwt");
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("price", product.price);
+      formData.append("description", product.description);
+      formData.append("quantity", product.quantity);
+
+      [...pictures, ...newPictures].forEach((picture, index) => {
+        formData.append("pictures", picture);
       });
 
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/products/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to update product');
+        throw new Error("Failed to update product");
       }
 
       setShowSuccessPopup(true);
       setError(null);
     } catch (err) {
-      setError('Error updating product. Please try again later.');
-      console.error('Error updating product:', err);
+      setError("Error updating product. Please try again later.");
+      console.error("Error updating product:", err);
     } finally {
       setLoading(false);
     }
@@ -137,9 +208,9 @@ const UpdateProduct = () => {
                   name="name"
                   value={product.name}
                   onChange={handleChange}
-                  className={product.name.trim() === '' ? 'border-red-500' : ''}
+                  className={product.name.trim() === "" ? "border-red-500" : ""}
                 />
-                {product.name.trim() === '' && (
+                {product.name.trim() === "" && (
                   <p className="text-red-500 text-sm mt-1">Name is required</p>
                 )}
               </div>
@@ -151,10 +222,20 @@ const UpdateProduct = () => {
                   type="number"
                   value={product.price}
                   onChange={handleChange}
-                  className={product.price === '' || isNaN(parseFloat(product.price)) || parseFloat(product.price) < 0 ? 'border-red-500' : ''}
+                  className={
+                    product.price === "" ||
+                    isNaN(parseFloat(product.price)) ||
+                    parseFloat(product.price) < 0
+                      ? "border-red-500"
+                      : ""
+                  }
                 />
-                {(product.price === '' || isNaN(parseFloat(product.price)) || parseFloat(product.price) < 0) && (
-                  <p className="text-red-500 text-sm mt-1">Price must be a non-negative number</p>
+                {(product.price === "" ||
+                  isNaN(parseFloat(product.price)) ||
+                  parseFloat(product.price) < 0) && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Price must be a non-negative number
+                  </p>
                 )}
               </div>
               <div>
@@ -165,10 +246,14 @@ const UpdateProduct = () => {
                   value={product.description}
                   onChange={handleChange}
                   rows={5}
-                  className={product.description.trim() === '' ? 'border-red-500' : ''}
+                  className={
+                    product.description.trim() === "" ? "border-red-500" : ""
+                  }
                 />
-                {product.description.trim() === '' && (
-                  <p className="text-red-500 text-sm mt-1">Description is required</p>
+                {product.description.trim() === "" && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Description is required
+                  </p>
                 )}
               </div>
               <div>
@@ -179,26 +264,74 @@ const UpdateProduct = () => {
                   type="number"
                   value={product.quantity}
                   onChange={handleChange}
-                  className={product.quantity === '' ? 'border-red-500' : ''}
+                  className={product.quantity === "" ? "border-red-500" : ""}
                 />
-                {product.quantity === '' && (
-                  <p className="text-red-500 text-sm mt-1">Quantity is required</p>
+                {product.quantity === "" && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Quantity is required
+                  </p>
                 )}
-
-                {product.quantity !== '' && parseInt(product.quantity) < 0 && (
-                  <p className="text-red-500 text-sm mt-1">Quantity must be a non-negative number</p>
+                {product.quantity !== "" && parseInt(product.quantity) < 0 && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Quantity must be a non-negative number
+                  </p>
                 )}
-
+              </div>
+              <div>
+                <Label htmlFor="pictures">Add New Pictures</Label>
+                <Input
+                  id="pictures"
+                  type="file"
+                  multiple
+                  onChange={handlePicturesUpload}
+                  className="mb-2"
+                />
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  {pictures.map((picture, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={picture}
+                        alt={`Product ${index + 1}`}
+                        className="w-full h-32 object-cover rounded cursor-pointer"
+                        onClick={() => setSelectedImage(picture)}
+                      />
+                      <button
+                        onClick={() => removePicture(index, false)}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                  {newPictures.map((picture, index) => (
+                    <div key={`new-${index}`} className="relative">
+                      <img
+                        src={picture}
+                        alt={`New Product ${index + 1}`}
+                        className="w-full h-32 object-cover rounded cursor-pointer"
+                        onClick={() => setSelectedImage(picture)}
+                      />
+                      <button
+                        onClick={() => removePicture(index, true)}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-
-
+              </div>
             </div>
 
-            <div className="mt-8 flex justify-end"> {/* Use justify-end to align items to the right */}
-            <Button  variant="default" onClick={handleUpdate} disabled={!isFormValid}>
-              Update Product
-            </Button>
-          </div>
+            <div className="mt-8 flex justify-end">
+              <Button
+                variant="default"
+                onClick={handleUpdate}
+                disabled={!isFormValid}
+              >
+                Update Product
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -215,12 +348,27 @@ const UpdateProduct = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate('/all-products')}>
+            <Button onClick={() => navigate("/all-products")}>
               Back to All Products
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {selectedImage && (
+        <Dialog
+          open={!!selectedImage}
+          onOpenChange={() => setSelectedImage(null)}
+        >
+          <DialogContent className="sm:max-w-[80vw] sm:max-h-[80vh]">
+            <img
+              src={selectedImage}
+              alt="Full size product"
+              className="w-full h-full object-contain"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

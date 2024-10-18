@@ -1,57 +1,40 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-  } from "@/components/ui/dialog";
-  import {
-    XCircle,
-    CheckCircle,
-    ChevronLeft,
-    Calendar,
-    MapPin,
-    Users,
-    DollarSign,
-    Globe,
-    Accessibility,
-    Star,
-    Edit,
-    Trash2,
-    Mail,
-    Phone,
-    Award,
-    Clock,
-    Info,
-  } from 'lucide-react';
-  import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { role } from '@/pages/login';
-// Form validation schema using zod
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
 const formSchema = z.object({
-  name: z.string().min(1, 'Please enter a product name'),
-  picture: z.string().url('Please enter a valid URL for the picture').min(1, 'Picture URL is required'),
-  price: z.number().min(1, 'Please enter a valid price'),
-  description: z.string().min(1, 'Please enter a description'),
-  quantity: z.number().min(1, 'Please enter a valid quantity'),
+  name: z.string().min(1, "Please enter a product name"),
+  price: z.number().min(1, "Please enter a valid price"),
+  description: z.string().min(1, "Please enter a description"),
+  quantity: z.number().min(1, "Please enter a valid quantity"),
 });
 
 const CreateProductForm = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [showDialog, setShowDialog] = useState(false);
-  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest');
+  const [pictures, setPictures] = useState([]);
+  const navigate = useNavigate();
+  const userRole = Cookies.get("role") || "guest";
+
   const {
     register,
     handleSubmit,
@@ -59,16 +42,83 @@ const CreateProductForm = () => {
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      picture: '',
-      price: '',
-      description: '',
-      quantity: '',
+      name: "",
+      price: "",
+      description: "",
+      quantity: "",
     },
   });
+
+  const handlePicturesUpload = (e) => {
+    const files = e.target.files; // This is a FileList
+    if (files) {
+      const readers = []; // To keep track of all FileReader promises
+      const newPictures = []; // Array to store base64 strings
+
+      // Loop over each file
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        readers.push(
+          new Promise((resolve) => {
+            reader.onloadend = () => {
+              newPictures.push(reader.result); // Store base64 image
+              resolve();
+            };
+            reader.readAsDataURL(file);
+          })
+        );
+      });
+
+      // Once all FileReaders are done, update state
+      Promise.all(readers).then(() => {
+        setPictures([...pictures, ...newPictures]);
+      });
+    }
+  };
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("price", data.price);
+    formData.append("description", data.description);
+    formData.append("quantity", data.quantity);
+    pictures.forEach((picture) => {
+      formData.append("pictures", picture);
+    });
+
+    const token = Cookies.get("jwt");
+    try {
+      const response = await axios.post(
+        `http://localhost:4000/${userRole}/products`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Server response:", response.data);
+      setSuccess("Product created successfully!");
+      setShowDialog(true);
+    } catch (err) {
+      setError("Failed to create product. Please try again.");
+      console.error(
+        "Error creating product:",
+        err.response ? err.response.data : err.message
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGoBack = () => {
     setShowDialog(false);
-    navigate('/all-products');
+    navigate("/all-products");
   };
 
   const handleCreateNew = () => {
@@ -76,142 +126,92 @@ const CreateProductForm = () => {
     window.location.reload();
   };
 
-  const onSubmit = async (data) => {
-  
-    setLoading(true);
-    setShowDialog(true);
-    setError('');
-    setSuccess('');
-
-    const token = Cookies.get('jwt'); // Assuming the token is stored in cookies
-    try {
-      await axios.post(`http://localhost:4000/${userRole}/products`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSuccess('Product created successfully!');
-      <Dialog>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-            Itinerary Deleted
-          </DialogTitle>
-          <DialogDescription>
-            The itinerary has been successfully deleted.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="default" onClick={() => navigate('/all-products')}>
-            Back to All Itineraries
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-    } catch (err) {
-      setError('Failed to create product. Please try again.');
-      console.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-20 mb-20 space-y-4"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <h2 className="text-xl font-semibold mb-4 text-center">Create Product</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <Card className="w-full max-w-md">
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <h2 className="text-2xl font-bold text-center mb-6">
+              Create Product
+            </h2>
 
-        
-        
-        {/* Product Name */}
-        <div>
-          <label htmlFor="name" className="block text-gray-700">Product Name</label>
-          <input
-            {...register('name')}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12"
-            id="name"
-          />
-          {errors.name && <span className="text-red-500">{errors.name.message}</span>}
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Product Name</Label>
+              <Input id="name" {...register("name")} />
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
+            </div>
 
-        {/* Picture URL */}
-        <div>
-          <label htmlFor="picture" className="block text-gray-700">Picture URL</label>
-          <input
-            {...register('picture')}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12"
-            id="picture"
-          />
-          {errors.picture && <span className="text-red-500">{errors.picture.message}</span>}
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="pictures">Pictures</Label>
+              <Input
+                id="pictures"
+                type="file"
+                multiple
+                onChange={handlePicturesUpload}
+              />
+            </div>
 
-        {/* Price */}
-        <div>
-          <label htmlFor="price" className="block text-gray-700">Price</label>
-          <input
-            {...register('price', { valueAsNumber: true })}
-            type="number"
-            className="border border-gray-300 rounded-xl p-2 w-full h-12"
-            id="price"
-          />
-          {errors.price && <span className="text-red-500">{errors.price.message}</span>}
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">Price</Label>
+              <Input
+                id="price"
+                type="number"
+                {...register("price", { valueAsNumber: true })}
+              />
+              {errors.price && (
+                <p className="text-red-500 text-sm">{errors.price.message}</p>
+              )}
+            </div>
 
-        {/* Description */}
-        <div>
-          <label htmlFor="description" className="block text-gray-700">Description</label>
-          <textarea
-            {...register('description')}
-            className="border border-gray-300 rounded-xl p-2 w-full h-24"
-            id="description"
-          />
-          {errors.description && <span className="text-red-500">{errors.description.message}</span>}
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea id="description" {...register("description")} />
+              {errors.description && (
+                <p className="text-red-500 text-sm">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
 
-        {/* Quantity */}
-        <div>
-          <label htmlFor="quantity" className="block text-gray-700">Quantity</label>
-          <input
-            {...register('quantity', { valueAsNumber: true })}
-            type="number"
-            className="border border-gray-300 rounded-xl p-2 w-full h-12"
-            id="quantity"
-          />
-          {errors.quantity && <span className="text-red-500">{errors.quantity.message}</span>}
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="quantity">Quantity</Label>
+              <Input
+                id="quantity"
+                type="number"
+                {...register("quantity", { valueAsNumber: true })}
+              />
+              {errors.quantity && (
+                <p className="text-red-500 text-sm">
+                  {errors.quantity.message}
+                </p>
+              )}
+            </div>
 
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="bg-orange-500 text-white font-semibold py-2 px-4 rounded-xl w-full hover:bg-orange-600 transition duration-200 h-12"
-        >
-          {loading ? 'Submitting...' : 'Submit'}
-        </button>
-        {/* {success && <div className="text-green-500 mb-4">{success}</div>}
-        {error && <div className="text-red-500 mb-4">{error}</div>} */}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Submitting..." : "Submit"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      </form>
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Success!</DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
+            <DialogTitle>Success!</DialogTitle>
+            <DialogDescription>
               The Product was created successfully.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4 flex justify-end space-x-4">
-            <Button colorScheme="blue" onClick={handleGoBack}>
-              Go to all products
-            </Button>
+          <DialogFooter>
+            <Button onClick={handleGoBack}>Go to all products</Button>
             <Button variant="outline" onClick={handleCreateNew}>
               Create Another
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-  
     </div>
   );
 };

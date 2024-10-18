@@ -12,9 +12,17 @@ router.get("/seller/:id", sellerController.getSellerByID);
 
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);
-router.post("/products", productController.addProduct);
+router.post(
+  "/products",
+  upload.array("pictures", 5),
+  productController.addProduct
+);
 router.delete("/products/:id", productController.deleteProductOfSeller);
-router.put("/products/:id", productController.editProductOfSeller);
+router.put(
+  "/products/:id",
+  upload.array("pictures", 5),
+  productController.editProductOfSeller
+);
 
 router.post("/password", sellerController.changePassword);
 
