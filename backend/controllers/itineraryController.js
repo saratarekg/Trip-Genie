@@ -15,6 +15,9 @@ const getAllItineraries = async (req, res) => {
       myItineraries,
       isBooked,
     } = req.query;
+
+   // const userRole = res.locals.role; 
+
     const filterResult = await Itinerary.filter(
       budget,
       upperDate,
@@ -32,6 +35,12 @@ const getAllItineraries = async (req, res) => {
     let query = [];
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
+
+    // Apply the appropriate condition only for "tourist" or "guest" roles
+    if (userRole === "tourist" || userRole === "guest") {
+      query.push({ appropriate: true });
+    }
+
     if (!myItineraries) {
       query.push({
         availableDates: {
@@ -49,9 +58,9 @@ const getAllItineraries = async (req, res) => {
       $and: query,
     })
       .populate("tourGuide")
-      .populate({path:"activities",populate:{path:"tags category"}})
+      .populate({ path: "activities", populate: { path: "tags category" } })
       .exec();
-     
+
     if (sort) {
       const sortBy = {};
       sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
@@ -59,14 +68,14 @@ const getAllItineraries = async (req, res) => {
         $and: query,
       })
         .populate("tourGuide")
-        .populate({path:"activities",populate:{path:"tags category"}})
+        .populate({ path: "activities", populate: { path: "tags category" } })
         .sort(sortBy);
     } else {
       itinerariesQuery = await Itinerary.find({
         $and: query,
       })
         .populate("tourGuide")
-        .populate({path:"activities",populate:{path:"tags category"}})
+        .populate({ path: "activities", populate: { path: "tags category" } })
         .sort({ createdAt: -1 });
     }
 
@@ -80,6 +89,7 @@ const getAllItineraries = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // GET a single itinerary
 const getItineraryById = async (req, res) => {
