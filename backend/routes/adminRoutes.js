@@ -94,7 +94,7 @@ router.get("/complaints", complaintsController.getAllComplaints);
 router.get("/complaint/:id", complaintsController.getComplaintDetails);
 
 router.put("/itineraries/:id", itineraryController.flagItinerary);
-router.get("/itineraries", itineraryController.getAllItineraries);
+router.get("/itineraries", itineraryController.getAllItinerariesAdmin);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 router.post("/password", adminController.changePassword);
 

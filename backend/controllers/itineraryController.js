@@ -16,7 +16,6 @@ const getAllItineraries = async (req, res) => {
       isBooked,
     } = req.query;
 
-  const userRole = res.locals.role; 
 
     const filterResult = await Itinerary.filter(
       budget,
@@ -35,12 +34,90 @@ const getAllItineraries = async (req, res) => {
     let query = [];
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
-
-    // Apply the appropriate condition only for "tourist" or "guest" roles
-    if (userRole === "tourist" || userRole === "guest") {
-      query.push({ appropriate: true });
+    query.push({ appropriate: true });
+    
+    if (!myItineraries) {
+      query.push({
+        availableDates: {
+          $elemMatch: {
+            date: { $gte: new Date() }, // Match any date that is upcoming
+          },
+        },
+      });
+    }
+    if (myItineraries) {
+      query.push({ tourGuide: res.locals.user_id });
     }
 
+    let itinerariesQuery = await Itinerary.find({
+      $and: query,
+    })
+      .populate("tourGuide")
+      .populate({ path: "activities", populate: { path: "tags category" } })
+      .exec();
+
+    if (sort) {
+      const sortBy = {};
+      sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
+      itinerariesQuery = await Itinerary.find({
+        $and: query,
+      })
+        .populate("tourGuide")
+        .populate({ path: "activities", populate: { path: "tags category" } })
+        .sort(sortBy);
+    } else {
+      itinerariesQuery = await Itinerary.find({
+        $and: query,
+      })
+        .populate("tourGuide")
+        .populate({ path: "activities", populate: { path: "tags category" } })
+        .sort({ createdAt: -1 });
+    }
+
+    const itineraries = await itinerariesQuery;
+
+    if (!itineraries || itineraries.length === 0) {
+      return res.status(200).json([]);
+    }
+    res.status(200).json(itineraries);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAllItinerariesAdmin = async (req, res) => {
+  try {
+    const {
+      budget,
+      upperDate,
+      lowerDate,
+      types,
+      languages,
+      searchBy,
+      sort,
+      asc,
+      myItineraries,
+      isBooked,
+    } = req.query;
+
+
+    const filterResult = await Itinerary.filter(
+      budget,
+      upperDate,
+      lowerDate,
+      types,
+      languages,
+      isBooked
+    );
+
+    const searchResult = await Itinerary.findByFields(searchBy);
+
+    const searchResultIds = searchResult.map((itinerary) => itinerary._id);
+    const filterResultIds = filterResult.map((itinerary) => itinerary._id);
+
+    let query = [];
+    query.push({ _id: { $in: searchResultIds } });
+    query.push({ _id: { $in: filterResultIds } });
     if (!myItineraries) {
       query.push({
         availableDates: {
@@ -391,6 +468,7 @@ const rateItinerary = async (req, res) => {
 
 module.exports = {
   getAllItineraries,
+  getAllItinerariesAdmin,
   getItineraryById,
   createItinerary,
   deleteItinerary,
