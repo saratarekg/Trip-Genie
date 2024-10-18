@@ -64,6 +64,7 @@ router.get('/touristActivityBookings', activityBookingController.getTouristBooki
 router.get("/itineraryBooking", itineraryBookingController.getAllBookings);
 router.delete("/irineraryBooking/:id", itineraryBookingController.deleteBooking);
 router.post("/itineraryBooking", itineraryBookingController.createBooking);
+router.get('/touristItineraryBookings', itineraryBookingController.getTouristBookings);
 
 router.post("/password", touristController.changePassword);
 router.post("/complaint", complaintsController.addComplaint);

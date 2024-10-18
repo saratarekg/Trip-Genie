@@ -129,3 +129,18 @@ exports.deleteBooking = async (req, res) => {
         res.status(500).json({ message: 'Failed to delete booking', error: error.message });
     }
 };
+
+exports.getTouristBookings = async (req, res) => {
+    try {
+        const touristId = res.locals.user_id; // Get the user's ID from response locals
+        const bookings = await ItineraryBooking.getBookingsForTourist(touristId);
+
+        if (!bookings || bookings.length === 0) {
+            return res.status(400).json({ message: 'No bookings found for this tourist.' });
+        }
+
+        res.status(200).json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

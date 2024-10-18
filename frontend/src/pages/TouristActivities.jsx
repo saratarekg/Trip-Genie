@@ -39,6 +39,11 @@ export default function TouristActivities() {
     navigate(`/activity/${id}`);
   
   };
+  const handleItineraryClick = (id) => {
+   
+    navigate(`/itineraries/${id}`);
+  
+  };
 
   useEffect(() => {
     const role = Cookies.get("role") || "guest"
@@ -50,7 +55,7 @@ export default function TouristActivities() {
       try {
         const [activitiesData, itinerariesData] = await Promise.all([
           fetchData(role, 'touristActivityBookings'),
-          fetchData(role, 'itineraries')
+          fetchData(role, 'touristItineraryBookings')
         ])
         setActivities(activitiesData)
         console.log(activitiesData);
@@ -88,15 +93,15 @@ export default function TouristActivities() {
             <CardContent>
               <ScrollArea className="h-[400px]">
                 {itineraries.length > 0 ? (
-                  itineraries.map((itinerary) => (
-                    <div key={itinerary.id} className="mb-4">
+                  itineraries.map((booking) => (
+                    <div key={booking.itinerary.id} className="mb-4">
                       <Button
                         variant="ghost"
                         className="w-full justify-start"
-                        onClick={() => setSelectedItinerary(itinerary)}
+                        onClick={() => handleItineraryClick(booking.itinerary._id)}
                       >
                         <Calendar className="mr-2 h-4 w-4" />
-                        {itinerary.name}
+                        {booking.itinerary.name}
                       </Button>
                       <Separator className="my-2" />
                     </div>
