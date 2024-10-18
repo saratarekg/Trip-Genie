@@ -66,7 +66,7 @@ router.get('/touristActivityAttendedBookings', activityBookingController.getTour
 router.put('/activityBooking/:id', activityBookingController.updateBooking);
 
 router.get("/itineraryBooking", itineraryBookingController.getAllBookings);
-router.delete("/irineraryBooking/:id", itineraryBookingController.deleteBooking);
+router.delete("/itineraryBooking/:id", itineraryBookingController.deleteBooking);
 router.post("/itineraryBooking", itineraryBookingController.createBooking);
 router.get('/touristItineraryBookings', itineraryBookingController.getTouristBookings);
 router.get('/touristItineraryAttendedBookings', itineraryBookingController.getTouristAttendedItineraries);

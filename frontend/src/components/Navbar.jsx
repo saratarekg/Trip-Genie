@@ -4,7 +4,7 @@ import keyNavbar from "../assets/images/keyNavbar.svg";
 import settingsIcon from "../assets/settings-svgrepo-com.svg";
 import gearIcon from "../assets/gear-fill.svg";
 import React, { useState } from "react";
-import { HistoryIcon, Menu, X } from "lucide-react";
+import { HistoryIcon, Menu, X, Calendar } from "lucide-react";
 import { Link } from "react-router-dom"; // Import Link from React Router
 import logo from "../assets/images/tgLogofinal6.png";
 import Cookies from "js-cookie";
@@ -191,6 +191,13 @@ export function NavbarComponent() {
                               >
                                 <HistoryIcon className="mr-2 h-4 w-4" />
                                 History
+                              </Link>
+                              <Link
+                                to="/account/upcoming"
+                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                              >
+                                <Calendar className="mr-2 h-4 w-4" />
+                                Upcoming Bookings
                               </Link>
                               <Link
                                 to="/account/complain"

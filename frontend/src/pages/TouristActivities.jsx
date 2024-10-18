@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { Calendar, ChevronRight, Eye, Trash2 , Clock} from 'lucide-react'
+import { Calendar, ChevronRight, Eye, Trash2 , Clock, CheckCircle, XCircle, AlertCircle} from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -43,6 +43,7 @@ export default function Component() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isNotificationDialogOpen, setIsNotificationDialogOpen] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState("")
+  const [notificationIconType, setNotificationIconType] = useState("")
   const navigate = useNavigate()
 
   const handleActivityClick = (id) => {
@@ -63,10 +64,11 @@ export default function Component() {
     setIsDeleteDialogOpen(true)
   }
 
-  const showNotification = (message) => {
-    setNotificationMessage(message)
-    setIsNotificationDialogOpen(true)
-  }
+  const showNotification = (message, iconType) => {
+    setNotificationMessage(message);
+    setNotificationIconType(iconType);
+    setIsNotificationDialogOpen(true);
+  };
 
   const confirmDelete = async () => {
     if (!selectedBooking) return
@@ -78,7 +80,7 @@ export default function Component() {
 
 
     if (hoursDifference < 48) {
-      showNotification("Bookings can only be cancelled 48 hours or more before the event starts.")
+      showNotification("Bookings can only be cancelled 48 hours or more before the event starts.", 'error');
       setIsDeleteDialogOpen(false)
       return
     }
@@ -94,11 +96,10 @@ export default function Component() {
         setItineraries(itineraries.filter(i => i.id !== selectedBooking.id))
       }
 
-      showNotification("Your booking has been successfully cancelled.")
-    } catch (error) {
+      showNotification("Your booking has been successfully cancelled.", 'success');
+        } catch (error) {
       console.error('Error deleting booking:', error)
-      showNotification("An error occurred while cancelling your booking. Please try again.")
-    }
+      showNotification("An error occurred while cancelling your booking. Please try again.", 'error');    }
 
     setIsDeleteDialogOpen(false)
   }
@@ -351,16 +352,24 @@ export default function Component() {
       </Dialog>
 
       <Dialog open={isNotificationDialogOpen} onOpenChange={setIsNotificationDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Notification</DialogTitle>
-          </DialogHeader>
-          <p>{notificationMessage}</p>
-          <DialogFooter>
-            <Button onClick={() => setIsNotificationDialogOpen(false)}>OK</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Notification</DialogTitle>
+    </DialogHeader>
+    {/* Dynamic Icon */}
+    <div className="flex items-center gap-2">
+      {notificationIconType === 'error' && <XCircle className="w-6 h-6 text-red-500" />}
+      {notificationIconType === 'success' && <CheckCircle className="w-6 h-6 text-green-500" />}
+      {notificationIconType === 'warning' && <AlertCircle className="w-6 h-6 text-yellow-500" />}
+      {/* Notification Message */}
+      <p>{notificationMessage}</p>
+    </div>
+    <DialogFooter>
+      <Button onClick={() => setIsNotificationDialogOpen(false)}>OK</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
     </div>
   )
 }
