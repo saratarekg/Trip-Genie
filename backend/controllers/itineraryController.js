@@ -409,7 +409,6 @@ const addCommentToItinerary = async (req, res) => {
       // .populate("advertiser")
       // .populate("category")
       // .populate("tags")
-      // .populate("attended")
       // .exec();
 
     if (!itinerary) {
@@ -461,7 +460,6 @@ const rateItinerary = async (req, res) => {
     // .populate("advertiser")
     // .populate("category")
     // .populate("tags")
-    // .populate("attended")
     // .populate("comments")
     //.exec();
 

@@ -148,7 +148,6 @@ const ActivityDetail = () => {
   const [showUpdateBookingDialog, setShowUpdateBookingDialog] = useState(false);
   const [activityRating, setActivityRating] = useState(0);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
-  const [hasAttended, setHasAttended] = useState(false);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [numberOfTickets, setNumberOfTickets] = useState(1);
   const [paymentType, setPaymentType] = useState("CreditCard");
@@ -279,11 +278,6 @@ const ActivityDetail = () => {
           setCanModify(decodedToken.id === data.advertiser._id);
           setCurrentUser(decodedToken.id);
 
-          if (data.attended && Array.isArray(data.attended)) {
-            setHasAttended(
-              data.attended.some((tourist) => tourist._id === decodedToken.id)
-            );
-          }
         }
       } catch (err) {
         setError("Error fetching activity details. Please try again later.");
@@ -819,9 +813,29 @@ const ActivityDetail = () => {
                       )}
                     </div>
                   </div>
+                  
                 </div>
+                
               </div>
+               {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
+          <Button
+          onClick={handleUpdateNowClick}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+          >
+          {"Update Booking"}
+          </Button>
+          )} */}
+          {userRole === 'tourist' && !isActivityPassed() &&(
+          <Button
+          onClick={handleBookNowClick}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+          >
+          {"Book Now"}
+          </Button>
+          )}
+
             </div>
+            
           </div>
 
           {/* Comment Carousel */}
@@ -939,23 +953,7 @@ const ActivityDetail = () => {
           </div>
         </div>
 
-        {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
-          <Button
-          onClick={handleUpdateNowClick}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-          >
-          {"Update Booking"}
-          </Button>
-          )} */}
-          {userRole === 'tourist' && !isActivityPassed() &&(
-          <Button
-          onClick={handleBookNowClick}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-          >
-          {"Book Now"}
-          </Button>
-          )}
-
+       
 
 
 <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>

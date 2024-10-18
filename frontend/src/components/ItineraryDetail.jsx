@@ -150,8 +150,6 @@ const ItineraryDetail = () => {
   const [itineraryReview, setItineraryReview] = useState('');
   const [showFullComment, setShowFullComment] = useState(null);
   const [activityRating, setActivityRating] = useState(0);
-  const [hasAttendedTourGuide, setHasAttendedTourGuide] = useState(false);
-  const [hasAttendedItinerary, setHasAttendedItinerary] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isAppropriate, setIsAppropriate] = useState(true); // Track the current status
   const [showBookingDialog, setShowBookingDialog] = useState(false);
@@ -333,20 +331,6 @@ const ItineraryDetail = () => {
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
           setCanModify(decodedToken.id === data.tourGuide._id);
-
-
-          if (data.attended && Array.isArray(data.attended)) {
-            data.attended.forEach(tourist => {
-              console.log("Tourist:", tourist, "Tourist ID:", tourist._id);
-            });
-
-            setHasAttendedItinerary(data.attended.some(tourist => tourist === decodedToken.id));
-          }
-
-
-          if (data.tourGuide.attended && Array.isArray(data.tourGuide.attended)) {
-            setHasAttendedTourGuide(data.tourGuide.attended.some(tourist => tourist === decodedToken.id));
-          }
         }
 
 
@@ -927,6 +911,22 @@ const ItineraryDetail = () => {
             {tourGuideProfile && (
               <TourguideProfileCard profile={tourGuideProfile} />
             )}
+
+            {userRole === 'tourist' && isItineraryAvailable() &&(
+        isActivated ? (
+          <Button
+            onClick={handleBookNowClick}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+          >
+            Book Now
+          </Button>
+        ) : (
+          <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
+            Currently Unavailable
+          </div>
+        )
+      )}
+      
           {userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole !== "admin" &&  (
               <>
                 <Card className="mt-4">
@@ -948,6 +948,7 @@ const ItineraryDetail = () => {
               </>
 
             )}
+
             {userRole === "admin" && (
               <>
                 <Button
@@ -1072,20 +1073,7 @@ const ItineraryDetail = () => {
       </Button>
       )} */}
 
-{userRole === 'tourist' && isItineraryAvailable() &&(
-        isActivated ? (
-          <Button
-            onClick={handleBookNowClick}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-          >
-            Book Now
-          </Button>
-        ) : (
-          <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
-            Currently Unavailable
-          </div>
-        )
-      )}
+
 
 
 <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>

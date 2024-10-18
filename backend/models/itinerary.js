@@ -79,12 +79,7 @@ const itinerarySchema = new Schema(
       ref: "TourGuide",
       required: true,
     },
-    attended: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Tourist",
-      },
-    ],allRatings: [
+    allRatings: [
       {
         type: Number,
         min: 0,

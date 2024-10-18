@@ -4,6 +4,7 @@ const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
 
 const getAllActivities = async (req, res) => {
+
   try {
     const {
       price,
@@ -24,7 +25,7 @@ const getAllActivities = async (req, res) => {
       category,
       minRating
     );
-
+    console.log(1);
     const searchResult = await Activity.findByFields(searchBy);
 
     const searchResultIds = searchResult.map((activity) => activity._id);
@@ -45,7 +46,6 @@ const getAllActivities = async (req, res) => {
     })
       .populate("tags")
       .populate("category")
-      .populate("attended")
       // .populate("comments")
       ;
 
@@ -135,7 +135,6 @@ const getActivitiesByPreferences = async (req, res) => {
     })
       .populate("tags")
       .populate("category")
-      .populate("attended");
 
     // Apply sorting
     if (sort) {
@@ -161,8 +160,6 @@ const getActivityById = async (req, res) => {
       .populate("advertiser")
       .populate("category")
       .populate("tags")
-      .populate("attended")
-      .populate("comments") // Populating comments
       ;
 
     if (!activity) {
@@ -301,7 +298,6 @@ const rateActivity = async (req, res) => {
     .populate("advertiser")
     .populate("category")
     .populate("tags")
-    // .populate("attended")
     .exec();
 
     // Add the rating and calculate the new average
@@ -350,7 +346,6 @@ const addCommentToActivity = async (req, res) => {
       .populate("advertiser")
       .populate("category")
       .populate("tags")
-      .populate("attended")
       .exec();
 
     if (!activity) {
