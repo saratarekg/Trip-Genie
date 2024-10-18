@@ -367,10 +367,18 @@ const ProductDetail = () => {
                 (userRole === "seller" && canModify)) && (
                 <Button
                   className="w-full"
-                  variant="default"
+                  variant={product.isArchived ? "outline" : "default"}
                   onClick={() => setShowArchiveConfirm(true)}
                 >
-                  <Edit className="w-4 h-4 mr-2" /> Archive Product
+                  {product.isArchived ? (
+                    <>
+                      <Edit className="w-4 h-4 mr-2" /> Unarchive Product
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="w-4 h-4 mr-2" /> Archive Product
+                    </>
+                  )}
                 </Button>
               )}
 
@@ -393,9 +401,12 @@ const ProductDetail = () => {
       <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Archive Product</DialogTitle>
+            <DialogTitle>
+              {product.isArchived ? "Unarchive" : "Archive"} Product
+            </DialogTitle>
             <DialogDescription>
-              Are you sure you want to archive this product?
+              Are you sure you want to{" "}
+              {product.isArchived ? "unarchive" : "archive"} this product?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -406,7 +417,7 @@ const ProductDetail = () => {
               Cancel
             </Button>
             <Button variant="default" onClick={handleArchive}>
-              Archive
+              {product.isArchived ? "Unarchive" : "Archive"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -418,19 +429,29 @@ const ProductDetail = () => {
           <DialogHeader>
             <DialogTitle>
               <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-              Product Archived
+              Product {product.isArchived ? "Unarchived" : "Archived"}
             </DialogTitle>
             <DialogDescription>
-              The product has been successfully archived.
+              The product has been successfully {}
+              {product.isArchived ? "unarchived" : "archived"}.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               variant="default"
-              onClick={() => navigate("/product-archive")}
-            >
-              Go to archived
-            </Button>
+              onClick={() => {
+                {
+                  product.isArchived
+                    ? "Back to all products"
+                    : "Back to all archived products";
+                }
+                if (product.isArchived) {
+                  navigate("/all-products");
+                } else {
+                  navigate("/product-archive");
+                }
+              }}
+            ></Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -444,7 +465,7 @@ const ProductDetail = () => {
           <DialogHeader>
             <DialogTitle>
               <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
-              Failed to Archive Product
+              Failed to {product.isArchived ? "Unarchive" : "Archive"} Product
             </DialogTitle>
             <DialogDescription>{archiveError}</DialogDescription>
           </DialogHeader>
