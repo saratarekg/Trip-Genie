@@ -44,8 +44,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// Custom validator for mobile number
 const phoneValidator = (value) => {
   const phoneNumber = parsePhoneNumberFromString("+" + value);
   if (!phoneNumber || !phoneNumber.isValid()) {
@@ -54,170 +54,11 @@ const phoneValidator = (value) => {
   return true;
 };
 
-const formSchema = z
-  .object({
-    username: z
-      .string()
-      .min(3, {
-        message: "Username must be at least 3 characters.",
-      })
-      .trim(),
-    email: z
-      .string()
-      .email({
-        message: "Please enter a valid email address.",
-      })
-      .trim()
-      .toLowerCase(),
-    password: z
-      .string()
-      .min(8, {
-        message: "Password must be at least 8 characters.",
-      })
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/, {
-        message:
-          "Password must contain at least one uppercase letter, one lowercase letter, and one number.\nOnly these characters are allowed: @$!%*?&",
-      })
-      .trim(),
-    userType: z.enum(["tourist", "tour-guide", "advertiser", "seller"], {
-      required_error: "Please select a user type.",
-    }),
-    mobile: z.string().trim().optional(),
-    nationality: z.string().optional(),
-    dateOfBirth: z.date().optional(),
-    jobOrStudent: z.string().trim().optional(),
-    yearsOfExperience: z.number().int().optional(),
-    previousWorks: z
-      .array(
-        z.object({
-          title: z.string().trim().optional(),
-          company: z.string().trim().optional(),
-          duration: z.string().trim().optional(),
-          description: z.string().trim().optional(),
-        })
-      )
-      .optional(),
-    name: z.string().trim().optional(),
-    description: z.string().trim().optional(),
-    website: z.string().trim().optional(),
-    hotline: z.string().trim().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (
-      data.userType === "tourist" ||
-      data.userType === "tour-guide" ||
-      data.userType === "seller"
-    ) {
-      if (!phoneValidator(data.mobile)) {
-        ctx.addIssue({
-          path: ["mobile"],
-          message:
-            "Please enter a valid phone number with a valid country code.",
-        });
-      }
-    }
-    if (data.userType === "tourist" || data.userType === "tour-guide") {
-      if (!data.nationality) {
-        ctx.addIssue({
-          path: ["nationality"],
-          message: "Nationality is required.",
-        });
-      }
-    }
-    if (data.userType === "tourist") {
-      console.log("hi");
-      if (
-        data.dateOfBirth > new Date() ||
-        data.dateOfBirth > new Date().setFullYear(new Date().getFullYear() - 18)
-      ) {
-        ctx.addIssue({
-          path: ["dateOfBirth"],
-          message: "You must be at least 18 years old.",
-        });
-      }
-      if (!data.jobOrStudent) {
-        ctx.addIssue({
-          path: ["jobOrStudent"],
-          message: "Occupation is required.",
-        });
-      }
-    }
-    if (data.userType === "tour-guide") {
-      if (data.yearsOfExperience < 0 || data.yearsOfExperience > 50) {
-        ctx.addIssue({
-          path: ["yearsOfExperience"],
-          message: "Experience must be between 0 and 50 years.",
-        });
-      }
-      if (!Number.isInteger(data.yearsOfExperience)) {
-        ctx.addIssue({
-          path: ["yearsOfExperience"],
-          message: "Experience must be an integer value.",
-        });
-      }
-      if (data.previousWorks && data.previousWorks.length > 0) {
-        data.previousWorks.forEach((work, index) => {
-          if (work.title === "") {
-            ctx.addIssue({
-              path: ["previousWorks", index, "title"],
-              message: "Please enter the title for your previous work.",
-            });
-          }
-          if (work.company === "") {
-            ctx.addIssue({
-              path: ["previousWorks", index, "company"],
-              message: "Please enter the company for your previous work.",
-            });
-          }
-          if (work.duration === "") {
-            ctx.addIssue({
-              path: ["previousWorks", index, "duration"],
-              message: "Please enter the duration for your previous work.",
-            });
-          }
-        });
-      }
-    }
-    if (
-      data.userType === "advertiser" ||
-      data.userType === "seller" ||
-      data.userType === "tour-guide"
-    ) {
-      if (!data.name) {
-        ctx.addIssue({
-          path: ["name"],
-          message: "Name is required.",
-        });
-      }
-    }
-    if (data.userType === "advertiser") {
-      if (!data.hotline) {
-        ctx.addIssue({
-          path: ["hotline"],
-          message: "Hotline is required.",
-        });
-      }
-
-      if (!data.hotline.match(/^\d+$/)) {
-        ctx.addIssue({
-          path: ["hotline"],
-          message: "Hotline must be a number.",
-        });
-      }
-
-      if (
-        data.website &&
-        !data.website.match(/^(https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*$/i)
-      ) {
-        ctx.addIssue({
-          path: ["website"],
-          message: "Website must be a valid URL.",
-        });
-      }
-    }
-  });
+// const formSchema = stage1Schema.merge(stage2Schema).merge(stage3Schema);
 
 export function SignupForm() {
+  const [stage, setStage] = useState(1);
+  const [formData, setFormData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [nationalities, setNationalities] = useState([]);
   const [apiError, setApiError] = useState(null);
@@ -225,7 +66,187 @@ export function SignupForm() {
   const alertRef = useRef(null);
   const navigate = useNavigate();
 
-  // Create refs for form fields
+  const formSchema = z
+    .object({
+      username: z
+        .string()
+        .min(3, {
+          message: "Username must be at least 3 characters.",
+        })
+        .trim(),
+      email: z
+        .string()
+        .email({
+          message: "Please enter a valid email address.",
+        })
+        .trim()
+        .toLowerCase(),
+      password: z
+        .string()
+        .min(8, {
+          message: "Password must be at least 8 characters.",
+        })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/, {
+          message:
+            "Password must contain at least one uppercase letter, one lowercase letter, and one number.\nOnly these characters are allowed: @$!%*?&",
+        })
+        .trim(),
+      userType: z.enum(["tourist", "tour-guide", "advertiser", "seller"], {
+        required_error: "Please select a user type.",
+      }),
+      mobile: z.string().trim().optional(),
+      nationality: z.string().optional(),
+      dateOfBirth: z.date().optional(),
+      jobOrStudent: z.string().trim().optional(),
+      yearsOfExperience: z.number().int().optional(),
+      previousWorks: z
+        .array(
+          z.object({
+            title: z.string().trim().optional(),
+            company: z.string().trim().optional(),
+            duration: z.string().trim().optional(),
+            description: z.string().trim().optional(),
+          })
+        )
+        .optional(),
+      name: z.string().trim().optional(),
+      description: z.string().trim().optional(),
+      website: z.string().trim().optional(),
+      hotline: z.string().trim().optional(),
+      documents: z.array(z.any()).optional(),
+      profilePicture: z.any().optional(),
+      termsAccepted: z.boolean().optional(),
+    })
+    .superRefine((data, ctx) => {
+      if (
+        data.userType === "tourist" ||
+        data.userType === "tour-guide" ||
+        data.userType === "seller"
+      ) {
+        if (!phoneValidator(data.mobile)) {
+          ctx.addIssue({
+            path: ["mobile"],
+            message:
+              "Please enter a valid phone number with a valid country code.",
+          });
+        }
+      }
+      if (data.userType === "tourist" || data.userType === "tour-guide") {
+        if (!data.nationality) {
+          ctx.addIssue({
+            path: ["nationality"],
+            message: "Nationality is required.",
+          });
+        }
+      }
+      if (data.userType === "tourist") {
+        if (
+          data.dateOfBirth > new Date() ||
+          data.dateOfBirth >
+            new Date().setFullYear(new Date().getFullYear() - 18)
+        ) {
+          ctx.addIssue({
+            path: ["dateOfBirth"],
+            message: "You must be at least 18 years old.",
+          });
+        }
+        if (!data.jobOrStudent) {
+          ctx.addIssue({
+            path: ["jobOrStudent"],
+            message: "Occupation is required.",
+          });
+        }
+      }
+      if (data.userType === "tour-guide") {
+        if (data.yearsOfExperience < 0 || data.yearsOfExperience > 50) {
+          ctx.addIssue({
+            path: ["yearsOfExperience"],
+            message: "Experience must be between 0 and 50 years.",
+          });
+        }
+        if (!Number.isInteger(data.yearsOfExperience)) {
+          ctx.addIssue({
+            path: ["yearsOfExperience"],
+            message: "Experience must be an integer value.",
+          });
+        }
+        if (data.previousWorks && data.previousWorks.length > 0) {
+          data.previousWorks.forEach((work, index) => {
+            if (work.title === "") {
+              ctx.addIssue({
+                path: ["previousWorks", index, "title"],
+                message: "Please enter the title for your previous work.",
+              });
+            }
+            if (work.company === "") {
+              ctx.addIssue({
+                path: ["previousWorks", index, "company"],
+                message: "Please enter the company for your previous work.",
+              });
+            }
+            if (work.duration === "") {
+              ctx.addIssue({
+                path: ["previousWorks", index, "duration"],
+                message: "Please enter the duration for your previous work.",
+              });
+            }
+          });
+        }
+      }
+      if (
+        data.userType === "advertiser" ||
+        data.userType === "seller" ||
+        data.userType === "tour-guide"
+      ) {
+        if (!data.name) {
+          ctx.addIssue({
+            path: ["name"],
+            message: "Name is required.",
+          });
+        }
+        if (stage === 2 && (!data.documents || data.documents.length === 0)) {
+          ctx.addIssue({
+            path: ["documents"],
+            message: "Please upload the required documents.",
+          });
+        }
+      }
+      if (data.userType === "advertiser") {
+        if (!data.hotline) {
+          ctx.addIssue({
+            path: ["hotline"],
+            message: "Hotline is required.",
+          });
+        }
+
+        if (data.hotline && !data.hotline.match(/^\d+$/)) {
+          ctx.addIssue({
+            path: ["hotline"],
+            message: "Hotline must be a number.",
+          });
+        }
+
+        if (
+          data.website &&
+          !data.website.match(
+            /^(https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*$/i
+          )
+        ) {
+          ctx.addIssue({
+            path: ["website"],
+            message: "Website must be a valid URL.",
+          });
+        }
+      }
+
+      if (stage === totalStages && !data.termsAccepted) {
+        ctx.addIssue({
+          path: ["termsAccepted"],
+          message: "Please accept the terms and conditions.",
+        });
+      }
+    });
+
   const formRefs = {
     username: useRef(null),
     email: useRef(null),
@@ -240,6 +261,9 @@ export function SignupForm() {
     description: useRef(null),
     website: useRef(null),
     hotline: useRef(null),
+    documents: useRef(null),
+    profilePicture: useRef(null),
+    termsAccepted: useRef(null),
   };
 
   const form = useForm({
@@ -255,6 +279,13 @@ export function SignupForm() {
       jobOrStudent: "",
       yearsOfExperience: 0,
       previousWorks: [],
+      name: "",
+      description: "",
+      website: "",
+      hotline: "",
+      documents: [],
+      profilePicture: null,
+      termsAccepted: false,
     },
   });
 
@@ -262,14 +293,16 @@ export function SignupForm() {
     control,
     register,
     handleSubmit,
-    formState: { errors },
     watch,
+    formState: { errors },
   } = form;
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "previousWorks",
   });
+
+  const userType = watch("userType");
 
   useEffect(() => {
     const fetchNationalities = async () => {
@@ -291,8 +324,6 @@ export function SignupForm() {
     }
   }, [apiError]);
 
-  const userType = watch("userType");
-
   const scrollToError = (errors) => {
     for (const field in errors) {
       if (formRefs[field] && formRefs[field].current) {
@@ -305,22 +336,70 @@ export function SignupForm() {
     }
   };
 
+  const handleBack = () => {
+    setStage(stage - 1);
+  };
+
+  const totalStages = userType === "tourist" || userType === undefined ? 3 : 4;
+  const progress = (stage / totalStages) * 100;
+
   const onSubmit = async (values) => {
+    if (stage === 1) {
+      const { username, email } = values;
+      try {
+        await axios.get(
+          `http://localhost:4000/auth/check-unique?username=${username}&email=${email}`
+        );
+      } catch (error) {
+        const response = error.response;
+        if (response.data.existingUsername) {
+          console.log("Username already exists");
+          setApiError("Username already exists");
+          return;
+        }
+        if (response.data.existingEmail) {
+          setApiError("Email already exists");
+          return;
+        }
+      }
+    }
+    if (stage < totalStages) {
+      setFormData({ ...formData, ...values });
+      console.log("Form data:", formData);
+      setStage(stage + 1);
+      return;
+    }
+
+    console.log("Final form data:", { ...formData, ...values });
+
     setIsLoading(true);
     setApiError(null);
     values.mobile = "+" + values.mobile;
+
     try {
-      await axios.post(
-        `http://localhost:4000/auth/sign-up/${values.userType}`,
-        values
-      );
+      const finalData = { ...formData, ...values };
+      for (const key in values) {
+        if (key === "documents") {
+          values[key].forEach((doc) => {
+            finalData.append(`documents`, doc);
+          });
+        } else if (key === "profilePicture") {
+          if (userType === "advertiser" || userType === "seller") {
+            finalData.append("logo", values[key]);
+          } else {
+            finalData.append("profilePicture", values[key]);
+          }
+        } else {
+          finalData.append(key, values[key]);
+        }
+      }
+
+      await axios.post(`http://localhost:4000/auth/sign-up/`, finalData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setShowSignupSuccess(true);
-      // navigate("/login", {
-      //   state: {
-      //     successMessage:
-      //       "Your account has been created successfully. Please log in.",
-      //   },
-      // });
     } catch (error) {
       if (error.response) {
         setApiError(
@@ -337,34 +416,11 @@ export function SignupForm() {
     }
   };
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg mt-20 mb-20">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
-            Create an account
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join us and start your unforgettable journey
-          </p>
-        </div>
-        {apiError && (
-          <div ref={alertRef}>
-            <Alert
-              variant="destructive"
-              className="mb-4"
-              onClose={() => setApiError(null)}
-            >
-              <AlertDescription>{apiError}</AlertDescription>
-            </Alert>
-            {/* <Alert message={apiError} onClose={() => setApiError(null)} /> */}
-          </div>
-        )}
-        <Form {...form}>
-          <form
-            onSubmit={handleSubmit(onSubmit, scrollToError)}
-            className="space-y-6"
-          >
+  const renderStage = () => {
+    switch (stage) {
+      case 1:
+        return (
+          <>
             <FormField
               control={control}
               name="username"
@@ -372,11 +428,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Username*</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Username"
-                      {...field}
-                      ref={formRefs.username}
-                    />
+                    <Input placeholder="Username" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -414,32 +466,6 @@ export function SignupForm() {
                       ref={formRefs.password}
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="userType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>I am a*</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger ref={formRefs.userType}>
-                        <SelectValue placeholder="Please choose your role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="tourist">Tourist</SelectItem>
-                      <SelectItem value="tour-guide">Tour Guide</SelectItem>
-                      <SelectItem value="advertiser">Advertiser</SelectItem>
-                      <SelectItem value="seller">Seller</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -772,28 +798,272 @@ export function SignupForm() {
                 />
               </>
             )}
-            <Button
-              className="w-full bg-orange-500 hover:bg-orange-600"
-              disabled={isLoading}
-            >
-              {isLoading ? "Signing up..." : "Sign up"}
-            </Button>
+          </>
+        );
+      case 2:
+        if (["tour-guide", "advertiser", "seller"].includes(userType)) {
+          return (
+            <>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Please upload documents that prove your identity and
+                qualifications. For example : ID card, Passport, Certificates,
+                etc.
+              </h2>
+              <FormField
+                control={control}
+                name="documents"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Upload Required Documents*</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="file"
+                        multiple
+                        onChange={(e) => {
+                          field.onChange(Array.from(e.target.files));
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          );
+        } else {
+          return (
+            <>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Continue your profile setup by uploading a profile picture.
+              </h2>
+              <FormField
+                control={control}
+                name="profilePicture"
+                render={({ field }) => (
+                  <>
+                    <FormItem>
+                      <FormLabel>Upload {} (Optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            field.onChange(e.target.files[0]);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                    <Button
+                      type="button"
+                      className="w-full bg-gray-300 hover:bg-gray-400"
+                      onClick={() => setStage(stage + 1)}
+                      disabled={isLoading}
+                    >
+                      Skip
+                    </Button>
+                  </>
+                )}
+              />
+            </>
+          );
+        }
+      case 3:
+        if (userType === "tourist") {
+          return (
+            <>
+              <FormField
+                control={control}
+                name="termsAccepted"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>I accept the terms and conditions</FormLabel>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </>
+          );
+        } else {
+          return (
+            <>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Continue your profile setup by uploading a{" "}
+                {["advertiser", "seller"].includes(userType)
+                  ? "logo"
+                  : "profile picture"}
+                .
+              </h2>
+              <FormField
+                control={control}
+                name="profilePicture"
+                render={({ field }) => (
+                  <>
+                    <FormItem>
+                      <FormLabel>Upload {} (Optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            field.onChange(e.target.files[0]);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                    <Button
+                      type="button"
+                      className="w-full bg-gray-300 hover:bg-gray-400"
+                      onClick={() => setStage(stage + 1)}
+                      disabled={isLoading}
+                    >
+                      Skip for now
+                    </Button>
+                  </>
+                )}
+              />
+            </>
+          );
+        }
+      case 4:
+        return (
+          <FormField
+            control={control}
+            name="termsAccepted"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>I accept the terms and conditions</FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg mt-20 mb-20">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900">
+            Create an account
+          </h2>
+        </div>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={control}
+              name="userType"
+              render={({ field }) => (
+                <FormItem className={stage !== 1 ? "hidden" : ""}>
+                  <FormLabel>I am a*</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger ref={formRefs.userType}>
+                        <SelectValue placeholder="Please choose your role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="tourist">Tourist</SelectItem>
+                      <SelectItem value="tour-guide">Tour Guide</SelectItem>
+                      <SelectItem value="advertiser">Advertiser</SelectItem>
+                      <SelectItem value="seller">Seller</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {userType && (
+              <>
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-gray-500">
+                    Step {stage} of {totalStages}
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                    <div
+                      className="bg-orange-500 h-2.5 rounded-full"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+                {apiError && (
+                  <Alert variant="destructive" className="mb-4">
+                    <AlertDescription>{apiError}</AlertDescription>
+                  </Alert>
+                )}
+                {renderStage()}
+                <div className="flex justify-between">
+                  {stage > 1 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleBack}
+                    >
+                      Back
+                    </Button>
+                  ) : (
+                    <div></div>
+                  )}
+                  <Button type="submit">
+                    {stage < totalStages ? `Next` : `Submit`}
+                  </Button>
+                  {/* {stage < totalStages ? (
+                <Button type="submit">Next</Button>
+              ) : (
+                <Button type="submit">Sign up</Button>
+              )} */}
+                </div>
+              </>
+            )}
           </form>
         </Form>
-        <div className="mt-4 text-center text-sm">
-          <p className="text-gray-600">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-orange-500 hover:text-orange-600"
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
+        {stage === 1 && (
+          <div className="mt-4 text-center text-sm">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="font-medium text-orange-500 hover:text-orange-600"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
 
-      <Dialog open={showSignupSuccess} onOpenChange={setShowSignupSuccess}>
+      <Dialog
+        open={showSignupSuccess}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            navigate("/");
+          }
+          setShowSignupSuccess(isOpen);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -804,12 +1074,10 @@ export function SignupForm() {
               Your account has been created successfully! Please log in.
             </DialogDescription>
           </DialogHeader>
-
           <DialogFooter className="flex justify-center items-center w-full">
-            {/* Adding a div around the button to provide margin */}
             <div className="flex justify-center w-full">
               <Button
-                className="bg-orange-500 mr-4" // Add margin-right here
+                className="bg-orange-500 mr-4"
                 variant="default"
                 onClick={() => navigate("/login")}
               >
