@@ -4,6 +4,7 @@ const productController = require("../controllers/productController");
 const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
 const activityBookingController = require("../controllers/activityBookingController.js");
+const itineraryBookingController = require("../controllers/itineraryBookingController.js");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
 const tourguideController = require("../controllers/tourGuideController");
 const sellerController = require("../controllers/sellerController");
@@ -58,6 +59,10 @@ router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlac
 router.get("/activityBooking", activityBookingController.getAllBookings);
 router.delete("/activityBooking/:id", activityBookingController.deleteBooking);
 router.post("/activityBooking", activityBookingController.createBooking);
+
+router.get("/itineraryBooking", itineraryBookingController.getAllBookings);
+router.delete("/irineraryBooking/:id", itineraryBookingController.deleteBooking);
+router.post("/itineraryBooking", itineraryBookingController.createBooking);
 
 router.post("/password", touristController.changePassword);
 router.post("/complaint", complaintsController.addComplaint);
