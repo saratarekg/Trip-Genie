@@ -181,7 +181,7 @@ export function NavbarComponent() {
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                           >
                             <User className="mr-2 h-4 w-4" />
-                            Account Info
+                            Settings & Privacy
                           </Link>
                           {role === "tourist" && (
                             <>
@@ -190,23 +190,23 @@ export function NavbarComponent() {
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                               >
                                 <HistoryIcon className="mr-2 h-4 w-4" />
-                                History
+                                Give Feedback
                               </Link>
                               <Link
                                 to="/account/upcoming"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                               >
                                 <Calendar className="mr-2 h-4 w-4" />
-                                Upcoming Bookings
+                                Dashboard
                               </Link>
                               <Link
                                 to="/account/complain"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                               >
                                 <AlertTriangle className="mr-2 h-4 w-4" />
-                                Complain
+                                Help & Support
                               </Link>
-                              <Link
+                              {/* <Link
                                 to="/account/cart"
                                 className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                               >
@@ -220,11 +220,11 @@ export function NavbarComponent() {
                               >
                                 <Wallet className="mr-2 h-4 w-4" />
                                 Points and Wallet
-                              </Link>
+                              </Link> */}
                             </>
                           )}
 
-                          <Link
+                          {/* <Link
                             to="/account/security"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                           >
@@ -238,7 +238,7 @@ export function NavbarComponent() {
                           >
                             <Settings className="h-4 w-4 mr-2" />
                             Preferences
-                          </Link>
+                          </Link> */}
                         </div>
                       )}
                     </div>
@@ -248,29 +248,25 @@ export function NavbarComponent() {
               {/* Login, Sign Up */}
               <div className="hidden md:block">
                 <div className="ml-4 flex items-center md:ml-6 space-x-4">
-                  {role === undefined ? (
-                    <>
-                      <NavLink
-                        to="/login"
-                        className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium"
-                      >
-                        Login
-                      </NavLink>
-                      <Link
-                        to="/sign-up"
-                        className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-                      >
-                        Sign up
-                      </Link>
-                    </>
-                  ) : (
-                    <button
-                      onClick={logOut} // Call logOut on button click
-                      className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-                    >
-                      Logout
-                    </button>
-                  )}
+                {
+  role === undefined && (
+    <>
+      <NavLink
+        to="/login"
+        className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium"
+      >
+        Login
+      </NavLink>
+      <Link
+        to="/sign-up"
+        className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+      >
+        Sign up
+      </Link>
+    </>
+  )
+}
+
                 </div>
               </div>
 
