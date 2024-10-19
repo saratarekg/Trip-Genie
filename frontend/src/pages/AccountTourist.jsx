@@ -205,12 +205,12 @@ export default function AccountTourist() {
       { name: "Cart", icon: ShoppingBag, tab: "cart" },
       { name: "Points and Wallet", icon: Wallet, tab: "redeem-points" },
     ],
-    "Settings and Privacy": [
+    "Settings & Privacy": [
       { name: "Account", icon: User, tab: "info" },
       { name: "Security", icon: Lock, tab: "security" },
       { name: "Preferences", icon: Settings, tab: "preferences" },
     ],
-    "Help and Support": [
+    "Help & Support": [
       { name: "File a Complaint", icon: AlertTriangle, tab: "complain" },
       { name: "FAQs", icon: HelpCircle, tab: "faqs" },
     ],
