@@ -9,32 +9,33 @@ import {
   Lock,
   AlertTriangle,
   Settings,
-  HistoryIcon ,
+  HistoryIcon,
   Calendar,
+  HelpCircle,
+  Eye,
+  MessageSquare,
+  LogOut
 } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PasswordChanger from "@/components/Passwords";
 import { TouristProfileComponent } from "@/components/touristProfile";
 import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
-import TouristActivities from '@/pages/TouristActivities'
-import TouristAttendedActivities from '@/pages/TouristAttended'
-// Sub-components for each section
+import TouristActivities from '@/pages/TouristActivities';
+import TouristAttendedActivities from '@/pages/TouristAttended';
+
+// Sub-components
 const AccountInfo = ({ tourist }) => <TouristProfileComponent />;
 
 const Upcoming = ({ tourist }) => <TouristActivities />;
+
 const History = ({ tourist }) => <TouristAttendedActivities />;
+
 const Complaint = () => <FileComplaintForm />;
 
 const Cart = ({ tourist }) => (
@@ -44,11 +45,7 @@ const Cart = ({ tourist }) => (
   </div>
 );
 
-const Preferences = () => (
-  <div>
-    <TravelPreferences />
-  </div>
-);
+const Preferences = () => <TravelPreferences />;
 
 const RedeemPoints = ({ tourist, onRedeemPoints }) => {
   const [isRedeeming, setIsRedeeming] = useState(false);
@@ -111,6 +108,7 @@ const RedeemPoints = ({ tourist, onRedeemPoints }) => {
 
 export default function AccountTourist() {
   const [activeTab, setActiveTab] = useState("info");
+  const [expandedMenu, setExpandedMenu] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const [tourist, setTourist] = useState(null);
@@ -162,7 +160,6 @@ export default function AccountTourist() {
         }
       );
 
-      // Update the tourist state with the new data
       setTourist((prevTourist) => ({
         ...prevTourist,
         wallet: response.data.walletBalance,
@@ -180,44 +177,72 @@ export default function AccountTourist() {
   };
 
   const renderContent = () => {
-    if (isLoading) {
-      return <div className="text-center">Loading...</div>;
-    }
-
-    if (error) {
-      return <div className="text-center text-red-500">Error: {error}</div>;
-    }
-
-    if (!tourist) {
-      return <div className="text-center">No tourist data available.</div>;
-    }
+    if (isLoading) return <div className="text-center">Loading...</div>;
+    if (error) return <div className="text-center text-red-500">Error: {error}</div>;
+    if (!tourist) return <div className="text-center">No tourist data available.</div>;
 
     switch (activeTab) {
-      case "info":
-        return <AccountInfo tourist={tourist} />;
-      case "complain":
-        return <Complaint />;
-      case "cart":
-        return <Cart tourist={tourist} />;
-        case "history":
-        return <TouristAttendedActivities tourist={tourist} />;
-        case "upcoming":
-          return <TouristActivities tourist={tourist} />;
-      case "redeem-points":
-        return (
-          <RedeemPoints tourist={tourist} onRedeemPoints={handleRedeemPoints} />
-        );
-      case "security":
-        return <PasswordChanger />;
-      case "preferences":
-        return <Preferences />;
-      default:
-        return <AccountInfo tourist={tourist} />;
+      case "info": return <AccountInfo tourist={tourist} />;
+      case "complain": return <Complaint />;
+      case "cart": return <Cart tourist={tourist} />;
+      case "history": return <History tourist={tourist} />;
+      case "upcoming": return <Upcoming tourist={tourist} />;
+      case "redeem-points": return <RedeemPoints tourist={tourist} onRedeemPoints={handleRedeemPoints} />;
+      case "security": return <PasswordChanger />;
+      case "preferences": return <Preferences />;
+      default: return <AccountInfo tourist={tourist} />;
     }
   };
+
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     navigate(`/account/${tab}`);
+  };
+
+  const menuStructure = {
+    "Dashboard": [
+      { name: "Upcoming Bookings", icon: Calendar, tab: "upcoming" },
+      { name: "Cart", icon: ShoppingBag, tab: "cart" },
+      { name: "Points and Wallet", icon: Wallet, tab: "redeem-points" },
+    ],
+    "Settings and Privacy": [
+      { name: "Account", icon: User, tab: "info" },
+      { name: "Security", icon: Lock, tab: "security" },
+      { name: "Preferences", icon: Settings, tab: "preferences" },
+    ],
+    "Help and Support": [
+      { name: "File a Complaint", icon: AlertTriangle, tab: "complain" },
+      { name: "FAQs", icon: HelpCircle, tab: "faqs" },
+    ],
+    "Display and Accessibility": [
+      { name: "Theme", icon: Eye, tab: "theme" },
+      { name: "Language", icon: MapPin, tab: "language" },
+    ],
+    "Give Feedback": [
+      { name: "Feedback", icon: MessageSquare, tab: "feedback" },
+      { name: "History", icon: HistoryIcon, tab: "history" },
+    ],
+  };
+
+  const logOut = async () => {
+    console.log("Logging out...");
+    try {
+      const response = await fetch("http://localhost:4000/auth/logout");
+
+      if (response.ok) {
+        Cookies.set("jwt", "");
+        Cookies.set("role", "");
+        Cookies.remove("jwt");
+        Cookies.remove("role");
+        console.log("Logged out successfully");
+        navigate("/login"); // Redirect to login page after logout
+        window.location.reload(); // Refresh the page after logout
+      } else {
+        console.error("Logout failed.");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   return (
@@ -229,114 +254,43 @@ export default function AccountTourist() {
         <aside className="w-full md:w-1/4">
           <nav>
             <ul className="space-y-2">
+              {Object.entries(menuStructure).map(([category, items]) => (
+                <li key={category} className="mb-4">
+                  <button
+                    onClick={() => setExpandedMenu(expandedMenu === category ? null : category)}
+                    className="flex items-center justify-between w-full text-left text-gray-700 hover:text-orange-500 py-2"
+                  >
+                    <span>{category}</span>
+                    <ChevronRight className={`h-5 w-5 transform transition-transform ${expandedMenu === category ? 'rotate-90' : ''}`} />
+                  </button>
+                  {expandedMenu === category && (
+                    <ul className="ml-4 mt-2 space-y-2">
+                      {items.map((item) => (
+                        <li key={item.tab}>
+                          <button
+                            onClick={() => handleTabClick(item.tab)}
+                            className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
+                              activeTab === item.tab
+                                ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
+                                : ""
+                            }`}
+                          >
+                            <item.icon className="h-5 w-5 mr-3" />
+                            {item.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
               <li>
                 <button
-                  onClick={() => handleTabClick("info")}
-                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                    activeTab === "info"
-                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                      : ""
-                  }`}
+                  onClick={logOut}
+                  className="flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left"
                 >
-                  <User className="h-5 w-5 mr-3" />
-                  Account
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleTabClick("history")}
-                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                    activeTab === "history"
-                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                      : ""
-                  }`}
-                >
-                  <HistoryIcon  className="h-5 w-5 mr-3" />
-                  History
-                </button>
-              </li>
-
-              <li>
-                <button
-                  onClick={() => handleTabClick("upcoming")}
-                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                    activeTab === "upcoming"
-                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                      : ""
-                  }`}
-                >
-                  <Calendar   className="h-5 w-5 mr-3" />
-                  Upcoming Bookings
-                </button>
-              </li>
-             
-              <li>
-                <button
-                  onClick={() => handleTabClick("complain")}
-                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                    activeTab === "complain"
-                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                      : ""
-                  }`}
-                >
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  File a Complaint
-                </button>
-              </li>
-
-              <li>
-                <button
-                  onClick={() => handleTabClick("cart")}
-                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                    activeTab === "cart"
-                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                      : ""
-                  }`}
-                >
-                  <ShoppingBag className="h-5 w-5 mr-3" />
-                  Cart
-                </button>
-              </li>
-
-              <li>
-                <button
-                  onClick={() => handleTabClick("redeem-points")}
-                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                    activeTab === "redeem-points"
-                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                      : ""
-                  }`}
-                >
-                  <Wallet className="h-5 w-5 mr-3" />
-                  Points and Wallet
-                </button>
-              </li>
-
-              <li>
-                <button
-                  onClick={() => handleTabClick("security")}
-                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                    activeTab === "security"
-                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                      : ""
-                  }`}
-                >
-                  <Lock className="h-4 w-4 mr-2" />
-                  Security
-                </button>
-              </li>
-
-              <li>
-                <button
-                  onClick={() => handleTabClick("preferences")}
-                  className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                    activeTab === "preferences"
-                      ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                      : ""
-                  }`}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Preferences
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Logout
                 </button>
               </li>
             </ul>
@@ -347,6 +301,7 @@ export default function AccountTourist() {
         <main className="w-full md:w-3/4">
           <div className="bg-white p-6 rounded-lg shadow">
             {renderContent()}
+          
           </div>
         </main>
       </div>
