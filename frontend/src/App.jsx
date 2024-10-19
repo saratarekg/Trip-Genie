@@ -22,7 +22,7 @@ import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./components/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
-import { ViewComplaints } from "./components/ViewComplaints.jsx";
+import  ViewComplaints  from "./components/ViewComplaints.jsx";
 import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
