@@ -261,11 +261,10 @@ const archiveProduct = async (req, res) => {
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
     }
-    product.isArchived = !product.isArchived;
-    await product.save();
+    const updatedProduct = await Product.findByIdAndUpdate(id,{isArchived:!product.isArchived},{new:true,runValidators:true})
     res
       .status(200)
-      .json({ message: "Product archived status toggled successfully" });
+      .json({ product:updatedProduct,message: "Product archived status toggled successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

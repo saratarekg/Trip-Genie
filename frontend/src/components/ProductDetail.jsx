@@ -148,6 +148,10 @@ const ProductDetail = () => {
         throw new Error("Failed to archive product");
       }
 
+      const data = await response.json();
+      setProduct(data.product);
+      setError(null);
+
       setShowArchiveSuccess(true);
     } catch (err) {
       setError("Error archiving product. Please try again later.");
@@ -440,18 +444,18 @@ const ProductDetail = () => {
             <Button
               variant="default"
               onClick={() => {
-                {
-                  product.isArchived
-                    ? "Back to all products"
-                    : "Back to all archived products";
-                }
                 if (product.isArchived) {
-                  navigate("/all-products");
-                } else {
                   navigate("/product-archive");
+                } else {
+                  navigate("/all-products");
                 }
               }}
-            ></Button>
+              
+            >{
+              product.isArchived
+                ? "Back to all archived products"
+                : "Back to all products"
+            }</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
