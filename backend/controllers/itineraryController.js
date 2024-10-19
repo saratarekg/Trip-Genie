@@ -22,6 +22,9 @@ const getAllItineraries = async (req, res) => {
       isBooked,
     } = req.query;
 
+    const userRole = res.locals.user_role; // Assuming user role is stored in res.locals
+    const userId = res.locals.user_id;
+
     const filterResult = await Itinerary.filter(
       budget,
       upperDate,
@@ -39,49 +42,56 @@ const getAllItineraries = async (req, res) => {
     let query = [];
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
-
-    // ADDING the appropriate condition
     query.push({ appropriate: true });
-
+    
     if (!myItineraries) {
       query.push({
         availableDates: {
           $elemMatch: {
-            date: { $gte: new Date() }, // Match any date that is upcoming
+            date: { $gte: new Date() },
           },
         },
       });
     }
-    if (myItineraries) {
-      query.push({ tourGuide: res.locals.user_id });
+
+    // Handle different user roles
+    if (userRole === 'tourist') {
+      const bookedItineraries = await ItineraryBooking.find({ user: userId }).distinct('itinerary');
+      query.push({
+        $or: [
+          { isActivated: true },
+          { _id: { $in: bookedItineraries } }
+        ]
+      });
+    } else if (userRole === 'tour-guide') {
+      query.push({
+        $or: [
+          { isActivated: true },
+          { tourGuide: userId }
+        ]
+      });
+    } else {
+      // For guests or any other role
+      query.push({ isActivated: true });
     }
 
-    let itinerariesQuery = await Itinerary.find({
-      $and: query,
-    })
+    if (myItineraries) {
+      query.push({ tourGuide: userId });
+    }
+
+    let itinerariesQuery = Itinerary.find({ $and: query })
       .populate("tourGuide")
-      .populate({ path: "activities", populate: { path: "tags category" } })
-      .exec();
+      .populate({ path: "activities", populate: { path: "tags category" } });
 
     if (sort) {
       const sortBy = {};
-      sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
-      itinerariesQuery = await Itinerary.find({
-        $and: query,
-      })
-        .populate("tourGuide")
-        .populate({ path: "activities", populate: { path: "tags category" } })
-        .sort(sortBy);
+      sortBy[sort] = parseInt(asc);
+      itinerariesQuery = itinerariesQuery.sort(sortBy);
     } else {
-      itinerariesQuery = await Itinerary.find({
-        $and: query,
-      })
-        .populate("tourGuide")
-        .populate({ path: "activities", populate: { path: "tags category" } })
-        .sort({ createdAt: -1 });
+      itinerariesQuery = itinerariesQuery.sort({ createdAt: -1 });
     }
 
-    const itineraries = await itinerariesQuery;
+    const itineraries = await itinerariesQuery.exec();
 
     if (!itineraries || itineraries.length === 0) {
       return res.status(200).json([]);
@@ -91,7 +101,6 @@ const getAllItineraries = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 const getAllItinerariesAdmin = async (req, res) => {
   try {
@@ -409,7 +418,6 @@ const addCommentToItinerary = async (req, res) => {
       // .populate("advertiser")
       // .populate("category")
       // .populate("tags")
-      // .populate("attended")
       // .exec();
 
     if (!itinerary) {
@@ -461,7 +469,6 @@ const rateItinerary = async (req, res) => {
     // .populate("advertiser")
     // .populate("category")
     // .populate("tags")
-    // .populate("attended")
     // .populate("comments")
     //.exec();
 

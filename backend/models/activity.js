@@ -59,12 +59,6 @@ const activitySchema = new Schema(
         ref: "Tag",
       },
     ],
-    attended: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Tourist",
-      },
-    ],
     specialDiscount: {
       type: Number,
       default: 0,
@@ -142,7 +136,6 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
       .populate("category")
       .populate("tags")
       .populate("advertiser")
-      .populate("attended")
       .exec();
   }
   const query = [];
@@ -184,7 +177,6 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
     .populate("category")
     .populate("tags")
     .populate("advertiser")
-    .populate("attended")
     .exec(); // Perform a search with the regex query
 };
 
@@ -225,7 +217,6 @@ activitySchema.statics.findByTagTypes = async function (types) {
       .populate("category")
       .populate("tags")
       .populate("advertiser")
-      .populate("attended")
       .exec();
   }
 
@@ -240,7 +231,6 @@ activitySchema.statics.findByTagTypes = async function (types) {
     .populate("category")
     .populate("tags")
     .populate("advertiser")
-    .populate("attended")
     .exec();
 };
 
@@ -250,7 +240,6 @@ activitySchema.statics.findByCategoryNames = async function (names) {
       .populate("category")
       .populate("tags")
       .populate("advertiser")
-      .populate("attended")
       .exec(); // Perform a search with the regex query
   }
 
@@ -275,7 +264,6 @@ activitySchema.statics.findByCategoryNames = async function (names) {
     .populate("category")
     .populate("tags")
     .populate("advertiser")
-    .populate("attended")
     .exec(); // Perform a search with the regex query
 };
 
@@ -314,9 +302,9 @@ activitySchema.statics.filter = async function (
     query.push({ ["rating"]: { $gte: minRating } });
   }
   if (query.length === 0) {
-    return this.find().populate("category tags advertiser attended").exec();
+    return this.find().populate("category tags advertiser").exec();
   }
-  return this.find({ $and: query }).populate("category tags advertiser attended").exec();
+  return this.find({ $and: query }).populate("category tags advertiser").exec();
 };
 
 // Method to rate an activity and calculate the new average rating

@@ -150,8 +150,6 @@ const ItineraryDetail = () => {
   const [itineraryReview, setItineraryReview] = useState('');
   const [showFullComment, setShowFullComment] = useState(null);
   const [activityRating, setActivityRating] = useState(0);
-  const [hasAttendedTourGuide, setHasAttendedTourGuide] = useState(false);
-  const [hasAttendedItinerary, setHasAttendedItinerary] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isAppropriate, setIsAppropriate] = useState(true); // Track the current status
   const [showBookingDialog, setShowBookingDialog] = useState(false);
@@ -333,20 +331,6 @@ const ItineraryDetail = () => {
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
           setCanModify(decodedToken.id === data.tourGuide._id);
-
-
-          if (data.attended && Array.isArray(data.attended)) {
-            data.attended.forEach(tourist => {
-              console.log("Tourist:", tourist, "Tourist ID:", tourist._id);
-            });
-
-            setHasAttendedItinerary(data.attended.some(tourist => tourist === decodedToken.id));
-          }
-
-
-          if (data.tourGuide.attended && Array.isArray(data.tourGuide.attended)) {
-            setHasAttendedTourGuide(data.tourGuide.attended.some(tourist => tourist === decodedToken.id));
-          }
         }
 
 
@@ -361,9 +345,46 @@ const ItineraryDetail = () => {
         setLoading(false);
       }
     };
+    const fetchUserBookings = async () => {
+      try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/touristItineraryAttendedBookings`, {
+      headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserBookings(response.data);
+      } catch (error) {
+      console.error("Error fetching user bookings:", error);
+      }
+      };
+
 
     fetchItineraryDetails();
+    if (userRole === 'tourist') {
+      fetchUserBookings();
+      }
+    fetchItineraryDetails();
   }, [id, userRole]);
+
+
+  const isItineraryAvailable = () => {
+    if (!itinerary.availableDates || itinerary.availableDates.length === 0) {
+      console.log("No available dates, returning false.");
+      return false; // No dates to check, assume not passed
+    }
+  
+    const hasUpcomingDate = itinerary.availableDates.some(dateInfo => {
+      const itineraryDate = new Date(dateInfo.date).setHours(0, 0, 0, 0);
+      const currentDate = new Date().setHours(0, 0, 0, 0);
+      
+      const isFutureDate = itineraryDate >= currentDate;
+      console.log(`Checking date: ${dateInfo.date} | Is upcoming or today: ${isFutureDate}`);
+      
+      return isFutureDate;
+    });
+
+    console.log(`Final result: ${hasUpcomingDate}`);
+    return hasUpcomingDate;
+  };
 
   const handleActivationToggle = async () => {
     try {
@@ -890,7 +911,23 @@ const ItineraryDetail = () => {
             {tourGuideProfile && (
               <TourguideProfileCard profile={tourGuideProfile} />
             )}
-            {userRole === "tourist" && hasAttendedTourGuide && hasAttendedItinerary && (
+
+            {userRole === 'tourist' && isItineraryAvailable() &&(
+        isActivated ? (
+          <Button
+            onClick={handleBookNowClick}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+          >
+            Book Now
+          </Button>
+        ) : (
+          <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
+            Currently Unavailable
+          </div>
+        )
+      )}
+      
+          {userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole !== "admin" &&  (
               <>
                 <Card className="mt-4">
                   <CardHeader>
@@ -911,6 +948,7 @@ const ItineraryDetail = () => {
               </>
 
             )}
+
             {userRole === "admin" && (
               <>
                 <Button
@@ -1012,7 +1050,7 @@ const ItineraryDetail = () => {
             <p>No comments yet.</p>
           )}
 
-          {userRole !== "admin" && hasAttendedItinerary && hasAttendedTourGuide && (
+{userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole!== "admin" && (
             <>
               <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
                 Add a Review
@@ -1035,117 +1073,107 @@ const ItineraryDetail = () => {
       </Button>
       )} */}
 
-      {userRole === 'tourist' && (
-        isActivated ? (
-          <Button
-            onClick={handleBookNowClick}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-          >
-            Book Now
-          </Button>
-        ) : (
-          <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
-            Currently Unavailable
-          </div>
-        )
-      )}
+
 
 
 <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="date" className="text-right">
-              Date
-            </Label>
-            <Select onValueChange={setSelectedDate} value={selectedDate || undefined}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select a date" />
-              </SelectTrigger>
-              <SelectContent>
-                {itinerary.availableDates.map((dateInfo, index) => (
-                  <SelectItem key={index} value={dateInfo.date}>
-                    {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader>
+      <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
+    </DialogHeader>
+    <div className="grid gap-4 py-4">
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="date" className="text-right">
+          Date
+        </Label>
+        <Select onValueChange={setSelectedDate} value={selectedDate || undefined}>
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Select a date" />
+          </SelectTrigger>
+          <SelectContent>
+            {itinerary.availableDates
+              .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0)) // Filter upcoming dates
+              .map((dateInfo, index) => (
+                <SelectItem key={index} value={dateInfo.date}>
+                  {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {selectedDate && (
+        <div className="grid grid-cols-4 items-center gap-4">
+          <Label htmlFor="time" className="text-right">
+            Time
+          </Label>
+          <Select onValueChange={setSelectedTime} value={selectedTime || undefined}>
+            <SelectTrigger className="col-span-3">
+              <SelectValue placeholder="Select a time" />
+            </SelectTrigger>
+            <SelectContent>
+              {itinerary.availableDates
+                .find(dateInfo => dateInfo.date === selectedDate)
+                ?.times.map((time, index) => (
+                  <SelectItem key={index} value={`${time.startTime}-${time.endTime}`}>
+                    {time.startTime} - {time.endTime}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {selectedDate && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="time" className="text-right">
-                Time
-              </Label>
-              <Select onValueChange={setSelectedTime} value={selectedTime || undefined}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select a time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {itinerary.availableDates
-                    .find(dateInfo => dateInfo.date === selectedDate)
-                    ?.times.map((time, index) => (
-                      <SelectItem key={index} value={`${time.startTime}-${time.endTime}`}>
-                        {time.startTime} - {time.endTime}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="tickets" className="text-right">
-              Tickets
-            </Label>
-            <Input
-              id="tickets"
-              type="number"
-              value={numberOfTickets}
-              onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Total Price</Label>
-            <div className="col-span-3">${calculateTotalPrice()}</div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Payment Type</Label>
-            <RadioGroup
-              value={paymentType}
-              onValueChange={setPaymentType}
-              className="col-span-3"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="CreditCard" id="CreditCard" />
-                <Label htmlFor="CreditCard">Credit Card</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="DebitCard" id="DebitCard" />
-                <Label htmlFor="DebitCard">Debit Card</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="Wallet" id="Wallet" />
-                <Label htmlFor="Wallet">Wallet</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          {bookingError && (
-            <div className="text-red-500 text-sm">{bookingError}</div>
-          )}
+            </SelectContent>
+          </Select>
         </div>
-        <DialogFooter>
-          <Button onClick={() => setShowBookingDialog(false)} variant="outline">
-            Cancel
-          </Button>
-          <Button onClick={handleBooking} disabled={isBooking || !selectedDate || !selectedTime}>
-            {isBooking ? "Booking..." : "Confirm Booking"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      )}
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="tickets" className="text-right">
+          Tickets
+        </Label>
+        <Input
+          id="tickets"
+          type="number"
+          value={numberOfTickets}
+          onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
+          className="col-span-3"
+        />
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label className="text-right">Total Price</Label>
+        <div className="col-span-3">${calculateTotalPrice()}</div>
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label className="text-right">Payment Type</Label>
+        <RadioGroup
+          value={paymentType}
+          onValueChange={setPaymentType}
+          className="col-span-3"
+        >
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="CreditCard" id="CreditCard" />
+            <Label htmlFor="CreditCard">Credit Card</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="DebitCard" id="DebitCard" />
+            <Label htmlFor="DebitCard">Debit Card</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="Wallet" id="Wallet" />
+            <Label htmlFor="Wallet">Wallet</Label>
+          </div>
+        </RadioGroup>
+      </div>
+      {bookingError && (
+        <div className="text-red-500 text-sm">{bookingError}</div>
+      )}
+    </div>
+    <DialogFooter>
+      <Button onClick={() => setShowBookingDialog(false)} variant="outline">
+        Cancel
+      </Button>
+      <Button onClick={handleBooking} disabled={isBooking || !selectedDate || !selectedTime}>
+        {isBooking ? "Booking..." : "Confirm Booking"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
 
       <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
         <DialogContent className="sm:max-w-[425px]">
