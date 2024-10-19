@@ -4,7 +4,7 @@ import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import { Link } from "react-router-dom";
 import { Calendar as CalendarIcon, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
@@ -63,6 +64,10 @@ export function SignupForm() {
   const [nationalities, setNationalities] = useState([]);
   const [apiError, setApiError] = useState(null);
   const [showSignupSuccess, setShowSignupSuccess] = useState(false);
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [validationError, setValidationError] = useState(null);
+  const fileInputRef = useRef(null);
+  const [profilePicture, setProfilePicture] = useState(null);
   const alertRef = useRef(null);
   const navigate = useNavigate();
 
@@ -113,8 +118,6 @@ export function SignupForm() {
       description: z.string().trim().optional(),
       website: z.string().trim().optional(),
       hotline: z.string().trim().optional(),
-      documents: z.array(z.any()).optional(),
-      profilePicture: z.any().optional(),
       termsAccepted: z.boolean().optional(),
     })
     .superRefine((data, ctx) => {
@@ -204,12 +207,6 @@ export function SignupForm() {
             message: "Name is required.",
           });
         }
-        if (stage === 2 && (!data.documents || data.documents.length === 0)) {
-          ctx.addIssue({
-            path: ["documents"],
-            message: "Please upload the required documents.",
-          });
-        }
       }
       if (data.userType === "advertiser") {
         if (!data.hotline) {
@@ -261,8 +258,6 @@ export function SignupForm() {
     description: useRef(null),
     website: useRef(null),
     hotline: useRef(null),
-    documents: useRef(null),
-    profilePicture: useRef(null),
     termsAccepted: useRef(null),
   };
 
@@ -283,8 +278,6 @@ export function SignupForm() {
       description: "",
       website: "",
       hotline: "",
-      documents: [],
-      profilePicture: null,
       termsAccepted: false,
     },
   });
@@ -340,6 +333,42 @@ export function SignupForm() {
     setStage(stage - 1);
   };
 
+  const handleDocumentsUpload = (e) => {
+    const files = e.target.files;
+    if (files) {
+      setValidationError(null);
+      const readers = [];
+      const newDocumentsArray = [];
+
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        readers.push(
+          new Promise((resolve) => {
+            reader.onloadend = () => {
+              newDocumentsArray.push({
+                name: file.name, // Store the file name
+                data: reader.result, // Store the Base64 data
+                type: file.type, // Store the file type
+              });
+              resolve();
+            };
+            reader.readAsDataURL(file);
+          })
+        );
+      });
+
+      console.log("New documents array:", newDocumentsArray);
+
+      Promise.all(readers).then(() => {
+        setUploadedDocuments([...uploadedDocuments, ...newDocumentsArray]);
+      });
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Clear the input value
+      }
+    }
+  };
+
   const totalStages = userType === "tourist" || userType === undefined ? 3 : 4;
   const progress = (stage / totalStages) * 100;
 
@@ -363,42 +392,47 @@ export function SignupForm() {
         }
       }
     }
-    if (stage < totalStages) {
-      setFormData({ ...formData, ...values });
-      console.log("Form data:", formData);
-      setStage(stage + 1);
-      return;
+    if (stage === 2) {
+      if (uploadedDocuments.length === 0) {
+        setValidationError("Please upload at least one document.");
+        return;
+      }
     }
 
-    console.log("Final form data:", { ...formData, ...values });
+    if (stage < totalStages) {
+      setFormData(values);
+      setStage(stage + 1);
+      setApiError(null);
+      return;
+    }
 
     setIsLoading(true);
     setApiError(null);
     values.mobile = "+" + values.mobile;
 
     try {
-      const finalData = { ...formData, ...values };
+      const finalData = new FormData();
       for (const key in values) {
-        if (key === "documents") {
-          values[key].forEach((doc) => {
-            finalData.append(`documents`, doc);
-          });
-        } else if (key === "profilePicture") {
-          if (userType === "advertiser" || userType === "seller") {
-            finalData.append("logo", values[key]);
-          } else {
-            finalData.append("profilePicture", values[key]);
-          }
-        } else {
-          finalData.append(key, values[key]);
-        }
+        finalData.append(key, values[key]);
       }
+      finalData.append("profilePicture", profilePicture);
+      // uploadedDocuments.forEach((doc) => {
+      //   finalData.append("documents", doc);
+      // });
+      finalData.append("documents", JSON.stringify(uploadedDocuments));
 
-      await axios.post(`http://localhost:4000/auth/sign-up/`, finalData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      console.log(uploadedDocuments);
+      console.log("Final dataaaa:", finalData.get("documents"));
+
+      await axios.post(
+        `http://localhost:4000/auth/sign-up/${userType}`,
+        finalData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       setShowSignupSuccess(true);
     } catch (error) {
       if (error.response) {
@@ -413,6 +447,22 @@ export function SignupForm() {
       console.error("Signup error:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRemoveDocument = (index) => {
+    const updatedDocuments = uploadedDocuments.filter((_, i) => i !== index);
+    setUploadedDocuments(updatedDocuments);
+  };
+
+  const handlePictureUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePicture(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -806,28 +856,50 @@ export function SignupForm() {
             <>
               <h2 className="text-2xl font-semibold text-gray-900">
                 Please upload documents that prove your identity and
-                qualifications. For example : ID card, Passport, Certificates,
-                etc.
+                qualifications.
               </h2>
-              <FormField
-                control={control}
-                name="documents"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Upload Required Documents*</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        multiple
-                        onChange={(e) => {
-                          field.onChange(Array.from(e.target.files));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <h3>For example : ID card, Passport, Certificates, etc.</h3>
+              <Label htmlFor="documents">Upload Required Documents*</Label>
+              <Input
+                id="documents"
+                type="file"
+                multiple
+                onChange={handleDocumentsUpload}
+                className="mb-2"
+                ref={fileInputRef}
               />
+              {validationError && (
+                <p className="text-red-500">{validationError}</p>
+              )}
+
+              <div>
+                {console.log("Uploaded documentsssss:", uploadedDocuments)}
+                {uploadedDocuments.map((doc, index) => (
+                  <div key={index} className="flex items-center mb-2">
+                    {/* Display document preview */}
+                    {doc.type.startsWith("image/") ? (
+                      <img
+                        src={doc.data}
+                        alt={doc.name}
+                        className="h-20 w-20 mr-2"
+                      />
+                    ) : (
+                      <a href={doc.data} download={doc.name} className="mr-2">
+                        {doc.name}
+                      </a>
+                    )}
+
+                    {/* Remove button */}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDocument(index)}
+                      className="bg-red-500 text-white px-2 py-1 rounded"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
             </>
           );
         } else {
@@ -836,35 +908,23 @@ export function SignupForm() {
               <h2 className="text-2xl font-semibold text-gray-900">
                 Continue your profile setup by uploading a profile picture.
               </h2>
-              <FormField
-                control={control}
-                name="profilePicture"
-                render={({ field }) => (
-                  <>
-                    <FormItem>
-                      <FormLabel>Upload {} (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            field.onChange(e.target.files[0]);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                    <Button
-                      type="button"
-                      className="w-full bg-gray-300 hover:bg-gray-400"
-                      onClick={() => setStage(stage + 1)}
-                      disabled={isLoading}
-                    >
-                      Skip
-                    </Button>
-                  </>
-                )}
+
+              <Label>Upload {} (Optional)</Label>
+              <Input
+                id="profilePicture"
+                type="file"
+                accept="image/*"
+                onChange={handlePictureUpload}
+                className="mb-2"
               />
+              <Button
+                type="button"
+                className="w-full bg-gray-300 hover:bg-gray-400"
+                onClick={() => setStage(stage + 1)}
+                disabled={isLoading}
+              >
+                Skip for now
+              </Button>
             </>
           );
         }
@@ -896,41 +956,25 @@ export function SignupForm() {
           return (
             <>
               <h2 className="text-2xl font-semibold text-gray-900">
-                Continue your profile setup by uploading a{" "}
-                {["advertiser", "seller"].includes(userType)
-                  ? "logo"
-                  : "profile picture"}
-                .
+                Continue your profile setup by uploading a profile picture.
               </h2>
-              <FormField
-                control={control}
-                name="profilePicture"
-                render={({ field }) => (
-                  <>
-                    <FormItem>
-                      <FormLabel>Upload {} (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            field.onChange(e.target.files[0]);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                    <Button
-                      type="button"
-                      className="w-full bg-gray-300 hover:bg-gray-400"
-                      onClick={() => setStage(stage + 1)}
-                      disabled={isLoading}
-                    >
-                      Skip for now
-                    </Button>
-                  </>
-                )}
+
+              <Label>Upload {} (Optional)</Label>
+              <Input
+                id="profilePicture"
+                type="file"
+                accept="image/*"
+                onChange={handlePictureUpload}
+                className="mb-2"
               />
+              <Button
+                type="button"
+                className="w-full bg-gray-300 hover:bg-gray-400"
+                onClick={() => setStage(stage + 1)}
+                disabled={isLoading}
+              >
+                Skip for now
+              </Button>
             </>
           );
         }

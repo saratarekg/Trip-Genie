@@ -282,6 +282,7 @@ const UpdateProduct = () => {
                 <Input
                   id="pictures"
                   type="file"
+                  accept="image/*"
                   multiple
                   onChange={handlePicturesUpload}
                   className="mb-2"

@@ -28,6 +28,7 @@ const touristSignup = async (req, res) => {
       mobile,
       dateOfBirth,
       jobOrStudent,
+      profilePicture,
     } = req.body;
     const tourist = new Tourist({
       email,
@@ -37,6 +38,7 @@ const touristSignup = async (req, res) => {
       mobile,
       dateOfBirth,
       jobOrStudent,
+      profilePicture,
     });
 
     tourist
