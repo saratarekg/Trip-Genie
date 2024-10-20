@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow, format, set } from 'date-fns';
 import { useParams, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from "axios"; // Ensure axios is installed
@@ -9,6 +9,8 @@ import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, Toas
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import * as jwtDecode from 'jwt-decode';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+import Loader from './Loader';
 
 import {
   CheckCircle,
@@ -45,13 +47,6 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimelinePreviewComponent } from "@/components/timeline-preview";
 
-const LoadingSpinner = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
-    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
-    </svg>
-  </div>
-);
 
 const StarRating = ({ rating, setRating, readOnly = false }) => {
   return (
@@ -294,27 +289,32 @@ const ItineraryDetail = () => {
         setLoading(false);
         return;
       }
-
+  
       setLoading(true);
       try {
         const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/itineraries/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+        
+        const itineraryFetch = fetch(`http://localhost:4000/${userRole}/itineraries/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(response => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch itinerary details");
           }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch itinerary details");
-        }
-
-        const data = await response.json();
+          return response.json();
+        });
+  
+        const userBookingsFetch = userRole === 'tourist' ? axios.get(`http://localhost:4000/${userRole}/touristItineraryAttendedBookings`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then(response => response.data) : Promise.resolve([]);
+  
+        const [data, userBookings] = await Promise.all([itineraryFetch, userBookingsFetch]);
+  
         setItinerary(data);
-        setError(null);
-
+        setActivities(data.activities);
+        setUserBookings(userBookings);
+  
         if (data.tourGuide) {
           setTourGuideProfile({
             ...data.tourGuide,
@@ -322,22 +322,13 @@ const ItineraryDetail = () => {
             specialties: ['Historical Tours', 'Food Tours', 'Adventure Tours'],
           });
         }
+  
         setIsAppropriate(data.appropriate);
-
         setIsActivated(data.isActivated);
-
-
-        setActivities(data.activities);
-        if (token) {
-          const decodedToken = jwtDecode.jwtDecode(token);
-          setCanModify(decodedToken.id === data.tourGuide._id);
-        }
-
-
-
-
-
-
+  
+        const decodedToken = jwtDecode.jwtDecode(token);
+        setCanModify(decodedToken.id === data.tourGuide._id);
+        setError(null);
       } catch (err) {
         setError("Error fetching itinerary details. Please try again later.");
         console.error("Error fetching itinerary details:", err);
@@ -345,26 +336,9 @@ const ItineraryDetail = () => {
         setLoading(false);
       }
     };
-    const fetchUserBookings = async () => {
-      try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/touristItineraryAttendedBookings`, {
-      headers: { Authorization: `Bearer ${token}` },
-      });
-      setUserBookings(response.data);
-      } catch (error) {
-      console.error("Error fetching user bookings:", error);
-      }
-      };
-
-
-    fetchItineraryDetails();
-    if (userRole === 'tourist') {
-      fetchUserBookings();
-      }
+  
     fetchItineraryDetails();
   }, [id, userRole]);
-
 
   const isItineraryAvailable = () => {
     if (!itinerary.availableDates || itinerary.availableDates.length === 0) {
@@ -387,6 +361,7 @@ const ItineraryDetail = () => {
   };
 
   const handleActivationToggle = async () => {
+    setLoading(true);
     try {
       const token = Cookies.get("jwt");
       setIsActivated(prevState => !prevState); // Immediately update the state
@@ -403,14 +378,14 @@ const ItineraryDetail = () => {
       }
 
       const updatedItinerary = await response.json();
-      // Only update if the server response is different from our optimistic update
-      if (updatedItinerary.isActivated !== isActivated) {
-        setIsActivated(updatedItinerary.isActivated);
-      }
+
     } catch (error) {
       console.error('Error toggling activation:', error);
       setIsActivated(prevState => !prevState); // Revert the state if there's an error
       // Optionally, show an error message to the user
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -607,7 +582,9 @@ const ItineraryDetail = () => {
 
 
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <Loader />;
+
+
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
