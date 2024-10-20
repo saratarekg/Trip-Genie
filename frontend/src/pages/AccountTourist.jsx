@@ -15,7 +15,7 @@ import {
   Eye,
   MessageSquare,
   LogOut,
-  Trash2, XCircle, CheckCircle
+  Trash2, XCircle, CheckCircle, Heart
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -298,7 +298,7 @@ export default function AccountTourist() {
     ],
     "Products": [
       { name: "Cart", icon: ShoppingBag, tab: "cart" },
-      { name: "Wishlist", icon: ShoppingBag, tab: "wishlist" },
+      { name: "Wishlist", icon: Heart, tab: "wishlist" },
 
     ],
     "Settings and Privacy": [
