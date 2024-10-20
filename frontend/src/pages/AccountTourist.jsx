@@ -37,22 +37,22 @@ import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from '@/pages/TouristActivities';
 import TouristAttendedActivities from '@/pages/TouristAttended';
+import ShoppingCart from '@/components/touristCart.jsx';
+import WishlistPage from '@/components/touristWishlist.jsx';
 
 // Sub-components
 const AccountInfo = ({ tourist }) => <TouristProfileComponent />;
 
 const Upcoming = ({ tourist }) => <TouristActivities />;
 
+const Cart = ({ tourist }) => <ShoppingCart />;
+
+const Wishlist = ({ tourist }) => <TouristActivities />;
+
 const History = ({ tourist }) => <TouristAttendedActivities />;
 
 const Complaint = () => <FileComplaintForm />;
 
-const Cart = ({ tourist }) => (
-  <div>
-    <h2 className="text-2xl font-semibold mb-4">My Orders</h2>
-    <p>Your cart and order history goes here.</p>
-  </div>
-);
 
 const Preferences = () => <TravelPreferences />;
 
@@ -271,7 +271,8 @@ export default function AccountTourist() {
     switch (activeTab) {
       case "info": return <AccountInfo tourist={tourist} />;
       case "complain": return <Complaint />;
-      case "cart": return <Cart tourist={tourist} />;
+      case "cart": return <ShoppingCart tourist={tourist} />;
+      case "wishlist": return <WishlistPage tourist={tourist} />;
       case "history": return <History tourist={tourist} />;
       case "upcoming": return <Upcoming tourist={tourist} />;
       case "redeem-points": return <RedeemPoints tourist={tourist} onRedeemPoints={handleRedeemPoints} />;
@@ -291,10 +292,14 @@ export default function AccountTourist() {
   };
 
   const menuStructure = {
-    "Dashboard": [
+    "Activities & Itineraries": [
       { name: "Upcoming Bookings", icon: Calendar, tab: "upcoming" },
-      { name: "Cart", icon: ShoppingBag, tab: "cart" },
       { name: "Points and Wallet", icon: Wallet, tab: "redeem-points" },
+    ],
+    "Products": [
+      { name: "Cart", icon: ShoppingBag, tab: "cart" },
+      { name: "Wishlist", icon: ShoppingBag, tab: "wishlist" },
+
     ],
     "Settings and Privacy": [
       { name: "Account", icon: User, tab: "info" },

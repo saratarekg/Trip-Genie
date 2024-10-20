@@ -9,12 +9,23 @@ const historicalPlacesController = require("../controllers/historicalPlacesContr
 const tourguideController = require("../controllers/tourGuideController");
 const sellerController = require("../controllers/sellerController");
 const complaintsController = require("../controllers/complaintsController.js");
+const purchaseController = require("../controllers/purchaseController.js");
 
 const router = express.Router();
 
 router.put("/", touristController.updateTouristProfile);
 router.put("/preferences", touristController.updatePreferences);
 router.get("/preferences", touristController.getTouristPreferences);
+
+router.get("/cart", touristController.getCart);
+router.delete("/empty/cart", touristController.emptyCart);
+router.delete("/remove/cart/:id", touristController.removeItemFromCart);
+router.put("/update/cart", touristController.updateCartProductQuantity);
+
+router.get("/wishlist", touristController.getWishlist);
+router.delete("/remove/wishlist/:id", touristController.removeProductFromWishlist);
+router.put("/move/wishlist/:id", touristController.moveProductToCart);
+
 
 router.get("/", touristController.getTouristProfile);
 
@@ -43,10 +54,7 @@ router.post(
 );
 
 router.post("/itinerary/rate/:id", itineraryController.rateItinerary);
-router.post(
-  "/itinerary/comment/:id",
-  itineraryController.addCommentToItinerary
-);
+router.post("/itinerary/comment/:id",itineraryController.addCommentToItinerary);
 
 router.get(
   "/historical-places",
@@ -54,9 +62,15 @@ router.get(
 );
 router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);
 
-// router.get("/bookings", bookingController.getUserBookings);
-// router.delete("/bookings/:id", bookingController.deleteBooking);
-// router.post("/bookings", bookingController.createBooking);
+
+router.post("/purchase", purchaseController.createPurchase);
+router.get('/purchase', purchaseController.getPurchasesByTourist);
+router.delete('/purchase/:id', purchaseController.deletePurchase);
+
+router.post("/product/rate/:id", productController.rateProduct);
+router.post("/product/comment/:id",productController.addCommentToProduct);
+router.post("/product/addToCart", productController.addProductToCart);
+router.post("/product/addToWishlist/:id",productController.addProductToWishlist);
 
 router.get("/activityBooking", activityBookingController.getAllBookings);
 router.delete("/activityBooking/:id", activityBookingController.deleteBooking);

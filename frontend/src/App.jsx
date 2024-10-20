@@ -15,6 +15,10 @@ import ProductDetail from "./components/ProductDetail.jsx";
 import { TourGuideProfileComponent } from "./components/tourGuideProfile.jsx";
 import { TouristProfileComponent } from "./components/touristProfile.jsx";
 
+import ShoppingCart from "./components/touristCart.jsx";
+import WishlistPage from "./components/touristWishlist.jsx";
+// import TouristPurchases from "./components/touristPurchases.jsx";
+
 import CreateItineraryPage from "./pages/CreateItineraryPage.jsx";
 import CreateProduct from "./components/CreateProduct.jsx";
 import { NavbarComponent } from "./components/navbar.jsx";
@@ -290,6 +294,30 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+           <Route
+            path="/touristCart"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <ShoppingCart />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/touristWishlist"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <WishlistPage />
+              </ProtectedRoute>
+            }
+          />
+           {/* <Route
+            path="/touristPurchases"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <TouristPurchases />
+              </ProtectedRoute>
+            }
+          /> */}
           <Route
             path="/update-itinerary/:id"
             element={

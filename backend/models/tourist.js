@@ -70,6 +70,22 @@ const touristSchema = new Schema(
       type: String,
       enum: ["Bronze", "Silver", "Gold"],
     },
+    cart: [
+      {
+        product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+        quantity: { type: Number, required: true, min: 1 },
+        totalPrice: { type: Number, required: true },
+      },
+    ],
+    wishlist: [
+      {
+        product: { 
+          type: mongoose.Schema.Types.ObjectId, 
+          ref: "Product", 
+          required: true 
+        },
+      },
+    ],
     preference: {
       budget: {
         type: Number,
