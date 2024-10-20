@@ -6,8 +6,11 @@ const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
 const sellerController = require("../controllers/sellerController");
+const currencyController = require('../controllers/currencyController');
 
 const router = express.Router();
+
+router.get('/getCurrency/:id', currencyController.getCurrencyById);
 
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.get("/itineraries/:id", itineraryController.getItineraryById);

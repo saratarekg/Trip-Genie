@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
+import * as jwtDecode from "jwt-decode";
 import FilterComponent from "./filterHistoricalPlaces.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
@@ -15,70 +16,136 @@ import {
 import { ChevronLeft, ChevronRight, Search } from "lucide-react"; // Import icons
 
 // HistoricalPlaceCard Component
-const HistoricalPlaceCard = ({ historicalPlace, onSelect }) => (
-  <Card
-    className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
-    onClick={() => onSelect(historicalPlace._id)}
-  >
-    <div className="overflow-hidden">
-      <img
-        src={
-          historicalPlace.pictures && historicalPlace.pictures.length > 0
-            ? historicalPlace.pictures[0]
-            : defaultImage
-        }
-        alt={historicalPlace.title}
-        className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-      />
-    </div>
-    <CardHeader>
-      <h3 className="text-xl font-semibold mt-2">{historicalPlace.title}</h3>
-      <h3 className="text-sm mt-2 text-gray-700">
-        {historicalPlace.description}
-      </h3>
-    </CardHeader>
-    <CardContent>
-      <div className="flex justify-between items-center mt-4">
-        <div className="flex flex-col">
-          <span className="text-md font-bold text-gray-900">
-            {historicalPlace.ticketPrices && historicalPlace.ticketPrices.native
-              ? `native: $${historicalPlace.ticketPrices.native}/Day`
-              : ""}
-          </span>
-          <span className="text-md font-bold text-gray-900">
-            {historicalPlace.ticketPrices &&
-            historicalPlace.ticketPrices.student
-              ? `student: $${historicalPlace.ticketPrices.student}/Day`
-              : ""}
-          </span>
-          <span className="text-md font-bold text-gray-900">
-            {historicalPlace.ticketPrices &&
-            historicalPlace.ticketPrices.foreigner
-              ? `foreigner: $${historicalPlace.ticketPrices.foreigner}/Day`
-              : ""}
+const HistoricalPlaceCard = ({ historicalPlace, onSelect, userRole, userPreferredCurrency }) => {
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
+  // console.log(historicalPlace);
+  // console.log(userPreferredCurrency);
+
+  useEffect(() => {
+    if (userRole === 'tourist' && userPreferredCurrency !== historicalPlace.currency) {
+      fetchExchangeRate();
+    }
+    else{
+      getCurrencySymbol();
+    }
+  }, [userRole, userPreferredCurrency, historicalPlace.currency]);
+
+  const fetchExchangeRate = async () => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: historicalPlace.currency,     // Sending base currency ID
+              target: userPreferredCurrency,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRates(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const getCurrencySymbol = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${historicalPlace.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const formatPrice = (price, type) => {
+    if (userRole === 'tourist') {
+      if (userPreferredCurrency._id === historicalPlace.currency._id) {
+        return `${userPreferredCurrency.symbol}${price}/Day`;
+      } else {
+        const exchangedPrice = price * exchangeRates;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}/Day`;
+      }
+    } else {
+      return `${currencySymbol.symbol}${price}/Day`;
+    }
+  };
+
+  return (
+    <Card
+      className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
+      onClick={() => onSelect(historicalPlace._id)}
+    >
+      <div className="overflow-hidden">
+        <img
+          src={historicalPlace.pictures?.[0] || defaultImage}
+          alt={historicalPlace.title}
+          className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
+      </div>
+      <CardHeader>
+        <h3 className="text-xl font-semibold mt-2">{historicalPlace.title}</h3>
+        <h3 className="text-sm mt-2 text-gray-700">{historicalPlace.description}</h3>
+      </CardHeader>
+      <CardContent>
+        <div className="flex justify-between items-center mt-4">
+          <div className="flex flex-col">
+            {historicalPlace.ticketPrices?.native && (
+              <span className="text-md font-bold text-gray-900">
+                native: {formatPrice(historicalPlace.ticketPrices.native, 'native')}
+              </span>
+            )}
+            {historicalPlace.ticketPrices?.student && (
+              <span className="text-md font-bold text-gray-900">
+                student: {formatPrice(historicalPlace.ticketPrices.student, 'student')}
+              </span>
+            )}
+            {historicalPlace.ticketPrices?.foreigner && (
+              <span className="text-md font-bold text-gray-900">
+                foreigner: {formatPrice(historicalPlace.ticketPrices.foreigner, 'foreigner')}
+              </span>
+            )}
+          </div>
+          <span className="text-sm text-gray-500">
+            {historicalPlace.location.city}, {historicalPlace.location.country}
           </span>
         </div>
-        <span className="text-sm text-gray-500">
-          {historicalPlace.location.city}, {historicalPlace.location.country}
-        </span>
-      </div>
-    </CardContent>
-    <CardFooter className="p-4 pt-0">
-      <div className="flex flex-wrap gap-2">
-        {historicalPlace.historicalTag.map((historicalTag, index) => (
-          <Badge key={index} variant="secondary">
-            {historicalTag.type}
-          </Badge>
-        ))}
-        {historicalPlace.historicalTag.map((historicalTag, index) => (
-          <Badge key={index} variant="secondary">
-            {historicalTag.period}
-          </Badge>
-        ))}
-      </div>
-    </CardFooter>
-  </Card>
-);
+      </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <div className="flex flex-wrap gap-2">
+          {historicalPlace.historicalTag.map((historicalTag, index) => (
+            <Badge key={`type-${index}`} variant="secondary">
+              {historicalTag.type}
+            </Badge>
+          ))}
+          {historicalPlace.historicalTag.map((historicalTag, index) => (
+            <Badge key={`period-${index}`} variant="secondary">
+              {historicalTag.period}
+            </Badge>
+          ))}
+        </div>
+      </CardFooter>
+    </Card>
+  );
+};
 
 // Main Component
 export function AllHistoricalPlacesComponent() {
@@ -91,6 +158,8 @@ export function AllHistoricalPlacesComponent() {
   const [selectedPeriods, setSelectedPeriods] = useState([]);
   const [myHistoricalPlaces, setmyHistoricalPlaces] = useState(false);
   const tripsPerPage = 6;
+  const [userRole, setUserRole] = useState('guest');
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const navigate = useNavigate();
   const historicalPlacesContainerRef = useRef(null);
   const [typesOptions, setTypesOptions] = useState([]);
@@ -108,7 +177,7 @@ export function AllHistoricalPlacesComponent() {
     setIsLoading(true);
     const fetchData = async () => {
       try {
-        await Promise.all([fetchHistoricalPlace(), fetchTypesAndPeriods()]);
+        await Promise.all([fetchHistoricalPlace(), fetchTypesAndPeriods(), fetchUserInfo()]);
         setIsLoading(false); // Set loading to false after both requests
       } catch (error) {
         console.error("Error in fetching data:", error);
@@ -128,6 +197,29 @@ export function AllHistoricalPlacesComponent() {
   useEffect(() => {
     searchHistoricalPlaces();
   }, [myHistoricalPlaces]);
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency
+
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
 
   const handleHistoricalPlaceSelect = (id) => {
     setIsLoading(true);
@@ -313,6 +405,8 @@ export function AllHistoricalPlacesComponent() {
                       key={historicalPlace._id}
                       historicalPlace={historicalPlace}
                       onSelect={handleHistoricalPlaceSelect}
+                    userRole={userRole}
+                    userPreferredCurrency={userPreferredCurrency}
                     />
                   ))}
               </div>
