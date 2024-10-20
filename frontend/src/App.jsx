@@ -15,6 +15,10 @@ import ProductDetail from "./components/ProductDetail.jsx";
 import { TourGuideProfileComponent } from "./components/tourGuideProfile.jsx";
 import { TouristProfileComponent } from "./components/touristProfile.jsx";
 
+import ShoppingCart from "./components/touristCart.jsx";
+import WishlistPage from "./components/touristWishlist.jsx";
+// import TouristPurchases from "./components/touristPurchases.jsx";
+
 import CreateItineraryPage from "./pages/CreateItineraryPage.jsx";
 import CreateProduct from "./components/CreateProduct.jsx";
 import { NavbarComponent } from "./components/navbar.jsx";
@@ -22,11 +26,11 @@ import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./components/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
-import ViewComplaints from "./components/ViewComplaints.jsx";
+import  ViewComplaints  from "./components/ViewComplaints.jsx";
 import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
-import { SignupForm } from "./components/signup-form.jsx";
+import { SignupForm } from "./pages/SignUp.jsx";
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
@@ -290,6 +294,30 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+           <Route
+            path="/touristCart"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <ShoppingCart />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/touristWishlist"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <WishlistPage />
+              </ProtectedRoute>
+            }
+          />
+           {/* <Route
+            path="/touristPurchases"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <TouristPurchases />
+              </ProtectedRoute>
+            }
+          /> */}
           <Route
             path="/update-itinerary/:id"
             element={

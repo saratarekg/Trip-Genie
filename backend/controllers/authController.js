@@ -28,6 +28,7 @@ const touristSignup = async (req, res) => {
       mobile,
       dateOfBirth,
       jobOrStudent,
+      profilePicture,
     } = req.body;
     const tourist = new Tourist({
       email,
@@ -37,6 +38,7 @@ const touristSignup = async (req, res) => {
       mobile,
       dateOfBirth,
       jobOrStudent,
+      profilePicture,
     });
 
     tourist
@@ -229,6 +231,25 @@ const usernameExists = async (username) => {
   }
 };
 
+const checkUnique = async (req, res) => {
+  const { email, username } = req.query;
+  const existingEmail = await emailExists(email);
+  const existingUsername = await usernameExists(username);
+  try {
+    if (existingEmail) {
+      throw new Error("Email already exists");
+    }
+    if (existingUsername) {
+      throw new Error("Username already exists");
+    }
+    res.status(200).json({ message: "Unique" });
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: err.message, existingEmail, existingUsername });
+  }
+};
+
 module.exports = {
   touristSignup,
   advertiserSignup,
@@ -236,4 +257,5 @@ module.exports = {
   sellerSignup,
   login,
   logout,
+  checkUnique,
 };

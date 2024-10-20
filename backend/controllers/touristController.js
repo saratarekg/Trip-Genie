@@ -4,6 +4,7 @@ const Advertiser = require("../models/advertiser");
 const Seller = require("../models/seller");
 const Admin = require("../models/admin");
 const TourismGovernor = require("../models/tourismGovernor");
+const Product = require("../models/product");
 const activity = require("../models/activity");
 
 const deleteTouristAccount = async (req, res) => {
@@ -314,7 +315,283 @@ const changePassword = async (req, res) => {
   }
 };
 
+// Tourist Controller
+// Method to get the tourist's wishlist
+const getWishlist = async (req, res) => {
+  try {
+    const userId = res.locals.user_id; // Get the logged-in tourist's ID from response locals
+
+    // Find the tourist by their user ID
+    const tourist = await Tourist.findById(userId)
+      .populate('wishlist.product') // Populate product information in wishlist
+      .exec();
+
+    // Check if the tourist exists
+    if (!tourist) {
+      return res.status(400).json({ message: "Tourist not found" });
+    }
+
+    // Return the wishlist data
+    res.status(200).json(tourist.wishlist );
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Method to get the tourist's cart
+const getCart = async (req, res) => {
+  try {
+    const userId = res.locals.user_id; // Get the logged-in tourist's ID from response locals
+
+    // Find the tourist by their user ID
+    const tourist = await Tourist.findById(userId)
+      .populate('cart.product') // Populate product information in the cart
+      .exec();
+
+    // Check if the tourist exists
+    if (!tourist) {
+      return res.status(400).json({ message: "Tourist not found" });
+    }
+    console.log(tourist.cart);
+    // Return the cart data
+    res.status(200).json( tourist.cart );
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const removeItemFromCart = async (req, res) => {
+  const  productId  = req.params.id; // Extract the productId from the request body
+  const userId = res.locals.user_id; // Get the user ID from the logged-in user
+
+  try {
+    // Debug: Log incoming request data
+    console.log('Removing item with productId:', productId, 'for userId:', userId);
+
+    // Find the tourist and update the cart by removing the product
+    const user = await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $pull: { cart: { product: productId } }, // Pull (remove) the item with the given productId
+      },
+      { new: true } // Return the updated document
+    );
+
+    // Check if user was found
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Check if the product was successfully removed
+    if (!user.cart || user.cart.length === 0) {
+      return res.status(400).json({ message: "Cart is empty or item not found" });
+    }
+
+    // Success: Send back the updated cart
+    res.status(200).json({ message: "Product removed from cart" });
+
+  } catch (error) {
+    // Debug: Print the error to console
+    console.error('Error removing product from cart:', error);
+
+    // Send a response with the error details
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const emptyCart = async (req, res) => {
+  console.log("hiii");
+  const userId = res.locals.user_id; // Get the user ID from the logged-in user
+
+  try {
+    // Find the tourist and empty the cart by setting it to an empty array
+    const user = await Tourist.findByIdAndUpdate(
+      userId,
+      { $set: { cart: [] } }, // Set the cart to an empty array
+      { new: true } // Return the updated document
+    );
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Cart emptied" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateCartProductQuantity = async (req, res) => {
+  const { productId, newQuantity } = req.body; // Extract productId and newQuantity from the request body
+  const userId = res.locals.user_id; // Get the user ID from the logged-in user
+
+  try {
+    // Validate that the new quantity is greater than 0
+    if (newQuantity <= 0) {
+      console.log(1);
+
+      return res.status(400).json({ message: "Quantity must be greater than 0" });
+    }
+
+    // Find the tourist and update the quantity of the product in the cart
+    const user = await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $set: { "cart.$[elem].quantity": newQuantity }, // Update the quantity field of the matching product
+      },
+      {
+        arrayFilters: [{ "elem.product": productId }], // Find the item that matches the productId
+        new: true, // Return the updated document
+      }
+    );
+
+    if (!user) {
+      console.log(2);
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const cartItem = user.cart.find(item => {
+      console.log('Iterating over cart item:', item);  // Log every iteration
+      return item.product._id.toString() === productId.toString();
+    });
+    
+    if (cartItem) {
+      console.log('Found cart item:', cartItem);
+    } else {
+      console.log('No matching cart item found for productId:', productId);
+    }
+        if (!cartItem) {
+      return res.status(400).json({ message: "Product not found in cart" });
+    }
+   
+
+    res.status(200).json({ message: "Cart product quantity updated", cart: user.cart });
+  } catch (error) {
+    // Log the full error object for debugging purposes
+    console.error('Error details:', error);
+  
+    // Send back only the message for the client
+    res.status(500).json({ message: error.message, stack: error.stack });
+  }
+  
+};
+
+const removeProductFromWishlist = async (req, res) => {
+  const productId = req.params.id;  // Extract productId from the request params
+  console.log("Removing product with ID:", productId);  // Debug log the productId being passed
+  const userId = res.locals.user_id;  // Get the logged-in user id
+
+  try {
+    // First, find the user and log their current wishlist
+    const user = await Tourist.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Debug log the current wishlist
+    console.log("Current wishlist:", user.wishlist);
+
+    // Now, proceed to remove the product from the wishlist
+    const updatedUser = await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $pull: { wishlist: { product: productId } } // Remove the product from the wishlist using $pull
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Failed to update user" });
+    }
+
+    // Debug log the updated wishlist
+    console.log("Updated wishlist:", updatedUser.wishlist);
+
+    res.status(200).json({
+      message: "Product removed from wishlist",
+      wishlist: updatedUser.wishlist // Send back the updated wishlist
+    });
+  } catch (error) {
+    console.error("Error removing product from wishlist:", error);  // Log the full error
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Method to move a product from wishlist to cart
+const moveProductToCart = async (req, res) => {
+  const { id: productId } = req.params;
+  const userId = res.locals.user_id; // Get logged-in user id
+
+  try {
+    // Find the product details using the productId
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(400).json({ message: "Product not found" });
+    }
+
+    // Find the user (tourist)
+    const user = await Tourist.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Check if the product is already in the cart
+    const existingCartItem = user.cart.find(item => item.product._id.toString() === productId);
+
+    if (existingCartItem) {
+      // If the product is already in the cart, update its quantity and totalPrice
+      await Tourist.updateOne(
+        { _id: userId, "cart.product": productId },
+        {
+          $set: {
+            "cart.$.quantity": existingCartItem.quantity + 1, // Increase the quantity by 1
+            "cart.$.totalPrice": (existingCartItem.quantity + 1) * product.price // Update the total price
+          }
+        }
+      );
+    } else {
+      // If the product is not in the cart, add it with quantity 1 and set the totalPrice
+      await Tourist.findByIdAndUpdate(
+        userId,
+        {
+          $push: {
+            cart: {
+              product: productId,
+              quantity: 1,
+              totalPrice: product.price,
+            }
+          }
+        },
+        { new: true }
+      );
+    }
+
+    // Now remove the product from the wishlist
+    await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $pull: { wishlist: { product: productId } } // Remove the product from wishlist
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Product moved to cart", cart: user.cart, wishlist: user.wishlist });
+  } catch (error) {
+    console.error("Error occurred: ", error);  // Logs the complete error object, including the stack trace
+    res.status(500).json({
+      message: "An error occurred",
+      error: error.message,  // Send only the error message in the response
+      stack: process.env.NODE_ENV === 'development' ? error.stack : null,  // Send the stack trace in development mode only
+    });
+  }
+};
+
+
 module.exports = {
+  removeProductFromWishlist,
+  moveProductToCart,
   deleteTouristAccount,
   getAllTourists,
   getTouristByID,
@@ -326,4 +603,9 @@ module.exports = {
   changePassword,
   updatePreferences,
   getTouristPreferences,
+  getCart,
+  getWishlist,
+  removeItemFromCart,
+  emptyCart,
+  updateCartProductQuantity
 };

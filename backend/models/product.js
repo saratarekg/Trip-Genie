@@ -29,11 +29,20 @@ const productSchema = new mongoose.Schema(
       min: 0,
       max: 5,
     },
+    allRatings: [
+      {
+        type: Number,
+        min: 0,
+        max: 5,
+        default: 0,
+      },
+    ],
     reviews: [
       {
         user: { type: String, required: true },
         rating: { type: Number, required: true, min: 1, max: 5 },
         comment: { type: String, required: true },
+        date:{type: Date },
       },
     ],
     quantity: {
@@ -50,6 +59,7 @@ const productSchema = new mongoose.Schema(
       default: false,
     },
   },
+  
   { timestamps: true }
 );
 

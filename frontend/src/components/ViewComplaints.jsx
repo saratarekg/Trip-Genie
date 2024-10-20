@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const ViewComplaints = () => {
+export function ViewComplaints() {
   const [complaints, setComplaints] = useState([]);
   const [error, setError] = useState(null);
   const [status, setStatus] = useState("");
@@ -193,6 +193,6 @@ const ViewComplaints = () => {
       )}
     </div>
   );
-};
+}
 
 export default ViewComplaints;
