@@ -103,6 +103,7 @@ export function AllActivitiesComponent() {
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [minStars, setMinStars] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false); // To track if it's the initial load
 
   const navigate = useNavigate();
 

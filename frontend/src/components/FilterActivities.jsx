@@ -20,13 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Range, getTrackBackground } from "react-range";
 
-function DualHandleSliderComponent({
-  min,
-  max,
-  step,
-  values,
-  onChange,
-}) {
+function DualHandleSliderComponent({ min, max, step, values, onChange }) {
   return (
     <div className="w-full px-4 py-8">
       <Range
@@ -35,32 +29,40 @@ function DualHandleSliderComponent({
         min={min}
         max={max}
         onChange={onChange}
-        renderTrack={({ props, children }) => (
-          <div
-            {...props}
-            className="w-full h-3 pr-2 my-4 bg-gray-200 rounded-md"
-            style={{
-              background: getTrackBackground({
-                values,
-                colors: ["#ccc", "#3b82f6", "#ccc"],
-                min,
-                max,
-              }),
-            }}
-          >
-            {children}
-          </div>
-        )}
-        renderThumb={({ props, isDragged }) => (
-          <div
-            {...props}
-            className={`w-5 h-5 transform translate-x-10 bg-white rounded-full shadow flex items-center justify-center ${
-              isDragged ? "ring-2 ring-blue-500" : ""
-            }`}
-          >
-            <div className="w-2 h-2 bg-blue-500 rounded-full" />
-          </div>
-        )}
+        renderTrack={({ props, children }) => {
+          const { key, ...restProps } = props; // Exclude the 'key' from props
+          return (
+            <div
+              {...restProps} // Spread remaining props without 'key'
+              className="w-full h-3 pr-2 my-4 bg-gray-200 rounded-md"
+              style={{
+                background: getTrackBackground({
+                  values,
+                  colors: ["#ccc", "#3b82f6", "#ccc"],
+                  min,
+                  max,
+                }),
+              }}
+            >
+              {React.Children.map(children, (child, index) => 
+                React.cloneElement(child, { key: `thumb-${index}` }) // Add a unique key to each child
+              )}
+            </div>
+          );
+        }}
+        renderThumb={({ props, isDragged }) => {
+          const { key, ...restProps } = props; // Exclude the 'key' from props
+          return (
+            <div
+              {...restProps} // Spread remaining props without 'key'
+              className={`w-5 h-5 transform translate-x-10 bg-white rounded-full shadow flex items-center justify-center ${
+                isDragged ? "ring-2 ring-blue-500" : ""
+              }`}
+            >
+              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+            </div>
+          );
+        }}
       />
       <div className="flex justify-between mt-2">
         <span className="text-sm font-medium text-gray-700">
@@ -88,7 +90,7 @@ const FilterComponent = ({
   initialPriceRange,
   dateRange,
   setDateRange,
-  myActivities, 
+  myActivities,
   handlemyActivities,
   selectedCategories,
   setSelectedCategories,
@@ -100,10 +102,16 @@ const FilterComponent = ({
 }) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [localPriceRange, setLocalPriceRange] = useState(initialPriceRange);
+  const [isInitialized, setIsInitialized] = useState(false); // To track if it's the initial load
+
 
   useEffect(() => {
-    setLocalPriceRange(priceRange);
-  }, [priceRange]);
+  if (isInitialized) {
+    searchActivites();  // Trigger search only after the component has initialized
+  } else {
+    setIsInitialized(true);  // Set initialization flag to true after first render
+  }
+}, [priceRange]); // Dependency array that listens to changes in priceRange
 
   role = Cookies.get("role");
   // Handle Category Selection
@@ -141,7 +149,10 @@ const FilterComponent = ({
     setLocalPriceRange(newValues);
   };
 
-
+  const applyFilters = () => {
+    setPriceRange(localPriceRange);
+    toggleFilters();
+  };
 
   const getSelectedCategoriesLabel = () => {
     if (!selectedCategories || selectedCategories.length === 0) {
@@ -313,11 +324,7 @@ const FilterComponent = ({
 
           {/* Apply Filters Button */}
           <button
-            onClick={() => {
-              setPriceRange(localPriceRange);
-              searchActivites();
-              toggleFilters(); // Hide filters after applying them
-            }}
+            onClick={applyFilters}
             className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
           >
             Apply Filters
