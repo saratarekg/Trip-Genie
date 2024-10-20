@@ -152,10 +152,7 @@ export function AllItinerariesComponent() {
 
 
   const handleItinerarySelect = (id) => {
-    setIsLoading(true); // Start the loader
-    navigate(`/itinerary/${id}`).then(() => {
-      setIsLoading(false); // End the loader after navigation is complete
-    });
+    navigate(`/itinerary/${id}`);
   };
 
   useEffect(() => {
