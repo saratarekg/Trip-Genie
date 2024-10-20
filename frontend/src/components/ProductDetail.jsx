@@ -41,7 +41,13 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -136,7 +142,9 @@ const ProductDetail = () => {
 
         if (purchasesResponse.ok) {
           const purchasesData = await purchasesResponse.json();
-          setHasPurchased(purchasesData.some(purchase => purchase.product._id === id));
+          setHasPurchased(
+            purchasesData.some((purchase) => purchase.product._id === id)
+          );
         }
       } catch (err) {
         setError("Error fetching product details. Please try again later.");
@@ -232,18 +240,21 @@ const ProductDetail = () => {
   const handleAddToCart = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await fetch("http://localhost:4000/tourist/product/addToCart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          productId: product._id,
-          quantity: quantity,
-          totalAmount: product.price * quantity,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:4000/tourist/product/addToCart",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            productId: product._id,
+            quantity: quantity,
+            totalAmount: product.price * quantity,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to add to cart");
@@ -258,13 +269,17 @@ const ProductDetail = () => {
   const handleAddToWishlist = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await fetch(`http://localhost:4000/tourist/product/addToWishlist/${id}`, {  // Send `productId` in URL
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:4000/tourist/product/addToWishlist/${id}`,
+        {
+          // Send `productId` in URL
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to add to wishlist");
@@ -303,7 +318,6 @@ const ProductDetail = () => {
           throw new Error("Failed to complete purchase");
         }
       }
-      
 
       setActionSuccess("Purchase completed successfully!");
       setShowPurchaseConfirm(false);
@@ -317,14 +331,17 @@ const ProductDetail = () => {
   const handleRatingSubmit = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await fetch(`http://localhost:4000/tourist/product/rate/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ rating }),
-      });
+      const response = await fetch(
+        `http://localhost:4000/tourist/product/rate/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ rating }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to submit rating");
@@ -353,14 +370,17 @@ const ProductDetail = () => {
   const handleCommentSubmit = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await fetch(`http://localhost:4000/tourist/product/comment/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ rating, comment }),
-      });
+      const response = await fetch(
+        `http://localhost:4000/tourist/product/comment/${id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ rating, comment }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to submit comment");
@@ -423,7 +443,9 @@ const ProductDetail = () => {
                       </span>
                     </>
                   ) : (
-                    <span className="ml-2 text-lg font-semibold">No ratings yet</span>
+                    <span className="ml-2 text-lg font-semibold">
+                      No ratings yet
+                    </span>
                   )}
                 </CardDescription>
               </CardHeader>
@@ -546,59 +568,78 @@ const ProductDetail = () => {
               </Card>
             )}
 
-<Card className="mt-4">
-  <CardContent className="pt-6">
-    {product.quantity === 0 ? (
-      <p className="text-red-500 text-center">No more left</p>
-    ) : (
-      <>
-        <Select value={quantity.toString()} onValueChange={handleQuantityChange}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select quantity" />
-          </SelectTrigger>
-          <SelectContent>
-            {[...Array(Math.min(10, product.quantity)).keys()].map((i) => (
-              <SelectItem key={i + 1} value={(i + 1).toString()}>
-                {i + 1}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <Card className="mt-4">
+              {userRole === "tourist" && (
+                <CardContent className="pt-6">
+                  {product.quantity === 0 ? (
+                    <p className="text-red-500 text-center">No more left</p>
+                  ) : (
+                    <>
+                      <Select
+                        value={quantity.toString()}
+                        onValueChange={handleQuantityChange}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select quantity" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[
+                            ...Array(Math.min(10, product.quantity)).keys(),
+                          ].map((i) => (
+                            <SelectItem key={i + 1} value={(i + 1).toString()}>
+                              {i + 1}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
 
-        <div className="space-y-2 mt-4">
-          <Button 
-            className="w-full" 
-            onClick={() => setShowPurchaseConfirm(true)}
-            disabled={product.quantity === 0}
-          >
-            Purchase Now
-          </Button>
-          <Button 
-            className="w-full" 
-            variant="outline" 
-            onClick={handleAddToCart}
-            disabled={product.quantity === 0}
-          >
-            Add to Cart
-          </Button>
-          <Button className="w-full" variant="secondary" onClick={handleAddToWishlist}>
-            Add to Wishlist
-          </Button>
-        </div>
-      </>
-    )}
-  </CardContent>
-</Card>
+                      <div className="space-y-2 mt-4">
+                        <Button
+                          className="w-full"
+                          onClick={() => setShowPurchaseConfirm(true)}
+                          disabled={product.quantity === 0}
+                        >
+                          Purchase Now
+                        </Button>
 
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          onClick={handleAddToCart}
+                          disabled={product.quantity === 0}
+                        >
+                          Add to Cart
+                        </Button>
+
+                        <Button
+                          className="w-full"
+                          variant="secondary"
+                          onClick={handleAddToWishlist}
+                        >
+                          Add to Wishlist
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              )}
+            </Card>
 
             {hasPurchased && (
               <Card className="mt-4">
                 <CardContent className="pt-6">
                   <div className="space-y-2">
-                    <Button className="w-full" onClick={() => setShowRatingDialog(true)}>
+                    <Button
+                      className="w-full"
+                      onClick={() => setShowRatingDialog(true)}
+                    >
                       Rate Product
                     </Button>
-                    <Button className="w-full" variant="outline" onClick={() => setShowCommentDialog(true)}>
+                    <Button
+                      className="w-full"
+                      variant="outline"
+                      onClick={() => setShowCommentDialog(true)}
+                    >
                       Add Comment
                     </Button>
                   </div>
@@ -608,7 +649,7 @@ const ProductDetail = () => {
 
             <div className="mt-8 space-y-4">
               {(userRole === "admin" ||
-                (userRole === "seller" && canModify)) && (
+                (userRole === "seller" && canModify && product.seller)) && (
                 <Button
                   className="w-full"
                   variant="default"
@@ -619,7 +660,7 @@ const ProductDetail = () => {
               )}
 
               {((userRole === "admin" && product.seller == null) ||
-                (userRole === "seller" && canModify)) && (
+                (userRole === "seller" && canModify && product.seller)) && (
                 <Button
                   className="w-full"
                   variant={product.isArchived ? "outline" : "default"}
@@ -638,7 +679,7 @@ const ProductDetail = () => {
               )}
 
               {(userRole === "admin" ||
-                (userRole === "seller" && canModify)) && (
+                (userRole === "seller" && canModify && product.seller)) && (
                 <Button
                   className="w-full"
                   variant="destructive"
@@ -701,12 +742,11 @@ const ProductDetail = () => {
                   navigate("/all-products");
                 }
               }}
-              
-            >{
-              product.isArchived
+            >
+              {product.isArchived
                 ? "Back to all archived products"
-                : "Back to all products"
-            }</Button>
+                : "Back to all products"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -799,143 +839,141 @@ const ProductDetail = () => {
 
       {/* Purchase Confirmation Dialog */}
       <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Confirm Purchase</DialogTitle>
-      <DialogDescription>
-        Product: {product.name}
-        <br />
-        Quantity: {quantity}
-        <br />
-        Total Price: ${(product.price * quantity).toFixed(2)}
-      </DialogDescription>
-    </DialogHeader>
-    <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select payment method" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="credit_card">Credit Card</SelectItem>
-        <SelectItem value="debit_card">Debit Card</SelectItem>
-        <SelectItem value="cash_on_delivery">Cash on Delivery</SelectItem>
-        <SelectItem value="wallet">Wallet</SelectItem>
-      </SelectContent>
-    </Select>
-    <DialogFooter>
-      {/* Cancel button resets everything */}
-      <Button
-        variant="outline"
-        onClick={() => {
-          setShowPurchaseConfirm(false);   // Close the dialog
-          setPaymentMethod("");             // Reset payment method
-        }}
-      >
-        Cancel
-      </Button>
-      {/* Disable if paymentMethod is not selected */}
-      <Button
-  onClick={() => {
-    handlePurchase(); // Call your purchase logic
-    setShowPurchaseConfirm(false); // Close the dialog
-    setPaymentMethod("");           // Reset payment method
-  }}
-  disabled={!paymentMethod}
->
-  Confirm Purchase
-</Button>
-
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
-
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Purchase</DialogTitle>
+            <DialogDescription>
+              Product: {product.name}
+              <br />
+              Quantity: {quantity}
+              <br />
+              Total Price: ${(product.price * quantity).toFixed(2)}
+            </DialogDescription>
+          </DialogHeader>
+          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select payment method" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="credit_card">Credit Card</SelectItem>
+              <SelectItem value="debit_card">Debit Card</SelectItem>
+              <SelectItem value="cash_on_delivery">Cash on Delivery</SelectItem>
+              <SelectItem value="wallet">Wallet</SelectItem>
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            {/* Cancel button resets everything */}
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowPurchaseConfirm(false); // Close the dialog
+                setPaymentMethod(""); // Reset payment method
+              }}
+            >
+              Cancel
+            </Button>
+            {/* Disable if paymentMethod is not selected */}
+            <Button
+              onClick={() => {
+                handlePurchase(); // Call your purchase logic
+                setShowPurchaseConfirm(false); // Close the dialog
+                setPaymentMethod(""); // Reset payment method
+              }}
+              disabled={!paymentMethod}
+            >
+              Confirm Purchase
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Rating Dialog */}
-{/* Rating Dialog */}
-<Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Rate Product</DialogTitle>
-      <DialogDescription>
-        How would you rate this product?
-      </DialogDescription>
-    </DialogHeader>
-    <div className="flex justify-center items-center py-4">
-      <StarRating rating={rating} onRatingChange={setRating} />
-    </div>
-    <DialogFooter>
-      <Button
-        variant="outline"
-        onClick={() => {
-          setRating(0); // Reset the rating to 0
-          setShowRatingDialog(false); // Close the dialog
-        }}
-      >
-        Cancel
-      </Button>
-      <Button
-        onClick={() => {
-          handleRatingSubmit(); // Submit the rating
-          setRating(0); // Reset the rating after submission
-          setShowRatingDialog(false); // Close the dialog after submission
-        }}
-        disabled={rating === 0}
-      >
-        Submit Rating
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+      {/* Rating Dialog */}
+      <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rate Product</DialogTitle>
+            <DialogDescription>
+              How would you rate this product?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center items-center py-4">
+            <StarRating rating={rating} onRatingChange={setRating} />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRating(0); // Reset the rating to 0
+                setShowRatingDialog(false); // Close the dialog
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                handleRatingSubmit(); // Submit the rating
+                setRating(0); // Reset the rating after submission
+                setShowRatingDialog(false); // Close the dialog after submission
+              }}
+              disabled={rating === 0}
+            >
+              Submit Rating
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-{/* Comment Dialog */}
-<Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Add Comment</DialogTitle>
-      <DialogDescription>
-        Share your thoughts about this product
-      </DialogDescription>
-    </DialogHeader>
-    <div className="space-y-4 py-4">
-      <div className="flex justify-center items-center">
-        <StarRating rating={rating} onRatingChange={setRating} />
-      </div>
-      <Textarea
-        placeholder="Write your comment here..."
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-      />
-    </div>
-    <DialogFooter>
-      <Button
-        variant="outline"
-        onClick={() => {
-          setRating(0); // Reset the rating to 0
-          setComment(""); // Reset the comment to an empty string
-          setShowCommentDialog(false); // Close the dialog
-        }}
-      >
-        Cancel
-      </Button>
-      <Button
-        onClick={() => {
-          handleCommentSubmit(); // Submit the comment
-          setRating(0); // Reset the rating after submission
-          setComment(""); // Reset the comment after submission
-          setShowCommentDialog(false); // Close the dialog after submission
-        }}
-        disabled={rating === 0 || comment.trim() === ""}
-      >
-        Submit Comment
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
-
+      {/* Comment Dialog */}
+      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Comment</DialogTitle>
+            <DialogDescription>
+              Share your thoughts about this product
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex justify-center items-center">
+              <StarRating rating={rating} onRatingChange={setRating} />
+            </div>
+            <Textarea
+              placeholder="Write your comment here..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setRating(0); // Reset the rating to 0
+                setComment(""); // Reset the comment to an empty string
+                setShowCommentDialog(false); // Close the dialog
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                handleCommentSubmit(); // Submit the comment
+                setRating(0); // Reset the rating after submission
+                setComment(""); // Reset the comment after submission
+                setShowCommentDialog(false); // Close the dialog after submission
+              }}
+              disabled={rating === 0 || comment.trim() === ""}
+            >
+              Submit Comment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Action Success Dialog */}
-      <Dialog open={actionSuccess !== null} onOpenChange={() => setActionSuccess(null)}>
+      <Dialog
+        open={actionSuccess !== null}
+        onOpenChange={() => setActionSuccess(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -953,7 +991,10 @@ const ProductDetail = () => {
       </Dialog>
 
       {/* Action Error Dialog */}
-      <Dialog open={actionError !== null} onOpenChange={() => setActionError(null)}>
+      <Dialog
+        open={actionError !== null}
+        onOpenChange={() => setActionError(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
