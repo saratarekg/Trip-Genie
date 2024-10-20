@@ -2,7 +2,12 @@ const express = require("express");
 const historicalTagController = require("../controllers/historicalTagController");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
 const tourismGovernorController = require("../controllers/tourismGovernorController");
+const currencyController = require("../controllers/currencyController");
+
 const router = express.Router();
+
+router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/currencies", currencyController.getSupportedCurrencies);
 router.post(
   "/historical-places",
   historicalPlacesController.createHistoricalPlace

@@ -10,8 +10,15 @@ const tourguideController = require("../controllers/tourGuideController");
 const sellerController = require("../controllers/sellerController");
 const complaintsController = require("../controllers/complaintsController.js");
 const purchaseController = require("../controllers/purchaseController.js");
+const currencyController = require('../controllers/currencyController');
+
 
 const router = express.Router();
+
+router.post('/populate', currencyController.getExchangeRate);
+router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/currencies", currencyController.getSupportedCurrencies);
+// router.get('/fill', currencyController.populateCurrencies);
 
 router.put("/", touristController.updateTouristProfile);
 router.put("/preferences", touristController.updatePreferences);

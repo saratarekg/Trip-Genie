@@ -1,6 +1,12 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const Schema = mongoose.Schema;
+const Currency = require("./currency");
+
+const getDefaultCurrency = async () => {
+  const defaultCurrency = await Currency.findOne({ code: "EGP" });
+  return defaultCurrency ? defaultCurrency._id : null; // Return the default currency ID or null
+};
 
 const touristSchema = new Schema(
   {
@@ -53,6 +59,11 @@ const touristSchema = new Schema(
       type: String,
       required: true,
       trim: true,
+    },
+    preferredCurrency: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Currency",
+      default: null,
     },
     wallet: {
       type: Number,
@@ -121,6 +132,10 @@ const touristSchema = new Schema(
 );
 
 touristSchema.pre("save", async function (next) {
+  if (!this.preferredCurrency) {
+    this.preferredCurrency = await getDefaultCurrency(); // Fetch the default currency
+  }
+
   const salt = await bcrypt.genSalt();
   this.password = await bcrypt.hash(this.password, salt);
   next();

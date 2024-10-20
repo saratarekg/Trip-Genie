@@ -6,6 +6,7 @@ import Select from 'react-select';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,7 @@ const createFormSchema = (isCityDisabled) => z.object({
     native: z.string().min(1, 'Please enter native ticket price'),
     student: z.string().min(1, 'Please enter student ticket price'),
   }),
+  currency: z.string().min(1, 'Please select a currency'),
   pictures: z.string().min(1, 'Please enter at least one picture URL')
     .refine(
       (value) => value.split('\n').every(url => url.trim().startsWith('http')),
@@ -61,6 +63,7 @@ export default function CreateHpForm() {
   const [cities, setCities] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(false);
   const [isCityDisabled, setIsCityDisabled] = useState(true);
+  const [currencies, setCurrencies] = useState([]);
   const navigate = useNavigate();
 
   const {
@@ -89,6 +92,7 @@ export default function CreateHpForm() {
         native: '',
         student: '',
       },
+      currency: '',
       pictures: '',
     },
   });
@@ -111,6 +115,22 @@ export default function CreateHpForm() {
     };
     fetchCountries();
 
+    const fetchCurrencies = async () => {
+      try {
+        const token = Cookies.get('jwt');
+        const response = await axios.get(`http://localhost:4000/tourism-governor/currencies`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCurrencies(response.data);
+      } catch (err) {
+        console.error('Error fetching currencies:', err.message);
+        setError('Failed to fetch currencies. Please try again.');
+      }
+    };
+
+    fetchCurrencies();
+  }, []);
+
     const fetchHistoricalTags = async () => {
       try {
         const token = Cookies.get('jwt');
@@ -123,8 +143,6 @@ export default function CreateHpForm() {
         setError('Failed to fetch tags. Please try again.');
       }
     };
-    fetchHistoricalTags();
-  }, []);
 
   const fetchCities = async (country) => {
     setCitiesLoading(true);
@@ -178,6 +196,7 @@ export default function CreateHpForm() {
         body: JSON.stringify({
           ...data,
           historicalTag: data.historicalTag.map(tag => tag.value),
+          // currency: data.currency,
           pictures: data.pictures.split('\n').map(url => url.trim()).filter(url => url),
         }),
       });
@@ -363,6 +382,23 @@ export default function CreateHpForm() {
             id="student"
           />
           {errors.ticketPrices?.student && <span className="text-red-500">{errors.ticketPrices.student.message}</span>}
+        </div>
+
+        <div>
+          <Label htmlFor="currency">Currency *</Label>
+          <select
+            {...register('currency')}
+            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="currency"
+          >
+            <option value="">Select currency</option>
+            {currencies.map((currency) => (
+              <option key={currency._id} value={currency._id}>
+                {currency.code} - {currency.name}  ({currency.symbol})
+              </option>
+            ))}
+          </select>
+          {errors.currency && <span className="text-red-500">{errors.currency.message}</span>}
         </div>
 
         <div>

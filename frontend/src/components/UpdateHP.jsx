@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react'
+import axios from 'axios';
 import Cookies from 'js-cookie'
 import { Check, Plus, XCircle, X, CheckCircle } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -11,7 +12,6 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
     <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
@@ -39,6 +39,7 @@ export default function UpdateHistoricalPlace() {
       student: 0,
       foreigner: 0,
     },
+    currency: '',
     historicalTag: [],
     pictures: [],
   })
@@ -54,6 +55,7 @@ export default function UpdateHistoricalPlace() {
   const [showErrorPopup, setShowErrorPopup] = useState(null)
   const [availableTags, setAvailableTags] = useState([])
   const [newTag, setNewTag] = useState('')
+  const [currencies, setCurrencies] = useState([]);
   const navigate = useNavigate()
 
   const titleRef = useRef(null)
@@ -65,6 +67,23 @@ export default function UpdateHistoricalPlace() {
   const studentPriceRef = useRef(null)
   const foreignerPriceRef = useRef(null)
   const pictureUrlRef = useRef(null)
+
+  useEffect(() => {
+    const fetchCurrencies = async () => {
+      try {
+        const token = Cookies.get('jwt')
+        const response = await axios.get(`http://localhost:4000/tourism-governor/currencies`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        setCurrencies(response.data)
+      } catch (err) {
+        console.error('Error fetching currencies:', err.message)
+        setError('Failed to fetch currencies. Please try again.')
+      }
+    }
+
+    fetchCurrencies()
+  }, [])
 
   useEffect(() => {
     const fetchHistoricalPlaceDetails = async () => {
@@ -548,6 +567,26 @@ export default function UpdateHistoricalPlace() {
                     className={formErrors.foreignerPrice ? 'border-red-500' : ''}
                   />
                   {formErrors.foreignerPrice && <p className="text-red-500">{formErrors.foreignerPrice}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="currency">Currency</Label>
+                  <Select
+                    name="currency"
+                    onValueChange={(value) => handleSelectChange('currency', value)}
+                    value={historicalPlace.currency}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map((currency) => (
+                        <SelectItem key={currency._id} value={currency._id}>
+                          {currency.code} - {currency.name} ({currency.symbol})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {formErrors.currency && <p className="text-red-500">{formErrors.currency}</p>}
                 </div>
               </div>
 
