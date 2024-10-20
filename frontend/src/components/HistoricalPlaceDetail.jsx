@@ -171,8 +171,8 @@ const HistoricalPlaceDetail = () => {
   };
 
   const formatPrice = (price, type) => {
-    if(historicalPlace && userPreferredCurrency){
-    if (userRole === 'tourist') {
+    if(historicalPlace){
+    if (userRole === 'tourist' && userPreferredCurrency) {
       if (userPreferredCurrency === historicalPlace.currency) {
         return `${userPreferredCurrency.symbol}${price}/Day`;
       } else {
@@ -180,7 +180,9 @@ const HistoricalPlaceDetail = () => {
         return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}/Day`;
       }
     } else {
+      if(currencySymbol){
       return `${currencySymbol.symbol}${price}/Day`;
+      }
     }
   }
   };
@@ -211,8 +213,8 @@ const HistoricalPlaceDetail = () => {
 
 
   useEffect(() => {
-    if (historicalPlace && userPreferredCurrency) {
-      if (userRole === 'tourist' && userPreferredCurrency !== historicalPlace.currency) {
+    if (historicalPlace ) {
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== historicalPlace.currency) {
         fetchExchangeRate();
       }
       else{
