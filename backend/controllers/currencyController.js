@@ -1,8 +1,5 @@
-const axios = require('axios');
+const CurrencyRates = require('../models/currencyRate');
 const Currency = require('../models/currency'); 
-
-const API_KEY = process.env.API_KEY;
-const BASE_URL = 'https://v6.exchangerate-api.com/v6';
 
 const getCurrencyById = async (req, res) => {
     const { id } = req.params;  // Assuming you're passing the currency ID as a URL parameter
@@ -26,35 +23,50 @@ const getCurrencyById = async (req, res) => {
 
 // Example method to fetch exchange rates
 const getExchangeRate = async (req, res) => {
-    const { base, target } = req.body;
-
-    try {
-    // Fetch the base and target currencies by their ObjectId
-    const baseCurrency = await Currency.findById(base);
-    const targetCurrency = await Currency.findById(target);
-
-    if (!baseCurrency || !targetCurrency) {
-      return res.status(404).json({ message: 'Currency not found.' });
-    }
-
-    // Get the 'code' from the found Currency documents
-    const baseCode = baseCurrency.code;
-    const targetCode = targetCurrency.code;
-
-    // Now use the currency codes to call the external API
-    const response = await axios.get(`${BASE_URL}/${API_KEY}/pair/${baseCode}/${targetCode}`);
-    const { rate, conversion_rate } = response.data;
-        res.json({
-            base,
-            target,
-            rate,
-            conversion_rate,
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error fetching exchange rate.' });
-    }
+        const { base, target } = req.body;
+    
+        try {
+            // Fetch the base and target currencies by their ObjectId
+            const baseCurrency = await Currency.findById(base);
+            const targetCurrency = await Currency.findById(target);
+    
+            if (!baseCurrency || !targetCurrency) {
+                return res.status(400).json({ message: 'Currency not found.' });
+            }
+    
+            // Get the 'code' from the found Currency documents
+            const baseCode = baseCurrency.code;
+            const targetCode = targetCurrency.code;
+    
+            // Fetch the latest currency rates from the database
+            const latestRates = await CurrencyRates.findOne().sort({ lastUpdated: -1 });
+    
+            if (!latestRates) {
+                return res.status(404).json({ message: 'Exchange rates not available.' });
+            }
+    
+            // Get the rates for base and target currencies
+            const baseRate = latestRates.rates.get(baseCode);
+            const targetRate = latestRates.rates.get(targetCode);
+    
+            if (!baseRate || !targetRate) {
+                return res.status(404).json({ message: 'Exchange rate not available for one or both currencies.' });
+            }
+    
+            // Calculate the exchange rate
+            const exchangeRate = targetRate / baseRate;
+    
+            res.json({
+                base: baseCode,
+                target: targetCode,
+                conversion_rate: exchangeRate,
+                lastUpdated: latestRates.lastUpdated
+            });
+    
+        } catch (error) {
+            console.error('Error calculating exchange rate:', error);
+            res.status(500).json({ message: 'Error calculating exchange rate.' });
+        }
 };
 
 const getSupportedCurrencies = async (req, res) => {

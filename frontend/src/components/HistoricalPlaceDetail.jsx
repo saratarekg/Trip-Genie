@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Cookies from "js-cookie";
 import * as jwtDecode from "jwt-decode";
 import {
@@ -66,8 +67,11 @@ const HistoricalPlaceDetail = () => {
   const [canModify, setCanModify] = useState(false);
   const [open, setOpen] = useState(false); // Added state for popover
   const [isToastOpen, setIsToastOpen] = useState(false);
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchHistoricalPlaceDetails = async () => {
@@ -76,7 +80,7 @@ const HistoricalPlaceDetail = () => {
         setLoading(false);
         return;
       }
-
+  
       setLoading(true);
       try {
         const token = Cookies.get("jwt");
@@ -88,13 +92,17 @@ const HistoricalPlaceDetail = () => {
             },
           }
         );
-
+  
         if (!response.ok) {
           throw new Error("Failed to fetch historical place details");
         }
-
+  
         const data = await response.json();
+  
+        // Now set the state
         setHistoricalPlace(data);
+
+  
         if (data.pictures && data.pictures.length > 0) {
           setMainImage(data.pictures[0]);
         }
@@ -112,9 +120,106 @@ const HistoricalPlaceDetail = () => {
         setLoading(false);
       }
     };
-
+    fetchUserInfo();
     fetchHistoricalPlaceDetails();
-  }, [id, userRole]);
+  }, []);
+
+
+  const fetchExchangeRate = async () => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: historicalPlace.currency,     // Sending base currency ID
+              target: userPreferredCurrency._id,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRates(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const getCurrencySymbol = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${historicalPlace.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const formatPrice = (price, type) => {
+    if(historicalPlace && userPreferredCurrency){
+    if (userRole === 'tourist') {
+      if (userPreferredCurrency === historicalPlace.currency) {
+        return `${userPreferredCurrency.symbol}${price}/Day`;
+      } else {
+        const exchangedPrice = price * exchangeRates;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}/Day`;
+      }
+    } else {
+      return `${currencySymbol.symbol}${price}/Day`;
+    }
+  }
+  };
+
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency
+
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+
+  useEffect(() => {
+    if (historicalPlace && userPreferredCurrency) {
+      if (userRole === 'tourist' && userPreferredCurrency !== historicalPlace.currency) {
+        fetchExchangeRate();
+      }
+      else{
+        getCurrencySymbol();
+      }
+    }
+  }, [userRole, userPreferredCurrency, historicalPlace]);
 
   const handleUpdate = () => {
     navigate(`/update-historical-place/${id}`);
@@ -348,19 +453,19 @@ const HistoricalPlaceDetail = () => {
                     <div className="flex items-center justify-between">
                       <span>Foreigner:</span>
                       <span>
-                        ${historicalPlace.ticketPrices?.foreigner || "N/A"}
+                        {formatPrice(historicalPlace.ticketPrices?.foreigner, 'foreigner')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <span>Native:</span>
                       <span>
-                        ${historicalPlace.ticketPrices?.native || "N/A"}
+                        {formatPrice(historicalPlace.ticketPrices?.native, 'native')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <span>Student:</span>
                       <span>
-                        ${historicalPlace.ticketPrices?.student || "N/A"}
+                        {formatPrice(historicalPlace.ticketPrices?.student, 'student')}
                       </span>
                     </div>
                   </CardContent>

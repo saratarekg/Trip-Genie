@@ -21,6 +21,8 @@ const cookieParser = require('cookie-parser');
 const {requireAuth} = require('./middlewares/authMiddleware');
 const { getAllLanguages } = require('./controllers/itineraryController');
 
+const cron = require('node-cron');
+const currencyRateController = require('./controllers/currencyRateController');
 
 const PORT = process.env.PORT;
 
@@ -36,6 +38,29 @@ app.use(express.urlencoded({ extended: true }));
 mongoose.connect(process.env.URI)
   .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
   .catch(err => console.log(err));
+
+
+// Check and update the exchange rates when the server starts
+const checkAndUpdateRatesOnStart = async () => {
+  try {
+    console.log('Checking exchange rates on server start...');
+    await currencyRateController.updateRatesAgainstUSD();
+} catch (error) {
+    console.error('Error updating rates on server start:', error);
+}
+};
+
+// Run this function on server startup
+checkAndUpdateRatesOnStart();
+
+// Schedule the task to run once every day at midnight (server time)
+cron.schedule('0 0 * * *', async () => {
+  console.log('Running daily job to update currency rates...');
+  await currencyRateController.updateRatesAgainstUSD();
+});
+
+app.get('/', (req, res) => res.send('Currency API is running!'));
+
 
 app.use('/auth',authRoutes);
 app.use('/guest', guestRoutes);
@@ -53,3 +78,4 @@ app.get('/api/getAllHistoricalTypes',historicaltagController.getAllHistoricalTyp
 app.get('/api/getAllHistoricalPeriods',historicaltagController.getAllHistoricalPeriods);
 
 app.get('/api/getAllLanguages' ,getAllLanguages)
+
