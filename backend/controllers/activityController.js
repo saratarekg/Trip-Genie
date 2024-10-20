@@ -8,6 +8,7 @@ const getAllActivities = async (req, res) => {
   try {
     const {
       price,
+      minPrice,
       startDate,
       endDate,
       category,
@@ -20,6 +21,7 @@ const getAllActivities = async (req, res) => {
 
     const filterResult = await Activity.filter(
       price,
+      minPrice,
       startDate,
       endDate,
       category,

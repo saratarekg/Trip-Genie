@@ -269,6 +269,7 @@ activitySchema.statics.findByCategoryNames = async function (names) {
 
 activitySchema.statics.filter = async function (
   price,
+  minPrice,
   startDate,
   endDate,
   category,
@@ -278,6 +279,9 @@ activitySchema.statics.filter = async function (
 
   if (price !== undefined && price !== null && price !== "") {
     query.push({ ["price"]: { $lte: price } });
+  }
+  if (minPrice !== undefined && minPrice !== null && minPrice !== "") {
+    query.push({ ["price"]: { $gte: minPrice } });
   }
   if (startDate !== undefined && startDate !== null && startDate !== "") {
     query.push({ ["timing"]: { $gte: startDate } });

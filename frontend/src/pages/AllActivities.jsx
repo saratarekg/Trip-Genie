@@ -7,10 +7,15 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader.jsx";
 import ActivityDetail from "./SingleActivity.jsx";
-import { Star } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { set } from "zod";
+import { Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const ActivityCard = ({ activity, onSelect }) => (
   <Card
@@ -19,28 +24,44 @@ const ActivityCard = ({ activity, onSelect }) => (
   >
     <div className="relative aspect-video overflow-hidden">
       <img
-        src={activity.pictures && activity.pictures.length > 0 ? activity.pictures[0] : defaultImage}
+        src={
+          activity.pictures && activity.pictures.length > 0
+            ? activity.pictures[0]
+            : defaultImage
+        }
         alt={activity.name}
         className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
       />
     </div>
     <CardHeader className="p-4">
       <CardTitle className="text-xl font-semibold">{activity.name}</CardTitle>
-      <p className="text-sm text-muted-foreground">{activity.location.address}</p>
+      <p className="text-sm text-muted-foreground">
+        {activity.location.address}
+      </p>
     </CardHeader>
     <CardContent className="p-4 pt-0 space-y-2">
       <div className="flex items-center space-x-1">
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`h-4 w-4 ${i < activity.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+            className={`h-4 w-4 ${
+              i < activity.rating
+                ? "text-yellow-400 fill-yellow-400"
+                : "text-gray-300"
+            }`}
           />
         ))}
-        <span className="text-sm text-muted-foreground ml-1">{activity.rating.toFixed(1)}</span>
+        <span className="text-sm text-muted-foreground ml-1">
+          {activity.rating.toFixed(1)}
+        </span>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-lg font-bold text-primary">${activity.price}</span>
-        <span className="text-sm text-muted-foreground">{activity.duration} hours</span>
+        <span className="text-lg font-bold text-primary">
+          ${activity.price}
+        </span>
+        <span className="text-sm text-muted-foreground">
+          {activity.duration} hours
+        </span>
       </div>
       <p className="text-sm text-muted-foreground">
         {new Date(activity.timing).toLocaleDateString()}
@@ -54,7 +75,7 @@ const ActivityCard = ({ activity, onSelect }) => (
           </Badge>
         ))}
         {activity.category.map((cat, index) => (
-          <Badge  key={index} variant="secondary">
+          <Badge key={index} variant="secondary">
             {cat.name}
           </Badge>
         ))}
@@ -71,7 +92,9 @@ export function AllActivitiesComponent() {
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [price, setPrice] = useState("");
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [initialPriceRange, setInitialPriceRange] = useState([0, 1000]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
@@ -110,16 +133,15 @@ export function AllActivitiesComponent() {
   useEffect(() => {
     scrollToTop();
   }, [currentPage]);
-  
+
   useEffect(() => {
     searchActivities();
   }, [myActivities]);
-  
-  
+
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -129,27 +151,24 @@ export function AllActivitiesComponent() {
     setMyActivities(attribute);
     setIsLoading(false);
   };
-  
 
   useEffect(() => {
-    // Fetch activities
     fetchActivities();
-  
-   
+
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/api/getAllCategories");  
+        const response = await axios.get(
+          "http://localhost:4000/api/getAllCategories"
+        );
         setCategoryOptions(response.data);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     };
-  
+
     fetchCategories();
     setIsLoading(false);
   }, []);
-  
-
 
   useEffect(() => {
     if (sortBy) {
@@ -182,6 +201,14 @@ export function AllActivitiesComponent() {
       }
       const data = await response.json();
       setActivities(data);
+
+      // Calculate max price
+      const maxActivityPrice = Math.max(...data.map(activity => activity.price));
+      const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
+      setMaxPrice(roundedMaxPrice);
+      setInitialPriceRange([0, roundedMaxPrice]);
+      setPriceRange([0, roundedMaxPrice]);
+
       setError(null);
       setCurrentPage(1);
       setIsLoading(false);
@@ -204,8 +231,9 @@ export function AllActivitiesComponent() {
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
       }
-      if (price && price !== "") {
-        url.searchParams.append("price", price);
+      if (priceRange[0] !== 0 || priceRange[1] !== 1000) {
+        url.searchParams.append("minPrice", priceRange[0]);
+        url.searchParams.append("price", priceRange[1]);
       }
 
       if (dateRange.end) {
@@ -215,7 +243,10 @@ export function AllActivitiesComponent() {
         url.searchParams.append("startDate", dateRange.start);
       }
       if (selectedCategories.length > 0) {
-        url.searchParams.append("category", selectedCategories.map((c) => c.name).join(","));
+        url.searchParams.append(
+          "category",
+          selectedCategories.map((c) => c.name).join(",")
+        );
       }
       if (minStars) {
         url.searchParams.append("minRating", minStars);
@@ -253,7 +284,7 @@ export function AllActivitiesComponent() {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setPrice("");
+    setPriceRange([0, 1000]);
     setDateRange({ start: "", end: "" });
     setSelectedCategories([]);
     setSortBy("");
@@ -269,7 +300,6 @@ export function AllActivitiesComponent() {
     setIsLoading(false);
   };
 
- 
   return (
     <div>
       {isLoading ? (
@@ -301,8 +331,8 @@ export function AllActivitiesComponent() {
                   sortBy={sortBy}
                   handleSort={handleSort}
                   clearFilters={clearFilters}
-                  price={price}
-                  setPrice={setPrice}
+                  priceRange={priceRange}
+                  setPriceRange={setPriceRange}
                   dateRange={dateRange}
                   setDateRange={setDateRange}
                   minStars={minStars}
@@ -313,6 +343,8 @@ export function AllActivitiesComponent() {
                   setSelectedCategories={setSelectedCategories}
                   myActivities={myActivities}
                   handlemyActivities={handlemyActivities}
+                  maxPrice={maxPrice} // Pass maxPrice as a prop
+                  initialPriceRange={initialPriceRange}
                 />
 
                 {activities.length > 0 ? (
@@ -336,43 +368,55 @@ export function AllActivitiesComponent() {
                   </p>
                 )}
 
-                 {/* Pagination Section */}
-           {/* Pagination Component here */}
-           <div className="mt-8 flex justify-center items-center space-x-4">
-                        <button
-                            onClick={() => {
-                                handlePageChange(currentPage - 1);
-                            }}
-                            disabled={currentPage === 1}
-                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"}`}
-                        >
-                            <ChevronLeft />
-                        </button>
+                {/* Pagination Section */}
+                <div className="mt-8 flex justify-center items-center space-x-4">
+                  <button
+                    onClick={() => {
+                      handlePageChange(currentPage - 1);
+                    }}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-full bg-white shadow ${
+                      currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                    }`}
+                  >
+                    <ChevronLeft />
+                  </button>
 
-                        {/* Page X of Y */}
-                        <span className="text-lg font-medium">
-                            {activities.length > 0
-                                ? `Page ${currentPage} of ${Math.ceil(activities.length / activitiesPerPage)}`
-                                : "No pages available"}
-                        </span>
+                  {/* Page X of Y */}
+                  <span className="text-lg font-medium">
+                    {activities.length > 0
+                      ? `Page ${currentPage} of ${Math.ceil(
+                          activities.length / activitiesPerPage
+                        )}`
+                      : "No pages available"}
+                  </span>
 
-                        <button
-                            onClick={() => {
-                                handlePageChange(currentPage + 1);
-                            }}
-                            disabled={currentPage === Math.ceil(activities.length / activitiesPerPage) || activities.length === 0}
-                            className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(activities.length / activitiesPerPage) ? "text-gray-300" : "text-blue-600"}`}
-                        >
-                            <ChevronRight />
-                        </button>
-                    </div>
-
+                  <button
+                    onClick={() => {
+                      handlePageChange(currentPage + 1);
+                    }}
+                    disabled={
+                      currentPage ===
+                        Math.ceil(activities.length / activitiesPerPage) ||
+                      activities.length === 0
+                    }
+                    className={`px-4 py-2 rounded-full bg-white shadow ${
+                      currentPage ===
+                      Math.ceil(activities.length / activitiesPerPage)
+                        ? "text-gray-300"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+            </>
           </div>
-        </>
-      </div>
+        </div>
+      )}
     </div>
-  )}
-</div>
-  )}
-  
+  );
+}
+
 export default AllActivitiesComponent;
