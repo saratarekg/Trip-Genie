@@ -46,10 +46,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import Latex from "react-latex-next";
-import { BlockMath, InlineMath } from "react-katex";
-import "katex/dist/katex.min.css";
-
+import TermsAndConditions from "@/components/TermsAndConditions";
 const phoneValidator = (value) => {
   const phoneNumber = parsePhoneNumberFromString("+" + value);
   if (!phoneNumber || !phoneNumber.isValid()) {
@@ -80,7 +77,6 @@ export function SignupForm() {
   const [profilePicture, setProfilePicture] = useState(null);
   const alertRef = useRef(null);
   const navigate = useNavigate();
-  const [terms, setTerms] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [canAcceptTerms, setCanAcceptTerms] = useState(false); // Track if user can accept terms
   const termsRef = useRef(null); // Reference to the terms div
@@ -308,23 +304,6 @@ export function SignupForm() {
   const userType = watch("userType");
   const totalStages = userType === "tourist" || userType === undefined ? 3 : 4;
   const progress = (stage / totalStages) * 100;
-
-  useEffect(() => {
-    const fetchTerms = async () => {
-      try {
-        const response = await fetch(`/terms/TermsAndConditions.txt`); // No need for require()
-        if (!response.ok) throw new Error("Failed to fetch");
-        const text = await response.text();
-        setTerms(text);
-      } catch (error) {
-        console.error("Error loading terms:", error);
-        setTerms("Unable to load terms. Please try again later.");
-      }
-    };
-    if (stage === totalStages) {
-      fetchTerms();
-    }
-  }, [userType, stage, totalStages]);
 
   const handleTermsScroll = () => {
     const termsDiv = termsRef.current;
@@ -1012,7 +991,7 @@ export function SignupForm() {
                   ref={termsRef}
                 >
                   <pre className="whitespace-pre-wrap text-sm">
-                    <Latex>{terms}</Latex>
+                    <TermsAndConditions />
                   </pre>
                 </div>
               </div>
@@ -1077,7 +1056,7 @@ export function SignupForm() {
                 ref={termsRef}
               >
                 <pre className="whitespace-pre-wrap text-sm">
-                  <Latex>{terms}</Latex>
+                  <TermsAndConditions />
                 </pre>
               </div>
             </div>
