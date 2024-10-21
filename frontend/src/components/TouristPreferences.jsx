@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,8 +9,8 @@ import Select from 'react-select';
 import Cookies from 'js-cookie';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import DualHandleSliderComponent from './dual-handle-slider';
 
 const schema = z.object({
   budget: z.number().min(0, "Budget must be a positive number").nullable(),
@@ -20,7 +22,7 @@ const schema = z.object({
   historicalPlacePeriod: z.array(z.object({ value: z.string(), label: z.string() })).nullable(),
 });
 
-const TravelPreferences = () => {
+export default function TravelPreferences() {
   const [preferences, setPreferences] = useState(null);
   const [options, setOptions] = useState({
     languages: [],
@@ -31,8 +33,9 @@ const TravelPreferences = () => {
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
+  const [sliderValues, setSliderValues] = useState([0, 1000]);
 
-  const { control, handleSubmit, reset, formState: { errors } } = useForm({
+  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(schema),
     defaultValues: {
       budget: null,
@@ -82,6 +85,7 @@ const TravelPreferences = () => {
         };
 
         reset(formattedPrefs);
+        setSliderValues([formattedPrefs.price || 0, formattedPrefs.budget || 1000]);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -95,7 +99,6 @@ const TravelPreferences = () => {
       const token = Cookies.get('jwt');
       const headers = { Authorization: `Bearer ${token}` };
       
-      console.log(data.price);  
       const updatedData = {
         budget: data.budget === null ? Infinity : data.budget,
         price: data.price === null ? Infinity : data.price,
@@ -105,8 +108,6 @@ const TravelPreferences = () => {
         historicalPlaceType: data.historicalPlaceType?.map(item => item.value) || [],
         historicalPlacePeriod: data.historicalPlacePeriod?.map(item => item.value) || [],
       };
-      console.log(updatedData);
-
 
       await axios.put('http://localhost:4000/tourist/preferences', updatedData, { headers });
       setDialogMessage('Preferences updated successfully!');
@@ -116,6 +117,12 @@ const TravelPreferences = () => {
       setDialogMessage('Failed to update preferences. Please try again.');
       setIsDialogOpen(true);
     }
+  };
+
+  const handleSliderChange = (values) => {
+    setSliderValues(values);
+    setValue('price', values[0]);
+    setValue('budget', values[1]);
   };
 
   if (Cookies.get("role") !== "tourist") {
@@ -129,52 +136,17 @@ const TravelPreferences = () => {
       <h1 className="text-xl font-semibold mb-4 text-left">Travel Preferences</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
-          <Controller
-            name="budget"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <Label htmlFor="budget" className="text-sm font-medium text-gray-600 mb-1">Budget</Label>
-                <Input
-                  {...field}
-                  type="number"
-                  id="budget"
-                  value={field.value ?? ''}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? null : Number(e.target.value);
-                    if (value === null || value >= 0) {
-                      field.onChange(value);
-                    }
-                  }}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                />
-                {errors.budget && <p className="text-red-500 text-xs mt-1">{errors.budget.message}</p>}
-              </div>
-            )}
-          />
-          <Controller
-            name="price"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <Label htmlFor="price" className="text-sm font-medium text-gray-600 mb-1">Price</Label>
-                <Input
-                  {...field}
-                  type="number"
-                  id="price"
-                  value={field.value ?? ''}
-                  onChange={(e) => {
-                    const value = e.target.value === '' ? null : Number(e.target.value);
-                    if (value === null || value >= 0) {
-                      field.onChange(value);
-                    }
-                  }}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                />
-                {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price.message}</p>}
-              </div>
-            )}
-          />
+          <div>
+            <Label className="text-sm font-medium text-gray-600 mb-1">Price and Budget Range</Label>
+            <DualHandleSliderComponent
+              min={0}
+              max={10000}
+              step={100}
+              values={sliderValues}
+              currency="₺"
+              onChange={handleSliderChange}
+            />
+          </div>
           <Controller
             name="categories"
             control={control}
@@ -277,6 +249,4 @@ const TravelPreferences = () => {
       </Dialog>
     </div>
   );
-};
-
-export default TravelPreferences;
+}
