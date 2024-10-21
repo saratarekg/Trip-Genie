@@ -43,8 +43,11 @@ const ProductCard = ({ product, onSelect }) => (
     </CardHeader>
     <CardContent>
       <CardTitle>{product.name}</CardTitle>
-      <CardDescription className="mt-2">{product.description}</CardDescription>
-    </CardContent>
+      <CardDescription className="mt-2">
+      {product.description.length > 150
+        ? `${product.description.slice(0, 150)}...`
+        : product.description}
+    </CardDescription>    </CardContent>
     <CardFooter className="flex justify-between items-center">
       <span className="text-lg font-bold text-blue-600">${product.price}</span>
       <div className="flex items-center">{renderStars(product.rating)}</div>
