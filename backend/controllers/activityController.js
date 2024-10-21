@@ -98,7 +98,8 @@ const getActivitiesByPreferences = async (req, res) => {
     } = req.query;
 
     const filterResult = await Activity.filter(
-      budget || price,
+      budget,
+      price,
       startDate,
       endDate,
       categories,
@@ -155,6 +156,48 @@ const getActivitiesByPreferences = async (req, res) => {
   }
 };
 
+const theHolyAntiFilter = async (req, res) => {
+  try {
+    // First, call getAllActivities to get all activities
+    const allActivities = await new Promise((resolve, reject) => {
+      getAllActivities(req, {
+        status: () => ({
+          json: resolve,
+        }),
+        locals: res.locals,
+      });
+    });
+
+    // Then, call getActivitiesByPreferences to get activities based on user preferences
+    const preferredActivities = await new Promise((resolve, reject) => {
+      getActivitiesByPreferences(req, {
+        status: () => ({
+          json: resolve,
+        }),
+        locals: res.locals,
+      });
+    });
+
+    // Map activity IDs for comparison
+    const allActivityIds = new Set(allActivities.map((activity) => activity._id.toString()));
+    const preferredActivityIds = new Set(preferredActivities.map((activity) => activity._id.toString()));
+
+    // Find the set difference (activities in allActivities but not in preferredActivities)
+    const differenceIds = [...allActivityIds].filter(id => !preferredActivityIds.has(id));
+
+    // Filter out the activities that match the differenceIds from allActivities
+    const activitiesDifference = allActivities.filter((activity) =>
+      differenceIds.includes(activity._id.toString())
+    );
+
+    // Return the set difference
+    res.status(200).json(activitiesDifference);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
 const getActivityById = async (req, res) => {
   try {
@@ -182,6 +225,7 @@ const createActivity = async (req, res) => {
     description,
     timing,
     price,
+    currency,
     category,
     tags,
     specialDiscount,
@@ -195,6 +239,7 @@ const createActivity = async (req, res) => {
     timing,
     description,
     price,
+    currency,
     category,
     tags,
     specialDiscount,
@@ -257,6 +302,7 @@ const updateActivity = async (req, res) => {
       description,
       timing,
       price,
+      currency,
       range,
       category,
       tags,
@@ -273,6 +319,7 @@ const updateActivity = async (req, res) => {
         description,
         timing,
         price,
+        currency,
         range,
         category,
         tags,
@@ -404,5 +451,6 @@ module.exports = {
   addCommentToActivity,
   rateActivity,
   getActivitiesByPreferences,
+  theHolyAntiFilter, 
 };
 

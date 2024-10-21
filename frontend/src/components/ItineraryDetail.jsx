@@ -326,8 +326,10 @@ const ItineraryDetail = () => {
         setIsAppropriate(data.appropriate);
         setIsActivated(data.isActivated);
   
+        if(token){
         const decodedToken = jwtDecode.jwtDecode(token);
         setCanModify(decodedToken.id === data.tourGuide._id);
+        }
         setError(null);
       } catch (err) {
         setError("Error fetching itinerary details. Please try again later.");

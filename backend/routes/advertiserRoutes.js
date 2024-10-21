@@ -1,11 +1,15 @@
 const express = require("express");
 const activityController = require("../controllers/activityController");
 const advertiserController = require("../controllers/advertiserController");
+const currencyController = require('../controllers/currencyController');
 const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const router = express.Router();
+
+router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/currencies", currencyController.getSupportedCurrencies);
 
 router.post("/activities", activityController.createActivity);
 router.get("/activities", activityController.getAllActivities);

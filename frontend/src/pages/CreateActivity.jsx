@@ -40,6 +40,7 @@ const schema = z.object({
     message: "Timing must be a future date",
   }),
   price: z.number().int().positive("Price must be a positive integer"),
+  currency: z.string().min(1, 'Please select a currency'),
   category: z
     .array(z.object({ value: z.string(), label: z.string() }))
     .nonempty("At least one category is required"),
@@ -56,6 +57,7 @@ const schema = z.object({
 
 export default function CreateActivity() {
   const {
+    register,
     control,
     handleSubmit,
     setValue,
@@ -89,6 +91,7 @@ export default function CreateActivity() {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [selectedCity, setSelectedCity] = useState(null)
   const [citiesLoading, setCitiesLoading] = useState(false)
+  const [currencies, setCurrencies] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -109,6 +112,7 @@ export default function CreateActivity() {
 
     fetchCategories()
     fetchTags()
+    fetchCurrencies();
     fetchCountries()
   }, [])
 
@@ -159,6 +163,21 @@ export default function CreateActivity() {
     }
   }
 
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get('jwt');
+      const response = await axios.get(`http://localhost:4000/advertiser/currencies`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCurrencies(response.data);
+    } catch (err) {
+      console.error('Error fetching currencies:', err.message);
+      setError('Failed to fetch currencies. Please try again.');
+    }
+  };
+
+
+  
   const onSubmit = async (data) => {
     console.log("Submitted data:", data)
     setLoading(true)
@@ -348,6 +367,7 @@ export default function CreateActivity() {
                     render={({ field }) => (
                       <Input
                         type="number"
+                        min='0'
                         id="price"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
@@ -370,6 +390,7 @@ export default function CreateActivity() {
                       <Input
                         type="number"
                         id="specialDiscount"
+                        min='0'
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
@@ -382,6 +403,23 @@ export default function CreateActivity() {
                   )}
                 </div>
               </div>
+
+              <div>
+          <Label htmlFor="currency">Currency </Label>
+          <select
+            {...register('currency')}
+            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="currency"
+          >
+            <option value="">Select currency</option>
+            {currencies.map((currency) => (
+              <option key={currency._id} value={currency._id}>
+                {currency.code} - {currency.name}  ({currency.symbol})
+              </option>
+            ))}
+          </select>
+          {errors.currency && <span className="text-red-500">{errors.currency.message}</span>}
+        </div>
 
               <div className="space-y-2">
                 <Label>Categories</Label>
