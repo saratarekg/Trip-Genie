@@ -679,13 +679,13 @@ const characterLimit = 150; // Set your desired character limit
 
 
 
-<span className="ml-2 text-blue-500 font-medium font-semibold">
-          {product.reviews ? product.reviews.length : 0} reviews
+<span className=" text-blue-500 text-medium font-semibold ml-4">
+          {product.reviews ? product.reviews.length : 0} Item Ratings
       </span>
     </CardDescription>
   </CardHeader>
   <CardContent>
-  <div className="lg:w-1/2 space-y-4">
+  <div className=" space-y-4">
                   
                   <div className="flex items-center">
                     <span className="text-lg font-semibold text-blue-500">
@@ -704,12 +704,14 @@ const characterLimit = 150; // Set your desired character limit
                     </>
 
                   ) : (
-                    <span className="text-red-500 text-4xl font-bold">
+                    <div className="w-full">
+                    <span className="block text-red-500 text-4xl font-bold w-full">
                       Out of stock
-                      <div className="mt-2 text-sm text-gray-600">
-                        Add to wishlist now and you will be notified when it's back in stock!
-                      </div>
                     </span>
+                    <div className="mt-2 text-sm text-gray-600 w-full">
+                      Add to wishlist now and you will be notified when it's back in stock!
+                    </div>
+                  </div>
                   )}
                  </span>
                   </div>
@@ -766,29 +768,43 @@ const characterLimit = 150; // Set your desired character limit
                   </p>
                 </div>   
 <div className="space-y-4 mt-5">
-      {userRole === "tourist" && (
-        <>
-        <div className="space-y-2">
-  {/* Buy Now Button */}
-  <Button className="w-full text-xl bg-green-500 hover:bg-green-600 text-white font-bold py-2 flex items-center justify-center" onClick={() => setShowPurchaseConfirm(true)}>
-    {/* <Wallet className="w-5 h-5 mr-2" /> */}
-    Buy Now
-  </Button>
+{userRole === "tourist" && (
+  <div className="space-y-2">
+    {/* Buy Now Button - Only if product quantity is greater than 0 */}
+    {product.quantity > 0 && (
+      <Button
+        className="w-full text-xl bg-green-500 hover:bg-green-600 text-white font-bold py-2 flex items-center justify-center"
+        onClick={() => setShowPurchaseConfirm(true)}
+      >
+        {/* <Wallet className="w-5 h-5 mr-2" /> */}
+        Buy Now
+      </Button>
+    )}
 
-  {/* Add to Cart Button */}
-  <Button variant="outline" className="w-full text-xl border-green-500 text-green-500 hover:bg-green-50 font-bold py-2 flex items-center justify-center" onClick={handleAddToCart}>
-    <ShoppingCart className="w-5 h-5 mr-2" />
-    Add to Cart
-  </Button>
+    {/* Add to Cart Button - Only if product quantity is greater than 0 */}
+    {product.quantity > 0 && (
+      <Button
+        variant="outline"
+        className="w-full text-xl border-green-500 text-green-500 hover:bg-green-50 font-bold py-2 flex items-center justify-center"
+        onClick={handleAddToCart}
+      >
+        <ShoppingCart className="w-5 h-5 mr-2" />
+        Add to Cart
+      </Button>
+    )}
 
-  {/* Add to Wishlist Button */}
-  <Button variant="secondary" className="w-full text-xl bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 flex items-center justify-center" onClick={handleAddToWishlist}>
-    <Heart className="w-5 h-5 mr-2" />
-    Add to Wishlist
-  </Button>
-</div>
-        </>
-      )}
+    {/* Add to Wishlist Button - Always visible */}
+    <Button
+      variant="secondary"
+      className="w-full text-xl bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 flex items-center justify-center"
+      onClick={handleAddToWishlist}
+    >
+      <Heart className="w-5 h-5 mr-2" />
+      Add to Wishlist
+    </Button>
+  </div>
+)}
+
     </div>
   </CardContent>
 
