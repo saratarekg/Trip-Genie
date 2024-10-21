@@ -70,6 +70,8 @@ export function SignupForm() {
   const [profilePicture, setProfilePicture] = useState(null);
   const alertRef = useRef(null);
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [terms, setTerms] = useState('');
 
   const formSchema = z
     .object({
@@ -296,6 +298,23 @@ export function SignupForm() {
   });
 
   const userType = watch("userType");
+
+  useEffect(() => {
+    const fetchTerms = async () => {
+      try {
+        const response = await fetch(`/terms/${userType}.txt`); // No need for require()
+        if (!response.ok) throw new Error('Failed to fetch');
+        const text = await response.text();
+        setTerms(text);
+      } catch (error) {
+        console.error('Error loading terms:', error);
+        setTerms('Unable to load terms. Please try again later.');
+      }
+    };
+  
+    if (showModal) fetchTerms(); // Fetch only when the modal opens
+  }, [userType, showModal]);
+  
 
   useEffect(() => {
     const fetchNationalities = async () => {
@@ -931,26 +950,50 @@ export function SignupForm() {
       case 3:
         if (userType === "tourist") {
           return (
-            <>
-              <FormField
-                control={control}
-                name="termsAccepted"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>I accept the terms and conditions</FormLabel>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </>
+            <div>
+          <FormField
+            control={control}
+            name="termsAccepted"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>
+                    I accept and agree to the{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(true)}
+                      className="text-indigo-600 hover:underline"
+                    >
+                      terms and conditions
+                    </button>
+                  </FormLabel>
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+    
+          {/* Terms and Conditions Modal */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="relative w-11/12 max-w-3xl p-6 bg-white rounded-lg shadow-lg max-h-[60vh] overflow-auto">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full px-3 py-1"
+                >
+                  X
+                </button>
+                <h2 className="text-xl font-semibold mb-4">
+                  Terms and Conditions for {userType.charAt(0).toUpperCase() + userType.slice(1)}
+                </h2>
+                <pre className="whitespace-pre-wrap">{terms}</pre>
+              </div>
+            </div>
+          )}
+        </div>
           );
         } else {
           return (
@@ -980,24 +1023,50 @@ export function SignupForm() {
         }
       case 4:
         return (
+          <div>
           <FormField
             control={control}
             name="termsAccepted"
             render={({ field }) => (
               <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                 <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel>I accept the terms and conditions</FormLabel>
+                  <FormLabel>
+                    I accept and agree to the{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(true)}
+                      className="text-indigo-600 hover:underline"
+                    >
+                      terms and conditions
+                    </button>
+                  </FormLabel>
                   <FormMessage />
                 </div>
               </FormItem>
             )}
           />
+    
+          {/* Terms and Conditions Modal */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="relative w-11/12 max-w-3xl p-6 bg-white rounded-lg shadow-lg max-h-[60vh] overflow-auto">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full px-3 py-1"
+                >
+                  X
+                </button>
+                <h2 className="text-xl font-semibold mb-4">
+                  Terms and Conditions for {userType.charAt(0).toUpperCase() + userType.slice(1)}
+                </h2>
+                <pre className="whitespace-pre-wrap">{terms}</pre>
+              </div>
+            </div>
+          )}
+        </div>
         );
       default:
         return null;
