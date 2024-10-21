@@ -31,6 +31,19 @@ const purchaseSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    deliveryDate: {
+      type: Date,
+      required: false,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "delivered", "cancelled"], // Only these values are allowed
+      default: "pending",
+    },
+    shippingAddress: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
@@ -38,7 +51,9 @@ const purchaseSchema = new mongoose.Schema(
 // Static method to find purchases by tourist ID
 purchaseSchema.statics.findByTourist = async function (touristId) {
   try {
-    const purchases = await this.find({ tourist: touristId }).populate("product").exec();
+    const purchases = await this.find({ tourist: touristId })
+      .populate("product")
+      .exec();
     return purchases;
   } catch (error) {
     throw new Error(error.message);
@@ -48,7 +63,9 @@ purchaseSchema.statics.findByTourist = async function (touristId) {
 // Static method to find purchases by product ID
 purchaseSchema.statics.findByProduct = async function (productId) {
   try {
-    const purchases = await this.find({ product: productId }).populate("tourist").exec();
+    const purchases = await this.find({ product: productId })
+      .populate("tourist")
+      .exec();
     return purchases;
   } catch (error) {
     throw new Error(error.message);
