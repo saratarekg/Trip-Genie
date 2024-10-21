@@ -41,6 +41,7 @@ exports.createPurchase = async (req, res) => {
       );
     }
 
+
     // Create a new purchase
     const newPurchase = new Purchase({
       tourist: userId,
@@ -56,9 +57,16 @@ exports.createPurchase = async (req, res) => {
     // Update the product's quantity (reduce it based on the purchase)
     const updatedProduct = await Product.findByIdAndUpdate(
       productId, // Assuming you have the product ID
-      { $inc: { quantity: -quantity } }, // Decrease the quantity by the specified amount
+      {
+        $inc: {
+          quantity: -quantity, // Decrease the quantity by the specified amount
+          sales: quantity      // Increase the sales by the specified amount
+        }
+      },
       { new: true, runValidators: true } // Return the updated document and run validation
     );
+
+    console.log(updatedProduct.quantity);
 
     return res.status(201).json({ message: "Purchase successful", purchase: newPurchase });
   } catch (error) {

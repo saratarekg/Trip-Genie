@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import EnhancedCarousel from "./enhanced-carousel";
 import {
   Dialog,
   DialogContent,
@@ -23,23 +22,20 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import {
-  Star,
+  ShieldCheck, Star, Flame,
   Edit,
   Trash2,
+  TrendingUp,
   Mail,
   Phone,
   User,
+  StarHalf,
   DollarSign,
   Package,
   CheckCircle,
   XCircle,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import {
   Select,
@@ -67,6 +63,66 @@ const StarRating = ({ rating, onRatingChange = null }) => {
   );
 };
 
+const ImageGallery = ({ pictures }) => {
+  const [mainImage, setMainImage] = useState(pictures[0]);
+  const [startIndex, setStartIndex] = useState(0);
+
+  const handlePrev = () => {
+    setStartIndex((prevIndex) => Math.max(0, prevIndex - 1));
+  };
+
+  const handleNext = () => {
+    setStartIndex((prevIndex) => Math.min(pictures.length - 5, prevIndex + 1));
+  };
+
+  return (
+    <div className="flex gap-4 h-full">
+      <div className="w-1/5 relative">
+        <div className="h-full overflow-hidden">
+          {pictures.length > 5 && (
+            <button
+              onClick={handlePrev}
+              className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full z-10"
+              disabled={startIndex === 0}
+              aria-label="Previous images"
+            >
+              <ChevronUp size={20} />
+            </button>
+          )}
+          <div className="flex flex-col gap-2 h-full">
+            {pictures.slice(startIndex, startIndex + 5).map((pic, index) => (
+              <img
+                key={index}
+                src={pic}
+                alt={`Product image ${startIndex + index + 1}`}
+                className="w-full h-[18%] object-cover rounded-lg cursor-pointer"
+                onClick={() => setMainImage(pic)}
+              />
+            ))}
+          </div>
+          {pictures.length > 5 && (
+            <button
+              onClick={handleNext}
+              className="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full z-10"
+              disabled={startIndex >= pictures.length - 5}
+              aria-label="Next images"
+            >
+              <ChevronDown size={20} />
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="w-4/5">
+        <img
+          src={mainImage}
+          alt="Main product image"
+          className="w-full h-full object-cover rounded-lg"
+        />
+      </div>
+    </div>
+  );
+};
+
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -90,6 +146,16 @@ const ProductDetail = () => {
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [filteredRating, setFilteredRating] = useState(0);
+
+  const characterLimit = 150; // Set your desired character limit
+
+  // Function to toggle between expanded and collapsed states
+  const toggleExpansion = () => {
+    setIsExpanded(!isExpanded);
+  };
 
   const navigate = useNavigate();
 
@@ -159,6 +225,30 @@ const ProductDetail = () => {
 
   const handleUpdate = () => {
     navigate(`/update-product/${id}`);
+  };
+
+  const handleFilterRating = async (rating) => {
+    setFilteredRating(rating);
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/products/${id}/reviews?rating=${rating}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch filtered reviews");
+      }
+
+      const data = await response.json();
+      setProduct({ ...product, reviews: data });
+    } catch (error) {
+      console.error("Error fetching filtered reviews:", error);
+    }
   };
 
   const handleArchive = async () => {
@@ -272,7 +362,6 @@ const ProductDetail = () => {
       const response = await fetch(
         `http://localhost:4000/tourist/product/addToWishlist/${id}`,
         {
-          // Send `productId` in URL
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -310,7 +399,7 @@ const ProductDetail = () => {
 
       if (!response.ok) {
         if (response.status === 400) {
-          const errorData = await response.json(); // Extract the error message from the response
+          const errorData = await response.json();
           setActionError(errorData.message);
           setShowPurchaseConfirm(false);
           return;
@@ -424,6 +513,10 @@ const ProductDetail = () => {
     );
   }
 
+  if (!product) {
+    return <div>No product  found.</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 pt-10">
       <div className="container mx-auto px-4 py-8">
@@ -434,102 +527,174 @@ const ProductDetail = () => {
                 <CardTitle className="text-3xl font-bold">
                   {product.name}
                 </CardTitle>
-                <CardDescription className="flex items-center">
-                  {product.rating ? (
-                    <>
-                      <StarRating rating={product.rating} />
-                      <span className="ml-2 text-lg font-semibold">
-                        {product.rating.toFixed(1)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="ml-2 text-lg font-semibold">
-                      No ratings yet
+                <CardDescription className="flex items-center justify-end">
+                  <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
+                    <Star className="w-7 h-7 text-yellow-500 mr-2" />
+                    <span className="text-xl font-semibold text-black">
+                      {product.rating ? product.rating.toFixed(1) : "N/A"}
                     </span>
-                  )}
+                  </div>
+                  <span className="ml-2">
+                    ({product.reviews ? product.reviews.length : 0})
+                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <EnhancedCarousel images={product.pictures} />
-                <div className="space-y-4 mt-4">
-                  <div className="flex items-center">
-                    <DollarSign className="w-6 h-6 mr-2 text-green-500" />
-                    <span className="text-2xl font-bold">
-                      ${product.price.toFixed(2)}
-                    </span>
+                <div className="flex flex-col lg:flex-row gap-8">
+                  <div className="lg:w-1/2 h-[400px]">
+                    <ImageGallery pictures={product.pictures} />
                   </div>
-                  {(userRole === "admin" || userRole === "seller") && (
-                    <>
-                      <div className="flex items-center mt-4">
-                        {product.sales > 0 ? (
-                          <>
-                            <CheckCircle className="w-6 h-6 mr-2 text-green-500" />
-                            <span className="text-lg font-semibold text-green-500">
-                              {product.sales} sold
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="w-6 h-6 mr-2 text-red-500" />
-                            <span className="text-lg font-semibold text-red-500">
-                              No sales yet
-                            </span>
-                          </>
-                        )}
-                      </div>
+                  <div className="lg:w-1/2 space-y-4">
+                  
+                    <div className="flex items-center">
+                      <span className="text-lg font-semibold text-blue-500">
+  {userRole === "admin" || userRole === "seller" ? (
+    product.quantity > 0 ? (
+      `${product.quantity} left in stock`
+    ) : (
+      <span className="text-red-500 text-3xl font-bold">
+        Out of stock
+      </span>
+    )
+  ) : product.quantity > 0 ? (
+    <>
+        {/* <Package className="w-6 h-6 mr-2 text-blue-500" /> */}
+        <span className="text-green-600 text-sm">Still in stock!</span>
+    </>
 
+  ) : (
+    <span className="text-red-500 text-4xl font-bold">
+      Out of stock
+      <div className="mt-2 text-sm text-gray-600">
+        Add to wishlist now and you will be notified when it's back in stock!
+      </div>
+    </span>
+  )}
+</span>
+
+
+                    </div>
+                    <div className="flex items-center">
+                      {product.sales > 0 ? (
+                        <>
+                          {/* <CheckCircle className="w-6 h-6 mr-2 text-green-500" />
+                          <span className="text-lg font-semibold text-green-500">
+                            {product.sales} sold
+                          </span> */}
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="w-6 h-6 mr-2 text-blue-500" />
+                          <span className="text-lg font-semibold text-blue-500">
+                            Be the first to try it!
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    {/* {product.sales > 50 && (
+                      <p className="text-green-600">Popular product</p>
+                    )} */}
+                    {product.quantity <= 5 && product.quantity > 0 && (
+                      <p className="text-red-600 font-semibold">
+                        Only {product.quantity} left in stock! Buy now!
+                      </p>
+                    )}
                       <div className="flex items-center">
-                        <Package className="w-6 h-6 mr-2 text-blue-500" />
-                        <span
-                          className={`text-lg  font-semibold ${
-                            product.quantity === 0
-                              ? "text-blue-500"
-                              : "text-blue-500"
-                          }`}
-                        >
-                          {product.quantity === 0
-                            ? "All products sold"
-                            : `${product.quantity} still in stock`}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  <p className="text-gray-700">{product.description}</p>
+                      {/* <DollarSign className="w-6 h-6 mr-2 text-green-500" /> */}
+                      <span className="text-4xl font-bold">
+                        ${product.price.toFixed(2)}
+                      </span>
+                    </div>
+  <div>
+      <p className="text-gray-700 inline">
+        {isExpanded || product.description.length <= characterLimit
+          ? product.description
+          : `${product.description.slice(0, characterLimit)}...`}
+        
+        {/* "View More / View Less" link placed inline */}
+        {product.description.length > characterLimit && (
+          <button
+            className="text-blue-500 font-semibold inline ml-1 hover:underline "
+            onClick={toggleExpansion}
+          >
+            {isExpanded ? 'View Less' : 'View More'}
+          </button>
+        )}
+      </p>
+    </div>                  </div>
                 </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+  {/* First Badge: Sales with ShieldCheck Icon */}
+  <Badge variant="secondary" className="flex items-center">
+    <ShieldCheck className="mr-2" /> {/* Add the ShieldCheck icon */}
+     Sold by Premier Dealers
+  </Badge>
+
+  {/* Second Badge: Top Rated with Star Icon (only if product.rating >= 4) */}
+  {product.rating >= 4 && (
+    <Badge variant="secondary" className="flex items-center">
+      <Star className="mr-2" /> {/* Add the Star icon */}
+      Top Rated
+    </Badge>
+  )}
+
+  {/* Third Badge: Sales with Flame Icon */}
+  <Badge variant="secondary" className="flex items-center">
+    <TrendingUp className="mr-2" /> {/* Add the Flame icon */}
+    {product.sales} Sales
+  </Badge>
+  <Badge variant="secondary" className="flex items-center">
+    <Flame className="mr-2" /> {/* Add the Flame icon */}
+    {product.sales} Sales
+  </Badge>
+</div>
               </CardContent>
             </Card>
 
             <Card className="mt-8">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold">
-                  Travelers' Experiences
+                  Customer Reviews
                 </CardTitle>
-                <CardDescription>
-                  Here's some awesome feedback from our travelers
-                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {product.reviews.map((review, index) => (
-                    <div key={index} className="flex space-x-4">
-                      <Avatar>
-                        <AvatarFallback>{review.user[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-lg font-semibold">
-                            {review.user}
-                          </h4>
-                          <StarRating rating={review.rating} />
+                  {product.reviews && product.reviews.length > 0 ? (
+                    <>
+                     {product.reviews.length > 5 && (
+                     <span 
+                     className="text-blue-500 font-semibold justify-end hover:underline flex justify-end cursor-pointer"
+                                          onClick={() => setShowAllReviews(true)}
+                   >
+                     View More Reviews
+                   </span>
+                      )}
+                      {product.reviews.slice(0, 5).map((review, index) => (
+                        <div key={index} className="flex space-x-4">
+                          <Avatar>
+                            <AvatarFallback>{review.user[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-lg font-semibold">
+                                {review.user}
+                              </h4>
+                              <StarRating rating={review.rating} />
+                            </div>
+                            <p className="text-gray-600 mt-1">{review.comment}</p>
+                          </div>
                         </div>
-                        <p className="text-gray-600 mt-1">{review.comment}</p>
-                      </div>
-                    </div>
-                  ))}
+                      ))}
+                     
+                    </>
+                  ) : (
+                    <p>No reviews yet.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
+ 
 
           <div>
             {product.seller && (
@@ -572,7 +737,17 @@ const ProductDetail = () => {
               {userRole === "tourist" && (
                 <CardContent className="pt-6">
                   {product.quantity === 0 ? (
-                    <p className="text-red-500 text-center">No more left</p>
+                    <>
+                      <p className="text-red-500 text-center">Out of stock</p>
+                     <Button
+                          className="w-full"
+                          variant="secondary"
+                          onClick={handleAddToWishlist}
+                        >
+                          Add to Wishlist
+                        </Button>
+                    </>
+                  
                   ) : (
                     <>
                       <Select
@@ -599,7 +774,7 @@ const ProductDetail = () => {
                           onClick={() => setShowPurchaseConfirm(true)}
                           disabled={product.quantity === 0}
                         >
-                          Purchase Now
+                          Buy Now
                         </Button>
 
                         <Button
@@ -611,13 +786,7 @@ const ProductDetail = () => {
                           Add to Cart
                         </Button>
 
-                        <Button
-                          className="w-full"
-                          variant="secondary"
-                          onClick={handleAddToWishlist}
-                        >
-                          Add to Wishlist
-                        </Button>
+                       
                       </div>
                     </>
                   )}
@@ -640,7 +809,7 @@ const ProductDetail = () => {
                       variant="outline"
                       onClick={() => setShowCommentDialog(true)}
                     >
-                      Add Comment
+                      Add Review
                     </Button>
                   </div>
                 </CardContent>
@@ -693,7 +862,7 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Archive Confirmation Dialog */}
+      {/* Dialogs */}
       <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm}>
         <DialogContent>
           <DialogHeader>
@@ -719,7 +888,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Archive Success Dialog */}
       <Dialog open={showArchiveSuccess} onOpenChange={setShowArchiveSuccess}>
         <DialogContent>
           <DialogHeader>
@@ -728,7 +896,7 @@ const ProductDetail = () => {
               Product {product.isArchived ? "Unarchived" : "Archived"}
             </DialogTitle>
             <DialogDescription>
-              The product has been successfully {}
+              The product has been successfully{" "}
               {product.isArchived ? "unarchived" : "archived"}.
             </DialogDescription>
           </DialogHeader>
@@ -751,7 +919,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Archive Error Dialog */}
       <Dialog
         open={archiveError !== null}
         onOpenChange={() => setArchiveError(null)}
@@ -772,7 +939,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
@@ -796,7 +962,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Success Dialog */}
       <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
         <DialogContent>
           <DialogHeader>
@@ -816,7 +981,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Error Dialog */}
       <Dialog
         open={deleteError !== null}
         onOpenChange={() => setDeleteError(null)}
@@ -837,7 +1001,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Purchase Confirmation Dialog */}
       <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
         <DialogContent>
           <DialogHeader>
@@ -862,22 +1025,20 @@ const ProductDetail = () => {
             </SelectContent>
           </Select>
           <DialogFooter>
-            {/* Cancel button resets everything */}
             <Button
               variant="outline"
               onClick={() => {
-                setShowPurchaseConfirm(false); // Close the dialog
-                setPaymentMethod(""); // Reset payment method
+                setShowPurchaseConfirm(false);
+                setPaymentMethod("");
               }}
             >
               Cancel
             </Button>
-            {/* Disable if paymentMethod is not selected */}
             <Button
               onClick={() => {
-                handlePurchase(); // Call your purchase logic
-                setShowPurchaseConfirm(false); // Close the dialog
-                setPaymentMethod(""); // Reset payment method
+                handlePurchase();
+                setShowPurchaseConfirm(false);
+                setPaymentMethod("");
               }}
               disabled={!paymentMethod}
             >
@@ -887,8 +1048,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Rating Dialog */}
-      {/* Rating Dialog */}
       <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
         <DialogContent>
           <DialogHeader>
@@ -904,17 +1063,17 @@ const ProductDetail = () => {
             <Button
               variant="outline"
               onClick={() => {
-                setRating(0); // Reset the rating to 0
-                setShowRatingDialog(false); // Close the dialog
+                setRating(0);
+                setShowRatingDialog(false);
               }}
             >
               Cancel
             </Button>
             <Button
               onClick={() => {
-                handleRatingSubmit(); // Submit the rating
-                setRating(0); // Reset the rating after submission
-                setShowRatingDialog(false); // Close the dialog after submission
+                handleRatingSubmit();
+                setRating(0);
+                setShowRatingDialog(false);
               }}
               disabled={rating === 0}
             >
@@ -924,11 +1083,10 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Comment Dialog */}
       <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Comment</DialogTitle>
+            <DialogTitle>Add Review</DialogTitle>
             <DialogDescription>
               Share your thoughts about this product
             </DialogDescription>
@@ -938,7 +1096,7 @@ const ProductDetail = () => {
               <StarRating rating={rating} onRatingChange={setRating} />
             </div>
             <Textarea
-              placeholder="Write your comment here..."
+              placeholder="Write your review here..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
@@ -947,29 +1105,28 @@ const ProductDetail = () => {
             <Button
               variant="outline"
               onClick={() => {
-                setRating(0); // Reset the rating to 0
-                setComment(""); // Reset the comment to an empty string
-                setShowCommentDialog(false); // Close the dialog
+                setRating(0);
+                setComment("");
+                setShowCommentDialog(false);
               }}
             >
               Cancel
             </Button>
             <Button
               onClick={() => {
-                handleCommentSubmit(); // Submit the comment
-                setRating(0); // Reset the rating after submission
-                setComment(""); // Reset the comment after submission
-                setShowCommentDialog(false); // Close the dialog after submission
+                handleCommentSubmit();
+                setRating(0);
+                setComment("");
+                setShowCommentDialog(false);
               }}
               disabled={rating === 0 || comment.trim() === ""}
             >
-              Submit Comment
+              Submit Review
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Action Success Dialog */}
       <Dialog
         open={actionSuccess !== null}
         onOpenChange={() => setActionSuccess(null)}
@@ -990,7 +1147,6 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Action Error Dialog */}
       <Dialog
         open={actionError !== null}
         onOpenChange={() => setActionError(null)}
@@ -1010,6 +1166,177 @@ const ProductDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+     <Dialog open={showAllReviews} onOpenChange={setShowAllReviews}>
+  <DialogContent className="max-w-2xl "> {/* Reduced max-width to fit the screen */}
+    <DialogHeader>
+      <DialogTitle>All Reviews</DialogTitle>
+      <DialogDescription>
+        {/* Top Section for Overall Rating */}
+        <div className="text-center my-4">
+          <span className="text-gray-500 uppercase text-sm">Overall</span>
+
+          {/* Overall Rating Number */}
+          <div className="flex justify-center items-center">
+            <span className="text-4xl font-bold">
+              {product.rating ? product.rating.toFixed(1) : "N/A"}
+            </span>
+
+            {/* Star Rating Display */}
+            <div className="ml-2 flex items-center">
+              {[...Array(5)].map((_, i) => {
+                if (i < Math.floor(product.rating)) {
+                  return <Star key={i} className="w-6 h-6 text-blue-500" />;
+                } else if (i === Math.floor(product.rating) && product.rating % 1 >= 0.5) {
+                  return <StarHalf key={i} className="w-6 h-6 text-blue-500" />;
+                } else {
+                  return <Star key={i} className="w-6 h-6 text-gray-300" />;
+                }
+              })}
+            </div>
+          </div>
+
+          {/* Total Ratings Count */}
+          <p className="text-lg font-semibold text-gray-600">
+            {product.allRatings ? `${product.allRatings.length} Ratings` : 'No Ratings Yet'}
+          </p>
+
+          {/* Divider Line */}
+          <hr className="my-4 border-t border-gray-300" />
+        </div>
+
+        {/* Filter by Rating Buttons */}
+        <div className="flex justify-center space-x-2 mb-4">
+          <button
+            className={`px-3 py-2 rounded-md ${filteredRating === 0 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => handleFilterRating(0)}
+          >
+            All
+          </button>
+          <button
+            className={`px-3 py-2 rounded-md ${filteredRating === 5 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => handleFilterRating(5)}
+          >
+            5 Stars
+          </button>
+          <button
+            className={`px-3 py-2 rounded-md ${filteredRating === 4 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => handleFilterRating(4)}
+          >
+            4 Stars
+          </button>
+          <button
+            className={`px-3 py-2 rounded-md ${filteredRating === 3 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => handleFilterRating(3)}
+          >
+            3 Stars
+          </button>
+          <button
+            className={`px-3 py-2 rounded-md ${filteredRating === 2 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => handleFilterRating(2)}
+          >
+            2 Stars
+          </button>
+          <button
+            className={`px-3 py-2 rounded-md ${filteredRating === 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            onClick={() => handleFilterRating(1)}
+          >
+            1 Star
+          </button>
+        </div>
+        <div className="flex justify-center space-x-2 mb-4">
+      {/* All button */}
+
+
+      {/* 5 Star button */}
+      <button
+        className={`px-3 py-2 rounded-md ${filteredRating === 5 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        onClick={() => handleFilterRating(5)}
+      >
+        <div className="flex space-x-1">
+          {[...Array(5)].map((_, index) => (
+            <Star key={index} filled={filteredRating >= 5 - index} />
+          ))}
+        </div>
+      </button>
+
+      {/* 4 Star button */}
+      <button
+        className={`px-3 py-2 rounded-md ${filteredRating === 4 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        onClick={() => handleFilterRating(4)}
+      >
+        <div className="flex space-x-1">
+          {[...Array(4)].map((_, index) => (
+            <Star key={index} filled={filteredRating >= 4 - index} />
+          ))}
+        </div>
+      </button>
+
+      {/* 3 Star button */}
+      <button
+        className={`px-3 py-2 rounded-md ${filteredRating === 3 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        onClick={() => handleFilterRating(3)}
+      >
+        <div className="flex space-x-1">
+          {[...Array(3)].map((_, index) => (
+            <Star key={index} filled={filteredRating >= 3 - index} />
+          ))}
+        </div>
+      </button>
+
+      {/* 2 Star button */}
+      <button
+        className={`px-3 py-2 rounded-md ${filteredRating === 2 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        onClick={() => handleFilterRating(2)}
+      >
+        <div className="flex space-x-1">
+          {[...Array(2)].map((_, index) => (
+            <Star key={index} filled={filteredRating >= 2 - index} />
+          ))}
+        </div>
+      </button>
+
+      {/* 1 Star button */}
+      <button
+        className={`px-3 py-2 rounded-md ${filteredRating === 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+        onClick={() => handleFilterRating(1)}
+      >
+        <div className="flex space-x-1">
+          {[...Array(1)].map((_, index) => (
+            <Star key={index} filled={filteredRating >= 1 - index} />
+          ))}
+        </div>
+      </button>
+    </div>
+
+      </DialogDescription>
+    </DialogHeader>
+
+    {/* Reviews List */}
+    <div className="space-y-6 max-h-[40vh] overflow-y-auto">
+      {product.reviews.map((review, index) => (
+        <div key={index} className="flex space-x-4 border-b pb-4">
+          <Avatar>
+            <AvatarFallback>{review.user[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h4 className="text-lg font-semibold">{review.user}</h4>
+              <StarRating rating={review.rating} />
+            </div>
+            <p className="text-gray-600 mt-1">{review.comment}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <DialogFooter>
+      <Button onClick={() => setShowAllReviews(false)}>Close</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+
     </div>
   );
 };
