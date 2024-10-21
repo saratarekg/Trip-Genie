@@ -43,6 +43,11 @@ const activitySchema = new Schema(
       type: Number,
       required: true,
     },
+    currency: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Currency",
+      required: true,
+    },
     range: {
       type: Number,
       required: false,

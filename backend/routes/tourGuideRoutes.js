@@ -15,9 +15,14 @@ const upload = multer({ storage: storage });
 
 const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
+const currencyController = require('../controllers/currencyController');
 
 // Route for getting a single tour guide by ID
 router.get("/", getTourGuideProfile);
+
+router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/currencies", currencyController.getSupportedCurrencies);
+
 // Route for updating a tour guide by ID
 router.put("/", upload.single("profilePicture"), updateTourGuideProfile);
 router.get("/tour-guide/:id", getTourGuideByID);
