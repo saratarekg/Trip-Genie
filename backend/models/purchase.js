@@ -35,12 +35,20 @@ const purchaseSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
+    deliveryTime: {
+      type: String,
+      required: false,
+    },
     status: {
       type: String,
       enum: ["pending", "delivered", "cancelled"], // Only these values are allowed
       default: "pending",
     },
     shippingAddress: {
+      type: String,
+      required: true,
+    },
+    locationType: {
       type: String,
       required: true,
     },

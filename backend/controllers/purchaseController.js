@@ -3,10 +3,15 @@ const Purchase = require('../models/purchase'); // Assuming your Activity model 
 const Tourist = require('../models/tourist'); // Assuming your Tourist model is in models/tourist.js
 
 exports.createPurchase = async (req, res) => {
-  const { productId, quantity, paymentMethod } = req.body;
+  const { productId, quantity, paymentMethod, deliveryDate, deliveryTime, shippingAddress,locationType } = req.body;
+  console.log(productId);
+  console.log(quantity);
+  console.log(paymentMethod);
+  console.log(shippingAddress);
+
 
   try {
-    if (!productId || !quantity || !paymentMethod) {
+    if (!productId || !quantity || !paymentMethod || !shippingAddress) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -41,7 +46,6 @@ exports.createPurchase = async (req, res) => {
       );
     }
 
-
     // Create a new purchase
     const newPurchase = new Purchase({
       tourist: userId,
@@ -49,6 +53,11 @@ exports.createPurchase = async (req, res) => {
       quantity,
       totalPrice,
       paymentMethod, // Assuming payment is processed
+      deliveryDate,  // Optional delivery date
+      deliveryTime,  // Optional delivery time
+      shippingAddress, // Required shipping address
+      status: "pending",
+      locationType // Default status is 'pending'
     });
 
     // Save the purchase to the database
@@ -74,6 +83,7 @@ exports.createPurchase = async (req, res) => {
     return res.status(500).json({ error: error.message }); // Return the error message in the response
   }
 };
+
 
 
 // Get all purchases by a specific tourist

@@ -36,6 +36,16 @@ import {
   XCircle,
   ChevronUp,
   ChevronDown,
+  RotateCcw,
+  CreditCard,
+  Coins,
+  Info,
+  StoreIcon,
+  CircleUserRound,
+  Heart,
+  ShoppingCart,
+  Wallet,
+  MessageSquare,
 } from "lucide-react";
 import {
   Select,
@@ -137,8 +147,13 @@ const ProductDetail = () => {
   const [archiveError, setArchiveError] = useState(null);
   const [canModify, setCanModify] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [quantityError, setQuantityError] = useState(false);
   const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("credit");
+  const [deliveryDate, setDeliveryDate] = useState(null);
+  const [deliveryTime, setDeliveryTime] = useState("12:00-06:00");
+  const [location, setLocation] = useState("");
+  const [locationType, setLocationType] = useState("Home");
   const [actionSuccess, setActionSuccess] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [hasPurchased, setHasPurchased] = useState(false);
@@ -149,8 +164,19 @@ const ProductDetail = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [filteredRating, setFilteredRating] = useState(0);
+  const [streetName, setStreetName] = useState("");
+const [streetNumber, setStreetNumber] = useState("");
+const [floorUnit, setFloorUnit] = useState("");
+const [state, setState] = useState("");
+const [city, setCity] = useState("");
+const [showMore, setShowMore] = useState(false);
+const characterLimit = 150; // Set your desired character limit
 
-  const characterLimit = 150; // Set your desired character limit
+  const handleViewMore = () => {
+    setShowMore(!showMore);
+  };
+
+
 
   // Function to toggle between expanded and collapsed states
   const toggleExpansion = () => {
@@ -394,6 +420,8 @@ const ProductDetail = () => {
           quantity: quantity,
           totalAmount: product.price * quantity,
           paymentMethod: paymentMethod,
+          shippingAddress: location,
+          locationType: locationType,
         }),
       });
 
@@ -518,6 +546,7 @@ const ProductDetail = () => {
   }
 
   return (
+    
     <div className="min-h-screen bg-gray-100 pt-10">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -528,123 +557,43 @@ const ProductDetail = () => {
                   {product.name}
                 </CardTitle>
                 <CardDescription className="flex items-center justify-end">
-                  <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                    <Star className="w-7 h-7 text-yellow-500 mr-2" />
-                    <span className="text-xl font-semibold text-black">
-                      {product.rating ? product.rating.toFixed(1) : "N/A"}
-                    </span>
-                  </div>
-                  <span className="ml-2">
-                    ({product.reviews ? product.reviews.length : 0})
-                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col lg:flex-row gap-8">
-                  <div className="lg:w-1/2 h-[400px]">
-                    <ImageGallery pictures={product.pictures} />
-                  </div>
-                  <div className="lg:w-1/2 space-y-4">
-                  
-                    <div className="flex items-center">
-                      <span className="text-lg font-semibold text-blue-500">
-  {userRole === "admin" || userRole === "seller" ? (
-    product.quantity > 0 ? (
-      `${product.quantity} left in stock`
-    ) : (
-      <span className="text-red-500 text-3xl font-bold">
-        Out of stock
-      </span>
-    )
-  ) : product.quantity > 0 ? (
-    <>
-        {/* <Package className="w-6 h-6 mr-2 text-blue-500" /> */}
-        <span className="text-green-600 text-sm">Still in stock!</span>
-    </>
-
-  ) : (
-    <span className="text-red-500 text-4xl font-bold">
-      Out of stock
-      <div className="mt-2 text-sm text-gray-600">
-        Add to wishlist now and you will be notified when it's back in stock!
-      </div>
-    </span>
-  )}
-</span>
+              <div className="flex flex-col lg:flex-row gap-8">
+  <div className="w-full h-[400px]">
+    <ImageGallery pictures={product.pictures} />
+  </div>
+</div>
 
 
-                    </div>
-                    <div className="flex items-center">
-                      {product.sales > 0 ? (
-                        <>
-                          {/* <CheckCircle className="w-6 h-6 mr-2 text-green-500" />
-                          <span className="text-lg font-semibold text-green-500">
-                            {product.sales} sold
-                          </span> */}
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="w-6 h-6 mr-2 text-blue-500" />
-                          <span className="text-lg font-semibold text-blue-500">
-                            Be the first to try it!
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    {/* {product.sales > 50 && (
-                      <p className="text-green-600">Popular product</p>
-                    )} */}
-                    {product.quantity <= 5 && product.quantity > 0 && (
-                      <p className="text-red-600 font-semibold">
-                        Only {product.quantity} left in stock! Buy now!
-                      </p>
-                    )}
-                      <div className="flex items-center">
-                      {/* <DollarSign className="w-6 h-6 mr-2 text-green-500" /> */}
-                      <span className="text-4xl font-bold">
-                        ${product.price.toFixed(2)}
-                      </span>
-                    </div>
-  <div>
-      <p className="text-gray-700 inline">
-        {isExpanded || product.description.length <= characterLimit
-          ? product.description
-          : `${product.description.slice(0, characterLimit)}...`}
-        
-        {/* "View More / View Less" link placed inline */}
-        {product.description.length > characterLimit && (
-          <button
-            className="text-blue-500 font-semibold inline ml-1 hover:underline "
-            onClick={toggleExpansion}
-          >
-            {isExpanded ? 'View Less' : 'View More'}
-          </button>
-        )}
-      </p>
-    </div>                  </div>
-                </div>
                 <div className="mt-4 flex flex-wrap gap-2">
   {/* First Badge: Sales with ShieldCheck Icon */}
-  <Badge variant="secondary" className="flex items-center">
-    <ShieldCheck className="mr-2" /> {/* Add the ShieldCheck icon */}
-     Sold by Premier Dealers
-  </Badge>
+  <Badge 
+  variant="secondary" 
+  className="flex items-center text-md bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+>
+  <ShieldCheck className="mr-2" /> {/* Add the ShieldCheck icon */}
+  Sold by Premier Dealers
+</Badge>
+
 
   {/* Second Badge: Top Rated with Star Icon (only if product.rating >= 4) */}
   {product.rating >= 4 && (
-    <Badge variant="secondary" className="flex items-center">
+  <Badge 
+  variant="secondary" 
+  className="flex items-center text-md bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+>
       <Star className="mr-2" /> {/* Add the Star icon */}
       Top Rated
     </Badge>
   )}
 
   {/* Third Badge: Sales with Flame Icon */}
-  <Badge variant="secondary" className="flex items-center">
-    <TrendingUp className="mr-2" /> {/* Add the Flame icon */}
-    {product.sales} Sales
-  </Badge>
-  <Badge variant="secondary" className="flex items-center">
-    <Flame className="mr-2" /> {/* Add the Flame icon */}
+  <Badge 
+  variant="secondary" 
+  className="flex items-center text-md bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+>    <TrendingUp className="mr-2" /> {/* Add the Flame icon */}
     {product.sales} Sales
   </Badge>
 </div>
@@ -697,124 +646,327 @@ const ProductDetail = () => {
  
 
           <div>
-            {product.seller && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold">
-                    Seller Profile
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-4 mb-4">
-                    <Avatar className="w-16 h-16">
-                      <AvatarImage src={product.seller.avatar} />
-                      <AvatarFallback>
-                        <User className="w-8 h-8" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {product.seller.name}
-                      </h3>
-                      <Badge variant="secondary">Verified Seller</Badge>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <Mail className="w-5 h-5 mr-2 text-gray-500" />
-                      <span>{product.seller.email}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Phone className="w-5 h-5 mr-2 text-gray-500" />
-                      <span>{product.seller.mobile}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+           
+          <div className="space-y-6">
+          <Card>
+  {/* Product Info Section */}
+  <CardHeader>
+    <CardTitle className="text-2xl font-bold">{product.name}</CardTitle>
+    <CardDescription className="flex items-center">
+    <div className="flex items-center">
+  {Array.from({ length: 5 }, (_, index) => {
+    if (product.rating) {
+      const ratingValue = Math.floor(product.rating); // Get the integer part
+      const isHalfStar = product.rating - ratingValue >= 0.5; // Check for half-star
 
-            <Card className="mt-4">
-              {userRole === "tourist" && (
-                <CardContent className="pt-6">
-                  {product.quantity === 0 ? (
-                    <>
-                      <p className="text-red-500 text-center">Out of stock</p>
-                     <Button
-                          className="w-full"
-                          variant="secondary"
-                          onClick={handleAddToWishlist}
-                        >
-                          Add to Wishlist
-                        </Button>
-                    </>
+      if (index < ratingValue) {
+        // Full star
+        return <Star key={index} fill="#ffef00" strokeWidth={0} className="w-7 h-7" />;
+      } else if (index === ratingValue && isHalfStar) {
+        // Half star
+        return <StarHalf key={index} fill="#ffef00" strokeWidth={0} className="w-7 h-7" />;
+      } else {
+        // Empty star (if you have a separate empty Star component, use it here)
+        return <Star key={index} fill="#E5E7EB" strokeWidth={0} className="w-7 h-7" />;
+      }
+    }
+    return null;
+  })}
+  <span className="text-xl font-semibold text-black ml-2">
+    {product.rating ? product.rating.toFixed(1) : "N/A"}
+  </span>
+</div>
+
+
+
+<span className="ml-2 text-blue-500 font-medium font-semibold">
+          {product.reviews ? product.reviews.length : 0} reviews
+      </span>
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+  <div className="lg:w-1/2 space-y-4">
                   
-                  ) : (
+                  <div className="flex items-center">
+                    <span className="text-lg font-semibold text-blue-500">
+                  {userRole === "admin" || userRole === "seller" ? (
+                    product.quantity > 0 ? (
+                      `${product.quantity} left in stock`
+                    ) : (
+                      <span className="text-red-500 text-3xl font-bold">
+                        Out of stock
+                      </span>
+                    )
+                  ) : product.quantity > 0 ? (
                     <>
-                      <Select
-                        value={quantity.toString()}
-                        onValueChange={handleQuantityChange}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select quantity" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {[
-                            ...Array(Math.min(10, product.quantity)).keys(),
-                          ].map((i) => (
-                            <SelectItem key={i + 1} value={(i + 1).toString()}>
-                              {i + 1}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      <div className="space-y-2 mt-4">
-                        <Button
-                          className="w-full"
-                          onClick={() => setShowPurchaseConfirm(true)}
-                          disabled={product.quantity === 0}
-                        >
-                          Buy Now
-                        </Button>
-
-                        <Button
-                          className="w-full"
-                          variant="outline"
-                          onClick={handleAddToCart}
-                          disabled={product.quantity === 0}
-                        >
-                          Add to Cart
-                        </Button>
-
-                       
-                      </div>
+                        {/* <Package className="w-6 h-6 mr-2 text-blue-500" /> */}
+                        <span className="text-green-600 text-medium">Still in stock!</span>
                     </>
-                  )}
-                </CardContent>
-              )}
-            </Card>
 
-            {hasPurchased && (
-              <Card className="mt-4">
-                <CardContent className="pt-6">
-                  <div className="space-y-2">
-                    <Button
-                      className="w-full"
-                      onClick={() => setShowRatingDialog(true)}
-                    >
-                      Rate Product
-                    </Button>
-                    <Button
-                      className="w-full"
-                      variant="outline"
-                      onClick={() => setShowCommentDialog(true)}
-                    >
-                      Add Review
-                    </Button>
+                  ) : (
+                    <span className="text-red-500 text-4xl font-bold">
+                      Out of stock
+                      <div className="mt-2 text-sm text-gray-600">
+                        Add to wishlist now and you will be notified when it's back in stock!
+                      </div>
+                    </span>
+                  )}
+                 </span>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex items-center">
+                    {product.sales > 0 ? (
+                      <>
+                        {/* <CheckCircle className="w-6 h-6 mr-2 text-green-500" />
+                        <span className="text-lg font-semibold text-green-500">
+                          {product.sales} sold
+                        </span> */}
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-6 h-6 mr-2 text-blue-500" />
+                        <span className="text-lg font-semibold text-blue-500">
+                          Be the first to try it!
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  {/* {product.sales > 50 && (
+                    <p className="text-green-600">Popular product</p>
+                  )} */}
+                  {product.quantity <= 5 && product.quantity > 0 && (
+                    <p className="text-red-600 font-semibold">
+                      Only {product.quantity} left in stock! Buy now!
+                    </p>
+                  )}
+                    <div className="flex items-center">
+                    {/* <DollarSign className="w-6 h-6 mr-2 text-green-500" /> */}
+                    <span className="text-4xl font-bold">
+                      ${product.price.toFixed(2)}
+                    </span>
+                  </div>                 
+              </div><div className="flex items-center text-sm text-gray-500 mb-4 mt-2">
+  <Info className="w-5 h-5 mr-2" />
+  <p>Price includes VAT</p>
+</div>
+<div>
+                  <p className="text-gray-700 inline">
+                    {isExpanded || product.description.length <= characterLimit
+                      ? product.description
+                      : `${product.description.slice(0, characterLimit)}...`}
+                    
+                    {/* "View More / View Less" link placed inline */}
+                    {product.description.length > characterLimit && (
+                      <button
+                        className="text-blue-500 font-semibold inline ml-1 hover:underline "
+                        onClick={toggleExpansion}
+                      >
+                        {isExpanded ? 'View Less' : 'View More'}
+                      </button>
+                    )}
+                  </p>
+                </div>   
+<div className="space-y-4 mt-5">
+      {userRole === "tourist" && (
+        <>
+        <div className="space-y-2">
+  {/* Buy Now Button */}
+  <Button className="w-full text-xl bg-green-500 hover:bg-green-600 text-white font-bold py-2 flex items-center justify-center" onClick={() => setShowPurchaseConfirm(true)}>
+    {/* <Wallet className="w-5 h-5 mr-2" /> */}
+    Buy Now
+  </Button>
+
+  {/* Add to Cart Button */}
+  <Button variant="outline" className="w-full text-xl border-green-500 text-green-500 hover:bg-green-50 font-bold py-2 flex items-center justify-center" onClick={handleAddToCart}>
+    <ShoppingCart className="w-5 h-5 mr-2" />
+    Add to Cart
+  </Button>
+
+  {/* Add to Wishlist Button */}
+  <Button variant="secondary" className="w-full text-xl bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 flex items-center justify-center" onClick={handleAddToWishlist}>
+    <Heart className="w-5 h-5 mr-2" />
+    Add to Wishlist
+  </Button>
+</div>
+        </>
+      )}
+      {(userRole === "admin" || (userRole === "seller" && canModify)) && (
+        <>
+          <Button className="w-full" variant="default" onClick={handleUpdate}>
+            <Edit className="w-4 h-4 mr-2" /> Update Product
+          </Button>
+          <Button
+            className="w-full"
+            variant={product.isArchived ? "outline" : "default"}
+            onClick={() => setShowArchiveConfirm(true)}
+          >
+            {product.isArchived ? (
+              <>
+                <Edit className="w-4 h-4 mr-2" /> Unarchive Product
+              </>
+            ) : (
+              <>
+                <Edit className="w-4 h-4 mr-2" /> Archive Product
+              </>
             )}
+          </Button>
+          <Button
+            className="w-full"
+            variant="destructive"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" /> Delete Product
+          </Button>
+        </>
+      )}
+    </div>
+  </CardContent>
+
+  {/* Divider */}
+  <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+
+  {/* Delivery Options Section */}
+  <CardHeader>
+    <CardTitle className="text-2xl font-semibold">Delivery Options</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="space-y-2">
+      <div className="flex justify-between text-xl">
+        <span className="font-semibold text-green-700">Standard shipping</span>
+        <span>€2.99</span>
+      </div>
+      <div className="text-sm text-gray-500">2 Nov–8</div>
+      <div className="flex justify-between text-xl">
+        <span className="font-semibold text-green-700">Overnight shipping</span>
+        <span>€6.99</span>
+      </div>
+      <div className="text-sm text-gray-500">18 Nov–23</div>
+    </div>
+  </CardContent>
+
+  {/* Divider */}
+  <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+
+  {/* Shop with Confidence Section */}
+  <CardHeader>
+    <CardTitle className="text-2xl font-semibold">Shop with Confidence</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <ul className="space-y-2">
+      <li className="flex items-center text-lg">
+        <Coins className="w-5 h-5 mr-2 text-blue-500" />
+        Buyer Protection
+      </li>
+      <li className="flex items-center text-lg">
+        <RotateCcw className="w-5 h-5 mr-2 text-blue-500" />
+        30 day returns
+      </li>
+      <li className="flex items-center text-lg">
+        <Phone className="w-5 h-5 mr-2 text-blue-500" />
+        Easy access to support
+      </li>
+      <li className="flex items-center text-lg">
+        <CreditCard className="w-5 h-5 mr-2 text-blue-500" />
+        Secure, flexible payment options
+      </li>
+    </ul>
+  </CardContent>
+  <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+
+  {hasPurchased && (
+          <CardContent className="pt-6">
+            <div className="space-y-2">
+              {/* Rate Product Button */}
+              <Button
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 flex items-center justify-center"
+                onClick={() => setShowRatingDialog(true)}
+              >
+                <Star className="w-5 h-5 mr-2" />
+                Rate Product
+              </Button>
+        
+              {/* Add Review Button */}
+              <Button
+                className="w-full border-yellow-400 text-yellow-400 hover:bg-yellow-50 font-bold py-2 flex items-center justify-center"
+                variant="outline"
+                onClick={() => setShowCommentDialog(true)}
+              >
+                <MessageSquare className="w-5 h-5 mr-2" />
+                Add Review
+              </Button>
+            </div>
+          </CardContent>
+        
+            )}
+              <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+              {product.seller && (
+                <>
+ 
+
+  {/* Verified Seller Badge aligned to the right */}
+  
+  <Card className="mt-8">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <span className="text-3xl font-bold">Sold By</span>
+          <Badge variant="secondary" className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white">
+            Verified Seller
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center">
+          <Avatar className="h-16 w-16">
+            <AvatarFallback>
+              <StoreIcon className="h-8 w-8" />
+            </AvatarFallback>
+          </Avatar>
+          <div className="ml-4">
+            <h3 className="text-2xl font-bold">{product.seller.name}</h3>
+            <div className="flex items-center text-sm text-gray-500 mt-1">
+              <span className="font-semibold">95% positive</span>
+              <span className="mx-2">|</span>
+              <span className="font-semibold">{product.allRatings.length} ratings</span>
+              <span className="mx-2">|</span>
+              <span className="font-semibold">Seller since {product.seller.sellerSince}</span>
+            </div>
+            <div className="flex items-center mt-2">
+              <StarRating rating={product.rating} />
+              <span className="ml-2 text-lg font-semibold">{product.rating.toFixed(1)}</span>
+            </div>
+          </div>
+        </div>
+        {showMore && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center text-sm">
+              <Mail className="h-5 w-5 mr-2 text-gray-500" />
+              <span>{product.seller.email}</span>
+            </div>
+            <div className="flex items-center text-sm">
+              <Phone className="h-5 w-5 mr-2 text-gray-500" />
+              <span>{product.seller.mobile}</span>
+            </div>
+          </div>
+        )}
+        <div className="mt-4">
+          <Button
+            variant="link"
+            className="w-full p-0 h-auto font-normal text-blue-500 hover:text-blue-700"
+            onClick={() => setShowMore(!showMore)}
+          >
+            {showMore ? "Less Info" : "More Info"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  </>
+            )}
+</Card>
+
+          </div>
+
+
+
+
 
             <div className="mt-8 space-y-4">
               {(userRole === "admin" ||
@@ -1002,51 +1154,246 @@ const ProductDetail = () => {
       </Dialog>
 
       <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Purchase</DialogTitle>
-            <DialogDescription>
-              Product: {product.name}
-              <br />
-              Quantity: {quantity}
-              <br />
-              Total Price: ${(product.price * quantity).toFixed(2)}
-            </DialogDescription>
-          </DialogHeader>
-          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select payment method" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="credit_card">Credit Card</SelectItem>
-              <SelectItem value="debit_card">Debit Card</SelectItem>
-              <SelectItem value="cash_on_delivery">Cash on Delivery</SelectItem>
-              <SelectItem value="wallet">Wallet</SelectItem>
-            </SelectContent>
-          </Select>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowPurchaseConfirm(false);
-                setPaymentMethod("");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                handlePurchase();
-                setShowPurchaseConfirm(false);
-                setPaymentMethod("");
-              }}
-              disabled={!paymentMethod}
-            >
-              Confirm Purchase
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+  <DialogContent className="max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle className="text-3xl font-bold">Confirm Purchase</DialogTitle>
+    </DialogHeader>
+
+    {/* Product Details Header */}
+    <div className="my-4">
+      <h2 className="text-2xl font-bold">Product Details</h2>
+      <div className="my-4">
+        <p className="text-xl font-semibold"> {product.name}</p>
+     
+      </div>
+      <div className="my-4">
+        <label htmlFor="quantity" className="block text-lg font-medium">
+          Quantity
+        </label>
+        <input
+          type="number"
+          id="quantity"
+          value={quantity}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value > product.quantity) {
+              setQuantityError(true); // Trigger error state
+            } else {
+              setQuantityError(false); // Clear error
+              setQuantity(value);
+            }
+          }}
+          className={`w-full mt-1 px-3 py-2 border rounded-md ${
+            quantityError ? 'border-red-500' : ''
+          }`}
+          min="1"
+          max={product.quantity}
+        />
+        {quantityError && (
+          <p className="text-red-500 text-sm mt-1">
+            Unavailable amount, max is: {product.quantity}
+          </p>
+        )}
+           <p className="text-xl ">
+            <br/>
+          Price: ${(product.price * quantity).toFixed(2)}
+        </p>
+      </div>
+    </div>
+
+    {/* Payment & Delivery Header */}
+    <div className="my-4">
+      <h2 className="text-2xl font-bold">Payment & Delivery</h2>
+
+      {/* Delivery Date Picker */}
+      <div className="my-4">
+        <label htmlFor="deliveryDate" className="block text-lg font-medium">
+          Delivery Date
+        </label>
+        <input
+          type="date"
+          id="deliveryDate"
+          value={deliveryDate}
+          onChange={(e) => setDeliveryDate(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+        />
+      </div>
+
+      {/* Delivery Time Selector */}
+      <div className="my-4">
+        <label htmlFor="deliveryTime" className="block text-lg font-medium">
+          Delivery Time
+        </label>
+        <Select value={deliveryTime} onValueChange={setDeliveryTime}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select delivery time" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="morning">Morning (8 AM - 12 PM)</SelectItem>
+            <SelectItem value="midday">Midday (12 PM - 3 PM)</SelectItem>
+            <SelectItem value="afternoon">Afternoon (3 PM - 6 PM)</SelectItem>
+            <SelectItem value="night">Night (6 PM - 9 PM)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Payment Method Selector */}
+      <div className="my-4">
+        <label htmlFor="paymentMethod" className="block text-lg font-medium">
+          Payment Method
+        </label>
+        <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select payment method" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="credit_card">Credit Card</SelectItem>
+            <SelectItem value="debit_card">Debit Card</SelectItem>
+            <SelectItem value="cash_on_delivery">Cash on Delivery</SelectItem>
+            <SelectItem value="wallet">Wallet</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    {/* Address Details Header */}
+    <div className="my-4">
+      <h2 className="text-2xl font-bold">Address Details</h2>
+      <div className="my-4">
+        <label htmlFor="streetName" className="block text-lg font-medium">Street Name</label>
+        <input
+          type="text"
+          id="streetName"
+          value={streetName}
+          onChange={(e) => setStreetName(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter street name"
+        />
+      </div>
+      <div className="my-4">
+        <label htmlFor="streetNumber" className="block text-lg font-medium">Street Number</label>
+        <input
+          type="text"
+          id="streetNumber"
+          value={streetNumber}
+          onChange={(e) => setStreetNumber(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter street number"
+        />
+      </div>
+      <div className="my-4">
+        <label htmlFor="floorUnit" className="block text-lg font-medium">Floor/Unit</label>
+        <input
+          type="text"
+          id="floorUnit"
+          value={floorUnit}
+          onChange={(e) => setFloorUnit(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter floor/unit (optional)"
+        />
+      </div>
+      <div className="my-4">
+        <label htmlFor="state" className="block text-lg font-medium">State</label>
+        <input
+          type="text"
+          id="state"
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter state"
+        />
+      </div>
+      <div className="my-4">
+        <label htmlFor="city" className="block text-lg font-medium">City</label>
+        <input
+          type="text"
+          id="city"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter city"
+        />
+      </div>
+
+      {/* Location Type Selector */}
+      <div className="my-4">
+        <label htmlFor="locationType" className="block text-lg font-medium">Location Type</label>
+        <Select value={locationType} onValueChange={setLocationType}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select location type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="home">Home</SelectItem>
+            <SelectItem value="work">Work</SelectItem>
+            <SelectItem value="apartment">Apartment/Condo</SelectItem>
+            <SelectItem value="friend_family">Friend/Family's Address</SelectItem>
+            <SelectItem value="po_box">PO Box</SelectItem>
+            <SelectItem value="office">Office/Business</SelectItem>
+            <SelectItem value="pickup_point">Pickup Point</SelectItem>
+            <SelectItem value="vacation">Vacation/Temporary Address</SelectItem>
+            <SelectItem value="school">School/University</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    {/* Dialog Footer */}
+    <DialogFooter>
+      <Button
+        variant="outline"
+        onClick={() => {
+          setShowPurchaseConfirm(false);
+          setPaymentMethod("");
+          setDeliveryDate("");
+          setDeliveryTime("");
+          // Reset location fields
+          setStreetName("");
+          setStreetNumber("");
+          setFloorUnit("");
+          setState("");
+          setCity("");
+          setLocationType(""); // Reset location type
+        }}
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={() => {
+          const fullLocation = `${streetName} ${streetNumber}, ${floorUnit}, ${state}, ${city}`;
+          setLocation(fullLocation); // Concatenate location details into a single string
+          handlePurchase();
+          setShowPurchaseConfirm(false);
+          setPaymentMethod("");
+          setDeliveryDate("");
+          setDeliveryTime("");
+          // Reset location fields
+          setStreetName("");
+          setStreetNumber("");
+          setFloorUnit("");
+          setState("");
+          setCity("");
+          setLocationType("");
+        }}
+        disabled={
+          !paymentMethod ||
+          !deliveryDate ||
+          !deliveryTime ||
+          !streetName || !streetNumber || !state || !city || // Ensure all location fields are filled
+          !quantity ||
+          quantityError || // Disable submit if quantity exceeds max
+          !locationType // Location type is required
+        }
+      >
+        Confirm Purchase
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+
+
+
 
       <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
         <DialogContent>
@@ -1244,71 +1591,6 @@ const ProductDetail = () => {
             1 Star
           </button>
         </div>
-        <div className="flex justify-center space-x-2 mb-4">
-      {/* All button */}
-
-
-      {/* 5 Star button */}
-      <button
-        className={`px-3 py-2 rounded-md ${filteredRating === 5 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        onClick={() => handleFilterRating(5)}
-      >
-        <div className="flex space-x-1">
-          {[...Array(5)].map((_, index) => (
-            <Star key={index} filled={filteredRating >= 5 - index} />
-          ))}
-        </div>
-      </button>
-
-      {/* 4 Star button */}
-      <button
-        className={`px-3 py-2 rounded-md ${filteredRating === 4 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        onClick={() => handleFilterRating(4)}
-      >
-        <div className="flex space-x-1">
-          {[...Array(4)].map((_, index) => (
-            <Star key={index} filled={filteredRating >= 4 - index} />
-          ))}
-        </div>
-      </button>
-
-      {/* 3 Star button */}
-      <button
-        className={`px-3 py-2 rounded-md ${filteredRating === 3 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        onClick={() => handleFilterRating(3)}
-      >
-        <div className="flex space-x-1">
-          {[...Array(3)].map((_, index) => (
-            <Star key={index} filled={filteredRating >= 3 - index} />
-          ))}
-        </div>
-      </button>
-
-      {/* 2 Star button */}
-      <button
-        className={`px-3 py-2 rounded-md ${filteredRating === 2 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        onClick={() => handleFilterRating(2)}
-      >
-        <div className="flex space-x-1">
-          {[...Array(2)].map((_, index) => (
-            <Star key={index} filled={filteredRating >= 2 - index} />
-          ))}
-        </div>
-      </button>
-
-      {/* 1 Star button */}
-      <button
-        className={`px-3 py-2 rounded-md ${filteredRating === 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-        onClick={() => handleFilterRating(1)}
-      >
-        <div className="flex space-x-1">
-          {[...Array(1)].map((_, index) => (
-            <Star key={index} filled={filteredRating >= 1 - index} />
-          ))}
-        </div>
-      </button>
-    </div>
-
       </DialogDescription>
     </DialogHeader>
 
