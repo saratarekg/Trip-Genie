@@ -46,6 +46,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import Latex from "react-latex-next";
+import { BlockMath, InlineMath } from "react-katex";
+import "katex/dist/katex.min.css";
 
 const phoneValidator = (value) => {
   const phoneNumber = parsePhoneNumberFromString("+" + value);
@@ -53,6 +56,12 @@ const phoneValidator = (value) => {
     return false;
   }
   return true;
+};
+
+const requiredDocuments = {
+  "tour-guide": ["ID", "Certificates"],
+  advertiser: ["ID", "Taxation Registry Card"],
+  seller: ["ID", "Taxation Registry Card"],
 };
 
 // const formSchema = stage1Schema.merge(stage2Schema).merge(stage3Schema);
@@ -64,14 +73,17 @@ export function SignupForm() {
   const [nationalities, setNationalities] = useState([]);
   const [apiError, setApiError] = useState(null);
   const [showSignupSuccess, setShowSignupSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
   const [validationError, setValidationError] = useState(null);
   const fileInputRef = useRef(null);
   const [profilePicture, setProfilePicture] = useState(null);
   const alertRef = useRef(null);
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(false);
-  const [terms, setTerms] = useState('');
+  const [terms, setTerms] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [canAcceptTerms, setCanAcceptTerms] = useState(false); // Track if user can accept terms
+  const termsRef = useRef(null); // Reference to the terms div
 
   const formSchema = z
     .object({
@@ -120,7 +132,6 @@ export function SignupForm() {
       description: z.string().trim().optional(),
       website: z.string().trim().optional(),
       hotline: z.string().trim().optional(),
-      termsAccepted: z.boolean().optional(),
     })
     .superRefine((data, ctx) => {
       if (
@@ -145,6 +156,12 @@ export function SignupForm() {
         }
       }
       if (data.userType === "tourist") {
+        if (!data.dateOfBirth) {
+          ctx.addIssue({
+            path: ["dateOfBirth"],
+            message: "Date of birth is required.",
+          });
+        }
         if (
           data.dateOfBirth > new Date() ||
           data.dateOfBirth >
@@ -237,13 +254,6 @@ export function SignupForm() {
           });
         }
       }
-
-      if (stage === totalStages && !data.termsAccepted) {
-        ctx.addIssue({
-          path: ["termsAccepted"],
-          message: "Please accept the terms and conditions.",
-        });
-      }
     });
 
   const formRefs = {
@@ -260,7 +270,6 @@ export function SignupForm() {
     description: useRef(null),
     website: useRef(null),
     hotline: useRef(null),
-    termsAccepted: useRef(null),
   };
 
   const form = useForm({
@@ -280,7 +289,6 @@ export function SignupForm() {
       description: "",
       website: "",
       hotline: "",
-      termsAccepted: false,
     },
   });
 
@@ -298,23 +306,48 @@ export function SignupForm() {
   });
 
   const userType = watch("userType");
+  const totalStages = userType === "tourist" || userType === undefined ? 3 : 4;
+  const progress = (stage / totalStages) * 100;
 
   useEffect(() => {
     const fetchTerms = async () => {
       try {
-        const response = await fetch(`/terms/${userType}.txt`); // No need for require()
-        if (!response.ok) throw new Error('Failed to fetch');
+        const response = await fetch(`/terms/TermsAndConditions.txt`); // No need for require()
+        if (!response.ok) throw new Error("Failed to fetch");
         const text = await response.text();
         setTerms(text);
       } catch (error) {
-        console.error('Error loading terms:', error);
-        setTerms('Unable to load terms. Please try again later.');
+        console.error("Error loading terms:", error);
+        setTerms("Unable to load terms. Please try again later.");
       }
     };
-  
-    if (showModal) fetchTerms(); // Fetch only when the modal opens
-  }, [userType, showModal]);
-  
+    if (stage === totalStages) {
+      fetchTerms();
+    }
+  }, [userType, stage, totalStages]);
+
+  const handleTermsScroll = () => {
+    const termsDiv = termsRef.current;
+    const scrollBottom =
+      termsDiv.scrollTop + termsDiv.clientHeight >= termsDiv.scrollHeight - 1;
+    if (scrollBottom) {
+      setCanAcceptTerms(true); // Enable checkbox when scrolled to bottom
+    }
+  };
+
+  // Add scroll event listener to terms container
+  useEffect(() => {
+    const termsDiv = termsRef.current;
+    if (termsDiv) {
+      termsDiv.addEventListener("scroll", handleTermsScroll);
+    }
+    // Cleanup the event listener on unmount
+    return () => {
+      if (termsDiv) {
+        termsDiv.removeEventListener("scroll", handleTermsScroll);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const fetchNationalities = async () => {
@@ -352,44 +385,59 @@ export function SignupForm() {
     setStage(stage - 1);
   };
 
-  const handleDocumentsUpload = (e) => {
-    const files = e.target.files;
-    if (files) {
-      setValidationError(null);
-      const readers = [];
-      const newDocumentsArray = [];
+  // const handleDocumentsUpload = (e) => {
+  //   const files = e.target.files;
+  //   console.log("Files:", files);
+  //   if (files) {
+  //     setValidationError(null);
+  //     const readers = [];
+  //     const newDocumentsArray = [];
 
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        readers.push(
-          new Promise((resolve) => {
-            reader.onloadend = () => {
-              newDocumentsArray.push({
-                name: file.name, // Store the file name
-                data: reader.result, // Store the Base64 data
-                type: file.type, // Store the file type
-              });
-              resolve();
-            };
-            reader.readAsDataURL(file);
-          })
-        );
-      });
+  //     Array.from(files).forEach((file) => {
+  //       const reader = new FileReader();
+  //       readers.push(
+  //         new Promise((resolve) => {
+  //           reader.onloadend = () => {
+  //             newDocumentsArray.push({
+  //               name: file.name, // Store the file name
+  //               data: reader.result, // Store the Base64 data
+  //               type: file.type, // Store the file type
+  //             });
+  //             resolve();
+  //           };
+  //           reader.readAsDataURL(file);
+  //         })
+  //       );
+  //     });
 
-      console.log("New documents array:", newDocumentsArray);
+  //     console.log("New documents array:", newDocumentsArray);
 
-      Promise.all(readers).then(() => {
-        setUploadedDocuments([...uploadedDocuments, ...newDocumentsArray]);
-      });
+  //     Promise.all(readers).then(() => {
+  //       // setUploadedDocuments([...uploadedDocuments, ...newDocumentsArray]);
+  //       setUploadedDocuments(e.target.files);
+  //     });
 
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ""; // Clear the input value
+  //     if (fileInputRef.current) {
+  //       fileInputRef.current.value = ""; // Clear the input value
+  //     }
+  //   }
+  // };
+
+  const handleFileChange = (e, docType) => {
+    if (e.target.files) {
+      if (docType === "Certificates" && userRole === "tourGuide") {
+        setUploadedDocuments((prev) => ({
+          ...prev,
+          [docType]: [...(prev[docType] || []), ...e.target.files],
+        }));
+      } else {
+        setUploadedDocuments((prev) => ({
+          ...prev,
+          [docType]: e.target.files[0],
+        }));
       }
     }
   };
-
-  const totalStages = userType === "tourist" || userType === undefined ? 3 : 4;
-  const progress = (stage / totalStages) * 100;
 
   const onSubmit = async (values) => {
     if (stage === 1) {
@@ -411,9 +459,14 @@ export function SignupForm() {
         }
       }
     }
-    if (stage === 2) {
+    if (
+      stage === 2 &&
+      ["tour-guide", "advertiser", "seller"].includes(userType)
+    ) {
       if (uploadedDocuments.length === 0) {
-        setValidationError("Please upload at least one document.");
+        setValidationError(
+          "Please upload at least one document for each required field."
+        );
         return;
       }
     }
@@ -425,6 +478,13 @@ export function SignupForm() {
       return;
     }
 
+    if (!termsAccepted) {
+      setShowError(true);
+      return;
+    } else {
+      setShowError(false);
+    }
+
     setIsLoading(true);
     setApiError(null);
     values.mobile = "+" + values.mobile;
@@ -434,14 +494,20 @@ export function SignupForm() {
       for (const key in values) {
         finalData.append(key, values[key]);
       }
-      finalData.append("profilePicture", profilePicture);
+      // finalData.append("profilePicture", profilePicture);
       // uploadedDocuments.forEach((doc) => {
       //   finalData.append("documents", doc);
       // });
-      finalData.append("documents", JSON.stringify(uploadedDocuments));
 
-      console.log(uploadedDocuments);
-      console.log("Final dataaaa:", finalData.get("documents"));
+      Object.entries(uploadedDocuments).forEach(([docType, fileOrFiles]) => {
+        if (Array.isArray(fileOrFiles)) {
+          fileOrFiles.forEach((file, index) => {
+            formData.append(`${docType}`, file, `${docType}_${index + 1}`);
+          });
+        } else if (fileOrFiles) {
+          formData.append(docType, fileOrFiles, fileOrFiles.name);
+        }
+      });
 
       await axios.post(
         `http://localhost:4000/auth/sign-up/${userType}`,
@@ -469,11 +535,6 @@ export function SignupForm() {
     }
   };
 
-  const handleRemoveDocument = (index) => {
-    const updatedDocuments = uploadedDocuments.filter((_, i) => i !== index);
-    setUploadedDocuments(updatedDocuments);
-  };
-
   const handlePictureUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -484,6 +545,10 @@ export function SignupForm() {
       reader.readAsDataURL(file);
     }
   };
+
+  useEffect(() => {
+    console.log(uploadedDocuments);
+  }, [uploadedDocuments]);
 
   const renderStage = () => {
     switch (stage) {
@@ -879,46 +944,33 @@ export function SignupForm() {
               </h2>
               <h3>For example : ID card, Passport, Certificates, etc.</h3>
               <Label htmlFor="documents">Upload Required Documents*</Label>
-              <Input
-                id="documents"
-                type="file"
-                multiple
-                onChange={handleDocumentsUpload}
-                className="mb-2"
-                ref={fileInputRef}
-              />
+              {requiredDocuments[userType].map((docType) => (
+                <div key={docType}>
+                  <label
+                    htmlFor={docType}
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    {docType}
+                  </label>
+                  <Input
+                    id={docType}
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => handleFileChange(e, docType)}
+                    multiple={docType === "Certificates"}
+                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                  />
+                  {docType === "Certificates" && uploadedDocuments[docType] && (
+                    <div className="mt-2 text-sm text-gray-500">
+                      {uploadedDocuments[docType].length} certificate(s)
+                      selected
+                    </div>
+                  )}
+                </div>
+              ))}
               {validationError && (
                 <p className="text-red-500">{validationError}</p>
               )}
-
-              <div>
-                {console.log("Uploaded documentsssss:", uploadedDocuments)}
-                {uploadedDocuments.map((doc, index) => (
-                  <div key={index} className="flex items-center mb-2">
-                    {/* Display document preview */}
-                    {doc.type.startsWith("image/") ? (
-                      <img
-                        src={doc.data}
-                        alt={doc.name}
-                        className="h-20 w-20 mr-2"
-                      />
-                    ) : (
-                      <a href={doc.data} download={doc.name} className="mr-2">
-                        {doc.name}
-                      </a>
-                    )}
-
-                    {/* Remove button */}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveDocument(index)}
-                      className="bg-red-500 text-white px-2 py-1 rounded"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
             </>
           );
         } else {
@@ -950,56 +1002,48 @@ export function SignupForm() {
       case 3:
         if (userType === "tourist") {
           return (
-            <div>
-          <FormField
-            control={control}
-            name="termsAccepted"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    I accept and agree to the{' '}
-                    <button
-                      type="button"
-                      onClick={() => setShowModal(true)}
-                      className="text-indigo-600 hover:underline"
-                    >
-                      terms and conditions
-                    </button>
-                  </FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
-    
-          {/* Terms and Conditions Modal */}
-          {showModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="relative w-11/12 max-w-3xl p-6 bg-white rounded-lg shadow-lg max-h-[60vh] overflow-auto">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full px-3 py-1"
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  Terms and Conditions
+                </h3>
+                <div
+                  className="border rounded-md p-4 h-48 overflow-y-auto bg-gray-50"
+                  ref={termsRef}
                 >
-                  X
-                </button>
-                <h2 className="text-xl font-semibold mb-4">
-                  Terms and Conditions for {userType.charAt(0).toUpperCase() + userType.slice(1)}
-                </h2>
-                <pre className="whitespace-pre-wrap">{terms}</pre>
+                  <pre className="whitespace-pre-wrap text-sm">
+                    <Latex>{terms}</Latex>
+                  </pre>
+                </div>
+              </div>
+
+              <div className="flex flex-row items-start space-x-3 space-y-0">
+                <Checkbox
+                  checked={termsAccepted}
+                  onCheckedChange={() => setTermsAccepted(!termsAccepted)}
+                  disabled={!canAcceptTerms}
+                  aria-describedby="terms-description"
+                />
+                <div className="space-y-1 leading-none">
+                  <label>I accept and agree to the terms and conditions</label>
+                  {showError && (
+                    <div
+                      className="mt-5"
+                      style={{ color: "red", fontSize: "16px" }}
+                    >
+                      Please accept the terms and conditions.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          )}
-        </div>
           );
         } else {
           return (
             <>
               <h2 className="text-2xl font-semibold text-gray-900">
-                Continue your profile setup by uploading a profile picture.
+                Continue your profile setup by uploading a
+                {userType === "tour-guide" ? " profile picture" : " logo"}.
               </h2>
 
               <Label>Upload {} (Optional)</Label>
@@ -1023,50 +1067,41 @@ export function SignupForm() {
         }
       case 4:
         return (
-          <div>
-          <FormField
-            control={control}
-            name="termsAccepted"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                <FormControl>
-                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    I accept and agree to the{' '}
-                    <button
-                      type="button"
-                      onClick={() => setShowModal(true)}
-                      className="text-indigo-600 hover:underline"
-                    >
-                      terms and conditions
-                    </button>
-                  </FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
-          />
-    
-          {/* Terms and Conditions Modal */}
-          {showModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="relative w-11/12 max-w-3xl p-6 bg-white rounded-lg shadow-lg max-h-[60vh] overflow-auto">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full px-3 py-1"
-                >
-                  X
-                </button>
-                <h2 className="text-xl font-semibold mb-4">
-                  Terms and Conditions for {userType.charAt(0).toUpperCase() + userType.slice(1)}
-                </h2>
-                <pre className="whitespace-pre-wrap">{terms}</pre>
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-gray-900">
+                Terms and Conditions
+              </h3>
+              <div
+                className="border rounded-md p-4 h-48 overflow-y-auto bg-gray-50"
+                ref={termsRef}
+              >
+                <pre className="whitespace-pre-wrap text-sm">
+                  <Latex>{terms}</Latex>
+                </pre>
               </div>
             </div>
-          )}
-        </div>
+
+            <div className="flex flex-row items-start space-x-3 space-y-0">
+              <Checkbox
+                checked={termsAccepted}
+                onCheckedChange={() => setTermsAccepted(!termsAccepted)}
+                disabled={!canAcceptTerms}
+                aria-describedby="terms-description"
+              />
+              <div className="space-y-1 leading-none">
+                <label>I accept and agree to the terms and conditions</label>
+                {showError && (
+                  <div
+                    className="mt-5"
+                    style={{ color: "red", fontSize: "16px" }}
+                  >
+                    Please accept the terms and conditions.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         );
       default:
         return null;
