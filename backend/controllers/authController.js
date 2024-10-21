@@ -129,6 +129,8 @@ const advertiserSignup = async (req, res) => {
     if (await usernameExists(req.body.username)) {
       throw new Error("Username already exists");
     }
+
+    console.log(req.body);
     const advertiser = new Advertiser(req.body);
 
     advertiser
