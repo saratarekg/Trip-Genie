@@ -129,6 +129,8 @@ export default function CreateHpForm() {
     };
 
     fetchCurrencies();
+
+    fetchHistoricalTags();
   }, []);
 
     const fetchHistoricalTags = async () => {
