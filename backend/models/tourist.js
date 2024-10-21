@@ -98,11 +98,11 @@ const touristSchema = new Schema(
       },
     ],
     preference: {
-      budget: {
+      budget: {  // max price
         type: Number,
         default: Infinity, // Default value set to Infinity
       },
-      price: {
+      price: { // min price
         type: Number,
         default: Infinity, // Default value set to Infinity
       },

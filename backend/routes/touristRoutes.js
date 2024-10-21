@@ -48,6 +48,8 @@ router.get("/seller/:id", sellerController.getSellerByID);
 
 router.get("/activities", activityController.getAllActivities);
 router.get("/activities-preference", activityController.getActivitiesByPreferences);
+router.get("/activities-not-preference", activityController.theHolyAntiFilter);
+
 
 router.get("/activities/:id", activityController.getActivityById);
 
