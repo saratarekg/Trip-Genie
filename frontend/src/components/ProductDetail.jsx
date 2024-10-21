@@ -789,35 +789,6 @@ const characterLimit = 150; // Set your desired character limit
 </div>
         </>
       )}
-      {(userRole === "admin" || (userRole === "seller" && canModify)) && (
-        <>
-          <Button className="w-full" variant="default" onClick={handleUpdate}>
-            <Edit className="w-4 h-4 mr-2" /> Update Product
-          </Button>
-          <Button
-            className="w-full"
-            variant={product.isArchived ? "outline" : "default"}
-            onClick={() => setShowArchiveConfirm(true)}
-          >
-            {product.isArchived ? (
-              <>
-                <Edit className="w-4 h-4 mr-2" /> Unarchive Product
-              </>
-            ) : (
-              <>
-                <Edit className="w-4 h-4 mr-2" /> Archive Product
-              </>
-            )}
-          </Button>
-          <Button
-            className="w-full"
-            variant="destructive"
-            onClick={() => setShowDeleteConfirm(true)}
-          >
-            <Trash2 className="w-4 h-4 mr-2" /> Delete Product
-          </Button>
-        </>
-      )}
     </div>
   </CardContent>
 
@@ -870,10 +841,12 @@ const characterLimit = 150; // Set your desired character limit
       </li>
     </ul>
   </CardContent>
-  <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
 
   {hasPurchased && (
+    
           <CardContent className="pt-6">
+              <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+
             <div className="space-y-2">
               {/* Rate Product Button */}
               <Button
@@ -904,7 +877,7 @@ const characterLimit = 150; // Set your desired character limit
 
   {/* Verified Seller Badge aligned to the right */}
   
-  <Card className="mt-8">
+
       <CardHeader>
         <div className="flex justify-between items-center">
           <span className="text-3xl font-bold">Sold By</span>
@@ -957,7 +930,6 @@ const characterLimit = 150; // Set your desired character limit
           </Button>
         </div>
       </CardContent>
-    </Card>
   </>
             )}
 </Card>
