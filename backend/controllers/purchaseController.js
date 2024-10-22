@@ -12,6 +12,8 @@ console.log(shippingAddress);
 
   try {
     if (!productId || !quantity || !paymentMethod || !shippingAddress) {
+      console.log("fields");
+
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -19,12 +21,14 @@ console.log(shippingAddress);
     const tourist = await Tourist.findById(userId);
 
     if (!tourist) {
+      console.log("tou");
       return res.status(400).json({ message: "Tourist not found" });
     }
 
     // Check if the product exists
     const product = await Product.findById(productId);
     if (!product) {
+      console.log("prod");
       return res.status(400).json({ message: "Product not found" });
     }
     

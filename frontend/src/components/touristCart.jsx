@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CheckCircle, Minus, Plus, Trash2, XCircle } from "lucide-react";
 
 const ShoppingCart = () => {
   const navigate = useNavigate();
@@ -25,6 +26,14 @@ const ShoppingCart = () => {
   const [location, setLocation] = useState("");
   const [locationType, setLocationType] = useState("");
   const [quantityError, setQuantityError] = useState(false);
+  const [allPurchasesSuccessful, setAllPurchasesSuccessful] = useState(false);
+  const [actionError, setActionError] = useState(null);
+
+  const isCheckoutDisabled = cartItems.some(item => 
+    item.product.quantity === 0 || item.quantity > item.product.quantity
+  )
+
+  const blueButtonStyle = "bg-blue-500 hover:bg-blue-600 text-white disabled:bg-blue-300"
 
 
   const resetFields = () => {
@@ -100,6 +109,7 @@ const ShoppingCart = () => {
       }
     } catch (error) {
       console.error('Error removing item:', error);
+      setActionError(error.message);
     }
   };
 
@@ -121,6 +131,7 @@ const ShoppingCart = () => {
       }
     } catch (error) {
       console.error('Error updating quantity:', error);
+      setActionError(error.message);
     }
   };
 
@@ -131,13 +142,12 @@ const ShoppingCart = () => {
   const handlePurchase = async () => {
     try {
       const token = Cookies.get("jwt");
-      let allPurchasesSuccessful = true;
   
       // Loop through each item in the cart
       for (const item of cartItems) {
         // Calculate total price for each item
         const totalPriceForItem = item.quantity * item.product.price;
-  
+        console.log(location);
         // Make a POST request for each individual item purchase
         const response = await fetch("http://localhost:4000/tourist/purchase", {
           method: "POST",
@@ -159,9 +169,12 @@ const ShoppingCart = () => {
         // Check if the response is OK for each item
         if (!response.ok) {
           console.error(`Failed to purchase item: ${item.product.name}`);
-          allPurchasesSuccessful = false;
+          setActionError(`Failed to purchase item: ${item.product.name}`);
+          setAllPurchasesSuccessful(false);
+          
           break; // Exit the loop if any purchase fails
         }
+        setAllPurchasesSuccessful(true);
       }
   
       // If all purchases were successful, proceed to clear the cart
@@ -171,7 +184,6 @@ const ShoppingCart = () => {
         setShowPurchaseConfirm(false);
         setPaymentMethod('');
   
-        alert('Purchase successful!');
   
         // Now, make the call to the empty cart API
         const emptyCartResponse = await fetch("http://localhost:4000/tourist/empty/cart", {
@@ -187,9 +199,11 @@ const ShoppingCart = () => {
           console.error('Failed to empty the cart.');
         }
       } else {
+        setActionError("Failed to complete purchase for some items.");
         console.error('Failed to complete purchase for some items.');
       }
     } catch (error) {
+      setActionError(error.message);
       console.error('Error making purchase:', error);
     }
   };
@@ -206,51 +220,76 @@ const ShoppingCart = () => {
         <p className="text-center text-gray-500 my-8">No items in cart</p>
       ) : (
         cartItems.map(item => (
-          <div key={item._id} className="flex items-center justify-between border-b py-4">
-            <div className="flex items-center">
-              <img 
-                src={item?.product?.pictures?.length ? item.product.pictures[0] : '/placeholder.svg'} 
-                alt={item?.product?.name || 'Product'} 
-                className="w-20 h-20 object-cover mr-4 cursor-pointer"
-                onClick={() => handleProductClick(item.product._id)}
-              />
-              <div>
-                {item.product ? (
-                  <>
-                    <h2 
-                      className="text-lg font-semibold cursor-pointer hover:underline"
-                      onClick={() => handleProductClick(item.product._id)}
-                    >
-                      {item.product.name}
-                    </h2>
-                    <p className="text-sm text-gray-600">{item.product.description}</p>
-                  </>
-                ) : (
-                  <p>Product is not available</p>
-                )}
+          <div key={item.product._id} className="flex flex-col border-b py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <img 
+                  src={item?.product?.pictures?.length ? item.product.pictures[0] : '/placeholder.svg'} 
+                  alt={item?.product?.name || 'Product'} 
+                  className="w-20 h-20 object-cover mr-4 cursor-pointer"
+                  onClick={() => handleProductClick(item.product._id)}
+                />
+                <div>
+                  {item.product ? (
+                    <>
+                      <h2 
+                        className="text-lg font-semibold cursor-pointer hover:underline"
+                        onClick={() => handleProductClick(item.product._id)}
+                      >
+                        {item.product.name}
+                      </h2>
+                      <p className="text-sm text-gray-600">
+                        {item.product.description.length > 150
+                          ? `${item.product.description.slice(0, 150)}...`
+                          : item.product.description}
+                      </p>
+                    </>
+                  ) : (
+                    <p>Product is not available</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center">
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    onClick={() => handleQuantityChange(item.product._id, Math.max(1, item.quantity - 1))}
+                    className={`px-2 py-1 rounded ${blueButtonStyle}`}
+                    disabled={item.quantity <= 1 || item.product.quantity === 0}
+                    variant={item.quantity <= 1 || item.product.quantity === 0 ? "ghost" : "default"}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="px-4 py-1 bg-gray-100 rounded">{item.quantity}</span>
+                  <Button 
+                    onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
+                    className={`px-2 py-1 rounded ${blueButtonStyle}`}
+                    disabled={item.quantity >= item.product.quantity}
+                    variant={item.quantity >= item.product.quantity ? "ghost" : "default"}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <span className="ml-4 font-semibold">${(item.product.price * item.quantity).toFixed(2)}</span>
+                <Button 
+                  onClick={() => handleRemoveItem(item.product._id)}
+                  className="ml-4"
+                  variant="destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             </div>
-            <div className="flex items-center">
-              <button 
-                onClick={() => handleQuantityChange(item.product._id, Math.max(1, item.quantity - 1))}
-                className="px-2 py-1 bg-gray-200 rounded-l"
-              >
-                -
-              </button>
-              <span className="px-4 py-1 bg-gray-100">{item.quantity}</span>
-              <button 
-                onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
-                className="px-2 py-1 bg-gray-200 rounded-r"
-              >
-                +
-              </button>
-              <span className="ml-4 font-semibold">${(item.product.price * item.quantity).toFixed(2)}</span>
-              <button 
-                onClick={() => handleRemoveItem(item.product._id)}
-                className="ml-4 text-red-500 hover:text-red-700"
-              >
-                Remove
-              </button>
+            <div className="mt-2">
+              {item.product.quantity === 0 && (
+                <p className="text-red-500 text-sm">
+                  This item is out of stock. Please remove it to proceed with checkout.
+                </p>
+              )}
+              {item.quantity > item.product.quantity && item.product.quantity!=0 &&(
+                <p className="text-red-500 text-sm">
+                  Only {item.product.quantity} left in stock. Please adjust the quantity.
+                </p>
+              )}
             </div>
           </div>
         ))
@@ -260,11 +299,22 @@ const ShoppingCart = () => {
           <div className="text-xl font-bold">
             Total: ${totalAmount.toFixed(2)}
           </div>
-          <Button onClick={handleCheckout} disabled={cartItems.length === 0}>
+          <Button onClick={handleCheckout} disabled={isCheckoutDisabled}>
             Checkout
           </Button>
         </div>
       )}
+      {cartItems.some(item => item.product.quantity === 0) && (
+        <p className="text-red-500 mt-4">
+          Some items in your cart are out of stock. Please remove them to proceed with checkout.
+        </p>
+      )}
+      {cartItems.some(item => item.quantity > item.product.quantity) && (
+        <p className="text-red-500 mt-4">
+          Some items in your cart exceed available stock. Please adjust quantities to proceed with checkout.
+        </p>
+      )}
+     
 
 <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
   <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -578,6 +628,46 @@ const ShoppingCart = () => {
     </DialogFooter>
   </DialogContent>
 </Dialog>
+
+<Dialog
+        open={allPurchasesSuccessful}
+        onOpenChange={() => setAllPurchasesSuccessful(false)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Success
+            </DialogTitle>
+            <DialogDescription>{allPurchasesSuccessful}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="default" onClick={() => setAllPurchasesSuccessful(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={actionError !== null}
+        onOpenChange={() => setActionError(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Error
+            </DialogTitle>
+            <DialogDescription>{actionError}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="default" onClick={() => setActionError(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </div>
   );
