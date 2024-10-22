@@ -11,6 +11,52 @@ const ShoppingCart = () => {
   const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [totalAmount, setTotalAmount] = useState(0);
+  const [streetName, setStreetName] = useState("");
+  const [streetNumber, setStreetNumber] = useState("");
+  const [floorUnit, setFloorUnit] = useState("");
+  const [state, setState] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [landmark, setLandmark] = useState("");
+  const [deliveryType, setDeliveryType] = useState("");
+  const [deliveryDate, setDeliveryDate] = useState(null);
+  const [deliveryTime, setDeliveryTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [locationType, setLocationType] = useState("");
+  const [quantityError, setQuantityError] = useState(false);
+
+
+  const resetFields = () => {
+    setPaymentMethod("");
+    setDeliveryDate("");
+    setDeliveryTime("");
+    setDeliveryType("");
+    setStreetName("");
+    setStreetNumber("");
+    setFloorUnit("");
+    setState("");
+    setCity("");
+    setPostalCode("");
+    setLandmark("");
+    setLocationType("");
+  };
+
+  const calculateDeliveryCost = (type) => {
+    switch (type) {
+      case "Standard":
+        return 2.99; // Standard delivery cost
+      case "Express":
+        return 4.99; // Express delivery cost
+      case "Next-Same":
+        return 6.99; // Next/Same Day delivery cost
+      case "International":
+        return 14.99; // International delivery cost
+      default:
+        return 0; // No additional cost
+    }
+  };
+
 
   useEffect(() => {
     fetchCartItems();
@@ -103,7 +149,10 @@ const ShoppingCart = () => {
             productId: item.product._id,  // The ID of the product
             quantity: item.quantity,      // Quantity of this product
             totalPrice: totalPriceForItem, // Total price for this specific item
-            paymentMethod,                // Payment method selected by the user
+            paymentMethod: paymentMethod,
+            shippingAddress: location,
+            locationType: locationType,
+            deliveryType: deliveryType,         // Payment method selected by the user
           }),
         });
   
@@ -217,50 +266,319 @@ const ShoppingCart = () => {
         </div>
       )}
 
-      <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Purchase</DialogTitle>
-            <DialogDescription>
-              Total Amount: ${totalAmount.toFixed(2)}
-              <br />
-              Number of Items: {cartItems.length}
-            </DialogDescription>
-          </DialogHeader>
-          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select payment method" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="credit_card">Credit Card</SelectItem>
-              <SelectItem value="debit_card">Debit Card</SelectItem>
-              <SelectItem value="cash_on_delivery">Cash on Delivery</SelectItem>
-              <SelectItem value="wallet">Wallet</SelectItem>
-            </SelectContent>
-          </Select>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowPurchaseConfirm(false);
-                setPaymentMethod("");
+<Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
+  <DialogContent className="max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle className="text-3xl font-bold">Confirm Purchase</DialogTitle>
+    </DialogHeader>
+
+    {/* Product Details Header */}
+    <div className="my-4">
+      <h2 className="text-2xl font-bold">Product Details</h2>
+
+      {/* Loop through cartItems to display product details */}
+      {cartItems.map((item, index) => (
+        <div key={index} className="my-4">
+          <p className="text-xl font-semibold">{item.product.name}</p>
+          <p className="text-lg">
+            Quantity: 
+            <input
+              type="number"
+              value={item.quantity} // Controlled input using item.quantity
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10); // Convert input to integer
+                // Check for valid quantity
+                if (value > item.product.quantity || value < 1) {
+                  setQuantityError(true); // Trigger error state if exceeding available stock
+                } else {
+                  setQuantityError(false); // Clear error
+                  // Update the quantity in the cart
+                  const updatedCartItems = [...cartItems];
+                  updatedCartItems[index].quantity = value; // Update quantity for specific item
+                  setCartItems(updatedCartItems); // Update state with modified cart items
+                }
               }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                handlePurchase();
-                setShowPurchaseConfirm(false);
-                setPaymentMethod("");
-              }}
-              disabled={!paymentMethod}
-            >
-              Confirm Purchase
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              className={`w-20 ml-2 border rounded-md ${quantityError ? 'border-red-500' : ''}`}
+              min="1"
+              max={item.product.quantity}
+            />
+          </p>
+          {quantityError && (
+          <p className="text-red-500 text-sm mt-1">
+            Unavailable amount, max is: {item.product.quantity}
+          </p>
+        )}
+          <p className="text-xl">
+            Price: ${(item.product.price * item.quantity).toFixed(2)}
+          </p>
+        </div>
+      ))}
+    </div>
+
+    {/* Payment & Delivery Header */}
+    <div className="my-4">
+      <h2 className="text-2xl font-bold">Payment & Delivery</h2>
+
+      {/* Delivery Date Picker */}
+      <div className="my-4">
+        <label htmlFor="deliveryDate" className="block text-lg font-medium">Delivery Date</label>
+        <input
+          type="date"
+          id="deliveryDate"
+          value={deliveryDate}
+          onChange={(e) => setDeliveryDate(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+        />
+      </div>
+
+      {/* Delivery Time Selector */}
+      <div className="my-4">
+        <label htmlFor="deliveryTime" className="block text-lg font-medium">Delivery Time</label>
+        <Select value={deliveryTime} onValueChange={setDeliveryTime}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select delivery time" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="morning">Morning (8 AM - 12 PM)</SelectItem>
+            <SelectItem value="midday">Midday (12 PM - 3 PM)</SelectItem>
+            <SelectItem value="afternoon">Afternoon (3 PM - 6 PM)</SelectItem>
+            <SelectItem value="night">Night (6 PM - 9 PM)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Delivery Type Selector */}
+      <div className="my-4">
+        <label htmlFor="deliveryType" className="block text-lg font-medium">Delivery Type</label>
+        <Select value={deliveryType} onValueChange={setDeliveryType}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select delivery type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Standard">Standard Shipping (5-7 days) - $2.99</SelectItem>
+            <SelectItem value="Express">Express Shipping (2-3 days) - $4.99</SelectItem>
+            <SelectItem value="Next-Same">Next/Same Day Shipping - $6.99</SelectItem>
+            <SelectItem value="International">International Shipping - $14.99</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Payment Method Selector */}
+      <div className="my-4">
+        <label htmlFor="paymentMethod" className="block text-lg font-medium">Payment Method</label>
+        <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select payment method" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="credit_card">Credit Card</SelectItem>
+            <SelectItem value="debit_card">Debit Card</SelectItem>
+            <SelectItem value="cash_on_delivery">Cash on Delivery</SelectItem>
+            <SelectItem value="wallet">Wallet</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    {/* Address Details Header */}
+    <div className="my-4">
+      <h2 className="text-2xl font-bold">Address Details</h2>
+
+      {/* Street Name */}
+      <div className="my-4">
+        <label htmlFor="streetName" className="block text-lg font-medium">Street Name</label>
+        <input
+          type="text"
+          id="streetName"
+          value={streetName}
+          onChange={(e) => setStreetName(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter street name"
+        />
+      </div>
+
+      {/* Street Number */}
+      <div className="my-4">
+        <label htmlFor="streetNumber" className="block text-lg font-medium">Street Number</label>
+        <input
+          type="text"
+          id="streetNumber"
+          value={streetNumber}
+          onChange={(e) => setStreetNumber(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter street number"
+        />
+      </div>
+
+      {/* Floor/Unit */}
+      <div className="my-4">
+        <label htmlFor="floorUnit" className="block text-lg font-medium">Floor/Unit</label>
+        <input
+          type="text"
+          id="floorUnit"
+          value={floorUnit}
+          onChange={(e) => setFloorUnit(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter floor/unit (optional)"
+        />
+      </div>
+
+      {/* City */}
+      <div className="my-4">
+        <label htmlFor="city" className="block text-lg font-medium">City</label>
+        <input
+          type="text"
+          id="city"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter city"
+        />
+      </div>
+
+      {/* State */}
+      <div className="my-4">
+        <label htmlFor="state" className="block text-lg font-medium">State/Province/Region</label>
+        <input
+          type="text"
+          id="state"
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter state"
+        />
+      </div>
+
+      {/* Country */}
+      <div className="my-4">
+        <label htmlFor="country" className="block text-lg font-medium">Country</label>
+        <input
+          type="text"
+          id="country"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter country"
+        />
+      </div>
+
+      {/* Postal Code */}
+      <div className="my-4">
+        <label htmlFor="postalCode" className="block text-lg font-medium">Postal/ZIP Code</label>
+        <input
+          type="text"
+          id="postalCode"
+          value={postalCode}
+          onChange={(e) => setPostalCode(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter postal code (Optional)"
+        />
+      </div>
+
+      {/* Landmark / Additional Info */}
+      <div className="my-4">
+        <label htmlFor="landmark" className="block text-lg font-medium">Landmark/Additional Info</label>
+        <input
+          type="text"
+          id="landmark"
+          value={landmark}
+          onChange={(e) => setLandmark(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter landmark or additional info (optional)"
+        />
+      </div>
+
+      {/* Location Type Selector */}
+      <div className="my-4">
+  <label htmlFor="locationType" className="block text-lg font-medium">Location Type</label>
+  <Select value={locationType} onValueChange={setLocationType}>
+    <SelectTrigger className="w-full">
+      <SelectValue placeholder="Select location type" />
+    </SelectTrigger>
+    <SelectContent style={{ maxHeight: '200px', overflowY: 'auto' }}>
+      <SelectItem value="home">Home</SelectItem>
+      <SelectItem value="work">Work</SelectItem>
+      <SelectItem value="apartment">Apartment/Condo</SelectItem>
+      <SelectItem value="friend_family">Friend/Family's Address</SelectItem>
+      <SelectItem value="po_box">PO Box</SelectItem>
+      <SelectItem value="office">Office/Business</SelectItem>
+      <SelectItem value="pickup_point">Pickup Point</SelectItem>
+      <SelectItem value="vacation">Vacation/Temporary Address</SelectItem>
+      <SelectItem value="school">School/University</SelectItem>
+      <SelectItem value="other">Other</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+
+    </div>
+
+    {/* Total Price Section */}
+    <div className="my-4 border-t border-gray-300 pt-4">
+      <h2 className="text-2xl font-bold">Total Price</h2>
+      <div className="flex flex-col">
+        {cartItems.map((item, index) => (
+          <div key={index} className="flex justify-between mt-2">
+            <p className="text-lg">{item.product.name} x {item.quantity}</p>
+            <p className="text-lg">${(item.product.price * item.quantity).toFixed(2)}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between mt-2">
+        <p className="text-lg">Delivery Cost:</p>
+        <p className="text-lg">${calculateDeliveryCost(deliveryType).toFixed(2)}</p>
+      </div>
+      <div className="flex justify-between mt-4 font-bold">
+        <p className="text-lg">Total Price:</p>
+        <p className="text-lg">
+          ${(
+            cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0) +
+            calculateDeliveryCost(deliveryType)
+          ).toFixed(2)}
+        </p>
+      </div>
+    </div>
+
+    {/* Dialog Footer */}
+    <DialogFooter>
+      <Button
+        variant="outline"
+        onClick={() => {
+          setShowPurchaseConfirm(false);
+          resetFields(); // Reset all input fields
+        }}
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={() => {
+          const fullLocation = "Street Name: " + streetName + 
+          ", Street Number: " + streetNumber + 
+          (floorUnit ? ", Floor/Unit: " + floorUnit : "") + 
+          ", State: " + state + 
+          ", City: " + city + 
+          ", Postal Code: " + postalCode + 
+          (landmark ? ", Landmark: " + landmark : "");
+          
+          setLocation(fullLocation); // Concatenate location details into a single string
+          handlePurchase(); // Function to handle purchase
+          setShowPurchaseConfirm(false); // Close dialog
+          resetFields(); // Reset input fields after purchase
+        }}
+        disabled={
+          !paymentMethod ||
+          !deliveryDate ||
+          !deliveryTime ||
+          !streetName || !streetNumber || !state || !city ||
+          quantityError || // Disable submit if quantity exceeds max
+          !locationType // Location type is required
+        }
+      >
+        Checkout
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
     </div>
   );
 };

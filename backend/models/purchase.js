@@ -39,6 +39,12 @@ const purchaseSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    deliveryType: {
+      type: String,
+      enum: ["Standard", "Express", "Next-Same", "International"],
+      default: "Standard", // Only these values are allowed
+      required: true,
+    },
     status: {
       type: String,
       enum: ["pending", "delivered", "cancelled"], // Only these values are allowed

@@ -149,11 +149,11 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [quantityError, setQuantityError] = useState(false);
   const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("credit");
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [deliveryDate, setDeliveryDate] = useState(null);
-  const [deliveryTime, setDeliveryTime] = useState("12:00-06:00");
+  const [deliveryTime, setDeliveryTime] = useState("");
   const [location, setLocation] = useState("");
-  const [locationType, setLocationType] = useState("Home");
+  const [locationType, setLocationType] = useState("");
   const [actionSuccess, setActionSuccess] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [hasPurchased, setHasPurchased] = useState(false);
@@ -168,7 +168,11 @@ const ProductDetail = () => {
 const [streetNumber, setStreetNumber] = useState("");
 const [floorUnit, setFloorUnit] = useState("");
 const [state, setState] = useState("");
+const [country, setCountry] = useState("");
 const [city, setCity] = useState("");
+const [postalCode, setPostalCode] = useState("");
+const [landmark, setLandmark] = useState("");
+const [deliveryType, setDeliveryType] = useState("");
 const [showMore, setShowMore] = useState(false);
 const characterLimit = 150; // Set your desired character limit
 
@@ -176,6 +180,35 @@ const characterLimit = 150; // Set your desired character limit
     setShowMore(!showMore);
   };
 
+  const resetFields = () => {
+    setPaymentMethod("");
+    setDeliveryDate("");
+    setDeliveryTime("");
+    setDeliveryType("");
+    setStreetName("");
+    setStreetNumber("");
+    setFloorUnit("");
+    setState("");
+    setCity("");
+    setPostalCode("");
+    setLandmark("");
+    setLocationType("");
+  };
+
+  const calculateDeliveryCost = (type) => {
+    switch (type) {
+      case "Standard":
+        return 2.99; // Standard delivery cost
+      case "Express":
+        return 4.99; // Express delivery cost
+      case "Next-Same":
+        return 6.99; // Next/Same Day delivery cost
+      case "International":
+        return 14.99; // International delivery cost
+      default:
+        return 0; // No additional cost
+    }
+  };
 
 
   // Function to toggle between expanded and collapsed states
@@ -422,6 +455,7 @@ const characterLimit = 150; // Set your desired character limit
           paymentMethod: paymentMethod,
           shippingAddress: location,
           locationType: locationType,
+          deliveryType: deliveryType,
         }),
       });
 
@@ -677,8 +711,6 @@ const characterLimit = 150; // Set your desired character limit
   </span>
 </div>
 
-
-
 <span className=" text-blue-500 text-medium font-semibold ml-4">
           {product.reviews ? product.reviews.length : 0} Item Ratings
       </span>
@@ -725,7 +757,6 @@ const characterLimit = 150; // Set your desired character limit
                       </>
                     ) : (
                       <>
-                        <XCircle className="w-6 h-6 mr-2 text-blue-500" />
                         <span className="text-lg font-semibold text-blue-500">
                           Be the first to try it!
                         </span>
@@ -816,19 +847,44 @@ const characterLimit = 150; // Set your desired character limit
     <CardTitle className="text-2xl font-semibold">Delivery Options</CardTitle>
   </CardHeader>
   <CardContent>
-    <div className="space-y-2">
+  <div className="space-y-4">
+    {/* Standard Shipping */}
+    <div>
       <div className="flex justify-between text-xl">
-        <span className="font-semibold text-green-700">Standard shipping</span>
+        <span className="font-semibold text-green-700">Standard Shipping</span>
         <span>€2.99</span>
       </div>
-      <div className="text-sm text-gray-500">2 Nov–8</div>
+      <div className="text-sm text-gray-500">2–8 business days</div>
+    </div>
+
+    {/* Express Shipping */}
+    <div>
       <div className="flex justify-between text-xl">
-        <span className="font-semibold text-green-700">Overnight shipping</span>
+        <span className="font-semibold text-green-700">Express Shipping</span>
+        <span>€4.99</span>
+      </div>
+      <div className="text-sm text-gray-500">1–3 business days</div>
+    </div>
+
+    {/* Next-Day/Same-Day Shipping */}
+    <div>
+      <div className="flex justify-between text-xl">
+        <span className="font-semibold text-green-700">Next-Day/Same-Day Shipping</span>
         <span>€6.99</span>
       </div>
-      <div className="text-sm text-gray-500">18 Nov–23</div>
+      <div className="text-sm text-gray-500">Next day or same day delivery</div>
     </div>
-  </CardContent>
+
+    {/* International Shipping */}
+    <div>
+      <div className="flex justify-between text-xl">
+        <span className="font-semibold text-green-700">International Shipping</span>
+        <span>€14.99</span>
+      </div>
+      <div className="text-sm text-gray-500">7–21 business days (depending on location)</div>
+    </div>
+  </div>
+</CardContent>
 
   {/* Divider */}
   <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
@@ -912,11 +968,11 @@ const characterLimit = 150; // Set your desired character limit
           <div className="ml-4">
             <h3 className="text-2xl font-bold">{product.seller.name}</h3>
             <div className="flex items-center text-sm text-gray-500 mt-1">
-              <span className="font-semibold">95% positive</span>
+              <span className="font-semibold text-xs">95% positive</span>
               <span className="mx-2">|</span>
-              <span className="font-semibold">{product.allRatings.length} ratings</span>
+              <span className="font-semibold text-xs">{product.allRatings.length} ratings</span>
               <span className="mx-2">|</span>
-              <span className="font-semibold">Seller since {product.seller.sellerSince}</span>
+              <span className="font-semibold text-xs">Open since 2021 {product.seller.sellerSince}</span>
             </div>
             <div className="flex items-center mt-2">
               <StarRating rating={product.rating} />
@@ -1141,6 +1197,8 @@ const characterLimit = 150; // Set your desired character limit
         </DialogContent>
       </Dialog>
 
+
+
       <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
   <DialogContent className="max-h-[90vh] overflow-y-auto">
     <DialogHeader>
@@ -1151,13 +1209,10 @@ const characterLimit = 150; // Set your desired character limit
     <div className="my-4">
       <h2 className="text-2xl font-bold">Product Details</h2>
       <div className="my-4">
-        <p className="text-xl font-semibold"> {product.name}</p>
-     
+        <p className="text-xl font-semibold">{product.name}</p>
       </div>
       <div className="my-4">
-        <label htmlFor="quantity" className="block text-lg font-medium">
-          Quantity
-        </label>
+        <label htmlFor="quantity" className="block text-lg font-medium">Quantity</label>
         <input
           type="number"
           id="quantity"
@@ -1171,9 +1226,7 @@ const characterLimit = 150; // Set your desired character limit
               setQuantity(value);
             }
           }}
-          className={`w-full mt-1 px-3 py-2 border rounded-md ${
-            quantityError ? 'border-red-500' : ''
-          }`}
+          className={`w-full mt-1 px-3 py-2 border rounded-md ${quantityError ? 'border-red-500' : ''}`}
           min="1"
           max={product.quantity}
         />
@@ -1182,8 +1235,8 @@ const characterLimit = 150; // Set your desired character limit
             Unavailable amount, max is: {product.quantity}
           </p>
         )}
-           <p className="text-xl ">
-            <br/>
+        <p className="text-xl">
+          <br />
           Price: ${(product.price * quantity).toFixed(2)}
         </p>
       </div>
@@ -1195,9 +1248,7 @@ const characterLimit = 150; // Set your desired character limit
 
       {/* Delivery Date Picker */}
       <div className="my-4">
-        <label htmlFor="deliveryDate" className="block text-lg font-medium">
-          Delivery Date
-        </label>
+        <label htmlFor="deliveryDate" className="block text-lg font-medium">Delivery Date</label>
         <input
           type="date"
           id="deliveryDate"
@@ -1209,9 +1260,7 @@ const characterLimit = 150; // Set your desired character limit
 
       {/* Delivery Time Selector */}
       <div className="my-4">
-        <label htmlFor="deliveryTime" className="block text-lg font-medium">
-          Delivery Time
-        </label>
+        <label htmlFor="deliveryTime" className="block text-lg font-medium">Delivery Time</label>
         <Select value={deliveryTime} onValueChange={setDeliveryTime}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select delivery time" />
@@ -1225,11 +1274,25 @@ const characterLimit = 150; // Set your desired character limit
         </Select>
       </div>
 
+      {/* Delivery Type Selector */}
+      <div className="my-4">
+        <label htmlFor="deliveryType" className="block text-lg font-medium">Delivery Type</label>
+        <Select value={deliveryType} onValueChange={setDeliveryType}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select delivery type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Standard">Standard Shipping (5-7 days) - $2.99</SelectItem>
+            <SelectItem value="Express">Express Shipping (2-3 days) - $4.99</SelectItem>
+            <SelectItem value="Next-Same">Next/Same Day Shipping - $6.99</SelectItem>
+            <SelectItem value="International">International Shipping - $14.99</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Payment Method Selector */}
       <div className="my-4">
-        <label htmlFor="paymentMethod" className="block text-lg font-medium">
-          Payment Method
-        </label>
+        <label htmlFor="paymentMethod" className="block text-lg font-medium">Payment Method</label>
         <Select value={paymentMethod} onValueChange={setPaymentMethod}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select payment method" />
@@ -1247,6 +1310,8 @@ const characterLimit = 150; // Set your desired character limit
     {/* Address Details Header */}
     <div className="my-4">
       <h2 className="text-2xl font-bold">Address Details</h2>
+
+      {/* Street Name */}
       <div className="my-4">
         <label htmlFor="streetName" className="block text-lg font-medium">Street Name</label>
         <input
@@ -1258,6 +1323,8 @@ const characterLimit = 150; // Set your desired character limit
           placeholder="Enter street name"
         />
       </div>
+
+      {/* Street Number */}
       <div className="my-4">
         <label htmlFor="streetNumber" className="block text-lg font-medium">Street Number</label>
         <input
@@ -1269,6 +1336,8 @@ const characterLimit = 150; // Set your desired character limit
           placeholder="Enter street number"
         />
       </div>
+
+      {/* Floor/Unit */}
       <div className="my-4">
         <label htmlFor="floorUnit" className="block text-lg font-medium">Floor/Unit</label>
         <input
@@ -1280,17 +1349,8 @@ const characterLimit = 150; // Set your desired character limit
           placeholder="Enter floor/unit (optional)"
         />
       </div>
-      <div className="my-4">
-        <label htmlFor="state" className="block text-lg font-medium">State</label>
-        <input
-          type="text"
-          id="state"
-          value={state}
-          onChange={(e) => setState(e.target.value)}
-          className="w-full mt-1 px-3 py-2 border rounded-md"
-          placeholder="Enter state"
-        />
-      </div>
+
+      {/* City */}
       <div className="my-4">
         <label htmlFor="city" className="block text-lg font-medium">City</label>
         <input
@@ -1303,26 +1363,100 @@ const characterLimit = 150; // Set your desired character limit
         />
       </div>
 
+      {/* State */}
+      <div className="my-4">
+        <label htmlFor="state" className="block text-lg font-medium">State/Province/Region</label>
+        <input
+          type="text"
+          id="state"
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter state"
+        />
+      </div>
+
+      {/* Country */}
+      <div className="my-4">
+        <label htmlFor="country" className="block text-lg font-medium">Country</label>
+        <input
+          type="text"
+          id="country"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter country"
+        />
+      </div>
+
+      {/* Postal Code */}
+      <div className="my-4">
+        <label htmlFor="postalCode" className="block text-lg font-medium">Postal/ZIP Code</label>
+        <input
+          type="text"
+          id="postalCode"
+          value={postalCode}
+          onChange={(e) => setPostalCode(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter postal code (Optional)"
+        />
+      </div>
+
+      {/* Landmark / Additional Info */}
+      <div className="my-4">
+        <label htmlFor="landmark" className="block text-lg font-medium">Landmark/Additional Info</label>
+        <input
+          type="text"
+          id="landmark"
+          value={landmark}
+          onChange={(e) => setLandmark(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter landmark or additional info (optional)"
+        />
+      </div>
+
+      {/* Location Type Selector */}
       {/* Location Type Selector */}
       <div className="my-4">
-        <label htmlFor="locationType" className="block text-lg font-medium">Location Type</label>
-        <Select value={locationType} onValueChange={setLocationType}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select location type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="home">Home</SelectItem>
-            <SelectItem value="work">Work</SelectItem>
-            <SelectItem value="apartment">Apartment/Condo</SelectItem>
-            <SelectItem value="friend_family">Friend/Family's Address</SelectItem>
-            <SelectItem value="po_box">PO Box</SelectItem>
-            <SelectItem value="office">Office/Business</SelectItem>
-            <SelectItem value="pickup_point">Pickup Point</SelectItem>
-            <SelectItem value="vacation">Vacation/Temporary Address</SelectItem>
-            <SelectItem value="school">School/University</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
+  <label htmlFor="locationType" className="block text-lg font-medium">Location Type</label>
+  <Select value={locationType} onValueChange={setLocationType}>
+    <SelectTrigger className="w-full">
+      <SelectValue placeholder="Select location type" />
+    </SelectTrigger>
+    <SelectContent style={{ maxHeight: '200px', overflowY: 'auto' }}>
+      <SelectItem value="home">Home</SelectItem>
+      <SelectItem value="work">Work</SelectItem>
+      <SelectItem value="apartment">Apartment/Condo</SelectItem>
+      <SelectItem value="friend_family">Friend/Family's Address</SelectItem>
+      <SelectItem value="po_box">PO Box</SelectItem>
+      <SelectItem value="office">Office/Business</SelectItem>
+      <SelectItem value="pickup_point">Pickup Point</SelectItem>
+      <SelectItem value="vacation">Vacation/Temporary Address</SelectItem>
+      <SelectItem value="school">School/University</SelectItem>
+      <SelectItem value="other">Other</SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+
+
+    </div>
+
+    {/* Total Price Section */}
+    <div className="my-4 border-t border-gray-300 pt-4">
+      <h2 className="text-2xl font-bold">Total Price</h2>
+      <div className="flex justify-between mt-2">
+        <p className="text-lg">{product.name} x {quantity}</p>
+        <p className="text-lg">${(product.price * quantity).toFixed(2)}</p>
+      </div>
+      <div className="flex justify-between mt-2">
+        <p className="text-lg">Delivery Cost:</p>
+        <p className="text-lg">${calculateDeliveryCost(deliveryType).toFixed(2)}</p>
+      </div>
+      <div className="flex justify-between mt-4 font-bold">
+        <p className="text-lg">Total Price:</p>
+        <p className="text-lg">
+          ${((product.price * quantity) + calculateDeliveryCost(deliveryType)).toFixed(2)}
+        </p>
       </div>
     </div>
 
@@ -1332,53 +1466,41 @@ const characterLimit = 150; // Set your desired character limit
         variant="outline"
         onClick={() => {
           setShowPurchaseConfirm(false);
-          setPaymentMethod("");
-          setDeliveryDate("");
-          setDeliveryTime("");
-          // Reset location fields
-          setStreetName("");
-          setStreetNumber("");
-          setFloorUnit("");
-          setState("");
-          setCity("");
-          setLocationType(""); // Reset location type
+          resetFields();
         }}
       >
         Cancel
       </Button>
       <Button
         onClick={() => {
-          const fullLocation = `${streetName} ${streetNumber}, ${floorUnit}, ${state}, ${city}`;
+          const fullLocation = "Street Name: " + streetName + 
+          ", Street Number: " + streetNumber + 
+          (floorUnit ? ", Floor/Unit: " + floorUnit : "") + 
+          ", State: " + state + 
+          ", City: " + city + 
+          ", Postal Code: " + postalCode + 
+          (landmark ? ", Landmark: " + landmark : "");
+          
           setLocation(fullLocation); // Concatenate location details into a single string
           handlePurchase();
           setShowPurchaseConfirm(false);
-          setPaymentMethod("");
-          setDeliveryDate("");
-          setDeliveryTime("");
-          // Reset location fields
-          setStreetName("");
-          setStreetNumber("");
-          setFloorUnit("");
-          setState("");
-          setCity("");
-          setLocationType("");
+          resetFields();
         }}
         disabled={
           !paymentMethod ||
           !deliveryDate ||
           !deliveryTime ||
-          !streetName || !streetNumber || !state || !city || // Ensure all location fields are filled
+          !streetName || !streetNumber || !state || !city ||
           !quantity ||
           quantityError || // Disable submit if quantity exceeds max
           !locationType // Location type is required
         }
       >
-        Confirm Purchase
+        Checkout
       </Button>
     </DialogFooter>
   </DialogContent>
 </Dialog>
-
 
 
 

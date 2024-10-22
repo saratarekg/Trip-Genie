@@ -3,12 +3,12 @@ const Purchase = require('../models/purchase'); // Assuming your Activity model 
 const Tourist = require('../models/tourist'); // Assuming your Tourist model is in models/tourist.js
 
 exports.createPurchase = async (req, res) => {
-  const { productId, quantity, paymentMethod, deliveryDate, deliveryTime, shippingAddress,locationType } = req.body;
-  console.log(productId);
-  console.log(quantity);
-  console.log(paymentMethod);
-  console.log(shippingAddress);
+  const { productId, quantity, paymentMethod, deliveryDate, deliveryType, deliveryTime, shippingAddress,locationType } = req.body;
 
+console.log(productId);
+console.log(quantity);
+console.log(paymentMethod);
+console.log(shippingAddress);
 
   try {
     if (!productId || !quantity || !paymentMethod || !shippingAddress) {
@@ -19,17 +19,30 @@ exports.createPurchase = async (req, res) => {
     const tourist = await Tourist.findById(userId);
 
     if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
+      return res.status(400).json({ message: "Tourist not found" });
     }
 
     // Check if the product exists
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(400).json({ message: "Product not found" });
     }
-
+    
+    let delPrice = 0;
+    if(deliveryType==="Standard"){
+      delPrice = 2.99;
+    }
+    else if(deliveryType==="Express"){
+      delPrice = 4.99;
+    }
+    else if(deliveryType==="Next-Same"){
+      delPrice = 6.99;
+    }
+    else {
+      delPrice = 14.99;
+    }
     // Calculate total price
-    const totalPrice = product.price * quantity;
+    const totalPrice = (product.price * quantity) + delPrice;
 
     // Check if the payment method is 'wallet'
     if (paymentMethod === "wallet") {
@@ -76,7 +89,7 @@ exports.createPurchase = async (req, res) => {
     );
 
     console.log(updatedProduct.quantity);
-
+    console.log(newPurchase);
     return res.status(201).json({ message: "Purchase successful", purchase: newPurchase });
   } catch (error) {
     console.error("Error: ", error.message); // Print the error message to the console

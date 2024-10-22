@@ -201,23 +201,44 @@ exports.deleteBooking = async (req, res) => {
 
 exports.getTouristBookings = async (req, res) => {
     try {
+        console.log(1);
         const touristId = res.locals.user_id; // Get the user's ID from response locals
         const bookings = await ActivityBooking.getBookingsForTourist(touristId); // Fetch all bookings for the tourist
+        console.log(2);
 
         // Filter out bookings with activity dates that have passed
-        const upcomingBookings = bookings.filter(booking => {
-            const activityDate = booking.activity.timing; // Assuming timing is a Date object
-            return activityDate > new Date(); // Check if the activity date is in the future
+        const upcomingBookings = bookings.filter(booking => {        
+            // Check if the activity exists
+            const activity = booking.activity;
+            if (!activity) {
+                return false; // Exclude if activity doesn't exist
+            }
+        
+            const activityDate = activity.timing; // Access timing only if activity exists
+        
+            // Check if timing exists and is not a string
+            if (activityDate && typeof activityDate !== 'string') {
+                // Determine if activityDate is a valid Date object or needs conversion
+                const dateToCheck = activityDate instanceof Date ? activityDate : new Date(activityDate);
+                return dateToCheck > new Date(); // Check if the activity date is in the future
+            }
+        
+            // Exclude bookings where timing is a string or undefined
+            return false;
         });
-
+        
+        
         if (!upcomingBookings || upcomingBookings.length === 0) {
             return res.status(200).json([]); // Return an empty array if no upcoming bookings found
         }
+        console.log(3);
 
         res.status(200).json(upcomingBookings); // Return the found upcoming bookings
     } catch (error) {
+        console.error("Error occurred:", error); // Print the error to the console
         res.status(500).json({ message: error.message }); // Handle any errors
     }
+    
 };
 
 
@@ -229,11 +250,26 @@ exports.getTouristAttendedBookings = async (req, res) => {
         const bookings = await ActivityBooking.find({ user: touristId }).populate('activity');
 
         // Filter out bookings with activity dates in the future
-        const pastBookings = bookings.filter(booking => {
-            const activityDate = booking.activity.timing; // Assuming timing is a Date object
-            return activityDate <= new Date(); // Check if the activity date has passed
+        const pastBookings = bookings.filter(booking => {        
+            // Check if the activity exists
+            const activity = booking.activity;
+            if (!activity) {
+                return false; // Exclude if activity doesn't exist
+            }
+        
+            const activityDate = activity.timing; // Access timing only if activity exists
+        
+            // Check if timing exists and is not a string
+            if (activityDate && typeof activityDate !== 'string') {
+                // Determine if activityDate is a valid Date object or needs conversion
+                const dateToCheck = activityDate instanceof Date ? activityDate : new Date(activityDate);
+                return dateToCheck <= new Date(); // Check if the activity date is in the future
+            }
+        
+            // Exclude bookings where timing is a string or undefined
+            return false;
         });
-
+        
         if (!pastBookings || pastBookings.length === 0) {
             return res.status(200).json([]); // Return an empty array if no past bookings found
         }
