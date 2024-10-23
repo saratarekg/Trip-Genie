@@ -174,6 +174,8 @@ const FilterComponent = ({
                 max={maxPrice}
                 step={Math.max(1, Math.ceil(maxPrice / 100))}
                 values={priceRange}
+                middleColor="#2563EB"
+                colorRing="blue"
                 onChange={(values) => setPriceRange(values)}
               />
             </div>

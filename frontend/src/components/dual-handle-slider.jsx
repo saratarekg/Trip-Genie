@@ -1,7 +1,16 @@
 import React from "react";
 import { Range, getTrackBackground } from "react-range";
 
-function DualHandleSliderComponent({ min, max, step, values, onChange, currency = "$" }) {
+function DualHandleSliderComponent({
+  min,
+  max,
+  step,
+  values,
+  onChange,
+  currency = "$",
+  middleColor = "#f97516",
+  colorRing = "orange",
+}) {
   return (
     <div className="w-full px-4 py-8">
       <Range
@@ -19,7 +28,7 @@ function DualHandleSliderComponent({ min, max, step, values, onChange, currency 
               style={{
                 background: getTrackBackground({
                   values,
-                  colors: ["#ccc", "#f97516", "#ccc"],
+                  colors: ["#ccc", middleColor, "#ccc"],
                   min,
                   max,
                 }),
@@ -39,20 +48,22 @@ function DualHandleSliderComponent({ min, max, step, values, onChange, currency 
             <div
               {...restProps} // Spread remaining props without 'key'
               className={`w-5 h-5 transform translate-x-10 bg-white rounded-full shadow flex items-center justify-center ${
-                isDragged ? "ring-2 ring-orange-500" : ""
+                isDragged ? `ring-2 ring-${colorRing}-500` : ""
               }`}
             >
-              <div className="w-2 h-2 bg-orange-500 rounded-full" />
+              <div className={`w-2 h-2 bg-${colorRing}-500 rounded-full`} />
             </div>
           );
         }}
       />
       <div className="flex justify-between mt-2">
         <span className="text-sm font-medium text-gray-700">
-          Min: {currency}{values[0]}
+          Min: {currency}
+          {values[0]}
         </span>
         <span className="text-sm font-medium text-gray-700">
-          Max: {currency}{values[1]}
+          Max: {currency}
+          {values[1]}
         </span>
       </div>
     </div>

@@ -3,7 +3,7 @@ const Seller = require("../models/seller");
 const Tourist = require("../models/tourist");
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, budget, searchBy, asc, myproducts } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
 
   try {
     // Debugging: Log incoming query parameters
@@ -17,11 +17,11 @@ const getAllProducts = async (req, res) => {
     }
 
     // Apply price range filter if provided
-    if (minPrice || budget) {
+    if (minPrice || maxPrice) {
       query.price = {};
-      if (minPrice) query.price.$gte = parseFloat(minPrice); // Apply minPrice if given
-      if (budget) query.price.$lte = parseFloat(budget); // Apply budget if given
     }
+    if (minPrice) query.price.$gte = parseFloat(minPrice); // Apply minPrice if given
+    if (maxPrice) query.price.$lte = parseFloat(maxPrice); // Apply maxPrice if given}
 
     // Filter by the user's products (myProducts)
     if (myproducts) {
@@ -56,7 +56,7 @@ const getAllProducts = async (req, res) => {
 };
 
 const getAllProductsArchive = async (req, res) => {
-  const { minPrice, budget, searchBy, asc, myproducts } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
 
   try {
     // Debugging: Log incoming query parameters
@@ -70,10 +70,10 @@ const getAllProductsArchive = async (req, res) => {
     }
 
     // Apply price range filter if provided
-    if (minPrice || budget) {
+    if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = parseFloat(minPrice); // Apply minPrice if given
-      if (budget) query.price.$lte = parseFloat(budget); // Apply budget if given
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice); // Apply maxPrice if given
     }
 
     // Filter by the user's products (myProducts)

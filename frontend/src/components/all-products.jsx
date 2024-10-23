@@ -44,10 +44,11 @@ const ProductCard = ({ product, onSelect }) => (
     <CardContent>
       <CardTitle>{product.name}</CardTitle>
       <CardDescription className="mt-2">
-      {product.description.length > 150
-        ? `${product.description.slice(0, 150)}...`
-        : product.description}
-    </CardDescription>    </CardContent>
+        {product.description.length > 150
+          ? `${product.description.slice(0, 150)}...`
+          : product.description}
+      </CardDescription>{" "}
+    </CardContent>
     <CardFooter className="flex justify-between items-center">
       <span className="text-lg font-bold text-blue-600">${product.price}</span>
       <div className="flex items-center">{renderStars(product.rating)}</div>
@@ -67,6 +68,8 @@ export function AllProducts() {
   const tripsPerPage = 6;
   const [isLoading, setIsLoading] = useState(true);
   const [myProducts, setMyProducts] = useState(false);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [maxPrice, setMaxPrice] = useState(1000);
 
   const navigate = useNavigate();
 
@@ -111,6 +114,12 @@ export function AllProducts() {
       setIsLoading(true);
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/products`);
+
+      if (priceRange[0] !== 0 || priceRange[1] !== maxPrice) {
+        url.searchParams.append("minPrice", priceRange[0].toString());
+        url.searchParams.append("maxPrice", priceRange[1].toString());
+      }
+
 
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
@@ -260,8 +269,9 @@ export function AllProducts() {
                 clearFilters={clearFilters}
                 myProducts={myProducts}
                 handlemyProducts={handleMyProducts}
-                price={price}
-                setPrice={setPrice}
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                maxPrice={maxPrice}
                 searchProducts={searchProducts}
                 role={getUserRole()}
               />
