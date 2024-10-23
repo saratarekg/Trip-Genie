@@ -1,15 +1,5 @@
 /* Basic Reset and Font Settings */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 300;
-    background: #eee;
-}
+
 
 /* Modal and SVG styles */
 .modal-content {
