@@ -109,8 +109,10 @@ router.put("/archiveproducts/:id", productController.archiveProduct);
 router.delete("/products/:id", productController.deleteProduct);
 
 router.get("/complaints", complaintsController.getAllComplaints);
-
 router.get("/complaint/:id", complaintsController.getComplaintDetails);
+router.post("/complaint/:id/reply", complaintsController.replyToComplaint);
+router.put("/complaint/:id/status", complaintsController.markComplaintStatus);
+
 
 router.put("/itineraries/:id", itineraryController.flagItinerary);
 router.get("/itineraries", itineraryController.getAllItinerariesAdmin);
