@@ -7,16 +7,20 @@ const purchaseSchema = new mongoose.Schema(
       ref: "Tourist", // Reference to the Tourist model (you will need to define this model)
       required: true,
     },
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product", // Reference to the Product model
-      required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1, // At least 1 product should be purchased
-    },
+    products: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product", // Reference to the Product model
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1, // At least 1 product should be purchased
+        },
+      }
+    ],
     totalPrice: {
       type: Number,
       required: true,

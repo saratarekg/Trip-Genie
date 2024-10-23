@@ -74,6 +74,7 @@ const WishlistPage = () => {
         throw new Error("Failed to add item to cart");
       }
       setActionSuccess("Item added to cart successfully!");
+      fetchWishlistItems();
     } catch (error) {
       setActionError("Error adding item to cart. Please try again.");
     }
@@ -92,7 +93,7 @@ const WishlistPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-20">
+    <div>
       <h1 className="text-2xl font-bold mb-4">My Wishlist</h1>
       {wishlistItems.length === 0 ? (
         <p className="text-center text-gray-500">Your wishlist is empty.</p>

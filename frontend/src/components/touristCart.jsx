@@ -61,6 +61,15 @@ const ShoppingCart = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    if (allPurchasesSuccessful) {
+    emptyCart();
+      
+    } else {
+      console.error('Failed to complete purchase for some items.');
+    }
+  }, [allPurchasesSuccessful]);
+
   const calculateDeliveryCost = (type) => {
     switch (type) {
       case "Standard":
@@ -100,6 +109,31 @@ const ShoppingCart = () => {
       }
     } catch (error) {
       console.error('Error fetching cart items:', error);
+    }
+  };
+
+  const emptyCart = async () => {
+    try {
+      setCartItems([]);
+      setShowPurchaseConfirm(false);
+      setPaymentMethod('');
+
+
+      const token = Cookies.get("jwt");
+      const emptyCartResponse = await fetch("http://localhost:4000/tourist/empty/cart", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (emptyCartResponse.ok) {
+        console.log('Cart emptied successfully.');
+      } else {
+        console.error('Failed to empty the cart.');
+      }
+    } catch (error) {
+      console.error('Error emptying cart items:', error);
     }
   };
 
@@ -153,73 +187,57 @@ const ShoppingCart = () => {
     try {
       const token = Cookies.get("jwt");
   
-      // Loop through each item in the cart
-      for (const item of cartItems) {
-        // Calculate total price for each item
-        const totalPriceForItem = item.quantity * item.product.price;
-        console.log(item.product.name);
-        // Make a POST request for each individual item purchase
-        const response = await fetch("http://localhost:4000/tourist/purchase", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            productId: item.product._id,  // The ID of the product
-            quantity: item.quantity,      // Quantity of this product
-            totalPrice: totalPriceForItem, // Total price for this specific item
-            paymentMethod: paymentMethod,
-            shippingAddress: location,
-            locationType: locationType,
-            deliveryType: deliveryType,         // Payment method selected by the user
-          }),
-        });
+      // Construct an array of products with their ids and quantities
+      const products = cartItems.map((item) => ({
+        product: item.product._id, // Product ID
+        quantity: item.quantity,     // Quantity of this product
+      }));
   
-        // Check if the response is OK for each item
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error(`Failed to purchase item: ${item.product.name}`);
-          setActionError(errorData.message);
-          setAllPurchasesSuccessful(false);
-          setAllPurchasesSuccessfulPopup(false);
-
-          break; // Exit the loop if any purchase fails
-        }
+      // Calculate the total amount for all items in the cart
+      const totalAmount = cartItems.reduce(
+        (total, item) => total + item.quantity * item.product.price,
+        0
+      );
+  
+      // Make a single POST request for purchasing all items in the cart
+      const response = await fetch("http://localhost:4000/tourist/purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          products,               // Array of products (productId, quantity, totalPrice)
+          totalAmount,            // Total price for the entire purchase
+          paymentMethod: paymentMethod,   // Payment method selected by the user
+          shippingAddress: location,      // Shipping address
+          locationType: locationType,     // Location type (e.g., home, office)
+          deliveryType: deliveryType,  
+          deliveryTime: deliveryTime,
+          deliveryDate: deliveryDate,   // Delivery type selected by the user
+        }),
+      });
+  
+      // Check if the response is OK for the entire purchase
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Purchase failed:', errorData.message);
+        setActionError(errorData.message);
+        setAllPurchasesSuccessful(false);
+        setAllPurchasesSuccessfulPopup(false);
+      } else {
         setAllPurchasesSuccessful(true);
         setAllPurchasesSuccessfulPopup(true);
-
+        console.log("Purchase successful for all items!");
+        // Proceed to clear the cart or any post-purchase actions
       }
   
-      // If all purchases were successful, proceed to clear the cart
-      if (allPurchasesSuccessful) {
-        // Clear the cart items in the local state
-        setCartItems([]);
-        setShowPurchaseConfirm(false);
-        setPaymentMethod('');
-  
-  
-        // Now, make the call to the empty cart API
-        const emptyCartResponse = await fetch("http://localhost:4000/tourist/empty/cart", {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
-        if (emptyCartResponse.ok) {
-          console.log('Cart emptied successfully.');
-        } else {
-          console.error('Failed to empty the cart.');
-        }
-      } else {
-        console.error('Failed to complete purchase for some items.');
-      }
     } catch (error) {
       setActionError(error.message);
       console.error('Error making purchase:', error);
     }
   };
+  
   
 
   const handleProductClick = (productId) => {
@@ -227,7 +245,7 @@ const ShoppingCart = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 pt-20">
+    <div >
       <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
       {cartItems.length === 0 ? (
         <p className="text-center text-gray-500 my-8">No items in cart</p>

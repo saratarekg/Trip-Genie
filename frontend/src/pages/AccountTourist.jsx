@@ -87,7 +87,7 @@ const RedeemPoints = ({ tourist, onRedeemPoints }) => {
       <div className="space-y-2 mb-4">
         <p className="text-sm font-medium">
           Available Wallet Balance:{" "}
-          <span className="text-green-600">{tourist.wallet} EGP</span>
+          <span className="text-green-600">{tourist.wallet.toFixed(2)} EGP</span>
         </p>
         <p className="text-sm font-medium">
           Loyalty Points:{" "}

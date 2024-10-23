@@ -3,17 +3,11 @@ const Purchase = require('../models/purchase'); // Assuming your Activity model 
 const Tourist = require('../models/tourist'); // Assuming your Tourist model is in models/tourist.js
 
 exports.createPurchase = async (req, res) => {
-  const { productId, quantity, paymentMethod, deliveryDate, deliveryType, deliveryTime, shippingAddress,locationType } = req.body;
-
-console.log(productId);
-console.log(quantity);
-console.log(paymentMethod);
-console.log(shippingAddress);
+  const { products, paymentMethod, deliveryDate, deliveryType, deliveryTime, shippingAddress, locationType } = req.body;
 
   try {
-    if (!productId || !quantity || !paymentMethod || !shippingAddress) {
-      console.log("fields");
-
+    // Validate fields
+    if (!products || products.length === 0 || !paymentMethod || !shippingAddress) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -21,32 +15,37 @@ console.log(shippingAddress);
     const tourist = await Tourist.findById(userId);
 
     if (!tourist) {
-      console.log("tou");
       return res.status(400).json({ message: "Tourist not found" });
     }
 
-    // Check if the product exists
-    const product = await Product.findById(productId);
-    if (!product) {
-      console.log("prod");
-      return res.status(400).json({ message: "Product not found" });
+    let totalPrice = 0; // Initialize total price
+
+    // Loop through the products array to calculate the total price
+    for (const item of products) {
+      const { product, quantity } = item; // product now refers to the productId
+
+      // Check if the product exists
+      const productDoc = await Product.findById(product); // Use `product` which is the product ID
+      if (!productDoc) {
+        return res.status(400).json({ message: `Product not found for ID ${product}` });
+      }
+
+      // Calculate the price for this product and add it to the total price
+      totalPrice += productDoc.price * quantity;
     }
-    
+
+    // Add delivery price to the total
     let delPrice = 0;
-    if(deliveryType==="Standard"){
+    if (deliveryType === "Standard") {
       delPrice = 2.99;
-    }
-    else if(deliveryType==="Express"){
+    } else if (deliveryType === "Express") {
       delPrice = 4.99;
-    }
-    else if(deliveryType==="Next-Same"){
+    } else if (deliveryType === "Next-Same") {
       delPrice = 6.99;
+    } else {
+      delPrice = 14.99; // International delivery
     }
-    else {
-      delPrice = 14.99;
-    }
-    // Calculate total price
-    const totalPrice = (product.price * quantity) + delPrice;
+    totalPrice += delPrice;
 
     // Check if the payment method is 'wallet'
     if (paymentMethod === "wallet") {
@@ -55,47 +54,50 @@ console.log(shippingAddress);
         return res.status(400).json({ message: "Insufficient funds in wallet" });
       }
 
-      // Use findByIdAndUpdate to subtract the total price from the user's wallet
+      // Deduct the total price from the tourist's wallet
       await Tourist.findByIdAndUpdate(
         userId,
-        { $inc: { wallet: -totalPrice } }, // Decrease the wallet balance by the total price
-        { new: true, runValidators: true } // Return the updated tourist document
+        { $inc: { wallet: -totalPrice } },
+        { new: true, runValidators: true }
       );
     }
 
-    // Create a new purchase
+    // Create a new purchase with an array of products
     const newPurchase = new Purchase({
       tourist: userId,
-      product: productId,
-      quantity,
+      products, // Array of { product: productId, quantity }
       totalPrice,
-      paymentMethod, // Assuming payment is processed
-      deliveryDate,  // Optional delivery date
-      deliveryTime,  // Optional delivery time
-      shippingAddress, // Required shipping address
+      paymentMethod,
+      deliveryDate,
+      deliveryTime,
+      shippingAddress,
+      deliveryType,
+      locationType,
       status: "pending",
-      locationType // Default status is 'pending'
     });
 
     // Save the purchase to the database
     await newPurchase.save();
 
-    // Update the product's quantity (reduce it based on the purchase)
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId, // Assuming you have the product ID
-      {
-        $inc: {
-          quantity: -quantity, // Decrease the quantity by the specified amount
-          sales: quantity      // Increase the sales by the specified amount
-        }
-      },
-      { new: true, runValidators: true } // Return the updated document and run validation
-    );
+    // Update the product's stock quantity and sales
+    for (const item of products) {
+      const { product, quantity } = item; // Using `product` (the productId)
+      await Product.findByIdAndUpdate(
+        product,
+        {
+          $inc: {
+            quantity: -quantity, // Decrease product quantity
+            sales: quantity,     // Increase product sales
+          },
+        },
+        { new: true, runValidators: true }
+      );
+    }
 
-    return res.status(201).json({ message: "Purchase successful"});
+    return res.status(201).json({ message: "Purchase successful" });
   } catch (error) {
-    console.error("Error: ", error.message); // Print the error message to the console
-    return res.status(500).json({ error: error.message }); // Return the error message in the response
+    console.error("Error: ", error.message);
+    return res.status(500).json({ error: error.message });
   }
 };
 

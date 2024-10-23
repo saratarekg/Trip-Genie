@@ -46,6 +46,7 @@ import {
   ShoppingCart,
   Wallet,
   MessageSquare,
+  XCircleIcon,
 } from "lucide-react";
 import {
   Select,
@@ -137,7 +138,6 @@ const ImageGallery = ({ pictures }) => {
     </div>
   );
 };
-
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -448,6 +448,11 @@ const characterLimit = 150; // Set your desired character limit
   const handlePurchase = async () => {
     try {
       const token = Cookies.get("jwt");
+      
+      // Calculate the total amount for this purchase
+      const totalAmount = product.price * quantity;
+  
+      // Make the POST request to purchase the single product
       const response = await fetch("http://localhost:4000/tourist/purchase", {
         method: "POST",
         headers: {
@@ -455,16 +460,23 @@ const characterLimit = 150; // Set your desired character limit
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          productId: product._id,
-          quantity: quantity,
-          totalAmount: product.price * quantity,
-          paymentMethod: paymentMethod,
-          shippingAddress: location,
-          locationType: locationType,
-          deliveryType: deliveryType,
+          products: [
+            {
+              product: product._id, // The ID of the single product
+              quantity: quantity,     // Quantity being purchased
+            }
+          ],              // Array of products (productId, quantity, totalPrice)
+          totalAmount,            // Total price for the entire purchase
+          paymentMethod: paymentMethod,   // Payment method selected by the user
+          shippingAddress: location,      // Shipping address
+          locationType: locationType,     // Location type (e.g., home, office)
+          deliveryType: deliveryType,  
+          deliveryTime: deliveryTime,
+          deliveryDate: deliveryDate,              // Delivery type (e.g., Standard, Express)
         }),
       });
-
+  
+      // Check for errors in the response
       if (!response.ok) {
         if (response.status === 400) {
           const errorData = await response.json();
@@ -475,16 +487,19 @@ const characterLimit = 150; // Set your desired character limit
           throw new Error("Failed to complete purchase");
         }
       }
-
+  
+      // Handle successful purchase
       setActionSuccess("Purchase completed successfully!");
       setShowPurchaseConfirm(false);
       setHasPurchased(true);
+  
     } catch (error) {
+      // Handle any error during the purchase process
       setActionError("Error completing purchase. Please try again.");
       setShowPurchaseConfirm(false);
     }
   };
-
+  
   const handleRatingSubmit = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -753,22 +768,42 @@ const characterLimit = 150; // Set your desired character limit
                   )}
                  </span>
                   </div>
-                  <div className="flex items-center">
-                    {product.sales > 0 ? (
-                      <>
-                        {/* <CheckCircle className="w-6 h-6 mr-2 text-green-500" />
-                        <span className="text-lg font-semibold text-green-500">
-                          {product.sales} sold
-                        </span> */}
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-lg font-semibold text-blue-500">
-                          Be the first to try it!
-                        </span>
-                      </>
-                    )}
-                  </div>
+                    <div className="flex items-center">
+                      {userRole === "tourist" ? (
+                        product.sales > 0 ? (
+                          <>
+                          </>
+                        ) : (
+                          <>
+                            {/* Tourist sees this if there are no sales */}
+                            <span className="text-lg font-semibold text-blue-500">
+                              Be the first to try it!
+                            </span>
+                          </>
+                        )
+                      ) : userRole === "admin" || userRole === "seller" ? (
+                        <>
+                          {product.sales > 0 ? (
+                            <>
+                              {/* Admin or seller sees this if there are sales */}
+                              <CheckCircle className="w-6 h-6 mr-2 text-green-500" />
+                              <span className="text-lg font-semibold text-green-500">
+                                {product.sales} sold
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              {/* Admin or seller sees this if there are no sales */}
+                              <XCircleIcon className="w-6 h-6 mr-2 text-red-500" />
+                              <span className="text-lg font-semibold text-red-500">
+                                No sales yet
+                              </span>
+                            </>
+                          )}
+                        </>
+                      ) : null}
+                    </div>
+
                   {/* {product.sales > 50 && (
                     <p className="text-green-600">Popular product</p>
                   )} */}
