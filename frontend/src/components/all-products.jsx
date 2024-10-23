@@ -137,13 +137,24 @@ export function AllProducts() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
+
+      if (maxPrice === priceRange[1]) {
       fetchProducts({ searchBy: searchTerm
         , sort: sortBy
         , asc: sortOrder
         , myproducts: myProducts
         , minPrice: priceRange[0]
-        , maxPrice: priceRange[1]
        });
+      }
+      else{
+        fetchProducts({ searchBy: searchTerm
+          , sort: sortBy
+          , asc: sortOrder
+          , myproducts: myProducts
+          , minPrice: priceRange[0]
+          , maxPrice: priceRange[1]
+         });
+      }
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
