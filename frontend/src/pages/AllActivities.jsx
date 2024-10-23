@@ -87,6 +87,7 @@ const ActivityCard = ({ activity, onSelect }) => (
 export function AllActivitiesComponent() {
   const [activities, setActivities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSortedByPreference, setIsSortedByPreference] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("");
@@ -172,6 +173,12 @@ export function AllActivitiesComponent() {
   }, []);
 
   useEffect(() => {
+    if (sortBy || searchTerm || filtersVisible) {
+      setIsSortedByPreference(false);
+    }
+  }, [sortBy, searchTerm, filtersVisible]);
+
+  useEffect(() => {
     if (sortBy) {
       searchActivities();
     }
@@ -190,25 +197,46 @@ export function AllActivitiesComponent() {
       setIsLoading(true);
       const token = Cookies.get("jwt");
       const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/activities`);
 
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (role === 'tourist' && !isInitialized) {
+        const preferredActivities = await fetch("http://localhost:4000/tourist/activities-preference", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.json());
+
+        const otherActivities = await fetch("http://localhost:4000/tourist/activities-not-preference", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.json());
+
+        setActivities([...preferredActivities, ...otherActivities]);
+        setIsSortedByPreference(true);
+        setIsInitialized(true);
+      } else {
+        const url = new URL(`http://localhost:4000/${role}/activities`);
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setActivities(data);
       }
-      const data = await response.json();
-      setActivities(data);
 
       // Calculate max price
-      const maxActivityPrice = Math.max(...data.map(activity => activity.price));
+      const maxActivityPrice = Math.max(...activities.map(activity => activity.price));
       const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
+
+      if (roundedMaxPrice > -Infinity){
       setMaxPrice(roundedMaxPrice);
       setInitialPriceRange([0, roundedMaxPrice]);
       setPriceRange([0, roundedMaxPrice]);
+      }
 
       setError(null);
       setCurrentPage(1);
@@ -222,6 +250,7 @@ export function AllActivitiesComponent() {
   };
 
   const searchActivities = async () => {
+    setIsSortedByPreference(false);
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/activities`);
@@ -312,6 +341,12 @@ export function AllActivitiesComponent() {
               <h1 className="text-4xl font-bold text-gray-900 mb-8">
                 All Activities
               </h1>
+
+              {isSortedByPreference && getUserRole() === 'tourist' && (
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                  Sorted based on your preferences
+                </h2>
+              )}
 
               <div className="flex flex-col mb-8">
                 <div className="relative w-full mb-4">
