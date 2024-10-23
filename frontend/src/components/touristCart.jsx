@@ -38,17 +38,19 @@ const ShoppingCart = () => {
 
   const [popupType, setPopupType] = useState('');
   const [popupOpen, setPopupOpen] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
 
-  const openSuccessPopup = () => {
-      setPopupType('success');
-      setPopupOpen(true);
-  };
+  const openSuccessPopup = (message) => {
+    setPopupType('success'); // Set the type to success
+    setPopupOpen(true); // Open the popup
+    setPopupMessage(message); // Set the custom message
+};
 
-  const openErrorPopup = () => {
-      setPopupType('error');
-      setPopupOpen(true);
-  };
-
+const openErrorPopup = (message) => {
+    setPopupType('error'); // Set the type to error
+    setPopupOpen(true); // Open the popup
+    setPopupMessage(message); // Set the custom message
+};
   const closePopup = () => {
       setPopupOpen(false);
   };
@@ -173,6 +175,7 @@ const ShoppingCart = () => {
         });
       if (response.ok) {
         setCartItems(cartItems.filter(item => item.product._id !== productId));
+        openSuccessPopup('Item removed successfully!');
       }
     } catch (error) {
       console.error('Error removing item:', error);
@@ -272,7 +275,7 @@ const ShoppingCart = () => {
   return (
     <div >
         <div className="container p-5">
-            <div className="row text-center">
+            {/* <div className="row text-center">
                 <div className="col-12">
                     <h1>Advanced Animated Bootstrap 5 Popup Success and Error Example</h1>
                     <p>Click the buttons below to see the popups.</p>
@@ -283,10 +286,10 @@ const ShoppingCart = () => {
                         Error Popup
                     </button>
                 </div>
-            </div>
+            </div> */}
 
             {/* Popup Component */}
-            <Popup isOpen={popupOpen} onClose={closePopup} type={popupType} />
+            <Popup isOpen={popupOpen} onClose={closePopup} type={popupType} message={popupMessage}/>
         </div>
       <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
       {cartItems.length === 0 ? (

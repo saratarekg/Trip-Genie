@@ -1,42 +1,88 @@
 /* Basic Reset and Font Settings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+body {
+    font-family: 'Roboto', sans-serif; /* Ensure you have the font included */
+}
 
-/* Modal and SVG styles */
+/* Modal styles */
+.modal {
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    position: fixed; /* Fixed position for overlay */
+    top: 0; /* Top edge */
+    left: 0; /* Left edge */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 1000; /* Ensure modal appears above other content */
+    transition: opacity 0.3s ease; /* Smooth transition */
+}
+
 .modal-content {
     border-radius: 30px;
+    background: #fff; /* Background color for modal */
+    padding: 20px; /* Padding inside modal */
+    max-width: 400px; /* Max width for modal */
+    width: 90%; /* Responsive width */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Box shadow for depth */
 }
+
+/* SVG styles */
 .modal-content svg {
-    width: 100px; 
-    display: block; 
-    margin: 0 auto;
+    width: 100px;
+    display: block;
+    margin: 0 auto; /* Center SVG */
 }
+
 .path {
-    stroke-dasharray: 1000; 
+    stroke-dasharray: 1000;
     stroke-dashoffset: 0;
     stroke-width: 6;
     stroke-miterlimit: 10;
 }
+
 .circle {
     fill: none;
 }
+
 .path.circle {
     animation: dash 0.9s ease-in-out;
 }
+
 .path.line {
-    stroke-dashoffset: 1000; 
+    stroke-dashoffset: 1000;
     animation: dash 0.95s 0.35s ease-in-out forwards;
 }
+
 .path.check {
-    stroke-dashoffset: -100; 
+    stroke-dashoffset: -100;
     animation: dash-check 0.95s 0.35s ease-in-out forwards;
 }
 
+.fade-out {
+    opacity: 0; /* Fade out effect */
+}
+
 @keyframes dash {
-    0% { stroke-dashoffset: 1000; }
-    100% { stroke-dashoffset: 0; }
+    0% {
+        stroke-dashoffset: 1000;
+    }
+    100% {
+        stroke-dashoffset: 0;
+    }
 }
 
 @keyframes dash-check {
-    0% { stroke-dashoffset: -100; }
-    100% { stroke-dashoffset: 900; }
+    0% {
+        stroke-dashoffset: -100;
+    }
+    100% {
+        stroke-dashoffset: 900;
+    }
 }

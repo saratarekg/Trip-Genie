@@ -1,16 +1,32 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import '@/styles/Popup.css'; // Create a CSS file for styling
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-
-const Popup = ({ isOpen, onClose, type }) => {
+const Popup = ({ isOpen, onClose, type, message }) => {
     const isSuccess = type === 'success';
-    
+    const [fadeOut, setFadeOut] = useState(false); // New state for fade out
+
+    useEffect(() => {
+        if (isOpen) {
+            const timer = setTimeout(() => {
+                setFadeOut(true); // Trigger fade out
+                setTimeout(() => {
+                    onClose(); // Close after fading
+                }, 300); // Wait for fade-out duration
+            }, 2000); // Auto-close after 5000ms (5 seconds)
+
+            // Cleanup the timer on component unmount or when isOpen changes
+            return () => {
+                clearTimeout(timer);
+                setFadeOut(false); // Reset fadeOut when closing
+            };
+        }
+    }, [isOpen, onClose]);
+
     return (
         <>
             {isOpen && (
-                <div className="modal fade show" style={{ display: 'block' }} id={`${type}Popup`} tabIndex="-1" role="dialog">
+                <div className={`modal fade show ${fadeOut ? 'fade-out' : ''}`} style={{ display: 'block' }} id={`${type}Popup`} tabIndex="-1" role="dialog">
                     <div className="modal-dialog modal-dialog-centered modal-sm" role="document">
                         <div className="modal-content">
                             <div className="modal-body text-center p-lg-4">
@@ -63,14 +79,11 @@ const Popup = ({ isOpen, onClose, type }) => {
                                     )}
                                 </svg>
                                 <h4 className={isSuccess ? "text-success mt-3" : "text-danger mt-3"}>
-                                    {isSuccess ? 'Oh Yeah!' : 'Invalid email!'}
+                                    {isSuccess ? 'Success!' : 'Error!'}
                                 </h4>
                                 <p className="mt-3">
-                                    {isSuccess ? 'You have successfully registered and logged in.' : 'This email is already registered, please login.'}
+                                    {message} {/* Display the custom message */}
                                 </p>
-                                <button type="button" className={`btn btn-sm mt-3 btn-${isSuccess ? 'success' : 'danger'}`} onClick={onClose}>
-                                    Ok
-                                </button>
                             </div>
                         </div>
                     </div>
