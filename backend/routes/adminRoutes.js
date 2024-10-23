@@ -11,14 +11,14 @@ const productController = require("../controllers/productController");
 const historicalTagController = require("../controllers/historicalTagController");
 const complaintsController = require("../controllers/complaintsController.js");
 const itineraryController = require("../controllers/itineraryController.js");
-const currencyController = require('../controllers/currencyController');
+const currencyController = require("../controllers/currencyController");
 const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const router = express.Router();
 
-router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/getCurrency/:id", currencyController.getCurrencyById);
 
 router.post("/admins", adminController.addAdmin);
 router.post("/governors", tourismGovernorController.addTourismGovernor);
@@ -112,7 +112,6 @@ router.get("/complaints", complaintsController.getAllComplaints);
 router.get("/complaint/:id", complaintsController.getComplaintDetails);
 router.post("/complaint/:id/reply", complaintsController.replyToComplaint);
 router.put("/complaint/:id/status", complaintsController.markComplaintStatus);
-
 
 router.put("/itineraries/:id", itineraryController.flagItinerary);
 router.get("/itineraries", itineraryController.getAllItinerariesAdmin);
