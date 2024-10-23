@@ -104,6 +104,127 @@ const getAllItineraries = async (req, res) => {
   }
 };
 
+const getItinerariesByPreference = async (req, res) => {
+  try {
+    // Fetch tourist preferences
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const {
+      budget,
+      price,
+      tourType,
+      tourLanguages,
+      historicalPlacePeriod,
+      historicalPlaceType,
+    } = tourist.preference;
+
+    // Apply filters based on preferences and query params
+    const {
+      upperDate,
+      lowerDate,
+      sort,
+      asc,
+      myItineraries,
+    } = req.query;
+
+    console.log(budget, price, upperDate, lowerDate, tourType, tourLanguages);
+    const filterResult = await Itinerary.filter(
+      budget, //max
+      price, //min
+      upperDate,
+      lowerDate,
+      tourType,
+      tourLanguages,
+    );
+
+    const searchResult = await Itinerary.findByFields(tourist.searchBy);
+
+    const searchResultIds = searchResult.map((itinerary) => itinerary._id);
+    const filterResultIds = filterResult.map((itinerary) => itinerary._id);
+
+    const query = [];
+    query.push({ _id: { $in: searchResultIds } });
+    query.push({ _id: { $in: filterResultIds } });
+
+    // Only show future itineraries if 'myItineraries' is not specified
+      query.push({
+        availableDates: {
+          $elemMatch: {
+            date: { $gte: new Date() },
+          },
+        },
+      });
+    
+
+    let itinerariesQuery = Itinerary.find({
+      $and: query,
+    })
+      .populate("tourGuide")
+      .populate({ path: "activities", populate: { path: "tags category" } });
+
+    // Apply sorting
+    if (sort) {
+      const sortBy = {};
+      sortBy[sort] = parseInt(asc); // Ascending (1) or Descending (-1)
+      itinerariesQuery = itinerariesQuery.sort(sortBy);
+    } else {
+      itinerariesQuery = itinerariesQuery.sort({ createdAt: -1 });
+    }
+
+    const itineraries = await itinerariesQuery;
+
+    res.status(200).json(itineraries);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const theHolyAntiFilter = async (req, res) => {
+  try {
+    // First, call getAllItineraries to get all itineraries
+    const allItineraries = await new Promise((resolve, reject) => {
+      getAllItineraries(req, {
+        status: () => ({
+          json: resolve,
+        }),
+        locals: res.locals,
+      });
+    });
+
+    // Then, call getItinerariesByPreference to get itineraries based on user preferences
+    const preferredItineraries = await new Promise((resolve, reject) => {
+      getItinerariesByPreference(req, {
+        status: () => ({
+          json: resolve,
+        }),
+        locals: res.locals,
+      });
+    });
+
+    // Map itinerary IDs for comparison
+    const allItineraryIds = new Set(allItineraries.map((itinerary) => itinerary._id.toString()));
+    const preferredItineraryIds = new Set(preferredItineraries.map((itinerary) => itinerary._id.toString()));
+
+    // Find the set difference (itineraries in allItineraries but not in preferredItineraries)
+    const differenceIds = [...allItineraryIds].filter(id => !preferredItineraryIds.has(id));
+
+    // Filter out the itineraries that match the differenceIds from allItineraries
+    const itinerariesDifference = allItineraries.filter((itinerary) =>
+      differenceIds.includes(itinerary._id.toString())
+    );
+
+    // Return the set difference
+    res.status(200).json(itinerariesDifference);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 const getAllItinerariesAdmin = async (req, res) => {
   try {
     const {
@@ -527,5 +648,7 @@ module.exports = {
   addCommentToItinerary,
   rateItinerary,
   flagItinerary,
-  toggleActivationStatus
+  toggleActivationStatus, 
+  getItinerariesByPreference,
+  theHolyAntiFilter,
 };

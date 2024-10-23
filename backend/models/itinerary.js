@@ -192,12 +192,14 @@ itinerarySchema.statics.filter = async function (
     const languageArray = Array.isArray(languages)
       ? languages
       : languages.split(","); // Ensure it's an array
+    console.log(languages);  
     query.push({ language: { $in: languageArray } });
   }
   if (isBooked !== undefined && isBooked !== null) {
     query.push({ isBooked: isBooked });
   }
 
+  console.log("hello");
   console.log(query);
   if (query.length === 0)
     itineraries = await this.find()

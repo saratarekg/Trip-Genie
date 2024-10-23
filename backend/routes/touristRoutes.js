@@ -40,6 +40,8 @@ router.get("/tour-guide/:id", tourguideController.getTourGuideByID);
 
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
+router.get("/itineraries-preference", itineraryController.getItinerariesByPreference);
+router.get("/itineraries-not-preference", itineraryController.theHolyAntiFilter);
 
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);
