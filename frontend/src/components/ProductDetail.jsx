@@ -87,8 +87,9 @@ const ImageGallery = ({ pictures }) => {
 
   return (
     <div className="flex gap-4 h-full">
+      {/* Thumbnail Column */}
       <div className="w-1/5 relative">
-        <div className="h-full overflow-hidden">
+        <div className="h-full overflow-hidden relative">
           {pictures.length > 5 && (
             <button
               onClick={handlePrev}
@@ -105,7 +106,7 @@ const ImageGallery = ({ pictures }) => {
                 key={index}
                 src={pic}
                 alt={`Product image ${startIndex + index + 1}`}
-                className="w-full h-[18%] object-cover rounded-lg cursor-pointer"
+                className="w-full h-[20%] object-cover rounded-lg cursor-pointer"
                 onClick={() => setMainImage(pic)}
               />
             ))}
@@ -122,16 +123,21 @@ const ImageGallery = ({ pictures }) => {
           )}
         </div>
       </div>
-      <div className="w-4/5">
-        <img
-          src={mainImage}
-          alt="Main product image"
-          className="w-full h-full object-cover rounded-lg"
-        />
+
+      {/* Main Image Column */}
+      <div className="w-4/5 h-full">
+        <div className="h-full flex items-center justify-center">
+          <img
+            src={mainImage}
+            alt="Main product image"
+            className="w-full h-full object-contain rounded-lg"
+          />
+        </div>
       </div>
     </div>
   );
 };
+
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -268,8 +274,8 @@ const characterLimit = 150; // Set your desired character limit
         if (purchasesResponse.ok) {
           const purchasesData = await purchasesResponse.json();
           setHasPurchased(
-            purchasesData.some((purchase) => purchase.product._id === id)
-          );
+            purchasesData.some((purchase) => purchase.product && purchase.product._id === id)
+          );          
         }
       } catch (err) {
         setError("Error fetching product details. Please try again later.");

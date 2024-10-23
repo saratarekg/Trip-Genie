@@ -356,7 +356,6 @@ const getCart = async (req, res) => {
     if (!tourist) {
       return res.status(400).json({ message: "Tourist not found" });
     }
-    console.log(tourist.cart);
     // Return the cart data
     res.status(200).json(tourist.cart);
   } catch (error) {
@@ -411,7 +410,7 @@ const removeItemFromCart = async (req, res) => {
 };
 
 const emptyCart = async (req, res) => {
-  console.log("hiii");
+  console.log("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
   const userId = res.locals.user_id; // Get the user ID from the logged-in user
 
   try {
@@ -421,10 +420,12 @@ const emptyCart = async (req, res) => {
       { $set: { cart: [] } }, // Set the cart to an empty array
       { new: true } // Return the updated document
     );
+    console.log("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
+    console.log("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
 
     res.status(200).json({ message: "Cart emptied" });
   } catch (error) {

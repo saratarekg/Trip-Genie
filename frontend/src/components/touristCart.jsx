@@ -27,13 +27,15 @@ const ShoppingCart = () => {
   const [locationType, setLocationType] = useState("");
   const [quantityError, setQuantityError] = useState(false);
   const [allPurchasesSuccessful, setAllPurchasesSuccessful] = useState(false);
+  const [allPurchasesSuccessfulPopup, setAllPurchasesSuccessfulPopup] = useState(false);
+
   const [actionError, setActionError] = useState(null);
 
   const isCheckoutDisabled = cartItems.some(item => 
     item.product.quantity === 0 || item.quantity > item.product.quantity
   )
 
-  const blueButtonStyle = "bg-blue-500 hover:bg-blue-600 text-white disabled:bg-blue-300"
+  const blueButtonStyle = " bg-blue-500 hover:bg-blue-600 text-white disabled:bg-blue-300"
 
 
   const resetFields = () => {
@@ -49,7 +51,15 @@ const ShoppingCart = () => {
     setPostalCode("");
     setLandmark("");
     setLocationType("");
+    setLocation("");
   };
+
+  useEffect(() => {
+    if (location) {
+      console.log("Location updated:", location); // Log to verify state is set
+      handlePurchase();
+    }
+  }, [location]);
 
   const calculateDeliveryCost = (type) => {
     switch (type) {
@@ -147,7 +157,7 @@ const ShoppingCart = () => {
       for (const item of cartItems) {
         // Calculate total price for each item
         const totalPriceForItem = item.quantity * item.product.price;
-        console.log(location);
+        console.log(item.product.name);
         // Make a POST request for each individual item purchase
         const response = await fetch("http://localhost:4000/tourist/purchase", {
           method: "POST",
@@ -168,13 +178,17 @@ const ShoppingCart = () => {
   
         // Check if the response is OK for each item
         if (!response.ok) {
+          const errorData = await response.json();
           console.error(`Failed to purchase item: ${item.product.name}`);
-          setActionError(`Failed to purchase item: ${item.product.name}`);
+          setActionError(errorData.message);
           setAllPurchasesSuccessful(false);
-          
+          setAllPurchasesSuccessfulPopup(false);
+
           break; // Exit the loop if any purchase fails
         }
         setAllPurchasesSuccessful(true);
+        setAllPurchasesSuccessfulPopup(true);
+
       }
   
       // If all purchases were successful, proceed to clear the cart
@@ -199,7 +213,6 @@ const ShoppingCart = () => {
           console.error('Failed to empty the cart.');
         }
       } else {
-        setActionError("Failed to complete purchase for some items.");
         console.error('Failed to complete purchase for some items.');
       }
     } catch (error) {
@@ -609,16 +622,18 @@ const ShoppingCart = () => {
           ", Postal Code: " + postalCode + 
           (landmark ? ", Landmark: " + landmark : "");
           
-          setLocation(fullLocation); // Concatenate location details into a single string
-          handlePurchase(); // Function to handle purchase
+          setLocation(fullLocation); 
+ // Function to handle purchase
+          setTimeout(() => {
+            resetFields(); // Reset input fields after a short delay
+          }, 100);
           setShowPurchaseConfirm(false); // Close dialog
-          resetFields(); // Reset input fields after purchase
         }}
         disabled={
           !paymentMethod ||
           !deliveryDate ||
           !deliveryTime ||
-          !streetName || !streetNumber || !state || !city ||
+          !streetName || !streetNumber || !state || !city  ||
           quantityError || // Disable submit if quantity exceeds max
           !locationType // Location type is required
         }
@@ -630,8 +645,8 @@ const ShoppingCart = () => {
 </Dialog>
 
 <Dialog
-        open={allPurchasesSuccessful}
-        onOpenChange={() => setAllPurchasesSuccessful(false)}
+        open={allPurchasesSuccessfulPopup}
+        onOpenChange={() => setAllPurchasesSuccessfulPopup(false)}
       >
         <DialogContent>
           <DialogHeader>
@@ -639,10 +654,10 @@ const ShoppingCart = () => {
               <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
               Success
             </DialogTitle>
-            <DialogDescription>{allPurchasesSuccessful}</DialogDescription>
+            <DialogDescription>Purchase completed successfully!</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="default" onClick={() => setAllPurchasesSuccessful(false)}>
+            <Button variant="default" onClick={() => setAllPurchasesSuccessfulPopup(false)}>
               Close
             </Button>
           </DialogFooter>

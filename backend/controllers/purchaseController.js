@@ -92,9 +92,7 @@ console.log(shippingAddress);
       { new: true, runValidators: true } // Return the updated document and run validation
     );
 
-    console.log(updatedProduct.quantity);
-    console.log(newPurchase);
-    return res.status(201).json({ message: "Purchase successful", purchase: newPurchase });
+    return res.status(201).json({ message: "Purchase successful"});
   } catch (error) {
     console.error("Error: ", error.message); // Print the error message to the console
     return res.status(500).json({ error: error.message }); // Return the error message in the response
