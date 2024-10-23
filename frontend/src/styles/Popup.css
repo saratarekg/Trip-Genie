@@ -1,0 +1,52 @@
+/* Basic Reset and Font Settings */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    background: #eee;
+}
+
+/* Modal and SVG styles */
+.modal-content {
+    border-radius: 30px;
+}
+.modal-content svg {
+    width: 100px; 
+    display: block; 
+    margin: 0 auto;
+}
+.path {
+    stroke-dasharray: 1000; 
+    stroke-dashoffset: 0;
+    stroke-width: 6;
+    stroke-miterlimit: 10;
+}
+.circle {
+    fill: none;
+}
+.path.circle {
+    animation: dash 0.9s ease-in-out;
+}
+.path.line {
+    stroke-dashoffset: 1000; 
+    animation: dash 0.95s 0.35s ease-in-out forwards;
+}
+.path.check {
+    stroke-dashoffset: -100; 
+    animation: dash-check 0.95s 0.35s ease-in-out forwards;
+}
+
+@keyframes dash {
+    0% { stroke-dashoffset: 1000; }
+    100% { stroke-dashoffset: 0; }
+}
+
+@keyframes dash-check {
+    0% { stroke-dashoffset: -100; }
+    100% { stroke-dashoffset: 900; }
+}

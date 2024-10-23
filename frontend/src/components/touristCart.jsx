@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle, Minus, Plus, Trash2, XCircle } from "lucide-react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Popup from './popup'; // Import your Popup component
+import '@/styles/Popup.css'; // Create a CSS file for styling
+
 
 const ShoppingCart = () => {
   const navigate = useNavigate();
@@ -30,6 +35,24 @@ const ShoppingCart = () => {
   const [allPurchasesSuccessfulPopup, setAllPurchasesSuccessfulPopup] = useState(false);
 
   const [actionError, setActionError] = useState(null);
+
+  const [popupType, setPopupType] = useState('');
+  const [popupOpen, setPopupOpen] = useState(false);
+
+  const openSuccessPopup = () => {
+      setPopupType('success');
+      setPopupOpen(true);
+  };
+
+  const openErrorPopup = () => {
+      setPopupType('error');
+      setPopupOpen(true);
+  };
+
+  const closePopup = () => {
+      setPopupOpen(false);
+  };
+
 
   const isCheckoutDisabled = cartItems.some(item => 
     item.product.quantity === 0 || item.quantity > item.product.quantity
@@ -183,6 +206,8 @@ const ShoppingCart = () => {
     setShowPurchaseConfirm(true);
   };
 
+  
+
   const handlePurchase = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -246,6 +271,23 @@ const ShoppingCart = () => {
 
   return (
     <div >
+        <div className="container p-5">
+            <div className="row text-center">
+                <div className="col-12">
+                    <h1>Advanced Animated Bootstrap 5 Popup Success and Error Example</h1>
+                    <p>Click the buttons below to see the popups.</p>
+                    <button type="button" className="btn btn-success m-1" onClick={openSuccessPopup}>
+                        Success Popup
+                    </button>
+                    <button type="button" className="btn btn-danger m-1" onClick={openErrorPopup}>
+                        Error Popup
+                    </button>
+                </div>
+            </div>
+
+            {/* Popup Component */}
+            <Popup isOpen={popupOpen} onClose={closePopup} type={popupType} />
+        </div>
       <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
       {cartItems.length === 0 ? (
         <p className="text-center text-gray-500 my-8">No items in cart</p>
