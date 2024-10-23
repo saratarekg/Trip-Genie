@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { Search, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import FilterComponent from "./FilterProduct.jsx";
@@ -48,7 +48,7 @@ const ProductCard = ({ product, onSelect }) => (
         {product.description.length > 150
           ? `${product.description.slice(0, 150)}...`
           : product.description}
-      </CardDescription>
+      </CardDescription>{" "}
     </CardContent>
     <CardFooter className="flex justify-between items-center">
       <span className="text-lg font-bold text-blue-600">${product.price}</span>
@@ -74,88 +74,29 @@ export function AllProducts() {
 
   const navigate = useNavigate();
 
-  const getUserRole = useCallback(() => {
+  const getUserRole = () => {
     let role = Cookies.get("role");
     if (!role) role = "guest";
     return role;
-  }, []);
-
-  const fetchProducts = useCallback(async (url) => {
-    const token = Cookies.get("jwt");
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  }, []);
-
-  const searchProducts = useCallback(async () => {
-    try {
-      const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/products`);
-
-      if (priceRange[0] !== 0 || priceRange[1] !== maxPrice) {
-        url.searchParams.append("minPrice", priceRange[0].toString());
-        url.searchParams.append("maxPrice", priceRange[1].toString());
-      }
-      if (searchTerm) {
-        url.searchParams.append("searchBy", searchTerm);
-      }
-      if (myProducts) {
-        url.searchParams.append("myproducts", myProducts.toString());
-      }
-      if (price && price !== "") {
-        url.searchParams.append("budget", price);
-      }
-      if (sortBy) {
-        url.searchParams.append("sort", sortBy);
-      }
-      if (sortOrder) {
-        url.searchParams.append("asc", sortOrder.toString());
-      }
-
-      const data = await fetchProducts(url);
-      setProducts(data);
-      setError(null);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Error fetching filtered results:", error);
-      setError("Error fetching filtered results");
-      setProducts([]);
-    }
-  }, [fetchProducts, getUserRole, priceRange, maxPrice, searchTerm, myProducts, price, sortBy, sortOrder]);
+  };
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        await Promise.all([
-          searchProducts(),
-          // Add any other initial data fetching here
-        ]);
-      } catch (error) {
-        console.error("Error fetching initial data:", error);
-        setError("Error fetching initial data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
+    fetchProducts();
+    setIsLoading(false);
+  }, []);
 
-    fetchInitialData();
-  }, [searchProducts]);
+  const handleProductSelect = (id) => {
+    setIsLoading(true);
+    navigate(`/product/${id}`);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      searchProducts();
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, myProducts, sortBy, sortOrder, searchProducts]);
+    setIsLoading(true);
+    searchProducts();
+    setIsLoading(false);
+  }, [myProducts]);
 
   useEffect(() => {
     scrollToTop();
@@ -169,32 +110,132 @@ export function AllProducts() {
     setCurrentPage(pageNumber);
   };
 
-  const handleProductSelect = (id) => {
+  const searchProducts = async () => {
+    try {
+      setIsLoading(true);
+      const role = getUserRole();
+      const url = new URL(`http://localhost:4000/${role}/products`);
+
+      if (priceRange[0] !== 0 || priceRange[1] !== maxPrice) {
+        url.searchParams.append("minPrice", priceRange[0].toString());
+        url.searchParams.append("maxPrice", priceRange[1].toString());
+      }
+
+
+      if (searchTerm) {
+        url.searchParams.append("searchBy", searchTerm);
+      }
+      if (myProducts) {
+        url.searchParams.append("myproducts", myProducts);
+      }
+      if (price && price !== "") {
+        url.searchParams.append("budget", price);
+      }
+      if (sortBy) {
+        url.searchParams.append("sort", sortBy);
+      }
+      if (sortOrder) {
+        url.searchParams.append("asc", sortOrder);
+      }
+      const token = Cookies.get("jwt");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setProducts(data);
+      setError(null);
+      setCurrentPage(1);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching filtered results:", error);
+      setError("Error fetching filtered results");
+      setProducts([]);
+    }
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm) {
+        searchProducts();
+      } else {
+        fetchProducts();
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  useEffect(() => {
     setIsLoading(true);
-    navigate(`/product/${id}`);
+    if (sortBy) {
+      searchProducts();
+    }
+    setIsLoading(false);
+  }, [sortBy, sortOrder]);
+
+  const handleSort = (attribute) => {
+    setIsLoading(true);
+    const newSortOrder = sortOrder === 1 ? -1 : 1;
+    setSortOrder(newSortOrder);
+    setSortBy(attribute);
     setIsLoading(false);
   };
 
-  const handleSort = (attribute) => {
-    setSortOrder(sortOrder === 1 ? -1 : 1);
-    setSortBy(attribute);
+  const handleMyProducts = (attribute) => {
+    setIsLoading(true);
+    setMyProducts(attribute);
+    setIsLoading(false);
   };
 
-  const handleMyProducts = (attribute) => {
-    setMyProducts(attribute);
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const response = await fetch(`http://localhost:4000/${role}/products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setProducts(data);
+      setError(null);
+      setCurrentPage(1);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setError("Error fetching products");
+      setProducts([]);
+    }
   };
 
   const clearFilters = () => {
+    setIsLoading(true);
     setSearchTerm("");
     setPrice("");
     setSortBy("");
     setSortOrder("");
     setMyProducts(false);
-    searchProducts();
+    fetchProducts();
+    setIsLoading(false);
   };
 
   const toggleFilters = () => {
+    setIsLoading(true);
     setFiltersVisible(!filtersVisible);
+    setIsLoading(false);
   };
 
   return (
@@ -202,7 +243,7 @@ export function AllProducts() {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="min-h-screen bg-gray-100 pt-20 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-100 pt-20 py-12 px-4 sm:px-6 lg:px-8 ">
           <div className="max-w-7xl mx-auto">
             <h1 className="text-4xl font-bold text-gray-900 mb-8">
               All Products
@@ -296,5 +337,3 @@ export function AllProducts() {
     </div>
   );
 }
-
-export default AllProducts;
