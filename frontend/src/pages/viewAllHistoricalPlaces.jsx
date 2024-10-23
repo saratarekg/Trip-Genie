@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import Cookies from "js-cookie";
 import * as jwtDecode from "jwt-decode";
-import FilterComponent from "./filterHistoricalPlaces.jsx";
+import FilterComponent from "../components/filterHistoricalPlaces.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Loader from "./Loader.jsx";
+import Loader from "../components/Loader.jsx";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,17 +16,24 @@ import {
 import { ChevronLeft, ChevronRight, Search } from "lucide-react"; // Import icons
 
 // HistoricalPlaceCard Component
-const HistoricalPlaceCard = ({ historicalPlace, onSelect, userRole, userPreferredCurrency }) => {
+const HistoricalPlaceCard = ({
+  historicalPlace,
+  onSelect,
+  userRole,
+  userPreferredCurrency,
+}) => {
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
   // console.log(historicalPlace);
   // console.log(userPreferredCurrency);
 
   useEffect(() => {
-    if (userRole === 'tourist' && userPreferredCurrency !== historicalPlace.currency) {
+    if (
+      userRole === "tourist" &&
+      userPreferredCurrency !== historicalPlace.currency
+    ) {
       fetchExchangeRate();
-    }
-    else{
+    } else {
       getCurrencySymbol();
     }
   }, [userRole, userPreferredCurrency, historicalPlace.currency]);
@@ -34,29 +41,29 @@ const HistoricalPlaceCard = ({ historicalPlace, onSelect, userRole, userPreferre
   const fetchExchangeRate = async () => {
     try {
       const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',  // Ensure content type is set to JSON
-            },
-            body: JSON.stringify({
-              base: historicalPlace.currency,     // Sending base currency ID
-              target: userPreferredCurrency,      // Sending target currency ID
-            }),
-          }
-        );
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // Ensure content type is set to JSON
+          },
+          body: JSON.stringify({
+            base: historicalPlace.currency, // Sending base currency ID
+            target: userPreferredCurrency, // Sending target currency ID
+          }),
+        }
+      );
       // Parse the response JSON
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setExchangeRates(data.conversion_rate);
-    } else {
-      // Handle possible errors
-      console.error('Error in fetching exchange rate:', data.message);
-    }
+      if (response.ok) {
+        setExchangeRates(data.conversion_rate);
+      } else {
+        // Handle possible errors
+        console.error("Error in fetching exchange rate:", data.message);
+      }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
@@ -65,24 +72,32 @@ const HistoricalPlaceCard = ({ historicalPlace, onSelect, userRole, userPreferre
   const getCurrencySymbol = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${historicalPlace.currency}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `http://localhost:4000/${userRole}/getCurrency/${historicalPlace.currency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setCurrencySymbol(response.data);
-
     } catch (error) {
       console.error("Error fetching currensy symbol:", error);
     }
   };
 
   const formatPrice = (price, type) => {
-    if (userRole === 'tourist') {
+    console.log(price);
+    console.log(userPreferredCurrency); 
+    console.log(historicalPlace.currency);  
+
+    if (userRole === "tourist") {
       if (userPreferredCurrency._id === historicalPlace.currency._id) {
         return `${userPreferredCurrency.symbol}${price}/Day`;
       } else {
         const exchangedPrice = price * exchangeRates;
-        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}/Day`;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(
+          2
+        )}/Day`;
       }
     } else {
       return `${currencySymbol.symbol}${price}/Day`;
@@ -103,24 +118,32 @@ const HistoricalPlaceCard = ({ historicalPlace, onSelect, userRole, userPreferre
       </div>
       <CardHeader>
         <h3 className="text-xl font-semibold mt-2">{historicalPlace.title}</h3>
-        <h3 className="text-sm mt-2 text-gray-700">{historicalPlace.description}</h3>
+        <h3 className="text-sm mt-2 text-gray-700">
+          {historicalPlace.description}
+        </h3>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between items-center mt-4">
           <div className="flex flex-col">
             {historicalPlace.ticketPrices?.native && (
               <span className="text-md font-bold text-gray-900">
-                native: {formatPrice(historicalPlace.ticketPrices.native, 'native')}
+                native:{" "}
+                {formatPrice(historicalPlace.ticketPrices.native, "native")}
               </span>
             )}
             {historicalPlace.ticketPrices?.student && (
               <span className="text-md font-bold text-gray-900">
-                student: {formatPrice(historicalPlace.ticketPrices.student, 'student')}
+                student:{" "}
+                {formatPrice(historicalPlace.ticketPrices.student, "student")}
               </span>
             )}
             {historicalPlace.ticketPrices?.foreigner && (
               <span className="text-md font-bold text-gray-900">
-                foreigner: {formatPrice(historicalPlace.ticketPrices.foreigner, 'foreigner')}
+                foreigner:{" "}
+                {formatPrice(
+                  historicalPlace.ticketPrices.foreigner,
+                  "foreigner"
+                )}
               </span>
             )}
           </div>
@@ -158,7 +181,7 @@ export function AllHistoricalPlacesComponent() {
   const [selectedPeriods, setSelectedPeriods] = useState([]);
   const [myHistoricalPlaces, setmyHistoricalPlaces] = useState(false);
   const tripsPerPage = 6;
-  const [userRole, setUserRole] = useState('guest');
+  const [userRole, setUserRole] = useState("guest");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const navigate = useNavigate();
   const historicalPlacesContainerRef = useRef(null);
@@ -177,7 +200,11 @@ export function AllHistoricalPlacesComponent() {
     setIsLoading(true);
     const fetchData = async () => {
       try {
-        await Promise.all([fetchHistoricalPlace(), fetchTypesAndPeriods(), fetchUserInfo()]);
+        await Promise.all([
+          fetchHistoricalPlace(),
+          fetchTypesAndPeriods(),
+          fetchUserInfo(),
+        ]);
         setIsLoading(false); // Set loading to false after both requests
       } catch (error) {
         console.error("Error in fetching data:", error);
@@ -202,19 +229,23 @@ export function AllHistoricalPlacesComponent() {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const currencyId = response.data.preferredCurrency
+        const currencyId = response.data.preferredCurrency;
 
-        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        
+
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUserPreferredCurrency(response2.data);
-
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
@@ -340,8 +371,7 @@ export function AllHistoricalPlacesComponent() {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
       setHistoricalPlaces([]);
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };
@@ -405,8 +435,8 @@ export function AllHistoricalPlacesComponent() {
                       key={historicalPlace._id}
                       historicalPlace={historicalPlace}
                       onSelect={handleHistoricalPlaceSelect}
-                    userRole={userRole}
-                    userPreferredCurrency={userPreferredCurrency}
+                      userRole={userRole}
+                      userPreferredCurrency={userPreferredCurrency}
                     />
                   ))}
               </div>
