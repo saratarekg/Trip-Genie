@@ -7,6 +7,7 @@ import {
   ContactRound,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import DualHandleSliderComponent from "./dual-handle-slider";
 
 const FilterComponent = ({
   filtersVisible,
@@ -16,6 +17,9 @@ const FilterComponent = ({
   handleSort,
   clearFilters,
   price,
+  priceRange,
+  setPriceRange,
+  maxPrice,
   myItineraries,
   handlemyItineraries,
   setPrice,
@@ -164,13 +168,13 @@ const FilterComponent = ({
           <div className="flex flex-col space-y-4">
             {/* Price Input */}
             <div>
-              <label className="block text-gray-700">Price</label>
-              <input
-                type="number"
-                placeholder="Max budget"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full mt-1 border rounded-lg p-2"
+              <label className="block text-gray-700">Price Range</label>
+              <DualHandleSliderComponent
+                min={0}
+                max={maxPrice}
+                step={Math.max(1, Math.ceil(maxPrice / 100))}
+                values={priceRange}
+                onChange={(values) => setPriceRange(values)}
               />
             </div>
 

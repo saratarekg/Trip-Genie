@@ -10,7 +10,8 @@ const ItineraryBooking = require("../models/itineraryBooking");
 const getAllItineraries = async (req, res) => {
   try {
     const {
-      budget,
+      maxPrice,
+      minPrice,
       upperDate,
       lowerDate,
       types,
@@ -26,7 +27,8 @@ const getAllItineraries = async (req, res) => {
     const userId = res.locals.user_id;
 
     const filterResult = await Itinerary.filter(
-      budget,
+      maxPrice,
+      minPrice,
       upperDate,
       lowerDate,
       types,
@@ -105,7 +107,8 @@ const getAllItineraries = async (req, res) => {
 const getAllItinerariesAdmin = async (req, res) => {
   try {
     const {
-      budget,
+      maxPrice,
+      minPrice, 
       upperDate,
       lowerDate,
       types,
@@ -119,7 +122,8 @@ const getAllItinerariesAdmin = async (req, res) => {
 
 
     const filterResult = await Itinerary.filter(
-      budget,
+      maxPrice,
+      minPrice,
       upperDate,
       lowerDate,
       types,

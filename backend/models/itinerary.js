@@ -162,7 +162,8 @@ itinerarySchema.statics.findByFields = async function (searchCriteria) {
 };
 
 itinerarySchema.statics.filter = async function (
-  budget,
+  maxPrice,
+  minPrice,
   upperdate,
   lowerdate,
   types,
@@ -172,9 +173,14 @@ itinerarySchema.statics.filter = async function (
   const query = [];
   let itineraries = null;
 
-  if (budget !== undefined && budget !== null && budget !== "") {
-    query.push({ ["price"]: { $lte: budget } });
+  
+  if (maxPrice !== undefined && maxPrice !== null && maxPrice !== "") {
+    query.push({ price: { $lte: maxPrice } });
   }
+  if (minPrice !== undefined && minPrice !== null && minPrice !== "") {
+    query.push({ price: { $gte: minPrice } });
+  }
+
   if (upperdate !== undefined && upperdate !== null && upperdate !== "") {
     // console.log(upperdate);
     query.push({ ["availableDates.date"]: { $lte: upperdate } });

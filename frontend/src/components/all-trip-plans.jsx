@@ -120,6 +120,8 @@ export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [maxPrice, setMaxPrice] = useState(1000);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
@@ -282,6 +284,12 @@ export function AllItinerariesComponent() {
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
 
       // Add the search term and filter parameters
+
+      if (priceRange[0] !== 0 || priceRange[1] !== maxPrice) {
+        url.searchParams.append("minPrice", priceRange[0].toString());
+        url.searchParams.append("maxPrice", priceRange[1].toString());
+      }
+
       if (myItineraries) {
         url.searchParams.append("myItineraries", myItineraries);
       }
@@ -434,6 +442,9 @@ export function AllItinerariesComponent() {
                   handleSort={handleSort}
                   clearFilters={clearFilters}
                   // sortItineraries={sortItineraries}
+                  priceRange={priceRange}
+                  setPriceRange={setPriceRange}
+                  maxPrice={maxPrice}
                   price={price}
                   setPrice={setPrice}
                   dateRange={dateRange}
