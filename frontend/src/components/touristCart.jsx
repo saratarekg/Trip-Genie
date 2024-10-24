@@ -375,9 +375,13 @@ const openErrorPopup = (message) => {
           <div className="text-xl font-bold">
             Total: ${totalAmount.toFixed(2)}
           </div>
-          <Button onClick={handleCheckout} disabled={isCheckoutDisabled}>
-            Checkout
-          </Button>
+          <Button 
+    className="bg-[#000034]" 
+    onClick={handleCheckout} 
+    disabled={isCheckoutDisabled}
+>
+    Checkout
+</Button>
         </div>
       )}
       {cartItems.some(item => item.product.quantity === 0) && (
