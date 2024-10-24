@@ -141,6 +141,8 @@ export function AllItinerariesComponent() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [isSortedByPreference, setIsSortedByPreference] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
 
   const navigate = useNavigate();
@@ -203,6 +205,13 @@ export function AllItinerariesComponent() {
   };
 
   useEffect(() => {
+    if (sortBy || sortOrder || searchTerm ) {
+      setIsSortedByPreference(false);
+      searchItineraries();
+    }
+  }, [sortBy, sortOrder, searchTerm]);
+
+  useEffect(() => {
     if (sortBy || currentPage || sortOrder) {
       searchItineraries();
     }
@@ -229,41 +238,55 @@ export function AllItinerariesComponent() {
 
   const fetchItineraries = async () => {
     try {
-      setIsLoading(true); // Start the loader
+      setIsLoading(true);
       const token = Cookies.get("jwt");
       const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/itineraries`);
 
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (role === 'tourist' && !isInitialized) {
+        const preferredItineraries = await fetch("http://localhost:4000/tourist/itineraries-preference", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.json());
+
+        const otherItineraries = await fetch("http://localhost:4000/tourist/itineraries-not-preference", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.json());
+
+        setItineraries([...preferredItineraries, ...otherItineraries]);
+        setIsSortedByPreference(true);
+        setIsInitialized(true);
+      } else {
+        const url = new URL(`http://localhost:4000/${role}/itineraries`);
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setItineraries(data);
       }
-      const data = await response.json();
-      setItineraries(data);
+
       setError(null);
       setCurrentPage(1);
-      // if (token) {
-      //   const decodedToken = jwtDecode.jwtDecode(token);
-      //   console.log(data.tourGuide);
-      //   setCanModify(decodedToken.id === data.tourGuide._id);
-      // }
-      // data.tourguide wont work 3shan dool list of itineraries, mesh itinerary wahda
       setCanModify(true);
     } catch (error) {
       console.error("Error fetching itineraries:", error);
       setError("Error fetching itineraries");
       setItineraries([]);
     } finally {
-      setIsLoading(false); // End the loader after everything is done
+      setIsLoading(false);
     }
   };
 
   const clearFilters = () => {
     // Reset all filter states to initial values
+    setIsSortedByPreference(false);
     setSearchTerm("");
     setPrice("");
     setDateRange({ lower: "", upper: "" });
@@ -279,11 +302,10 @@ export function AllItinerariesComponent() {
   };
 
   const searchItineraries = async () => {
+    setIsSortedByPreference(false);
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/itineraries`);
-
-      // Add the search term and filter parameters
 
       if (priceRange[0] !== 0 || priceRange[1] !== maxPrice) {
         url.searchParams.append("minPrice", priceRange[0].toString());
@@ -307,16 +329,15 @@ export function AllItinerariesComponent() {
         url.searchParams.append("lowerDate", dateRange.lower);
       }
       if (selectedTypes.length > 0) {
-        url.searchParams.append("types", selectedTypes.join(",")); // Send selected types as comma-separated
+        url.searchParams.append("types", selectedTypes.join(","));
       }
       if (selectedLanguages.length > 0) {
-        url.searchParams.append("languages", selectedLanguages.join(",")); // Send selected languages as comma-separated
+        url.searchParams.append("languages", selectedLanguages.join(","));
       }
       if (isBooked) {
         url.searchParams.append("isBooked", isBooked);
       }
 
-      // Add sorting parameters
       if (sortBy) {
         url.searchParams.append("sort", sortBy);
       }
@@ -346,6 +367,7 @@ export function AllItinerariesComponent() {
       setItineraries([]);
     }
   };
+
 
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
@@ -419,6 +441,12 @@ export function AllItinerariesComponent() {
               <h1 className="text-4xl font-bold text-gray-900 mb-8">
                 All Trip Plans
               </h1>
+
+              {isSortedByPreference && getUserRole() === 'tourist' && (
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                  Sorted based on your preferences
+                </h2>
+              )}
 
               <div className="flex flex-col mb-8">
                 <div className="relative w-full mb-4">
