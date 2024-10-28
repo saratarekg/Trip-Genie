@@ -5,6 +5,7 @@ import {
   ArrowUpDown,
   Plus,
   ContactRound,
+  Heart,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import DualHandleSliderComponent from "./dual-handle-slider";
@@ -35,6 +36,9 @@ const FilterComponent = ({
   role,
   isBooked,
   setIsBooked,
+  handleSortByPreference,
+  isSortedByPreference,
+
 }) => {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
@@ -129,6 +133,20 @@ const FilterComponent = ({
                 : "(High to Low)"
               : ""}
           </button>
+
+          {role === "tourist" && (
+            <button
+              onClick={handleSortByPreference}
+              className={`flex items-center px-4 py-2 rounded-full shadow ${
+                isSortedByPreference
+                  ? "bg-orange-500 text-white"
+                  : "bg-white text-black"
+              }`}
+            >
+              <Heart className="mr-2" size={18} />
+              Sort by Preference
+            </button>
+          )}
 
           {role === "tour-guide" && (
             <button
@@ -269,24 +287,24 @@ const FilterComponent = ({
               </div>
             </div>
 
-                {role === "tour-guide" && (
-            <div>
+            {role === "tour-guide" && (
               <div>
-                <label className="block text-gray-700">Booking Status</label>
+                <div>
+                  <label className="block text-gray-700">Booking Status</label>
+                </div>
+                <div className="mt-2 pl-1">
+                  <label className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      checked={isBooked}
+                      onChange={handleIsBookedChange}
+                      className="form-checkbox w-5 h-5"
+                    />
+                    <span className="text-gray-700 text-l">Booked Only</span>
+                  </label>
+                </div>
               </div>
-              <div className="mt-2 pl-1">
-                <label className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={isBooked}
-                    onChange={handleIsBookedChange}
-                    className="form-checkbox w-5 h-5"
-                  />
-                  <span className="text-gray-700 text-l">Booked Only</span>
-                </label>
-              </div>
-            </div>
-  )}
+            )}
           </div>
 
           {/* Apply Filters Button */}

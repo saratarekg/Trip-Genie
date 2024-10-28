@@ -6,6 +6,7 @@ import {
   Plus,
   Star,
   ContactRound,
+  Heart,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
@@ -99,6 +100,8 @@ const FilterComponent = ({
   setMinStars,
   searchActivites,
   role,
+  handleSortByPreference,
+  isSortedByPreference,
 }) => {
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [localPriceRange, setLocalPriceRange] = useState(initialPriceRange);
@@ -200,6 +203,20 @@ const FilterComponent = ({
                 : "(High to Low)"
               : ""}
           </button>
+
+          {role === "tourist" && (
+            <button
+              onClick={handleSortByPreference}
+              className={`flex items-center px-4 py-2 rounded-full shadow ${
+                isSortedByPreference
+                  ? "bg-orange-500 text-white"
+                  : "bg-white text-black"
+              }`}
+            >
+              <Heart className="mr-2" size={18} />
+              Sort by Preference
+            </button>
+          )}
 
           {role === "advertiser" && ( // Check if role is "tour-guide"
             <button

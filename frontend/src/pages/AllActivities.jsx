@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import FilterComponent from "../components/FilterActivities.jsx";
@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { set } from "date-fns";
 
 const ActivityCard = ({ activity, onSelect }) => (
   <Card
@@ -114,6 +115,15 @@ export function AllActivitiesComponent() {
     return role;
   };
 
+  const handleSortByPreference = async () => {
+    if (!isSortedByPreference) {
+      await fetchActivitiesByPreference();
+    } else {
+      setIsSortedByPreference(false);
+      // Implement your default sorting logic here
+      await fetchActivities();
+    }
+  };
   const handleActivitySelect = (id) => {
     setIsLoading(true);
     navigate(`/activity/${id}`);
@@ -312,6 +322,66 @@ export function AllActivitiesComponent() {
     }
   };
 
+  const fetchActivitiesByPreference = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+
+      if (role === 'tourist') {
+        const preferredActivities = await fetch("http://localhost:4000/tourist/activities-preference", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.json());
+
+        const otherActivities = await fetch("http://localhost:4000/tourist/activities-not-preference", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }).then(res => res.json());
+
+        setActivities([...preferredActivities, ...otherActivities]);
+        setIsSortedByPreference(true);
+      } else {
+        const url = new URL(`http://localhost:4000/${role}/activities`);
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setActivities(data);
+      }
+
+      // Calculate max price
+      const maxActivityPrice = Math.max(...activities.map(activity => activity.price));
+      const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
+
+      if (roundedMaxPrice > -Infinity) {
+        setMaxPrice(roundedMaxPrice);
+        setInitialPriceRange([0, roundedMaxPrice]);
+        setPriceRange([0, roundedMaxPrice]);
+      }
+
+      setError(null);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+      setError("Error fetching activities");
+      setActivities([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActivitiesByPreference();
+  }, [fetchActivitiesByPreference]);
+
   const clearFilters = () => {
     setSearchTerm("");
     setPriceRange([0, 1000]);
@@ -320,9 +390,17 @@ export function AllActivitiesComponent() {
     setSortBy("");
     setSortOrder("");
     setMinStars(0);
-    fetchActivities();
     setMyActivities(false);
+    if(getUserRole() === 'tourist') {
+      fetchActivitiesByPreference();
+    }
+    else {
+      fetchActivities();
+    }
+    
   };
+
+
 
   const toggleFilters = () => {
     setIsLoading(false);
@@ -381,6 +459,8 @@ export function AllActivitiesComponent() {
                   handlemyActivities={handlemyActivities}
                   maxPrice={maxPrice} // Pass maxPrice as a prop
                   initialPriceRange={initialPriceRange}
+                  isSortedByPreference={isSortedByPreference}
+                  handleSortByPreference={handleSortByPreference}
                 />
 
                 {activities.length > 0 ? (

@@ -173,6 +173,56 @@ export function AllItinerariesComponent() {
     return role;
   };
 
+  const handleSortByPreference = async () => {
+    try {
+      setIsLoading(true);
+      const newSortedByPreference = !isSortedByPreference;
+      setIsSortedByPreference(newSortedByPreference);
+  
+      const token = Cookies.get("jwt");
+      const url = newSortedByPreference
+        ? "http://localhost:4000/tourist/itineraries-preference"
+        : "http://localhost:4000/tourist/itineraries";
+  
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      if (newSortedByPreference) {
+        const otherItineraries = await fetch(
+          "http://localhost:4000/tourist/itineraries-not-preference",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        ).then((res) => res.json());
+  
+        setItineraries([...data, ...otherItineraries]);
+      } else {
+        setItineraries(data);
+      }
+  
+      setError(null);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error fetching sorted itineraries:", error);
+      setError("Error fetching sorted itineraries. Please try again.");
+      setItineraries([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleItinerarySelect = (id) => {
     navigate(`/itinerary/${id}`);
   };
@@ -296,14 +346,9 @@ export function AllItinerariesComponent() {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    myItineraries,
-    searchTerm,
-    selectedTypes,
-    isBooked,
-    sortBy,
-    sortOrder,
-  ]);
+  }, [myItineraries, searchTerm, selectedTypes, isBooked, sortBy, sortOrder]);
+
+
 
   useEffect(() => {
     fetchItineraries();
@@ -344,11 +389,11 @@ export function AllItinerariesComponent() {
   ]);
 
   const handleSort = (attribute) => {
-      setIsLoading(true);
-      const newSortOrder = sortOrder === 1 ? -1 : 1;
-      setSortOrder(newSortOrder);
-      setSortBy(attribute);
-      setIsLoading(false);
+    setIsLoading(true);
+    const newSortOrder = sortOrder === 1 ? -1 : 1;
+    setSortOrder(newSortOrder);
+    setSortBy(attribute);
+    setIsLoading(false);
   };
 
   const handlePageChange = (pageNumber) => {
@@ -467,6 +512,8 @@ export function AllItinerariesComponent() {
                 role={getUserRole()}
                 isBooked={isBooked}
                 setIsBooked={setIsBooked}
+                isSortedByPreference={isSortedByPreference}
+                handleSortByPreference={handleSortByPreference}
               />
             </div>
 
