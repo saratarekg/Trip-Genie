@@ -297,14 +297,9 @@ export function AllItinerariesComponent() {
       setIsLoading(false);
     }
   }, [
-    priceRange,
-    maxPrice,
     myItineraries,
     searchTerm,
-    price,
-    dateRange,
     selectedTypes,
-    selectedLanguages,
     isBooked,
     sortBy,
     sortOrder,
