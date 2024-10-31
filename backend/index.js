@@ -19,6 +19,7 @@ const { requireAuth } = require("./middlewares/authMiddleware");
 const { getAllLanguages } = require("./controllers/itineraryController");
 const cron = require("node-cron");
 const currencyRateController = require("./controllers/currencyRateController");
+const Grid = require("gridfs-stream");
 
 const PORT = process.env.PORT;
 
@@ -32,9 +33,12 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 mongoose
   .connect(process.env.URI)
-  .then(() =>
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
-  )
+  .then((connection) => {
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    const db = connection.connection.db; // access the raw MongoDB driver from the connection
+    const gfs = new mongoose.mongo.GridFSBucket(db, { bucketName: "uploads" });
+    app.locals.gfs = gfs;
+  })
   .catch((err) => console.log(err));
 
 // Check and update the exchange rates when the server starts

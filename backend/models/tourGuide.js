@@ -91,6 +91,16 @@ const tourGuideSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    files: {
+      IDFilename: {
+        type: String,
+        required: true,
+      },
+      certificatesFilename: {
+        type: [String],
+        required: true,
+      },
+    },
     attended: [
       {
         type: mongoose.Schema.Types.ObjectId,

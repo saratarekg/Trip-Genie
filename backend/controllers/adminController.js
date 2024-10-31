@@ -4,11 +4,9 @@ const Tourist = require("../models/tourist");
 const Seller = require("../models/seller");
 const Advertiser = require("../models/advertiser");
 const TourGuide = require("../models/tourGuide");
-const TourismGovernor1 = require("../controllers/tourismGovernorController");
-const Tourist1 = require("../controllers/touristController");
-const Seller1 = require("../controllers/sellerController");
-const Advertiser1 = require("../controllers/advertiserController");
-const TourGuide1 = require("../controllers/tourGuideController");
+const Grid = require("gridfs-stream");
+const express = require("express");
+const mongoose = require("mongoose");
 
 const addAdmin = async (req, res) => {
   try {
@@ -166,6 +164,63 @@ const changePassword = async (req, res) => {
   }
 };
 
+const getAllFiles = async (req, res) => {
+  try {
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+
+    const files = await gfs.find().toArray();
+    res.status(200).json(files);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getFile = async (req, res) => {
+  try {
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+
+    const filename = req.params.filename;
+    const files = await gfs.find({ filename }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+
+    const readstream = gfs.openDownloadStreamByName(filename);
+    readstream.pipe(res);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteFile = async (req, res) => {
+  try {
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+
+    const filename = req.params.filename;
+    const files = await gfs.find({ filename }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+
+    await gfs.delete(files[0]._id);
+    res.status(200).json({ message: "File deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const usernameExists = async (username) => {
   if (
     (await Tourist.findOne({ username })) ||
@@ -189,4 +244,7 @@ module.exports = {
   getAllUsers,
   getUsersByRoles,
   changePassword,
+  getAllFiles,
+  getFile,
+  deleteFile,
 };

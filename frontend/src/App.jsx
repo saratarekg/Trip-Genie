@@ -51,6 +51,7 @@ import NotFound from "./components/NotFound.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import TouristActivities from "./pages/TouristActivities.jsx";
 import { ProductArchive } from "./components/product-archive.jsx";
+import UserFiles from "./pages/UserFiles.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -374,6 +375,15 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin", "seller"]}>
                 <ProductArchive />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/files"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <UserFiles />
               </ProtectedRoute>
             }
           />

@@ -54,6 +54,16 @@ const advertiserSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    files: {
+      IDFilename: {
+        type: String,
+        required: true,
+      },
+      taxationRegistryCardFilename: {
+        type: String,
+        required: true,
+      },
+    },
   },
   { timestamps: true }
 );

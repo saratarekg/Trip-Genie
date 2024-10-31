@@ -5,12 +5,46 @@ const Tourist = require("../models/tourist");
 const Seller = require("../models/seller");
 const Advertiser = require("../models/advertiser");
 const TourGuide = require("../models/tourGuide");
+const multer = require("multer");
 
 const createToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.SECRET, {
     expiresIn: process.env.EXPIRES_IN,
   });
 };
+
+// // File upload route
+// app.post("/api/upload-documents", (req, res) => {
+//   const uploadFields = [
+//     { name: "ID", maxCount: 1 },
+//     { name: "Taxation Registry Card", maxCount: 1 },
+//   ];
+
+//   if (req.body.userRole === "tourGuide") {
+//     uploadFields.push({ name: "Certificates", maxCount: 5 }); // Allow up to 5 certificates
+//   }
+
+//   upload.fields(uploadFields)(req, res, (err) => {
+//     if (err) {
+//       return res
+//         .status(400)
+//         .json({ message: "Error uploading files", error: err.message });
+//     }
+//     res.status(200).json({ message: "Documents uploaded successfully" });
+//   });
+// });
+
+// app.get('/api/files/:filename', (req, res) => {
+//   gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
+//     if (!file || file.length === 0) {
+//       return res.status(404).json({
+//         err: 'No file exists'
+//       });
+//     }
+//     const readstream = gfs.createReadStream(file.filename);
+//     readstream.pipe(res);
+//   });
+// });
 
 const touristSignup = async (req, res) => {
   try {
@@ -130,9 +164,30 @@ const advertiserSignup = async (req, res) => {
       throw new Error("Username already exists");
     }
 
-    console.log(req.body);
-    const advertiser = new Advertiser(req.body);
-
+    const {
+      email,
+      username,
+      password,
+      name,
+      description,
+      website,
+      hotline,
+      logo,
+    } = req.body;
+    const IDFilename = req.files.ID[0].filename;
+    const taxationRegistryCardFilename =
+      req.files["Taxation Registry Card"][0].filename;
+    const advertiser = new Advertiser({
+      email,
+      username,
+      password,
+      name,
+      description,
+      website,
+      hotline,
+      logo,
+      files: { IDFilename, taxationRegistryCardFilename },
+    });
     advertiser
       .save()
       .then((result) => {
@@ -155,7 +210,34 @@ const tourGuideSignup = async (req, res) => {
     if (await usernameExists(req.body.username)) {
       throw new Error("Username already exists");
     }
-    const tourGuide = new TourGuide(req.body);
+
+    const {
+      email,
+      username,
+      password,
+      name,
+      nationality,
+      mobile,
+      yearsOfExperience,
+      previousWorks,
+      profilePicture,
+    } = req.body;
+
+    const IDFilename = req.files.ID[0].filename;
+    const certificatesFilename = req.files["Certificates"][0].filename;
+
+    const tourGuide = new TourGuide({
+      email,
+      username,
+      password,
+      name,
+      nationality,
+      mobile,
+      yearsOfExperience,
+      previousWorks,
+      files: { IDFilename, certificatesFilename },
+      profilePicture,
+    });
 
     tourGuide
       .save()
@@ -179,7 +261,22 @@ const sellerSignup = async (req, res) => {
     if (await usernameExists(req.body.username)) {
       throw new Error("Username already exists");
     }
-    const seller = new Seller(req.body);
+
+    const { email, username, password, name, description, mobile, logo } =
+      req.body;
+    const IDFilename = req.files.ID[0].filename;
+    const taxationRegistryCardFilename =
+      req.files["Taxation Registry Card"][0].filename;
+    const seller = new Seller({
+      email,
+      username,
+      password,
+      name,
+      description,
+      mobile,
+      logo,
+      files: { IDFilename, taxationRegistryCardFilename },
+    });
 
     seller
       .save()

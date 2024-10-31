@@ -118,4 +118,8 @@ router.get("/itineraries", itineraryController.getAllItinerariesAdmin);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 router.post("/password", adminController.changePassword);
 
+router.get("/files", adminController.getAllFiles);
+router.get("/files/:filename", adminController.getFile);
+router.delete("/files/:filename", adminController.deleteFile);
+
 module.exports = router;

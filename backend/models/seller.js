@@ -52,6 +52,16 @@ const sellerSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  files: {
+    IDFilename: {
+      type: String,
+      required: true,
+    },
+    taxationRegistryCardFilename: {
+      type: String,
+      required: true,
+    },
+  },
 });
 
 sellerSchema.pre("save", async function (next) {

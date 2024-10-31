@@ -309,6 +309,7 @@ export function SignupForm() {
     const termsDiv = termsRef.current;
     const scrollBottom =
       termsDiv.scrollTop + termsDiv.clientHeight >= termsDiv.scrollHeight - 1;
+    console.log("Scroll bottom:", scrollBottom);
     if (scrollBottom) {
       setCanAcceptTerms(true); // Enable checkbox when scrolled to bottom
     }
@@ -316,6 +317,7 @@ export function SignupForm() {
 
   // Add scroll event listener to terms container
   useEffect(() => {
+    console.log("Adding scroll event listener");
     const termsDiv = termsRef.current;
     if (termsDiv) {
       termsDiv.addEventListener("scroll", handleTermsScroll);
@@ -326,7 +328,7 @@ export function SignupForm() {
         termsDiv.removeEventListener("scroll", handleTermsScroll);
       }
     };
-  }, []);
+  }, [termsRef.current]);
 
   useEffect(() => {
     const fetchNationalities = async () => {
@@ -404,7 +406,7 @@ export function SignupForm() {
 
   const handleFileChange = (e, docType) => {
     if (e.target.files) {
-      if (docType === "Certificates" && userRole === "tourGuide") {
+      if (docType === "Certificates" && userType === "tour-guide") {
         setUploadedDocuments((prev) => ({
           ...prev,
           [docType]: [...(prev[docType] || []), ...e.target.files],
@@ -473,18 +475,19 @@ export function SignupForm() {
       for (const key in values) {
         finalData.append(key, values[key]);
       }
-      // finalData.append("profilePicture", profilePicture);
-      // uploadedDocuments.forEach((doc) => {
-      //   finalData.append("documents", doc);
-      // });
+      if (userType === "tour-guide" || userType === "tourist") {
+        finalData.append("profilePicture", profilePicture);
+      } else {
+        finalData.append("logo", profilePicture);
+      }
 
       Object.entries(uploadedDocuments).forEach(([docType, fileOrFiles]) => {
         if (Array.isArray(fileOrFiles)) {
           fileOrFiles.forEach((file, index) => {
-            formData.append(`${docType}`, file, `${docType}_${index + 1}`);
+            finalData.append(`${docType}`, file, `${docType}_${index + 1}`);
           });
         } else if (fileOrFiles) {
-          formData.append(docType, fileOrFiles, fileOrFiles.name);
+          finalData.append(docType, fileOrFiles, fileOrFiles.name);
         }
       });
 

@@ -1,11 +1,9 @@
 import React from "react";
 
-
 const TermsAndConditions = () => {
   return (
-    <div class="p-6 bg-gray-50 text-gray-800">
-
-      <p class="font-bold mb-4">
+    <div className="p-6 bg-gray-50 text-gray-800">
+      <p className="font-bold mb-4">
         PLEASE READ THESE TERMS AND CONDITIONS CAREFULLY. BY ACCESSING OR USING
         THE TRIP GENIE APPLICATION (THE “APP”), YOU, THE USER, EXPRESSLY
         ACKNOWLEDGE AND AGREE THAT YOU HAVE READ, UNDERSTAND, ACCEPT, AND AGREE
@@ -16,7 +14,7 @@ const TermsAndConditions = () => {
         SERVICES PROVIDED AND POTENTIAL LIABILITY.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">
+      <h2 className="text-xl font-bold mt-6 mb-2">
         1. Acceptance of the Agreement
       </h2>
       <p>
@@ -32,7 +30,7 @@ const TermsAndConditions = () => {
         terms.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">
+      <h2 className="text-xl font-bold mt-6 mb-2">
         2. User Eligibility and Responsibility
       </h2>
       <p>
@@ -54,7 +52,7 @@ const TermsAndConditions = () => {
         Company of any suspected unauthorized use of your account.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">3. Grant of License</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">3. Grant of License</h2>
       <p>
         Subject to your compliance with the terms and conditions of this
         Agreement, the Company hereby grants you a limited, non-exclusive,
@@ -64,7 +62,7 @@ const TermsAndConditions = () => {
         without express prior written consent from the Company.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">
+      <h2 className="text-xl font-bold mt-6 mb-2">
         4. Bookings and Third-Party Services
       </h2>
       <p>
@@ -86,11 +84,11 @@ const TermsAndConditions = () => {
         such providers must be resolved directly with the relevant third party.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">
+      <h2 className="text-xl font-bold mt-6 mb-2">
         5. User Obligations and Prohibited Conduct
       </h2>
       <p>By using the App, you expressly agree not to:</p>
-      <ul class="list-disc ml-6 mb-4">
+      <ul className="list-disc ml-6 mb-4">
         <li>
           Use the App for any illegal, fraudulent, or unauthorized purpose;
         </li>
@@ -117,7 +115,9 @@ const TermsAndConditions = () => {
         actions.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">6. Smart Budgeting Disclaimer</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">
+        6. Smart Budgeting Disclaimer
+      </h2>
       <p>
         The budgeting tools provided in Trip Genie are solely for the purpose of
         assisting users in planning their financial expenditures during travel.
@@ -128,7 +128,7 @@ const TermsAndConditions = () => {
         or unanticipated costs that may occur.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">
+      <h2 className="text-xl font-bold mt-6 mb-2">
         7. No Guarantee of Accuracy for Local Information
       </h2>
       <p>
@@ -142,7 +142,7 @@ const TermsAndConditions = () => {
         accuracy of any information before acting upon it.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">
+      <h2 className="text-xl font-bold mt-6 mb-2">
         8. Exclusive In-App Gift Shop Purchases
       </h2>
       <p>
@@ -154,7 +154,9 @@ const TermsAndConditions = () => {
         purchases. You agree to resolve any disputes directly with the vendor.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">9. Limitation of Liability</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">
+        9. Limitation of Liability
+      </h2>
       <p>
         TO THE FULLEST EXTENT PERMITTED BY LAW, THE COMPANY, ITS AFFILIATES,
         OFFICERS, EMPLOYEES, AGENTS, OR LICENSORS SHALL NOT BE LIABLE FOR ANY
@@ -169,7 +171,7 @@ const TermsAndConditions = () => {
         TO CEASE USING THE APP IMMEDIATELY.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">10. Indemnification</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">10. Indemnification</h2>
       <p>
         YOU AGREE TO INDEMNIFY, DEFEND, AND HOLD HARMLESS THE COMPANY, ITS
         AFFILIATES, DIRECTORS, OFFICERS, EMPLOYEES, AGENTS, AND LICENSORS FROM
@@ -179,7 +181,7 @@ const TermsAndConditions = () => {
         YOUR VIOLATION OF ANY RIGHTS OF A THIRD PARTY.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">
+      <h2 className="text-xl font-bold mt-6 mb-2">
         11. Dispute Resolution and Governing Law
       </h2>
       <p>
@@ -193,7 +195,9 @@ const TermsAndConditions = () => {
         COMPANY.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">12. Severability and Waiver</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">
+        12. Severability and Waiver
+      </h2>
       <p>
         If any provision of this Agreement is held to be invalid or
         unenforceable, the remaining provisions of this Agreement shall remain
@@ -204,7 +208,7 @@ const TermsAndConditions = () => {
         right or provision.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">13. Entire Agreement</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">13. Entire Agreement</h2>
       <p>
         This Agreement constitutes the entire agreement between you and the
         Company regarding the use of the App and supersedes all prior agreements
@@ -212,7 +216,7 @@ const TermsAndConditions = () => {
         matter hereof.
       </p>
 
-      <h2 class="text-xl font-bold mt-6 mb-2">14. Contact Information</h2>
+      <h2 className="text-xl font-bold mt-6 mb-2">14. Contact Information</h2>
       <p>
         If you have any questions regarding this Agreement, please contact us
         at:
