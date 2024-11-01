@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { format, set } from "date-fns";
 import { Link } from "react-router-dom";
-import { Calendar as CalendarIcon, CheckCircle } from "lucide-react";
+import { Calendar as CalendarIcon, CheckCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
@@ -80,6 +80,7 @@ export function SignupForm() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [canAcceptTerms, setCanAcceptTerms] = useState(false); // Track if user can accept terms
   const termsRef = useRef(null); // Reference to the terms div
+  const [showScrollMessage, setShowScrollMessage] = useState(false);
 
   const formSchema = z
     .object({
@@ -309,7 +310,6 @@ export function SignupForm() {
     const termsDiv = termsRef.current;
     const scrollBottom =
       termsDiv.scrollTop + termsDiv.clientHeight >= termsDiv.scrollHeight - 1;
-    console.log("Scroll bottom:", scrollBottom);
     if (scrollBottom) {
       setCanAcceptTerms(true); // Enable checkbox when scrolled to bottom
     }
@@ -317,7 +317,6 @@ export function SignupForm() {
 
   // Add scroll event listener to terms container
   useEffect(() => {
-    console.log("Adding scroll event listener");
     const termsDiv = termsRef.current;
     if (termsDiv) {
       termsDiv.addEventListener("scroll", handleTermsScroll);
@@ -409,7 +408,7 @@ export function SignupForm() {
       if (docType === "Certificates" && userType === "tour-guide") {
         setUploadedDocuments((prev) => ({
           ...prev,
-          [docType]: [...(prev[docType] || []), ...e.target.files],
+          [docType]: [...e.target.files],
         }));
       } else {
         setUploadedDocuments((prev) => ({
@@ -430,7 +429,6 @@ export function SignupForm() {
       } catch (error) {
         const response = error.response;
         if (response.data.existingUsername) {
-          console.log("Username already exists");
           setApiError("Username already exists");
           return;
         }
@@ -444,11 +442,13 @@ export function SignupForm() {
       stage === 2 &&
       ["tour-guide", "advertiser", "seller"].includes(userType)
     ) {
-      if (uploadedDocuments.length === 0) {
-        setValidationError(
-          "Please upload at least one document for each required field."
-        );
-        return;
+      for (const docType of requiredDocuments[userType]) {
+        if (!uploadedDocuments[docType]) {
+          setValidationError(
+            "Please upload all required documents before proceeding."
+          );
+          return;
+        }
       }
     }
 
@@ -473,8 +473,13 @@ export function SignupForm() {
     try {
       const finalData = new FormData();
       for (const key in values) {
-        finalData.append(key, values[key]);
+        if (key === "previousWorks") {
+          finalData.append(key, JSON.stringify(values[key]));
+        } else {
+          finalData.append(key, values[key]);
+        }
       }
+
       if (userType === "tour-guide" || userType === "tourist") {
         finalData.append("profilePicture", profilePicture);
       } else {
@@ -491,6 +496,7 @@ export function SignupForm() {
         }
       });
 
+      console.log(finalData);
       await axios.post(
         `http://localhost:4000/auth/sign-up/${userType}`,
         finalData,
@@ -528,9 +534,31 @@ export function SignupForm() {
     }
   };
 
+  const handleCheckboxClick = () => {
+    if (!canAcceptTerms) {
+      setShowScrollMessage(true);
+    } else {
+      setTermsAccepted(!termsAccepted);
+    }
+  };
+
   useEffect(() => {
-    console.log(uploadedDocuments);
-  }, [uploadedDocuments]);
+    if (
+      stage === 2 &&
+      ["tour-guide", "advertiser", "seller"].includes(userType)
+    ) {
+      let flag = true;
+      for (const docType of requiredDocuments[userType]) {
+        if (!uploadedDocuments[docType]) {
+          flag = false;
+          break;
+        }
+      }
+      if (flag) {
+        setValidationError(null);
+      }
+    }
+  }, [uploadedDocuments, stage, userType]);
 
   const renderStage = () => {
     switch (stage) {
@@ -934,14 +962,33 @@ export function SignupForm() {
                   >
                     {docType}
                   </label>
-                  <Input
+                  <label
+                    htmlFor={docType}
+                    className="inline-block cursor-pointer bg-gray-100 px-4 py-2 rounded-lg text-violet-700"
+                  >
+                    <div className="text-sm">
+                      {uploadedDocuments[docType]?.name || "Select a file..."}
+                    </div>
+                    <Input
+                      id={docType}
+                      type="file"
+                      accept="image/*,.pdf"
+                      onChange={(e) => {
+                        handleFileChange(e, docType);
+                      }}
+                      multiple={docType === "Certificates"}
+                      className="hidden"
+                    />
+                  </label>
+                  {/* <Input
                     id={docType}
                     type="file"
                     accept="image/*,.pdf"
                     onChange={(e) => handleFileChange(e, docType)}
+                    defaultValue={uploadedDocuments[docType]?.filename}
                     multiple={docType === "Certificates"}
-                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-                  />
+                    className="file:mr-4 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                  /> */}
                   {docType === "Certificates" && uploadedDocuments[docType] && (
                     <div className="mt-2 text-sm text-gray-500">
                       {uploadedDocuments[docType].length} certificate(s)
@@ -960,16 +1007,28 @@ export function SignupForm() {
             <>
               <h2 className="text-2xl font-semibold text-gray-900">
                 Continue your profile setup by uploading a profile picture.
+                (Optional)
               </h2>
 
-              <Label>Upload {} (Optional)</Label>
-              <Input
-                id="profilePicture"
-                type="file"
-                accept="image/*"
-                onChange={handlePictureUpload}
-                className="mb-2"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Profile Picture
+                </label>
+                <label className="inline-block cursor-pointer bg-gray-100 px-4 py-2 rounded-lg text-violet-700">
+                  <div className="text-sm">
+                    {profilePicture
+                      ? "Profile picture selected"
+                      : "Select a file..."}
+                  </div>
+                  <Input
+                    id="profilePicture"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePictureUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
               <Button
                 type="button"
                 className="w-full bg-gray-300 hover:bg-gray-400"
@@ -1002,10 +1061,19 @@ export function SignupForm() {
               <div className="flex flex-row items-start space-x-3 space-y-0">
                 <Checkbox
                   checked={termsAccepted}
-                  onCheckedChange={() => setTermsAccepted(!termsAccepted)}
+                  onCheckedChange={handleCheckboxClick}
                   disabled={!canAcceptTerms}
                   aria-describedby="terms-description"
                 />
+                {showScrollMessage && (
+                  <div
+                    className="mt-5"
+                    style={{ color: "red", fontSize: "16px" }}
+                  >
+                    Please scroll to the bottom of the terms and conditions
+                    before accepting.
+                  </div>
+                )}
                 <div className="space-y-1 leading-none">
                   <label>I accept and agree to the terms and conditions</label>
                   {showError && (
@@ -1025,17 +1093,29 @@ export function SignupForm() {
             <>
               <h2 className="text-2xl font-semibold text-gray-900">
                 Continue your profile setup by uploading a
-                {userType === "tour-guide" ? " profile picture" : " logo"}.
+                {userType === "tour-guide" ? " profile picture. " : " logo. "}
+                (Optional)
               </h2>
 
-              <Label>Upload {} (Optional)</Label>
-              <Input
-                id="profilePicture"
-                type="file"
-                accept="image/*"
-                onChange={handlePictureUpload}
-                className="mb-2"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Profile Picture
+                </label>
+                <label className="inline-block cursor-pointer bg-gray-100 px-4 py-2 rounded-lg text-violet-700">
+                  <div className="text-sm">
+                    {profilePicture
+                      ? "Profile picture selected"
+                      : "Select a file..."}
+                  </div>
+                  <Input
+                    id="profilePicture"
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePictureUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
               <Button
                 type="button"
                 className="w-full bg-gray-300 hover:bg-gray-400"
@@ -1158,7 +1238,16 @@ export function SignupForm() {
                     <div></div>
                   )}
                   <Button type="submit">
-                    {stage < totalStages ? `Next` : `Submit`}
+                    {stage < totalStages ? (
+                      `Next`
+                    ) : isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Please wait
+                      </>
+                    ) : (
+                      "Submit"
+                    )}
                   </Button>
                   {/* {stage < totalStages ? (
                 <Button type="submit">Next</Button>

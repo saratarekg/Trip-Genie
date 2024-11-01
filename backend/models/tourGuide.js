@@ -96,7 +96,7 @@ const tourGuideSchema = new Schema(
         type: String,
         required: true,
       },
-      certificatesFilename: {
+      certificatesFilenames: {
         type: [String],
         required: true,
       },

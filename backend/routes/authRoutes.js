@@ -33,9 +33,6 @@ const storage = new GridFsStorage({
 
 const upload = multer({ storage });
 
-const storage1 = multer.memoryStorage(); // Store files in memory
-const upload1 = multer({ storage: storage1 });
-
 advertiserSellerFileFields = [
   { name: "ID", maxCount: 1 },
   { name: "Taxation Registry Card", maxCount: 1 },
@@ -49,19 +46,16 @@ router.post("/sign-up/tourist", authController.touristSignup);
 router.post(
   "/sign-up/advertiser",
   upload.fields(advertiserSellerFileFields),
-  upload1.single("logo"),
   authController.advertiserSignup
 );
 router.post(
   "/sign-up/tour-guide",
   upload.fields(tourGuideFileFields),
-  upload1.single("profilePicture"),
   authController.tourGuideSignup
 );
 router.post(
   "/sign-up/seller",
   upload.fields(advertiserSellerFileFields),
-  upload1.single("logo"),
   authController.sellerSignup
 );
 router.get("/check-unique", authController.checkUnique);
