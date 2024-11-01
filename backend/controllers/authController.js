@@ -164,19 +164,15 @@ const advertiserSignup = async (req, res) => {
       throw new Error("Username already exists");
     }
 
-    const {
-      email,
-      username,
-      password,
-      name,
-      description,
-      website,
-      hotline,
-      logo,
-    } = req.body;
+    const { email, username, password, name, description, website, hotline } =
+      req.body;
     const IDFilename = req.files.ID[0].filename;
     const taxationRegistryCardFilename =
       req.files["Taxation Registry Card"][0].filename;
+    let { logo } = req.body;
+    if (logo === "null") {
+      logo = null;
+    }
     const advertiser = new Advertiser({
       email,
       username,
@@ -220,11 +216,16 @@ const tourGuideSignup = async (req, res) => {
       mobile,
       yearsOfExperience,
       previousWorks,
-      profilePicture,
     } = req.body;
 
+    let { profilePicture } = req.body;
+    if (profilePicture === "null") {
+      profilePicture = null;
+    }
     const IDFilename = req.files.ID[0].filename;
-    const certificatesFilename = req.files["Certificates"][0].filename;
+    const certificatesFilenames = req.files.Certificates.map(
+      (file) => file.filename
+    );
 
     const tourGuide = new TourGuide({
       email,
@@ -234,8 +235,8 @@ const tourGuideSignup = async (req, res) => {
       nationality,
       mobile,
       yearsOfExperience,
-      previousWorks,
-      files: { IDFilename, certificatesFilename },
+      previousWorks: JSON.parse(previousWorks),
+      files: { IDFilename, certificatesFilenames },
       profilePicture,
     });
 
@@ -262,8 +263,11 @@ const sellerSignup = async (req, res) => {
       throw new Error("Username already exists");
     }
 
-    const { email, username, password, name, description, mobile, logo } =
-      req.body;
+    const { email, username, password, name, description, mobile } = req.body;
+    let { logo } = req.body;
+    if (logo === "null") {
+      logo = null;
+    }
     const IDFilename = req.files.ID[0].filename;
     const taxationRegistryCardFilename =
       req.files["Taxation Registry Card"][0].filename;
