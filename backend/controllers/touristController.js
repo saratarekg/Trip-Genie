@@ -9,6 +9,7 @@ const activity = require("../models/activity");
 const ActivityBooking = require("../models/activityBooking");
 const Purchase = require("../models/purchase");
 const ItineraryBooking = require("../models/itineraryBooking");
+const Currency = require("../models/currency");
 
 const deleteTouristAccount = async (req, res) => {
   try {
@@ -315,6 +316,24 @@ const changePassword = async (req, res) => {
         .json({ message: "Validation error", errors: validationErrors });
     }
     res.status(400).json({ error: error.message });
+  }
+};
+
+// get currency code from the userPrefferedCurrency variable in the tourist model
+const getCurrencyCode = async (req, res) => {
+  try {
+    const tourist = await Tourist.findById(res.locals.user_id);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+    // preffered currency is an Object ID in a currency table
+    const currency = await Currency.findById(tourist.preferredCurrency);
+    if (!currency) {
+      return res.status(404).json({ message: "Currency not found" });
+    }
+    res.status(200).json(currency.code);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -674,4 +693,5 @@ module.exports = {
   removeItemFromCart,
   emptyCart,
   updateCartProductQuantity,
+  getCurrencyCode,
 };
