@@ -40,6 +40,7 @@ const schema = z.object({
       message: "Timing must be a future date",
     }),
   price: z.number().int().positive("Price must be a positive integer"),
+  currency: z.string().min(1, 'Please select a currency'),
   category: z
     .array(z.object({ value: z.string(), label: z.string() }))
     .nonempty("At least one category is required"),
@@ -57,6 +58,7 @@ const schema = z.object({
 export default function UpdateActivity() {
   const { id } = useParams();
   const {
+    register,
     control,
     handleSubmit,
     setValue,
@@ -87,6 +89,7 @@ export default function UpdateActivity() {
   const [showDialog, setShowDialog] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: 29.9792, lng: 31.1342 });
   const [markerPosition, setMarkerPosition] = useState({ lat: 29.9792, lng: 31.1342 });
+  const [currencies, setCurrencies] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -119,6 +122,7 @@ export default function UpdateActivity() {
         setValue("duration", activityData.duration);
         setValue("timing", new Date(activityData.timing));
         setValue("price", activityData.price);
+        setValue("currency", activityData.currency);
         setValue("specialDiscount", activityData.specialDiscount);
         setValue("isBookingOpen", activityData.isBookingOpen);
         setValue("pictures", activityData.pictures);
@@ -142,7 +146,7 @@ export default function UpdateActivity() {
         setLoading(false);
       }
     };
-
+    fetchCurrencies();
     fetchData();
   }, [id, setValue]);
 
@@ -204,6 +208,18 @@ export default function UpdateActivity() {
     return <Marker position={[markerPosition.lat, markerPosition.lng]} />;
   };
   
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get('jwt');
+      const response = await axios.get(`http://localhost:4000/advertiser/currencies`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCurrencies(response.data);
+    } catch (err) {
+      console.error('Error fetching currencies:', err.message);
+      setError('Failed to fetch currencies. Please try again.');
+    }
+  };
 
   const handleGoBack = () => {
     navigate("/activity");
@@ -347,6 +363,23 @@ export default function UpdateActivity() {
                   )}
                 </div>
               </div>
+
+              <div>
+          <Label htmlFor="currency">Currency </Label>
+          <select
+            {...register('currency')}
+            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="currency"
+          >
+            <option value="">Select currency</option>
+            {currencies.map((currency) => (
+              <option key={currency._id} value={currency._id}>
+                {currency.code} - {currency.name}  ({currency.symbol})
+              </option>
+            ))}
+          </select>
+          {errors.currency && <span className="text-red-500">{errors.currency.message}</span>}
+        </div>
 
               <div className="space-y-2">
                 <Label>Categories</Label>

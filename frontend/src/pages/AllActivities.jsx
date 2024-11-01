@@ -18,7 +18,115 @@ import {
 } from "@/components/ui/card";
 import { set } from "date-fns";
 
-const ActivityCard = ({ activity, onSelect }) => (
+const ActivityCard = ({ activity, onSelect }) => {
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
+
+  const fetchExchangeRate = async () => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: activity.currency,     // Sending base currency ID
+              target: userPreferredCurrency._id,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRates(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const getCurrencySymbol = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${activity.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const formatPrice = (price, type) => {
+    if(activity){
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      if (userPreferredCurrency === activity.currency) {
+        return `${userPreferredCurrency.symbol}${price}`;
+      } else {
+        const exchangedPrice = price * exchangeRates;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+    } else {
+      if(currencySymbol){
+      return `${currencySymbol.symbol}${price}`;
+      }
+    }
+  }
+  };
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency
+
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if(activity)
+    fetchUserInfo();
+  }, [activity]);
+
+
+  useEffect(() => {
+    if (activity) {
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== activity.currency) {
+        fetchExchangeRate();
+      }
+      else{
+        getCurrencySymbol();
+      }
+    }
+  }, [userRole, userPreferredCurrency, activity]);
+
+return(
   <Card
     className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
     onClick={() => onSelect(activity._id)}
@@ -58,7 +166,7 @@ const ActivityCard = ({ activity, onSelect }) => (
       </div>
       <div className="flex justify-between items-center">
         <span className="text-lg font-bold text-primary">
-          ${activity.price}
+          {formatPrice(activity.price)}
         </span>
         <span className="text-sm text-muted-foreground">
           {activity.duration} hours
@@ -84,6 +192,7 @@ const ActivityCard = ({ activity, onSelect }) => (
     </CardFooter>
   </Card>
 );
+};
 
 export function AllActivitiesComponent() {
   const [activities, setActivities] = useState([]);

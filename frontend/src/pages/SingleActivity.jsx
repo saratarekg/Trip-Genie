@@ -157,6 +157,9 @@ const ActivityDetail = () => {
   const [open, setOpen] = useState(false); // Added state for popover
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [userBookings, setUserBookings] = useState([]);
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -333,13 +336,111 @@ const ActivityDetail = () => {
       }
       };
 
-
+    fetchUserInfo();
     fetchActivityDetails();
     if (userRole === 'tourist') {
       fetchUserBookings();
       }
-    fetchActivityDetails();
   }, [id, userRole]);
+
+  
+  const fetchExchangeRate = async () => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: activity.currency,     // Sending base currency ID
+              target: userPreferredCurrency._id,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRates(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const getCurrencySymbol = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${activity.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const formatPrice = (price, type) => {
+    if(activity){
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      if (userPreferredCurrency === activity.currency) {
+        return `${userPreferredCurrency.symbol}${price}`;
+      } else {
+        const exchangedPrice = price * exchangeRates;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+    } else {
+      if(currencySymbol){
+      return `${currencySymbol.symbol}${price}`;
+      }
+    }
+  }
+  };
+
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency
+
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+
+  useEffect(() => {
+    if (activity) {
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== activity.currency) {
+        fetchExchangeRate();
+      }
+      else{
+        getCurrencySymbol();
+      }
+    }
+  }, [userRole, userPreferredCurrency, activity]);
 
   
   const isActivityPassed = () => {
@@ -619,18 +720,18 @@ const ActivityDetail = () => {
                         <div className="flex flex-col items-start">
                           <div className="flex items-baseline">
                             <span className="text-4xl font-bold text-gray-900">
-                              $
-                              {calculateDiscountedPrice(
+                              {formatPrice(
+                                calculateDiscountedPrice(
                                 activity.price,
                                 activity.specialDiscount
-                              )}
+                              ))}
                             </span>
                             <span className="ml-3  text-xl font-semibold text-red-600">
                               -{activity.specialDiscount}% Discount
                             </span>
                           </div>
                           <div className="text-xl text-gray-500 line-through mt-2">
-                            ${activity.price.toFixed(2)}
+                            {formatPrice(activity.price)}
                           </div>
                         </div>
                       </div>
@@ -976,7 +1077,7 @@ const ActivityDetail = () => {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Total Price</Label>
-              <div className="col-span-3">${calculateTotalPrice()}</div>
+              <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Payment Type</Label>
@@ -1035,7 +1136,7 @@ const ActivityDetail = () => {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Additional Price</Label>
               <div className="col-span-3">
-                ${(calculateDiscountedPrice(activity.price, activity.specialDiscount) * (numberOfTickets - userBooking.numberOfTickets)).toFixed(2)}
+                {(calculateDiscountedPrice(activity.price, activity.specialDiscount) * (numberOfTickets - userBooking.numberOfTickets)).toFixed(2)}
               </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">

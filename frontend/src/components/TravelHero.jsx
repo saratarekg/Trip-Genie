@@ -62,7 +62,7 @@ export default function TravelHero() {
       ))}
 
       {/* Overlay Text */}
-      <div className="absolute inset-0 bg-black bg-opacity-40">
+      <div className="absolute inset-0 bg-opacity-40">
         <div className="container mx-auto h-full px-4">
           <div className="flex h-[calc(100%-5rem)] flex-col justify-between">
             <div className="mt-20 max-w-2xl">
