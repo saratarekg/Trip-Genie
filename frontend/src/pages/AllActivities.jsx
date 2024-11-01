@@ -65,7 +65,7 @@ const ActivityCard = ({ activity, onSelect }) => {
       setCurrencySymbol(response.data);
 
     } catch (error) {
-      console.error("Error fetching currensy symbol:", error);
+      console.error("Error fetching currency symbol:", error);
     }
   };
 

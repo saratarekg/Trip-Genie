@@ -17,7 +17,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
-export default function Component() {
+function BookingPage() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [departureDate, setDepartureDate] = useState('')
@@ -33,6 +33,8 @@ export default function Component() {
   const [isLoading, setIsLoading] = useState(false)
   
   const itemsPerPage = 9
+
+
 
   async function refreshToken() {
     try {
@@ -122,8 +124,12 @@ export default function Component() {
     }
 
     filtered.sort((a, b) => {
-      const aValue = sortBy === 'price' ? parseFloat(a.price.total) : a.itineraries[0].segments[0].departure.at
-      const bValue = sortBy === 'price' ? parseFloat(b.price.total) : b.itineraries[0].segments[0].departure.at
+      const aValue = sortBy === 'price' ? parseFloat(a.price.total) : 
+                     sortBy === 'departure' ? a.itineraries[0].segments[0].departure.at :
+                     a.itineraries[0].segments[0].arrival.at
+      const bValue = sortBy === 'price' ? parseFloat(b.price.total) : 
+                     sortBy === 'departure' ? b.itineraries[0].segments[0].departure.at :
+                     b.itineraries[0].segments[0].arrival.at
       return sortOrder === 'asc' ? aValue - bValue : bValue - aValue
     })
 
@@ -145,8 +151,8 @@ export default function Component() {
   }
 
   return (
-    <div className="bg-[#F5EBE6] min-h-screen p-4 space-y-4">
-      <h1 className="text-3xl font-bold text-[#002B3D] text-center">Flight Booking</h1>
+    <div className="bg-white-100 min-h-screen p-4 space-y-4">
+      <h1 className="text-3xl font-bold text-blue-900 text-center">Flight Booking</h1>
 
       <Card className="bg-white shadow-lg">
         <CardContent className="p-4">
@@ -156,31 +162,31 @@ export default function Component() {
               placeholder="From (City Code)"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="border-2 border-[#00A7B3]"
+              className="border-2 border-amber-400"
             />
             <Input
               type="text"
               placeholder="To (City Code)"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="border-2 border-[#00A7B3]"
+              className="border-2 border-amber-400"
             />
             <Input
               type="date"
               value={departureDate}
               onChange={(e) => setDepartureDate(e.target.value)}
-              className="border-2 border-[#00A7B3]"
+              className="border-2 border-amber-400"
             />
             {tripType === 'round-trip' && (
               <Input
                 type="date"
                 value={returnDate}
                 onChange={(e) => setReturnDate(e.target.value)}
-                className="border-2 border-[#00A7B3]"
+                className="border-2 border-amber-400"
               />
             )}
             <Select value={tripType} onValueChange={setTripType}>
-              <SelectTrigger className="border-2 border-[#00A7B3]">
+              <SelectTrigger className="border-2 border-amber-400">
                 <SelectValue placeholder="Trip Type" />
               </SelectTrigger>
               <SelectContent>
@@ -193,7 +199,7 @@ export default function Component() {
             <Button
               onClick={handleSearch}
               disabled={isLoading}
-              className="bg-[#8B1E3F] hover:bg-[#6B172F] text-white font-semibold px-8"
+              className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-8"
             >
               {isLoading ? 'Searching...' : 'Search Flights'}
             </Button>
@@ -214,25 +220,25 @@ export default function Component() {
           <div className="flex flex-wrap gap-3 justify-between items-center">
             <div className="flex gap-3">
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[160px] border-[#00A7B3]">
+                <SelectTrigger className="w-[160px] border-amber-400">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="price">Price</SelectItem>
-                  <SelectItem value="departure">Departure Time</SelectItem>
+                  <SelectItem value="arrival">Arrival Time</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 variant="outline"
                 onClick={() => setSortOrder(order => order === 'asc' ? 'desc' : 'asc')}
-                className="flex gap-2 border-[#00A7B3]"
+                className="flex gap-2 border-amber-400"
               >
                 <ArrowUpDown className="h-4 w-4" />
                 {sortOrder.toUpperCase()}
               </Button>
             </div>
             <Select value={priceFilter} onValueChange={setPriceFilter}>
-              <SelectTrigger className="w-[160px] border-[#00A7B3]">
+              <SelectTrigger className="w-[160px] border-amber-400">
                 <SelectValue placeholder="Filter by price" />
               </SelectTrigger>
               <SelectContent>
@@ -250,7 +256,7 @@ export default function Component() {
                 <CardContent className="p-3">
                   <div className="flex flex-col h-full">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 bg-[#002B3D] text-white rounded">
+                      <div className="p-2 bg-blue-900 text-white rounded">
                         <Plane className="h-5 w-5" />
                       </div>
                       <h3 className="text-base font-semibold">
@@ -268,10 +274,10 @@ export default function Component() {
                       </div>
                     </div>
                     <div className="mt-auto pt-3 flex items-center justify-between">
-                      <p className="text-xl font-bold text-[#8B1E3F]">
+                      <p className="text-xl font-bold text-amber-600">
                         {flight.price.total} {flight.price.currency}
                       </p>
-                      <Button className="bg-[#002B3D] hover:bg-[#001F2D] text-white">
+                      <Button className="bg-blue-900 hover:bg-blue-800 text-white">
                         Select
                       </Button>
                     </div>
@@ -286,7 +292,7 @@ export default function Component() {
               <PaginationItem>
                 <PaginationPrevious 
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  className={`cursor-pointer ${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}`}
                 />
               </PaginationItem>
               {[...Array(totalPages)].map((_, i) => {
@@ -300,12 +306,16 @@ export default function Component() {
                       <PaginationLink
                         onClick={() => setCurrentPage(i + 1)}
                         isActive={currentPage === i + 1}
+                        className="cursor-pointer"
                       >
                         {i + 1}
                       </PaginationLink>
                     </PaginationItem>
                   )
-                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                } else if (
+                  (i === currentPage - 3 && i > 0) || 
+                  (i === currentPage + 3 && i < totalPages - 1)
+                ) {
                   return <PaginationEllipsis key={i} />
                 }
                 return null
@@ -313,7 +323,7 @@ export default function Component() {
               <PaginationItem>
                 <PaginationNext
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  className={`cursor-pointer ${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}`}
                 />
               </PaginationItem>
             </PaginationContent>
@@ -323,3 +333,5 @@ export default function Component() {
     </div>
   )
 }
+
+export default BookingPage; 
