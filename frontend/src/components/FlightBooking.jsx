@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowUpDown, Calendar, Plane } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { ArrowUpDown, Calendar, Plane, AlertCircle } from "lucide-react"
 import {
   Pagination,
   PaginationContent,
@@ -16,7 +17,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 
-function BookingPage() {
+export default function Component() {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [departureDate, setDepartureDate] = useState('')
@@ -28,27 +29,37 @@ function BookingPage() {
   const [sortBy, setSortBy] = useState('price')
   const [sortOrder, setSortOrder] = useState('asc')
   const [priceFilter, setPriceFilter] = useState('all')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   
-  const itemsPerPage = 5
+  const itemsPerPage = 9
 
   async function refreshToken() {
-    const API_KEY = import.meta.env.VITE_AMADEUS_API_KEY
-    const API_SECRET = import.meta.env.VITE_AMADEUS_API_SECRET
-    const response = await fetch('https://test.api.amadeus.com/v1/security/oauth2/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        'grant_type': 'client_credentials',
-        'client_id': API_KEY,
-        'client_secret': API_SECRET,
-      }),
-    })
-  
-    const data = await response.json()
-    setAccessToken(data.access_token)
-    setTimeout(refreshToken, 29 * 60 * 1000)
+    try {
+      const API_KEY = import.meta.env.VITE_AMADEUS_API_KEY
+      const API_SECRET = import.meta.env.VITE_AMADEUS_API_SECRET
+      const response = await fetch('https://test.api.amadeus.com/v1/security/oauth2/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          'grant_type': 'client_credentials',
+          'client_id': API_KEY,
+          'client_secret': API_SECRET,
+        }),
+      })
+    
+      if (!response.ok) {
+        throw new Error('Failed to refresh access token')
+      }
+
+      const data = await response.json()
+      setAccessToken(data.access_token)
+      setTimeout(refreshToken, 29 * 60 * 1000)
+    } catch (err) {
+      setError('Authentication failed. Please try again later.')
+    }
   }
 
   useEffect(() => {
@@ -57,22 +68,42 @@ function BookingPage() {
 
   const handleSearch = async () => {
     if (returnDate && new Date(returnDate) < new Date(departureDate)) {
-      alert("Return date cannot be before departure date.")
+      setError("Return date cannot be before departure date.")
       return
     }    
 
-    const response = await fetch(
-      `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}&returnDate=${tripType === 'round-trip' ? returnDate : ''}&adults=1`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    )
+    setIsLoading(true)
+    setError('')
 
-    const data = await response.json()
-    setFlights(data.data)
-    setCurrentPage(1)
+    try {
+      const response = await fetch(
+        `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}&returnDate=${tripType === 'round-trip' ? returnDate : ''}&adults=1&nonStop=true`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch flights')
+      }
+
+      const data = await response.json()
+      
+      if (!data.data || data.data.length === 0) {
+        setError('No flights found for your search criteria.')
+        setFlights([])
+      } else {
+        setFlights(data.data)
+        setCurrentPage(1)
+      }
+    } catch (err) {
+      setError('Failed to fetch flights. Please try again later.')
+      setFlights([])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const filterFlights = (flights) => {
@@ -114,42 +145,42 @@ function BookingPage() {
   }
 
   return (
-    <div className="bg-amber-50 min-h-screen p-6 space-y-6">
-      <h1 className="text-3xl font-bold text-teal-600 text-center">Flight Booking</h1>
+    <div className="bg-[#F5EBE6] min-h-screen p-4 space-y-4">
+      <h1 className="text-3xl font-bold text-[#002B3D] text-center">Flight Booking</h1>
 
       <Card className="bg-white shadow-lg">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <Input
               type="text"
               placeholder="From (City Code)"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="border-2 border-cyan-300"
+              className="border-2 border-[#00A7B3]"
             />
             <Input
               type="text"
               placeholder="To (City Code)"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="border-2 border-cyan-300"
+              className="border-2 border-[#00A7B3]"
             />
             <Input
               type="date"
               value={departureDate}
               onChange={(e) => setDepartureDate(e.target.value)}
-              className="border-2 border-cyan-300"
+              className="border-2 border-[#00A7B3]"
             />
             {tripType === 'round-trip' && (
               <Input
                 type="date"
                 value={returnDate}
                 onChange={(e) => setReturnDate(e.target.value)}
-                className="border-2 border-cyan-300"
+                className="border-2 border-[#00A7B3]"
               />
             )}
             <Select value={tripType} onValueChange={setTripType}>
-              <SelectTrigger className="border-2 border-cyan-300">
+              <SelectTrigger className="border-2 border-[#00A7B3]">
                 <SelectValue placeholder="Trip Type" />
               </SelectTrigger>
               <SelectContent>
@@ -158,23 +189,32 @@ function BookingPage() {
               </SelectContent>
             </Select>
           </div>
-          <div className="mt-4 flex justify-center">
+          <div className="mt-3 flex justify-center">
             <Button
               onClick={handleSearch}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-8"
+              disabled={isLoading}
+              className="bg-[#8B1E3F] hover:bg-[#6B172F] text-white font-semibold px-8"
             >
-              Search Flights
+              {isLoading ? 'Searching...' : 'Search Flights'}
             </Button>
           </div>
         </CardContent>
       </Card>
 
+      {error && (
+        <Alert variant="destructive" className="bg-red-50 border-red-200">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
       {flights.length > 0 && (
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-4 justify-between items-center">
-            <div className="flex gap-4">
+          <div className="flex flex-wrap gap-3 justify-between items-center">
+            <div className="flex gap-3">
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[160px] border-[#00A7B3]">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -185,14 +225,14 @@ function BookingPage() {
               <Button
                 variant="outline"
                 onClick={() => setSortOrder(order => order === 'asc' ? 'desc' : 'asc')}
-                className="flex gap-2"
+                className="flex gap-2 border-[#00A7B3]"
               >
                 <ArrowUpDown className="h-4 w-4" />
                 {sortOrder.toUpperCase()}
               </Button>
             </div>
             <Select value={priceFilter} onValueChange={setPriceFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[160px] border-[#00A7B3]">
                 <SelectValue placeholder="Filter by price" />
               </SelectTrigger>
               <SelectContent>
@@ -204,37 +244,35 @@ function BookingPage() {
             </Select>
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {paginatedFlights.map((flight, index) => (
               <Card key={index} className="overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 bg-teal-600 text-white rounded">
-                        <Plane className="h-6 w-6" />
+                <CardContent className="p-3">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-[#002B3D] text-white rounded">
+                        <Plane className="h-5 w-5" />
                       </div>
-                      <div>
-                        <h3 className="text-lg font-semibold">
-                          {flight.itineraries[0].segments[0].departure.iataCode} → {flight.itineraries[0].segments[0].arrival.iataCode}
-                        </h3>
-                        <div className="text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            Departure: {formatDateTime(flight.itineraries[0].segments[0].departure.at)}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            Arrival: {formatDateTime(flight.itineraries[0].segments[0].arrival.at)}
-                          </div>
-                        </div>
+                      <h3 className="text-base font-semibold">
+                        {flight.itineraries[0].segments[0].departure.iataCode} → {flight.itineraries[0].segments[0].arrival.iataCode}
+                      </h3>
+                    </div>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>Departure: {formatDateTime(flight.itineraries[0].segments[0].departure.at)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>Arrival: {formatDateTime(flight.itineraries[0].segments[0].arrival.at)}</span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-orange-500">
+                    <div className="mt-auto pt-3 flex items-center justify-between">
+                      <p className="text-xl font-bold text-[#8B1E3F]">
                         {flight.price.total} {flight.price.currency}
                       </p>
-                      <Button className="mt-2 bg-teal-600 hover:bg-teal-700">
-                        Select Flight
+                      <Button className="bg-[#002B3D] hover:bg-[#001F2D] text-white">
+                        Select
                       </Button>
                     </div>
                   </div>
@@ -285,7 +323,3 @@ function BookingPage() {
     </div>
   )
 }
-
-export default BookingPage;
-
-
