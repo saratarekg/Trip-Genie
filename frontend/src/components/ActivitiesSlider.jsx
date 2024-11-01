@@ -43,7 +43,7 @@ export function Activities() {
       }
     };
 
-    // fetchUserInfo();
+    fetchUserInfo();
     fetchActivities();
     setIsLoading(false);
   }, []);
@@ -52,116 +52,107 @@ export function Activities() {
     return <div>Error: {error}</div>;
   }
 
-  // const fetchExchangeRate = async () => {
-  //   try {
-  //     const token = Cookies.get("jwt");
-  //       const response = await fetch(
-  //         `http://localhost:4000/${userRole}/populate`,
-  //         {
-  //           method: 'POST',
-  //           headers: {
-  //             'Authorization': `Bearer ${token}`,
-  //             'Content-Type': 'application/json',  // Ensure content type is set to JSON
-  //           },
-  //           body: JSON.stringify({
-  //             base: historicalPlace.currency,     // Sending base currency ID
-  //             target: userPreferredCurrency._id,      // Sending target currency ID
-  //           }),
-  //         }
-  //       );
-  //     // Parse the response JSON
-  //   const data = await response.json();
+  const fetchExchangeRate = async (activityCurrency) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            base: activityCurrency,
+            target: userPreferredCurrency._id,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setExchangeRates((prevRates) => ({
+          ...prevRates,
+          [activityCurrency]: data.conversion_rate,
+        }));
+      } else {
+        console.error('Error in fetching exchange rate:', data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
 
-  //   if (response.ok) {
-  //     setExchangeRates(data.conversion_rate);
-  //   } else {
-  //     // Handle possible errors
-  //     console.error('Error in fetching exchange rate:', data.message);
-  //   }
-  //   } catch (error) {
-  //     console.error("Error fetching exchange rate:", error);
-  //   }
-  // };
+  // Fetch user's preferred currency symbol
+  const getCurrencySymbol = async (activityCurrency) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        `http://localhost:4000/${userRole}/getCurrency/${activityCurrency}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCurrencySymbol(response.data);
+    } catch (error) {
+      console.error("Error fetching currency symbol:", error);
+    }
+  };
 
-  // const getCurrencySymbol = async () => {
-  //   try {
-  //     const token = Cookies.get("jwt");
-  //     const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${historicalPlace.currency}`, {
-  //       headers: { Authorization: `Bearer ${token}` }
-  //     });
+  // Format price with exchange rate conversion
+  const formatPrice = (price, currency) => {
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      if (userPreferredCurrency._id === currency) {
+        return `${userPreferredCurrency.symbol}${price}`;
+      } else if (exchangeRates[currency]) {
+        const convertedPrice = price * exchangeRates[currency];
+        return `${userPreferredCurrency.symbol}${convertedPrice.toFixed(2)}`;
+      }
+    } else if (currencySymbol) {
+      return `${currencySymbol.symbol}${price}`;
+    }
+    return `$${price}`;
+  };
 
-  //     setCurrencySymbol(response.data);
+  // Fetch user info and preferred currency
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
 
-  //   } catch (error) {
-  //     console.error("Error fetching currensy symbol:", error);
-  //   }
-  // };
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const currencyId = response.data.preferredCurrency;
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
 
-  // const formatPrice = (price, type) => {
-  //   if(historicalPlace){
-  //   if (userRole === 'tourist' && userPreferredCurrency) {
-  //     if (userPreferredCurrency === historicalPlace.currency) {
-  //       return `${userPreferredCurrency.symbol}${price}/Day`;
-  //     } else {
-  //       const exchangedPrice = price * exchangeRates;
-  //       return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}/Day`;
-  //     }
-  //   } else {
-  //     if(currencySymbol){
-  //     return `${currencySymbol.symbol}${price}/Day`;
-  //     }
-  //   }
-  // }
-  // };
-
-
-  // const fetchUserInfo = async () => {
-  //   const role = Cookies.get("role") || "guest";
-  //   setUserRole(role);
-
-  //   if (role === 'tourist') {
-  //     try {
-  //       const token = Cookies.get("jwt");
-  //       const response = await axios.get('http://localhost:4000/tourist/', {
-  //         headers: { Authorization: `Bearer ${token}` }
-  //       });
-  //       const currencyId = response.data.preferredCurrency
-
-  //       const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-  //         headers: { Authorization: `Bearer ${token}` }
-  //       });
-  //       setUserPreferredCurrency(response2.data);
-
-  //     } catch (error) {
-  //       console.error("Error fetching user profile:", error);
-  //     }
-  //   }
-  // };
-
-
-  // useEffect(() => {
-  //   if (historicalPlace ) {
-  //     if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== historicalPlace.currency) {
-  //       fetchExchangeRate();
-  //     }
-  //     else{
-  //       getCurrencySymbol();
-  //     }
-  //   }
-  // }, [userRole, userPreferredCurrency, historicalPlace]);
+  useEffect(() => {
+    activities.forEach((activity) => {
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency._id !== activity.currency) {
+        fetchExchangeRate(activity.currency);
+      } else {
+        getCurrencySymbol(activity.currency);
+      }
+    });
+  }, [userRole, userPreferredCurrency, activities]);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => {
-      if (prevIndex < activities.length - visibleSlides) {
-        return prevIndex + 1;
-      }
-      return prevIndex;
-    });
+    setCurrentIndex((prevIndex) => (prevIndex < activities.length - visibleSlides ? prevIndex + 1 : prevIndex));
   };
 
   const prevSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : prevIndex));
   };
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -241,7 +232,7 @@ export function Activities() {
                 <p className="text-sm text-gray-600 mb-2">{`Location: ${act.location.address}`}</p>
                 <p className="text-sm text-gray-600 mb-2">{`Duration: ${act.duration}`}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold">From ${act.price}</span>
+                  <span className="text-lg font-bold">From {formatPrice(act.price, act.currency)}</span>
                   {/* Details button with hover effect */}
                   <Link to={`/activity/${act._id}`}>
                   <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
