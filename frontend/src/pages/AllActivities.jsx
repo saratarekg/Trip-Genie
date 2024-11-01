@@ -23,6 +23,7 @@ const ActivityCard = ({ activity, onSelect }) => {
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
+  const [fetchedUserRole, setFetchedUserRole] = useState(false);
 
   const fetchExchangeRate = async () => {
     try {
@@ -102,6 +103,7 @@ const ActivityCard = ({ activity, onSelect }) => {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserPreferredCurrency(response2.data);
+        setFetchedUserRole(true);
 
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -110,13 +112,14 @@ const ActivityCard = ({ activity, onSelect }) => {
   };
 
   useEffect(() => {
-    if(activity)
+    if(!fetchedUserRole && userRole && activity && !userPreferredCurrency){
     fetchUserInfo();
-  }, [activity]);
+    }
+  }, [userPreferredCurrency, fetchedUserRole]);
 
 
   useEffect(() => {
-    if (activity) {
+    if (activity && fetchedUserRole) {
       if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== activity.currency) {
         fetchExchangeRate();
       }

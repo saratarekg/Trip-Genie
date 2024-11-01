@@ -33,6 +33,7 @@ import {
   Share2,
   Link,
   MessageSquare,
+  Banknote,
   Smile,
   Frown
 } from 'lucide-react';
@@ -157,9 +158,108 @@ const ItineraryDetail = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [userBookings, setUserBookings] = useState([]);
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
 
   const [open, setOpen] = useState(false); // Added state for popover
   const [isToastOpen, setIsToastOpen] = useState(false);
+  const fetchExchangeRate = async () => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: itinerary.currency,     // Sending base currency ID
+              target: userPreferredCurrency._id,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRates(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const getCurrencySymbol = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${itinerary.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const formatPrice = (price, type) => {
+    if(itinerary){
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      if (userPreferredCurrency === itinerary.currency) {
+        return `${userPreferredCurrency.symbol}${price}`;
+      } else {
+        const exchangedPrice = price * exchangeRates;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+    } else {
+      if(currencySymbol){
+      return `${currencySymbol.symbol}${price}`;
+      }
+    }
+  }
+  };
+
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency
+
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (itinerary) {
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== itinerary.currency) {
+        fetchExchangeRate();
+      }
+      else{
+        getCurrencySymbol();
+      }
+    }
+  }, [userRole, userPreferredCurrency, itinerary]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -340,6 +440,7 @@ const ItineraryDetail = () => {
     };
   
     fetchItineraryDetails();
+    fetchUserInfo();
   }, [id, userRole]);
 
   const isItineraryAvailable = () => {
@@ -684,9 +785,9 @@ const ItineraryDetail = () => {
                     )}
 
                     <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
-                      <DollarSign className="w-8 h-8 text-blue-500 mr-2" />
-                      <span className="text-2xl font-semibold">
-                        {itinerary.price || "N/A"}
+                      {/* <DollarSign className="w-8 h-8 text-blue-500 mr-2" /> */}
+                      <span className="text-2xl text-blue-500 font-semibold">
+                        {formatPrice(itinerary.price) || "N/A"}
                       </span>
                     </div>
 
@@ -714,9 +815,9 @@ const ItineraryDetail = () => {
                       </span>
                     </div>
                     <div className="flex items-center">
-                      <DollarSign className="w-6 h-6 mr-2 text-orange-500" />
+                      <Banknote className="w-6 h-6 mr-2 text-orange-500" />
                       <span className="text-gray-700">
-                        Price: ${itinerary.price}
+                        Price: {formatPrice(itinerary.price)}
                       </span>
                     </div>
                     <div className="flex items-center">
@@ -1115,7 +1216,7 @@ const ItineraryDetail = () => {
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label className="text-right">Total Price</Label>
-        <div className="col-span-3">${calculateTotalPrice()}</div>
+        <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label className="text-right">Payment Type</Label>

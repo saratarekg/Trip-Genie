@@ -26,6 +26,11 @@ const itinerarySchema = new Schema(
       type: Number,
       required: true,
     },
+    currency: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Currency",
+      required: true,
+    },
     availableDates: [
       {
         date: {
