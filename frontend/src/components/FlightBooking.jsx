@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ArrowUpDown, Calendar, Plane, AlertCircle } from "lucide-react"
+import { ArrowUpDown, Calendar, Plane, AlertCircle, X } from "lucide-react"
 import {
   Pagination,
   PaginationContent,
@@ -16,6 +16,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 function BookingPage() {
   const [from, setFrom] = useState('')
@@ -31,10 +39,9 @@ function BookingPage() {
   const [priceFilter, setPriceFilter] = useState('all')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedFlight, setSelectedFlight] = useState(null)
   
   const itemsPerPage = 9
-
-
 
   async function refreshToken() {
     try {
@@ -79,7 +86,7 @@ function BookingPage() {
 
     try {
       const response = await fetch(
-        `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}&returnDate=${tripType === 'round-trip' ? returnDate : ''}&adults=1&nonStop=true`,
+        `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}${tripType === 'round-trip' ? `&returnDate=${returnDate}` : ''}&adults=1&nonStop=true`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -272,15 +279,67 @@ function BookingPage() {
                         <Calendar className="h-4 w-4" />
                         <span>Arrival: {formatDateTime(flight.itineraries[0].segments[0].arrival.at)}</span>
                       </div>
+                      {flight.itineraries[1] && (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span>Return Departure: {formatDateTime(flight.itineraries[1].segments[0].departure.at)}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <span>Return Arrival: {formatDateTime(flight.itineraries[1].segments[0].arrival.at)}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                     <div className="mt-auto pt-3 flex items-center justify-between">
                       <p className="text-xl font-bold text-amber-600">
                         {flight.price.total} {flight.price.currency}
                       </p>
-                      <Button className="bg-blue-900 hover:bg-blue-800 text-white">
-                        Select
-                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="bg-blue-900 hover:bg-blue-800 text-white" onClick={() => setSelectedFlight(flight)}>
+                            See Flight
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                          <DialogHeader>
+                            <DialogTitle>Flight Details</DialogTitle>
+                            <DialogDescription>
+                              Complete information about the selected flight.
+                            </DialogDescription>
+                          </DialogHeader>
+                          {selectedFlight && (
+                            <div className="mt-4">
+                              <h4 className="font-semibold mb-2">Outbound Flight</h4>
+                              {selectedFlight.itineraries[0].segments.map((segment, index) => (
+                                <div key={index} className="mb-2">
+                                  <p>From: {segment.departure.iataCode} at {formatDateTime(segment.departure.at)}</p>
+                                  <p>To: {segment.arrival.iataCode} at {formatDateTime(segment.arrival.at)}</p>
+                                  <p>Flight: {segment.carrierCode} {segment.number}</p>
+                                </div>
+                              ))}
+                              {selectedFlight.itineraries[1] && (
+                                <>
+                                  <h4 className="font-semibold mb-2 mt-4">Return Flight</h4>
+                                  {selectedFlight.itineraries[1].segments.map((segment, index) => (
+                                    <div key={index} className="mb-2">
+                                      <p>From: {segment.departure.iataCode} at {formatDateTime(segment.departure.at)}</p>
+                                      <p>To: {segment.arrival.iataCode} at {formatDateTime(segment.arrival.at)}</p>
+                                      <p>Flight: {segment.carrierCode} {segment.number}</p>
+                                    </div>
+                                  ))}
+                                </>
+                              )}
+                              <h4 className="font-semibold mt-4">Price Details</h4>
+                              <p>Total: {selectedFlight.price.total} {selectedFlight.price.currency}</p>
+                              <Button className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white">Book Now</Button>
+                            </div>
+                          )}
+                        </DialogContent>
+                      </Dialog>
                     </div>
+                  
                   </div>
                 </CardContent>
               </Card>
@@ -334,4 +393,4 @@ function BookingPage() {
   )
 }
 
-export default BookingPage; 
+export default BookingPage
