@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import TravelBookingForm from "./travel-booking-form";
 
 const images = [
   "/images/travelHero(1).jpeg",
@@ -61,18 +62,17 @@ export default function TravelHero() {
         </div>
       ))}
 
-      {/* Overlay Text */}
-      <div className="absolute inset-0 bg-opacity-40">
-        <div className="container mx-auto h-full px-4">
-          <div className="flex h-[calc(100%-5rem)] flex-col justify-between">
-            <div className="mt-20 max-w-2xl">
-              <h1 className="mb-4 text-5xl font-bold text-white">
-                Start your unforgettable journey with us.
-              </h1>
-              <p className="text-xl text-white">
-                The best travel for your journey begins now
-              </p>
-            </div>
+      {/* Overlay Text and Booking Form */}
+      <div className="absolute inset-0 bg-opacity-100">
+        <div className="container mx-auto h-full px-4 flex flex-col justify-center">
+          <div className="max-w-2xl">
+            <h1 className="mb-4 text-5xl font-bold text-white">
+              Start your unforgettable journey with us.
+            </h1>
+            <p className="text-xl text-white mb-8">
+              The best travel for your journey begins now
+            </p>
+            {/* <TravelBookingForm /> */}
           </div>
         </div>
       </div>
