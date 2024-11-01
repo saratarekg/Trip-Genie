@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Cookies from 'js-cookie';
+import axios from "axios";
 import { XCircle, CheckCircle, ChevronLeft, Trash, Plus } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ export default function UpdateItinerary() {
     timeline: '',
     language: '',
     price: '',
+    currency: '',
     pickUpLocation: '',
     dropOffLocation: '',
     accessibility: false,
@@ -62,6 +64,8 @@ export default function UpdateItinerary() {
   const [availableActivities, setAvailableActivities] = useState([]);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(null);
+  const [currencies, setCurrencies] = useState([]);
+  const [selectedCurrency, setSelectedCurrency] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -99,6 +103,7 @@ export default function UpdateItinerary() {
     };
 
     fetchItineraryDetails();
+    fetchCurrencies();
   }, [id, userRole]);
 
   const handleChange = (e) => {
@@ -108,6 +113,12 @@ export default function UpdateItinerary() {
 
   const handleLanguageChange = (value) => {
     setItinerary((prev) => ({ ...prev, language: value }));
+  };
+
+  const handleCurrencyChange = (value) => {
+    const selected = currencies.find(c => c._id === value);
+    setSelectedCurrency(selected);
+    setItinerary(prev => ({ ...prev, currency: value }));
   };
 
   const handleSwitchChange = (name) => {
@@ -179,12 +190,26 @@ export default function UpdateItinerary() {
     }));
   };
 
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get('jwt');
+      const response = await axios.get(`http://localhost:4000/tour-guide/currencies`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCurrencies(response.data);
+    } catch (err) {
+      console.error('Error fetching currencies:', err.message);
+      setError('Failed to fetch currencies. Please try again.');
+    }
+  };
+
   const isFormValid = useMemo(() => {
     return (
       itinerary.title.trim() !== '' &&
       itinerary.timeline.trim() !== '' &&
       itinerary.language !== '' &&
       itinerary.price !== '' &&
+      itinerary.currency !== '' &&
       !isNaN(itinerary.price) &&
       Number(itinerary.price) >= 0 &&
       itinerary.pickUpLocation.trim() !== '' &&
@@ -315,6 +340,21 @@ export default function UpdateItinerary() {
                   {(itinerary.price === '' || isNaN(itinerary.price) || Number(itinerary.price) < 0) && 
                     <span className="text-red-500">Price must be a positive number.</span>}
                 </div>
+                <div>
+                <Label htmlFor="currency">Currency</Label>
+                <Select value={itinerary.currency} onValueChange={handleCurrencyChange}>
+                  <SelectTrigger id="currency">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map((currency) => (
+                      <SelectItem key={currency._id} value={currency._id}>
+                        {currency.code} - {currency.name} ({currency.symbol})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               </div>
               <div className="space-y-4">
                 <div>

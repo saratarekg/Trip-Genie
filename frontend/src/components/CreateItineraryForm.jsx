@@ -5,6 +5,7 @@ import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
+import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ const formSchema = z.object({
   timeline: z.string().min(1, "Timeline is required"),
   language: z.string().min(1, "Language is required"),
   price: z.number().min(1, "Price is required"),
+  currency: z.string().min(1, 'Currency is required'),
   pickUpLocation: z.string().min(1, "Pick-up location is required"),
   dropOffLocation: z.string().min(1, "Drop-off location is required"),
   activities: z
@@ -49,6 +51,7 @@ const ItineraryForm = () => {
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
   const [showDialog, setShowDialog] = useState(false);
+  const [currencies, setCurrencies] = useState([]);
   
 
   const {
@@ -65,6 +68,7 @@ const ItineraryForm = () => {
       timeline: "",
       language: "",
       price: "",
+      currency:"",
       availableDates: [{ date: "", times: [{ startTime: "", endTime: "" }] }],
       activities: [],
       pickUpLocation: "",
@@ -100,6 +104,7 @@ const ItineraryForm = () => {
       }
     };
     fetchActivities();
+    fetchCurrencies();
   }, []);
 
   const onSubmit = async (data) => {
@@ -137,6 +142,19 @@ const ItineraryForm = () => {
     setShowDialog(false)
     window.location.reload();
     
+  };
+
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get('jwt');
+      const response = await axios.get(`http://localhost:4000/tour-guide/currencies`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCurrencies(response.data);
+    } catch (err) {
+      console.error('Error fetching currencies:', err.message);
+      setError('Failed to fetch currencies. Please try again.');
+    }
   };
 
   return (
@@ -205,6 +223,23 @@ const ItineraryForm = () => {
           {errors.price && (
             <span className="text-red-500">{errors.price.message}</span>
           )}
+        </div>
+
+        <div>
+          <Label htmlFor="currency">Currency </Label>
+          <select
+            {...register('currency')}
+            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+            id="currency"
+          >
+            <option value="">Select currency</option>
+            {currencies.map((currency) => (
+              <option key={currency._id} value={currency._id}>
+                {currency.code} - {currency.name}  ({currency.symbol})
+              </option>
+            ))}
+          </select>
+          {errors.currency && <span className="text-red-500">{errors.currency.message}</span>}
         </div>
 
         <div className="mb-4">

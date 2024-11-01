@@ -40,7 +40,115 @@ const ItineraryCard = ({
   canModify,
   setShowDeleteConfirm,
   setSelectedItinerary,
-}) => (
+}) =>{
+
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
+
+  const fetchExchangeRate = async () => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: itinerary.currency,     // Sending base currency ID
+              target: userPreferredCurrency._id,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRates(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const getCurrencySymbol = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${itinerary.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const formatPrice = (price, type) => {
+    if(itinerary){
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      if (userPreferredCurrency === itinerary.currency) {
+        return `${userPreferredCurrency.symbol}${price}`;
+      } else {
+        const exchangedPrice = price * exchangeRates;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+    } else {
+      if(currencySymbol){
+      return `${currencySymbol.symbol}${price}`;
+      }
+    }
+  }
+  };
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency
+
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if(itinerary)
+    fetchUserInfo();
+  }, [itinerary]);
+
+
+  useEffect(() => {
+    if (itinerary) {
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== itinerary.currency) {
+        fetchExchangeRate();
+      }
+      else{
+        getCurrencySymbol();
+      }
+    }
+  }, [userRole, userPreferredCurrency, itinerary]);
+  return (
   <Card
     className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
     onClick={() => onSelect(itinerary._id)}
@@ -80,7 +188,7 @@ const ItineraryCard = ({
     <CardContent className="p-4 pt-0 space-y-2">
       <div className="flex justify-between items-center">
         <span className="text-lg font-bold text-primary">
-          ${itinerary.price}/Day
+          {formatPrice(itinerary.price)}/Day
         </span>
         <span className="text-sm text-muted-foreground">
           {itinerary.language}
@@ -137,6 +245,7 @@ const ItineraryCard = ({
     )}
   </Card>
 );
+}
 
 export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);

@@ -18,7 +18,11 @@ const router = express.Router();
 router.post('/populate', currencyController.getExchangeRate);
 router.get('/getCurrency/:id', currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
+
 // router.get('/fill', currencyController.populateCurrencies);
+
+router.get("/currencies/code", touristController.getCurrencyCode);
+
 
 router.put("/", touristController.updateTouristProfile);
 router.put("/preferences", touristController.updatePreferences);
