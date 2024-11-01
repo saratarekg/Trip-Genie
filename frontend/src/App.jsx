@@ -51,6 +51,7 @@ import NotFound from "./components/NotFound.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import TouristActivities from "./pages/TouristActivities.jsx";
 import { ProductArchive } from "./components/product-archive.jsx";
+import BookingPage from "./components/FlightBooking.jsx";
 import UserFiles from "./pages/UserFiles.jsx";
 
 function ScrollToTop() {
@@ -367,6 +368,15 @@ function AppContent() {
                 ]}
               >
                 <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/flights"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <BookingPage/>
               </ProtectedRoute>
             }
           />

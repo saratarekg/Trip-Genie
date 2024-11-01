@@ -79,8 +79,6 @@ const getActivitiesByPreferences = async (req, res) => {
     const {
       budget,
       categories,
-      historicalPlacePeriod,
-      historicalPlaceType,
       price,
       tourLanguages,
       tourType,
