@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import TermsAndConditions from "@/components/TermsAndConditions";
+import { ImageCropper } from "@/components/ImageCropper";
 const phoneValidator = (value) => {
   const phoneNumber = parsePhoneNumberFromString("+" + value);
   if (!phoneNumber || !phoneNumber.isValid()) {
@@ -312,6 +313,7 @@ export function SignupForm() {
       termsDiv.scrollTop + termsDiv.clientHeight >= termsDiv.scrollHeight - 1;
     if (scrollBottom) {
       setCanAcceptTerms(true); // Enable checkbox when scrolled to bottom
+      setShowScrollMessage(false); // Hide scroll message when scrolled to bottom
     }
   };
 
@@ -496,7 +498,6 @@ export function SignupForm() {
         }
       });
 
-      console.log(finalData);
       await axios.post(
         `http://localhost:4000/auth/sign-up/${userType}`,
         finalData,
@@ -523,15 +524,19 @@ export function SignupForm() {
     }
   };
 
-  const handlePictureUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePicture(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+  // const handlePictureUpload = (e) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setProfilePicture(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
+
+  const handleImageCropped = (croppedImage) => {
+    setProfilePicture(croppedImage);
   };
 
   const handleCheckboxClick = () => {
@@ -1014,7 +1019,7 @@ export function SignupForm() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Profile Picture
                 </label>
-                <label className="inline-block cursor-pointer bg-gray-100 px-4 py-2 rounded-lg text-violet-700">
+                {/* <label className="inline-block cursor-pointer bg-gray-100 px-4 py-2 rounded-lg text-violet-700">
                   <div className="text-sm">
                     {profilePicture
                       ? "Profile picture selected"
@@ -1027,12 +1032,19 @@ export function SignupForm() {
                     onChange={handlePictureUpload}
                     className="hidden"
                   />
-                </label>
+                </label> */}
+                <ImageCropper
+                  onImageCropped={handleImageCropped}
+                  currentImage={profilePicture}
+                />
               </div>
               <Button
                 type="button"
                 className="w-full bg-gray-300 hover:bg-gray-400"
-                onClick={() => setStage(stage + 1)}
+                onClick={() => {
+                  setProfilePicture(null);
+                  setStage(stage + 1);
+                }}
                 disabled={isLoading}
               >
                 Skip for now
@@ -1058,30 +1070,47 @@ export function SignupForm() {
                 </div>
               </div>
 
-              <div className="flex flex-row items-start space-x-3 space-y-0">
-                <Checkbox
-                  checked={termsAccepted}
-                  onCheckedChange={handleCheckboxClick}
-                  disabled={!canAcceptTerms}
-                  aria-describedby="terms-description"
-                />
-                {showScrollMessage && (
-                  <div
-                    className="mt-5"
-                    style={{ color: "red", fontSize: "16px" }}
-                  >
-                    Please scroll to the bottom of the terms and conditions
-                    before accepting.
-                  </div>
-                )}
+              <div className="flex flex-row items-start space-x-3 space-y-0.5">
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <Checkbox
+                    checked={termsAccepted}
+                    onCheckedChange={() => setTermsAccepted(!termsAccepted)}
+                    disabled={!canAcceptTerms}
+                    aria-describedby="terms-description"
+                  />
+                  {!canAcceptTerms && (
+                    <div
+                      onClick={() => {
+                        setShowScrollMessage(true);
+                      }}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "transparent",
+                      }}
+                    />
+                  )}
+                </div>
                 <div className="space-y-1 leading-none">
                   <label>I accept and agree to the terms and conditions</label>
                   {showError && (
                     <div
-                      className="mt-5"
+                      className="mt-3"
                       style={{ color: "red", fontSize: "16px" }}
                     >
                       Please accept the terms and conditions.
+                    </div>
+                  )}
+                  {showScrollMessage && (
+                    <div
+                      className="mt-3"
+                      style={{ color: "red", fontSize: "16px" }}
+                    >
+                      Please scroll to the bottom of the terms and conditions
+                      before accepting.
                     </div>
                   )}
                 </div>
@@ -1099,27 +1128,20 @@ export function SignupForm() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Profile Picture
+                  {userType === "tour-guide" ? "Profile Picture" : "Logo"}
                 </label>
-                <label className="inline-block cursor-pointer bg-gray-100 px-4 py-2 rounded-lg text-violet-700">
-                  <div className="text-sm">
-                    {profilePicture
-                      ? "Profile picture selected"
-                      : "Select a file..."}
-                  </div>
-                  <Input
-                    id="profilePicture"
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePictureUpload}
-                    className="hidden"
-                  />
-                </label>
+                <ImageCropper
+                  onImageCropped={handleImageCropped}
+                  currentImage={profilePicture}
+                />
               </div>
               <Button
                 type="button"
                 className="w-full bg-gray-300 hover:bg-gray-400"
-                onClick={() => setStage(stage + 1)}
+                onClick={() => {
+                  setProfilePicture(null);
+                  setStage(stage + 1);
+                }}
                 disabled={isLoading}
               >
                 Skip for now
@@ -1144,21 +1166,47 @@ export function SignupForm() {
               </div>
             </div>
 
-            <div className="flex flex-row items-start space-x-3 space-y-0">
-              <Checkbox
-                checked={termsAccepted}
-                onCheckedChange={() => setTermsAccepted(!termsAccepted)}
-                disabled={!canAcceptTerms}
-                aria-describedby="terms-description"
-              />
+            <div className="flex flex-row items-start space-x-3 space-y-0.5">
+              <div style={{ position: "relative", display: "inline-block" }}>
+                <Checkbox
+                  checked={termsAccepted}
+                  onCheckedChange={() => setTermsAccepted(!termsAccepted)}
+                  disabled={!canAcceptTerms}
+                  aria-describedby="terms-description"
+                />
+                {!canAcceptTerms && (
+                  <div
+                    onClick={() => {
+                      setShowScrollMessage(true);
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: "transparent",
+                    }}
+                  />
+                )}
+              </div>
               <div className="space-y-1 leading-none">
                 <label>I accept and agree to the terms and conditions</label>
                 {showError && (
                   <div
-                    className="mt-5"
+                    className="mt-3"
                     style={{ color: "red", fontSize: "16px" }}
                   >
                     Please accept the terms and conditions.
+                  </div>
+                )}
+                {showScrollMessage && (
+                  <div
+                    className="mt-3"
+                    style={{ color: "red", fontSize: "16px" }}
+                  >
+                    Please scroll to the bottom of the terms and conditions
+                    before accepting.
                   </div>
                 )}
               </div>

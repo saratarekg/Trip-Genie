@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ImageIcon } from "lucide-react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
-export function ImageCropper({ onImageCropped }) {
-  const [selectedImage, setSelectedImage] = useState(null);
+export function ImageCropper({ onImageCropped, currentImage }) {
+  const [selectedImage, setSelectedImage] = useState(currentImage);
   const [crop, setCrop] = useState({
     unit: "%",
     width: 90,
@@ -46,15 +46,8 @@ export function ImageCropper({ onImageCropped }) {
       crop.height
     );
 
-    return new Promise((resolve) => {
-      canvas.toBlob(
-        (blob) => {
-          if (blob) resolve(blob);
-        },
-        "image/jpeg",
-        1
-      );
-    });
+    // Return the base64 encoding of the cropped image
+    return canvas.toDataURL("image/jpeg", 1);
   };
 
   const handleCropComplete = async () => {
@@ -68,12 +61,12 @@ export function ImageCropper({ onImageCropped }) {
     <div className="flex flex-col items-center justify-center gap-4 p-4 border-2 border-dashed rounded-lg">
       {!selectedImage ? (
         <div className="text-center">
-          <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <div className="mt-4 flex text-sm leading-6 text-gray-600">
-            <label
-              htmlFor="file-upload"
-              className="relative cursor-pointer rounded-md bg-white font-semibold text-primary hover:text-primary/80"
-            >
+          <label
+            htmlFor="file-upload"
+            className="relative cursor-pointer rounded-md bg-white font-semibold text-primary hover:text-primary/80"
+          >
+            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <div className="mt-4 flex text-sm leading-6 text-gray-600">
               <span>Upload a file</span>
               <input
                 id="file-upload"
@@ -83,12 +76,12 @@ export function ImageCropper({ onImageCropped }) {
                 accept="image/*"
                 onChange={onSelectFile}
               />
-            </label>
-            <p className="pl-1">or drag and drop</p>
-          </div>
-          <p className="text-xs leading-5 text-gray-600">
-            PNG, JPG, GIF up to 10MB
-          </p>
+              <p className="pl-1">or drag and drop</p>
+            </div>
+            <p className="text-xs leading-5 text-gray-600">
+              PNG, JPG, GIF up to 10MB
+            </p>
+          </label>
         </div>
       ) : (
         <div className="w-full max-w-sm">
