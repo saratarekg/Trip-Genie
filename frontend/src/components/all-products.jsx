@@ -4,6 +4,7 @@ import { Search, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import FilterComponent from "./FilterProduct";
 import defaultImage from "../assets/images/default-image.jpg";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   Card,
   CardContent,
@@ -30,7 +31,125 @@ const renderStars = (rating) => {
   );
 };
 
-const ProductCard = ({ product, onSelect }) => (
+
+
+const ProductCard = ({ product, onSelect }) =>{
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+
+  const fetchExchangeRate = async () => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: product.currency,     // Sending base currency ID
+              target: userPreferredCurrency._id,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRates(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const getCurrencySymbol = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${product.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const formatPrice = (price, type) => {
+    if(product){
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      if (userPreferredCurrency === product.currency) {
+        return `${userPreferredCurrency.symbol}${price}`;
+      } else {
+        const exchangedPrice = price * exchangeRates;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+    } else {
+      if(currencySymbol){
+      return `${currencySymbol.symbol}${price}`;
+      }
+    }
+  }
+  };
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency
+
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if(product)
+    fetchUserInfo();
+  }, [product]);
+
+
+  useEffect(() => {
+    if (product) {
+      setIsLoading(true);
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== product.currency) {
+        fetchExchangeRate();
+      }
+      else{
+        getCurrencySymbol();
+      }
+    }
+    setIsLoading(false);
+  }, [userRole, userPreferredCurrency, product]);
+
+  return (
+    <div >
+      {isLoading ? (
+        <Loader />
+      ) : (
   <Card
     className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
     onClick={() => onSelect(product._id)}
@@ -51,11 +170,14 @@ const ProductCard = ({ product, onSelect }) => (
       </CardDescription>
     </CardContent>
     <CardFooter className="flex justify-between items-center">
-      <span className="text-lg font-bold text-blue-600">${product.price}</span>
+      <span className="text-lg font-bold text-blue-600">{formatPrice(product.price)}</span>
       <div className="flex items-center">{renderStars(product.rating)}</div>
     </CardFooter>
   </Card>
+      )}
+      </div>
 );
+}
 
 export function AllProducts() {
   const [products, setProducts] = useState([]);

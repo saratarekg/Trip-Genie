@@ -111,6 +111,7 @@ const getAllProductsArchive = async (req, res) => {
 const addProduct = async (req, res) => {
   const { name, pictures, price, description, rating, reviews, quantity , currency } =
     req.body; // Extract the data from request
+    console.log(currency);
 
   console.log(req.files);
   try {
