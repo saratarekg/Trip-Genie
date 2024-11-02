@@ -96,8 +96,6 @@ const ItineraryCard = ({
   }, [userInfo, itinerary, fetchExchangeRate, getCurrencySymbol]);
 
   const formatPrice = (price) => {
-    if (!userInfo || !price) return '';
-
     if (userInfo.role === 'tourist' && userInfo.preferredCurrency) {
       if (userInfo.preferredCurrency === itinerary.currency) {
         return `${userInfo.preferredCurrency.symbol}${price}`;
@@ -108,8 +106,6 @@ const ItineraryCard = ({
     } else if (currencySymbol) {
       return `${currencySymbol}${price}`;
     }
-
-    return `${price}`;
   };
 
   return (

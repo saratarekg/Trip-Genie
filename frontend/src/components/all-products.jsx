@@ -33,27 +33,23 @@ const renderStars = (rating) => {
 
 
 
-const ProductCard = ({ product, onSelect, userInfo, exchangeRates, currencySymbols }) =>{
+const ProductCard = ({ product, onSelect, userInfo, exchangeRate, currencySymbol }) =>{
   const [isLoading, setIsLoading] = useState(false);
   
   const formatPrice = (price) => {
-  if (!product || !userInfo) return '';
 
-  if (userInfo.role === 'tourist' && userInfo.preferredCurrency) {
-    if (userInfo.preferredCurrency._id === product.currency) {
-      return `${userInfo.preferredCurrency.symbol}${price}`;
-    } else {
-      const exchangeRate = exchangeRates[`${product.currency}-${userInfo.preferredCurrency._id}`];
-      console.log("userInfo.preferredCurrency:", exchangeRates);
-      if (exchangeRate) {
+    if (userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+      
+      if (userInfo.preferredCurrency._id === product.currency) {
+        return `${userInfo.preferredCurrency.symbol}${price}`;
+      } else if (exchangeRate) {
         const exchangedPrice = price * exchangeRate;
         return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
       }
     }
-  }
-  
-  // return `${currencySymbols[product.currency] || ''}${price}`;
-};
+    
+    // return `${currencySymbol || ''}${price}`;
+  };
 
   return (
     <div >
@@ -102,8 +98,6 @@ export function AllProducts() {
   const [maxPrice, setMaxPrice] = useState(1000);
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [exchangeRates, setExchangeRates] = useState({});
-  const [currencySymbols, setCurrencySymbols] = useState({});
   const tripsPerPage = 6;
 
   const navigate = useNavigate();
@@ -136,60 +130,50 @@ export function AllProducts() {
     }
   }, []);
 
-  const fetchExchangeRates = useCallback(async (productCurrencies) => {
-    if (!userInfo || userInfo.role !== 'tourist' || !userInfo.preferredCurrency) return;
+  const fetchExchangeRate = useCallback(async (productCurrency) => {
+    if (!userInfo || userInfo.role !== 'tourist' || !userInfo.preferredCurrency) return null;
+
+    if (productCurrency === userInfo.preferredCurrency._id) return 1;
 
     const token = Cookies.get("jwt");
-    const uniqueCurrencies = [...new Set(productCurrencies)];
-    const rates = {};
-
-    for (const currency of uniqueCurrencies) {
-      if (currency !== userInfo.preferredCurrency._id) {
-        try {
-          const response = await fetch(
-            `http://localhost:4000/tourist/populate`,
-            {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                base: currency,
-                target: userInfo.preferredCurrency._id,
-              }),
-            }
-          );
-          const data = await response.json();
-          if (response.ok) {
-            rates[`${currency}-${userInfo.preferredCurrency._id}`] = data.conversion_rate;
-          }
-        } catch (error) {
-          console.error("Error fetching exchange rate:", error);
+    try {
+      const response = await fetch(
+        `http://localhost:4000/tourist/populate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            base: productCurrency,
+            target: userInfo.preferredCurrency._id,
+          }),
         }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        return data.conversion_rate;
       }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
     }
-
-    setExchangeRates(rates);
+    return null;
   }, [userInfo]);
 
-  const fetchCurrencySymbols = useCallback(async (productCurrencies) => {
+  const fetchCurrencySymbol = useCallback(async (currency) => {
+    if (!userInfo) return null;
+
     const token = Cookies.get("jwt");
-    const uniqueCurrencies = [...new Set(productCurrencies)];
-    const symbols = {};
-
-    for (const currency of uniqueCurrencies) {
-      try {
-        const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${currency}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        symbols[currency] = response.data.symbol;
-      } catch (error) {
-        console.error("Error fetching currency symbol:", error);
-      }
+    try {
+      const response = await axios.get(`http://localhost:4000/${userInfo.role}/getCurrency/${currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data.symbol;
+    } catch (error) {
+      console.error("Error fetching currency symbol:", error);
     }
-
-    setCurrencySymbols(symbols);
+    return null;
   }, [userInfo]);
 
   const getUserRole = useCallback(() => {
@@ -237,11 +221,13 @@ export function AllProducts() {
       }
 
       const data = await response.json();
-      const productCurrencies = data.map(product => product.currency);
-      await fetchExchangeRates(productCurrencies);
-      await fetchCurrencySymbols(productCurrencies);
+      const productsWithRates = await Promise.all(data.map(async (product) => {
+        const exchangeRate = await fetchExchangeRate(product.currency);
+        const currencySymbol = await fetchCurrencySymbol(product.currency);
+        return { ...product, exchangeRate, currencySymbol };
+      }));
 
-      setProducts(data);
+      setProducts(productsWithRates);
       setError(null);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -393,8 +379,8 @@ export function AllProducts() {
                   key={product._id}
                   product={product}
                   userInfo={userInfo}
-                  exchangeRates={exchangeRates}
-                  currencySymbols={currencySymbols}
+                  exchangeRate={product.exchangeRate}
+                  currencySymbol={product.currencySymbol}
                   onSelect={handleProductSelect}
                   />
                 ))}

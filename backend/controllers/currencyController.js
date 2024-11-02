@@ -14,7 +14,7 @@ const getCurrencyById = async (req, res) => {
         }
 
         // Return the found currency object as JSON
-        // console.log("backend", currency);
+        console.log("backend", currency);
         res.status(200).json(currency);
     } catch (error) {
         console.error('Error fetching currency by ID:', error);

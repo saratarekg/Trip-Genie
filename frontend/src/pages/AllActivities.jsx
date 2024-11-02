@@ -88,7 +88,6 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
         return `${currencySymbol}${price}`;
       }
   
-      return `${price}`;
     };
   };
 
