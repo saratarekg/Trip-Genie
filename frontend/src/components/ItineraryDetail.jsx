@@ -164,6 +164,7 @@ const ItineraryDetail = () => {
 
   const [open, setOpen] = useState(false); // Added state for popover
   const [isToastOpen, setIsToastOpen] = useState(false);
+  
   const fetchExchangeRate = async () => {
     try {
       const token = Cookies.get("jwt");
