@@ -51,8 +51,9 @@ import NotFound from "./components/NotFound.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import TouristActivities from "./pages/TouristActivities.jsx";
 import { ProductArchive } from "./components/product-archive.jsx";
-import BookingPage from "./components/FlightBooking.jsx";
+import BookingPage from "./pages/FlightBooking.jsx";
 import FileViewer from "./components/FileViewer.jsx";
+import HotelBookingPage from "./pages/HotelBooking.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -377,6 +378,15 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
                 <BookingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/hotels"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <HotelBookingPage />
               </ProtectedRoute>
             }
           />
