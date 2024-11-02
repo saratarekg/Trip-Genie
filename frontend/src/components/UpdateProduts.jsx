@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -45,6 +46,7 @@ const UpdateProduct = () => {
     price: "",
     description: "",
     quantity: "",
+    currency: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -53,6 +55,8 @@ const UpdateProduct = () => {
   const [pictures, setPictures] = useState([]);
   const [newPictures, setNewPictures] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [currencies, setCurrencies] = useState([]);
+  const [selectedCurrency, setSelectedCurrency] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,7 +81,9 @@ const UpdateProduct = () => {
           price: productData.price.toString(),
           description: productData.description,
           quantity: productData.quantity.toString(),
+          currency: productData.currency,
         });
+        setSelectedCurrency(productData.currency);
         setPictures(productData.pictures || []);
         setError(null);
       } catch (err) {
@@ -88,7 +94,24 @@ const UpdateProduct = () => {
       }
     };
 
+    const fetchSupportedCurrencies = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch("http://localhost:4000/seller/currencies", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch currencies");
+        }
+        const data = await response.json();
+        setCurrencies(data);
+      } catch (error) {
+        console.error('Error fetching supported currencies:', error);
+      }
+    };
+
     fetchProductDetails();
+    fetchSupportedCurrencies();
   }, [id, userRole]);
 
   const handleChange = (e) => {
@@ -137,9 +160,10 @@ const UpdateProduct = () => {
       product.price !== "" &&
       product.quantity !== "" &&
       !isNaN(parseFloat(product.price)) &&
-      parseFloat(product.price) >= 0
+      parseFloat(product.price) >= 0 &&
+      selectedCurrency !== ""
     );
-  }, [product]);
+  }, [product, selectedCurrency]);
 
   const handleUpdate = async () => {
     if (!isFormValid) {
@@ -155,6 +179,7 @@ const UpdateProduct = () => {
       formData.append("price", product.price);
       formData.append("description", product.description);
       formData.append("quantity", product.quantity);
+      formData.append("currency", selectedCurrency);
 
       [...pictures, ...newPictures].forEach((picture, index) => {
         formData.append("pictures", picture);
@@ -236,6 +261,27 @@ const UpdateProduct = () => {
                   <p className="text-red-500 text-sm mt-1">
                     Price must be a non-negative number
                   </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="currency">Currency</Label>
+                <Select
+                  value={selectedCurrency}
+                  onValueChange={(value) => setSelectedCurrency(value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={`${product.currency} - ${currencies.find(c => c.code === product.currency)?.name || ''}`} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[200px] overflow-y-auto">
+                    {currencies.map((currency) => (
+                      <SelectItem key={currency.code} value={currency._id}>
+                        {currency.code} - {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedCurrency === "" && (
+                  <p className="text-red-500 text-sm mt-1">Currency is required</p>
                 )}
               </div>
               <div>
