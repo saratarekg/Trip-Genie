@@ -193,6 +193,7 @@ const getFile = async (req, res) => {
       return res.status(404).json({ err: "No file exists" });
     }
 
+    res.set("Content-Type", files[0].contentType);
     const readstream = gfs.openDownloadStreamByName(filename);
     readstream.pipe(res);
   } catch (error) {
