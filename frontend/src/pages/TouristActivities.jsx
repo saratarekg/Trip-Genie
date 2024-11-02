@@ -32,6 +32,8 @@ const fetchData = async (userRole, dataType) => {
   }
 }
 
+
+
 export default function Component() {
   const [userRole, setUserRole] = useState(Cookies.get("role") || "guest")
   const [activities, setActivities] = useState([])
@@ -45,6 +47,177 @@ export default function Component() {
   const [notificationMessage, setNotificationMessage] = useState("")
   const [notificationIconType, setNotificationIconType] = useState("")
   const navigate = useNavigate()
+
+
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRateItinerary, setExchangeRateItinerary] = useState({});
+  const [exchangeRateActivity, setExchangeRateActivity] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
+
+
+  const fetchUserInfo = async () => {
+
+    if (userRole === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency
+  
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+  
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+
+  const fetchExchangeRateItinerary = async (booking) => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: booking.itinerary.currency,     // Sending base currency ID
+              target: userPreferredCurrency._id,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRateItinerary(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedBooking) {
+      if(selectedBooking.itinerary){
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== selectedBooking.itinerary.currency) {
+        fetchExchangeRateItinerary(selectedBooking);
+      }
+      else{
+        getCurrencySymbolItinerary(selectedBooking);
+      }
+    }
+  }
+  }, [userRole, userPreferredCurrency, selectedBooking]);
+
+  useEffect(() => {
+    if (selectedBooking) {
+      if(selectedBooking.activity){
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== selectedBooking.activity.currency) {
+        fetchExchangeRateActivity(selectedBooking);
+      }
+      else{
+        getCurrencySymbolActivity(selectedBooking);
+      }
+    }
+  }
+  }, [userRole, userPreferredCurrency, selectedBooking]);
+
+
+  const fetchExchangeRateActivity = async (booking) => {
+    try {
+      const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',  // Ensure content type is set to JSON
+            },
+            body: JSON.stringify({
+              base: booking.activity.currency,     // Sending base currency ID
+              target: userPreferredCurrency._id,      // Sending target currency ID
+            }),
+          }
+        );
+      // Parse the response JSON
+    const data = await response.json();
+
+    if (response.ok) {
+      setExchangeRateActivity(data.conversion_rate);
+    } else {
+      // Handle possible errors
+      console.error('Error in fetching exchange rate:', data.message);
+    }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+
+  const getCurrencySymbolItinerary = async (booking) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${booking.itinerary.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const getCurrencySymbolActivity = async (booking) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${booking.activity.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setCurrencySymbol(response.data);
+
+    } catch (error) {
+      console.error("Error fetching currensy symbol:", error);
+    }
+  };
+
+  const formatPrice = (price,type) => {
+    if(selectedBooking){
+    if (userRole === 'tourist' && userPreferredCurrency && selectedBooking.itinerary) {
+      if (userPreferredCurrency === selectedBooking.itinerary.currency) {
+        return `${userPreferredCurrency.symbol}${selectedBooking.paymentAmount}`;
+      } else {
+        const exchangedPrice = selectedBooking.paymentAmount * exchangeRateItinerary;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+    }else if (userRole === 'tourist' && userPreferredCurrency && selectedBooking.activity) {
+      if (userPreferredCurrency === selectedBooking.activity.currency) {
+        return `${userPreferredCurrency.symbol}${selectedBooking.paymentAmount}`;
+      } else {
+        const exchangedPrice = selectedBooking.paymentAmount * exchangeRateActivity;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+    } else {
+      if(currencySymbol){
+      return `${currencySymbol.symbol}${selectedBooking.paymentAmount}`;
+      }
+    }
+  }
+  };
 
   const handleActivityClick = (id) => {
     navigate(`/activity/${id}`)
@@ -118,6 +291,7 @@ export default function Component() {
         ])
         setActivities(activitiesData)
         setItineraries(itinerariesData)
+        fetchUserInfo();
       } catch (err) {
         setError('An error occurred while fetching data')
       } finally {
@@ -306,7 +480,9 @@ export default function Component() {
           <div className="flex items-center gap-4">
             <DollarSign className="w-5 h-5 text-gray-600" /> {/* Icon */}
             <span className="font-medium text-lg text-gray-700">Payment Amount:</span>
-            <span className="text-gray-800 text-base">{`$${selectedBooking.paymentAmount.toFixed(2)}`}</span>
+            <span className="text-gray-800 text-base">
+            {formatPrice(selectedBooking.paymentAmount)}
+              </span>
           </div>
 
           {/* Payment Type Row with dynamic icon */}
