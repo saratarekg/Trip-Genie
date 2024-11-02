@@ -235,6 +235,7 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const formatPrice = (price, type) => {
     if(product){
     if (userRole === 'tourist' && userPreferredCurrency) {
+      console.log(1);
       if (userPreferredCurrency === product.currency) {
         return `${userPreferredCurrency.symbol}${price}`;
       } else {
@@ -387,7 +388,7 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
         setLoading(false);
       }
     };
-
+    fetchUserInfo();
     fetchProductDetails();
   }, [id, userRole]);
 
