@@ -111,7 +111,6 @@ const getAllProductsArchive = async (req, res) => {
 const addProduct = async (req, res) => {
   const { name, pictures, price, description, rating, reviews, quantity , currency } =
     req.body; // Extract the data from request
-    console.log(currency);
 
   console.log(req.files);
   try {
@@ -203,7 +202,7 @@ const editProductOfSeller = async (req, res) => {
     // Find the product by ID and update its details
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity },
+      { name, pictures, price, description, quantity,currency },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 
