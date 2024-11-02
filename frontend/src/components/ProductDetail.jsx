@@ -1600,7 +1600,7 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
       <div className="flex justify-between mt-4 font-bold">
         <p className="text-lg">Total Price:</p>
         <p className="text-lg">
-          ${formatPrice(((product.price * quantity) + calculateDeliveryCost(deliveryType)))}
+          {formatPrice(((product.price * quantity) + calculateDeliveryCost(deliveryType)))}
         </p>
       </div>
     </div>
