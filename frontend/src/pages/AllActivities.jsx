@@ -32,8 +32,8 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
   }, [userInfo, activity]);
 
   const fetchExchangeRate = useCallback(async () => {
-    if (!userInfo || !userInfo.preferredCurrency) return;
-
+    // if (!userInfo || !userInfo.preferredCurrency) return;
+if(userInfo){
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
@@ -59,6 +59,7 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
+  }
   }, [userInfo, activity]);
 
   const getCurrencySymbol = useCallback(async () => {
@@ -73,7 +74,6 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
     }
   }, [userInfo, activity]);
 
-  const formatPrice = (price) => {
     const formatPrice = (price) => {
       // if (!userInfo || !price) return '';
   
@@ -87,8 +87,6 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
       } else if (currencySymbol) {
         return `${currencySymbol}${price}`;
       }
-  
-    };
   };
 
   
@@ -228,7 +226,7 @@ export function AllActivitiesComponent() {
     if (userInfo) {
       fetchActivities();
     }
-  }, [userInfo, fetchActivities]);
+  }, [userInfo]);
 
   const handleSortByPreference = async () => {
     if (!isSortedByPreference) {
