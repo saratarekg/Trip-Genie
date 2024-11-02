@@ -233,18 +233,18 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   };
 
   const formatPrice = (price, type) => {
+    const roundedPrice = Math.round(price);
     if(product){
     if (userRole === 'tourist' && userPreferredCurrency) {
-      console.log(1);
       if (userPreferredCurrency === product.currency) {
-        return `${userPreferredCurrency.symbol}${price}`;
+        return `${userPreferredCurrency.symbol}${roundedPrice}`;
       } else {
-        const exchangedPrice = price * exchangeRates;
-        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+        const exchangedPrice = Math.round(roundedPrice * exchangeRates);
+        return `${userPreferredCurrency.symbol}${exchangedPrice}`;
       }
     } else {
       if(currencySymbol){
-      return `${currencySymbol.symbol}${price}`;
+      return `${currencySymbol.symbol}${roundedPrice}`;
       }
     }
   }
@@ -997,7 +997,7 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
     <div>
       <div className="flex justify-between text-xl">
         <span className="font-semibold text-green-700">Standard Shipping</span>
-        <span>€2.99</span>
+        <span>{formatPrice(2.99)}</span>
       </div>
       <div className="text-sm text-gray-500">2–8 business days</div>
     </div>
@@ -1006,7 +1006,7 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
     <div>
       <div className="flex justify-between text-xl">
         <span className="font-semibold text-green-700">Express Shipping</span>
-        <span>€4.99</span>
+        <span>{formatPrice(4.99)}</span>
       </div>
       <div className="text-sm text-gray-500">1–3 business days</div>
     </div>
@@ -1015,7 +1015,7 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
     <div>
       <div className="flex justify-between text-xl">
         <span className="font-semibold text-green-700">Next-Day/Same-Day Shipping</span>
-        <span>€6.99</span>
+        <span>{formatPrice(6.99)}</span>
       </div>
       <div className="text-sm text-gray-500">Next day or same day delivery</div>
     </div>
@@ -1024,7 +1024,7 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
     <div>
       <div className="flex justify-between text-xl">
         <span className="font-semibold text-green-700">International Shipping</span>
-        <span>€14.99</span>
+        <span>{formatPrice(14.99)}</span>
       </div>
       <div className="text-sm text-gray-500">7–21 business days (depending on location)</div>
     </div>
@@ -1427,10 +1427,10 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
             <SelectValue placeholder="Select delivery type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Standard">Standard Shipping (5-7 days) - $2.99</SelectItem>
-            <SelectItem value="Express">Express Shipping (2-3 days) - $4.99</SelectItem>
-            <SelectItem value="Next-Same">Next/Same Day Shipping - $6.99</SelectItem>
-            <SelectItem value="International">International Shipping - $14.99</SelectItem>
+            <SelectItem value="Standard">Standard Shipping (5-7 days) - {formatPrice(2.99)}</SelectItem>
+            <SelectItem value="Express">Express Shipping (2-3 days) - {formatPrice(4.99)}</SelectItem>
+            <SelectItem value="Next-Same">Next/Same Day Shipping - {formatPrice(6.99)}</SelectItem>
+            <SelectItem value="International">International Shipping - {formatPrice(14.99)}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -1591,16 +1591,16 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
       <h2 className="text-2xl font-bold">Total Price</h2>
       <div className="flex justify-between mt-2">
         <p className="text-lg">{product.name} x {quantity}</p>
-        <p className="text-lg">${(product.price * quantity).toFixed(2)}</p>
+        <p className="text-lg">{(formatPrice(product.price * quantity))}</p>
       </div>
       <div className="flex justify-between mt-2">
         <p className="text-lg">Delivery Cost:</p>
-        <p className="text-lg">${calculateDeliveryCost(deliveryType).toFixed(2)}</p>
+        <p className="text-lg">{formatPrice(calculateDeliveryCost(deliveryType))}</p>
       </div>
       <div className="flex justify-between mt-4 font-bold">
         <p className="text-lg">Total Price:</p>
         <p className="text-lg">
-          ${((product.price * quantity) + calculateDeliveryCost(deliveryType)).toFixed(2)}
+          ${formatPrice(((product.price * quantity) + calculateDeliveryCost(deliveryType)))}
         </p>
       </div>
     </div>
