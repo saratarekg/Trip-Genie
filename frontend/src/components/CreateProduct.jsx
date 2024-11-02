@@ -18,7 +18,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   name: z.string().min(1, "Please enter a product name"),
@@ -58,12 +64,15 @@ const CreateProductForm = () => {
     const fetchSupportedCurrencies = async () => {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/seller/currencies", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://localhost:4000/seller/currencies",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setCurrencies(response.data);
       } catch (error) {
-        console.error('Error fetching supported currencies:', error);
+        console.error("Error fetching supported currencies:", error);
       }
     };
 
@@ -73,25 +82,7 @@ const CreateProductForm = () => {
   const handlePicturesUpload = (e) => {
     const files = e.target.files;
     if (files) {
-      const readers = [];
-      const newPictures = [];
-
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        readers.push(
-          new Promise((resolve) => {
-            reader.onloadend = () => {
-              newPictures.push(reader.result);
-              resolve();
-            };
-            reader.readAsDataURL(file);
-          })
-        );
-      });
-
-      Promise.all(readers).then(() => {
-        setPictures([...pictures, ...newPictures]);
-      });
+      setPictures([...pictures, ...Array.from(files)]);
     }
   };
 
@@ -106,8 +97,8 @@ const CreateProductForm = () => {
     formData.append("description", data.description);
     formData.append("quantity", data.quantity);
     formData.append("currency", data.currency);
-    pictures.forEach((picture) => {
-      formData.append("pictures", picture);
+    pictures.forEach((picture, index) => {
+      formData.append("pictures", picture); // Automatically adds as binary
     });
 
     const token = Cookies.get("jwt");
@@ -191,7 +182,11 @@ const CreateProductForm = () => {
                 name="currency"
                 control={control}
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value} position="item-aligned">
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    position="item-aligned"
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
@@ -206,7 +201,9 @@ const CreateProductForm = () => {
                 )}
               />
               {errors.currency && (
-                <p className="text-red-500 text-sm">{errors.currency.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.currency.message}
+                </p>
               )}
             </div>
 

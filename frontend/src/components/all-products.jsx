@@ -31,42 +31,39 @@ const renderStars = (rating) => {
   );
 };
 
-
-
-const ProductCard = ({ product, onSelect }) =>{
+const ProductCard = ({ product, onSelect }) => {
   const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-
   const fetchExchangeRate = async () => {
     try {
       const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',  // Ensure content type is set to JSON
-            },
-            body: JSON.stringify({
-              base: product.currency,     // Sending base currency ID
-              target: userPreferredCurrency._id,      // Sending target currency ID
-            }),
-          }
-        );
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // Ensure content type is set to JSON
+          },
+          body: JSON.stringify({
+            base: product.currency, // Sending base currency ID
+            target: userPreferredCurrency._id, // Sending target currency ID
+          }),
+        }
+      );
       // Parse the response JSON
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setExchangeRates(data.conversion_rate);
-    } else {
-      // Handle possible errors
-      console.error('Error in fetching exchange rate:', data.message);
-    }
+      if (response.ok) {
+        setExchangeRates(data.conversion_rate);
+      } else {
+        // Handle possible errors
+        console.error("Error in fetching exchange rate:", data.message);
+      }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
@@ -75,51 +72,55 @@ const ProductCard = ({ product, onSelect }) =>{
   const getCurrencySymbol = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${product.currency}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `http://localhost:4000/${userRole}/getCurrency/${product.currency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setCurrencySymbol(response.data);
-
     } catch (error) {
       console.error("Error fetching currensy symbol:", error);
     }
   };
 
   const formatPrice = (price, type) => {
-    if(product){
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      if (userPreferredCurrency === product.currency) {
-        return `${userPreferredCurrency.symbol}${price}`;
+    if (product) {
+      if (userRole === "tourist" && userPreferredCurrency) {
+        if (userPreferredCurrency === product.currency) {
+          return `${userPreferredCurrency.symbol}${price}`;
+        } else {
+          const exchangedPrice = price * exchangeRates;
+          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+        }
       } else {
-        const exchangedPrice = price * exchangeRates;
-        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-      }
-    } else {
-      if(currencySymbol){
-      return `${currencySymbol.symbol}${price}`;
+        if (currencySymbol) {
+          return `${currencySymbol.symbol}${price}`;
+        }
       }
     }
-  }
   };
 
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const currencyId = response.data.preferredCurrency
+        const currencyId = response.data.preferredCurrency;
 
-        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUserPreferredCurrency(response2.data);
-
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
@@ -127,18 +128,19 @@ const ProductCard = ({ product, onSelect }) =>{
   };
 
   useEffect(() => {
-    if(product)
-    fetchUserInfo();
+    if (product) fetchUserInfo();
   }, [product]);
-
 
   useEffect(() => {
     if (product) {
       setIsLoading(true);
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== product.currency) {
+      if (
+        userRole === "tourist" &&
+        userPreferredCurrency &&
+        userPreferredCurrency !== product.currency
+      ) {
         fetchExchangeRate();
-      }
-      else{
+      } else {
         getCurrencySymbol();
       }
     }
@@ -146,38 +148,42 @@ const ProductCard = ({ product, onSelect }) =>{
   }, [userRole, userPreferredCurrency, product]);
 
   return (
-    <div >
+    <div>
       {isLoading ? (
         <Loader />
       ) : (
-  <Card
-    className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
-    onClick={() => onSelect(product._id)}
-  >
-    <CardHeader>
-      <img
-        src={product.pictures[0] || defaultImage}
-        alt={product.name}
-        className="w-full h-48 object-cover rounded-t-lg"
-      />
-    </CardHeader>
-    <CardContent>
-      <CardTitle>{product.name}</CardTitle>
-      <CardDescription className="mt-2">
-        {product.description.length > 150
-          ? `${product.description.slice(0, 150)}...`
-          : product.description}
-      </CardDescription>
-    </CardContent>
-    <CardFooter className="flex justify-between items-center">
-      <span className="text-lg font-bold text-blue-600">{formatPrice(product.price)}</span>
-      <div className="flex items-center">{renderStars(product.rating)}</div>
-    </CardFooter>
-  </Card>
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow duration-300"
+          onClick={() => onSelect(product._id)}
+        >
+          <CardHeader>
+            <img
+              src={product.pictures[0] || defaultImage}
+              alt={product.name}
+              className="w-full h-48 object-cover rounded-t-lg"
+            />
+          </CardHeader>
+          <CardContent>
+            <CardTitle>{product.name}</CardTitle>
+            <CardDescription className="mt-2">
+              {product.description.length > 150
+                ? `${product.description.slice(0, 150)}...`
+                : product.description}
+            </CardDescription>
+          </CardContent>
+          <CardFooter className="flex justify-between items-center">
+            <span className="text-lg font-bold text-blue-600">
+              {formatPrice(product.price)}
+            </span>
+            <div className="flex items-center">
+              {renderStars(product.rating)}
+            </div>
+          </CardFooter>
+        </Card>
       )}
-      </div>
-);
-}
+    </div>
+  );
+};
 
 export function AllProducts() {
   const [products, setProducts] = useState([]);
@@ -200,58 +206,59 @@ export function AllProducts() {
     return role || "guest";
   }, []);
 
-  const fetchProducts = useCallback(async (params = {}) => {
-    setIsLoading(true);
-    try {
-      const token = Cookies.get("jwt");
-      const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/products`);
-      
-      if (params.searchBy) {
-        url.searchParams.append("searchBy", params.searchBy);
+  const fetchProducts = useCallback(
+    async (params = {}) => {
+      setIsLoading(true);
+      try {
+        const token = Cookies.get("jwt");
+        const role = getUserRole();
+        const url = new URL(`http://localhost:4000/${role}/products`);
+
+        if (params.searchBy) {
+          url.searchParams.append("searchBy", params.searchBy);
+        }
+
+        if (params.sort) {
+          url.searchParams.append("sort", params.sort);
+          url.searchParams.append("asc", params.asc);
+        }
+
+        if (params.myproducts) {
+          url.searchParams.append("myproducts", params.myproducts);
+        }
+
+        if (params.minPrice) {
+          url.searchParams.append("minPrice", params.minPrice);
+        }
+
+        if (params.maxPrice) {
+          url.searchParams.append("maxPrice", params.maxPrice);
+        }
+
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setProducts(data);
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setError("Error fetching products");
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
       }
-
-      if (params.sort) {
-        url.searchParams.append("sort", params.sort);
-        url.searchParams.append("asc", params.asc);
-      }
-
-      if (params.myproducts) {
-        url.searchParams.append("myproducts", params.myproducts);
-      }
-
-      if (params.minPrice) {
-        url.searchParams.append("minPrice", params.minPrice);
-      }
-
-      if (params.maxPrice) {
-        url.searchParams.append("maxPrice", params.maxPrice);
-      }
-
-
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setProducts(data);
-      setError(null);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      setError("Error fetching products");
-      setProducts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getUserRole]);
+    },
+    [getUserRole]
+  );
 
   useEffect(() => {
     fetchProducts();
@@ -259,23 +266,23 @@ export function AllProducts() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-
       if (maxPrice === priceRange[1]) {
-      fetchProducts({ searchBy: searchTerm
-        , sort: sortBy
-        , asc: sortOrder
-        , myproducts: myProducts
-        , minPrice: priceRange[0]
-       });
-      }
-      else{
-        fetchProducts({ searchBy: searchTerm
-          , sort: sortBy
-          , asc: sortOrder
-          , myproducts: myProducts
-          , minPrice: priceRange[0]
-          , maxPrice: priceRange[1]
-         });
+        fetchProducts({
+          searchBy: searchTerm,
+          sort: sortBy,
+          asc: sortOrder,
+          myproducts: myProducts,
+          minPrice: priceRange[0],
+        });
+      } else {
+        fetchProducts({
+          searchBy: searchTerm,
+          sort: sortBy,
+          asc: sortOrder,
+          myproducts: myProducts,
+          minPrice: priceRange[0],
+          maxPrice: priceRange[1],
+        });
       }
     }, 300);
 
@@ -284,7 +291,13 @@ export function AllProducts() {
 
   useEffect(() => {
     if (sortBy) {
-      fetchProducts({ sort: sortBy, asc: sortOrder, myproducts: myProducts, minPrice: priceRange[0], maxPrice: priceRange[1] });
+      fetchProducts({
+        sort: sortBy,
+        asc: sortOrder,
+        myproducts: myProducts,
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
+      });
     }
   }, [sortBy, sortOrder, fetchProducts]);
 
@@ -304,7 +317,7 @@ export function AllProducts() {
   };
 
   const handleSort = (attribute) => {
-    setSortOrder(prevOrder => prevOrder === 1 ? -1 : 1);
+    setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1));
     setSortBy(attribute);
   };
 
@@ -354,20 +367,20 @@ export function AllProducts() {
             priceRange={priceRange}
             setPriceRange={setPriceRange}
             maxPrice={maxPrice}
-            searchProducts={() => fetchProducts({
-              minPrice: priceRange[0],
-              maxPrice: priceRange[1],
-              myproducts: myProducts,
-              sort: sortBy,
-              asc: sortOrder
-            })}
+            searchProducts={() =>
+              fetchProducts({
+                minPrice: priceRange[0],
+                maxPrice: priceRange[1],
+                myproducts: myProducts,
+                sort: sortBy,
+                asc: sortOrder,
+              })
+            }
             role={getUserRole()}
           />
         </div>
 
-        {error && (
-          <div className="text-red-500 text-center mb-4">{error}</div>
-        )}
+        {error && <div className="text-red-500 text-center mb-4">{error}</div>}
 
         {isLoading ? (
           <Loader />

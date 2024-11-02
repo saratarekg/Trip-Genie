@@ -6,12 +6,10 @@ const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
-const currencyController = require('../controllers/currencyController');
+const currencyController = require("../controllers/currencyController");
 
-
-router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
-
 
 router.put("/", upload.single("logo"), sellerController.updateSeller);
 router.get("/", sellerController.getSeller);
