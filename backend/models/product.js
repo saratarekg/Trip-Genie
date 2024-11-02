@@ -53,6 +53,11 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    currency: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Currency",
+      required: true,
+    },
     isArchived: {
       type: Boolean,
       required: true,

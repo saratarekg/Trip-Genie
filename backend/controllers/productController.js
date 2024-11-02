@@ -109,7 +109,7 @@ const getAllProductsArchive = async (req, res) => {
 };
 
 const addProduct = async (req, res) => {
-  const { name, pictures, price, description, rating, reviews, quantity } =
+  const { name, pictures, price, description, rating, reviews, quantity , currency } =
     req.body; // Extract the data from request
 
   console.log(req.files);
@@ -121,6 +121,7 @@ const addProduct = async (req, res) => {
       description,
       seller: res.locals.user_id,
       quantity,
+      currency,
     });
 
     // Save the product to the database
@@ -132,7 +133,7 @@ const addProduct = async (req, res) => {
 };
 
 const addProductByAdmin = async (req, res) => {
-  const { name, pictures, price, description, rating, reviews, quantity } =
+  const { name, pictures, price, description, rating, reviews, quantity , currency } =
     req.body; // Extract the data from request
 
   try {
@@ -142,6 +143,7 @@ const addProductByAdmin = async (req, res) => {
       price,
       description,
       quantity,
+      currency,
     });
 
     // Save the product to the database
@@ -160,7 +162,7 @@ const editProduct = async (req, res) => {
     // Find the product by ID and update its details
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity, reviews },
+      { name, pictures, price, description, quantity, reviews , currency },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 
@@ -189,7 +191,7 @@ const editProduct = async (req, res) => {
 
 const editProductOfSeller = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, pictures, price, description, quantity } = req.body; // Get details from request body
+  const { name, pictures, price, description, quantity , currency} = req.body; // Get details from request body
   const product = await Product.findById(id);
   if (product.seller.toString() != res.locals.user_id) {
     return res
