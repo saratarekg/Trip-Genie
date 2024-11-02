@@ -18,7 +18,18 @@ const upload = multer({ storage: storage });
 
 const router = express.Router();
 
-router.get("/getCurrency/:id", currencyController.getCurrencyById);
+router.post('/populate', currencyController.getExchangeRate);
+router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/currencies", currencyController.getSupportedCurrencies);
+
+// router.get('/fill', currencyController.populateCurrencies);
+
+router.get("/currencies/code", touristController.getCurrencyCode);
+router.get("/currencies/idd", touristController.getCurrencyID);
+router.post("/currencies/set", touristController.setCurrencyCode);
+
+
+
 
 router.post("/admins", adminController.addAdmin);
 router.post("/governors", tourismGovernorController.addTourismGovernor);
