@@ -18,116 +18,81 @@ import {
 } from "@/components/ui/card";
 import { set } from "date-fns";
 
-const ActivityCard = ({ activity, onSelect }) => {
-  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
-  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
-  const [exchangeRates, setExchangeRates] = useState({});
-  const [currencySymbol, setCurrencySymbol] = useState({});
-  const [fetchedUserRole, setFetchedUserRole] = useState(false);
 
-  const fetchExchangeRate = async () => {
+const ActivityCard = ({ activity, onSelect, userInfo }) => {
+  const [exchangeRate, setExchangeRate] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
+
+  useEffect(() => {
+    if (userInfo && userInfo.preferredCurrency !== activity.currency) {
+      fetchExchangeRate();
+    } else {
+      getCurrencySymbol();
+    }
+  }, [userInfo, activity]);
+
+  const fetchExchangeRate = useCallback(async () => {
+    if (!userInfo || !userInfo.preferredCurrency) return;
+
     try {
       const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',  // Ensure content type is set to JSON
-            },
-            body: JSON.stringify({
-              base: activity.currency,     // Sending base currency ID
-              target: userPreferredCurrency._id,      // Sending target currency ID
-            }),
-          }
-        );
-      // Parse the response JSON
-    const data = await response.json();
-
-    if (response.ok) {
-      setExchangeRates(data.conversion_rate);
-    } else {
-      // Handle possible errors
-      console.error('Error in fetching exchange rate:', data.message);
-    }
+      const response = await fetch(
+        `http://localhost:4000/${userInfo.role}/populate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            base: activity.currency,
+            target: userInfo.preferredCurrency._id,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setExchangeRate(data.conversion_rate);
+      } else {
+        console.error('Error in fetching exchange rate:', data.message);
+      }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
-  };
+  }, [userInfo, activity]);
 
-  const getCurrencySymbol = async () => {
+  const getCurrencySymbol = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${activity.currency}`, {
+      const response = await axios.get(`http://localhost:4000/${userInfo.role}/getCurrency/${activity.currency}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
-      setCurrencySymbol(response.data);
-
+      setCurrencySymbol(response.data.symbol);
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
     }
+  }, [userInfo, activity]);
+
+  const formatPrice = (price) => {
+    const formatPrice = (price) => {
+      // if (!userInfo || !price) return '';
+  
+      if (userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+        if (userInfo.preferredCurrency === activity.currency) {
+          return `${userInfo.preferredCurrency.symbol}${price}`;
+        } else if (exchangeRate) {
+          const exchangedPrice = price * exchangeRate;
+          return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+        }
+      } else if (currencySymbol) {
+        return `${currencySymbol}${price}`;
+      }
+  
+      return `${price}`;
+    };
   };
 
-  const formatPrice = (price, type) => {
-    if(activity){
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      if (userPreferredCurrency === activity.currency) {
-        return `${userPreferredCurrency.symbol}${price}`;
-      } else {
-        const exchangedPrice = price * exchangeRates;
-        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-      }
-    } else {
-      if(currencySymbol){
-      return `${currencySymbol.symbol}${price}`;
-      }
-    }
-  }
-  };
-
-  const fetchUserInfo = async () => {
-    const role = Cookies.get("role") || "guest";
-    setUserRole(role);
-
-    if (role === 'tourist') {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const currencyId = response.data.preferredCurrency
-
-        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUserPreferredCurrency(response2.data);
-        setFetchedUserRole(true);
-
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if(!fetchedUserRole && userRole && activity && !userPreferredCurrency){
-    fetchUserInfo();
-    }
-  }, [userPreferredCurrency, fetchedUserRole]);
-
-
-  useEffect(() => {
-    if (activity && fetchedUserRole) {
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== activity.currency) {
-        fetchExchangeRate();
-      }
-      else{
-        getCurrencySymbol();
-      }
-    }
-  }, [userRole, userPreferredCurrency, activity]);
+  
 
 return(
   <Card
@@ -218,14 +183,53 @@ export function AllActivitiesComponent() {
   const [isLoading, setIsLoading] = useState(true);
   const [minStars, setMinStars] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false); // To track if it's the initial load
+  const [userInfo, setUserInfo] = useState(null);
 
   const navigate = useNavigate();
+
+  const fetchUserInfo = useCallback(async () => {
+    const role = Cookies.get("role") || "guest";
+    const token = Cookies.get("jwt");
+
+    if (role === 'tourist') {
+      try {
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency;
+
+        const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        setUserInfo({ role });
+      }
+    } else {
+      setUserInfo({ role });
+    }
+  }, []);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
     if (!role) role = "guest";
     return role;
   };
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, [fetchUserInfo]);
+
+  useEffect(() => {
+    if (userInfo) {
+      fetchActivities();
+    }
+  }, [userInfo, fetchActivities]);
 
   const handleSortByPreference = async () => {
     if (!isSortedByPreference) {
@@ -314,7 +318,7 @@ export function AllActivitiesComponent() {
     setIsLoading(false);
   };
 
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
     try {
       setIsLoading(true);
       const token = Cookies.get("jwt");
@@ -369,7 +373,7 @@ export function AllActivitiesComponent() {
       setActivities([]);
       setIsLoading(false);
     }
-  };
+  }, [userInfo, isSortedByPreference]);
 
   const searchActivities = async () => {
     setIsSortedByPreference(false);
@@ -585,6 +589,7 @@ export function AllActivitiesComponent() {
                       .map((activity) => (
                         <ActivityCard
                           key={activity._id}
+                          userInfo={userInfo}
                           activity={activity}
                           onSelect={handleActivitySelect}
                         />

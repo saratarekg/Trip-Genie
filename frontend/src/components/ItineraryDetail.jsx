@@ -905,9 +905,9 @@ const ItineraryDetail = () => {
                                 </span>
                               </div>
                               <div className="flex items-center">
-                                <DollarSign className="w-4 h-4 mr-2 text-gray-500" />
+                                <Banknote className="w-4 h-4 mr-2 text-gray-500" />
                                 <span className="text-sm">
-                                  Price: ${activity.price}
+                                  Price: {formatPrice(activity.price)}
                                 </span>
                               </div>
                               {activity.specialDiscount > 0 && (
