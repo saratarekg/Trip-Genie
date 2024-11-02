@@ -15,11 +15,16 @@ import {
   Eye,
   MessageSquare,
   LogOut,
-  Trash2, XCircle, CheckCircle, Heart
+  Trash2, XCircle, CheckCircle, Heart,
+  DollarSign
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
+import Popup from "@/components/popup";
+; // Import your Popup component
+import '@/styles/Popup.css'; // Create a CSS file for styling
+
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -114,6 +119,152 @@ const RedeemPoints = ({ tourist, onRedeemPoints }) => {
     </div>
   );
 };
+
+
+const CurrencyApp = () => {
+  const [currencies, setCurrencies] = useState([]);
+  const [preferredCurrency, setPreferredCurrency] = useState(null);
+  const [selectedCurrency, setSelectedCurrency] = useState("");
+
+  // Fetch user's preferred currency code and its details
+  const fetchPreferredCurrencyCode = async () => {
+      try {
+          const token = Cookies.get("jwt");
+          const codeResponse = await axios.get("http://localhost:4000/tourist/currencies/idd", {
+              headers: { Authorization: `Bearer ${token}` },
+          });
+          
+          const preferredCurrencyCode = codeResponse.data;
+          console.log("Preferred Currency Code:", preferredCurrencyCode);
+
+          // Fetch full details using the fetched currency code
+          const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${preferredCurrencyCode}`, {
+              headers: { Authorization: `Bearer ${token}` },
+          });
+          setPreferredCurrency(currencyResponse.data);
+      } catch (error) {
+          console.error('Error fetching preferred currency details:', error);
+      }
+  };
+
+  // Fetch list of available currencies
+  useEffect(() => {
+      const fetchSupportedCurrencies = async () => {
+          try {
+              const token = Cookies.get("jwt");
+              const response = await axios.get("http://localhost:4000/tourist/currencies", {
+                  headers: { Authorization: `Bearer ${token}` },
+              });
+              setCurrencies(response.data);
+          } catch (error) {
+              console.error('Error fetching supported currencies:', error);
+          }
+      };
+
+      fetchSupportedCurrencies();
+      fetchPreferredCurrencyCode(); // Initial fetch on mount
+  }, []);
+
+  // Handle setting the new preferred currency and then refetch the preferred currency details
+  const handleSetPreferredCurrency = async () => {
+      try {
+          const token = Cookies.get("jwt");
+          await axios.post(
+              "http://localhost:4000/tourist/currencies/set",
+              { currencyId: selectedCurrency },
+              { headers: { Authorization: `Bearer ${token}` } }
+          );
+          openSuccessPopup('Preferred currency set successfully!');
+          
+          // Refetch the preferred currency details
+          fetchPreferredCurrencyCode();
+      } catch (error) {
+          console.error('Error setting preferred currency:', error);
+          openErrorPopup(error);
+
+      }
+  };
+
+  const [popupType, setPopupType] = useState('');
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+
+  const openSuccessPopup = (message) => {
+    setPopupType('success'); // Set the type to success
+    setPopupOpen(true); // Open the popup
+    setPopupMessage(message); // Set the custom message
+};
+
+const openErrorPopup = (message) => {
+    setPopupType('error'); // Set the type to error
+    setPopupOpen(true); // Open the popup
+    setPopupMessage(message); // Set the custom message
+};
+  const closePopup = () => {
+      setPopupOpen(false);
+  };
+
+ return (
+  <div style={{ textAlign: 'center', padding: '20px' }}>
+    <div className="container p-5">
+            <Popup isOpen={popupOpen} onClose={closePopup} type={popupType} message={popupMessage}/>
+        </div>
+      <h1 style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '20px' }}>Preferred Currency</h1>
+      <h2 style={{ fontSize: '3em', fontWeight: 'bold', color: '#3B82F6', marginBottom: '20px' }}>
+          {preferredCurrency ? `${preferredCurrency.name} (${preferredCurrency.code})` : "Loading..."}
+      </h2>
+
+      <label style={{ display: 'block', marginBottom: '20px', fontSize: '1.2em' }}>
+          Select New Preferred Currency:
+          <div style={{ display: 'inline-block', marginLeft: '10px', position: 'relative' }}>
+              <select
+                  value={selectedCurrency}
+                  onChange={(e) => setSelectedCurrency(e.target.value)}
+                  style={{
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      border: '2px solid #3B82F6',
+                      fontSize: '1em',
+                      appearance: 'none',
+                      width: '250px',
+                      cursor: 'pointer',
+                      color: '#3B82F6',
+                      backgroundColor: '#f0f4ff',
+                      fontWeight: '500',
+                  }}
+              >
+                  <option value="" disabled>Choose Currency</option>
+                  {currencies.map((currency) => (
+                      <option key={currency._id} value={currency._id}>
+                          {currency.name} ({currency.code})
+                      </option>
+                  ))}
+              </select>
+          </div>
+          <button
+              type="button"
+              onClick={handleSetPreferredCurrency}
+              disabled={!selectedCurrency}
+              style={{
+                  marginLeft: '15px',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  backgroundColor: selectedCurrency ? '#3B82F6' : '#a3a3a3',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  border: 'none',
+                  cursor: selectedCurrency ? 'pointer' : 'not-allowed',
+                  fontSize: '1em',
+              }}
+          >
+              Set
+          </button>
+      </label>
+  </div>
+);
+
+};
+
 
 const DeleteAccount = ({ onClose }) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -278,6 +429,7 @@ export default function AccountTourist() {
       case "redeem-points": return <RedeemPoints tourist={tourist} onRedeemPoints={handleRedeemPoints} />;
       case "security": return <PasswordChanger />;
       case "preferences": return <Preferences />;
+      case "currency": return <CurrencyApp />;
       default: return <AccountInfo tourist={tourist} />;
     }
   };
@@ -305,6 +457,7 @@ export default function AccountTourist() {
       { name: "Account", icon: User, tab: "info" },
       { name: "Security", icon: Lock, tab: "security" },
       { name: "Preferences", icon: Settings, tab: "preferences" },
+      { name: "Set Currency", icon: DollarSign, tab: "currency" },
       { name: "Delete Account", icon: Trash2, tab: "delete-account" },
     ],
     "Help and Support": [

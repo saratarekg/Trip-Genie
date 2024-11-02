@@ -13,7 +13,7 @@ const Popup = ({ isOpen, onClose, type, message }) => {
                 setTimeout(() => {
                     onClose(); // Close after fading
                 }, 300); // Wait for fade-out duration
-            }, 2000); // Auto-close after 5000ms (5 seconds)
+            }, 1500); // Auto-close after 5000ms (5 seconds)
 
             // Cleanup the timer on component unmount or when isOpen changes
             return () => {

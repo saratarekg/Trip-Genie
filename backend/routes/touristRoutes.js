@@ -22,6 +22,9 @@ router.get("/currencies", currencyController.getSupportedCurrencies);
 // router.get('/fill', currencyController.populateCurrencies);
 
 router.get("/currencies/code", touristController.getCurrencyCode);
+router.get("/currencies/idd", touristController.getCurrencyID);
+router.post("/currencies/set", touristController.setCurrencyCode);
+
 
 
 router.put("/", touristController.updateTouristProfile);

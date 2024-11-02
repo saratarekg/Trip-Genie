@@ -337,6 +337,52 @@ const getCurrencyCode = async (req, res) => {
   }
 };
 
+const getCurrencyID = async (req, res) => {
+  try {
+    const tourist = await Tourist.findById(res.locals.user_id);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+    // preffered currency is an Object ID in a currency table
+    const currency = await Currency.findById(tourist.preferredCurrency);
+    if (!currency) {
+      return res.status(404).json({ message: "Currency not found" });
+    }
+    res.status(200).json(currency._id);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const setCurrencyCode = async (req, res) => {
+  try {
+    const { currencyId } = req.body;  // Get currency ID from request body
+    console.log(currencyId);
+
+    // Check if the currency exists
+    const currency = await Currency.findById(currencyId);
+    if (!currency) {
+      return res.status(400).json({ message: "Currency not found" });
+    }
+
+    // Find the tourist by user ID and update their preferred currency
+    const tourist = await Tourist.findByIdAndUpdate(
+      res.locals.user_id,
+      { preferredCurrency: currencyId },
+      { new: true } // Return the updated tourist document
+    );
+
+    if (!tourist) {
+      return res.status(400).json({ message: "Tourist not found" });
+    }
+
+    res.status(200).json({ message: "Preferred currency updated successfully", currencyCode: currency.code });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 // Tourist Controller
 // Method to get the tourist's wishlist
 const getWishlist = async (req, res) => {
@@ -694,4 +740,6 @@ module.exports = {
   emptyCart,
   updateCartProductQuantity,
   getCurrencyCode,
+  setCurrencyCode,
+  getCurrencyID
 };
