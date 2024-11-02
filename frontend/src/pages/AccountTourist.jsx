@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   User,
   Wallet,
+  ShoppingCartIcon,
   Lock,
   AlertTriangle,
   Settings,
@@ -449,7 +450,7 @@ export default function AccountTourist() {
       { name: "Points and Wallet", icon: Wallet, tab: "redeem-points" },
     ],
     "Products": [
-      { name: "Cart", icon: ShoppingBag, tab: "cart" },
+      { name: "Cart", icon: ShoppingCartIcon, tab: "cart" },
       { name: "Wishlist", icon: Heart, tab: "wishlist" },
 
     ],

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {CheckCircle, XCircle}  from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 
 const WishlistPage = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -14,9 +15,101 @@ const WishlistPage = () => {
   const [actionError, setActionError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchWishlistItems();
-  }, []);
+  const [userRole, setUserRole] = useState('guest');
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbols, setCurrencySymbols] = useState({});
+
+  const fetchExchangeRate = async (baseCurrency, targetCurrency) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            base: baseCurrency,
+            target: targetCurrency,
+          }),
+        }
+      );
+      const data = await response.json();
+
+      if (response.ok) {
+        return data.conversion_rate;
+      } else {
+        console.error('Error in fetching exchange rate:', data.message);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+      return null;
+    }
+  };
+
+  const getCurrencySymbol = async (currencyCode) => {
+    if (currencySymbols[currencyCode]) {
+      return currencySymbols[currencyCode];
+    }
+
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${currencyCode}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      const newSymbols = { ...currencySymbols, [currencyCode]: response.data.symbol };
+      setCurrencySymbols(newSymbols);
+      return response.data.symbol;
+    } catch (error) {
+      console.error("Error fetching currency symbol:", error);
+      return '';
+    }
+  };
+
+  const formatPrice = async (price, productCurrency) => {
+    const roundedPrice = Math.round(price);
+    
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      if (userPreferredCurrency.code === productCurrency) {
+        return `${userPreferredCurrency.symbol}${roundedPrice}`;
+      } else {
+        const rate = await fetchExchangeRate(productCurrency, userPreferredCurrency._id);
+        if (rate) {
+          const exchangedPrice = Math.round(roundedPrice * rate);
+          return `${userPreferredCurrency.symbol}${exchangedPrice}`;
+        }
+      }
+    }
+    const symbol = await getCurrencySymbol(productCurrency);
+    return `${symbol}${roundedPrice}`;
+  };
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency;
+
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
 
   const fetchWishlistItems = async () => {
     setLoading(true);
@@ -31,8 +124,14 @@ const WishlistPage = () => {
         throw new Error("Failed to fetch wishlist items");
       }
       const data = await response.json();
-      setWishlistItems(data);
-      console.log(data);
+      
+      // Format prices for each wishlist item
+      const formattedData = await Promise.all(data.map(async (item) => ({
+        ...item,
+        formattedPrice: await formatPrice(item.product.price, item.product.currency)
+      })));
+
+      setWishlistItems(formattedData);
     } catch (err) {
       setError("Error fetching wishlist items. Please try again later.");
       console.error("Error fetching wishlist items:", err);
@@ -40,6 +139,11 @@ const WishlistPage = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchUserInfo();
+    fetchWishlistItems();
+  }, []);
 
   const handleRemoveFromWishlist = async (productId) => {
     try {
@@ -66,10 +170,10 @@ const WishlistPage = () => {
       const response = await fetch(`http://localhost:4000/tourist/move/wishlist/${productId}`, {
         method: "PUT",
         headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to add item to cart");
       }
@@ -113,7 +217,7 @@ const WishlistPage = () => {
                   className="w-full h-48 object-cover mb-4 cursor-pointer"
                   onClick={() => navigate(`/product/${item.product._id}`)}
                 />
-                <p className="text-lg font-semibold mb-2">${item.product.price.toFixed(2)}</p>
+                <p className="text-lg font-semibold mb-2">{item.formattedPrice}</p>
                 <p className="text-sm text-gray-600 mb-4">{item.product.description.substring(0, 100)}...</p>
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={() => handleRemoveFromWishlist(item.product._id)}>
@@ -129,33 +233,32 @@ const WishlistPage = () => {
         </div>
       )}
 
-    <Dialog open={actionSuccess !== null} onOpenChange={() => setActionSuccess(null)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            <div className="flex items-center">
-              <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-              Success
-            </div>
-          </DialogTitle>
-          <DialogDescription>{actionSuccess}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button onClick={() => setActionSuccess(null)}>Close</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <Dialog open={actionSuccess !== null} onOpenChange={() => setActionSuccess(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <div className="flex items-center">
+                <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                Success
+              </div>
+            </DialogTitle>
+            <DialogDescription>{actionSuccess}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setActionSuccess(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {/* Action Error Dialog */}
       <Dialog open={actionError !== null} onOpenChange={() => setActionError(null)}>
         <DialogContent>
           <DialogHeader>
-          <DialogTitle>
-            <div className="flex items-center">
-              <XCircle className="w-6 h-6 text-red-500 mr-2" />
-              Error
-            </div>
-          </DialogTitle>
+            <DialogTitle>
+              <div className="flex items-center">
+                <XCircle className="w-6 h-6 text-red-500 mr-2" />
+                Error
+              </div>
+            </DialogTitle>
             <DialogDescription>{actionError}</DialogDescription>
           </DialogHeader>
           <DialogFooter>

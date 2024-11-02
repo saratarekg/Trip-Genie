@@ -184,8 +184,6 @@ const characterLimit = 150; // Set your desired character limit
 const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
-
-
    
   const fetchExchangeRate = async () => {
     try {
@@ -284,7 +282,6 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
       }
     }
   }, [userRole, userPreferredCurrency, product]);
-
 
   const handleViewMore = () => {
     setShowMore(!showMore);
