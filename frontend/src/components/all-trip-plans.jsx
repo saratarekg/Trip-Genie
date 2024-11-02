@@ -40,114 +40,78 @@ const ItineraryCard = ({
   canModify,
   setShowDeleteConfirm,
   setSelectedItinerary,
+  userInfo,
 }) =>{
+  const [exchangeRate, setExchangeRate] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
-  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
-  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
-  const [exchangeRates, setExchangeRates] = useState({});
-  const [currencySymbol, setCurrencySymbol] = useState({});
+  const fetchExchangeRate = useCallback(async () => {
+    if (!userInfo || !userInfo.preferredCurrency) return;
 
-  const fetchExchangeRate = async () => {
     try {
       const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',  // Ensure content type is set to JSON
-            },
-            body: JSON.stringify({
-              base: itinerary.currency,     // Sending base currency ID
-              target: userPreferredCurrency._id,      // Sending target currency ID
-            }),
-          }
-        );
-      // Parse the response JSON
-    const data = await response.json();
-
-    if (response.ok) {
-      setExchangeRates(data.conversion_rate);
-    } else {
-      // Handle possible errors
-      console.error('Error in fetching exchange rate:', data.message);
-    }
+      const response = await fetch(
+        `http://localhost:4000/${userInfo.role}/populate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            base: itinerary.currency,
+            target: userInfo.preferredCurrency._id,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        setExchangeRate(data.conversion_rate);
+      } else {
+        console.error('Error in fetching exchange rate:', data.message);
+      }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
-  };
+  }, [userInfo, itinerary.currency]);
 
-  const getCurrencySymbol = async () => {
+  const getCurrencySymbol = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${itinerary.currency}`, {
+      const response = await axios.get(`http://localhost:4000/${userInfo.role}/getCurrency/${itinerary.currency}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
-      setCurrencySymbol(response.data);
-
+      setCurrencySymbol(response.data.symbol);
     } catch (error) {
-      console.error("Error fetching currensy symbol:", error);
+      console.error("Error fetching currency symbol:", error);
     }
-  };
+  }, [userInfo.role, itinerary.currency]);
 
-  const formatPrice = (price, type) => {
-    if(itinerary){
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      if (userPreferredCurrency === itinerary.currency) {
-        return `${userPreferredCurrency.symbol}${price}`;
-      } else {
-        const exchangedPrice = price * exchangeRates;
-        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-      }
+  useEffect(() => {
+    if (userInfo.role === 'tourist' && userInfo.preferredCurrency && userInfo.preferredCurrency !== itinerary.currency) {
+      fetchExchangeRate();
     } else {
-      if(currencySymbol){
-      return `${currencySymbol.symbol}${price}`;
-      }
+      getCurrencySymbol();
     }
-  }
+  }, [userInfo, itinerary, fetchExchangeRate, getCurrencySymbol]);
+
+  const formatPrice = (price) => {
+    if (!userInfo || !price) return '';
+
+    if (userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+      if (userInfo.preferredCurrency === itinerary.currency) {
+        return `${userInfo.preferredCurrency.symbol}${price}`;
+      } else if (exchangeRate) {
+        const exchangedPrice = price * exchangeRate;
+        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+    } else if (currencySymbol) {
+      return `${currencySymbol}${price}`;
+    }
+
+    return `${price}`;
   };
 
-  const fetchUserInfo = async () => {
-    const role = Cookies.get("role") || "guest";
-    setUserRole(role);
-
-    if (role === 'tourist') {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const currencyId = response.data.preferredCurrency
-
-        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUserPreferredCurrency(response2.data);
-
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if(itinerary)
-    fetchUserInfo();
-  }, [itinerary]);
-
-
-  useEffect(() => {
-    if (itinerary) {
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== itinerary.currency) {
-        fetchExchangeRate();
-      }
-      else{
-        getCurrencySymbol();
-      }
-    }
-  }, [userRole, userPreferredCurrency, itinerary]);
   return (
   <Card
     className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
@@ -273,8 +237,37 @@ export function AllItinerariesComponent() {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [isSortedByPreference, setIsSortedByPreference] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
 
   const navigate = useNavigate();
+
+  const fetchUserInfo = useCallback(async () => {
+    const role = Cookies.get("role") || "guest";
+    const token = Cookies.get("jwt");
+
+    if (role === 'tourist') {
+      try {
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency;
+
+        const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        setUserInfo({ role });
+      }
+    } else {
+      setUserInfo({ role });
+    }
+  }, []);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -389,6 +382,16 @@ export function AllItinerariesComponent() {
       setIsLoading(false);
     }
   }, [searchTerm, sortBy, myItineraries]);
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, [fetchUserInfo]);
+
+  useEffect(() => {
+    if (userInfo) {
+      fetchItineraries();
+    }
+  }, [userInfo, fetchItineraries]);
 
   const searchItineraries = useCallback(async () => {
     setIsSortedByPreference(false);
@@ -641,7 +644,8 @@ export function AllItinerariesComponent() {
                     key={itinerary._id}
                     itinerary={itinerary}
                     onSelect={handleItinerarySelect}
-                    role={getUserRole()}
+                    role={userInfo.role}
+                    userInfo={userInfo}
                     canModify={canModify}
                     setShowDeleteConfirm={setShowDeleteConfirm}
                     setSelectedItinerary={setSelectedItinerary}
