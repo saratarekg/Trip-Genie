@@ -3,7 +3,7 @@
 import keyNavbar from "../assets/images/keyNavbar.svg";
 import settingsIcon from "../assets/settings-svgrepo-com.svg";
 import gearIcon from "../assets/gear-fill.svg";
-import React, { useState } from "react";
+import React, { useState,useRef, useEffect } from "react";
 import { HistoryIcon, Menu, X, Calendar } from "lucide-react";
 import { Link } from "react-router-dom"; // Import Link from React Router
 import logo from "../assets/images/tgLogofinal6.png";
@@ -32,13 +32,34 @@ const NavLink = ({ to, children }) => (
   </Link>
 );
 
+
+
 export function NavbarComponent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const role = Cookies.get("role");
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+  
   // Define the logOut function
   const logOut = async () => {
     console.log("Logging out...");
@@ -167,7 +188,7 @@ export function NavbarComponent() {
                     </>
                   )}
                   {role !== "guest" && role !== undefined && (
-                    <div className="relative">
+                    <div className="relative" ref={dropdownRef}>
                       <button
                         onClick={toggleDropdown}
                         className="flex items-center text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium focus:outline-none"
