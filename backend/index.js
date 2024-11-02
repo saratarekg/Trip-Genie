@@ -65,7 +65,7 @@ app.get("/", (req, res) => res.send("Currency API is running!"));
 app.use("/auth", authRoutes);
 app.use("/guest", guestRoutes);
 app.use("/api", apiRoutes);
-app.use("/admin", adminRoutes);
+app.use("/admin", requireAuth("admin"), adminRoutes);
 app.use(
   "/tourism-governor",
   requireAuth("tourism-governor"),

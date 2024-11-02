@@ -52,7 +52,7 @@ import SettingsPage from "./pages/SettingsPage.jsx";
 import TouristActivities from "./pages/TouristActivities.jsx";
 import { ProductArchive } from "./components/product-archive.jsx";
 import BookingPage from "./components/FlightBooking.jsx";
-import UserFiles from "./pages/UserFiles.jsx";
+import FileViewer from "./components/FileViewer.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -376,7 +376,7 @@ function AppContent() {
             path="/flights"
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
-                <BookingPage/>
+                <BookingPage />
               </ProtectedRoute>
             }
           />
@@ -393,7 +393,7 @@ function AppContent() {
             path="/admin/files"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
-                <UserFiles />
+                <FileViewer />
               </ProtectedRoute>
             }
           />
