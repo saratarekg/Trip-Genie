@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Bed, Calendar, ArrowUpDown, AlertCircle } from "lucide-react";
+import { Bed, Calendar, ArrowUpDown, AlertCircle, Star, MessageCircle } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -43,19 +43,19 @@ export default function HotelBookingPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("price");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [priceFilter, setPriceFilter] = useState("all");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [currencyCode, setCurrencyCode] = useState("USD");
-  const [maxPrice, setMaxPrice] = useState(0);
-  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
-    useState(false);
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [hotelOffers, setHotelOffers] = useState(null);
+  const [dialogError, setDialogError] = useState("");
+  const [hotelSentiments, setHotelSentiments] = useState({});
 
   const itemsPerPage = 9;
 
-  async function refreshToken() {
+  const refreshToken = useCallback(async () => {
     try {
       const API_KEY = import.meta.env.VITE_AMADEUS_API_KEY;
       const API_SECRET = import.meta.env.VITE_AMADEUS_API_SECRET;
@@ -84,9 +84,9 @@ export default function HotelBookingPage() {
     } catch (err) {
       setError("Authentication failed. Please try again later.");
     }
-  }
+  }, []);
 
-  const getCurrencyCode = async () => {
+  const getCurrencyCode = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
@@ -108,16 +108,16 @@ export default function HotelBookingPage() {
     } catch (err) {
       setError("Failed to fetch currency code. Please try again later.");
     }
-  };
+  }, []);
 
   useEffect(() => {
     refreshToken();
     getCurrencyCode();
-  }, []);
+  }, [refreshToken, getCurrencyCode]);
 
   const handleSearch = async () => {
-    if (new Date(checkOutDate) <= new Date(checkInDate)) {
-      setError("Check-out date must be after check-in date.");
+    if (!city) {
+      setError("Please enter a city code.");
       return;
     }
 
@@ -125,7 +125,7 @@ export default function HotelBookingPage() {
     setError("");
     try {
       const response = await fetch(
-        `https://test.api.amadeus.com/v2/shopping/hotel-offers?cityCode=${city}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&adults=${adults}&currency=${currencyCode}&bestRateOnly=true`,
+        `https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city?cityCode=${city}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -145,10 +145,7 @@ export default function HotelBookingPage() {
       } else {
         setHotels(data.data);
         setCurrentPage(1);
-        const prices = data.data.map((hotel) =>
-          parseFloat(hotel.offers[0].price.total)
-        );
-        setMaxPrice(Math.max(...prices));
+        fetchHotelSentiments(data.data.map(hotel => hotel.hotelId));
       }
     } catch (err) {
       setError("Failed to fetch hotels. Please try again later.");
@@ -158,41 +155,54 @@ export default function HotelBookingPage() {
     }
   };
 
+  const fetchHotelSentiments = async (hotelIds) => {
+    try {
+      hotelIds = hotelIds.slice(2, 3);
+      const response = await fetch(
+        `https://test.api.amadeus.com/v2/e-reputation/hotel-sentiments?hotelIds=[${hotelIds.join(',')}]`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch hotel sentiments");
+      }
+
+      const data = await response.json();
+      const sentiments = {};
+      data.data.forEach(hotel => {
+        sentiments[hotel.hotelId] = {
+          numberOfReviews: hotel.numberOfReviews,
+          numberOfRatings: hotel.numberOfRatings,
+          overallRating: hotel.overallRating
+        };
+      });
+      setHotelSentiments(sentiments);
+    } catch (err) {
+      console.error("Error fetching hotel sentiments:", err);
+    }
+  };
+
   const filterHotels = (hotels) => {
     let filtered = [...hotels];
-
-    if (priceFilter !== "all") {
-      filtered = filtered.filter((hotel) => {
-        const price = parseFloat(hotel.offers[0].price.total);
-        switch (priceFilter) {
-          case "under25":
-            return price < maxPrice * 0.25;
-          case "under50":
-            return price < maxPrice * 0.5;
-          case "under75":
-            return price < maxPrice * 0.75;
-          case "over75":
-            return price >= maxPrice * 0.75;
-          default:
-            return true;
-        }
-      });
-    }
 
     filtered.sort((a, b) => {
       let aValue, bValue;
       switch (sortBy) {
         case "price":
-          aValue = parseFloat(a.offers[0].price.total);
-          bValue = parseFloat(b.offers[0].price.total);
+          aValue = parseFloat(a.price || 0);
+          bValue = parseFloat(b.price || 0);
           break;
         case "rating":
-          aValue = a.hotel.rating || 0;
-          bValue = b.hotel.rating || 0;
+          aValue = hotelSentiments[a.hotelId]?.overallRating || 0;
+          bValue = hotelSentiments[b.hotelId]?.overallRating || 0;
           break;
         default:
-          aValue = parseFloat(a.offers[0].price.total);
-          bValue = parseFloat(b.offers[0].price.total);
+          aValue = parseFloat(a.price || 0);
+          bValue = parseFloat(b.price || 0);
       }
       return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     });
@@ -215,13 +225,40 @@ export default function HotelBookingPage() {
     });
   };
 
-  const handleOpenDialog = (hotel) => {
+  const handleOpenDialog = async (hotel) => {
     setSelectedHotel(hotel);
     setIsDialogOpen(true);
+    setDialogError("");
+
+    try {
+      const hotelIds = [hotel.hotelId];
+      const response = await fetch(
+        `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=[${hotelIds.join(',')}]`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.errors && errorData.errors[0].code === 1257) {
+          throw new Error("Invalid hotel ID. Please try another hotel.");
+        }
+        throw new Error("Failed to fetch hotel offers");
+      }
+
+      const data = await response.json();
+      setHotelOffers(data.data[0]);
+    } catch (err) {
+      setDialogError(err.message);
+    }
   };
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
+    setHotelOffers(null);
   };
 
   const handleBookNow = () => {
@@ -231,6 +268,7 @@ export default function HotelBookingPage() {
   const handleCloseAllPopups = () => {
     setIsBookingConfirmationOpen(false);
     setIsDialogOpen(false);
+    setHotelOffers(null);
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -243,6 +281,29 @@ export default function HotelBookingPage() {
     }
   };
 
+  const getPageNumbers = (current, total, maxVisible) => {
+    const pages = [];
+    if (total <= maxVisible) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    pages.push(1);
+    const halfVisible = Math.floor(maxVisible / 2);
+    let start = Math.max(2, current - halfVisible);
+    let end = Math.min(total - 1, current + halfVisible);
+    if (current <= halfVisible + 1) {
+      end = maxVisible - 1;
+    } else if (current >= total - halfVisible) {
+      start = total - maxVisible + 2;
+    }
+    if (start > 2) pages.push('ellipsis');
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    if (end < total - 1) pages.push('ellipsis');
+    pages.push(total);
+    return pages;
+  };
+
   return (
     <div className="bg-white-100 min-h-screen p-4 space-y-4 mt-5">
       <h1 className="text-3xl font-bold text-blue-900 text-center">
@@ -251,7 +312,7 @@ export default function HotelBookingPage() {
 
       <Card className="bg-white shadow-lg mt-2">
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <label
                 htmlFor="city"
@@ -267,57 +328,6 @@ export default function HotelBookingPage() {
                 onChange={(e) => setCity(e.target.value)}
                 className="border-2 border-amber-400"
               />
-            </div>
-            <div>
-              <label
-                htmlFor="checkInDate"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Check-in Date
-              </label>
-              <Input
-                id="checkInDate"
-                type="date"
-                value={checkInDate}
-                onChange={handleCheckInDateChange}
-                min={today}
-                className="border-2 border-amber-400"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="checkOutDate"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Check-out Date
-              </label>
-              <Input
-                id="checkOutDate"
-                type="date"
-                value={checkOutDate}
-                onChange={(e) => setCheckOutDate(e.target.value)}
-                min={checkInDate || today}
-                className="border-2 border-amber-400"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="adults"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Adults
-              </label>
-              <Select value={adults} onValueChange={setAdults}>
-                <SelectTrigger className="border-2 border-amber-400">
-                  <SelectValue placeholder="Number of adults" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div className="md:col-span-1 flex items-end">
               <Button
@@ -364,26 +374,6 @@ export default function HotelBookingPage() {
                 {sortOrder.toUpperCase()}
               </Button>
             </div>
-            <Select value={priceFilter} onValueChange={setPriceFilter}>
-              <SelectTrigger className="w-[160px] border-amber-400">
-                <SelectValue placeholder="Filter by price" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Prices</SelectItem>
-                <SelectItem value="under25">
-                  Under {Math.floor(0.25 * maxPrice)} {currencyCode}
-                </SelectItem>
-                <SelectItem value="under50">
-                  Under {Math.floor(0.5 * maxPrice)} {currencyCode}
-                </SelectItem>
-                <SelectItem value="under75">
-                  Under {Math.floor(0.75 * maxPrice)} {currencyCode}
-                </SelectItem>
-                <SelectItem value="over75">
-                  Over {Math.floor(0.75 * maxPrice)} {currencyCode}
-                </SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -396,34 +386,28 @@ export default function HotelBookingPage() {
                         <Bed className="h-5 w-5" />
                       </div>
                       <h3 className="text-base font-semibold">
-                        {hotel.hotel.name}
+                        {hotel.name}
                       </h3>
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>
-                          Check-in: {formatDate(hotel.offers[0].checkInDate)}
-                        </span>
+                        <Star className="h-4 w-4 text-yellow-400" />
+                        <span>Rating: {hotelSentiments[hotel.hotelId]?.overallRating || "N/A"}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>
-                          Check-out: {formatDate(hotel.offers[0].checkOutDate)}
-                        </span>
+                        <MessageCircle className="h-4 w-4 text-blue-400" />
+                        <span>Reviews: {hotelSentiments[hotel.hotelId]?.numberOfReviews || "N/A"}</span>
                       </div>
-                      {hotel.hotel.rating && (
-                        <div>Rating: {hotel.hotel.rating} / 5</div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <Star className="h-4 w-4 text-green-400" />
+                        <span>Ratings: {hotelSentiments[hotel.hotelId]?.numberOfRatings || "N/A"}</span>
+                      </div>
                     </div>
                     <div className="mt-auto pt-3 flex items-center justify-between">
-                      <p className="text-xl font-bold text-amber-600">
-                        {hotel.offers[0].price.total}{" "}
-                        {hotel.offers[0].price.currency}
-                      </p>
                       <Button
                         className="bg-blue-900 hover:bg-blue-800 text-white"
                         onClick={() => handleOpenDialog(hotel)}
+                      
                       >
                         See Details
                       </Button>
@@ -439,46 +423,28 @@ export default function HotelBookingPage() {
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className={`cursor-pointer ${
-                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                  }`}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                 />
               </PaginationItem>
-              {[...Array(totalPages)].map((_, i) => {
-                if (
-                  i === 0 ||
-                  i === totalPages - 1 ||
-                  (i >= currentPage - 2 && i <= currentPage + 2)
-                ) {
-                  return (
-                    <PaginationItem key={i + 1}>
-                      <PaginationLink
-                        onClick={() => setCurrentPage(i + 1)}
-                        isActive={currentPage === i + 1}
-                        className="cursor-pointer"
-                      >
-                        {i + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                } else if (
-                  (i === currentPage - 3 && i > 0) ||
-                  (i === currentPage + 3 && i < totalPages - 1)
-                ) {
-                  return <PaginationEllipsis key={i} />;
-                }
-                return null;
-              })}
+              {getPageNumbers(currentPage, totalPages, 5).map((page, index) => (
+                <PaginationItem key={index}>
+                  {page === 'ellipsis' ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page)}
+                      isActive={currentPage === page}
+                      className={currentPage === page ? "pointer-events-none" : ""}
+                    >
+                      {page}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
               <PaginationItem>
                 <PaginationNext
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
-                  className={`cursor-pointer ${
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : ""
-                  }`}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                 />
               </PaginationItem>
             </PaginationContent>
@@ -494,22 +460,74 @@ export default function HotelBookingPage() {
               Complete information about the selected hotel.
             </DialogDescription>
           </DialogHeader>
-          {selectedHotel && (
+          {dialogError && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{dialogError}</AlertDescription>
+            </Alert>
+          )}
+
+          {selectedHotel && hotelOffers && !dialogError && (
             <div className="mt-4">
-              <h4 className="font-semibold mb-2">{selectedHotel.hotel.name}</h4>
-              <p>Rating: {selectedHotel.hotel.rating} / 5</p>
-              <p>Check-in: {formatDate(selectedHotel.offers[0].checkInDate)}</p>
+              <h4 className="font-semibold mb-2">{selectedHotel.name}</h4>
+              <p>Rating: {hotelSentiments[selectedHotel.hotelId]?.overallRating || "N/A"}</p>
+              <p>Reviews: {hotelSentiments[selectedHotel.hotelId]?.numberOfReviews || "N/A"}</p>
+              <p>Ratings: {hotelSentiments[selectedHotel.hotelId]?.numberOfRatings || "N/A"}</p>
+              <p>Check-in: {formatDate(hotelOffers.offers[0].checkInDate)}</p>
+              <p>Check-out: {formatDate(hotelOffers.offers[0].checkOutDate)}</p>
+              <p>Room Type: {hotelOffers.offers[0].room.type}</p>
               <p>
-                Check-out: {formatDate(selectedHotel.offers[0].checkOutDate)}
+                Price: {hotelOffers.offers[0].price.total}{" "}
+                {hotelOffers.offers[0].price.currency}
               </p>
-              <p>Room Type: {selectedHotel.offers[0].room.type}</p>
-              <p>
-                Price: {selectedHotel.offers[0].price.total}{" "}
-                {selectedHotel.offers[0].price.currency}
-              </p>
+              <div className="mt-4">
+                <label htmlFor="adultsSelect" className="block text-sm font-medium text-gray-700 mb-1">
+                  Number of Adults
+                </label>
+                <Select value={adults} onValueChange={setAdults}>
+                  <SelectTrigger id="adultsSelect" className="w-full">
+                    <SelectValue placeholder="Select number of adults" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[...Array(9)].map((_, i) => (
+                      <SelectItem key={i + 1} value={(i + 1).toString()}>
+                        {i + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="mt-4">
+                <label htmlFor="checkInDatePicker" className="block text-sm font-medium text-gray-700 mb-1">
+                  Check-in Date
+                </label>
+                <Input
+                  id="checkInDatePicker"
+                  type="date"
+                  value={checkInDate}
+                  onChange={handleCheckInDateChange}
+                  min={today}
+                  className="w-full"
+                />
+              </div>
+              <div className="mt-4">
+                <label htmlFor="checkOutDatePicker" className="block text-sm font-medium text-gray-700 mb-1">
+                  Check-out Date
+                </label>
+                <Input
+                  id="checkOutDatePicker"
+                  type="date"
+                  value={checkOutDate}
+                  onChange={(e) => setCheckOutDate(e.target.value)}
+                  min={checkInDate || today}
+                  className="w-full"
+                />
+              </div>
               <Button
                 className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white"
                 onClick={handleBookNow}
+                disabled={!checkInDate || !checkOutDate}
               >
                 Book Now
               </Button>
