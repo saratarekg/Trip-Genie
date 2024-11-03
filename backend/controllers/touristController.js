@@ -725,16 +725,20 @@ const deleteTouristAccount = async (req, res) => {
 
 const addCard = async (req, res) => {
   try {
-    const { paymentMethod, cardNumber, expiryDate, holderName, cvv, default: isDefault } = req.body;
+    const { cardType, cardNumber, expiryDate, holderName, cvv, default: isDefault } = req.body;
 
-    // Validate the payment method
-    if (!['CREDIT_CARD', 'DEBIT_CARD'].includes(paymentMethod)) {
-      return res.status(400).json({ message: "Invalid payment method. Use 'CREDIT_CARD' or 'DEBIT_CARD'." });
+    // Validate input
+    if (!cardType || !cardNumber || !expiryDate || !holderName || !cvv) {
+      return res.status(400).json({ message: 'All card fields are required' });
+    }
+
+    if (!['Credit Card', 'Debit Card'].includes(cardType)) {
+      return res.status(400).json({ message: 'Invalid card type' });
     }
 
     // Prepare the new card object
     const newCard = {
-      paymentMethod,
+      cardType,
       cardNumber,
       expiryDate,
       holderName,
@@ -742,40 +746,48 @@ const addCard = async (req, res) => {
       default: isDefault || false, 
     };
 
-    // If a new card is marked as default, remove default status from any existing cards
-    if (isDefault) {
-      await Tourist.updateOne(
-        { _id: res.locals.user_id, 'cards.default': true },
-        { $set: { 'cards.$.default': false } }
-      );
-    }
-
-    // Update the tourist document with the new card
-    const result = await Tourist.findByIdAndUpdate(
-      res.locals.user_id,
+    // Step 1: Add the new card to the cards array
+    const result = await Tourist.findOneAndUpdate(
+      { _id: res.locals.user_id },
       { $push: { cards: newCard } },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     if (!result) {
       return res.status(404).json({ message: 'Tourist not found' });
     }
 
-    // Automatically set the first card as default if none exists
-    if (result.cards.length === 1) {
+    // Step 2: If the new card is set as default, unset other defaults
+    if (isDefault) {
       await Tourist.updateOne(
         { _id: res.locals.user_id },
-        { $set: { 'cards.0.default': true } }  // Set the first card as default
+        { $set: { 'cards.$[elem].default': false } },
+        {
+          arrayFilters: [{ 'elem.default': true }],
+          runValidators: true
+        }
+      );
+
+      // Set the last added card as the default
+      const lastIndex = result.cards.length - 1;
+      await Tourist.updateOne(
+        { _id: res.locals.user_id },
+        { $set: { [`cards.${lastIndex}.default`]: true } }
       );
     }
 
-    return res.status(200).json({ message: 'Card added successfully', cards: result.cards });
+    // Refetch the updated list of cards to return in the response
+    const updatedTourist = await Tourist.findById(res.locals.user_id);
+
+    return res.status(200).json({ message: 'Card added successfully', cards: updatedTourist.cards });
   } catch (error) {
     console.error(error);
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: 'Invalid card data', errors: error.errors });
+    }
     return res.status(500).json({ message: 'An error occurred while adding the card' });
   }
 };
-
 
 
 const getAllCards = async (req, res) => {
