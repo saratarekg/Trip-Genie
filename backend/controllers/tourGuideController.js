@@ -131,7 +131,10 @@ const getUnacceptedTourGuides = async (req, res) => {
     const unacceptedTourGuides = await TourGuide.find({ isAccepted: false });
     res.status(200).json(unacceptedTourGuides);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching unaccepted TourGuides", error: error.message });
+    res.status(500).json({
+      message: "Error fetching unaccepted TourGuides",
+      error: error.message,
+    });
   }
 };
 
@@ -179,7 +182,15 @@ const deleteTourGuideAccount = async (req, res) => {
       });
     }
 
-    res.status(201).json({ message: "Account deleted successfully" });
+    itineraries.forEach(async (itinerary) => {
+      await Itinerary.findByIdAndUpdate(itinerary._id, { isDeleted: true });
+    });
+
+    await TourGuide.findByIdAndDelete(res.locals.user_id);
+
+    res
+      .status(201)
+      .json({ message: "Tour guide account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -294,7 +305,6 @@ const rateTourGuide = async (req, res) => {
     // .populate("advertiser")
     // .populate("category")
     // .populate("tags")
-    // .populate("attended")
     // .populate("comments")
     //.exec();
 
@@ -323,9 +333,14 @@ const approveTourGuide = async (req, res) => {
       return res.status(404).json({ message: "TourGuide not found" });
     }
 
-    res.status(200).json({ message: "TourGuide approved successfully", tourGuide: updatedTourGuide });
+    res.status(200).json({
+      message: "TourGuide approved successfully",
+      tourGuide: updatedTourGuide,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error approving TourGuide", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error approving TourGuide", error: error.message });
   }
 };
 

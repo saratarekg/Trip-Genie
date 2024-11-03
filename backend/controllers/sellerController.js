@@ -30,7 +30,6 @@ const updateSeller = async (req, res) => {
       { email, username, name, description, mobile, logo },
       { new: true }
     );
-    
 
     if (!seller) {
       return res.status(404).json({ error: "Seller not found" });
@@ -48,7 +47,10 @@ const getUnacceptedSeller = async (req, res) => {
     const unacceptedSellers = await Seller.find({ isAccepted: false });
     res.status(200).json(unacceptedSellers);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching unaccepted Sellers", error: error.message });
+    res.status(500).json({
+      message: "Error fetching unaccepted Sellers",
+      error: error.message,
+    });
   }
 };
 
@@ -66,16 +68,19 @@ const deleteSellerAccount = async (req, res) => {
       if (
         purchase.products.some((product) => productIDs.includes(product._id))
       ) {
-        res
-          .status(400)
-          .json({
-            message:
-              "Cannot delete seller account, there are pending purchases",
-          });
+        res.status(400).json({
+          message: "Cannot delete seller account, there are pending purchases",
+        });
       }
     });
 
-    res.status(200).json({ message: "Seller account deleted" });
+    products.forEach(async (product) => {
+      await Product.findByIdAndUpdate(product._id, { isDeleted: true });
+    });
+
+    await Seller.findByIdAndDelete(res.locals.user_id);
+
+    res.status(200).json({ message: "Seller account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -95,9 +100,13 @@ const approveSeller = async (req, res) => {
       return res.status(404).json({ message: "seller not found" });
     }
 
-    res.status(200).json({ message: "Seller approved successfully", Seller: updatedSeller });
+    res
+      .status(200)
+      .json({ message: "Seller approved successfully", Seller: updatedSeller });
   } catch (error) {
-    res.status(500).json({ message: "Error approving Seller", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error approving Seller", error: error.message });
   }
 };
 
