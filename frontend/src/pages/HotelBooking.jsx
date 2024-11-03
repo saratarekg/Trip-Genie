@@ -156,7 +156,7 @@ export default function HotelBookingPage() {
         const hotelIds = data.data.map(hotel => hotel.hotelId);
         const fetchHotelOffers = async (ids) => {
           const response = await fetch(
-            `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currencyCode=${currencyCode}`,
+            `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currency=${currencyCode}`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -343,7 +343,7 @@ export default function HotelBookingPage() {
               <Input
                 id="city"
                 type="text"
-                placeholder="e.g., PAR"
+                placeholder="e.g., CAI"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 className="border-2 border-amber-400"
