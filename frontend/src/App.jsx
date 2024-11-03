@@ -53,6 +53,7 @@ import TouristActivities from "./pages/TouristActivities.jsx";
 import { ProductArchive } from "./components/product-archive.jsx";
 import BookingPage from "./components/FlightBooking.jsx";
 import FileViewer from "./components/FileViewer.jsx";
+import UserApproval from "./components/userApproval.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -394,6 +395,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <FileViewer />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/user-approval"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <UserApproval />
               </ProtectedRoute>
             }
           />

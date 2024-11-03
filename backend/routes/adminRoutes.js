@@ -121,5 +121,13 @@ router.post("/password", adminController.changePassword);
 router.get("/files", adminController.getAllFiles);
 router.get("/files/:filename", adminController.getFile);
 router.delete("/files/:filename", adminController.deleteFile);
+router.get("/unaccepted-advertiser", advertiserController.getUnacceptedAdvertisers);
+router.put("/approve-advertiser/:id", advertiserController.approveAdvertiser);
+router.get("/unaccepted-seller", sellerController.getUnacceptedSeller);
+router.put("/approve-seller/:id", sellerController.approveSeller);
+router.get("/unaccepted-tourguide", tourGuideController.getUnacceptedTourGuides);
+router.put("/approve-tourGuide/:id", tourGuideController.approveTourGuide);
+
+
 
 module.exports = router;

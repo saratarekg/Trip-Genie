@@ -101,6 +101,15 @@ const getAdvertiser = async (req, res) => {
   }
 };
 
+const getUnacceptedAdvertisers = async (req, res) => {
+  try {
+    const unacceptedAdvertisers = await Advertiser.find({ isAccepted: false });
+    res.status(200).json(unacceptedAdvertisers);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching unaccepted advertisers", error: error.message });
+  }
+};
+
 const changePassword = async (req, res) => {
   try {
     const advertiser = await Advertiser.findById(res.locals.user_id);
@@ -137,6 +146,26 @@ const changePassword = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+const approveAdvertiser = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    const updatedAdvertiser = await Advertiser.findByIdAndUpdate(
+      id,
+      { isAccepted: true },
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedAdvertiser) {
+      return res.status(404).json({ message: "Advertiser not found" });
+    }
+
+    res.status(200).json({ message: "Advertiser approved successfully", advertiser: updatedAdvertiser });
+  } catch (error) {
+    res.status(500).json({ message: "Error approving advertiser", error: error.message });
+  }
+};
+
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
@@ -177,4 +206,6 @@ module.exports = {
   updateAdvertiser,
   getAdvertiser,
   changePassword,
+  getUnacceptedAdvertisers,
+  approveAdvertiser,
 };

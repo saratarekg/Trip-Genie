@@ -125,6 +125,14 @@ const updateTourGuideProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getUnacceptedTourGuides = async (req, res) => {
+  try {
+    const unacceptedTourGuides = await TourGuide.find({ isAccepted: false });
+    res.status(200).json(unacceptedTourGuides);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching unaccepted TourGuides", error: error.message });
+  }
+};
 
 const getAllTourGuides = async (req, res) => {
   try {
@@ -286,6 +294,26 @@ const rateTourGuide = async (req, res) => {
   }
 };
 
+const approveTourGuide = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    const updatedTourGuide = await TourGuide.findByIdAndUpdate(
+      id,
+      { isAccepted: true },
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedTourGuide) {
+      return res.status(404).json({ message: "TourGuide not found" });
+    }
+
+    res.status(200).json({ message: "TourGuide approved successfully", tourGuide: updatedTourGuide });
+  } catch (error) {
+    res.status(500).json({ message: "Error approving TourGuide", error: error.message });
+  }
+};
+
 const changePassword = async (req, res) => {
   try {
     const tourGuide = await TourGuide.findById(res.locals.user_id);
@@ -334,4 +362,6 @@ module.exports = {
   rateTourGuide,
   addCommentToTourGuide,
   changePassword,
+  getUnacceptedTourGuides,
+  approveTourGuide,
 };

@@ -29,6 +29,7 @@ const updateSeller = async (req, res) => {
       { email, username, name, description, mobile, logo },
       { new: true }
     );
+    
 
     if (!seller) {
       return res.status(404).json({ error: "Seller not found" });
@@ -39,6 +40,14 @@ const updateSeller = async (req, res) => {
     res
       .status(400)
       .json({ error: "Error updating seller profile", message: error.message });
+  }
+};
+const getUnacceptedSeller = async (req, res) => {
+  try {
+    const unacceptedSellers = await Seller.find({ isAccepted: false });
+    res.status(200).json(unacceptedSellers);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching unaccepted Sellers", error: error.message });
   }
 };
 
@@ -55,6 +64,26 @@ const deleteSellerAccount = async (req, res) => {
     res.status(201).json({ message: "Seller and associated products deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+const approveSeller = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    const updatedSeller = await Seller.findByIdAndUpdate(
+      id,
+      { isAccepted: true },
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedSeller) {
+      return res.status(404).json({ message: "seller not found" });
+    }
+
+    res.status(200).json({ message: "Seller approved successfully", Seller: updatedSeller });
+  } catch (error) {
+    res.status(500).json({ message: "Error approving Seller", error: error.message });
   }
 };
 
@@ -164,4 +193,6 @@ module.exports = {
   updateSeller,
   getSeller,
   changePassword,
+  getUnacceptedSeller,
+  approveSeller,
 };
