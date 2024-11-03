@@ -196,6 +196,19 @@ const deleteTourGuideAccount = async (req, res) => {
   }
 };
 
+const rejectTourGuide = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tourGuide = await TourGuide.findByIdAndDelete(id);
+    if (!tourGuide) {
+      return res.status(400).json({ message: "TourGuide not found" });
+    }
+    res.status(200).json({ message: "TourGuide rejected successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
     return true;
@@ -394,4 +407,5 @@ module.exports = {
   changePassword,
   getUnacceptedTourGuides,
   approveTourGuide,
+  rejectTourGuide,
 };

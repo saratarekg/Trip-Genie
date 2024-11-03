@@ -46,6 +46,19 @@ const deleteAdvertiserAccount = async (req, res) => {
   }
 };
 
+const rejectAdvertiser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const advertiser = await Advertiser.findByIdAndDelete(id);
+    if (!advertiser) {
+      return res.status(400).json({ message: "Advertiser not found" });
+    }
+    res.status(200).json({ message: "Advertiser rejected successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getAllAdvertisers = async (req, res) => {
   try {
     const advertiser = await Advertiser.find().sort({ createdAt: -1 });
@@ -233,4 +246,5 @@ module.exports = {
   changePassword,
   getUnacceptedAdvertisers,
   approveAdvertiser,
+  rejectAdvertiser,
 };

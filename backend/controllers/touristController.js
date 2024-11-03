@@ -710,6 +710,18 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+const deleteTouristAccount = async (req, res) => {
+  try {
+    const tourist = await Tourist.findByIdAndDelete(req.params.id);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+    res.status(200).json({ message: "Tourist account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   removeProductFromWishlist,
   moveProductToCart,
@@ -732,4 +744,5 @@ module.exports = {
   setCurrencyCode,
   getCurrencyID,
   deleteAccount,
+  deleteTouristAccount,
 };

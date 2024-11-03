@@ -32,16 +32,16 @@ router.post("/admins", adminController.addAdmin);
 router.post("/governors", tourismGovernorController.addTourismGovernor);
 
 // Route to delete an Advertiser
-router.delete("/advertisers/:id", advertiserController.deleteAdvertiserAccount);
+router.delete("/advertisers/:id", advertiserController.rejectAdvertiser);
 
 // Route to delete a Seller
-router.delete("/sellers/:id", sellerController.deleteSellerAccount);
+router.delete("/sellers/:id", sellerController.rejectSeller);
 
 // Route to delete a Tour Guide
-router.delete("/tourGuides/:id", tourGuideController.deleteTourGuideAccount);
+router.delete("/tourGuides/:id", tourGuideController.rejectTourGuide);
 
 // Route to delete a Tourist
-router.delete("/tourists/:id", touristController.deleteAccount);
+router.delete("/tourists/:id", touristController.deleteTouristAccount);
 
 // Route to delete admin
 router.delete("/admins/:id", adminController.deleteAdminAccount);

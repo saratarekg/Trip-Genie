@@ -86,6 +86,19 @@ const deleteSellerAccount = async (req, res) => {
   }
 };
 
+const rejectSeller = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const seller = await Seller.findByIdAndDelete(id);
+    if (!seller) {
+      return res.status(400).json({ message: "Seller not found" });
+    }
+    res.status(200).json({ message: "Seller rejected successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const approveSeller = async (req, res) => {
   const { id } = req.params;
   console.log(id);
@@ -218,4 +231,5 @@ module.exports = {
   changePassword,
   getUnacceptedSeller,
   approveSeller,
+  rejectSeller,
 };
