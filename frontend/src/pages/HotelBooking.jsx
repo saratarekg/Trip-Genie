@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Bed, Calendar, ArrowUpDown, AlertCircle, Star, MessageCircle } from "lucide-react";
+import { Bed, Calendar, ArrowUpDown, AlertCircle } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -51,7 +51,6 @@ export default function HotelBookingPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hotelOffers, setHotelOffers] = useState(null);
   const [dialogError, setDialogError] = useState("");
-  const [hotelSentiments, setHotelSentiments] = useState({});
 
   const itemsPerPage = 9;
 
@@ -143,46 +142,30 @@ export default function HotelBookingPage() {
         setError("No hotels found for your search criteria.");
         setHotels([]);
       } else {
-        setHotels(data.data);
+        const hotelIds = data.data.map(hotel => hotel.hotelId);
+        const offersResponse = await fetch(
+          `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${hotelIds.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currencyCode=${currencyCode}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (!offersResponse.ok) {
+          throw new Error("Failed to fetch hotel offers");
+        }
+
+        const offersData = await offersResponse.json();
+        const hotelsWithOffers = offersData.data.filter(hotel => hotel.available && hotel.offers.length > 0);
+        setHotels(hotelsWithOffers);
         setCurrentPage(1);
-        fetchHotelSentiments(data.data.map(hotel => hotel.hotelId));
       }
     } catch (err) {
       setError("Failed to fetch hotels. Please try again later.");
       setHotels([]);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchHotelSentiments = async (hotelIds) => {
-    try {
-      hotelIds = hotelIds.slice(2, 3);
-      const response = await fetch(
-        `https://test.api.amadeus.com/v2/e-reputation/hotel-sentiments?hotelIds=[${hotelIds.join(',')}]`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch hotel sentiments");
-      }
-
-      const data = await response.json();
-      const sentiments = {};
-      data.data.forEach(hotel => {
-        sentiments[hotel.hotelId] = {
-          numberOfReviews: hotel.numberOfReviews,
-          numberOfRatings: hotel.numberOfRatings,
-          overallRating: hotel.overallRating
-        };
-      });
-      setHotelSentiments(sentiments);
-    } catch (err) {
-      console.error("Error fetching hotel sentiments:", err);
     }
   };
 
@@ -193,16 +176,12 @@ export default function HotelBookingPage() {
       let aValue, bValue;
       switch (sortBy) {
         case "price":
-          aValue = parseFloat(a.price || 0);
-          bValue = parseFloat(b.price || 0);
-          break;
-        case "rating":
-          aValue = hotelSentiments[a.hotelId]?.overallRating || 0;
-          bValue = hotelSentiments[b.hotelId]?.overallRating || 0;
+          aValue = parseFloat(a.offers[0].price.total || 0);
+          bValue = parseFloat(b.offers[0].price.total || 0);
           break;
         default:
-          aValue = parseFloat(a.price || 0);
-          bValue = parseFloat(b.price || 0);
+          aValue = parseFloat(a.offers[0].price.total || 0);
+          bValue = parseFloat(b.offers[0].price.total || 0);
       }
       return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     });
@@ -225,35 +204,11 @@ export default function HotelBookingPage() {
     });
   };
 
-  const handleOpenDialog = async (hotel) => {
+  const handleOpenDialog = (hotel) => {
     setSelectedHotel(hotel);
+    setHotelOffers(hotel);
     setIsDialogOpen(true);
     setDialogError("");
-
-    try {
-      const hotelIds = [hotel.hotelId];
-      const response = await fetch(
-        `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=[${hotelIds.join(',')}]`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.errors && errorData.errors[0].code === 1257) {
-          throw new Error("Invalid hotel ID. Please try another hotel.");
-        }
-        throw new Error("Failed to fetch hotel offers");
-      }
-
-      const data = await response.json();
-      setHotelOffers(data.data[0]);
-    } catch (err) {
-      setDialogError(err.message);
-    }
   };
 
   const handleCloseDialog = () => {
@@ -312,12 +267,9 @@ export default function HotelBookingPage() {
 
       <Card className="bg-white shadow-lg mt-2">
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label
-                htmlFor="city"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
                 City (IATA Code)
               </label>
               <Input
@@ -329,16 +281,57 @@ export default function HotelBookingPage() {
                 className="border-2 border-amber-400"
               />
             </div>
-            <div className="md:col-span-1 flex items-end">
-              <Button
-                onClick={handleSearch}
-                disabled={isLoading}
-                className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-8 w-full"
-              >
-                {isLoading ? "Searching..." : "Search Hotels"}
-              </Button>
+            <div>
+              <label htmlFor="checkInDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Check-in Date
+              </label>
+              <Input
+                id="checkInDate"
+                type="date"
+                value={checkInDate}
+                onChange={handleCheckInDateChange}
+                min={today}
+                className="border-2 border-amber-400"
+              />
+            </div>
+            <div>
+              <label htmlFor="checkOutDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Check-out Date
+              </label>
+              <Input
+                id="checkOutDate"
+                type="date"
+                value={checkOutDate}
+                onChange={(e) => setCheckOutDate(e.target.value)}
+                min={checkInDate || today}
+                className="border-2 border-amber-400"
+              />
+            </div>
+            <div>
+              <label htmlFor="adults" className="block text-sm font-medium text-gray-700 mb-1">
+                Number of Adults
+              </label>
+              <Select value={adults} onValueChange={setAdults}>
+                <SelectTrigger id="adults" className="border-2 border-amber-400">
+                  <SelectValue placeholder="Select number of adults" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[...Array(9)].map((_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
+          <Button
+            onClick={handleSearch}
+            disabled={isLoading || !city || !checkInDate || !checkOutDate}
+            className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-8 w-full mt-4"
+          >
+            {isLoading ? "Searching..." : "Search Hotels"}
+          </Button>
         </CardContent>
       </Card>
 
@@ -360,14 +353,11 @@ export default function HotelBookingPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="price">Price</SelectItem>
-                  <SelectItem value="rating">Rating</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 variant="outline"
-                onClick={() =>
-                  setSortOrder((order) => (order === "asc" ? "desc" : "asc"))
-                }
+                onClick={() => setSortOrder((order) => (order === "asc" ? "desc" : "asc"))}
                 className="flex gap-2 border-amber-400"
               >
                 <ArrowUpDown className="h-4 w-4" />
@@ -386,28 +376,27 @@ export default function HotelBookingPage() {
                         <Bed className="h-5 w-5" />
                       </div>
                       <h3 className="text-base font-semibold">
-                        {hotel.name}
+                        {hotel.hotel.name}
                       </h3>
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
                       <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-400" />
-                        <span>Rating: {hotelSentiments[hotel.hotelId]?.overallRating || "N/A"}</span>
+                        <Calendar className="h-4 w-4 text-blue-400" />
+                        <span>Check-in: {formatDate(hotel.offers[0].checkInDate)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4 text-blue-400" />
-                        <span>Reviews: {hotelSentiments[hotel.hotelId]?.numberOfReviews || "N/A"}</span>
+                        <Calendar className="h-4 w-4 text-green-400" />
+                        <span>Check-out: {formatDate(hotel.offers[0].checkOutDate)}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-green-400" />
-                        <span>Ratings: {hotelSentiments[hotel.hotelId]?.numberOfRatings || "N/A"}</span>
+                      <div className="flex items-center gap-2 font-semibold text-lg">
+                        <span>Price: {hotel.offers[0].price.total} {hotel.offers[0].price.currency}</span>
                       </div>
                     </div>
+                    
                     <div className="mt-auto pt-3 flex items-center justify-between">
                       <Button
                         className="bg-blue-900 hover:bg-blue-800 text-white"
                         onClick={() => handleOpenDialog(hotel)}
-                      
                       >
                         See Details
                       </Button>
@@ -470,10 +459,7 @@ export default function HotelBookingPage() {
 
           {selectedHotel && hotelOffers && !dialogError && (
             <div className="mt-4">
-              <h4 className="font-semibold mb-2">{selectedHotel.name}</h4>
-              <p>Rating: {hotelSentiments[selectedHotel.hotelId]?.overallRating || "N/A"}</p>
-              <p>Reviews: {hotelSentiments[selectedHotel.hotelId]?.numberOfReviews || "N/A"}</p>
-              <p>Ratings: {hotelSentiments[selectedHotel.hotelId]?.numberOfRatings || "N/A"}</p>
+              <h4 className="font-semibold mb-2">{selectedHotel.hotel.name}</h4>
               <p>Check-in: {formatDate(hotelOffers.offers[0].checkInDate)}</p>
               <p>Check-out: {formatDate(hotelOffers.offers[0].checkOutDate)}</p>
               <p>Room Type: {hotelOffers.offers[0].room.type}</p>
@@ -481,53 +467,10 @@ export default function HotelBookingPage() {
                 Price: {hotelOffers.offers[0].price.total}{" "}
                 {hotelOffers.offers[0].price.currency}
               </p>
-              <div className="mt-4">
-                <label htmlFor="adultsSelect" className="block text-sm font-medium text-gray-700 mb-1">
-                  Number of Adults
-                </label>
-                <Select value={adults} onValueChange={setAdults}>
-                  <SelectTrigger id="adultsSelect" className="w-full">
-                    <SelectValue placeholder="Select number of adults" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[...Array(9)].map((_, i) => (
-                      <SelectItem key={i + 1} value={(i + 1).toString()}>
-                        {i + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="mt-4">
-                <label htmlFor="checkInDatePicker" className="block text-sm font-medium text-gray-700 mb-1">
-                  Check-in Date
-                </label>
-                <Input
-                  id="checkInDatePicker"
-                  type="date"
-                  value={checkInDate}
-                  onChange={handleCheckInDateChange}
-                  min={today}
-                  className="w-full"
-                />
-              </div>
-              <div className="mt-4">
-                <label htmlFor="checkOutDatePicker" className="block text-sm font-medium text-gray-700 mb-1">
-                  Check-out Date
-                </label>
-                <Input
-                  id="checkOutDatePicker"
-                  type="date"
-                  value={checkOutDate}
-                  onChange={(e) => setCheckOutDate(e.target.value)}
-                  min={checkInDate || today}
-                  className="w-full"
-                />
-              </div>
+              <p>Adults: {adults}</p>
               <Button
                 className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white"
                 onClick={handleBookNow}
-                disabled={!checkInDate || !checkOutDate}
               >
                 Book Now
               </Button>
