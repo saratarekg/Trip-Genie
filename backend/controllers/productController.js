@@ -25,7 +25,7 @@ const getAllProducts = async (req, res) => {
 
     // Filter by the user's products (myProducts)
     if (myproducts) {
-      query.seller = res.locals.user_id;
+      query.seller = null;
     }
 
     // Perform the query

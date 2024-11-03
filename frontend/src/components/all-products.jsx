@@ -305,6 +305,15 @@ export function AllProducts() {
     if (myProducts) {
       fetchProducts({ myproducts: myProducts });
     }
+    else {
+      fetchProducts({
+        minPrice: priceRange[0],
+        maxPrice: priceRange[1],
+        myproducts: false,
+        sort: sortBy,
+        asc: sortOrder,
+      });
+    }
   }, [myProducts, fetchProducts]);
 
   const handleProductSelect = (id) => {

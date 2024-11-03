@@ -62,6 +62,7 @@ export default function HotelBookingPage() {
   const [expiryDate, setExpiryDate] = useState("");
   const [holderName, setHolderName] = useState("");
   const [cvv, setCvv] = useState("");
+  const [exchangeRates, setExchangeRates] = useState({});
 
   const itemsPerPage = 9;
 
@@ -120,10 +121,32 @@ export default function HotelBookingPage() {
     }
   }, []);
 
+  const getExchangeRates = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:4000/rates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch exchange rates");
+      }
+      const data = await response.json();
+      setExchangeRates(data.rates);
+    } catch (err) {
+      setError("Failed to fetch exchange rates. Please try again later.");
+    }
+  }, []);
+
   useEffect(() => {
     refreshToken();
     getCurrencyCode();
-  }, [refreshToken, getCurrencyCode]);
+    getExchangeRates();
+  }, [refreshToken, getCurrencyCode, getExchangeRates]);
+
+  const convertCurrency = (amount, fromCurrency, toCurrency) => {
+    if (fromCurrency === toCurrency) return amount;
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    if (!fromRate || !toRate) return amount;
+    return (amount / fromRate) * toRate;
+  };
 
   const handleSearch = async () => {
     if (!city) {
@@ -156,7 +179,7 @@ export default function HotelBookingPage() {
         const hotelIds = data.data.map(hotel => hotel.hotelId);
         const fetchHotelOffers = async (ids) => {
           const response = await fetch(
-            `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currencyCode=${currencyCode}`,
+            `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currency=USD`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -201,12 +224,12 @@ export default function HotelBookingPage() {
       let aValue, bValue;
       switch (sortBy) {
         case "price":
-          aValue = parseFloat(a.offers[0].price.total || 0);
-          bValue = parseFloat(b.offers[0].price.total || 0);
+          aValue = parseFloat(convertCurrency(a.offers[0].price.total, a.offers[0].price.currency, currencyCode) || 0);
+          bValue = parseFloat(convertCurrency(b.offers[0].price.total, b.offers[0].price.currency, currencyCode) || 0);
           break;
         default:
-          aValue = parseFloat(a.offers[0].price.total || 0);
-          bValue = parseFloat(b.offers[0].price.total || 0);
+          aValue = parseFloat(convertCurrency(a.offers[0].price.total, a.offers[0].price.currency, currencyCode) || 0);
+          bValue = parseFloat(convertCurrency(b.offers[0].price.total, b.offers[0].price.currency, currencyCode) || 0);
       }
       return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     });
@@ -343,7 +366,7 @@ export default function HotelBookingPage() {
               <Input
                 id="city"
                 type="text"
-                placeholder="e.g., PAR"
+                placeholder="e.g., CAI"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 className="border-2 border-amber-400"
@@ -390,6 +413,7 @@ export default function HotelBookingPage() {
                     </SelectItem>
                   ))}
                 </SelectContent>
+              
               </Select>
             </div>
           </div>
@@ -458,7 +482,7 @@ export default function HotelBookingPage() {
                         <span>Check-out: {formatDate(hotel.offers[0].checkOutDate)}</span>
                       </div>
                       <div className="flex items-center gap-2 font-semibold text-lg">
-                        <span>Price: {hotel.offers[0].price.total} {hotel.offers[0].price.currency}</span>
+                        <span>Price: {convertCurrency(hotel.offers[0].price.total, hotel.offers[0].price.currency, currencyCode).toFixed(2)} {currencyCode}</span>
                       </div>
                     </div>
                     
@@ -533,8 +557,7 @@ export default function HotelBookingPage() {
               <p>Check-out: {formatDate(hotelOffers.offers[0].checkOutDate)}</p>
               <p>Room Type: {hotelOffers.offers[0].room.type}</p>
               <p>
-                Price: {hotelOffers.offers[0].price.total}{" "}
-                {hotelOffers.offers[0].price.currency}
+                Price: {convertCurrency(hotelOffers.offers[0].price.total, hotelOffers.offers[0].price.currency, currencyCode).toFixed(2)} {currencyCode}
               </p>
               <p>Adults: {adults}</p>
               <div>
