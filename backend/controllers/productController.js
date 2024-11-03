@@ -168,9 +168,14 @@ const addProductByAdmin = async (req, res) => {
 
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, pictures, price, description, quantity, reviews } = req.body; // Get details from request body
+  const { name, price, description, quantity, reviews } = req.body; // Get details from request body
   console.log(reviews);
+  let pictures = req.body; // Get details from request body
   try {
+    pictures = req.files.map(
+      // Convert the uploaded files to base64 strings
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
     // Find the product by ID and update its details
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
