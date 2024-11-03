@@ -113,43 +113,58 @@ const getComplaintDetails = async (req, res) => {
 
 const replyToComplaint = async (req, res) => {
   try {
-    const { id } = req.params; // Extract the complaint ID from the request parameters
-    const { content } = req.body; // Get the reply content from the request body
-    const adminId = res.locals.user_id; // Assume the logged-in admin's ID is stored here
+    const { id } = req.params; 
+    const { content } = req.body; 
 
+    // Ensure content is provided
     if (!content) {
-      return res
-        .status(400)
-        .json({ message: "Please provide a reply content" });
+      return res.status(400).json({ message: "Please provide a reply content" });
     }
 
-    // Find the complaint by ID
-    const complaint = await Complaint.findById(id);
-
     // Check if the complaint exists
+    const complaint = await Complaint.findById(id);
     if (!complaint) {
       return res.status(404).json({ error: "Complaint not found" });
     }
 
     // Add the reply to the replies array
     complaint.replies.push({
-      admin: adminId,
-      content,
+      content, // Only content is now needed
     });
 
     // Save the updated complaint
     await complaint.save();
 
-    // Populate the complaint details, including tourist and nationality
-    const updatedComplaint = await Complaint.findById(id).populate({
-      path: "tourist",
-      populate: {
-        path: "nationality", // Populate nationality within tourist
-        select: "name", // Optionally select only the 'name' field from the Nationality schema
-      },
-    });
+    return res.status(200).json({ message: "Reply added successfully", complaint });
+  } catch (error) {
+    console.error("Error replying to complaint:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 
-    return res.status(200).json(updatedComplaint); // Return the updated complaint with populated details
+const getTouristComplaints = async (req, res) => {
+  try {
+    const touristId = res.locals.user_id; // ID of the logged-in tourist
+    const { status } = req.query; // Optional status filter (pending or resolved)
+
+    // Query to find complaints associated with this tourist
+    let query = { tourist: touristId };
+    if (status) {
+      query.status = status; // Add status filter if specified
+    }
+
+    // Fetch complaints and sort by creation date (most recent first)
+    const complaints = await Complaint.find(query).sort({ createdAt: -1 });
+
+    // Check if any complaints are found
+    if (!complaints.length) {
+      return res
+        .status(404)
+        .json({ message: "No complaints found for this tourist" });
+    }
+
+    // Return the complaints list
+    return res.status(200).json(complaints);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -161,4 +176,5 @@ module.exports = {
   markComplaintStatus,
   getComplaintDetails,
   replyToComplaint,
+  getTouristComplaints,
 };

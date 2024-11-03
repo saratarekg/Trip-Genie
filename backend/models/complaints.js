@@ -3,11 +3,6 @@ const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 // Create a sub-schema for replies
 const replySchema = new mongoose.Schema({
-  admin: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Admin", // Reference to the Admin who replied
-    required: true,
-  },
   content: {
     type: String, // The reply content
     required: true,

@@ -52,7 +52,7 @@ const FilterComponent = ({
               : ""}
           </button>
 
-          {role === "seller" && (
+          {role === "seller"|| role === "admin"  && (
             <button
               onClick={() => handlemyProducts(!myProducts)} // Toggle myProducts state
               className={`flex items-center px-4 py-2 rounded-full shadow ${
@@ -81,7 +81,22 @@ const FilterComponent = ({
             Create
           </Link>
         ) : null}
+
       </div>
+
+
+      {role === "seller" || role === "admin" ? (
+          <Link
+            to="/product-archive"
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
+          >
+          
+             Archived Products
+          </Link>
+        ) : null}
+   
+
+      
 
       {filtersVisible && (
         <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">

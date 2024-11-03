@@ -107,4 +107,8 @@ router.post("/password", touristController.changePassword);
 router.post("/complaint", complaintsController.addComplaint);
 router.post("/redeem-points", touristController.redeemPoints);
 
+router.get("/complaints", complaintsController.getTouristComplaints);
+
+
+
 module.exports = router;

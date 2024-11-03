@@ -97,7 +97,7 @@ const UpdateProduct = () => {
     const fetchSupportedCurrencies = async () => {
       try {
         const token = Cookies.get("jwt");
-        const response = await fetch("http://localhost:4000/seller/currencies", {
+        const response = await fetch(`http://localhost:4000/${userRole}/currencies`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) {

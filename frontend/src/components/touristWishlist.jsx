@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
@@ -17,12 +17,28 @@ const WishlistPage = () => {
 
   const [userRole, setUserRole] = useState('guest');
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
-  const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbols, setCurrencySymbols] = useState({});
+  const [exchangeRates, setExchangeRates] = useState({});
 
-  const fetchExchangeRate = async (baseCurrency, targetCurrency) => {
+  const fetchExchangeRate = useCallback(async (baseCurrency, targetCurrency) => {
+    if (!baseCurrency || !targetCurrency || !userRole) {
+ 
+
+      console.error("Missing required parameters for fetchExchangeRate");
+      return null;
+    }
+    const cacheKey = `${baseCurrency}_${targetCurrency}`;
+    if (exchangeRates[cacheKey]) {
+      return exchangeRates[cacheKey];
+    }
+
     try {
       const token = Cookies.get("jwt");
+      if (!token) {
+        console.error("No JWT token found");
+        return null;
+      }
+
       const response = await fetch(
         `http://localhost:4000/${userRole}/populate`,
         {
@@ -40,6 +56,10 @@ const WishlistPage = () => {
       const data = await response.json();
 
       if (response.ok) {
+        setExchangeRates(prev => ({
+          ...prev,
+          [cacheKey]: data.conversion_rate
+        }));
         return data.conversion_rate;
       } else {
         console.error('Error in fetching exchange rate:', data.message);
@@ -49,35 +69,49 @@ const WishlistPage = () => {
       console.error("Error fetching exchange rate:", error);
       return null;
     }
-  };
+  }, [userRole, exchangeRates]);
 
-  const getCurrencySymbol = async (currencyCode) => {
+  const getCurrencySymbol = useCallback(async (currencyCode) => {
+    if (!currencyCode || !userRole) {
+      console.error("Missing required parameters for getCurrencySymbol");
+      return '';
+    }
+
     if (currencySymbols[currencyCode]) {
       return currencySymbols[currencyCode];
     }
 
     try {
       const token = Cookies.get("jwt");
+      if (!token) {
+        console.error("No JWT token found");
+        return '';
+      }
+
       const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${currencyCode}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const newSymbols = { ...currencySymbols, [currencyCode]: response.data.symbol };
-      setCurrencySymbols(newSymbols);
+      setCurrencySymbols(prev => ({ ...prev, [currencyCode]: response.data.symbol }));
       return response.data.symbol;
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
       return '';
     }
-  };
+  }, [userRole, currencySymbols]);
 
-  const formatPrice = async (price, productCurrency) => {
+  const formatPrice = useCallback(async (price, productCurrency) => {
+    if (!price || !productCurrency || !userRole) {
+      console.error("Missing required parameters for formatPrice");
+      return '';
+    }
+
     const roundedPrice = Math.round(price);
-    
     if (userRole === 'tourist' && userPreferredCurrency) {
-      if (userPreferredCurrency.code === productCurrency) {
+      if (userPreferredCurrency.code === productCurrency.code) {
         return `${userPreferredCurrency.symbol}${roundedPrice}`;
       } else {
+
         const rate = await fetchExchangeRate(productCurrency, userPreferredCurrency._id);
         if (rate) {
           const exchangedPrice = Math.round(roundedPrice * rate);
@@ -87,34 +121,55 @@ const WishlistPage = () => {
     }
     const symbol = await getCurrencySymbol(productCurrency);
     return `${symbol}${roundedPrice}`;
-  };
+  }, [userRole, userPreferredCurrency, fetchExchangeRate, getCurrencySymbol]);
 
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
     if (role === 'tourist') {
       try {
         const token = Cookies.get("jwt");
+        if (!token) {
+          console.error("No JWT token found");
+          return;
+        }
+
         const response = await axios.get('http://localhost:4000/tourist/', {
           headers: { Authorization: `Bearer ${token}` }
         });
         const currencyId = response.data.preferredCurrency;
 
-        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUserPreferredCurrency(response2.data);
+        if (currencyId) {
+          const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setUserPreferredCurrency(response2.data);
+        } else {
+          console.error("No preferred currency found for user");
+        }
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
     }
-  };
+  }, []);
 
-  const fetchWishlistItems = async () => {
+  const fetchWishlistItems = useCallback(async () => {
+    if (!userRole) {
+      console.error("User role not set");
+      return;
+    }
+
     setLoading(true);
     try {
       const token = Cookies.get("jwt");
+      if (!token) {
+        console.error("No JWT token found");
+        setError("Authentication error. Please log in again.");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('http://localhost:4000/tourist/wishlist', {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -125,29 +180,49 @@ const WishlistPage = () => {
       }
       const data = await response.json();
       
-      // Format prices for each wishlist item
-      const formattedData = await Promise.all(data.map(async (item) => ({
-        ...item,
-        formattedPrice: await formatPrice(item.product.price, item.product.currency)
-      })));
+      const formattedData = await Promise.all(data.map(async (item) => {
+        if (!item.product || !item.product.price || !item.product.currency) {
+          console.error("Invalid product data:", item);
+          return null;
+        }
+        return {
+          ...item,
+          formattedPrice: await formatPrice(item.product.price, item.product.currency)
+        };
+      }));
 
-      setWishlistItems(formattedData);
+      setWishlistItems(formattedData.filter(Boolean));
     } catch (err) {
       setError("Error fetching wishlist items. Please try again later.");
       console.error("Error fetching wishlist items:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [userRole, formatPrice]);
 
   useEffect(() => {
     fetchUserInfo();
-    fetchWishlistItems();
-  }, []);
+  }, [fetchUserInfo]);
+
+  useEffect(() => {
+    if (userRole && (userRole === 'guest' || userPreferredCurrency)) {
+      fetchWishlistItems();
+    }
+  }, [userRole, userPreferredCurrency, fetchWishlistItems]);
 
   const handleRemoveFromWishlist = async (productId) => {
+    if (!productId) {
+      console.error("No product ID provided for removal");
+      return;
+    }
+
     try {
       const token = Cookies.get("jwt");
+      if (!token) {
+        setActionError("Authentication error. Please log in again.");
+        return;
+      }
+
       const response = await fetch(`http://localhost:4000/tourist/remove/wishlist/${productId}`, {
         method: 'DELETE',
         headers: {
@@ -161,12 +236,23 @@ const WishlistPage = () => {
       setActionSuccess("Item removed from wishlist successfully!");
     } catch (error) {
       setActionError("Error removing item from wishlist. Please try again.");
+      console.error("Error removing item from wishlist:", error);
     }
   };
 
   const handleAddToCart = async (productId) => {
+    if (!productId) {
+      console.error("No product ID provided for adding to cart");
+      return;
+    }
+
     try {
       const token = Cookies.get("jwt");
+      if (!token) {
+        setActionError("Authentication error. Please log in again.");
+        return;
+      }
+
       const response = await fetch(`http://localhost:4000/tourist/move/wishlist/${productId}`, {
         method: "PUT",
         headers: {
@@ -181,6 +267,7 @@ const WishlistPage = () => {
       fetchWishlistItems();
     } catch (error) {
       setActionError("Error adding item to cart. Please try again.");
+      console.error("Error adding item to cart:", error);
     }
   };
 
@@ -197,14 +284,14 @@ const WishlistPage = () => {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">My Wishlist</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">My Wishlist</h1>
       {wishlistItems.length === 0 ? (
-        <p className="text-center text-gray-500">Your wishlist is empty.</p>
+        <p className="text-center text-gray-500 text-lg">Your wishlist is empty.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {wishlistItems.map(item => (
-            <Card key={item._id}>
+            <Card key={item._id} className="overflow-hidden">
               <CardHeader>
                 <CardTitle className="cursor-pointer hover:underline" onClick={() => navigate(`/product/${item.product._id}`)}>
                   {item.product.name}
@@ -212,13 +299,13 @@ const WishlistPage = () => {
               </CardHeader>
               <CardContent>
                 <img 
-                  src={item.product.pictures[0] || '/placeholder.svg'} 
+                  src={item.product.pictures[0] || '/placeholder.svg?height=192&width=256'} 
                   alt={item.product.name} 
-                  className="w-full h-48 object-cover mb-4 cursor-pointer"
+                  className="w-full h-48 object-cover mb-4 cursor-pointer rounded-md"
                   onClick={() => navigate(`/product/${item.product._id}`)}
                 />
-                <p className="text-lg font-semibold mb-2">{item.formattedPrice}</p>
-                <p className="text-sm text-gray-600 mb-4">{item.product.description.substring(0, 100)}...</p>
+                <p className="text-xl font-semibold mb-2">{item.formattedPrice}</p>
+                <p className="text-sm text-gray-600 mb-4 line-clamp-3">{item.product.description}</p>
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={() => handleRemoveFromWishlist(item.product._id)}>
                     Remove
