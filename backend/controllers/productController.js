@@ -109,11 +109,13 @@ const getAllProductsArchive = async (req, res) => {
 };
 
 const addProduct = async (req, res) => {
-  const { name, pictures, price, description, rating, reviews, quantity , currency } =
-    req.body; // Extract the data from request
+  const { name, price, description, quantity, currency } = req.body; // Extract the data from request
 
-  console.log(req.files);
   try {
+    const pictures = req.files.map(
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
+
     const product = new Product({
       name,
       pictures,
@@ -124,7 +126,6 @@ const addProduct = async (req, res) => {
       currency,
     });
 
-    // Save the product to the database
     await product.save();
     res.status(201).json(product);
   } catch (error) {
@@ -133,10 +134,21 @@ const addProduct = async (req, res) => {
 };
 
 const addProductByAdmin = async (req, res) => {
-  const { name, pictures, price, description, rating, reviews, quantity , currency } =
-    req.body; // Extract the data from request
+  const {
+    name,
+    pictures,
+    price,
+    description,
+    rating,
+    reviews,
+    quantity,
+    currency,
+  } = req.body; // Extract the data from request
 
   try {
+    const pictures = req.files.map(
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
     const product = new Product({
       name,
       pictures,
@@ -156,13 +168,18 @@ const addProductByAdmin = async (req, res) => {
 
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, pictures, price, description, quantity, reviews } = req.body; // Get details from request body
+  const { name, price, description, quantity, reviews } = req.body; // Get details from request body
   console.log(reviews);
+  let pictures = req.body; // Get details from request body
   try {
+    pictures = req.files.map(
+      // Convert the uploaded files to base64 strings
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
     // Find the product by ID and update its details
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity, reviews , currency },
+      { name, pictures, price, description, quantity, reviews, currency },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 
@@ -191,7 +208,8 @@ const editProduct = async (req, res) => {
 
 const editProductOfSeller = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, pictures, price, description, quantity , currency} = req.body; // Get details from request body
+  const { name, price, description, quantity, currency } = req.body;
+  let pictures = req.body; // Get details from request body
   const product = await Product.findById(id);
   if (product.seller.toString() != res.locals.user_id) {
     return res
@@ -200,9 +218,14 @@ const editProductOfSeller = async (req, res) => {
   }
   try {
     // Find the product by ID and update its details
+    pictures = req.files.map(
+      // Convert the uploaded files to base64 strings
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity,currency },
+      { name, pictures, price, description, quantity, currency },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 
@@ -264,10 +287,15 @@ const archiveProduct = async (req, res) => {
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
     }
-    const updatedProduct = await Product.findByIdAndUpdate(id,{isArchived:!product.isArchived},{new:true,runValidators:true})
-    res
-      .status(200)
-      .json({ product:updatedProduct,message: "Product archived status toggled successfully" });
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      { isArchived: !product.isArchived },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json({
+      product: updatedProduct,
+      message: "Product archived status toggled successfully",
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -310,7 +338,9 @@ const addProductToCart = async (req, res) => {
     }
 
     // Check if the product already exists in the cart
-    const existingCartItem = user.cart.find(item => item.product.toString() === productId);
+    const existingCartItem = user.cart.find(
+      (item) => item.product.toString() === productId
+    );
 
     if (existingCartItem) {
       // If product is already in the cart, update the quantity and totalPrice
@@ -319,8 +349,8 @@ const addProductToCart = async (req, res) => {
         {
           $inc: {
             "cart.$[elem].quantity": quantity, // Increment the quantity of the existing product
-            "cart.$[elem].totalPrice": quantity * product.price // Update the totalPrice for the product
-          }
+            "cart.$[elem].totalPrice": quantity * product.price, // Update the totalPrice for the product
+          },
         },
         {
           arrayFilters: [{ "elem.product": productId }], // Find the product in the cart using arrayFilters
@@ -337,18 +367,18 @@ const addProductToCart = async (req, res) => {
               product: productId,
               quantity,
               totalPrice: quantity * product.price,
-            }
-          }
+            },
+          },
         },
         { new: true } // Return the updated document
       );
     }
-    
 
     // Find the updated user data with the cart to return the updated cart
     const updatedUser = await Tourist.findById(userId);
-    res.status(200).json({ message: "Product added to cart", cart: updatedUser.cart });
-    
+    res
+      .status(200)
+      .json({ message: "Product added to cart", cart: updatedUser.cart });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -373,34 +403,35 @@ const addProductToWishlist = async (req, res) => {
     }
 
     // Check if the product already exists in the wishlist
-    const existingWishlistItem = user.wishlist.find(item => {
-      console.log('Checking product:', item.product._id.toString(), 'against', productId); // Log each iteration
+    const existingWishlistItem = user.wishlist.find((item) => {
+      console.log(
+        "Checking product:",
+        item.product._id.toString(),
+        "against",
+        productId
+      ); // Log each iteration
       return item.product._id.toString() === productId;
     });
 
     if (existingWishlistItem) {
+    } else {
+      // If the product is not already in the wishlist, add it to the wishlist
+      await Tourist.findByIdAndUpdate(
+        userId,
+        {
+          $push: {
+            wishlist: { product: productId },
+          },
+        },
+        { new: true } // Return the updated document
+      );
 
+      // Fetch the updated user data with the wishlist
+      const updatedUser = await Tourist.findById(userId);
     }
-    else {
-
-    // If the product is not already in the wishlist, add it to the wishlist
-    await Tourist.findByIdAndUpdate(
-      userId,
-      {
-        $push: {
-          wishlist: { product: productId }
-        }
-      },
-      { new: true } // Return the updated document
-    );
-
-    // Fetch the updated user data with the wishlist
-    const updatedUser = await Tourist.findById(userId);
-  }
     res.status(200).json({
-      message: "Product added to wishlist"
+      message: "Product added to wishlist",
     });
-
   } catch (error) {
     console.error("Error: ", error); // Log the full error to the console
     res.status(500).json({ message: error.message });
@@ -417,14 +448,19 @@ const rateProduct = async (req, res) => {
     }
 
     if (rating < 0 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 0 and 5" });
     }
 
     // Add the new rating to the allRatings array
     product.allRatings.push(rating);
 
     // Calculate the new average rating
-    const totalRatings = product.allRatings.reduce((sum, rating) => sum + rating, 0);
+    const totalRatings = product.allRatings.reduce(
+      (sum, rating) => sum + rating,
+      0
+    );
     const newAverageRating = totalRatings / product.allRatings.length;
 
     // Update the product's overall rating
@@ -445,7 +481,9 @@ const addCommentToProduct = async (req, res) => {
     const { rating, comment } = req.body; // Get comment details from the request body
 
     if (rating !== undefined && (rating < 1 || rating > 5)) {
-      return res.status(400).json({ message: "Rating must be a number between 1 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 1 and 5" });
     }
 
     const userId = res.locals.user_id; // Get user ID from locals (assuming user is authenticated)
@@ -460,7 +498,7 @@ const addCommentToProduct = async (req, res) => {
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
     }
-    
+
     // Create the new review object
     const newReview = {
       user: tourist.username || "Anonymous", // Use 'Anonymous' if no username is provided
@@ -476,7 +514,10 @@ const addCommentToProduct = async (req, res) => {
     let newAverageRating;
     if (rating !== undefined) {
       product.allRatings.push(rating);
-      const totalRatings = product.allRatings.reduce((sum, rating) => sum + rating, 0);
+      const totalRatings = product.allRatings.reduce(
+        (sum, rating) => sum + rating,
+        0
+      );
       newAverageRating = totalRatings / product.allRatings.length;
       product.rating = newAverageRating;
     }
@@ -491,9 +532,9 @@ const addCommentToProduct = async (req, res) => {
       ...(newAverageRating && { newAverageRating }), // Only include the new rating if it was updated
     });
   } catch (error) {
-  console.error("Error: ", error.message); // Print the error message to the console
-  return res.status(500).json({ error: error.message }); // Return the error message in the response
-}
+    console.error("Error: ", error.message); // Print the error message to the console
+    return res.status(500).json({ error: error.message }); // Return the error message in the response
+  }
 };
 
 module.exports = {
