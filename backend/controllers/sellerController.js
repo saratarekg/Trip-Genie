@@ -56,7 +56,7 @@ const getUnacceptedSeller = async (req, res) => {
 
 const deleteSellerAccount = async (req, res) => {
   try {
-    const seller = await Seller.findByIdAndDelete(res.locals.user_id);
+    const seller = await Seller.findById(res.locals.user_id);
     if (!seller) {
       return res.status(404).json({ message: "Seller not found" });
     }
@@ -93,6 +93,22 @@ const rejectSeller = async (req, res) => {
     if (!seller) {
       return res.status(400).json({ message: "Seller not found" });
     }
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+  
+    const filenames = [];
+    filenames.push(seller.files.IDFilename);
+    filenames.push(seller.files.taxationRegistryCardFilename);
+    const files = await gfs.find({ filename:{$in:filenames} }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+  
+    await gfs.delete(files[0]._id);
+    await gfs.delete(files[1]._id);
     res.status(200).json({ message: "Seller rejected successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
