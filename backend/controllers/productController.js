@@ -2,8 +2,11 @@ const Product = require("../models/product");
 const Seller = require("../models/seller");
 const Tourist = require("../models/tourist");
 
+
 const getAllProducts = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
+  const role = res.locals.user_role;
+  console.log(role);
 
   try {
     // Debugging: Log incoming query parameters
@@ -25,7 +28,11 @@ const getAllProducts = async (req, res) => {
 
     // Filter by the user's products (myProducts)
     if (myproducts) {
+      if(role=="admin")
       query.seller = null;
+    else
+    query.seller = res.locals.user_id;;
+
     }
 
     // Perform the query

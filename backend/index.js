@@ -75,3 +75,7 @@ app.use("/tourist", requireAuth("tourist"), touristRoutes);
 app.use("/seller", requireAuth("seller"), sellerRoutes);
 app.use("/tour-guide", requireAuth("tour-guide"), tourGuideRoutes);
 app.use("/advertiser", requireAuth("advertiser"), advertiserRoutes);
+
+
+// get currency rates from the database currencyrates model with id 6726a0e0206edfcc2ef30c16
+app.get("/rates", currencyRateController.getExchangeRate);

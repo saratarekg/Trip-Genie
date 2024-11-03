@@ -17,7 +17,8 @@ import {
   MessageSquare,
   LogOut,
   Trash2, XCircle, CheckCircle, Heart,
-  DollarSign
+  DollarSign,
+   
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -43,6 +44,7 @@ import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from '@/pages/TouristActivities';
 import TouristAttendedActivities from '@/pages/TouristAttended';
+import AddCard from '@/pages/AddCard';
 import ShoppingCart from '@/components/touristCart.jsx';
 import WishlistPage from '@/components/touristWishlist.jsx';
 
@@ -61,6 +63,8 @@ const Complaint = () => <FileComplaintForm />;
 
 
 const Preferences = () => <TravelPreferences />;
+
+// const AddCard = () => <AddCard />;
 
 const RedeemPoints = ({ tourist, onRedeemPoints }) => {
   const [isRedeeming, setIsRedeeming] = useState(false);
@@ -430,6 +434,7 @@ export default function AccountTourist() {
       case "redeem-points": return <RedeemPoints tourist={tourist} onRedeemPoints={handleRedeemPoints} />;
       case "security": return <PasswordChanger />;
       case "preferences": return <Preferences />;
+      case "add-card": return <AddCard />;
       case "currency": return <CurrencyApp />;
       default: return <AccountInfo tourist={tourist} />;
     }
@@ -459,6 +464,7 @@ export default function AccountTourist() {
       { name: "Security", icon: Lock, tab: "security" },
       { name: "Preferences", icon: Settings, tab: "preferences" },
       { name: "Set Currency", icon: DollarSign, tab: "currency" },
+      { name: "Add credit/debit cards", icon: CreditCard , tab: "add-card" },
       { name: "Delete Account", icon: Trash2, tab: "delete-account" },
     ],
     "Help and Support": [

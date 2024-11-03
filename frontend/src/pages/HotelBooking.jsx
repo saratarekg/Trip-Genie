@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Bed, Calendar, ArrowUpDown, AlertCircle, CreditCard } from "lucide-react";
+import { Bed, Calendar, ArrowUpDown, AlertCircle } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -28,7 +28,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -62,6 +61,7 @@ export default function HotelBookingPage() {
   const [expiryDate, setExpiryDate] = useState("");
   const [holderName, setHolderName] = useState("");
   const [cvv, setCvv] = useState("");
+  const [exchangeRates, setExchangeRates] = useState({});
 
   const itemsPerPage = 9;
 
@@ -120,10 +120,32 @@ export default function HotelBookingPage() {
     }
   }, []);
 
+  const getExchangeRates = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:4000/rates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch exchange rates");
+      }
+      const data = await response.json();
+      setExchangeRates(data.rates);
+    } catch (err) {
+      setError("Failed to fetch exchange rates. Please try again later.");
+    }
+  }, []);
+
   useEffect(() => {
     refreshToken();
     getCurrencyCode();
-  }, [refreshToken, getCurrencyCode]);
+    getExchangeRates();
+  }, [refreshToken, getCurrencyCode, getExchangeRates]);
+
+  const convertCurrency = (amount, fromCurrency, toCurrency) => {
+    if (fromCurrency === toCurrency) return amount;
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    if (!fromRate || !toRate) return amount;
+    return (amount / fromRate) * toRate;
+  };
 
   const handleSearch = async () => {
     if (!city) {
@@ -133,6 +155,7 @@ export default function HotelBookingPage() {
 
     setIsLoading(true);
     setError("");
+    setHotels([]);
     try {
       const response = await fetch(
         `https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city?cityCode=${city}`,
@@ -155,35 +178,44 @@ export default function HotelBookingPage() {
       } else {
         const hotelIds = data.data.map(hotel => hotel.hotelId);
         const fetchHotelOffers = async (ids) => {
-          const response = await fetch(
-            `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currency=${currencyCode}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
+          try {
+            const response = await fetch(
+              `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currency=USD`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            );
+
+            if (response.ok) {
+              return await response.json();
+            } else {
+              console.warn(`Failed to fetch offers for hotels: ${ids.join(', ')}`);
+              return { data: [] };
             }
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch hotel offers");
+          } catch (error) {
+            console.error(`Error fetching hotel offers: ${error.message}`);
+            return { data: [] };
           }
-
-          return await response.json();
         };
 
-        const allHotels = [];
         for (let i = 0; i < hotelIds.length; i += 20) {
           const chunk = hotelIds.slice(i, i + 20);
           const offersData = await fetchHotelOffers(chunk);
-          const hotelsWithOffers = offersData.data.filter(hotel => hotel.available && hotel.offers.length > 0);
-          allHotels.push(...hotelsWithOffers);
+          const validHotels = offersData.data.filter(hotel => 
+            hotel.offers && 
+            hotel.offers[0] && 
+            hotel.offers[0].price && 
+            !isNaN(parseFloat(hotel.offers[0].price.total))
+          );
+          setHotels(prevHotels => [...prevHotels, ...validHotels]);
           
           if (i + 20 < hotelIds.length) {
             await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
           }
         }
 
-        setHotels(allHotels);
         setCurrentPage(1);
       }
     } catch (err) {
@@ -201,12 +233,12 @@ export default function HotelBookingPage() {
       let aValue, bValue;
       switch (sortBy) {
         case "price":
-          aValue = parseFloat(a.offers[0].price.total || 0);
-          bValue = parseFloat(b.offers[0].price.total || 0);
+          aValue = parseFloat(convertCurrency(a.offers[0].price.total, a.offers[0].price.currency, currencyCode) || 0);
+          bValue = parseFloat(convertCurrency(b.offers[0].price.total, b.offers[0].price.currency, currencyCode) || 0);
           break;
         default:
-          aValue = parseFloat(a.offers[0].price.total || 0);
-          bValue = parseFloat(b.offers[0].price.total || 0);
+          aValue = parseFloat(convertCurrency(a.offers[0].price.total, a.offers[0].price.currency, currencyCode) || 0);
+          bValue = parseFloat(convertCurrency(b.offers[0].price.total, b.offers[0].price.currency, currencyCode) || 0);
       }
       return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     });
@@ -376,7 +408,7 @@ export default function HotelBookingPage() {
               />
             </div>
             <div>
-              <label htmlFor="adults" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="adults" className="block text-sm font-medium text-gray-700  mb-1">
                 Number of Adults
               </label>
               <Select value={adults} onValueChange={setAdults}>
@@ -418,7 +450,6 @@ export default function HotelBookingPage() {
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[160px] border-amber-400">
                   <SelectValue placeholder="Sort by" />
-                
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="price">Price</SelectItem>
@@ -458,7 +489,7 @@ export default function HotelBookingPage() {
                         <span>Check-out: {formatDate(hotel.offers[0].checkOutDate)}</span>
                       </div>
                       <div className="flex items-center gap-2 font-semibold text-lg">
-                        <span>Price: {hotel.offers[0].price.total} {hotel.offers[0].price.currency}</span>
+                        <span>Price: {convertCurrency(hotel.offers[0].price.total, hotel.offers[0].price.currency, currencyCode).toFixed(2)} {currencyCode}</span>
                       </div>
                     </div>
                     
@@ -533,8 +564,7 @@ export default function HotelBookingPage() {
               <p>Check-out: {formatDate(hotelOffers.offers[0].checkOutDate)}</p>
               <p>Room Type: {hotelOffers.offers[0].room.type}</p>
               <p>
-                Price: {hotelOffers.offers[0].price.total}{" "}
-                {hotelOffers.offers[0].price.currency}
+                Price: {convertCurrency(hotelOffers.offers[0].price.total, hotelOffers.offers[0].price.currency, currencyCode).toFixed(2)} {currencyCode}
               </p>
               <p>Adults: {adults}</p>
               <div>
