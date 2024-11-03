@@ -19,7 +19,7 @@ const purchaseSchema = new mongoose.Schema(
           required: true,
           min: 1, // At least 1 product should be purchased
         },
-      }
+      },
     ],
     totalPrice: {
       type: Number,
@@ -90,4 +90,5 @@ purchaseSchema.statics.findByProduct = async function (productId) {
   }
 };
 
-module.exports = mongoose.model("Purchase", purchaseSchema);
+const Purchase = mongoose.model("Purchase", purchaseSchema);
+module.exports = Purchase;

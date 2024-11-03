@@ -98,31 +98,38 @@ const itinerarySchema = new Schema(
       max: 5,
       default: 0,
     },
-    comments: [{
-      username: {
-        type: String,// Assuming username is required
-      },
-      rating: {
-        type: Number,
-        min: 0,
-        max: 5,
-       // required: true, // Assuming rating is required
-      },
-      content: {
-        liked: {
-          type: String,
-          default: "", // Start with 0 likes
+    comments: [
+      {
+        username: {
+          type: String, // Assuming username is required
         },
-        disliked: {
-          type: String,
-          default: "", // Start with 0 dislikes
+        rating: {
+          type: Number,
+          min: 0,
+          max: 5,
+          // required: true, // Assuming rating is required
+        },
+        content: {
+          liked: {
+            type: String,
+            default: "", // Start with 0 likes
+          },
+          disliked: {
+            type: String,
+            default: "", // Start with 0 dislikes
+          },
+        },
+        date: {
+          type: Date,
         },
       },
-      date:{
-        type: Date
-      },
-  }],
-},
+    ],
+    isDeleted: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+  },
   {
     timestamps: true,
   }
@@ -178,7 +185,6 @@ itinerarySchema.statics.filter = async function (
   const query = [];
   let itineraries = null;
 
-  
   if (maxPrice !== undefined && maxPrice !== null && maxPrice !== "") {
     query.push({ price: { $lte: maxPrice } });
   }
@@ -197,7 +203,7 @@ itinerarySchema.statics.filter = async function (
     const languageArray = Array.isArray(languages)
       ? languages
       : languages.split(","); // Ensure it's an array
-    console.log(languages);  
+    console.log(languages);
     query.push({ language: { $in: languageArray } });
   }
   if (isBooked !== undefined && isBooked !== null) {
@@ -253,7 +259,6 @@ itinerarySchema.statics.filter = async function (
     .exec();
 };
 
-
 itinerarySchema.methods.addRating = async function (newRating) {
   // Add the new rating to the allRatings array
   this.allRatings.push(newRating);
@@ -281,4 +286,5 @@ itinerarySchema.methods.addComment = async function (comment) {
 
   return this.comments; // Return the updated comments array
 };
-module.exports = mongoose.model("Itinerary", itinerarySchema);
+const Itinerary = mongoose.model("Itinerary", itinerarySchema);
+module.exports = Itinerary;

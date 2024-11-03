@@ -41,7 +41,7 @@ router.delete("/sellers/:id", sellerController.deleteSellerAccount);
 router.delete("/tourGuides/:id", tourGuideController.deleteTourGuideAccount);
 
 // Route to delete a Tourist
-router.delete("/tourists/:id", touristController.deleteTouristAccount);
+router.delete("/tourists/:id", touristController.deleteAccount);
 
 // Route to delete admin
 router.delete("/admins/:id", adminController.deleteAdminAccount);

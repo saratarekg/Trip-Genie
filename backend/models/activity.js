@@ -96,31 +96,37 @@ const activitySchema = new Schema(
       ref: "Advertiser", // Replace 'User' with the appropriate model name for makers
       required: true, // Assuming it's required, you can set this to false if it's optional
     },
-    comments: [{
-      username: {
-        type: String,// Assuming username is required
-      },
-      rating: {
-        type: Number,
-        min: 0,
-        max: 5,
-       // required: true, // Assuming rating is required
-      },
-      content: {
-        liked: {
-          type: String,
-          default: "", // Start with 0 likes
+    comments: [
+      {
+        username: {
+          type: String, // Assuming username is required
         },
-        disliked: {
-          type: String,
-          default: "", // Start with 0 dislikes
+        rating: {
+          type: Number,
+          min: 0,
+          max: 5,
+          // required: true, // Assuming rating is required
+        },
+        content: {
+          liked: {
+            type: String,
+            default: "", // Start with 0 likes
+          },
+          disliked: {
+            type: String,
+            default: "", // Start with 0 dislikes
+          },
+        },
+        date: {
+          type: Date,
         },
       },
-      date:{
-        type: Date
-      },
-  }],
-    
+    ],
+    isDeleted: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   {
     timestamps: true,
@@ -184,33 +190,6 @@ activitySchema.statics.findByFields = async function (searchCriteria) {
     .populate("advertiser")
     .exec(); // Perform a search with the regex query
 };
-
-// activitySchema.statics.findByTagTypes = async function (types) {
-//     if (types.length === 0) {
-//         return this.find().populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
-//     }
-
-//     const cursor = this.find().cursor();
-//     const tags = await Tag.find({ type: { $in: types } });
-//     const tagIds = tags.map(tag => tag._id);
-//     const query = [];
-
-//     for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
-//         for (const tagId of tagIds) {
-//             if (doc.tags.includes(tagId)) {
-//                 query.push({ _id: doc._id });
-//                 break;
-//             }
-//         }
-//     }
-//     console.log(query);
-
-//     if (query.length === 0)
-//         return [];
-
-// console.log(query);
-//     return this.find({ $or: query }).populate('category').populate('tags').populate('advertiser').exec();  // Perform a search with the regex query
-// };
 
 activitySchema.statics.findByTagTypes = async function (types) {
   if (typeof types === "string") {
@@ -335,19 +314,17 @@ activitySchema.methods.addRating = async function (newRating) {
   // Save the updated activity document
   await this.save();
 
-  return this.rating; 
+  return this.rating;
 };
 
 // Method to add a comment to the activity
 activitySchema.methods.addComment = async function (comment) {
-
   this.comments.push(comment);
-
 
   await this.save();
 
-  return this.comments; 
+  return this.comments;
 };
 
-
-module.exports = mongoose.model("Activity", activitySchema);
+const Activity = mongoose.model("Activity", activitySchema);
+module.exports = Activity;
