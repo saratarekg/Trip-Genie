@@ -11,18 +11,6 @@ const Purchase = require("../models/purchase");
 const ItineraryBooking = require("../models/itineraryBooking");
 const Currency = require("../models/currency");
 
-const deleteTouristAccount = async (req, res) => {
-  try {
-    const tourist = await Tourist.findByIdAndDelete(req.params.id);
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
-    res.status(201).json({ message: "Tourist deleted" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
 const getAllTourists = async (req, res) => {
   try {
     const tourist = await Tourist.find();
@@ -356,7 +344,7 @@ const getCurrencyID = async (req, res) => {
 
 const setCurrencyCode = async (req, res) => {
   try {
-    const { currencyId } = req.body;  // Get currency ID from request body
+    const { currencyId } = req.body; // Get currency ID from request body
     console.log(currencyId);
 
     // Check if the currency exists
@@ -376,12 +364,14 @@ const setCurrencyCode = async (req, res) => {
       return res.status(400).json({ message: "Tourist not found" });
     }
 
-    res.status(200).json({ message: "Preferred currency updated successfully", currencyCode: currency.code });
+    res.status(200).json({
+      message: "Preferred currency updated successfully",
+      currencyCode: currency.code,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 // Tourist Controller
 // Method to get the tourist's wishlist
@@ -680,7 +670,7 @@ const deleteAccount = async (req, res) => {
     const tomorrow = new Date(today); // Clone today's date
     tomorrow.setDate(today.getDate() + 1);
 
-    bookedActivities = await ActivityBooking.find({
+    const bookedActivities = await ActivityBooking.find({
       user: res.locals.user_id,
     }).populate("activity");
     bookedActivities.forEach((activity) => {
@@ -691,7 +681,7 @@ const deleteAccount = async (req, res) => {
       }
     });
 
-    bookedItineraries = await ItineraryBooking.find({
+    const bookedItineraries = await ItineraryBooking.find({
       user: res.locals.user_id,
       date: { $gte: tomorrow.toISOString() },
     });
@@ -701,7 +691,7 @@ const deleteAccount = async (req, res) => {
         .json({ message: "Cannot delete account with active bookings" });
     }
 
-    purchases = await Purchase.find({
+    const purchases = await Purchase.find({
       tourist: res.locals.user_id,
       status: "pending",
     });
@@ -723,7 +713,6 @@ const deleteAccount = async (req, res) => {
 module.exports = {
   removeProductFromWishlist,
   moveProductToCart,
-  deleteTouristAccount,
   getAllTourists,
   getTouristByID,
   getTourist,
@@ -741,5 +730,6 @@ module.exports = {
   updateCartProductQuantity,
   getCurrencyCode,
   setCurrencyCode,
-  getCurrencyID
+  getCurrencyID,
+  deleteAccount,
 };

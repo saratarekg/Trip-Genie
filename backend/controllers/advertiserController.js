@@ -6,25 +6,32 @@ const Admin = require("../models/admin");
 const TourismGovernor = require("../models/tourismGovernor");
 const Activity = require("../models/activity");
 const { deleteActivity } = require("./activityController");
+const ActivityBooking = require("../models/activityBooking");
 
 const deleteAdvertiserAccount = async (req, res) => {
   try {
-    const advertiser = await Advertiser.findByIdAndDelete(req.params.id);
+    const advertiser = await Advertiser.findByIdAndDelete(res.locals.user_id);
     if (!advertiser) {
       return res.status(404).json({ message: "Advertiser not found" });
     }
 
     // Find all activities associated with the advertiser
-    const activities = await Activity.find({ advertiser: req.params.id });
+    const activities = await Activity.find({
+      advertiser: res.locals.user_id,
+      timing: { $gte: new Date() },
+    });
+    const activityIDs = activities.map((activity) => activity._id);
+    const bookedActivities = await ActivityBooking.find({
+      activity: { $in: activityIDs },
+    });
 
-    // Call the deleteActivity method for each activity associated with the advertiser
-    for (const activity of activities) {
-      await deleteActivity({ params: { id: activity._id } }, res);
+    if (bookedActivities.length > 0) {
+      return res.status(400).json({
+        message: "Advertiser has upcoming activities, can not delete account",
+      });
     }
 
-    res
-      .status(201)
-      .json({ message: "Advertiser and associated activities deleted" });
+    res.status(201).json({ message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -103,10 +110,15 @@ const getAdvertiser = async (req, res) => {
 
 const getUnacceptedAdvertisers = async (req, res) => {
   try {
-    const unacceptedAdvertisers = await Advertiser.find({ isAccepted: false });
+    const unacceptedAdvertisers = await Advertiser.find({
+      isAccepted: false,
+    }).populate("files");
     res.status(200).json(unacceptedAdvertisers);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching unaccepted advertisers", error: error.message });
+    res.status(500).json({
+      message: "Error fetching unaccepted advertisers",
+      error: error.message,
+    });
   }
 };
 
@@ -160,12 +172,16 @@ const approveAdvertiser = async (req, res) => {
       return res.status(404).json({ message: "Advertiser not found" });
     }
 
-    res.status(200).json({ message: "Advertiser approved successfully", advertiser: updatedAdvertiser });
+    res.status(200).json({
+      message: "Advertiser approved successfully",
+      advertiser: updatedAdvertiser,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error approving advertiser", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error approving advertiser", error: error.message });
   }
 };
-
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {

@@ -10,6 +10,7 @@ const Itinerary = require("../models/itinerary"); // Adjust the path as needed
 const authController = require("./authController");
 
 const { deleteItinerary } = require("./itineraryController");
+const itineraryBooking = require("../models/itineraryBooking");
 
 const getTourGuideProfile = async (req, res) => {
   try {
@@ -157,14 +158,28 @@ const getTourGuideByID = async (req, res) => {
 
 const deleteTourGuideAccount = async (req, res) => {
   try {
-    const tourGuide = await TourGuide.findByIdAndDelete(req.params.id);
+    const tourGuide = await TourGuide.findByIdAndDelete(res.locals.user_id);
     if (!tourGuide) {
       return res.status(404).json({ message: "TourGuide not found" });
     }
 
-    // Delete all itineraries associated with the tour guide
-    await Itinerary.deleteMany({ tourGuide: req.params.id });
-    res.status(201).json({ message: "TourGuide deleted" });
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const itineraries = await Itinerary.find({ tourGuide: res.locals.user_id });
+    const itinerariesIds = itineraries.map((itinerary) => itinerary._id);
+    const bookedItineraries = await itineraryBooking.find({
+      itinerary: { $in: itinerariesIds },
+      date: { $gte: tomorrow.toISOString() },
+    });
+
+    if (bookedItineraries.length > 0) {
+      return res.status(400).json({
+        message: "You cannot delete your account because you have bookings",
+      });
+    }
+
+    res.status(201).json({ message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

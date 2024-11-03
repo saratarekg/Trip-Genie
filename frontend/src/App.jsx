@@ -399,16 +399,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-
           <Route
-            path="/admin/files"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <FileViewer />
-              </ProtectedRoute>
-            }
-          />
-           <Route
             path="/user-approval"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>

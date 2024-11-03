@@ -5,6 +5,7 @@ const TourGuide = require("../models/tourGuide");
 const Advertiser = require("../models/advertiser");
 const Admin = require("../models/admin");
 const TourismGovernor = require("../models/tourismGovernor");
+const Purchase = require("../models/purchase");
 
 // Update
 const updateSeller = async (req, res) => {
@@ -53,15 +54,28 @@ const getUnacceptedSeller = async (req, res) => {
 
 const deleteSellerAccount = async (req, res) => {
   try {
-    const seller = await Seller.findByIdAndDelete(req.params.id);
+    const seller = await Seller.findByIdAndDelete(res.locals.user_id);
     if (!seller) {
       return res.status(404).json({ message: "Seller not found" });
     }
 
-    // Delete all products associated with the seller
-    await Product.deleteMany({ seller: seller._id });
+    const products = await Product.find({ seller: res.locals.user_id });
+    const productIDs = products.map((product) => product._id);
+    const purchases = await Purchase.find({ status: "pending" });
+    purchases.forEach(async (purchase) => {
+      if (
+        purchase.products.some((product) => productIDs.includes(product._id))
+      ) {
+        res
+          .status(400)
+          .json({
+            message:
+              "Cannot delete seller account, there are pending purchases",
+          });
+      }
+    });
 
-    res.status(201).json({ message: "Seller and associated products deleted" });
+    res.status(200).json({ message: "Seller account deleted" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
