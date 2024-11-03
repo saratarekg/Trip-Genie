@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Bed, Calendar, ArrowUpDown, AlertCircle, CreditCard } from "lucide-react";
+import { Bed, Calendar, ArrowUpDown, AlertCircle } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -28,7 +28,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -156,6 +155,7 @@ export default function HotelBookingPage() {
 
     setIsLoading(true);
     setError("");
+    setHotels([]);
     try {
       const response = await fetch(
         `https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city?cityCode=${city}`,
@@ -178,35 +178,44 @@ export default function HotelBookingPage() {
       } else {
         const hotelIds = data.data.map(hotel => hotel.hotelId);
         const fetchHotelOffers = async (ids) => {
-          const response = await fetch(
-            `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currency=USD`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
+          try {
+            const response = await fetch(
+              `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currency=USD`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            );
+
+            if (response.ok) {
+              return await response.json();
+            } else {
+              console.warn(`Failed to fetch offers for hotels: ${ids.join(', ')}`);
+              return { data: [] };
             }
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch hotel offers");
+          } catch (error) {
+            console.error(`Error fetching hotel offers: ${error.message}`);
+            return { data: [] };
           }
-
-          return await response.json();
         };
 
-        const allHotels = [];
         for (let i = 0; i < hotelIds.length; i += 20) {
           const chunk = hotelIds.slice(i, i + 20);
           const offersData = await fetchHotelOffers(chunk);
-          const hotelsWithOffers = offersData.data.filter(hotel => hotel.available && hotel.offers.length > 0);
-          allHotels.push(...hotelsWithOffers);
+          const validHotels = offersData.data.filter(hotel => 
+            hotel.offers && 
+            hotel.offers[0] && 
+            hotel.offers[0].price && 
+            !isNaN(parseFloat(hotel.offers[0].price.total))
+          );
+          setHotels(prevHotels => [...prevHotels, ...validHotels]);
           
           if (i + 20 < hotelIds.length) {
             await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
           }
         }
 
-        setHotels(allHotels);
         setCurrentPage(1);
       }
     } catch (err) {
@@ -399,7 +408,7 @@ export default function HotelBookingPage() {
               />
             </div>
             <div>
-              <label htmlFor="adults" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="adults" className="block text-sm font-medium text-gray-700  mb-1">
                 Number of Adults
               </label>
               <Select value={adults} onValueChange={setAdults}>
@@ -413,7 +422,6 @@ export default function HotelBookingPage() {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              
               </Select>
             </div>
           </div>
@@ -442,7 +450,6 @@ export default function HotelBookingPage() {
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[160px] border-amber-400">
                   <SelectValue placeholder="Sort by" />
-                
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="price">Price</SelectItem>
