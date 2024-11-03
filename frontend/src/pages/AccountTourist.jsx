@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   ChevronRight,
   CreditCard,
@@ -70,6 +70,8 @@ const RedeemPoints = ({ tourist, onRedeemPoints }) => {
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [redeemError, setRedeemError] = useState(null);
   const [redeemSuccess, setRedeemSuccess] = useState(null);
+  const [exchangeRate, setExchangeRate] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
   const handleRedeemClick = async () => {
     setIsRedeeming(true);
@@ -88,6 +90,58 @@ const RedeemPoints = ({ tourist, onRedeemPoints }) => {
     }
   };
 
+  const fetchExchangeRate = useCallback(async () => {
+    if(tourist){
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/tourist/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              base: "withEGP",
+              target: tourist.preferredCurrency,
+            }),
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setExchangeRate(data.conversion_rate);
+        } else {
+          console.error('Error in fetching exchange rate:', data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
+      }
+    }
+    }, [tourist]);
+
+    const getCurrencySymbol = useCallback(async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get(`http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCurrencySymbol(response.data.symbol);
+      } catch (error) {
+        console.error("Error fetching currency symbol:", error);
+      }
+    }, [tourist]);
+  
+    const formatWallet = (price) => {
+      fetchExchangeRate();
+      getCurrencySymbol();
+      if (tourist && exchangeRate && currencySymbol){
+          const exchangedPrice = price * exchangeRate;
+            return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+      }
+    };
+  
+
   return (
     <div className="w-full max-w-md mx-auto">
       <h2 className="text-2xl font-semibold mb-4">Redeem Loyalty Points</h2>
@@ -97,7 +151,7 @@ const RedeemPoints = ({ tourist, onRedeemPoints }) => {
       <div className="space-y-2 mb-4">
         <p className="text-sm font-medium">
           Available Wallet Balance:{" "}
-          <span className="text-green-600">{tourist.wallet.toFixed(2)} EGP</span>
+          <span className="text-green-600">{formatWallet(tourist.wallet)}</span>
         </p>
         <p className="text-sm font-medium">
           Loyalty Points:{" "}

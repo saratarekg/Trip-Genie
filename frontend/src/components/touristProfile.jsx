@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -43,6 +43,8 @@ export function TouristProfileComponent() {
   const [editedTourist, setEditedTourist] = useState(null);
   const [validationMessages, setValidationMessages] = useState({});
   const [nationalities, setNationalities] = useState([]);
+  const [exchangeRate, setExchangeRate] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
@@ -66,6 +68,58 @@ export function TouristProfileComponent() {
 
     fetchTouristProfile();
   }, []);
+
+  const fetchExchangeRate = useCallback(async () => {
+    if(tourist){
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/tourist/populate`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              base: "withEGP",
+              target: tourist.preferredCurrency,
+            }),
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setExchangeRate(data.conversion_rate);
+        } else {
+          console.error('Error in fetching exchange rate:', data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
+      }
+    }
+    }, [tourist]);
+
+    const getCurrencySymbol = useCallback(async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get(`http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCurrencySymbol(response.data.symbol);
+      } catch (error) {
+        console.error("Error fetching currency symbol:", error);
+      }
+    }, [tourist]);
+  
+    const formatWallet = (price) => {
+      fetchExchangeRate();
+      getCurrencySymbol();
+      if (tourist && exchangeRate && currencySymbol){
+          const exchangedPrice = price * exchangeRate;
+            return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+      }
+    };
+  
 
   useEffect(() => {
     const fetchNationalities = async () => {
@@ -336,7 +390,7 @@ export function TouristProfileComponent() {
 
           <div className="flex items-center gap-2">
             <Wallet className="w-4 h-4 text-gray-500" />
-            <span>${tourist.wallet.toFixed(2)}</span>
+            <span>{formatWallet(tourist.wallet)}</span>
           </div>
 
           <div className="flex items-center gap-2">

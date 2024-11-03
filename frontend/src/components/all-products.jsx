@@ -40,10 +40,10 @@ const ProductCard = ({ product, onSelect, userInfo }) => {
 
   useEffect(() => {
     if (userInfo && userInfo.role == 'tourist' && userInfo.preferredCurrency !== product.currency) {
-      console.log("exchange rate tyb?");
+      // console.log("exchange rate tyb?");
       fetchExchangeRate();
     } else {
-      console.log("ba get currency");
+      // console.log("ba get currency");
       getCurrencySymbol();
     }
   }, [userInfo, product]);
