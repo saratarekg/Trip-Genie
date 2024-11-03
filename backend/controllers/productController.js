@@ -175,8 +175,7 @@ const addProductByAdmin = async (req, res) => {
 
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, price, description, quantity, reviews } = req.body; // Get details from request body
-  console.log(reviews);
+  const { name, price, description, quantity , currency} = req.body; // Get details from request body
   let pictures = req.body; // Get details from request body
   try {
     pictures = req.files.map(
@@ -186,7 +185,7 @@ const editProduct = async (req, res) => {
     // Find the product by ID and update its details
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity, reviews, currency },
+      { name, pictures, price, description, quantity, currency },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 
@@ -264,7 +263,7 @@ const editProductOfSeller = async (req, res) => {
 const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findById(id).populate("seller").populate("currency").exec();
+    const product = await Product.findById(id).populate("seller").exec();
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }

@@ -76,7 +76,7 @@ const productSchema = new mongoose.Schema(
 productSchema.statics.searchByNames = async function (name) {
   try {
     if (name === undefined || name === null || name === "") {
-      return this.find().populate("seller").populate("currency").exec(); // Return all products if no name is provided
+      return this.find().populate("seller").exec(); // Return all products if no name is provided
     }
 
     const products = await this.find({
