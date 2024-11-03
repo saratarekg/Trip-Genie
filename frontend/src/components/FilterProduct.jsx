@@ -23,7 +23,10 @@ const FilterComponent = ({
   role,
   myProducts,
   handlemyProducts,
+  currentPage
 }) => {
+  const isAllProductsPage = currentPage === "all-products"
+
   return (
     <>
       <div className="flex mb-4">
@@ -52,7 +55,7 @@ const FilterComponent = ({
               : ""}
           </button>
 
-          {role === "seller"|| role === "admin"  && (
+          {isAllProductsPage && (role === "seller"|| role === "admin")  && (
             <button
               onClick={() => handlemyProducts(!myProducts)} // Toggle myProducts state
               className={`flex items-center px-4 py-2 rounded-full shadow ${
@@ -72,7 +75,7 @@ const FilterComponent = ({
           </button>
         </div>
 
-        {role === "seller" || role === "admin" ? (
+        {isAllProductsPage && (role === "seller" || role === "admin") ? (
           <Link
             to="/create-product"
             className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
@@ -85,7 +88,7 @@ const FilterComponent = ({
       </div>
 
 
-      {role === "seller" || role === "admin" ? (
+      {isAllProductsPage && (role === "seller" || role === "admin") ? (
           <Link
             to="/product-archive"
             className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
@@ -94,6 +97,18 @@ const FilterComponent = ({
              Archived Products
           </Link>
         ) : null}
+        
+      {!isAllProductsPage && (role === "seller" || role === "admin") ? (
+          <Link
+            to="/all-products"
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
+          >
+          
+             All Products
+          </Link>
+        ) : null}
+   
+
    
 
       

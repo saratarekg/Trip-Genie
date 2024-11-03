@@ -364,7 +364,7 @@ export function AllProducts() {
             <Search className="absolute left-3 top-2.5 text-gray-400" />
           </div>
 
-          <FilterComponent
+          <FilterComponent currentPage="all-products"
             filtersVisible={filtersVisible}
             toggleFilters={toggleFilters}
             sortOrder={sortOrder}
