@@ -3,13 +3,16 @@ const historicalTagController = require("../controllers/historicalTagController"
 const historicalPlacesController = require("../controllers/historicalPlacesController");
 const tourismGovernorController = require("../controllers/tourismGovernorController");
 const currencyController = require("../controllers/currencyController");
-
 const router = express.Router();
+const multer = require("multer");
+const storage = multer.memoryStorage(); // Store files in memory
+const upload = multer({ storage: storage });
 
-router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 router.post(
   "/historical-places",
+  upload.array("pictures", 10),
   historicalPlacesController.createHistoricalPlace
 );
 router.get(
@@ -26,6 +29,7 @@ router.delete(
 );
 router.put(
   "/historical-places/:id",
+  upload.array("pictures", 10),
   historicalPlacesController.updateHistoricalPlace
 );
 

@@ -27,8 +27,14 @@ const getExchangeRate = async (req, res) => {
         const { base, target } = req.body;
     
         try {
+            let baseCurrency;
+            
             // Fetch the base and target currencies by their ObjectId
-            const baseCurrency = await Currency.findById(base);
+            if (base === 'withEGP'){
+                baseCurrency = await Currency.findOne({ code: 'EGP' });
+            } else{
+                baseCurrency = await Currency.findById(base);
+            }
             const targetCurrency = await Currency.findById(target);
     
             if (!baseCurrency || !targetCurrency) {

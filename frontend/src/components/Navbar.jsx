@@ -141,7 +141,7 @@ export function NavbarComponent() {
                       {/* Admin-specific Navbar */}
                       <div className="hidden md:flex justify-between items-center w-full">
                         {/* Middle part with two orange boxes */}
-                        <div className="flex items-center space-x-4">
+                        {/* <div className="flex items-center space-x-4">
                           <div
                             className="w-10 h-10 rounded-md flex justify-center items-center"
                             style={{ backgroundColor: "#003F66" }}
@@ -162,7 +162,7 @@ export function NavbarComponent() {
                               className="h-6 w-6"
                             />
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     </>
                   )}

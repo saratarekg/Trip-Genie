@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Bed, Calendar, ArrowUpDown, AlertCircle, Star, MessageCircle } from "lucide-react";
+import { Bed, Calendar, ArrowUpDown, AlertCircle } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -28,9 +28,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
 
 export default function HotelBookingPage() {
@@ -51,7 +52,16 @@ export default function HotelBookingPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hotelOffers, setHotelOffers] = useState(null);
   const [dialogError, setDialogError] = useState("");
-  const [hotelSentiments, setHotelSentiments] = useState({});
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [holderName, setHolderName] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [exchangeRates, setExchangeRates] = useState({});
 
   const itemsPerPage = 9;
 
@@ -110,10 +120,32 @@ export default function HotelBookingPage() {
     }
   }, []);
 
+  const getExchangeRates = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:4000/rates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch exchange rates");
+      }
+      const data = await response.json();
+      setExchangeRates(data.rates);
+    } catch (err) {
+      setError("Failed to fetch exchange rates. Please try again later.");
+    }
+  }, []);
+
   useEffect(() => {
     refreshToken();
     getCurrencyCode();
-  }, [refreshToken, getCurrencyCode]);
+    getExchangeRates();
+  }, [refreshToken, getCurrencyCode, getExchangeRates]);
+
+  const convertCurrency = (amount, fromCurrency, toCurrency) => {
+    if (fromCurrency === toCurrency) return amount;
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    if (!fromRate || !toRate) return amount;
+    return (amount / fromRate) * toRate;
+  };
 
   const handleSearch = async () => {
     if (!city) {
@@ -123,6 +155,7 @@ export default function HotelBookingPage() {
 
     setIsLoading(true);
     setError("");
+    setHotels([]);
     try {
       const response = await fetch(
         `https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city?cityCode=${city}`,
@@ -143,46 +176,53 @@ export default function HotelBookingPage() {
         setError("No hotels found for your search criteria.");
         setHotels([]);
       } else {
-        setHotels(data.data);
+        const hotelIds = data.data.map(hotel => hotel.hotelId);
+        const fetchHotelOffers = async (ids) => {
+          try {
+            const response = await fetch(
+              `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currency=USD`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            );
+
+            if (response.ok) {
+              return await response.json();
+            } else {
+              console.warn(`Failed to fetch offers for hotels: ${ids.join(', ')}`);
+              return { data: [] };
+            }
+          } catch (error) {
+            console.error(`Error fetching hotel offers: ${error.message}`);
+            return { data: [] };
+          }
+        };
+
+        for (let i = 0; i < hotelIds.length; i += 20) {
+          const chunk = hotelIds.slice(i, i + 20);
+          const offersData = await fetchHotelOffers(chunk);
+          const validHotels = offersData.data.filter(hotel => 
+            hotel.offers && 
+            hotel.offers[0] && 
+            hotel.offers[0].price && 
+            !isNaN(parseFloat(hotel.offers[0].price.total))
+          );
+          setHotels(prevHotels => [...prevHotels, ...validHotels]);
+          
+          if (i + 20 < hotelIds.length) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+          }
+        }
+
         setCurrentPage(1);
-        fetchHotelSentiments(data.data.map(hotel => hotel.hotelId));
       }
     } catch (err) {
       setError("Failed to fetch hotels. Please try again later.");
       setHotels([]);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchHotelSentiments = async (hotelIds) => {
-    try {
-      hotelIds = hotelIds.slice(2, 3);
-      const response = await fetch(
-        `https://test.api.amadeus.com/v2/e-reputation/hotel-sentiments?hotelIds=[${hotelIds.join(',')}]`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch hotel sentiments");
-      }
-
-      const data = await response.json();
-      const sentiments = {};
-      data.data.forEach(hotel => {
-        sentiments[hotel.hotelId] = {
-          numberOfReviews: hotel.numberOfReviews,
-          numberOfRatings: hotel.numberOfRatings,
-          overallRating: hotel.overallRating
-        };
-      });
-      setHotelSentiments(sentiments);
-    } catch (err) {
-      console.error("Error fetching hotel sentiments:", err);
     }
   };
 
@@ -193,16 +233,12 @@ export default function HotelBookingPage() {
       let aValue, bValue;
       switch (sortBy) {
         case "price":
-          aValue = parseFloat(a.price || 0);
-          bValue = parseFloat(b.price || 0);
-          break;
-        case "rating":
-          aValue = hotelSentiments[a.hotelId]?.overallRating || 0;
-          bValue = hotelSentiments[b.hotelId]?.overallRating || 0;
+          aValue = parseFloat(convertCurrency(a.offers[0].price.total, a.offers[0].price.currency, currencyCode) || 0);
+          bValue = parseFloat(convertCurrency(b.offers[0].price.total, b.offers[0].price.currency, currencyCode) || 0);
           break;
         default:
-          aValue = parseFloat(a.price || 0);
-          bValue = parseFloat(b.price || 0);
+          aValue = parseFloat(convertCurrency(a.offers[0].price.total, a.offers[0].price.currency, currencyCode) || 0);
+          bValue = parseFloat(convertCurrency(b.offers[0].price.total, b.offers[0].price.currency, currencyCode) || 0);
       }
       return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
     });
@@ -231,9 +267,8 @@ export default function HotelBookingPage() {
     setDialogError("");
 
     try {
-      const hotelIds = [hotel.hotelId];
       const response = await fetch(
-        `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=[${hotelIds.join(',')}]`,
+        `https://test.api.amadeus.com/v3/shopping/hotel-offers/${hotel.offers[0].id}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -242,15 +277,11 @@ export default function HotelBookingPage() {
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.errors && errorData.errors[0].code === 1257) {
-          throw new Error("Invalid hotel ID. Please try another hotel.");
-        }
-        throw new Error("Failed to fetch hotel offers");
+        throw new Error("Failed to fetch hotel details");
       }
 
       const data = await response.json();
-      setHotelOffers(data.data[0]);
+      setHotelOffers(data.data);
     } catch (err) {
       setDialogError(err.message);
     }
@@ -259,6 +290,7 @@ export default function HotelBookingPage() {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setHotelOffers(null);
+    resetBookingForm();
   };
 
   const handleBookNow = () => {
@@ -269,6 +301,29 @@ export default function HotelBookingPage() {
     setIsBookingConfirmationOpen(false);
     setIsDialogOpen(false);
     setHotelOffers(null);
+    resetBookingForm();
+  };
+
+  const resetBookingForm = () => {
+    setFirstName("");
+    setLastName("");
+    setPhone("");
+    setEmail("");
+    setPaymentMethod("");
+    setCardNumber("");
+    setExpiryDate("");
+    setHolderName("");
+    setCvv("");
+  };
+
+  const isBookingFormValid = () => {
+    if (!firstName || !lastName || !phone || !email || !paymentMethod) {
+      return false;
+    }
+    if (paymentMethod === "card" && (!cardNumber || !expiryDate || !holderName || !cvv)) {
+      return false;
+    }
+    return true;
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -312,33 +367,71 @@ export default function HotelBookingPage() {
 
       <Card className="bg-white shadow-lg mt-2">
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label
-                htmlFor="city"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
                 City (IATA Code)
               </label>
               <Input
                 id="city"
                 type="text"
-                placeholder="e.g., PAR"
+                placeholder="e.g., CAI"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 className="border-2 border-amber-400"
               />
             </div>
-            <div className="md:col-span-1 flex items-end">
-              <Button
-                onClick={handleSearch}
-                disabled={isLoading}
-                className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-8 w-full"
-              >
-                {isLoading ? "Searching..." : "Search Hotels"}
-              </Button>
+            <div>
+              <label htmlFor="checkInDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Check-in Date
+              </label>
+              <Input
+                id="checkInDate"
+                type="date"
+                value={checkInDate}
+                onChange={handleCheckInDateChange}
+                min={today}
+                className="border-2 border-amber-400"
+              />
+            </div>
+            <div>
+              <label htmlFor="checkOutDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Check-out Date
+              </label>
+              <Input
+                id="checkOutDate"
+                type="date"
+                value={checkOutDate}
+                onChange={(e) => setCheckOutDate(e.target.value)}
+                min={checkInDate || today}
+                className="border-2 border-amber-400"
+              />
+            </div>
+            <div>
+              <label htmlFor="adults" className="block text-sm font-medium text-gray-700  mb-1">
+                Number of Adults
+              </label>
+              <Select value={adults} onValueChange={setAdults}>
+                <SelectTrigger id="adults" className="border-2 border-amber-400">
+                  <SelectValue placeholder="Select number of adults" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[...Array(9)].map((_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
+          <Button
+            onClick={handleSearch}
+            disabled={isLoading || !city || !checkInDate || !checkOutDate}
+            className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-8 w-full mt-4"
+          >
+            {isLoading ? "Searching..." : "Search Hotels"}
+          </Button>
         </CardContent>
       </Card>
 
@@ -360,14 +453,11 @@ export default function HotelBookingPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="price">Price</SelectItem>
-                  <SelectItem value="rating">Rating</SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 variant="outline"
-                onClick={() =>
-                  setSortOrder((order) => (order === "asc" ? "desc" : "asc"))
-                }
+                onClick={() => setSortOrder((order) => (order === "asc" ? "desc" : "asc"))}
                 className="flex gap-2 border-amber-400"
               >
                 <ArrowUpDown className="h-4 w-4" />
@@ -386,28 +476,27 @@ export default function HotelBookingPage() {
                         <Bed className="h-5 w-5" />
                       </div>
                       <h3 className="text-base font-semibold">
-                        {hotel.name}
+                        {hotel.hotel.name}
                       </h3>
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
                       <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-yellow-400" />
-                        <span>Rating: {hotelSentiments[hotel.hotelId]?.overallRating || "N/A"}</span>
+                        <Calendar className="h-4 w-4 text-blue-400" />
+                        <span>Check-in: {formatDate(hotel.offers[0].checkInDate)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4 text-blue-400" />
-                        <span>Reviews: {hotelSentiments[hotel.hotelId]?.numberOfReviews || "N/A"}</span>
+                        <Calendar className="h-4 w-4 text-green-400" />
+                        <span>Check-out: {formatDate(hotel.offers[0].checkOutDate)}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="h-4 w-4 text-green-400" />
-                        <span>Ratings: {hotelSentiments[hotel.hotelId]?.numberOfRatings || "N/A"}</span>
+                      <div className="flex items-center gap-2 font-semibold text-lg">
+                        <span>Price: {convertCurrency(hotel.offers[0].price.total, hotel.offers[0].price.currency, currencyCode).toFixed(2)} {currencyCode}</span>
                       </div>
                     </div>
+                    
                     <div className="mt-auto pt-3 flex items-center justify-between">
                       <Button
                         className="bg-blue-900 hover:bg-blue-800 text-white"
                         onClick={() => handleOpenDialog(hotel)}
-                      
                       >
                         See Details
                       </Button>
@@ -453,7 +542,7 @@ export default function HotelBookingPage() {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent className="sm:max-w-[425px] bg-white">
+        <DialogContent className="sm:max-w-[425px] bg-white max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Hotel Details</DialogTitle>
             <DialogDescription>
@@ -469,65 +558,98 @@ export default function HotelBookingPage() {
           )}
 
           {selectedHotel && hotelOffers && !dialogError && (
-            <div className="mt-4">
-              <h4 className="font-semibold mb-2">{selectedHotel.name}</h4>
-              <p>Rating: {hotelSentiments[selectedHotel.hotelId]?.overallRating || "N/A"}</p>
-              <p>Reviews: {hotelSentiments[selectedHotel.hotelId]?.numberOfReviews || "N/A"}</p>
-              <p>Ratings: {hotelSentiments[selectedHotel.hotelId]?.numberOfRatings || "N/A"}</p>
+            <div className="mt-4 space-y-4">
+              <h4 className="font-semibold mb-2">{hotelOffers.hotel.name}</h4>
               <p>Check-in: {formatDate(hotelOffers.offers[0].checkInDate)}</p>
               <p>Check-out: {formatDate(hotelOffers.offers[0].checkOutDate)}</p>
               <p>Room Type: {hotelOffers.offers[0].room.type}</p>
               <p>
-                Price: {hotelOffers.offers[0].price.total}{" "}
-                {hotelOffers.offers[0].price.currency}
+                Price: {convertCurrency(hotelOffers.offers[0].price.total, hotelOffers.offers[0].price.currency, currencyCode).toFixed(2)} {currencyCode}
               </p>
-              <div className="mt-4">
-                <label htmlFor="adultsSelect" className="block text-sm font-medium text-gray-700 mb-1">
-                  Number of Adults
-                </label>
-                <Select value={adults} onValueChange={setAdults}>
-                  <SelectTrigger id="adultsSelect" className="w-full">
-                    <SelectValue placeholder="Select number of adults" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[...Array(9)].map((_, i) => (
-                      <SelectItem key={i + 1} value={(i + 1).toString()}>
-                        {i + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <p>Adults: {adults}</p>
+              <div>
+                <h5 className="font-semibold mt-4 mb-2">Description:</h5>
+                <ul className="list-disc pl-5 space-y-1">
+                  {hotelOffers.offers[0].room.description.text.split('-').map((item, index) => (
+                    <li key={index}>{item.trim()}</li>
+                  ))}
+                </ul>
               </div>
-              <div className="mt-4">
-                <label htmlFor="checkInDatePicker" className="block text-sm font-medium text-gray-700 mb-1">
-                  Check-in Date
-                </label>
+              <div>
+                <h5 className="font-semibold mt-4 mb-2">Amenities:</h5>
+                <ul className="list-disc pl-5 space-y-1">
+                  {hotelOffers.hotel.amenities.map((amenity, index) => (
+                    <li key={index}>
+                      {amenity.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-4">
                 <Input
-                  id="checkInDatePicker"
-                  type="date"
-                  value={checkInDate}
-                  onChange={handleCheckInDateChange}
-                  min={today}
-                  className="w-full"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                 />
-              </div>
-              <div className="mt-4">
-                <label htmlFor="checkOutDatePicker" className="block text-sm font-medium text-gray-700 mb-1">
-                  Check-out Date
-                </label>
                 <Input
-                  id="checkOutDatePicker"
-                  type="date"
-                  value={checkOutDate}
-                  onChange={(e) => setCheckOutDate(e.target.value)}
-                  min={checkInDate || today}
-                  className="w-full"
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                 />
+                <Input
+                  placeholder="Phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+
+                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="wallet" id="wallet" />
+                    <Label htmlFor="wallet">Wallet</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="card" id="card" />
+                    <Label htmlFor="card">Credit/Debit Card</Label>
+                  </div>
+                </RadioGroup>
+
+                {paymentMethod === "card" && (
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Card Number"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Expiry Date (YYYY-MM)"
+                      value={expiryDate}
+                      onChange={(e) => setExpiryDate(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Card Holder Name"
+                      value={holderName}
+                      onChange={(e) => setHolderName(e.target.value)}
+                    />
+                    <Input
+                      placeholder="CVV"
+                      value={cvv}
+                      onChange={(e) => setCvv(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
+
               <Button
                 className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white"
                 onClick={handleBookNow}
-                disabled={!checkInDate || !checkOutDate}
+                disabled={!isBookingFormValid()}
               >
                 Book Now
               </Button>

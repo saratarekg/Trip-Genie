@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle, XCircle } from "lucide-react";
+import Loader from './Loader';
 
 const WishlistPage = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -192,11 +193,11 @@ const WishlistPage = () => {
       }));
 
       setWishlistItems(formattedData.filter(Boolean));
+      setLoading(false);
     } catch (err) {
       setError("Error fetching wishlist items. Please try again later.");
       console.error("Error fetching wishlist items:", err);
     } finally {
-      setLoading(false);
     }
   }, [userRole, formatPrice]);
 
@@ -271,9 +272,7 @@ const WishlistPage = () => {
     }
   };
 
-  if (loading) {
-    return <div className="text-center mt-8">Loading...</div>;
-  }
+  if (loading) return <Loader />;
 
   if (error) {
     return (
@@ -284,6 +283,7 @@ const WishlistPage = () => {
   }
 
   return (
+
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">My Wishlist</h1>
       {wishlistItems.length === 0 ? (

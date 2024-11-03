@@ -21,11 +21,13 @@ import { TagCRUD } from "@/components/tags-crud";
 import { Dialog } from "@/components/ui/dialog";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 Chart.register(ArcElement, Tooltip, Legend);
 
 // Reusable DashboardCard component
 const DashboardCard = ({ title, value, subtitle, icon }) => (
+  
   <Card className="bg-white border-[#808080] border">
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium text-[#003f66]">
@@ -47,6 +49,7 @@ export function Dashboard() {
   const [isCategoryCRUDOpen, setIsCategoryCRUDOpen] = useState(false);
   const [isTagCRUDOpen, setIsTagCRUDOpen] = useState(false);
   const [footerHeight, setFooterHeight] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const footer = document.querySelector("footer");
@@ -129,21 +132,21 @@ export function Dashboard() {
           <TabsList className="grid grid-cols-3 gap-4 bg-transparent">
             <TabsTrigger
               value="accounts"
-              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-white"
+              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-[#003f66]"
             >
               <UserCircle className="w-4 h-4 mr-2" />
               Accounts
             </TabsTrigger>
             <TabsTrigger
               value="activities"
-              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-white"
+              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-[#003f66] "
             >
               <Layers className="w-4 h-4 mr-2" />
               Activities
             </TabsTrigger>
             <TabsTrigger
               value="giftshop"
-              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-white"
+              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-[#003f66]"
             >
               <ShoppingBag className="w-4 h-4 mr-2" />
               Gift Shop
@@ -158,7 +161,9 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full bg-[#ED8936] hover:bg-[#003f66]">
+                  <Button  onClick={() => navigate('/user-approval')}
+                  className="w-full bg-[#ED8936] hover:bg-[#003f66]">
+                  
                     View
                   </Button>
                 </CardContent>

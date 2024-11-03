@@ -1157,13 +1157,14 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
             <div className="mt-8 space-y-4">
               {(userRole === "admin" ||
                 (userRole === "seller" && canModify && product.seller)) && (
-                <Button
-                  className="w-full"
-                  variant="default"
-                  onClick={handleUpdate}
-                >
-                  <Edit className="w-4 h-4 mr-2" /> Update Product
-                </Button>
+               <Button
+  className="w-full bg-blue-500 hover:bg-blue-700 text-white"
+  variant="default"
+  onClick={handleUpdate}
+>
+  <Edit className="w-4 h-4 mr-2" /> Update Product
+</Button>
+
               )}
 
               {((userRole === "admin" && product.seller == null) ||

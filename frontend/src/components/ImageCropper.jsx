@@ -16,11 +16,16 @@ export function ImageCropper({ onImageCropped, currentImage }) {
   });
   const imageRef = React.useRef(null);
 
+  useEffect(() => {
+    onImageCropped(selectedImage);
+    console.log(selectedImage);
+  }, [selectedImage]);
+
   const onSelectFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
       reader.addEventListener("load", () => setSelectedImage(reader.result));
-      reader.readAsDataURL(e.target.files[0]);
+      //reader.readAsDataURL(e.target.files[0]);
     }
   };
 

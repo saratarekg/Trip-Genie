@@ -101,12 +101,6 @@ const tourGuideSchema = new Schema(
         required: true,
       },
     },
-    attended: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Tourist",
-      },
-    ],
     allRatings: [
       {
         type: Number,

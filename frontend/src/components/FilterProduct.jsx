@@ -21,9 +21,13 @@ const FilterComponent = ({
   maxPrice,
   searchProducts,
   role,
+  symbol,
   myProducts,
   handlemyProducts,
+  currentPage
 }) => {
+  const isAllProductsPage = currentPage === "all-products"
+
   return (
     <>
       <div className="flex mb-4">
@@ -52,7 +56,7 @@ const FilterComponent = ({
               : ""}
           </button>
 
-          {role === "seller" && (
+          {isAllProductsPage && (role === "seller"|| role === "admin")  && (
             <button
               onClick={() => handlemyProducts(!myProducts)} // Toggle myProducts state
               className={`flex items-center px-4 py-2 rounded-full shadow ${
@@ -72,7 +76,7 @@ const FilterComponent = ({
           </button>
         </div>
 
-        {role === "seller" || role === "admin" ? (
+        {isAllProductsPage && (role === "seller" || role === "admin") ? (
           <Link
             to="/create-product"
             className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
@@ -81,7 +85,34 @@ const FilterComponent = ({
             Create
           </Link>
         ) : null}
+
       </div>
+
+
+      {isAllProductsPage && (role === "seller" || role === "admin") ? (
+          <Link
+            to="/product-archive"
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
+          >
+          
+             Archived Products
+          </Link>
+        ) : null}
+        
+      {!isAllProductsPage && (role === "seller" || role === "admin") ? (
+          <Link
+            to="/all-products"
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
+          >
+          
+             All Products
+          </Link>
+        ) : null}
+   
+
+   
+
+      
 
       {filtersVisible && (
         <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">
@@ -92,6 +123,7 @@ const FilterComponent = ({
               <DualHandleSliderComponent
                 min={0}
                 max={maxPrice}
+                symbol={symbol}
                 step={Math.max(1, Math.ceil(maxPrice / 100))}
                 values={priceRange}
                 middleColor="#2563EB"

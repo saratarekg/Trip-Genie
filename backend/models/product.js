@@ -42,7 +42,7 @@ const productSchema = new mongoose.Schema(
         user: { type: String, required: true },
         rating: { type: Number, required: true, min: 1, max: 5 },
         comment: { type: String, required: true },
-        date:{type: Date },
+        date: { type: Date },
       },
     ],
     quantity: {
@@ -63,8 +63,13 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    isDeleted: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
-  
+
   { timestamps: true }
 );
 
@@ -113,4 +118,5 @@ productSchema.statics.filterByPrice = async function (minPrice, maxPrice) {
   }
 };
 
-module.exports = mongoose.model("Product", productSchema);
+const Product = mongoose.model("Product", productSchema);
+module.exports = Product;

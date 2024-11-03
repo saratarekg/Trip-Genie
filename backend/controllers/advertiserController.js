@@ -6,28 +6,75 @@ const Admin = require("../models/admin");
 const TourismGovernor = require("../models/tourismGovernor");
 const Activity = require("../models/activity");
 const { deleteActivity } = require("./activityController");
+const ActivityBooking = require("../models/activityBooking");
 
 const deleteAdvertiserAccount = async (req, res) => {
   try {
-    const advertiser = await Advertiser.findByIdAndDelete(req.params.id);
+    const advertiser = await Advertiser.findById(res.locals.user_id);
     if (!advertiser) {
       return res.status(404).json({ message: "Advertiser not found" });
     }
 
     // Find all activities associated with the advertiser
-    const activities = await Activity.find({ advertiser: req.params.id });
+    const activities = await Activity.find({
+      advertiser: res.locals.user_id,
+      timing: { $gte: new Date() },
+    });
+    const activityIDs = activities.map((activity) => activity._id);
+    const bookedActivities = await ActivityBooking.find({
+      activity: { $in: activityIDs },
+    });
 
-    // Call the deleteActivity method for each activity associated with the advertiser
-    for (const activity of activities) {
-      await deleteActivity({ params: { id: activity._id } }, res);
+    if (bookedActivities.length > 0) {
+      return res.status(400).json({
+        message: "Advertiser has upcoming activities, can not delete account",
+      });
     }
 
+    // Delete all activities associated with the advertiser
+    activities.forEach(async (activity) => {
+      await Activity.findByIdAndUpdate(activity._id, { isDeleted: true });
+    });
+
+    await Advertiser.findByIdAndDelete(res.locals.user_id);
+
     res
-      .status(201)
-      .json({ message: "Advertiser and associated activities deleted" });
+      .status(200)
+      .json({ message: "Advertiser account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+const rejectAdvertiser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const advertiser = await Advertiser.findByIdAndDelete(id);
+    if (!advertiser) {
+      return res.status(400).json({ message: "Advertiser not found" });
+    }
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+  
+    const filenames = [];
+    filenames.push(advertiser.files.IDFilename);
+    filenames.push(advertiser.files.taxationRegistryCardFilename);
+    const files = await gfs.find({ filename:{$in:filenames} }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+  
+    await gfs.delete(files[0]._id);
+    await gfs.delete(files[1]._id);
+
+    res.status(200).json({ message: "Advertiser rejected successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+  
 };
 
 const getAllAdvertisers = async (req, res) => {
@@ -101,6 +148,20 @@ const getAdvertiser = async (req, res) => {
   }
 };
 
+const getUnacceptedAdvertisers = async (req, res) => {
+  try {
+    const unacceptedAdvertisers = await Advertiser.find({
+      isAccepted: false,
+    }).populate("files");
+    res.status(200).json(unacceptedAdvertisers);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching unaccepted advertisers",
+      error: error.message,
+    });
+  }
+};
+
 const changePassword = async (req, res) => {
   try {
     const advertiser = await Advertiser.findById(res.locals.user_id);
@@ -135,6 +196,30 @@ const changePassword = async (req, res) => {
         .json({ message: "Validation error", errors: validationErrors });
     }
     res.status(400).json({ error: error.message });
+  }
+};
+const approveAdvertiser = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    const updatedAdvertiser = await Advertiser.findByIdAndUpdate(
+      id,
+      { isAccepted: true },
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedAdvertiser) {
+      return res.status(404).json({ message: "Advertiser not found" });
+    }
+
+    res.status(200).json({
+      message: "Advertiser approved successfully",
+      advertiser: updatedAdvertiser,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error approving advertiser", error: error.message });
   }
 };
 
@@ -177,4 +262,7 @@ module.exports = {
   updateAdvertiser,
   getAdvertiser,
   changePassword,
+  getUnacceptedAdvertisers,
+  approveAdvertiser,
+  rejectAdvertiser,
 };

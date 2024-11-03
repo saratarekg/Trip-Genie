@@ -24,16 +24,17 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
-    if (userInfo && userInfo.preferredCurrency !== activity.currency) {
+    if (userInfo && userInfo.role == 'tourist' && userInfo.preferredCurrency !== activity.currency) {
+      // console.log("exchange rate tyb?");
       fetchExchangeRate();
     } else {
+      // console.log("ba get currency");
       getCurrencySymbol();
     }
   }, [userInfo, activity]);
 
   const fetchExchangeRate = useCallback(async () => {
-    // if (!userInfo || !userInfo.preferredCurrency) return;
-if(userInfo){
+  if(userInfo && userInfo.role == 'tourist'){
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
@@ -85,11 +86,10 @@ if(userInfo){
           return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
         }
       } else if (currencySymbol) {
+        // console.log("currencySymbol:", currencySymbol, "price:", price);
         return `${currencySymbol}${price}`;
       }
   };
-
-  
 
 return(
   <Card
@@ -217,6 +217,14 @@ export function AllActivitiesComponent() {
     if (!role) role = "guest";
     return role;
   };
+
+  const getSymbol = () => {
+    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+        return `${userInfo.preferredCurrency.symbol}`;
+    } else {
+      return "$";
+    }
+};
 
   useEffect(() => {
     fetchUserInfo();
@@ -569,6 +577,7 @@ export function AllActivitiesComponent() {
                   selectedCategories={selectedCategories}
                   setSelectedCategories={setSelectedCategories}
                   myActivities={myActivities}
+                  symbol={getSymbol()}
                   handlemyActivities={handlemyActivities}
                   maxPrice={maxPrice} // Pass maxPrice as a prop
                   initialPriceRange={initialPriceRange}

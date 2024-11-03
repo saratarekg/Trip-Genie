@@ -18,8 +18,8 @@ const upload = multer({ storage: storage });
 
 const router = express.Router();
 
-router.post('/populate', currencyController.getExchangeRate);
-router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.post("/populate", currencyController.getExchangeRate);
+router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
 // router.get('/fill', currencyController.populateCurrencies);
@@ -28,20 +28,17 @@ router.get("/currencies/code", touristController.getCurrencyCode);
 router.get("/currencies/idd", touristController.getCurrencyID);
 router.post("/currencies/set", touristController.setCurrencyCode);
 
-
-
-
 router.post("/admins", adminController.addAdmin);
 router.post("/governors", tourismGovernorController.addTourismGovernor);
 
 // Route to delete an Advertiser
-router.delete("/advertisers/:id", advertiserController.deleteAdvertiserAccount);
+router.delete("/advertisers/:id", advertiserController.rejectAdvertiser);
 
 // Route to delete a Seller
-router.delete("/sellers/:id", sellerController.deleteSellerAccount);
+router.delete("/sellers/:id", sellerController.rejectSeller);
 
 // Route to delete a Tour Guide
-router.delete("/tourGuides/:id", tourGuideController.deleteTourGuideAccount);
+router.delete("/tourGuides/:id", tourGuideController.rejectTourGuide);
 
 // Route to delete a Tourist
 router.delete("/tourists/:id", touristController.deleteTouristAccount);
@@ -102,12 +99,12 @@ router.put("/categories/:id", categoryController.updateCategory);
 router.get("/products", productController.getAllProducts);
 router.post(
   "/products",
-  upload.array("pictures", 5),
+  upload.array("pictures", 10),
   productController.addProductByAdmin
 );
 router.get(
   "/products/:id",
-  upload.array("pictures", 5),
+  upload.array("pictures", 10),
   productController.getProductById
 );
 router.get("/productsarchive", productController.getAllProductsArchive);
@@ -118,9 +115,6 @@ router.put(
 );
 router.put("/archiveproducts/:id", productController.archiveProduct);
 router.delete("/products/:id", productController.deleteProduct);
-
-
-
 
 router.post("/complaint/:id/reply", complaintsController.replyToComplaint);
 router.get("/complaints", complaintsController.getAllComplaints);
@@ -136,5 +130,17 @@ router.post("/password", adminController.changePassword);
 router.get("/files", adminController.getAllFiles);
 router.get("/files/:filename", adminController.getFile);
 router.delete("/files/:filename", adminController.deleteFile);
+router.get(
+  "/unaccepted-advertiser",
+  advertiserController.getUnacceptedAdvertisers
+);
+router.put("/approve-advertiser/:id", advertiserController.approveAdvertiser);
+router.get("/unaccepted-seller", sellerController.getUnacceptedSeller);
+router.put("/approve-seller/:id", sellerController.approveSeller);
+router.get(
+  "/unaccepted-tourguide",
+  tourGuideController.getUnacceptedTourGuides
+);
+router.put("/approve-tourGuide/:id", tourGuideController.approveTourGuide);
 
 module.exports = router;

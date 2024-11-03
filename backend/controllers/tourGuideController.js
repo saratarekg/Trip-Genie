@@ -10,6 +10,7 @@ const Itinerary = require("../models/itinerary"); // Adjust the path as needed
 const authController = require("./authController");
 
 const { deleteItinerary } = require("./itineraryController");
+const itineraryBooking = require("../models/itineraryBooking");
 
 const getTourGuideProfile = async (req, res) => {
   try {
@@ -125,6 +126,17 @@ const updateTourGuideProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getUnacceptedTourGuides = async (req, res) => {
+  try {
+    const unacceptedTourGuides = await TourGuide.find({ isAccepted: false });
+    res.status(200).json(unacceptedTourGuides);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching unaccepted TourGuides",
+      error: error.message,
+    });
+  }
+};
 
 const getAllTourGuides = async (req, res) => {
   try {
@@ -149,14 +161,69 @@ const getTourGuideByID = async (req, res) => {
 
 const deleteTourGuideAccount = async (req, res) => {
   try {
-    const tourGuide = await TourGuide.findByIdAndDelete(req.params.id);
+    const tourGuide = await TourGuide.findById(res.locals.user_id);
     if (!tourGuide) {
       return res.status(404).json({ message: "TourGuide not found" });
     }
 
-    // Delete all itineraries associated with the tour guide
-    await Itinerary.deleteMany({ tourGuide: req.params.id });
-    res.status(201).json({ message: "TourGuide deleted" });
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const itineraries = await Itinerary.find({ tourGuide: res.locals.user_id });
+    const itinerariesIds = itineraries.map((itinerary) => itinerary._id);
+    const bookedItineraries = await itineraryBooking.find({
+      itinerary: { $in: itinerariesIds },
+      date: { $gte: tomorrow.toISOString() },
+    });
+
+    if (bookedItineraries.length > 0) {
+      return res.status(400).json({
+        message: "You cannot delete your account because you have bookings",
+      });
+    }
+
+    itineraries.forEach(async (itinerary) => {
+      await Itinerary.findByIdAndUpdate(itinerary._id, { isDeleted: true });
+    });
+
+    await TourGuide.findByIdAndDelete(res.locals.user_id);
+
+    res
+      .status(201)
+      .json({ message: "Tour guide account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const rejectTourGuide = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tourGuide = await TourGuide.findByIdAndDelete(id);
+    console.log(tourGuide);
+    if (!tourGuide) {
+      return res.status(400).json({ message: "TourGuide not found" });
+    }
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+  
+    const filenames = [];
+    filenames.push(tourGuide.files.IDFilename);
+    filenames.push(...tourGuide.files.certificatesFilenames);
+    const files = await gfs.find({ filename:{$in:filenames} }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+  
+    files.forEach(async (file) => {
+      await gfs.delete(file._id);
+    });
+
+
+    res.status(200).json({ message: "TourGuide rejected successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -271,7 +338,6 @@ const rateTourGuide = async (req, res) => {
     // .populate("advertiser")
     // .populate("category")
     // .populate("tags")
-    // .populate("attended")
     // .populate("comments")
     //.exec();
 
@@ -283,6 +349,31 @@ const rateTourGuide = async (req, res) => {
   } catch (error) {
     console.error("Error adding rating: ", error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+const approveTourGuide = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  try {
+    const updatedTourGuide = await TourGuide.findByIdAndUpdate(
+      id,
+      { isAccepted: true },
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedTourGuide) {
+      return res.status(404).json({ message: "TourGuide not found" });
+    }
+
+    res.status(200).json({
+      message: "TourGuide approved successfully",
+      tourGuide: updatedTourGuide,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error approving TourGuide", error: error.message });
   }
 };
 
@@ -334,4 +425,7 @@ module.exports = {
   rateTourGuide,
   addCommentToTourGuide,
   changePassword,
+  getUnacceptedTourGuides,
+  approveTourGuide,
+  rejectTourGuide,
 };

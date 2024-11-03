@@ -40,21 +40,17 @@ export function HistoricalPlaces() {
   }
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => {
-      // Only increment if there are more cards ahead
-      if (prevIndex < places.length - visibleSlides) {
-        return prevIndex + 1;
-      }
-      return prevIndex;
-    });
+    setCurrentIndex((prevIndex) =>
+      prevIndex < places.length - visibleSlides ? prevIndex + 1 : prevIndex
+    );
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : prevIndex));
+    setCurrentIndex((prevIndex) => prevIndex > 0 ? prevIndex - 1 : prevIndex);
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-white">
       <div className="flex justify-between items-center mb-6">
         <div className="w-full sm:w-1/2">
           <h1 className="text-3xl font-bold">Historical Places</h1>
@@ -63,78 +59,84 @@ export function HistoricalPlaces() {
             Explore the world's most captivating historical landmarks, where rich cultural heritage and architectural wonders come to life. Each destination tells a story of the past, offering a unique journey through history. Plan your adventure today!
           </p>
         </div>
-        
-        <div className="flex gap-2">
-          {/* View More Button */}
-          <div className="flex">
-            <Link to="/all-historical-places">
-              <Button
-                variant="primary"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-lg font-medium"
+
+        <Link to="/all-historical-places">
+          <Button
+            variant="primary"
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-lg font-medium"
+          >
+            View More
+          </Button>
+        </Link>
+      </div>
+
+      {/* Slider container with relative positioning */}
+      <div className="relative px-12">
+        {/* Navigation Buttons - Positioned absolutely on the sides */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={prevSlide}
+          disabled={currentIndex === 0}
+          aria-label="Previous place"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={nextSlide}
+          disabled={currentIndex >= places.length - visibleSlides}
+          aria-label="Next place"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+
+        {/* Overflow container */}
+        <div className="overflow-hidden px-4">
+          {/* Sliding content */}
+          <div
+            className="flex transition-transform duration-300 bg-white"
+            style={{
+              transform: `translateX(-${currentIndex * (100 / visibleSlides)}%)`,
+            }}
+          >
+            {places.map((place, index) => (
+              <Link
+                to={`/historical-place/${place._id}`}
+                key={place._id}
+                className="w-full min-w-[25%] px-3 transition-all duration-300 group"
+                style={{
+                  transform: index < currentIndex ? 'scale(0)' : 'scale(1)',
+                  opacity: index < currentIndex ? 0 : 1,
+                }}
               >
-                View More
-              </Button>
-            </Link>
+                <div className="mt-8 cursor-pointer relative aspect-[3/4] rounded-lg hover:-translate-y-8 transition-transform duration-300">
+                  <img
+                    src={Array.isArray(place.pictures) && place.pictures.length > 0
+                      ? place.pictures[0]
+                      : defaultImage}
+                    alt={place.title}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-lg" />
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <h3 className="text-xl font-semibold">{place.title}</h3>
+                    <p className="flex items-center mt-2">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {place.location.city}, {place.location.country}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={prevSlide}
-            aria-label="Previous place"
-            className="bg-black text-white hover:bg-gray-700"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={nextSlide}
-            aria-label="Next place"
-            className="bg-orange-500 text-white hover:bg-orange-600"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
-      {/* Outer container (with overflow hidden) */}
-      <div>
-        {/* Inner sliding container */}
-        <div
-          className="flex gap-6 transition-transform duration-300"
-          style={{
-            // Adjust the total translation to ensure the last few cards are fully visible
-            transform: `translateX(-${
-              currentIndex * (100 / visibleSlides + 1)
-            }%)`,
-          }}
-        >
-          {places.map((place) => (
-            <Link to={`/historical-place/${place._id}`} key={place._id} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 transition-transform duration-300 hover:-translate-y-12 hover:z-10 relative">
-              <div className="cursor-pointer relative aspect-[3/4] rounded-lg overflow-hidden">
-                <img
-                  src={
-                    Array.isArray(place.pictures) && place.pictures.length > 0
-                      ? place.pictures[0]
-                      : defaultImage
-                  }
-                  alt={place.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-xl font-semibold">{place.title}</h3>
-                  <p className="flex items-center mt-2">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    {place.location.city}, {place.location.country}
-                  </p>
-                </div>
-              </div>
-            </Link>
-          ))}
-          <div className="ml-auto"></div>
-        </div>
-      </div>
     </div>
   );
 }
