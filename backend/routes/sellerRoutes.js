@@ -18,6 +18,7 @@ router.get("/", sellerController.getSeller);
 router.get("/seller/:id", sellerController.getSellerByID);
 
 router.get("/products", productController.getAllProducts);
+router.get("/productsarchive", productController.getAllProductsArchive);
 router.get("/products/:id", productController.getProductById);
 router.post(
   "/products",
