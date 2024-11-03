@@ -31,7 +31,16 @@ const deleteAdvertiserAccount = async (req, res) => {
       });
     }
 
-    res.status(201).json({ message: "Account deleted successfully" });
+    // Delete all activities associated with the advertiser
+    activities.forEach(async (activity) => {
+      await Activity.findByIdAndUpdate(activity._id, { isDeleted: true });
+    });
+
+    await Advertiser.findByIdAndDelete(res.locals.user_id);
+
+    res
+      .status(200)
+      .json({ message: "Advertiser account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
