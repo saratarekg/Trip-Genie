@@ -97,37 +97,34 @@ const touristSchema = new Schema(
         },
       },
     ],
-    paymentMethod: {
-      type: String,
-      enum: ['CREDIT_CARD', 'DEBIT_CARD', 'WALLET'],
-      required: true,
-    },
+
     cards: [
       {
+        cardType: {
+          type: String,
+          required: true,
+          enum: ['Credit Card', 'Debit Card'],
+        },
         cardNumber: {
           type: String,
           required: function() {
-            return this.paymentMethod === 'CREDIT_CARD' || this.paymentMethod === 'DEBIT_CARD';
+            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
           },
           match: [/^[0-9]{16}$/, "Please enter a valid 16-digit card number"],
         },
         expiryDate: {
           type: String,
           required: function () {
-            return this.paymentMethod === 'CREDIT_CARD' || this.paymentMethod === 'DEBIT_CARD';
+            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
           },
           match: [/^(0[1-9]|1[0-2])\/[0-9]{2}$/, "Please enter a valid expiry date in MM/YY format"],
           validate: {
             validator: function (v) {
-              // Check if the expiry date is in the future
               const [month, year] = v.split('/');
-              const expiryDate = new Date(`20${year}`, month - 1); // Create a date object
-              const currentDate = new Date(); // Get current date
-      
-              // Set the current date to the start of the month
+              const expiryDate = new Date(`20${year}`, month - 1);
+              const currentDate = new Date();
               currentDate.setDate(1);
-      
-              return expiryDate > currentDate; // Validate that expiry date is in the future
+              return expiryDate > currentDate;
             },
             message: "Expiry date must be in the future",
           },
@@ -135,14 +132,14 @@ const touristSchema = new Schema(
         holderName: {
           type: String,
           required: function() {
-            return this.paymentMethod === 'CREDIT_CARD' || this.paymentMethod === 'DEBIT_CARD';
+            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
           },
           trim: true,
         },
         cvv: {
           type: String,
           required: function() {
-            return this.paymentMethod === 'CREDIT_CARD' || this.paymentMethod === 'DEBIT_CARD';
+            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
           },
           match: [/^[0-9]{3,4}$/, "Please enter a valid 3 or 4 digit CVV"],
         },

@@ -12,7 +12,7 @@ export default function AddCard() {
     expiryDate: '',
     holderName: '',
     cvv: '',
-    paymentMethod: '',
+    cardType: '',
     default: false
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -81,8 +81,8 @@ export default function AddCard() {
     } else if (!/^[0-9]{3,4}$/.test(cardDetails.cvv)) {
       newErrors.cvv = "Please enter a valid 3 or 4 digit CVV"
     }
-    if (!cardDetails.paymentMethod) {
-      newErrors.paymentMethod = "Payment method is required"
+    if (!cardDetails.cardType) {
+      newErrors.cardType = "Card type is required"
     }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -112,7 +112,7 @@ export default function AddCard() {
         expiryDate: '',
         holderName: '',
         cvv: '',
-        paymentMethod: '',
+        cardType: '',
         default: false
       })
     } catch (error) {
@@ -173,7 +173,7 @@ export default function AddCard() {
             <div className="flex items-center space-x-4">
               <CreditCard className="h-8 w-8 text-blue-500" />
               <div>
-                <p className="font-semibold">{card.paymentMethod === 'CREDIT_CARD' ? 'Credit Card' : 'Debit Card'}</p>
+                <p className="font-semibold">{card.cardType}</p>
                 <p>Card Number: **** **** **** {card.cardNumber.slice(-4)}</p>
                 <p>Exp Date: {card.expiryDate}</p>
                 <p>Holder: {card.holderName}</p>
@@ -225,19 +225,19 @@ export default function AddCard() {
             <h3 className="text-xl font-bold mb-4">Add New Card</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="paymentMethod" className="block mb-2">Payment Method</label>
+                <label htmlFor="cardType" className="block mb-2">Card Type</label>
                 <select
-                  id="paymentMethod"
-                  name="paymentMethod"
-                  value={cardDetails.paymentMethod}
+                  id="cardType"
+                  name="cardType"
+                  value={cardDetails.cardType}
                   onChange={handleInputChange}
-                  className={`w-full p-2 border rounded-md ${errors.paymentMethod ? 'border-red-500' : ''}`}
+                  className={`w-full p-2 border rounded-md ${errors.cardType ? 'border-red-500' : ''}`}
                 >
-                  <option value="">Select payment method</option>
-                  <option value="CREDIT_CARD">Credit Card</option>
-                  <option value="DEBIT_CARD">Debit Card</option>
+                  <option value="">Select card type</option>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="Debit Card">Debit Card</option>
                 </select>
-                {errors.paymentMethod && <p className="text-red-500 text-sm mt-1">{errors.paymentMethod}</p>}
+                {errors.cardType && <p className="text-red-500 text-sm mt-1">{errors.cardType}</p>}
               </div>
               <div>
                 <label htmlFor="cardNumber" className="block mb-2">Card Number</label>
@@ -333,7 +333,6 @@ export default function AddCard() {
                 className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300 ease-in-out"
               >
                 Remove
-              
               </button>
             </div>
           </div>
