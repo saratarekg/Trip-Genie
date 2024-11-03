@@ -16,16 +16,18 @@ import {
   Eye,
   MessageSquare,
   LogOut,
-  Trash2, XCircle, CheckCircle, Heart,
-  DollarSign
+  Trash2,
+  XCircle,
+  CheckCircle,
+  Heart,
+  DollarSign,
+  FileText
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Popup from "@/components/popup";
-; // Import your Popup component
-import '@/styles/Popup.css'; // Create a CSS file for styling
-
+import '@/styles/Popup.css';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +47,7 @@ import TouristActivities from '@/pages/TouristActivities';
 import TouristAttendedActivities from '@/pages/TouristAttended';
 import ShoppingCart from '@/components/touristCart.jsx';
 import WishlistPage from '@/components/touristWishlist.jsx';
+import { MyComplaintsComponent } from "@/components/myComplaints";
 
 // Sub-components
 const AccountInfo = ({ tourist }) => <TouristProfileComponent />;
@@ -58,7 +61,6 @@ const Wishlist = ({ tourist }) => <TouristActivities />;
 const History = ({ tourist }) => <TouristAttendedActivities />;
 
 const Complaint = () => <FileComplaintForm />;
-
 
 const Preferences = () => <TravelPreferences />;
 
@@ -121,13 +123,11 @@ const RedeemPoints = ({ tourist, onRedeemPoints }) => {
   );
 };
 
-
 const CurrencyApp = () => {
   const [currencies, setCurrencies] = useState([]);
   const [preferredCurrency, setPreferredCurrency] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState("");
 
-  // Fetch user's preferred currency code and its details
   const fetchPreferredCurrencyCode = async () => {
       try {
           const token = Cookies.get("jwt");
@@ -138,7 +138,6 @@ const CurrencyApp = () => {
           const preferredCurrencyCode = codeResponse.data;
           console.log("Preferred Currency Code:", preferredCurrencyCode);
 
-          // Fetch full details using the fetched currency code
           const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${preferredCurrencyCode}`, {
               headers: { Authorization: `Bearer ${token}` },
           });
@@ -148,7 +147,6 @@ const CurrencyApp = () => {
       }
   };
 
-  // Fetch list of available currencies
   useEffect(() => {
       const fetchSupportedCurrencies = async () => {
           try {
@@ -163,10 +161,9 @@ const CurrencyApp = () => {
       };
 
       fetchSupportedCurrencies();
-      fetchPreferredCurrencyCode(); // Initial fetch on mount
+      fetchPreferredCurrencyCode();
   }, []);
 
-  // Handle setting the new preferred currency and then refetch the preferred currency details
   const handleSetPreferredCurrency = async () => {
       try {
           const token = Cookies.get("jwt");
@@ -177,12 +174,10 @@ const CurrencyApp = () => {
           );
           openSuccessPopup('Preferred currency set successfully!');
           
-          // Refetch the preferred currency details
           fetchPreferredCurrencyCode();
       } catch (error) {
           console.error('Error setting preferred currency:', error);
           openErrorPopup(error);
-
       }
   };
 
@@ -191,25 +186,26 @@ const CurrencyApp = () => {
   const [popupMessage, setPopupMessage] = useState('');
 
   const openSuccessPopup = (message) => {
-    setPopupType('success'); // Set the type to success
-    setPopupOpen(true); // Open the popup
-    setPopupMessage(message); // Set the custom message
-};
+    setPopupType('success');
+    setPopupOpen(true);
+    setPopupMessage(message);
+  };
 
-const openErrorPopup = (message) => {
-    setPopupType('error'); // Set the type to error
-    setPopupOpen(true); // Open the popup
-    setPopupMessage(message); // Set the custom message
-};
+  const openErrorPopup = (message) => {
+    setPopupType('error');
+    setPopupOpen(true);
+    setPopupMessage(message);
+  };
+
   const closePopup = () => {
       setPopupOpen(false);
   };
 
- return (
-  <div style={{ textAlign: 'center', padding: '20px' }}>
-    <div className="container p-5">
-            <Popup isOpen={popupOpen} onClose={closePopup} type={popupType} message={popupMessage}/>
-        </div>
+  return (
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <div className="container p-5">
+        <Popup isOpen={popupOpen} onClose={closePopup} type={popupType} message={popupMessage}/>
+      </div>
       <h1 style={{ fontSize: '2em', fontWeight: 'bold', marginBottom: '20px' }}>Preferred Currency</h1>
       <h2 style={{ fontSize: '3em', fontWeight: 'bold', color: '#3B82F6', marginBottom: '20px' }}>
           {preferredCurrency ? `${preferredCurrency.name} (${preferredCurrency.code})` : "Loading..."}
@@ -261,11 +257,9 @@ const openErrorPopup = (message) => {
               Set
           </button>
       </label>
-  </div>
-);
-
+    </div>
+  );
 };
-
 
 const DeleteAccount = ({ onClose }) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -293,54 +287,47 @@ const DeleteAccount = ({ onClose }) => {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>
-          {/* Conditional rendering of the icon and title */}
-          {deleteResult ? (
-            deleteResult.success ? (
-              <span className="flex items-center">
-                <CheckCircle className="text-green-500 mr-2" /> {/* Success icon */}
-                Account Deleted
-              </span>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {deleteResult ? (
+              deleteResult.success ? (
+                <span className="flex items-center">
+                  <CheckCircle className="text-green-500 mr-2" />
+                  Account Deleted
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <XCircle className="text-red-500 mr-2" />
+                  Error
+                </span>
+              )
             ) : (
-              <span className="flex items-center">
-                <XCircle className="text-red-500 mr-2" /> {/* Error icon */}
-                Error
-              </span>
-            )
-          ) : (
-            "Delete Account"
+              "Delete Account"
+            )}
+          </DialogTitle>
+          <DialogDescription>
+            {deleteResult ? deleteResult.message : "Are you sure you want to delete your account? This action cannot be undone."}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          {!deleteResult && (
+            <>
+              <Button variant="outline" onClick={onClose}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteAccount} disabled={isDeleting}>
+                {isDeleting ? "Deleting..." : "Confirm Delete"}
+              </Button>
+            </>
           )}
-        </DialogTitle>
-        <DialogDescription>
-          {/* Conditional rendering of the message */}
-          {deleteResult ? deleteResult.message : "Are you sure you want to delete your account? This action cannot be undone."}
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
-        {/* Render Cancel and Delete buttons if no result */}
-        {!deleteResult && (
-          <>
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button variant="destructive" onClick={handleDeleteAccount} disabled={isDeleting}>
-              {isDeleting ? "Deleting..." : "Confirm Delete"}
-            </Button>
-          </>
-        )}
-
-        {/* Render Return to Home button if successful */}
-        {deleteResult && deleteResult.success && (
-          <Button onClick={() => navigate("/")}>Return to Home</Button>
-        )}
-
-        {/* Render Close button if error */}
-        {deleteResult && !deleteResult.success && (
-          <Button onClick={onClose}>Close</Button>
-        )}
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+          {deleteResult && deleteResult.success && (
+            <Button onClick={() => navigate("/")}>Return to Home</Button>
+          )}
+          {deleteResult && !deleteResult.success && (
+            <Button onClick={onClose}>Close</Button>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
@@ -423,8 +410,9 @@ export default function AccountTourist() {
     switch (activeTab) {
       case "info": return <AccountInfo tourist={tourist} />;
       case "complain": return <Complaint />;
+      case "my-complaints": return <MyComplaintsComponent />;
       case "cart": return <ShoppingCart tourist={tourist} />;
-      case "wishlist": return <WishlistPage tourist={tourist} />;
+      case "wishlist": return  <WishlistPage tourist={tourist} />;
       case "history": return <History tourist={tourist} />;
       case "upcoming": return <Upcoming tourist={tourist} />;
       case "redeem-points": return <RedeemPoints tourist={tourist} onRedeemPoints={handleRedeemPoints} />;
@@ -452,7 +440,6 @@ export default function AccountTourist() {
     "Products": [
       { name: "Cart", icon: ShoppingCartIcon, tab: "cart" },
       { name: "Wishlist", icon: Heart, tab: "wishlist" },
-
     ],
     "Settings and Privacy": [
       { name: "Account", icon: User, tab: "info" },
@@ -463,6 +450,7 @@ export default function AccountTourist() {
     ],
     "Help and Support": [
       { name: "File a Complaint", icon: AlertTriangle, tab: "complain" },
+      { name: "My Complaints", icon: FileText, tab: "my-complaints" },
       { name: "FAQs", icon: HelpCircle, tab: "faqs" },
     ],
     "Display and Accessibility": [
@@ -486,8 +474,8 @@ export default function AccountTourist() {
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
-        navigate("/login"); // Redirect to login page after logout
-        window.location.reload(); // Refresh the page after logout
+        navigate("/login");
+        window.location.reload();
       } else {
         console.error("Logout failed.");
       }
@@ -501,7 +489,6 @@ export default function AccountTourist() {
       <h1 className="text-3xl font-bold mb-8">My Account</h1>
 
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Sidebar */}
         <aside className="w-full md:w-1/4">
           <nav>
             <ul className="space-y-2">
@@ -548,7 +535,6 @@ export default function AccountTourist() {
           </nav>
         </aside>
 
-        {/* Main Content */}
         <main className="w-full md:w-3/4">
           <div className="bg-white p-6 rounded-lg shadow">
             {renderContent()}
