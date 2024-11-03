@@ -6,6 +6,10 @@ import { Link } from "react-router-dom";
 
 export const ItineraryCards = () => {
   const [itineraries, setItineraries] = useState([]);
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [currencySymbol, setCurrencySymbol] = useState({});
 
   useEffect(() => {
     const fetchItineraries = async () => {
@@ -29,7 +33,105 @@ export const ItineraryCards = () => {
     };
 
     fetchItineraries();
+    fetchUserInfo();
   }, []);
+
+  const fetchExchangeRate = async (itineraryCurrency) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            base: itineraryCurrency,
+            target: userPreferredCurrency._id,
+          }),
+        }
+      );
+      const data = await response.json();
+      // console.log("data mn fetch", data);
+      if (response.ok) {
+        setExchangeRates((prevRates) => ({
+          ...prevRates,
+          [itineraryCurrency]: data.conversion_rate,
+        }));
+      } else {
+        console.error('Error in fetching exchange rate:', data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+    }
+  };
+
+  const getCurrencySymbol = async (itineraryCurrency) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        `http://localhost:4000/${userRole}/getCurrency/${itineraryCurrency}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCurrencySymbol(response.data);
+    } catch (error) {
+      console.error("Error fetching currency symbol:", error);
+    }
+  };
+
+  const formatPrice = (price, currency) => {
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      // console.log("exchangerates:", exchangeRates);
+      // console.log("currency:", currency);
+      // console.log("henaaaaaaa", exchangeRates[currency]);
+      if (userPreferredCurrency._id === currency) {
+        return `${userPreferredCurrency.symbol}${price}`;
+      } else if (exchangeRates[currency]) {
+        const convertedPrice = price * exchangeRates[currency];
+        return `${userPreferredCurrency.symbol}${convertedPrice.toFixed(2)}`;
+      }
+    } else if (currencySymbol) {
+      return `${currencySymbol.symbol}${price}`;
+    }
+    // return `$${price}`;
+  };
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const currencyId = response.data.preferredCurrency;
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    itineraries.forEach((itinerary) => {
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency._id !== itinerary.currency) {
+        // console.log("ba fetch exchange rate", itinerary.currency);
+        fetchExchangeRate(itinerary.currency);
+        // console.log("exchangerates:", exchangeRates);
+      } else {
+        // console.log("fetch currency symbol");
+        getCurrencySymbol(itinerary.currency);
+      }
+    });
+  }, [userRole, userPreferredCurrency, itineraries]);
 
   return (
     <div className="container mx-auto px-4 py-12 flex flex-col md:flex-row">
@@ -78,7 +180,7 @@ export const ItineraryCards = () => {
                 <div className="absolute bottom-0 left-0 right-0 p-5 text-white transform translate-y-full transition-transform duration-500 group-hover:translate-y-0">
                   <div className="flex justify-between">
                     <div className="font-normal text-lg">{itinerary.title}</div>
-                    <div className="font-normal text-lg">${itinerary.price}/Day</div>
+                    <div className="font-normal text-lg">{formatPrice(itinerary.price, itinerary.currency)}/Day</div>
                   </div>
 
                   <div className="flex justify-between mt-2">
