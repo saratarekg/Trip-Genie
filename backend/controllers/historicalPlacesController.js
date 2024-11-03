@@ -9,8 +9,10 @@ const createHistoricalPlace = async (req, res) => {
     openingHours,
     ticketPrices,
     currency,
-    pictures,
   } = req.body;
+  const pictures = req.files.map(
+    (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+  );
   const historicalPlace = new Museum({
     title,
     description,
@@ -85,7 +87,6 @@ const updateHistoricalPlace = async (req, res) => {
     openingHours,
     ticketPrices,
     currency,
-    pictures,
   } = req.body; // Get details from request body
   const museum = await Museum.findById(id);
   if (museum.governor.toString() != res.locals.user_id) {
