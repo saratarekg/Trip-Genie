@@ -271,6 +271,14 @@ export function AllItinerariesComponent() {
     return role;
   };
 
+  const getSymbol = () => {
+    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+        return `${userInfo.preferredCurrency.symbol}`;
+    } else {
+      return "$";
+    }
+};
+
   const handleSortByPreference = async () => {
     try {
       setIsLoading(true);
@@ -618,6 +626,7 @@ export function AllItinerariesComponent() {
                 typesOptions={typesOptions}
                 languagesOptions={languagesOptions}
                 role={getUserRole()}
+                symbol={getSymbol()}
                 isBooked={isBooked}
                 setIsBooked={setIsBooked}
                 isSortedByPreference={isSortedByPreference}

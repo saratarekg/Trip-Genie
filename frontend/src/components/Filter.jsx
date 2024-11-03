@@ -34,6 +34,7 @@ const FilterComponent = ({
   typesOptions = [],
   languagesOptions = [],
   role,
+  symbol,
   isBooked,
   setIsBooked,
   handleSortByPreference,
@@ -190,6 +191,7 @@ const FilterComponent = ({
               <DualHandleSliderComponent
                 min={0}
                 max={maxPrice}
+                symbol={symbol}
                 step={Math.max(1, Math.ceil(maxPrice / 100))}
                 values={priceRange}
                 middleColor="#2563EB"
