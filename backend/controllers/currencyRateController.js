@@ -40,4 +40,15 @@ const updateRatesAgainstUSD = async () => {
     }
 };
 
-module.exports = { updateRatesAgainstUSD };
+const getExchangeRate = async (req, res) => {
+    try {
+        const rates = await CurrencyRates.findOne();
+        res.json(rates);
+    } catch (error) {
+        console.error('Error fetching exchange rates:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+module.exports = { updateRatesAgainstUSD , getExchangeRate};

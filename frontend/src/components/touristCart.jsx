@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from 'axios';
@@ -17,6 +17,7 @@ const ShoppingCart = () => {
   const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [totalAmount, setTotalAmount] = useState(0);
+  const [totalAmountLoading, setTotalAmountLoading] = useState(true);
   const [streetName, setStreetName] = useState("");
   const [streetNumber, setStreetNumber] = useState("");
   const [floorUnit, setFloorUnit] = useState("");
@@ -41,7 +42,6 @@ const ShoppingCart = () => {
   const [userRole, setUserRole] = useState('guest');
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
-  const [currencySymbols, setCurrencySymbols] = useState({});
 
   const openSuccessPopup = (message) => {
     setPopupType('success');
@@ -106,6 +106,7 @@ const ShoppingCart = () => {
     }
   };
 
+
   useEffect(() => {
     fetchUserInfo();
     fetchCartItems();
@@ -137,87 +138,69 @@ const ShoppingCart = () => {
     }
   };
 
-  const fetchExchangeRate = async (baseCurrency, targetCurrency) => {
-    if (exchangeRates[`${baseCurrency}-${targetCurrency}`]) {
-      return exchangeRates[`${baseCurrency}-${targetCurrency}`];
-    }
+  const fetchExchangeRates = useCallback(async (baseCurrencies, targetCurrency) => {
+    const token = Cookies.get("jwt");
+    const newRates = { ...exchangeRates };
+    let hasNewRates = false;
 
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            base: baseCurrency,
-            target: targetCurrency,
-          }),
+    for (const baseCurrency of baseCurrencies) {
+      if (!exchangeRates[`${baseCurrency}-${targetCurrency}`]) {
+        try {
+          const response = await fetch(
+            `http://localhost:4000/${userRole}/populate`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                base: baseCurrency,
+                target: targetCurrency,
+              }),
+            }
+          );
+          const data = await response.json();
+          if (response.ok) {
+            newRates[`${baseCurrency}-${targetCurrency}`] = data.conversion_rate;
+            hasNewRates = true;
+          } else {
+            console.error('Error in fetching exchange rate:', data.message);
+          }
+        } catch (error) {
+          console.error("Error fetching exchange rate:", error);
         }
-      );
-      const data = await response.json();
-
-      if (response.ok) {
-        setExchangeRates(prev => ({
-          ...prev,
-          [`${baseCurrency}-${targetCurrency}`]: data.conversion_rate
-        }));
-        return data.conversion_rate;
-      } else {
-        console.error('Error in fetching exchange rate:', data.message);
-        return null;
       }
-    } catch (error) {
-      console.error("Error fetching exchange rate:", error);
-      return null;
-    }
-  };
-
-  const getCurrencySymbol = async (currencyCode) => {
-    if (currencySymbols[currencyCode]) {
-      return currencySymbols[currencyCode];
     }
 
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${currencyCode}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setCurrencySymbols(prev => ({
-        ...prev,
-        [currencyCode]: response.data.symbol
-      }));
-      return response.data.symbol;
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-      return '';
+    if (hasNewRates) {
+      setExchangeRates(newRates);
     }
-  };
+  }, [exchangeRates, userRole]);
 
-  const formatPrice = async (price, productCurrency) => {
-    const roundedPrice = Math.round(price);
+  const formatPrice = useCallback((price, productCurrency) => {
     if (userRole === 'tourist' && userPreferredCurrency) {
+      console.log(1,price,productCurrency);
       if (userPreferredCurrency.code === productCurrency) {
-        return `${userPreferredCurrency.symbol}${roundedPrice}`;
+        console.log(2);
+        return `${userPreferredCurrency.symbol}${price.toFixed(2)}`;
       } else {
-        console.log(productCurrency);
-        console.log(userPreferredCurrency);
-        const rate = await fetchExchangeRate(productCurrency, userPreferredCurrency._id);
+        console.log(3);
+        const rate = exchangeRates[`${productCurrency}-${userPreferredCurrency._id}`];
         if (rate) {
-          const exchangedPrice = Math.round(roundedPrice * rate);
-          return `${userPreferredCurrency.symbol}${exchangedPrice}`;
+          console.log(4);
+          const exchangedPrice = price * rate;
+          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
         }
+
       }
     }
-    const symbol = await getCurrencySymbol(productCurrency);
-    return `${symbol}${roundedPrice}`;
-  };
+    console.log(5);
 
-  const fetchCartItems = async () => {
+    return "NOTHING" ;
+  }, [userRole, userPreferredCurrency, exchangeRates]);
+
+  const fetchCartItems = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch('http://localhost:4000/tourist/cart', {
@@ -227,24 +210,38 @@ const ShoppingCart = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        const formattedData = await Promise.all(data.map(async (item) => ({
+        const itemsWithLoading = data.map(item => ({
           ...item,
-          formattedPrice: await formatPrice(item.product.price, item.product.currency)
-        })));
-        setCartItems(formattedData);
+          priceLoading: true
+        }));
+        setCartItems(itemsWithLoading);
+
+        if (userRole === 'tourist' && userPreferredCurrency) {
+          const baseCurrencies = [...new Set(data.map(item => item.product.currency))];
+          await fetchExchangeRates(baseCurrencies, userPreferredCurrency._id);
+        }
+
+        // Update items to remove loading state
+        setCartItems(prevItems => 
+          prevItems.map(item => ({
+            ...item,
+            priceLoading: false
+          }))
+        );
       }
     } catch (error) {
       console.error('Error fetching cart items:', error);
     }
-  };
+  }, [userRole, userPreferredCurrency, fetchExchangeRates]);
 
-  const calculateTotalAmount = async () => {
+  const calculateTotalAmount = useCallback(() => {
+    setTotalAmountLoading(true);
     let total = 0;
     for (const item of cartItems) {
       if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency.code !== item.product.currency) {
-        const rate = await fetchExchangeRate(item.product.currency, userPreferredCurrency._id);
+        const rate = exchangeRates[`${item.product.currency}-${userPreferredCurrency._id}`];
         if (rate) {
-          total += Math.round(item.product.price * rate) * item.quantity;
+          total += item.product.price * rate * item.quantity;
         } else {
           total += item.product.price * item.quantity;
         }
@@ -253,7 +250,8 @@ const ShoppingCart = () => {
       }
     }
     setTotalAmount(total);
-  };
+    setTotalAmountLoading(false);
+  }, [cartItems, userRole, userPreferredCurrency, exchangeRates]);
 
   const emptyCart = async () => {
     try {
@@ -311,17 +309,29 @@ const ShoppingCart = () => {
         body: JSON.stringify({ newQuantity, productId }),
       });
       if (response.ok) {
-        const updatedItems = await Promise.all(cartItems.map(async (item) => {
+        const updatedItems = cartItems.map((item) => {
           if (item.product._id === productId) {
             return {
               ...item,
               quantity: newQuantity,
-              formattedPrice: await formatPrice(item.product.price, item.product.currency)
+              priceLoading: true
             };
           }
           return item;
-        }));
+        });
         setCartItems(updatedItems);
+        calculateTotalAmount();
+        
+        // Simulate a delay for price recalculation
+        setTimeout(() => {
+          setCartItems(prevItems => 
+            prevItems.map(item => 
+              item.product._id === productId 
+                ? { ...item, priceLoading: false }
+                : item
+            )
+          );
+        }, 500);
       }
     } catch (error) {
       console.error('Error updating quantity:', error);
@@ -397,6 +407,7 @@ const ShoppingCart = () => {
               <div className="flex items-center">
                 <img 
                   src={item?.product?.pictures?.length ? item.product.pictures[0] : '/placeholder.svg'} 
+                
                   alt={item?.product?.name || 'Product'} 
                   className="w-20 h-20 object-cover mr-4 cursor-pointer"
                   onClick={() => handleProductClick(item.product._id)}
@@ -408,7 +419,6 @@ const ShoppingCart = () => {
                         className="text-lg font-semibold cursor-pointer hover:underline"
                         onClick={() => handleProductClick(item.product._id)}
                       >
-                        
                         {item.product.name}
                       </h2>
                       <p className="text-sm text-gray-600">
@@ -442,7 +452,13 @@ const ShoppingCart = () => {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <span className="ml-4 font-semibold">{item.formattedPrice}</span>
+                <span className="ml-4 font-semibold w-24 text-right">
+                  {item.priceLoading ? (
+                    <div className="animate-pulse bg-gray-200 h-6 w-full rounded"></div>
+                  ) : (
+                    formatPrice(item.product.price * item.quantity, item.product.currency)
+                  )}
+                </span>
                 <Button 
                   onClick={() => handleRemoveItem(item.product._id)}
                   className="ml-4"
@@ -470,8 +486,11 @@ const ShoppingCart = () => {
       {cartItems.length > 0 && (
         <div className="mt-8 flex justify-between items-center">
           <div className="text-xl font-bold">
-            Total: {userPreferredCurrency ? userPreferredCurrency.symbol : ''}
-            {totalAmount.toFixed(2)}
+            Total: {totalAmountLoading ? (
+              <span className="animate-pulse bg-gray-200 h-6 w-32 inline-block align-middle rounded"></span>
+            ) : (
+              formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : 'USD')
+            )}
           </div>
           <Button 
             className="bg-[#000034]" 
@@ -493,7 +512,7 @@ const ShoppingCart = () => {
         </p>
       )}
 
-<Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
+      <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-3xl font-bold">Confirm Purchase</DialogTitle>
@@ -530,7 +549,11 @@ const ShoppingCart = () => {
                   </p>
                 )}
                 <p className="text-xl">
-                  Price: {item.formattedPrice}
+                  Price: {item.priceLoading ? (
+                    <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
+                  ) : (
+                    formatPrice(item.product.price * item.quantity, item.product.currency)
+                  )}
                 </p>
               </div>
             ))}
@@ -572,10 +595,10 @@ const ShoppingCart = () => {
                   <SelectValue placeholder="Select delivery type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Standard">Standard Shipping (5-7 days) - {userPreferredCurrency?.symbol || '$'}2.99</SelectItem>
-                  <SelectItem value="Express">Express Shipping (2-3 days) - {userPreferredCurrency?.symbol || '$'}4.99</SelectItem>
-                  <SelectItem value="Next-Same">Next/Same Day Shipping - {userPreferredCurrency?.symbol || '$'}6.99</SelectItem>
-                  <SelectItem value="International">International Shipping - {userPreferredCurrency?.symbol || '$'}14.99</SelectItem>
+                  <SelectItem value="Standard">Standard Shipping (5-7 days) - {formatPrice(2.99, userPreferredCurrency ? userPreferredCurrency.code : 'USD')}</SelectItem>
+                  <SelectItem value="Express">Express Shipping (2-3 days) - {formatPrice(4.99, userPreferredCurrency ? userPreferredCurrency.code : 'USD')}</SelectItem>
+                  <SelectItem value="Next-Same">Next/Same Day Shipping - {formatPrice(6.99, userPreferredCurrency ? userPreferredCurrency.code : 'USD')}</SelectItem>
+                  <SelectItem value="International">International Shipping - {formatPrice(14.99, userPreferredCurrency ? userPreferredCurrency.code : 'USD')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -723,22 +746,30 @@ const ShoppingCart = () => {
               {cartItems.map((item, index) => (
                 <div key={index} className="flex justify-between mt-2">
                   <p className="text-lg">{item.product.name} x {item.quantity}</p>
-                  <p className="text-lg">{item.formattedPrice}</p>
+                  <p className="text-lg">
+                    {item.priceLoading ? (
+                      <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
+                    ) : (
+                      formatPrice(item.product.price * item.quantity, item.product.currency)
+                    )}
+                  </p>
                 </div>
               ))}
             </div>
             <div className="flex justify-between mt-2">
               <p className="text-lg">Delivery Cost:</p>
               <p className="text-lg">
-                {userPreferredCurrency?.symbol || '$'}
-                {calculateDeliveryCost(deliveryType).toFixed(2)}
+                {formatPrice(calculateDeliveryCost(deliveryType), userPreferredCurrency ? userPreferredCurrency.code : 'USD')}
               </p>
             </div>
             <div className="flex justify-between mt-4 font-bold">
               <p className="text-lg">Total Price:</p>
               <p className="text-lg">
-                {userPreferredCurrency?.symbol || '$'}
-                {(totalAmount + calculateDeliveryCost(deliveryType)).toFixed(2)}
+                {totalAmountLoading ? (
+                  <span className="animate-pulse bg-gray-200 h-6 w-32 inline-block align-middle rounded"></span>
+                ) : (
+                  formatPrice(totalAmount + calculateDeliveryCost(deliveryType), userPreferredCurrency ? userPreferredCurrency.code : 'USD')
+                )}
               </p>
             </div>
           </div>
@@ -820,6 +851,7 @@ const ShoppingCart = () => {
             <Button variant="default" onClick={() => setActionError(null)}>
               Close
             </Button>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>

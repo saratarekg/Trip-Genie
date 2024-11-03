@@ -723,6 +723,183 @@ const deleteTouristAccount = async (req, res) => {
   }
 };
 
+
+const addCard = async (req, res) => {
+  try {
+    const { cardType, cardNumber, expiryDate, holderName, cvv, default: isDefault } = req.body;
+
+    // Validate input
+    if (!cardType || !cardNumber || !expiryDate || !holderName || !cvv) {
+      return res.status(400).json({ message: 'All card fields are required' });
+    }
+
+    if (!['Credit Card', 'Debit Card'].includes(cardType)) {
+      return res.status(400).json({ message: 'Invalid card type' });
+    }
+
+    // Prepare the new card object
+    const newCard = {
+      cardType,
+      cardNumber,
+      expiryDate,
+      holderName,
+      cvv,
+      default: isDefault || false, 
+    };
+
+    // Step 1: Add the new card to the cards array
+    const result = await Tourist.findOneAndUpdate(
+      { _id: res.locals.user_id },
+      { $push: { cards: newCard } },
+      { new: true, runValidators: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    // Step 2: If the new card is set as default, unset other defaults
+    if (isDefault) {
+      await Tourist.updateOne(
+        { _id: res.locals.user_id },
+        { $set: { 'cards.$[elem].default': false } },
+        {
+          arrayFilters: [{ 'elem.default': true }],
+          runValidators: true
+        }
+      );
+
+      // Set the last added card as the default
+      const lastIndex = result.cards.length - 1;
+      await Tourist.updateOne(
+        { _id: res.locals.user_id },
+        { $set: { [`cards.${lastIndex}.default`]: true } }
+      );
+    }
+
+    // Refetch the updated list of cards to return in the response
+    const updatedTourist = await Tourist.findById(res.locals.user_id);
+
+    return res.status(200).json({ message: 'Card added successfully', cards: updatedTourist.cards });
+  } catch (error) {
+    console.error(error);
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: 'Invalid card data', errors: error.errors });
+    }
+    return res.status(500).json({ message: 'An error occurred while adding the card' });
+  }
+};
+
+
+const getAllCards = async (req, res) => {
+  try {
+    // Find the tourist by their ID
+    const tourist = await Tourist.findById(res.locals.user_id).select("cards");
+
+    // Check if tourist exists
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Return the cards
+    return res.status(200).json({ cards: tourist.cards });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred while retrieving cards" });
+  }
+};
+
+const changeDefaultCard = async (req, res) => {
+  const { id } = req.params; // Assuming cardId is passed as a URL parameter
+
+  try {
+    // Find the tourist by their ID
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    // Check if tourist exists
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Check if the card exists
+    const card = tourist.cards.find(card => card._id.toString() === id);
+    if (!card) {
+      return res.status(404).json({ message: "Card not found" });
+    }
+
+    // Update the default card
+    const updateResult = await Tourist.updateOne(
+      { _id: res.locals.user_id },
+      {
+        // Set the selected card as default and all others to not default
+        $set: {
+          "cards.$[selectedCard].default": true,  // Set the selected card to default
+          "cards.$[otherCards].default": false     // Set all other cards to not default
+        }
+      },
+      {
+        arrayFilters: [
+          { "selectedCard._id": id }, // Filter for the selected card
+          { "otherCards._id": { $ne: id } } // Filter for all other cards
+        ]
+      }
+    );
+    if (updateResult.modifiedCount === 0) {
+      return res.status(400).json({ message: "Failed to update the default card" });
+    }
+
+    // Retrieve the updated tourist document to return the updated cards
+    const updatedTourist = await Tourist.findById(res.locals.user_id).select("cards");
+    
+    return res.status(200).json({ message: "Default card updated successfully", cards: updatedTourist.cards });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred while updating the default card" });
+  }
+};
+
+const deleteCard = async (req, res) => {
+  try {
+    const { id } = req.params; // Assuming the card ID is passed as a URL parameter
+
+    // Validate the cardId parameter
+    if (!id) {
+      return res.status(400).json({ message: 'Card ID is required.' });
+    }
+
+    // Remove the card from the tourist's cards array
+    const result = await Tourist.findOneAndUpdate(
+      { _id: res.locals.user_id },
+      { $pull: { cards: { _id: id } } },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    // If the deleted card was the default card, set another card as default if available
+    if (result.cards.length === 0) {
+      // No cards left, do nothing
+    } else if (result.cards.every(card => !card.default)) {
+      // If there are cards left but none are marked as default, set the first one as default
+      await Tourist.updateOne(
+        { _id: res.locals.user_id },
+        { $set: { 'cards.0.default': true } }  // Set the first card as default
+      );
+    }
+
+    return res.status(200).json({ message: 'Card deleted successfully', cards: result.cards });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while deleting the card' });
+  }
+};
+
+
+
+
+
 module.exports = {
   removeProductFromWishlist,
   moveProductToCart,
@@ -746,4 +923,8 @@ module.exports = {
   getCurrencyID,
   deleteAccount,
   deleteTouristAccount,
+  addCard,
+  getAllCards,
+  changeDefaultCard,
+  deleteCard
 };

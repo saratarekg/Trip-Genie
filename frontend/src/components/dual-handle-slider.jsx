@@ -4,10 +4,10 @@ import { Range, getTrackBackground } from "react-range";
 function DualHandleSliderComponent({
   min,
   max,
+  symbol,
   step,
   values,
   onChange,
-  currency = "$",
   middleColor = "#f97516",
   colorRing = "orange",
 }) {
@@ -58,11 +58,11 @@ function DualHandleSliderComponent({
       />
       <div className="flex justify-between mt-2">
         <span className="text-sm font-medium text-gray-700">
-          Min: {currency}
+          Min: {symbol}
           {values[0]}
         </span>
         <span className="text-sm font-medium text-gray-700">
-          Max: {currency}
+          Max: {symbol}
           {values[1]}
         </span>
       </div>

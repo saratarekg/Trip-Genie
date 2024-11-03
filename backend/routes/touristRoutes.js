@@ -25,6 +25,10 @@ router.get("/currencies/code", touristController.getCurrencyCode);
 router.get("/currencies/idd", touristController.getCurrencyID);
 router.post("/currencies/set", touristController.setCurrencyCode);
 
+router.put("/add-card", touristController.addCard);
+router.get("/cards", touristController.getAllCards);
+router.put("/add-default-card/:id", touristController.changeDefaultCard);
+router.delete("/card/:id", touristController.deleteCard);
 
 
 router.put("/", touristController.updateTouristProfile);

@@ -100,12 +100,12 @@ export default function UserApproval() {
     setDialogOpen(true);
   };
 
-  const handleConfirm = (action, userId, role) => {
+  const handleConfirm = (action, user, role) => {
     setConfirmAction(() => async () => {
       if (action === "approve") {
-        await approveUser(userId, role);
+        await approveUser(user._id, role);
       } else {
-        await rejectUser(userId, role);
+        await rejectUser(user, role);
       }
     });
     setConfirmDialogOpen(true);
@@ -132,19 +132,25 @@ export default function UserApproval() {
     }
   };
 
-  const rejectUser = async (userId, role) => {
+  const rejectUser = async (user, role) => {
     try {
       const token = Cookies.get("jwt");
-      await axios.delete(`http://localhost:4000/admin/${role}s/${userId}`, {
+      await axios.delete(`http://localhost:4000/admin/${role}s/${user._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       showDialog(`Successfully rejected the ${role}.`);
       // Re-fetch the user type list after rejection
-      role === "advertiser"
-        ? fetchAdvertisers()
-        : role === "seller"
-        ? fetchSellers()
-        : fetchTourGuides();
+      if(role === "advertiser"){
+        fetchAdvertisers();
+        
+
+      }else if(role === "seller"){
+        fetchSellers();
+
+      }else{
+        fetchTourGuides();
+      }
+  
     } catch (err) {
       setError(`Failed to reject ${role}`);
       console.error(err);
@@ -162,13 +168,13 @@ export default function UserApproval() {
         <CardContent>
           <div className="flex flex-wrap gap-4">
             <Button
-              onClick={() => handleConfirm("reject", user._id, role)}
+              onClick={() => handleConfirm("reject", user, role)}
               variant="destructive"
             >
               Reject
             </Button>
             <Button
-              onClick={() => handleConfirm("approve", user._id, role)}
+              onClick={() => handleConfirm("approve", user, role)}
               variant="default"
             >
               Accept
@@ -179,7 +185,7 @@ export default function UserApproval() {
                   {user.files.IDFilename && (
                     <Button
                       onClick={() => fetchFile(user.files.IDFilename)}
-                      className="bg-gray-300 hover:bg-gray-500 text-black mt-2"
+                      className="bg-gray-300 hover:bg-gray-500 text-black mt-2 mr-1 ml-1"
                     >
                       View ID Document
                     </Button>
@@ -189,7 +195,7 @@ export default function UserApproval() {
                       onClick={() =>
                         fetchFile(user.files.taxationRegistryCardFilename)
                       }
-                      className="bg-gray-300 hover:bg-gray-500 text-black mt-2"
+                      className="bg-gray-300 hover:bg-gray-500 text-black mt-2 mr-1 ml-1"
                     >
                       View Taxation Registry Card
                     </Button>
@@ -201,7 +207,7 @@ export default function UserApproval() {
                         <Button
                           key={index}
                           onClick={() => fetchFile(certificate)}
-                          className="bg-gray-300 hover:bg-gray-500 text-black mt-2"
+                          className="bg-gray-300 hover:bg-gray-500 text-black mt-2 mr-1 ml-1"
                         >
                           View Certificate {index + 1}
                         </Button>
@@ -234,7 +240,7 @@ export default function UserApproval() {
         <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
           {renderUserCards(advertisers, "advertiser")}
           {renderUserCards(sellers, "seller")}
-          {renderUserCards(tourGuides, "tourguide")}
+          {renderUserCards(tourGuides, "tourGuide")}
         </div>
       )}
 

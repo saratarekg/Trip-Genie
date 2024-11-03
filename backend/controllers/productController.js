@@ -5,6 +5,8 @@ const Purchase = require("../models/purchase");
 
 const getAllProducts = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
+  const role = res.locals.user_role;
+  console.log(role);
 
   try {
     // Debugging: Log incoming query parameters
@@ -26,7 +28,8 @@ const getAllProducts = async (req, res) => {
 
     // Filter by the user's products (myProducts)
     if (myproducts) {
-      query.seller = res.locals.user_id;
+      if (role == "admin") query.seller = null;
+      else query.seller = res.locals.user_id;
     }
 
     // Perform the query
@@ -171,7 +174,7 @@ const addProductByAdmin = async (req, res) => {
 
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, price, description, quantity, reviews } = req.body; // Get details from request body
+  const { name, price, description, quantity, currency } = req.body; // Get details from request body
   let pictures = req.body; // Get details from request body
   try {
     const checkProduct = await Product.find({ _id: id, isDeleted: false });
@@ -185,7 +188,7 @@ const editProduct = async (req, res) => {
     // Find the product by ID and update its details
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity, reviews, currency },
+      { name, pictures, price, description, quantity, currency },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 

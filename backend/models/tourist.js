@@ -97,6 +97,58 @@ const touristSchema = new Schema(
         },
       },
     ],
+
+    cards: [
+      {
+        cardType: {
+          type: String,
+          required: true,
+          enum: ['Credit Card', 'Debit Card'],
+        },
+        cardNumber: {
+          type: String,
+          required: function() {
+            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
+          },
+          match: [/^[0-9]{16}$/, "Please enter a valid 16-digit card number"],
+        },
+        expiryDate: {
+          type: String,
+          required: function () {
+            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
+          },
+          match: [/^(0[1-9]|1[0-2])\/[0-9]{2}$/, "Please enter a valid expiry date in MM/YY format"],
+          validate: {
+            validator: function (v) {
+              const [month, year] = v.split('/');
+              const expiryDate = new Date(`20${year}`, month - 1);
+              const currentDate = new Date();
+              currentDate.setDate(1);
+              return expiryDate > currentDate;
+            },
+            message: "Expiry date must be in the future",
+          },
+        },
+        holderName: {
+          type: String,
+          required: function() {
+            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
+          },
+          trim: true,
+        },
+        cvv: {
+          type: String,
+          required: function() {
+            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
+          },
+          match: [/^[0-9]{3,4}$/, "Please enter a valid 3 or 4 digit CVV"],
+        },
+        default: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
     preference: {
       budget: {  // max price
         type: Number,

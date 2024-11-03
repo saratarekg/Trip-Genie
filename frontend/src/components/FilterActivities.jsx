@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Range, getTrackBackground } from "react-range";
 
-function DualHandleSliderComponent({ min, max, step, values, onChange }) {
+function DualHandleSliderComponent({ min, max, step, values, onChange, symbol }) {
   return (
     <div className="w-full px-4 py-8">
       <Range
@@ -67,10 +67,10 @@ function DualHandleSliderComponent({ min, max, step, values, onChange }) {
       />
       <div className="flex justify-between mt-2">
         <span className="text-sm font-medium text-gray-700">
-          Min: ${values[0]}
+          Min: {symbol}{values[0]}
         </span>
         <span className="text-sm font-medium text-gray-700">
-          Max: ${values[1]}
+          Max: {symbol}{values[1]}
         </span>
       </div>
     </div>
@@ -100,6 +100,7 @@ const FilterComponent = ({
   setMinStars,
   searchActivites,
   role,
+  symbol,
   handleSortByPreference,
   isSortedByPreference,
 }) => {
@@ -259,6 +260,7 @@ const FilterComponent = ({
               <DualHandleSliderComponent
                 min={0}
                 max={maxPrice}
+                symbol={symbol}
                 step={Math.max(1, Math.ceil(maxPrice / 100))}
                 values={localPriceRange}
                 onChange={handlePriceRangeChange}
