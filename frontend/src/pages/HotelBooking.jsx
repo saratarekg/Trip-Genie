@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Bed, Calendar, ArrowUpDown, AlertCircle } from "lucide-react";
+import { Bed, Calendar, ArrowUpDown, AlertCircle, CreditCard } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -31,6 +31,8 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
 
 export default function HotelBookingPage() {
@@ -51,6 +53,15 @@ export default function HotelBookingPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hotelOffers, setHotelOffers] = useState(null);
   const [dialogError, setDialogError] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [holderName, setHolderName] = useState("");
+  const [cvv, setCvv] = useState("");
 
   const itemsPerPage = 9;
 
@@ -143,22 +154,36 @@ export default function HotelBookingPage() {
         setHotels([]);
       } else {
         const hotelIds = data.data.map(hotel => hotel.hotelId);
-        const offersResponse = await fetch(
-          `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${hotelIds.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currencyCode=${currencyCode}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
+        const fetchHotelOffers = async (ids) => {
+          const response = await fetch(
+            `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${ids.join(',')}&adults=${adults}&checkInDate=${checkInDate}&checkOutDate=${checkOutDate}&currencyCode=${currencyCode}`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          );
 
-        if (!offersResponse.ok) {
-          throw new Error("Failed to fetch hotel offers");
+          if (!response.ok) {
+            throw new Error("Failed to fetch hotel offers");
+          }
+
+          return await response.json();
+        };
+
+        const allHotels = [];
+        for (let i = 0; i < hotelIds.length; i += 20) {
+          const chunk = hotelIds.slice(i, i + 20);
+          const offersData = await fetchHotelOffers(chunk);
+          const hotelsWithOffers = offersData.data.filter(hotel => hotel.available && hotel.offers.length > 0);
+          allHotels.push(...hotelsWithOffers);
+          
+          if (i + 20 < hotelIds.length) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+          }
         }
 
-        const offersData = await offersResponse.json();
-        const hotelsWithOffers = offersData.data.filter(hotel => hotel.available && hotel.offers.length > 0);
-        setHotels(hotelsWithOffers);
+        setHotels(allHotels);
         setCurrentPage(1);
       }
     } catch (err) {
@@ -204,16 +229,36 @@ export default function HotelBookingPage() {
     });
   };
 
-  const handleOpenDialog = (hotel) => {
+  const handleOpenDialog = async (hotel) => {
     setSelectedHotel(hotel);
-    setHotelOffers(hotel);
     setIsDialogOpen(true);
     setDialogError("");
+
+    try {
+      const response = await fetch(
+        `https://test.api.amadeus.com/v3/shopping/hotel-offers/${hotel.offers[0].id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch hotel details");
+      }
+
+      const data = await response.json();
+      setHotelOffers(data.data);
+    } catch (err) {
+      setDialogError(err.message);
+    }
   };
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setHotelOffers(null);
+    resetBookingForm();
   };
 
   const handleBookNow = () => {
@@ -224,6 +269,29 @@ export default function HotelBookingPage() {
     setIsBookingConfirmationOpen(false);
     setIsDialogOpen(false);
     setHotelOffers(null);
+    resetBookingForm();
+  };
+
+  const resetBookingForm = () => {
+    setFirstName("");
+    setLastName("");
+    setPhone("");
+    setEmail("");
+    setPaymentMethod("");
+    setCardNumber("");
+    setExpiryDate("");
+    setHolderName("");
+    setCvv("");
+  };
+
+  const isBookingFormValid = () => {
+    if (!firstName || !lastName || !phone || !email || !paymentMethod) {
+      return false;
+    }
+    if (paymentMethod === "card" && (!cardNumber || !expiryDate || !holderName || !cvv)) {
+      return false;
+    }
+    return true;
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -350,6 +418,7 @@ export default function HotelBookingPage() {
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[160px] border-amber-400">
                   <SelectValue placeholder="Sort by" />
+                
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="price">Price</SelectItem>
@@ -442,7 +511,7 @@ export default function HotelBookingPage() {
       )}
 
       <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-        <DialogContent className="sm:max-w-[425px] bg-white">
+        <DialogContent className="sm:max-w-[425px] bg-white max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Hotel Details</DialogTitle>
             <DialogDescription>
@@ -458,8 +527,8 @@ export default function HotelBookingPage() {
           )}
 
           {selectedHotel && hotelOffers && !dialogError && (
-            <div className="mt-4">
-              <h4 className="font-semibold mb-2">{selectedHotel.hotel.name}</h4>
+            <div className="mt-4 space-y-4">
+              <h4 className="font-semibold mb-2">{hotelOffers.hotel.name}</h4>
               <p>Check-in: {formatDate(hotelOffers.offers[0].checkInDate)}</p>
               <p>Check-out: {formatDate(hotelOffers.offers[0].checkOutDate)}</p>
               <p>Room Type: {hotelOffers.offers[0].room.type}</p>
@@ -468,9 +537,89 @@ export default function HotelBookingPage() {
                 {hotelOffers.offers[0].price.currency}
               </p>
               <p>Adults: {adults}</p>
+              <div>
+                <h5 className="font-semibold mt-4 mb-2">Description:</h5>
+                <ul className="list-disc pl-5 space-y-1">
+                  {hotelOffers.offers[0].room.description.text.split('-').map((item, index) => (
+                    <li key={index}>{item.trim()}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h5 className="font-semibold mt-4 mb-2">Amenities:</h5>
+                <ul className="list-disc pl-5 space-y-1">
+                  {hotelOffers.hotel.amenities.map((amenity, index) => (
+                    <li key={index}>
+                      {amenity.split('_').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ')}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-4">
+                <Input
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+                <Input
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+                <Input
+                  placeholder="Phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+
+                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="wallet" id="wallet" />
+                    <Label htmlFor="wallet">Wallet</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="card" id="card" />
+                    <Label htmlFor="card">Credit/Debit Card</Label>
+                  </div>
+                </RadioGroup>
+
+                {paymentMethod === "card" && (
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Card Number"
+                      value={cardNumber}
+                      onChange={(e) => setCardNumber(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Expiry Date (YYYY-MM)"
+                      value={expiryDate}
+                      onChange={(e) => setExpiryDate(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Card Holder Name"
+                      value={holderName}
+                      onChange={(e) => setHolderName(e.target.value)}
+                    />
+                    <Input
+                      placeholder="CVV"
+                      value={cvv}
+                      onChange={(e) => setCvv(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+
               <Button
                 className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white"
                 onClick={handleBookNow}
+                disabled={!isBookingFormValid()}
               >
                 Book Now
               </Button>
