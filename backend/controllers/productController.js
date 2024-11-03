@@ -264,7 +264,7 @@ const editProductOfSeller = async (req, res) => {
 const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findById(id).populate("seller").exec();
+    const product = await Product.findById(id).populate("seller").populate("currency").exec();
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
