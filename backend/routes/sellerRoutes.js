@@ -19,13 +19,13 @@ router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);
 router.post(
   "/products",
-  upload.array("pictures", 5),
+  upload.array("pictures", 10),
   productController.addProduct
 );
 router.delete("/products/:id", productController.deleteProductOfSeller);
 router.put(
   "/products/:id",
-  upload.array("pictures", 5),
+  upload.array("pictures", 10),
   productController.editProductOfSeller
 );
 router.put("/archiveproducts/:id", productController.archiveProduct);

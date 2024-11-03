@@ -203,7 +203,8 @@ const editProduct = async (req, res) => {
 
 const editProductOfSeller = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, pictures, price, description, quantity, currency } = req.body; // Get details from request body
+  const { name, price, description, quantity, currency } = req.body;
+  let pictures = req.body; // Get details from request body
   const product = await Product.findById(id);
   if (product.seller.toString() != res.locals.user_id) {
     return res
@@ -211,26 +212,15 @@ const editProductOfSeller = async (req, res) => {
       .json({ message: "You are not authorized to edit this product" });
   }
   try {
-    let newPictures = [];
-
-    // Check if there are new images uploaded
-    if (req.files && req.files.length > 0) {
-      // Convert each file buffer to Base64
-      newPictures = req.files.map(
-        (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
-      );
-    }
     // Find the product by ID and update its details
+    pictures = req.files.map(
+      // Convert the uploaded files to base64 strings
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      {
-        name,
-        pictures: newPictures > 0 ? newPictures : product.pictures,
-        price,
-        description,
-        quantity,
-        currency,
-      },
+      { name, pictures, price, description, quantity, currency },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 

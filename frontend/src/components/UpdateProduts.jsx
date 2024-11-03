@@ -169,15 +169,9 @@ const UpdateProduct = () => {
     }
   };
 
-  const removePicture = (index, isNewPicture) => {
-    if (isNewPicture) {
-      console.log("Removing new picture at index", index);
-      setNewPictures(newPictures.filter((_, i) => i !== index));
-    } else {
-      setPictures(pictures.filter((_, i) => i !== index));
-      console.log("Removing picture in else at index", index);
-    }
-    console.log("Removing picture at index", index);
+  const removePicture = (index) => {
+    setPictures(pictures.filter((_, i) => i !== index));
+
     setSelectedImage(null);
   };
 
@@ -380,25 +374,7 @@ const UpdateProduct = () => {
                         onClick={() => setSelectedImage(picture)}
                       />
                       <button
-                        onClick={() => removePicture(index, false)} // 'false' indicates it's an existing picture
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ))}
-                  {newPictures.map((newPicture, index) => (
-                    <div key={`new-${index}`} className="relative">
-                      <img
-                        src={URL.createObjectURL(newPicture)} // Create object URL for new pictures
-                        alt={`Product New ${index + 1}`}
-                        className="w-full h-32 object-cover rounded cursor-pointer"
-                        onClick={() =>
-                          setSelectedImage(URL.createObjectURL(newPicture))
-                        }
-                      />
-                      <button
-                        onClick={() => removePicture(index, true)} // 'true' indicates it's a new picture
+                        onClick={() => removePicture(index)} // 'false' indicates it's an existing picture
                         className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                       >
                         <X size={16} />
