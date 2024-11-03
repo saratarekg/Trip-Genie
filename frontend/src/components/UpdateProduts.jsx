@@ -15,7 +15,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -59,6 +65,18 @@ const UpdateProduct = () => {
   const [selectedCurrency, setSelectedCurrency] = useState("");
   const navigate = useNavigate();
 
+  const base64ToBlob = (base64, type = "image/jpeg") => {
+    const byteCharacters = atob(base64.split(",")[1]); // Decode base64 string
+    const byteNumbers = new Array(byteCharacters.length);
+
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type });
+  };
+
   useEffect(() => {
     const fetchProductDetails = async () => {
       setLoading(true);
@@ -97,16 +115,19 @@ const UpdateProduct = () => {
     const fetchSupportedCurrencies = async () => {
       try {
         const token = Cookies.get("jwt");
-        const response = await fetch(`http://localhost:4000/${userRole}/currencies`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await fetch(
+          "http://localhost:4000/seller/currencies",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch currencies");
         }
         const data = await response.json();
         setCurrencies(data);
       } catch (error) {
-        console.error('Error fetching supported currencies:', error);
+        console.error("Error fetching supported currencies:", error);
       }
     };
 
@@ -122,34 +143,35 @@ const UpdateProduct = () => {
   const handlePicturesUpload = (e) => {
     const files = e.target.files;
     if (files) {
-      const readers = [];
-      const newPicturesArray = [];
+      const newFilePictures = Array.from(files);
 
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        readers.push(
+      // Create a Set to avoid duplicates based on file names
+      const existingFileNames = new Set(newPictures.map((file) => file.name));
+
+      const newFilesToUpload = newFilePictures.filter(
+        (file) => !existingFileNames.has(file.name)
+      );
+
+      const newBase64PicturesPromises = newFilesToUpload.map(
+        (file) =>
           new Promise((resolve) => {
-            reader.onloadend = () => {
-              newPicturesArray.push(reader.result);
-              resolve();
-            };
+            const reader = new FileReader();
             reader.readAsDataURL(file);
+            reader.onloadend = () => resolve(reader.result);
           })
-        );
-      });
+      );
 
-      Promise.all(readers).then(() => {
-        setNewPictures([...newPictures, ...newPicturesArray]);
+      Promise.all(newBase64PicturesPromises).then((base64Pictures) => {
+        // Update the pictures state without overwriting existing ones
+        setPictures((prev) => [...prev, ...base64Pictures]); // Add new base64 previews
+        setNewPictures((prev) => [...prev, ...newFilesToUpload]); // Store new File objects for uploading
       });
     }
   };
 
-  const removePicture = (index, isNewPicture) => {
-    if (isNewPicture) {
-      setNewPictures(newPictures.filter((_, i) => i !== index));
-    } else {
-      setPictures(pictures.filter((_, i) => i !== index));
-    }
+  const removePicture = (index) => {
+    setPictures(pictures.filter((_, i) => i !== index));
+
     setSelectedImage(null);
   };
 
@@ -181,8 +203,10 @@ const UpdateProduct = () => {
       formData.append("quantity", product.quantity);
       formData.append("currency", selectedCurrency);
 
-      [...pictures, ...newPictures].forEach((picture, index) => {
-        formData.append("pictures", picture);
+      // Append existing pictures as Blob
+      pictures.forEach((picture) => {
+        const blob = base64ToBlob(picture); // Convert base64 to Blob
+        formData.append("pictures", blob, "existing_picture.jpg"); // You can customize the file name
       });
 
       const response = await fetch(
@@ -270,7 +294,12 @@ const UpdateProduct = () => {
                   onValueChange={(value) => setSelectedCurrency(value)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder={`${product.currency} - ${currencies.find(c => c.code === product.currency)?.name || ''}`} />
+                    <SelectValue
+                      placeholder={`${product.currency} - ${
+                        currencies.find((c) => c.code === product.currency)
+                          ?.name || ""
+                      }`}
+                    />
                   </SelectTrigger>
                   <SelectContent className="max-h-[200px] overflow-y-auto">
                     {currencies.map((currency) => (
@@ -281,7 +310,9 @@ const UpdateProduct = () => {
                   </SelectContent>
                 </Select>
                 {selectedCurrency === "" && (
-                  <p className="text-red-500 text-sm mt-1">Currency is required</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    Currency is required
+                  </p>
                 )}
               </div>
               <div>
@@ -335,31 +366,15 @@ const UpdateProduct = () => {
                 />
                 <div className="grid grid-cols-3 gap-4 mt-4">
                   {pictures.map((picture, index) => (
-                    <div key={index} className="relative">
+                    <div key={`existing-${index}`} className="relative">
                       <img
-                        src={picture}
-                        alt={`Product ${index + 1}`}
+                        src={picture} // This will be the base64 string
+                        alt={`Product Existing ${index + 1}`}
                         className="w-full h-32 object-cover rounded cursor-pointer"
                         onClick={() => setSelectedImage(picture)}
                       />
                       <button
-                        onClick={() => removePicture(index, false)}
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ))}
-                  {newPictures.map((picture, index) => (
-                    <div key={`new-${index}`} className="relative">
-                      <img
-                        src={picture}
-                        alt={`New Product ${index + 1}`}
-                        className="w-full h-32 object-cover rounded cursor-pointer"
-                        onClick={() => setSelectedImage(picture)}
-                      />
-                      <button
-                        onClick={() => removePicture(index, true)}
+                        onClick={() => removePicture(index)} // 'false' indicates it's an existing picture
                         className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                       >
                         <X size={16} />

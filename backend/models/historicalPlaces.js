@@ -36,7 +36,11 @@ const historicalPlacesSchema = new Schema(
       ref: "Currency",
       required: true,
     },
-    pictures: [String], // Array of GridFS filenames
+    pictures: {
+      type: [String],
+      required: false,
+      default: [],
+    }, // Array of GridFS filenames
     governor: {
       // New field for the maker's ID
       type: mongoose.Schema.Types.ObjectId,

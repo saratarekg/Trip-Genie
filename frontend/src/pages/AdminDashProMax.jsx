@@ -132,21 +132,21 @@ export function Dashboard() {
           <TabsList className="grid grid-cols-3 gap-4 bg-transparent">
             <TabsTrigger
               value="accounts"
-              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-white"
+              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-[#003f66]"
             >
               <UserCircle className="w-4 h-4 mr-2" />
               Accounts
             </TabsTrigger>
             <TabsTrigger
               value="activities"
-              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-white"
+              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-[#003f66] "
             >
               <Layers className="w-4 h-4 mr-2" />
               Activities
             </TabsTrigger>
             <TabsTrigger
               value="giftshop"
-              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-white"
+              className="bg-white text-[#003f66] shadow-sm data-[state=active]:bg-[#ED8936] data-[state=active]:text-[#003f66]"
             >
               <ShoppingBag className="w-4 h-4 mr-2" />
               Gift Shop

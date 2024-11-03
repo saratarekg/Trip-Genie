@@ -99,12 +99,12 @@ router.put("/categories/:id", categoryController.updateCategory);
 router.get("/products", productController.getAllProducts);
 router.post(
   "/products",
-  upload.array("pictures", 5),
+  upload.array("pictures", 10),
   productController.addProductByAdmin
 );
 router.get(
   "/products/:id",
-  upload.array("pictures", 5),
+  upload.array("pictures", 10),
   productController.getProductById
 );
 router.get("/productsarchive", productController.getAllProductsArchive);
