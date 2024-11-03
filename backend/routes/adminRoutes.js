@@ -119,9 +119,13 @@ router.put(
 router.put("/archiveproducts/:id", productController.archiveProduct);
 router.delete("/products/:id", productController.deleteProduct);
 
+
+
+
+router.post("/complaint/:id/reply", complaintsController.replyToComplaint);
 router.get("/complaints", complaintsController.getAllComplaints);
 router.get("/complaint/:id", complaintsController.getComplaintDetails);
-router.post("/complaint/:id/reply", complaintsController.replyToComplaint);
+
 router.put("/complaint/:id/status", complaintsController.markComplaintStatus);
 
 router.put("/itineraries/:id", itineraryController.flagItinerary);

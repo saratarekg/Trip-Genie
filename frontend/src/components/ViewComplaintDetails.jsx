@@ -1,40 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import Cookies from 'js-cookie';
-import { MapPin, Calendar, Clock, User, Mail, Phone, Flag, Briefcase, AlertCircle } from 'lucide-react'
+import { MapPin, Calendar, Clock, User, Mail, Phone, Flag, Briefcase, AlertCircle } from 'lucide-react';
 
 export const ViewComplaintDetails = () => {
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [replyContent, setReplyContent] = useState('');
   const { id } = useParams();
 
+  const fetchComplaintDetails = async () => {
+    try {
+      const token = Cookies.get('jwt');
+      let role = Cookies.get('role') || 'guest';
+
+      const api = `http://localhost:4000/${role}/complaint/${id}`;
+      const response = await axios.get(api, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+      });
+
+      setComplaint(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchComplaintDetails = async () => {
-      try {
-        const token = Cookies.get('jwt');
-        let role = Cookies.get('role') || 'guest';
-
-        const api = `http://localhost:4000/${role}/complaint/${id}`;
-        const response = await axios.get(api, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-
-        setComplaint(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
     fetchComplaintDetails();
-  }, [id]);
+  }, [id]);const handleReply = async () => {
+    try {
+        const token = Cookies.get('jwt');
+        if (!replyContent.trim()) {
+            console.error("Reply content is empty.");
+            return;
+        }
+        const response = await axios.post(
+            `http://localhost:4000/admin/complaint/${id}/reply`,
+            { content: replyContent },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        console.log("Reply added successfully:", response.data);
+        setReplyContent('');
+        await fetchComplaintDetails();
+    } catch (error) {
+        console.error("Failed to add reply", error.response ? error.response.data : error.message);
+    }
+};
+
+
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      const token = Cookies.get('jwt');
+      await axios.put(
+        `http://localhost:4000/admin/complaint/${id}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      await fetchComplaintDetails(); // Refresh complaint details
+    } catch (error) {
+      console.error("Failed to update status", error);
+    }
+  };
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">
@@ -90,8 +136,50 @@ export const ViewComplaintDetails = () => {
                 <span>{new Date(complaint.createdAt).toLocaleTimeString()}</span>
               </div>
             </div>
+
+            {/* Replies Section */}
+            <div className="mb-6">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-4">Replies</h3>
+              {complaint.replies.length ? (
+                complaint.replies.map((reply, index) => (
+                  <div key={index} className="mb-4 p-4 bg-gray-100 rounded-lg shadow-sm">
+                    <p className="text-gray-700">{reply.content}</p>
+                    <span className="text-sm text-gray-500">{new Date(reply.createdAt).toLocaleString()}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500">No replies yet</p>
+              )}
+            </div>
+
+            {/* Add Reply Section */}
+            <div className="mb-6">
+              <Textarea 
+                placeholder="Add your reply..."
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                className="mb-4"
+              />
+              <Button onClick={handleReply} className="bg-blue-500 text-white">Reply to Complaint</Button>
+            </div>
+
+            {/* Status Change Buttons */}
+            <div className="flex gap-4 mt-6">
+              <Button 
+                onClick={() => handleStatusChange("pending")} 
+                className="bg-yellow-500 text-white"
+              >
+                Mark as Pending
+              </Button>
+              <Button 
+                onClick={() => handleStatusChange("resolved")} 
+                className="bg-green-500 text-white"
+              >
+                Mark as Resolved
+              </Button>
+            </div>
           </div>
-          
+
           <div>
             <Card className="p-6 bg-white shadow-md rounded-lg mb-6">
               <h2 className="text-2xl font-semibold mb-4 text-gray-800">Tourist Profile</h2>
@@ -127,6 +215,4 @@ export const ViewComplaintDetails = () => {
       </Card>
     </div>
   );
-}
-
-export default ViewComplaintDetails;
+};
