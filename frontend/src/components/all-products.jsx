@@ -31,121 +31,125 @@ const renderStars = (rating) => {
   );
 };
 
-const ProductCard = ({ product, onSelect }) => {
+const ProductCard = ({ product, onSelect, userInfo }) => {
   const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
-  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
-  const [exchangeRates, setExchangeRates] = useState({});
-  const [currencySymbol, setCurrencySymbol] = useState({});
+  const [exchangeRate, setExchangeRate] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchExchangeRate = async () => {
+
+  useEffect(() => {
+    if (userInfo && userInfo.role == 'tourist' && userInfo.preferredCurrency !== product.currency) {
+      console.log("exchange rate tyb?");
+      fetchExchangeRate();
+    } else {
+      console.log("ba get currency");
+      getCurrencySymbol();
+    }
+  }, [userInfo, product]);
+
+  const fetchExchangeRate = useCallback(async () => {
+  if(userInfo && userInfo.role == 'tourist'){
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
+        `http://localhost:4000/${userInfo.role}/populate`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // Ensure content type is set to JSON
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            base: product.currency, // Sending base currency ID
-            target: userPreferredCurrency._id, // Sending target currency ID
+            base: product.currency,
+            target: userInfo.preferredCurrency._id,
           }),
         }
       );
-      // Parse the response JSON
       const data = await response.json();
-
       if (response.ok) {
-        setExchangeRates(data.conversion_rate);
+        setExchangeRate(data.conversion_rate);
       } else {
-        // Handle possible errors
-        console.error("Error in fetching exchange rate:", data.message);
+        console.error('Error in fetching exchange rate:', data.message);
       }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
-  };
+  }
+  }, [userInfo, product]);
 
-  const getCurrencySymbol = async () => {
+  const getCurrencySymbol = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/${userRole}/getCurrency/${product.currency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setCurrencySymbol(response.data);
+      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${product.currency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // console.log(response.data.symbol);
+      setCurrencySymbol(response.data.symbol);
     } catch (error) {
-      console.error("Error fetching currensy symbol:", error);
+      console.error("Error fetching currency symbol:", error);
     }
-  };
+  }, [userInfo, product]);
 
-  const formatPrice = (price, type) => {
-    if (product) {
-      if (userRole === "tourist" && userPreferredCurrency) {
-        if (userPreferredCurrency === product.currency) {
-          return `${userPreferredCurrency.symbol}${price}`;
-        } else {
-          const exchangedPrice = price * exchangeRates;
-          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+    const formatPrice = (price) => {
+      if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+        if (userInfo.preferredCurrency === product.currency) {
+          return `${userInfo.preferredCurrency.symbol}${price}`;
+        } else if (exchangeRate) {
+          const exchangedPrice = price * exchangeRate;
+          return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
         }
-      } else {
-        if (currencySymbol) {
-          return `${currencySymbol.symbol}${price}`;
-        }
+      } else if (currencySymbol) {
+        // console.log("currencySymbol:", currencySymbol, "price:", price);
+        return `${currencySymbol}${price}`;
       }
-    }
   };
 
-  const fetchUserInfo = async () => {
-    const role = Cookies.get("role") || "guest";
-    setUserRole(role);
+  // const fetchUserInfo = async () => {
+  //   const role = Cookies.get("role") || "guest";
+  //   setUserRole(role);
 
-    if (role === "tourist") {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const currencyId = response.data.preferredCurrency;
+  //   if (role === "tourist") {
+  //     try {
+  //       const token = Cookies.get("jwt");
+  //       const response = await axios.get("http://localhost:4000/tourist/", {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
+  //       const currencyId = response.data.preferredCurrency;
 
-        const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setUserPreferredCurrency(response2.data);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    }
-  };
+  //       const response2 = await axios.get(
+  //         `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       setUserPreferredCurrency(response2.data);
+  //     } catch (error) {
+  //       console.error("Error fetching user profile:", error);
+  //     }
+  //   }
+  // };
 
-  useEffect(() => {
-    if (product) fetchUserInfo();
-  }, [product]);
+  // useEffect(() => {
+  //   if (product) 
+  //     fetchUserInfo();
+  // }, [product]);
 
-  useEffect(() => {
-    if (product) {
-      setIsLoading(true);
-      if (
-        userRole === "tourist" &&
-        userPreferredCurrency &&
-        userPreferredCurrency !== product.currency
-      ) {
-        fetchExchangeRate();
-      } else {
-        getCurrencySymbol();
-      }
-    }
-    setIsLoading(false);
-  }, [userRole, userPreferredCurrency, product]);
+  // useEffect(() => {
+  //   if (product) {
+  //     setIsLoading(true);
+  //     if (
+  //       userRole === "tourist" &&
+  //       userPreferredCurrency &&
+  //       userPreferredCurrency !== product.currency
+  //     ) {
+  //       fetchExchangeRate();
+  //     } else {
+  //       getCurrencySymbol();
+  //     }
+  //   }
+  //   setIsLoading(false);
+  // }, [userRole, userPreferredCurrency, product]);
 
   return (
     <div>
@@ -197,6 +201,7 @@ export function AllProducts() {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [maxPrice, setMaxPrice] = useState(1000);
   const [isLoading, setIsLoading] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
   const tripsPerPage = 6;
 
   const navigate = useNavigate();
@@ -205,6 +210,44 @@ export function AllProducts() {
     let role = Cookies.get("role");
     return role || "guest";
   }, []);
+
+ 
+  const fetchUserInfo = useCallback(async () => {
+    const role = Cookies.get("role") || "guest";
+    const token = Cookies.get("jwt");
+
+    if (role === 'tourist') {
+      try {
+        const response = await axios.get('http://localhost:4000/tourist/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const currencyId = response.data.preferredCurrency;
+
+        const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        setUserInfo({ role });
+      }
+    } else {
+      setUserInfo({ role });
+    }
+  }, []);
+
+
+  const getSymbol = () => {
+    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+        return `${userInfo.preferredCurrency.symbol}`;
+    } else {
+      return "$";
+    }
+};
 
   const fetchProducts = useCallback(
     async (params = {}) => {
@@ -261,8 +304,15 @@ export function AllProducts() {
   );
 
   useEffect(() => {
+    if (userInfo) {
     fetchProducts();
-  }, [fetchProducts]);
+    }
+  }, [userInfo]);
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, [fetchUserInfo]);
+
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -386,6 +436,7 @@ export function AllProducts() {
               })
             }
             role={getUserRole()}
+            symbol={getSymbol()}
           />
         </div>
 
@@ -405,6 +456,7 @@ export function AllProducts() {
                   <ProductCard
                     key={product._id}
                     product={product}
+                    userInfo={userInfo}
                     onSelect={handleProductSelect}
                   />
                 ))}

@@ -91,8 +91,6 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
       }
   };
 
-  
-
 return(
   <Card
     className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
@@ -219,6 +217,14 @@ export function AllActivitiesComponent() {
     if (!role) role = "guest";
     return role;
   };
+
+  const getSymbol = () => {
+    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+        return `${userInfo.preferredCurrency.symbol}`;
+    } else {
+      return "$";
+    }
+};
 
   useEffect(() => {
     fetchUserInfo();
@@ -571,6 +577,7 @@ export function AllActivitiesComponent() {
                   selectedCategories={selectedCategories}
                   setSelectedCategories={setSelectedCategories}
                   myActivities={myActivities}
+                  symbol={getSymbol()}
                   handlemyActivities={handlemyActivities}
                   maxPrice={maxPrice} // Pass maxPrice as a prop
                   initialPriceRange={initialPriceRange}
