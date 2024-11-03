@@ -2,9 +2,9 @@ const Activity = require("../models/activity");
 const Category = require("../models/category");
 const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
+const ActivityBooking = require("../models/activityBooking");
 
 const getAllActivities = async (req, res) => {
-
   try {
     const {
       price,
@@ -34,6 +34,7 @@ const getAllActivities = async (req, res) => {
     const filterResultIds = filterResult.map((activity) => activity._id);
 
     const query = [];
+    query.push({ isDeleted: false });
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
     if (!myActivities) {
@@ -47,10 +48,8 @@ const getAllActivities = async (req, res) => {
       $and: query,
     })
       .populate("tags")
-      .populate("category")
-      // .populate("comments")
-      ;
-
+      .populate("category");
+    // .populate("comments")
     if (sort) {
       const sortBy = {};
       sortBy[sort] = parseInt(asc); // Sort ascending (1) or descending (-1) based on your needs
@@ -76,24 +75,12 @@ const getActivitiesByPreferences = async (req, res) => {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    const {
-      budget,
-      categories,
-      price,
-      tourLanguages,
-      tourType,
-    } = tourist.preference;
+    const { budget, categories, price, tourLanguages, tourType } =
+      tourist.preference;
 
     // Apply filters based on preferences and query params
-    const {
-      startDate,
-      endDate,
-      minRating,
-      searchBy,
-      sort,
-      asc,
-      myActivities,
-    } = req.query;
+    const { startDate, endDate, minRating, searchBy, sort, asc, myActivities } =
+      req.query;
 
     const filterResult = await Activity.filter(
       budget,
@@ -110,6 +97,7 @@ const getActivitiesByPreferences = async (req, res) => {
     const filterResultIds = filterResult.map((activity) => activity._id);
 
     const query = [];
+    query.push({ isDeleted: false });
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
 
@@ -135,7 +123,7 @@ const getActivitiesByPreferences = async (req, res) => {
       $and: query,
     })
       .populate("tags")
-      .populate("category")
+      .populate("category");
 
     // Apply sorting
     if (sort) {
@@ -177,11 +165,17 @@ const theHolyAntiFilter = async (req, res) => {
     });
 
     // Map activity IDs for comparison
-    const allActivityIds = new Set(allActivities.map((activity) => activity._id.toString()));
-    const preferredActivityIds = new Set(preferredActivities.map((activity) => activity._id.toString()));
+    const allActivityIds = new Set(
+      allActivities.map((activity) => activity._id.toString())
+    );
+    const preferredActivityIds = new Set(
+      preferredActivities.map((activity) => activity._id.toString())
+    );
 
     // Find the set difference (activities in allActivities but not in preferredActivities)
-    const differenceIds = [...allActivityIds].filter(id => !preferredActivityIds.has(id));
+    const differenceIds = [...allActivityIds].filter(
+      (id) => !preferredActivityIds.has(id)
+    );
 
     // Filter out the activities that match the differenceIds from allActivities
     const activitiesDifference = allActivities.filter((activity) =>
@@ -195,22 +189,21 @@ const theHolyAntiFilter = async (req, res) => {
   }
 };
 
-
-
 const getActivityById = async (req, res) => {
   try {
     const activity = await Activity.findById(req.params.id)
       .populate("advertiser")
       .populate("category")
-      .populate("tags")
-      ;
-
+      .populate("tags");
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
     }
+    if (activity.isDeleted) {
+      return res.status(400).json({ message: "Activity no longer exists" });
+    }
     res.status(200).json(activity);
   } catch (error) {
-    console.error("Error fetching activity:", error);  // Log the error
+    console.error("Error fetching activity:", error); // Log the error
     res.status(500).json({ error: error.message });
   }
 };
@@ -267,7 +260,13 @@ const deleteActivity = async (req, res) => {
         .json({ message: "You are not authorized to delete this activity" });
     }
 
-    await Activity.findByIdAndDelete(req.params.id);
+    const bookings = await ActivityBooking.find({ activity: req.params.id });
+    if (bookings.length > 0 && activity.timing > new Date()) {
+      return res.status(400).json({
+        message: "Cannot delete activity with existing bookings",
+      });
+    }
+    await Activity.findByIdAndUpdate(req.params.id, { isDeleted: true });
 
     // Remove the deleted activity from the 'activities' array in the Itinerary model
     await Itinerary.updateMany(
@@ -286,6 +285,9 @@ const updateActivity = async (req, res) => {
     const activity = await Activity.findById(req.params.id);
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
+    }
+    if (activity.isDeleted) {
+      return res.status(400).json({ message: "Activity no longer exists" });
     }
     const advertiser = res.locals.user_id;
     if (activity.advertiser.toString() !== advertiser) {
@@ -339,14 +341,19 @@ const updateActivity = async (req, res) => {
 
 const rateActivity = async (req, res) => {
   try {
-    
     const { rating } = req.body; // Get rating from the request body
     const activity = await Activity.findById(req.params.id)
-    .populate("advertiser")
-    .populate("category")
-    .populate("tags")
-    .exec();
+      .populate("advertiser")
+      .populate("category")
+      .populate("tags")
+      .exec();
 
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+    if (activity.isDeleted) {
+      return res.status(400).json({ message: "Activity no longer exists" });
+    }
     // Add the rating and calculate the new average
     const newAverageRating = await activity.addRating(rating);
 
@@ -359,15 +366,16 @@ const rateActivity = async (req, res) => {
 
 const addCommentToActivity = async (req, res) => {
   try {
-    
     const { username, rating, content } = req.body; // Get comment details from the request body
 
     if (rating === undefined) {
       rating = 0; // Default rating
     }
-    
-    if ( rating < 0 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+
+    if (rating < 0 || rating > 5) {
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 0 and 5" });
     }
 
     const tourist = await Tourist.findById(res.locals.user_id);
@@ -382,11 +390,10 @@ const addCommentToActivity = async (req, res) => {
       finalUsername = "Anonymous"; // Use 'anonymous' as the username
     } else if (tourist.username) {
       finalUsername = tourist.username;
-       // Use the authenticated user's username
+      // Use the authenticated user's username
     } else {
       return res.status(400).json({ message: "Valid username is required" });
     }
-
 
     // Find the activity by ID
     const activity = await Activity.findById(req.params.id)
@@ -398,6 +405,9 @@ const addCommentToActivity = async (req, res) => {
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
     }
+    if (activity.isDeleted) {
+      return res.status(400).json({ message: "Activity no longer exists" });
+    }
 
     console.log(tourist.username);
 
@@ -408,7 +418,6 @@ const addCommentToActivity = async (req, res) => {
       content,
       date: new Date(), // Set the current date
     };
-
 
     // Add the comment to the activity's comments array
     activity.comments.push(newComment);
@@ -430,15 +439,12 @@ const addCommentToActivity = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "An error occurred while adding the comment", error: error.message });
+    res.status(500).json({
+      message: "An error occurred while adding the comment",
+      error: error.message,
+    });
   }
 };
-
-
-
-
-
-
 
 module.exports = {
   getAllActivities,
@@ -449,6 +455,5 @@ module.exports = {
   addCommentToActivity,
   rateActivity,
   getActivitiesByPreferences,
-  theHolyAntiFilter, 
+  theHolyAntiFilter,
 };
-

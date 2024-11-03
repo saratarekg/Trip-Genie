@@ -6,7 +6,6 @@ const ItineraryBooking = require("../models/itineraryBooking");
 
 // GET all itineraries
 
-
 const getAllItineraries = async (req, res) => {
   try {
     const {
@@ -45,7 +44,7 @@ const getAllItineraries = async (req, res) => {
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
     query.push({ appropriate: true });
-    
+
     if (!myItineraries) {
       query.push({
         availableDates: {
@@ -56,21 +55,19 @@ const getAllItineraries = async (req, res) => {
       });
     }
 
+    query.push({ isDeleted: false });
+
     // Handle different user roles
-    if (userRole === 'tourist') {
-      const bookedItineraries = await ItineraryBooking.find({ user: userId }).distinct('itinerary');
+    if (userRole === "tourist") {
+      const bookedItineraries = await ItineraryBooking.find({
+        user: userId,
+      }).distinct("itinerary");
       query.push({
-        $or: [
-          { isActivated: true },
-          { _id: { $in: bookedItineraries } }
-        ]
+        $or: [{ isActivated: true }, { _id: { $in: bookedItineraries } }],
       });
-    } else if (userRole === 'tour-guide') {
+    } else if (userRole === "tour-guide") {
       query.push({
-        $or: [
-          { isActivated: true },
-          { tourGuide: userId }
-        ]
+        $or: [{ isActivated: true }, { tourGuide: userId }],
       });
     } else {
       // For guests or any other role
@@ -123,13 +120,7 @@ const getItinerariesByPreference = async (req, res) => {
     } = tourist.preference;
 
     // Apply filters based on preferences and query params
-    const {
-      upperDate,
-      lowerDate,
-      sort,
-      asc,
-      myItineraries,
-    } = req.query;
+    const { upperDate, lowerDate, sort, asc, myItineraries } = req.query;
 
     console.log(budget, price, upperDate, lowerDate, tourType, tourLanguages);
     const filterResult = await Itinerary.filter(
@@ -138,7 +129,7 @@ const getItinerariesByPreference = async (req, res) => {
       upperDate,
       lowerDate,
       tourType,
-      tourLanguages,
+      tourLanguages
     );
 
     const searchResult = await Itinerary.findByFields(tourist.searchBy);
@@ -151,15 +142,15 @@ const getItinerariesByPreference = async (req, res) => {
     query.push({ _id: { $in: filterResultIds } });
 
     // Only show future itineraries if 'myItineraries' is not specified
-      query.push({
-        availableDates: {
-          $elemMatch: {
-            date: { $gte: new Date() },
-          },
+    query.push({
+      availableDates: {
+        $elemMatch: {
+          date: { $gte: new Date() },
         },
-      });
-    
+      },
+    });
 
+    query.push({ isDeleted: false });
     let itinerariesQuery = Itinerary.find({
       $and: query,
     })
@@ -206,11 +197,17 @@ const theHolyAntiFilter = async (req, res) => {
     });
 
     // Map itinerary IDs for comparison
-    const allItineraryIds = new Set(allItineraries.map((itinerary) => itinerary._id.toString()));
-    const preferredItineraryIds = new Set(preferredItineraries.map((itinerary) => itinerary._id.toString()));
+    const allItineraryIds = new Set(
+      allItineraries.map((itinerary) => itinerary._id.toString())
+    );
+    const preferredItineraryIds = new Set(
+      preferredItineraries.map((itinerary) => itinerary._id.toString())
+    );
 
     // Find the set difference (itineraries in allItineraries but not in preferredItineraries)
-    const differenceIds = [...allItineraryIds].filter(id => !preferredItineraryIds.has(id));
+    const differenceIds = [...allItineraryIds].filter(
+      (id) => !preferredItineraryIds.has(id)
+    );
 
     // Filter out the itineraries that match the differenceIds from allItineraries
     const itinerariesDifference = allItineraries.filter((itinerary) =>
@@ -224,12 +221,11 @@ const theHolyAntiFilter = async (req, res) => {
   }
 };
 
-
 const getAllItinerariesAdmin = async (req, res) => {
   try {
     const {
       maxPrice,
-      minPrice, 
+      minPrice,
       upperDate,
       lowerDate,
       types,
@@ -240,7 +236,6 @@ const getAllItinerariesAdmin = async (req, res) => {
       myItineraries,
       isBooked,
     } = req.query;
-
 
     const filterResult = await Itinerary.filter(
       maxPrice,
@@ -272,7 +267,7 @@ const getAllItinerariesAdmin = async (req, res) => {
     if (myItineraries) {
       query.push({ tourGuide: res.locals.user_id });
     }
-
+    query.push({ isDeleted: false });
     let itinerariesQuery = await Itinerary.find({
       $and: query,
     })
@@ -309,7 +304,6 @@ const getAllItinerariesAdmin = async (req, res) => {
   }
 };
 
-
 // GET a single itinerary
 const getItineraryById = async (req, res) => {
   try {
@@ -318,7 +312,10 @@ const getItineraryById = async (req, res) => {
       .populate({ path: "activities", populate: { path: "tags category" } })
       .exec();
     if (!itinerary) {
-      return res.status(404).json({ message: "Itinerary not found" });
+      return res.status(400).json({ message: "Itinerary not found" });
+    }
+    if (itinerary.isDeleted) {
+      return res.status(400).json({ message: "Itinerary no longer exis" });
     }
     console.log(itinerary);
     res.status(200).json(itinerary);
@@ -391,14 +388,16 @@ const updateItinerary = async (req, res) => {
       return res.status(404).json({ message: "Itinerary not found" });
     }
 
+    if (itinerary.isDeleted) {
+      return res.status(400).json({ message: "Itinerary no longer exists" });
+    }
+
     // Check if the itinerary belongs to the current tour guide
     if (itinerary.tourGuide.toString() !== tourGuideId) {
       return res.status(403).json({
         message: "Unauthorized: You can only update your own itineraries",
       });
     }
-
-    
 
     // Check if the itinerary is booked
 
@@ -438,7 +437,6 @@ const updateItinerary = async (req, res) => {
 };
 const flagItinerary = async (req, res) => {
   try {
-   
     // Find the itinerary by ID
     const itinerary = await Itinerary.findById(req.params.id);
 
@@ -446,12 +444,14 @@ const flagItinerary = async (req, res) => {
       return res.status(404).json({ message: "Itinerary not found" });
     }
 
+    if (itinerary.isDeleted) {
+      return res.status(400).json({ message: "Itinerary no longer exists" });
+    }
+
     // Check if the itinerary is booked
 
     // If all checks pass, delete the itinerary
-    const {
-      appropriate,
-    } = req.body;
+    const { appropriate } = req.body;
 
     await Itinerary.findByIdAndUpdate(req.params.id, {
       appropriate,
@@ -462,9 +462,6 @@ const flagItinerary = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
-
 
 const deleteItinerary = async (req, res) => {
   try {
@@ -504,7 +501,10 @@ const deleteItinerary = async (req, res) => {
 
 const getAllLanguages = async (req, res) => {
   try {
-    const languages = await Itinerary.find().distinct("language");
+    const languages = await Itinerary.find({
+      isActivated: true,
+      isDeleted: false,
+    }).distinct("language");
     res.status(200).json(languages);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -514,13 +514,15 @@ const getAllLanguages = async (req, res) => {
 const addCommentToItinerary = async (req, res) => {
   try {
     const { username, rating, content } = req.body;
-    
+
     if (rating === undefined) {
       rating = 0; // Default rating
     }
 
-    if ( rating < 0 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+    if (rating < 0 || rating > 5) {
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 0 and 5" });
     }
 
     const tourist = await Tourist.findById(res.locals.user_id);
@@ -535,22 +537,23 @@ const addCommentToItinerary = async (req, res) => {
       finalUsername = "Anonymous"; // Use 'anonymous' as the username
     } else if (tourist.username) {
       finalUsername = tourist.username;
-       // Use the authenticated user's username
+      // Use the authenticated user's username
     } else {
       return res.status(400).json({ message: "Valid username is required" });
     }
-    
 
-   
     // Find the activity by ID
     const itinerary = await Itinerary.findById(req.params.id);
-      // .populate("advertiser")
-      // .populate("category")
-      // .populate("tags")
-      // .exec();
+    // .populate("advertiser")
+    // .populate("category")
+    // .populate("tags")
+    // .exec();
 
     if (!itinerary) {
       return res.status(404).json({ message: "Itinerary not found" });
+    }
+    if (itinerary.isDeleted) {
+      return res.status(400).json({ message: "Itinerary no longer exists" });
     }
 
     // Create the new comment object
@@ -583,14 +586,15 @@ const addCommentToItinerary = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "An error occurred while adding the comment", error: error.message });
+    res.status(500).json({
+      message: "An error occurred while adding the comment",
+      error: error.message,
+    });
   }
 };
 
-
 const rateItinerary = async (req, res) => {
   try {
-    
     const { rating } = req.body; // Get rating from the request body
 
     // Find the activity by ID
@@ -600,6 +604,13 @@ const rateItinerary = async (req, res) => {
     // .populate("tags")
     // .populate("comments")
     //.exec();
+
+    if (!itinerary) {
+      return res.status(404).json({ message: "Itinerary not found" });
+    }
+    if (itinerary.isDeleted) {
+      return res.status(400).json({ message: "Itinerary no longer exists" });
+    }
 
     // Add the rating and calculate the new average
     const newAverageRating = await itinerary.addRating(rating);
@@ -621,6 +632,9 @@ const toggleActivationStatus = async (req, res) => {
     if (!itinerary) {
       return res.status(404).json({ message: "Itinerary not found" });
     }
+    if (itinerary.isDeleted) {
+      return res.status(400).json({ message: "Itinerary no longer exists" });
+    }
 
     // Use findByIdAndUpdate to toggle the activation status
     const updatedItinerary = await Itinerary.findByIdAndUpdate(
@@ -631,7 +645,9 @@ const toggleActivationStatus = async (req, res) => {
 
     // Return the updated itinerary details
     return res.status(200).json({
-      message: `Itinerary ${updatedItinerary.isActivated ? 'activated' : 'deactivated'} successfully`,
+      message: `Itinerary ${
+        updatedItinerary.isActivated ? "activated" : "deactivated"
+      } successfully`,
       itinerary: updatedItinerary,
     });
   } catch (error) {
@@ -639,7 +655,6 @@ const toggleActivationStatus = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
-
 
 module.exports = {
   getAllItineraries,
@@ -652,7 +667,7 @@ module.exports = {
   addCommentToItinerary,
   rateItinerary,
   flagItinerary,
-  toggleActivationStatus, 
+  toggleActivationStatus,
   getItinerariesByPreference,
   theHolyAntiFilter,
 };

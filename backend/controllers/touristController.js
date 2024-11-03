@@ -10,6 +10,7 @@ const ActivityBooking = require("../models/activityBooking");
 const Purchase = require("../models/purchase");
 const ItineraryBooking = require("../models/itineraryBooking");
 const Currency = require("../models/currency");
+const Complaint = require("../models/complaints");
 
 const getAllTourists = async (req, res) => {
   try {
