@@ -66,7 +66,7 @@ const deleteSellerAccount = async (req, res) => {
     const purchases = await Purchase.find({ status: "pending" });
     purchases.forEach(async (purchase) => {
       if (
-        purchase.products.some((product) => productIDs.includes(product._id))
+        purchase.products.some((prod) => productIDs.includes(prod.product._id))
       ) {
         res.status(400).json({
           message: "Cannot delete seller account, there are pending purchases",

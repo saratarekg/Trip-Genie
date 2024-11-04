@@ -1,7 +1,7 @@
 const Product = require("../models/product");
 const Seller = require("../models/seller");
 const Tourist = require("../models/tourist");
-
+const Purchase = require("../models/purchase");
 
 const getAllProducts = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
@@ -28,15 +28,13 @@ const getAllProducts = async (req, res) => {
 
     // Filter by the user's products (myProducts)
     if (myproducts) {
-      if(role=="admin")
-      query.seller = null;
-    else
-    query.seller = res.locals.user_id;;
-
+      if (role == "admin") query.seller = null;
+      else query.seller = res.locals.user_id;
     }
 
     // Perform the query
     query.isArchived = false;
+    query.isDeleted = false;
     let productsQuery = Product.find(query);
 
     // Apply sorting if 'asc' is defined (for sorting by rating)
@@ -90,6 +88,7 @@ const getAllProductsArchive = async (req, res) => {
 
     // Perform the query
     query.isArchived = true;
+    query.isDeleted = false;
     let productsQuery = Product.find(query);
 
     // Apply sorting if 'asc' is defined (for sorting by rating)
@@ -175,10 +174,13 @@ const addProductByAdmin = async (req, res) => {
 
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, price, description, quantity, reviews } = req.body; // Get details from request body
-  console.log(reviews);
+  const { name, price, description, quantity, currency } = req.body; // Get details from request body
   let pictures = req.body; // Get details from request body
   try {
+    const checkProduct = await Product.find({ _id: id, isDeleted: false });
+    if (!checkProduct) {
+      return res.status(400).json({ message: "Product not found" });
+    }
     pictures = req.files.map(
       // Convert the uploaded files to base64 strings
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
@@ -186,7 +188,7 @@ const editProduct = async (req, res) => {
     // Find the product by ID and update its details
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity, reviews, currency },
+      { name, pictures, price, description, quantity, currency },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 
@@ -217,7 +219,10 @@ const editProductOfSeller = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
   const { name, price, description, quantity, currency } = req.body;
   let pictures = req.body; // Get details from request body
-  const product = await Product.findById(id);
+  const product = await Product.findById({ _id: id, isDeleted: false });
+  if (!product) {
+    return res.status(400).json({ message: "Product not found" });
+  }
   if (product.seller.toString() != res.locals.user_id) {
     return res
       .status(403)
@@ -264,9 +269,12 @@ const editProductOfSeller = async (req, res) => {
 const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findById(id).populate("seller").populate("currency").exec();
+    const product = await Product.findById(id).populate("seller").exec();
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(400).json({ message: "Product not found" });
+    }
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product no longer exists" });
     }
     res.status(200).json(product);
   } catch (error) {
@@ -277,7 +285,15 @@ const getProductById = async (req, res) => {
 const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findByIdAndDelete(id);
+    const purchases = await Purchase.find({ status: "pending" });
+    purchases.forEach(async (purchase) => {
+      if (purchase.products.some((prod) => prod.product.toString() === id)) {
+        res.status(400).json({
+          message: "Cannot delete product, there are pending purchases",
+        });
+      }
+    });
+    const product = await Product.findByIdAndUpdate(id, { isDeleted: true });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -294,6 +310,15 @@ const archiveProduct = async (req, res) => {
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
     }
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product no longer exists" });
+    }
+    const purchases = await Purchase.find({ status: "pending" });
+    purchases.forEach(async (purchase) => {
+      if (purchase.products.some((prod) => prod.product.toString() === id)) {
+        res.status(400).json({ message: "Cannot archive product" });
+      }
+    });
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       { isArchived: !product.isArchived },
@@ -317,7 +342,14 @@ const deleteProductOfSeller = async (req, res) => {
       .json({ message: "You are not authorized to delete this product" });
   }
   try {
-    const product = await Product.findByIdAndDelete(id);
+    const purchases = await Purchase.find({ status: "pending" });
+    purchases.forEach(async (purchase) => {
+      if (purchase.products.some((prod) => prod.product.toString() === id)) {
+        res.status(400).json({ message: "Cannot delete product" });
+      }
+    });
+
+    const product = await Product.findByIdAndUpdate(id, { isDeleted: true });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -342,6 +374,10 @@ const addProductToCart = async (req, res) => {
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
+    }
+
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product no longer exists" });
     }
 
     // Check if the product already exists in the cart
@@ -409,6 +445,10 @@ const addProductToWishlist = async (req, res) => {
       return res.status(400).json({ message: "Product not found" });
     }
 
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product no longer exists" });
+    }
+
     // Check if the product already exists in the wishlist
     const existingWishlistItem = user.wishlist.find((item) => {
       console.log(
@@ -452,6 +492,10 @@ const rateProduct = async (req, res) => {
 
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
+    }
+
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product no longer exists" });
     }
 
     if (rating < 0 || rating > 5) {
@@ -504,6 +548,10 @@ const addCommentToProduct = async (req, res) => {
 
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
+    }
+
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product no longer exists" });
     }
 
     // Create the new review object
