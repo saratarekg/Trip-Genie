@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import Cookies from "js-cookie"
+import { Link } from "react-router-dom";
 import axios from "axios"
 import { Search, ChevronLeft, ChevronRight, Star, Filter, Plus, Heart, ShoppingCart, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -575,19 +576,32 @@ export function AllProducts() {
             </div>
 
             {(userInfo?.role === 'admin' || userInfo?.role === 'seller') && (
-              <div className="mb-6">
-                <h3 className="font-medium text-blue-800 mb-2">My Products</h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={`w-full justify-between ${myProducts ? "bg-orange-400 text-white" : ""}`}
-                  onClick={() => handleMyProducts(!myProducts)}
-                >
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  {myProducts ? "Showing My Products" : "Show My Products"}
-                </Button>
-              </div>
-            )}
+  <div className="mb-6">
+    <h3 className="font-medium text-blue-800 mb-2">My Products</h3>
+    
+    <div className="flex flex-col gap-3"> {/* Add spacing between elements */}
+      <Button
+        variant="outline"
+        size="sm"
+        className={`w-full justify-between rounded-md ${myProducts ? "bg-orange-400 text-white" : ""}`}
+        onClick={() => handleMyProducts(!myProducts)}
+      >
+        <ShoppingCart className="w-4 h-4 mr-2" />
+        {myProducts ? "Showing My Products" : "Show My Products"}
+      </Button>
+
+      <Link
+        to="/create-product"
+        className={`flex items-center justify-between w-full px-4 py-2 rounded-md  ${myProducts ? "bg-orange-400 text-white" : "bg-white text-blue-800 border border-gray-300"}`}
+      >
+        <Plus className="mr-2 w-4 h-4" />
+        Create Product
+      </Link>
+    </div>
+  </div>
+)}
+
+          
           </div>
 
           {/* Main Content */}
