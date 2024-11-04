@@ -130,40 +130,48 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow, cartItems, wishlis
       <CardFooter className="p-4 flex justify-between items-center border-t">
         <span className="text-lg font-bold text-orange-400">{formatPrice(product.price)}</span>
         {renderStars(product.rating)}
-        <Button
-          className="bg-orange-400 hover:bg-orange-500 text-white"
-          onClick={(e) => {
-            e.stopPropagation()
-            onBuyNow(product)
-          }}
-        >
-          Buy Now
-        </Button>
-      </CardFooter>
-      <div className="absolute top-2 right-2 flex space-x-2">
-        {!isInCart && (
+
+        {/* Show "Buy Now" button only if user role is "tourist" */}
+        {userInfo?.role === "tourist" && (
           <Button
-            className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
+            className="bg-orange-400 hover:bg-orange-500 text-white"
             onClick={(e) => {
               e.stopPropagation()
-              onAddToCart(product)
+              onBuyNow(product)
             }}
           >
-            <Plus className="w-5 h-5" />
-            <span className="sr-only">Add to Cart</span>
+            Buy Now
           </Button>
         )}
-        <Button
-          className={`rounded-full w-10 h-10 p-0 ${isInWishlist ? 'bg-red-400 hover:bg-red-500' : 'bg-gray-200 hover:bg-gray-300'} text-white`}
-          onClick={(e) => {
-            e.stopPropagation()
-            onAddToWishlist(product)
-          }}
-        >
-          <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current' : ''}`} />
-          <span className="sr-only">Add to Wishlist</span>
-        </Button>
-      </div>
+      </CardFooter>
+
+      {/* Show "Add to Cart" and "Add to Wishlist" buttons only if user role is "tourist" */}
+      {userInfo?.role === "tourist" && (
+        <div className="absolute top-2 right-2 flex space-x-2">
+          {!isInCart && (
+            <Button
+              className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddToCart(product)
+              }}
+            >
+              <Plus className="w-5 h-5" />
+              <span className="sr-only">Add to Cart</span>
+            </Button>
+          )}
+          <Button
+            className={`rounded-full w-10 h-10 p-0 ${isInWishlist ? 'bg-red-400 hover:bg-red-500' : 'bg-gray-200 hover:bg-gray-300'} text-white`}
+            onClick={(e) => {
+              e.stopPropagation()
+              onAddToWishlist(product)
+            }}
+          >
+            <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current' : ''}`} />
+            <span className="sr-only">Add to Wishlist</span>
+          </Button>
+        </div>
+      )}
     </Card>
   )
 }
