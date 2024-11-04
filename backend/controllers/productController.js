@@ -5,7 +5,7 @@ const Purchase = require("../models/purchase");
 const cloudinary = require("../utils/cloudinary");
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, myproducts, rating } = req.query;
   const role = res.locals.user_role;
   console.log(role);
 
@@ -31,6 +31,10 @@ const getAllProducts = async (req, res) => {
     if (myproducts) {
       if (role == "admin") query.seller = null;
       else query.seller = res.locals.user_id;
+    }
+
+    if (rating) {
+      query.rating = parseInt(rating, 10); // Ensure rating is treated as a number
     }
 
     // Perform the query
@@ -62,7 +66,7 @@ const getAllProducts = async (req, res) => {
 };
 
 const getAllProductsArchive = async (req, res) => {
-  const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, myproducts, rating } = req.query;
 
   try {
     // Debugging: Log incoming query parameters
@@ -82,10 +86,16 @@ const getAllProductsArchive = async (req, res) => {
       if (maxPrice) query.price.$lte = parseFloat(maxPrice); // Apply maxPrice if given
     }
 
+    if (rating) {
+      query.rating = parseInt(rating, 10); // Ensure rating is treated as a number
+    }
+
     // Filter by the user's products (myProducts)
     if (myproducts) {
       query.seller = res.locals.user_id;
     }
+
+
 
     // Perform the query
     query.isArchived = true;
