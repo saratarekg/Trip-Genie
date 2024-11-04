@@ -495,7 +495,7 @@ export function AllProducts() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-blue-800 mb-8">All Products</h1>
+        <h1 className="text-4xl font-bold text-blue-800 mb-8 mt-8" >All Products</h1>
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="hidden md:block w-64 bg-white rounded-lg shadow-lg p-6">
