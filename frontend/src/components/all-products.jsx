@@ -605,6 +605,13 @@ export function AllProducts() {
         <Plus className="mr-2 w-4 h-4" />
         Create Product
       </Link>
+
+      <Link
+            to="/product-archive"
+            className={`flex items-center justify-between w-full px-4 py-2 rounded-md `}
+            >          
+             Archived Products
+          </Link>
     </div>
   </div>
 )}
