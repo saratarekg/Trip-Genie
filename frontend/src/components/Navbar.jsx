@@ -1,79 +1,71 @@
-"use client";
-
-import keyNavbar from "../assets/images/keyNavbar.svg";
-import settingsIcon from "../assets/settings-svgrepo-com.svg";
-import gearIcon from "../assets/gear-fill.svg";
-import React, { useState,useRef, useEffect } from "react";
-import { HistoryIcon, Menu, X, Calendar } from "lucide-react";
-import { Link } from "react-router-dom"; // Import Link from React Router
-import logo from "../assets/images/tgLogofinal6.png";
+import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-import Lottie from "lottie-react";
-import bellAnimation from "../assets/images/bell.json";
+import logo from "../assets/images/tgLogofinal6.png";
 import {
-  ChevronDown,
-  ShoppingBag,
+  Menu,
+  X,
   User,
-  MapPin,
-  LogOut,
-  Wallet,
-  Lock,
+  HistoryIcon,
+  Calendar,
   AlertTriangle,
-  Settings,
+  LogOut
 } from "lucide-react";
 
 const NavLink = ({ to, children }) => (
   <Link
     to={to}
-    className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium"
+    className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium"
   >
     {children}
   </Link>
 );
 
-
-
 export function NavbarComponent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const role = Cookies.get("role");
   const navigate = useNavigate();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsDropdownOpen(false);
+      setIsMenuOpen(false);
     }
   };
 
   useEffect(() => {
-    if (isDropdownOpen) {
+    if (isMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     } else {
       document.removeEventListener('mousedown', handleClickOutside);
     }
+
+    const handleScroll = () => {
+      const heroHeight = document.querySelector('.hero-section')?.offsetHeight || 0;
+      setIsScrolled(window.scrollY > heroHeight);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', handleScroll);
     };
-  }, [isDropdownOpen]);
-  
-  // Define the logOut function
+  }, [isMenuOpen]);
+
   const logOut = async () => {
     console.log("Logging out...");
     try {
       const response = await fetch("http://localhost:4000/auth/logout");
 
       if (response.ok) {
-        Cookies.set("jwt", "");
-        Cookies.set("role", "");
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
-        navigate("/login"); // Redirect to login page after logout
-        window.location.reload(); // Refresh the page after logout
+        navigate("/login");
+        window.location.reload();
       } else {
         console.error("Logout failed.");
       }
@@ -83,277 +75,261 @@ export function NavbarComponent() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50">
-      <div className="relative">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 w-full h-[70px] bg-cover bg-center"
-          style={{ background: "transparent" }}
-        ></div>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-black/50' : ''}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="logo" className="h-12 w-auto" />
+            </Link>
+          </div>
 
-        {/* Navbar Content */}
-        <div className="relative bg-black bg-opacity-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              {/* Logo */}
-              <div className="flex-shrink-0">
-                <Link to="/" className="flex items-center">
-                  <img src={logo} alt="logo" className="h-12 w-auto" />
-                </Link>
-              </div>
-
-              {/* Desktop Navigation */}
-              <div className="hidden md:block">
-                <div className="ml-10 flex items-baseline space-x-4">
-                  {role === "tour-guide" && (
-                    <>
-                      <NavLink to="/activity">Activities</NavLink>
-                      <NavLink to="/all-itineraries">Itineraries</NavLink>
-                      <NavLink to="/tour-guide-profile">Profile</NavLink>
-                    </>
-                  )}
-                  {role === "seller" && (
-                    <>
-                      <NavLink to="/all-products">Products</NavLink>
-                      <NavLink to="/seller-profile">Profile</NavLink>
-                    </>
-                  )}
-                  {role === "tourist" && (
-                    <>
-                      <NavLink to="/activity">Activities</NavLink>
-                      <NavLink to="/all-itineraries">Itineraries</NavLink>
-                      <NavLink to="/all-historical-places">
-                        Historical Places
-                      </NavLink>
-                      <NavLink to="/all-products">Products</NavLink>
-                      {/* <NavLink to="/tourist-profile">Profile</NavLink>
-                      <NavLink to="/file-complaint">Complaint</NavLink> */}
-                    </>
-                  )}
-                  {role === "advertiser" && (
-                    <>
-                      <NavLink to="/activity">Activities</NavLink>
-                      <NavLink to="/advertiser-profile">Profile</NavLink>
-                    </>
-                  )}
-                  {role === "admin" && (
-                    <>
-                      {/* Admin-specific Navbar */}
-                      <div className="hidden md:flex justify-between items-center w-full">
-                        {/* Middle part with two orange boxes */}
-                        {/* <div className="flex items-center space-x-4">
-                          <div
-                            className="w-10 h-10 rounded-md flex justify-center items-center"
-                            style={{ backgroundColor: "#003F66" }}
-                          >
-                            <Lottie
-                              animationData={bellAnimation}
-                              loop={true}
-                              style={{ width: "100%", height: "100%" }}
-                            />
-                          </div>
-                          <div
-                            className="w-10 h-10 rounded-md flex justify-center items-center"
-                            style={{ backgroundColor: "#003F66" }}
-                          >
-                            <img
-                              src={keyNavbar}
-                              alt="Key Icon"
-                              className="h-6 w-6"
-                            />
-                          </div>
-                        </div> */}
-                      </div>
-                    </>
-                  )}
-
-                  {role === "tourism-governor" && (
-                    <>
-                      <NavLink to="/all-historical-places">
-                        Historical Places
-                      </NavLink>
-                      <NavLink to="/create-historical-tag">
-                        Historical tag
-                      </NavLink>
-                    </>
-                  )}
-                  {(role === "guest" || role === undefined) && (
-                    <>
-                      <NavLink to="/activity">Activities</NavLink>
-                      <NavLink to="/all-itineraries">Itineraries</NavLink>
-                      <NavLink to="/all-historical-places">
-                        Historical Places
-                      </NavLink>
-                      <NavLink to="/all-products">Products</NavLink>
-                    </>
-                  )}
-                  {role !== "guest" && role !== undefined && (
-                    <div className="relative" ref={dropdownRef}>
-                      <button
-                        onClick={toggleDropdown}
-                        className="flex items-center text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium focus:outline-none"
-                      >
-                        My Account <ChevronDown className="ml-1" />
-                      </button>
-                      {isDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                          <Link
-                            to="/account/info"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                          >
-                            <User className="mr-2 h-4 w-4" />
-                            Settings & Privacy
-                          </Link>
-                          {role === "tourist" && (
-                            <>
-                              <Link
-                                to="/account/history"
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                              >
-                                <HistoryIcon className="mr-2 h-4 w-4" />
-                                Give Feedback
-                              </Link>
-                              <Link
-                                to="/account/upcoming"
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                              >
-                                <Calendar className="mr-2 h-4 w-4" />
-                                Dashboard
-                              </Link>
-                              <Link
-                                to="/account/complain"
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                              >
-                                <AlertTriangle className="mr-2 h-4 w-4" />
-                                Help & Support
-                              </Link>
-                              {/* <Link
-                                to="/account/cart"
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                              >
-                                <ShoppingBag className="mr-2 h-4 w-4" />
-                                My Cart
-                              </Link>
-
-                              <Link
-                                to="/account/redeem-points"
-                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                              >
-                                <Wallet className="mr-2 h-4 w-4" />
-                                Points and Wallet
-                              </Link> */}
-                            </>
-                          )}
-
-                          {/* <Link
-                            to="/account/security"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                          >
-                            <Lock className="h-4 w-4 mr-2" />
-                            Security
-                          </Link>
-
-                          <Link
-                            to="/account/preferences"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                          >
-                            <Settings className="h-4 w-4 mr-2" />
-                            Preferences
-                          </Link> */}
-                          <Link
-                            onClick={logOut}
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                          >
-                            <LogOut className="h-4 w-4 mr-2" />
-                            Log Out
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  )}
+          {/* Desktop Navigation */}
+          <div className="hidden md:block">
+            <div className="inline-flex items-center border border-white/20 rounded-full px-2 py-1">
+              {role === "tour-guide" && (
+                <>
+                  <NavLink to="/activity">Activities</NavLink>
+                  <NavLink to="/all-itineraries">Itineraries</NavLink>
+                  <NavLink to="/tour-guide-profile">Profile</NavLink>
+                </>
+              )}
+              {role === "seller" && (
+                <>
+                  <NavLink to="/all-products">Products</NavLink>
+                  <NavLink to="/seller-profile">Profile</NavLink>
+                </>
+              )}
+              {role === "tourist" && (
+                <>
+                  <NavLink to="/activity">Activities</NavLink>
+                  <NavLink to="/all-itineraries">Itineraries</NavLink>
+                  <NavLink to="/all-historical-places">Historical Places</NavLink>
+                  <NavLink to="/all-products">Products</NavLink>
+                </>
+              )}
+              {role === "advertiser" && (
+                <>
+                  <NavLink to="/activity">Activities</NavLink>
+                  <NavLink to="/advertiser-profile">Profile</NavLink>
+                </>
+              )}
+              {role === "admin" && (
+                <div className="flex justify-between items-center">
+                  {/* Admin-specific navigation items can be added here */}
                 </div>
-              </div>
-              {/* Login, Sign Up */}
-              <div className="hidden md:block">
-                <div className="ml-4 flex items-center md:ml-6 space-x-4">
-                {
-  role === undefined && (
-    <>
-      <NavLink
-        to="/login"
-        className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-sm font-medium"
-      >
-        Login
-      </NavLink>
-      <Link
-        to="/sign-up"
-        className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-      >
-        Sign up
-      </Link>
-    </>
-  )
-}
-
-                </div>
-              </div>
-
-              {/* Mobile menu button */}
-              <div className="md:hidden">
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-white hover:bg-opacity-10 focus:outline-none"
-                >
-                  <span className="sr-only">Open main menu</span>
-                  {isMenuOpen ? (
-                    <X className="block h-6 w-6" aria-hidden="true" />
-                  ) : (
-                    <Menu className="block h-6 w-6" aria-hidden="true" />
-                  )}
-                </button>
-              </div>
+              )}
+              {role === "tourism-governor" && (
+                <>
+                  <NavLink to="/all-historical-places">Historical Places</NavLink>
+                  <NavLink to="/create-historical-tag">Historical tag</NavLink>
+                </>
+              )}
+              {(role === "guest" || role === undefined) && (
+                <>
+                  <NavLink to="/activity">Activities</NavLink>
+                  <NavLink to="/all-itineraries">Itineraries</NavLink>
+                  <NavLink to="/all-historical-places">Historical Places</NavLink>
+                  <NavLink to="/all-products">Products</NavLink>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden bg-black bg-opacity-50">
-              <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                {[
-                  "Home",
-                  "Explore",
-                  "Travel",
-                  "Museums",
-                  "Pricing",
-                  "Historical Places",
-                ].map((item) => (
-                  <Link
-                    key={item}
-                    to={`/${item.toLowerCase().replace(/\s+/g, "-")}`}
-                    className="text-white hover:bg-white hover:bg-opacity-10 block px-3 py-2 rounded-md text-base font-medium"
-                  >
-                    {item}
-                  </Link>
-                ))}
-              </div>
-
-              {/* Login, Sign Up in Mobile View */}
-              <div className="pt-4 pb-3 border-t border-white border-opacity-25">
-                <div className="flex items-center px-5">
-                  <Link to="/login">
-                    <button className="text-white hover:bg-white hover:bg-opacity-10 px-3 py-2 rounded-md text-base font-medium">
-                      Login
+          {/* Login, Sign Up, and Menu Button */}
+          <div className="hidden md:flex items-center">
+            {role === undefined ? (
+              <>
+                <NavLink to="/login">Login</NavLink>
+                <Link
+                  to="/sign-up"
+                  className="ml-3 bg-white text-black hover:bg-white/90 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200"
+                >
+                  Sign up
+                </Link>
+              </>
+            ) : (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="inline-flex items-center justify-center p-2 rounded-full text-white hover:bg-white/10 focus:outline-none transition-colors duration-200"
+                >
+                  <Menu className="h-6 w-6" />
+                </button>
+                {isMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-black/90 rounded-2xl border border-white/20 shadow-lg py-1">
+                    <Link
+                      to="/account/info"
+                      className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      Settings & Privacy
+                    </Link>
+                    {role === "tourist" && (
+                      <>
+                        <Link
+                          to="/account/history"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        >
+                          <HistoryIcon className="mr-2 h-4 w-4" />
+                          Give Feedback
+                        </Link>
+                        <Link
+                          to="/account/upcoming"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                        <Link
+                          to="/account/complain"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        >
+                          <AlertTriangle className="mr-2 h-4 w-4" />
+                          Help & Support
+                        </Link>
+                      </>
+                    )}
+                    <button
+                      onClick={logOut}
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log Out
                     </button>
-                  </Link>
-                  <button className="ml-3 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-base font-medium">
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-full text-white hover:bg-white/10 focus:outline-none transition-colors duration-200"
+            >
+              <span className="sr-only">Open main menu</span>
+              {isMenuOpen ? (
+                <X className="block h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="block h-6 w-6" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      {isMenuOpen && (
+        <div className="md:hidden bg-black/90 mt-2 mx-4 rounded-2xl border border-white/20">
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {role === "tour-guide" && (
+              <>
+                <NavLink to="/activity">Activities</NavLink>
+                <NavLink to="/all-itineraries">Itineraries</NavLink>
+                <NavLink to="/tour-guide-profile">Profile</NavLink>
+              </>
+            )}
+            {role === "seller" && (
+              <>
+                <NavLink to="/all-products">Products</NavLink>
+                <NavLink to="/seller-profile">Profile</NavLink>
+              </>
+            )}
+            {role === "tourist" && (
+              <>
+                <NavLink to="/activity">Activities</NavLink>
+                <NavLink to="/all-itineraries">Itineraries</NavLink>
+                <NavLink to="/all-historical-places">Historical Places</NavLink>
+                <NavLink to="/all-products">Products</NavLink>
+              </>
+            )}
+            {role === "advertiser" && (
+              <>
+                <NavLink to="/activity">Activities</NavLink>
+                <NavLink to="/advertiser-profile">Profile</NavLink>
+              </>
+            )}
+            {role === "tourism-governor" && (
+              <>
+                <NavLink to="/all-historical-places">Historical Places</NavLink>
+                <NavLink to="/create-historical-tag">Historical tag</NavLink>
+              </>
+            )}
+            {(role === "guest" || role === undefined) && (
+              <>
+                <NavLink to="/activity">Activities</NavLink>
+                <NavLink to="/all-itineraries">Itineraries</NavLink>
+                <NavLink to="/all-historical-places">Historical Places</NavLink>
+                <NavLink to="/all-products">Products</NavLink>
+              </>
+            )}
+            {role !== "guest" && role !== undefined && (
+              <>
+                <Link
+                  to="/account/info"
+                  className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Settings & Privacy
+                </Link>
+                {role === "tourist" && (
+                  <>
+                    <Link
+                      to="/account/history"
+                      className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                    >
+                      <HistoryIcon className="mr-2 h-4 w-4" />
+                      Give Feedback
+                    </Link>
+                    <Link
+                      to="/account/upcoming"
+                      className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/account/complain"
+                      className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                    >
+                      <AlertTriangle className="mr-2 h-4 w-4" />
+                      Help & Support
+                    </Link>
+                  </>
+                )}
+                <button
+                  onClick={logOut}
+                  className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Login, Sign Up in Mobile View */}
+          {role === undefined && (
+            <div className="pt-4 pb-3 border-t border-white/20">
+              <div className="flex items-center px-5">
+                <Link to="/login">
+                  <button className="text-white hover:bg-white/10 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200">
+                    Login
+                  </button>
+                </Link>
+                <Link to="/sign-up">
+                  <button className="ml-3 bg-white text-black hover:bg-white/90 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200">
                     Sign up
                   </button>
-                </div>
+                </Link>
               </div>
             </div>
           )}
         </div>
-      </div>
+      )}
     </nav>
   );
 }

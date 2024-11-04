@@ -150,26 +150,29 @@ export function Activities() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <div className="w-full sm:w-1/2">
-          <h2 className="text-3xl font-bold">Activities</h2>
-          <hr className="border-red-500 w-1/2 mb-3 mt-1 border-t-2" />
-          <p className="text-gray-600 mt-2 mb-8">
-            Explore a range of exciting activities on our travel website! Whether it's guided tours, outdoor adventures, or cultural experiences, we have something for every traveler. Start planning today for unforgettable memories!
-          </p>
-        </div>
-        <div className="flex gap-2">
+    <div className="container mx-auto px-24 py-12">
+    <div className="flex items-start mb-6">
+      <div className="w-full pr-12">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-[#1A3B47] mb-4 pl-12 ml-4">Activities</h1>
+            <p className="text-[#1A3B47] mb-4 max-w-2xl pl-12 ml-4">
+              Explore a range of exciting activities on our travel website! Whether it's guided tours, outdoor adventures, or cultural experiences, we have something for every traveler. Start planning today for unforgettable memories!
+            </p>
+          </div>
+          <div className="pr-4 pt-24">
           <Link to="/activity">
             <Button
               variant="primary"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-lg font-medium"
+              className="bg-[#388A94] hover:bg-[#5D9297] text-white px-8 py-2 rounded-full text-lg font-medium transition-colors duration-300"
             >
               View More
             </Button>
           </Link>
+          </div>
         </div>
       </div>
+    </div>
 
       {/* Activity Cards Slider */}
       <div className="relative px-12">
@@ -180,7 +183,7 @@ export function Activities() {
           onClick={prevSlide}
           disabled={currentIndex === 0}
           aria-label="Previous activity"
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-[#B5D3D1] text-white hover:bg-[#1A3B47] disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -190,7 +193,7 @@ export function Activities() {
           onClick={nextSlide}
           disabled={currentIndex >= activities.length - visibleSlides}
           aria-label="Next activity"
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-orange-500 text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-[#F88C33] text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-full"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -228,13 +231,17 @@ export function Activities() {
                         }
                       })}
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{`Description: ${act.description}`}</p>
+                    <p className="text-sm text-gray-600 mb-2">
+                    {`Description: ${
+                      act.description.length > 85 ? act.description.slice(0, 85) + '...' : act.description
+                    }`}
+                  </p>
                     <p className="text-sm text-gray-600 mb-2">{`Location: ${act.location.address}`}</p>
                     <p className="text-sm text-gray-600 mb-2">{`Duration: ${act.duration}`}</p>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold">From {formatPrice(act.price, act.currency)}</span>
                       <Link to={`/activity/${act._id}`}>
-                        <button className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <button className="bg-[#388A94] hover:bg-[#5D9297] text-white px-4 py-2 rounded-full text-l font-medium transition-colors duration-300">
                           Details
                         </button>
                       </Link>
