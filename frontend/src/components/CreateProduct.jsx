@@ -65,7 +65,7 @@ const CreateProductForm = () => {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get(
-          "http://localhost:4000/seller/currencies",
+          `http://localhost:4000/${userRole}/currencies`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
