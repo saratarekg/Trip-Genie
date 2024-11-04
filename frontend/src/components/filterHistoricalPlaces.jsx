@@ -88,185 +88,97 @@ const FilterComponent = ({
   //   };
 
   return (
-    <>
-      <div className="flex mb-4">
-        <div className="flex space-x-4">
-          <button onClick={toggleFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-            <Filter className="mr-2" size={18} />
-            Filters <ChevronDown className={`ml-1 transform ${filtersVisible ? 'rotate-180' : ''}`} />
-          </button>
-
-          {/* <button onClick={() => handleSort('price')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-            <ArrowUpDown className="mr-2" size={18} />
-            Sort by Price {sortBy === 'price' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-          </button> */}
-          {/* 
-          <button onClick={() => handleSort('rating')} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-            <ArrowUpDown className="mr-2" size={18} />
-            Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
-          </button> */}
-
-          {role === 'tourism-governor' ? (
-
+    <div className="bg-white rounded-lg shadow-lg p-6">
+      
+      <div className="space-y-6">
+        {/* Top buttons */}
+        <div className="flex flex-wrap gap-2">
           <button
-            onClick={() => handlemyHistoricalPlaces(!myHistoricalPlaces)}
-            className={`flex items-center px-4 py-2 rounded-full shadow ${myHistoricalPlaces ? "bg-orange-500 text-white" : "bg-white text-black"
-              }`}          >
-            <ContactRound strokeWidth={1.25} />
-            My Places 
-          </button>
-
-           ) : null}
-          <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
-            Clear Filters 
-          </button>
-         
-        </div>
-
-
-
-        {role === 'tourism-governor' ? (
-          <Link to="/create-historicalPlace" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
-            <Plus className="mr-2" size={18} />
-            Create
-          </Link>
-        ) : null}
-
-
-      </div>
-
-      {filtersVisible && (
-        <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">
-          <div className="flex flex-col space-y-4">
-            {/* Price Input */}
-            {/* <div>
-              <label className="block text-gray-700">Price</label>
-              <input
-                type="number"
-                placeholder="Max budget"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                className="w-full mt-1 border rounded-lg p-2"
-              />
-            </div> */}
-
-            {/* Date Range Input */}
-            {/* <div>
-              <label className="block text-gray-700">Date Range</label>
-              <div className="flex space-x-2">
-                <input
-                  type="date"
-                  value={dateRange.lower}
-                  onChange={handleLowerDateChange}
-                  className="w-full mt-1 border rounded-lg p-2"
-                />
-                <input
-                  type="date"
-                  value={dateRange.upper}
-                  onChange={handleUpperDateChange}
-                  min={dateRange.lower}
-                  className="w-full mt-1 border rounded-lg p-2"
-                />
-              </div>
-            </div> */}
-
-            {/* Type Dropdown */}
-            <div>
-              <label className="block text-gray-700">Type</label>
-              <div className="relative">
-                <button
-                  onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-                  className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
-                >
-                  {getSelectedTypesLabel()} <ChevronDown className={`ml-1 transform ${showTypeDropdown ? 'rotate-180' : ''}`} />
-                </button>
-                {showTypeDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                    {typesOptions.map((type) => (
-                      <label key={type} className="flex items-center px-4 py-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedTypes.includes(type)}
-                          onChange={() => handleTypeChange(type)}
-                          className="form-checkbox"
-                        />
-                        <span className="ml-2">{type}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700">Period</label>
-              <div className="relative">
-                <button
-                  onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
-                  className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
-                >
-                  {getSelectedPeriodLabel()} <ChevronDown className={`ml-1 transform ${showPeriodDropdown ? 'rotate-180' : ''}`} />
-                </button>
-                {showPeriodDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                    {periodsOptions.map((period) => (
-                      <label key={period} className="flex items-center px-4 py-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedPeriods.includes(period)}
-                          onChange={() => handlePeriodChange(period)}
-                          className="form-checkbox"
-                        />
-                        <span className="ml-2">{period}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Language Dropdown */}
-            {/* <div>
-              <label className="block text-gray-700">Language</label>
-              <div className="relative">
-                <button
-                  onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-                  className="w-full mt-1 border rounded-lg p-2 flex justify-between items-center"
-                >
-                  Select Language(s) <ChevronDown className={`ml-1 transform ${showLanguageDropdown ? 'rotate-180' : ''}`} />
-                </button>
-                {showLanguageDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                    {languagesOptions.map((language) => (
-                      <label key={language} className="flex items-center px-4 py-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedLanguages.includes(language)}
-                          onChange={() => handleLanguageChange(language)}
-                          className="form-checkbox"
-                        />
-                        <span className="ml-2">{language}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div> */}
-          </div>
-
-          {/* Apply Filters Button */}
-          <button
-             onClick={() => {
-              searchHistoricalPlaces();
-              toggleFilters(); // Hide filters after applying them
-            }}
-            className="mt-12 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 "
+            onClick={toggleFilters}
+            className="flex items-center px-4 py-2 bg-[#388A94] hover:bg-[#5D9297] text-white rounded-full shadow"
           >
-            Apply Filters
+            <Filter className="mr-2 " size={18} />
+            Filters
           </button>
+
+          {role === 'tourism-governor' && (
+            <button
+              onClick={() => handlemyHistoricalPlaces(!myHistoricalPlaces)}
+              className={`flex items-center px-4 py-2 rounded-full shadow ${
+                myHistoricalPlaces ? "bg-orange-500 text-white" : "bg-white text-black"
+              }`}
+            >
+              <ContactRound strokeWidth={1.25} className="mr-2" />
+              My Places
+            </button>
+          )}
+
+          <button
+            onClick={clearFilters}
+            className="flex items-center px-4 py-2 bg-[#388A94] hover:bg-[#5D9297] text-white rounded-full shadow"
+          >
+            Clear Filters
+          </button>
+
+          {role === 'tourism-governor' && (
+            <Link
+              to="/create-historicalPlace"
+              className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
+            >
+              <Plus className="mr-2" size={18} />
+              Create
+            </Link>
+          )}
         </div>
-      )}
-    </>
+
+        {/* Types Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Types</h3>
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {typesOptions.map((type) => (
+              <label key={type} className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedTypes.includes(type)}
+                  onChange={() => handleTypeChange(type)}
+                  className="rounded border-gray-300 text-[#388A94] focus:ring-[#388A94]"
+                />
+                <span className="text-gray-700">{type}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Periods Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Periods</h3>
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {periodsOptions.map((period) => (
+              <label key={period} className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedPeriods.includes(period)}
+                  onChange={() => handlePeriodChange(period)}
+                  className="rounded border-gray-300 text-[#388A94] focus:ring-[#388A94]"
+                />
+                <span className="text-gray-700">{period}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Apply Filters Button */}
+        <button
+          onClick={() => {
+            searchHistoricalPlaces();
+            toggleFilters();
+          }}
+          className="w-full bg-[#388A94] text-white py-2 px-4 rounded-lg hover:bg-[#5D9297] transition-colors"
+        >
+          Apply Filters
+        </button>
+      </div>
+    </div>
   );
 };
 
