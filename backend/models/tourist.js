@@ -60,6 +60,14 @@ const touristSchema = new Schema(
       required: true,
       trim: true,
     },
+    fname: {
+      type: String,
+      trim: true,
+    },
+    lname: {
+      type: String,
+      trim: true,
+    },
     preferredCurrency: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Currency",
