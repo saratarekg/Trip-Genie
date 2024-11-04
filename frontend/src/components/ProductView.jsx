@@ -165,23 +165,20 @@ export function ProductViewer() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row">
+    <div className="container mx-auto px-24 py-12 flex flex-col md:flex-row">
       {isLoading && <Loader />}
       <div className="w-full md:w-1/3 pr-8 mb-8 md:mb-0">
-        <h2 className="text-3xl font-bold">Products</h2>
-        <hr className="border-red-500 w-1/2 mb-3 mt-1 border-t-2" />
-        <p className="text-gray-600 mb-8">
+      <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Products</h1>
+        <p className="text-[#1A3B47] mb-4">
         Discover our unique collection of locally-inspired keepsakes. Each item tells a story and celebrates the culture of our vibrant destination, making it a perfect gift for yourself or a loved one. Bring home a piece of your adventure!
          </p>
         <div className="flex justify-center">
           <div className="relative">
-            <div className="absolute left-0 top-0 w-8 h-8 bg-gray-800 -translate-x-1/2 -translate-y-1/2 rounded z-0"></div>
-            <div className="absolute right-0 bottom-0 w-8 h-8 bg-gray-300 translate-x-1/2 translate-y-1/2 rounded z-0"></div>
             <button 
               onClick={handleViewAllProducts}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-lg font-medium transition duration-300 z-20 relative"
+              className="bg-[#388A94] hover:bg-[#5D9297] text-white px-8 py-2 rounded-full text-lg font-medium transition-colors duration-300"
             >
-              View all products
+              View More
             </button>
           </div>
         </div>

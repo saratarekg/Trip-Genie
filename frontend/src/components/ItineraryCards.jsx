@@ -134,26 +134,25 @@ export const ItineraryCards = () => {
   }, [userRole, userPreferredCurrency, itineraries]);
 
   return (
-    <div className="container mx-auto px-4 py-12 flex flex-col md:flex-row">
+    <div className="container mx-auto px-24 py-12 flex flex-col md:flex-row">
       {/* Left Side: Itineraries Title, Line, Description, Button */}
-      <div className="w-full md:w-1/2 pr-8 mb-8 md:mb-0">
-        <h2 className="text-3xl font-bold mb-6">Itineraries</h2>
-        <hr className="border-red-500 w-1/2 mb-3 mt-1 border-t-2" />
-        <p className="text-gray-600 mb-10 text-lg leading-relaxed">
+      <div className="w-full md:w-2/6 pr-8 mb-8 md:mb-0">
+      <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Itineraries</h1>
+        <p className="text-[#1A3B47] mb-4">
           Discover our curated itineraries designed for every traveler, blending cultural experiences with thrilling adventures. From serene escapes to adrenaline-filled expeditions, our diverse journeys cater to all preferences. Let us turn your travel dreams into reality!
         </p>
 
         <div className="flex justify-center">
           <Link to="/all-itineraries">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-lg font-medium">
-              View all itineraries
+            <button className="bg-[#388A94] hover:bg-[#5D9297] text-white px-8a py-2 pl-8 pr-8 rounded-full text-lg font-medium transition-colors duration-300">
+              View More
             </button>
           </Link>
         </div>
       </div>
 
       {/* Right Side: Itineraries Cards */}
-      <div className="w-full md:w-3/5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="w-full md:w-4/6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {itineraries.map((itinerary) => {
           const activityImage =
             itinerary.activities &&

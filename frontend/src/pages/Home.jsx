@@ -1,74 +1,135 @@
-import React from "react";
-import TravelHero from "../components/TravelHero.jsx";
-import { HistoricalPlaces } from "../components/HistoricalPlacesSlider.jsx";
-import { Activities } from "../components/ActivitiesSlider.jsx";
-import { ItineraryCards } from "../components/ItineraryCards.jsx";
-import Cookies from "js-cookie";
-import { ProductViewer } from "../components/ProductView.jsx";
+'use client'
 
-const Home = () => {
-  let role = Cookies.get("role");
-  if (role === undefined) role = "guest";
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import TravelHero from '../components/TravelHero'
+import { HistoricalPlaces } from '../components/HistoricalPlacesSlider'
+import { Activities } from '../components/ActivitiesSlider'
+import { ItineraryCards } from '../components/ItineraryCards'
+import { ProductViewer } from '../components/ProductView'
+import { AboutUs } from '../components/AboutUs'
+import Cookies from 'js-cookie'
+
+export default function Home() {
+  const [activeTab, setActiveTab] = useState('activities')
+  const [role, setRole] = useState('guest')
+
+  useEffect(() => {
+    setRole(Cookies.get('role') || 'guest')
+  }, [])
+
+  const tabs = {
+    activities: <Activities />,
+    itineraries: <ItineraryCards />,
+    products: <ProductViewer />
+  }
+
+  const renderContent = () => {
+    switch (role) {
+      case 'tourism-governor':
+        return <HistoricalPlaces />
+      case 'advertiser':
+        return <Activities />
+      case 'seller':
+        return <ProductViewer />
+      case 'tour-guide':
+        return (
+          <>
+            <div className="text-center max-w-2xl mx-auto mb-4 mt-12">
+              <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">
+                Explore Your Next Adventure
+              </h1>
+              <p className="text-[#1A3B47] mb-4">
+                Discover a variety of thrilling activities and thoughtfully designed itineraries that will enhance your journey. Whether you're looking for cultural experiences or exciting excursions, we have everything you need to make your travels unforgettable. Start planning your next adventure today!
+              </p>
+            </div>
+            <div className="mb-2 max-w-2xl mx-auto">
+              <div className="flex justify-center">
+                <div className="inline-flex rounded-full p-1 w-full max-w-2xl border-2 border-[#1A3B47]">
+                  {['activities', 'itineraries'].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 w-full ${
+                        activeTab === tab
+                          ? 'bg-[#388A94] text-white'
+                          : 'text-[#1A3B47] hover:text-[#5D9297]'
+                      }`}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {activeTab === 'activities' ? <Activities /> : <ItineraryCards />}
+              </motion.div>
+            </AnimatePresence>
+          </>
+        )
+      default: // tourist, guest, admin
+        return (
+          <>
+            <AboutUs />
+            <HistoricalPlaces />
+            <div className="text-center max-w-2xl mx-auto mb-4 mt-24">
+              <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">
+                Explore Your Next Adventure
+              </h1>
+              <p className="text-[#1A3B47] mb-4">
+                Discover a variety of thrilling activities, thoughtfully designed itineraries, and unique travel products that will enhance your journey. Whether you're looking for cultural experiences or exciting excursions, we have everything you need to make your travels unforgettable. Start planning your next adventure today!
+              </p>
+            </div>
+            <div className="mb-2 max-w-2xl mx-auto">
+              <div className="flex justify-center">
+                <div className="inline-flex rounded-full p-1 w-full max-w-2xl border-2 border-[#1A3B47]">
+                  {Object.keys(tabs).map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 w-full ${
+                        activeTab === tab
+                          ? 'bg-[#388A94] text-white'
+                          : 'text-[#1A3B47] hover:text-[#5D9297]'
+                      }`}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {tabs[activeTab]}
+              </motion.div>
+            </AnimatePresence>
+          </>
+        )
+    }
+  }
 
   return (
-    
-    <>
-      <div className="flex flex-col items-center justify-center min-h-screen">
-      <TravelHero/>
-      {role === "guest" && (
-        <>
-          <HistoricalPlaces />
-          <Activities />
-          <ItineraryCards />
-          <ProductViewer />
-        </>
-      )}
-
-      {role === "tourist" && (
-         <>
-         <HistoricalPlaces />
-         <Activities />
-         <ItineraryCards />
-         <ProductViewer />
-       </>
-      )}
-
-{role === "tourism-governor" && (
-         <>
-         <HistoricalPlaces />
-       </>
-      )}
-      {role === "admin" && (
-         <>
-         <HistoricalPlaces />
-         <Activities />
-         <ItineraryCards />
-         <ProductViewer />
-       </>
-      )}
-      {role === "advertiser" && (
-         <>
-         <Activities />
-        
-       </>
-      )}
-      {role === "seller" && (
-         <>
-         
-         <ProductViewer />
-       </>
-      )}
-
-{role === "tour-guide" && (
-         <>
-         <Activities />
-         <ItineraryCards />
-       </>
-      )}
+    <div className="min-h-screen bg-[#E6DCCF]">
+      <TravelHero />
       
+      <div className="mx-auto px-4 py-16">
+        {renderContent()}
       </div>
-    </>
-  );
-};
-
-export default Home;
+    </div>
+  )
+}
