@@ -18,6 +18,7 @@ const getAllProducts = async (req, res) => {
     // Apply search filter (by name) if provided
     if (searchBy) {
       query.name = { $regex: searchBy, $options: "i" }; // Case-insensitive regex search
+      query.description = { $regex: searchBy, $options: "i" }; 
     }
 
     // Apply price range filter if provided
@@ -77,6 +78,7 @@ const getAllProductsArchive = async (req, res) => {
     // Apply search filter (by name) if provided
     if (searchBy) {
       query.name = { $regex: searchBy, $options: "i" }; // Case-insensitive regex search
+      query.description = { $regex: searchBy, $options: "i" }; 
     }
 
     // Apply price range filter if provided
