@@ -55,6 +55,9 @@ import BookingPage from "./pages/FlightBooking.jsx";
 import FileViewer from "./components/FileViewer.jsx";
 import HotelBookingPage from "./pages/HotelBooking.jsx";
 import UserApproval from "./components/userApproval.jsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
+import FAQs from "./pages/FAQs.jsx";
+import TermsandCondition from "./pages/TermsandCondition.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -303,6 +306,33 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
                 <ShoppingCart />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
+                <PrivacyPolicy />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/faqs"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
+                <FAQs />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/terms"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
+                <TermsandCondition/>
               </ProtectedRoute>
             }
           />

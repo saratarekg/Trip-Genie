@@ -1,24 +1,52 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect, useCallback } from "react"
-import { useNavigate } from "react-router-dom"
-import Cookies from "js-cookie"
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
-import axios from "axios"
-import { Search, ChevronLeft, ChevronRight, Star, Filter, Plus, Heart, ShoppingCart, ArrowUpDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Slider } from "@/components/ui/slider"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import Loader from "./Loader"
-import defaultImage from "../assets/images/default-image.jpg"
-import DualHandleSliderComponent from "./dual-handle-slider"
-import LazyLoad from "react-lazyload"
+import axios from "axios";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  Filter,
+  Plus,
+  Heart,
+  ShoppingCart,
+  ArrowUpDown,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Loader from "./Loader";
+import defaultImage from "../assets/images/default-image.jpg";
+import DualHandleSliderComponent from "./dual-handle-slider";
+import LazyLoad from "react-lazyload";
 
 const renderStars = (rating) => {
   return (
@@ -32,16 +60,27 @@ const renderStars = (rating) => {
         />
       ))}
     </div>
-  )
-}
+  );
+};
 
-const ProductCard = ({ product, onSelect, userInfo, onBuyNow, cartItems, wishlistItems, onAddToCart, onAddToWishlist }) => {
-  const [exchangeRate, setExchangeRate] = useState(null)
-  const [currencySymbol, setCurrencySymbol] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
+const ProductCard = ({
+  product,
+  onSelect,
+  userInfo,
+  onBuyNow,
+  cartItems,
+  wishlistItems,
+  onAddToCart,
+  onAddToWishlist,
+}) => {
+  const [exchangeRate, setExchangeRate] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const isInCart = cartItems.some(item => item.product?._id === product._id)
-  const isInWishlist = wishlistItems.some(item => item?.product?._id === product._id)
+  const isInCart = cartItems.some((item) => item.product?._id === product._id);
+  const isInWishlist = wishlistItems.some(
+    (item) => item?.product?._id === product._id
+  );
 
   useEffect(() => {
     if (
@@ -49,16 +88,16 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow, cartItems, wishlis
       userInfo.role === "tourist" &&
       userInfo.preferredCurrency !== product.currency
     ) {
-      fetchExchangeRate()
+      fetchExchangeRate();
     } else {
-      getCurrencySymbol()
+      getCurrencySymbol();
     }
-  }, [userInfo, product])
+  }, [userInfo, product]);
 
   const fetchExchangeRate = useCallback(async () => {
     if (userInfo && userInfo.role === "tourist") {
       try {
-        const token = Cookies.get("jwt")
+        const token = Cookies.get("jwt");
         const response = await fetch(
           `http://localhost:4000/${userInfo.role}/populate`,
           {
@@ -72,43 +111,48 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow, cartItems, wishlis
               target: userInfo.preferredCurrency._id,
             }),
           }
-        )
-        const data = await response.json()
+        );
+        const data = await response.json();
         if (response.ok) {
-          setExchangeRate(data.conversion_rate)
+          setExchangeRate(data.conversion_rate);
         } else {
-          console.error("Error in fetching exchange rate:", data.message)
+          console.error("Error in fetching exchange rate:", data.message);
         }
       } catch (error) {
-        console.error("Error fetching exchange rate:", error)
+        console.error("Error fetching exchange rate:", error);
       }
     }
-  }, [userInfo, product])
+  }, [userInfo, product]);
 
   const getCurrencySymbol = useCallback(async () => {
     try {
-      const token = Cookies.get("jwt")
-      const response = await axios.get(`http://localhost:4000/${userInfo.role}/getCurrency/${product.currency}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setCurrencySymbol(response.data.symbol)
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        `http://localhost:4000/${userInfo.role}/getCurrency/${product.currency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setCurrencySymbol(response.data.symbol);
     } catch (error) {
-      console.error("Error fetching currency symbol:", error)
+      console.error("Error fetching currency symbol:", error);
     }
-  }, [userInfo, product])
+  }, [userInfo, product]);
 
   const formatPrice = (price) => {
-    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+    if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
       if (userInfo.preferredCurrency === product.currency) {
-        return `${userInfo.preferredCurrency.symbol}${price}`
+        return `${userInfo.preferredCurrency.symbol}${price}`;
       } else if (exchangeRate) {
-        const exchangedPrice = price * exchangeRate
-        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`
+        const exchangedPrice = price * exchangeRate;
+        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
+          2
+        )}`;
       }
     } else if (currencySymbol) {
-      return `${currencySymbol}${price}`
+      return `${currencySymbol}${price}`;
     }
-  }
+  };
 
   return (
     <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
@@ -136,8 +180,8 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow, cartItems, wishlis
           <Button
             className="bg-orange-400 hover:bg-[#F88C33] text-white" style={{ borderRadius: '20px' }}
             onClick={(e) => {
-              e.stopPropagation()
-              onBuyNow(product)
+              e.stopPropagation();
+              onBuyNow(product);
             }}
           >
             Buy Now
@@ -152,8 +196,8 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow, cartItems, wishlis
             <Button
               className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
               onClick={(e) => {
-                e.stopPropagation()
-                onAddToCart(product)
+                e.stopPropagation();
+                onAddToCart(product);
               }}
             >
               <Plus className="w-5 h-5" />
@@ -161,112 +205,125 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow, cartItems, wishlis
             </Button>
           )}
           <Button
-            className={`rounded-full w-10 h-10 p-0 ${isInWishlist ? 'bg-red-400 hover:bg-red-500' : 'bg-gray-200 hover:bg-gray-300'} text-white`}
+            className={`rounded-full w-10 h-10 p-0 ${
+              isInWishlist
+                ? "bg-red-400 hover:bg-red-500"
+                : "bg-gray-200 hover:bg-gray-300"
+            } text-white`}
             onClick={(e) => {
-              e.stopPropagation()
-              onAddToWishlist(product)
+              e.stopPropagation();
+              onAddToWishlist(product);
             }}
           >
-            <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current' : ''}`} />
+            <Heart
+              className={`w-5 h-5 ${isInWishlist ? "fill-current" : ""}`}
+            />
             <span className="sr-only">Add to Wishlist</span>
           </Button>
         </div>
       )}
     </Card>
-  )
-}
+  );
+};
 
 export function AllProducts() {
-  const [products, setProducts] = useState([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [error, setError] = useState(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [sortOrder, setSortOrder] = useState(1)
-  const [sortBy, setSortBy] = useState("")
-  const [filtersVisible, setFiltersVisible] = useState(false)
-  const [myProducts, setMyProducts] = useState(false)
-  const [priceRange, setPriceRange] = useState([0, 1000])
-  const [maxPrice, setMaxPrice] = useState(1000)
-  const [isLoading, setIsLoading] = useState(false)
-  const [userInfo, setUserInfo] = useState(null)
-  const [selectedCategories, setSelectedCategories] = useState([])
-  const [selectedRating, setSelectedRating] = useState(null)
-  const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState(null)
-  const [quantity, setQuantity] = useState(1)
-  const [paymentMethod, setPaymentMethod] = useState("")
-  const [deliveryDate, setDeliveryDate] = useState("")
-  const [deliveryTime, setDeliveryTime] = useState("")
-  const [deliveryType, setDeliveryType] = useState("")
-  const [locationType, setLocationType] = useState("")
-  const [location, setLocation] = useState("")
-  const [cartItems, setCartItems] = useState([])
-  const [wishlistItems, setWishlistItems] = useState([])
-  const [alertMessage, setAlertMessage] = useState(null)
-  const tripsPerPage = 6
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState(1);
+  const [sortBy, setSortBy] = useState("");
+  const [filtersVisible, setFiltersVisible] = useState(false);
+  const [myProducts, setMyProducts] = useState(false);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [isLoading, setIsLoading] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedRating, setSelectedRating] = useState(null);
+  const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [deliveryDate, setDeliveryDate] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("");
+  const [deliveryType, setDeliveryType] = useState("");
+  const [locationType, setLocationType] = useState("");
+  const [location, setLocation] = useState("");
+  const [cartItems, setCartItems] = useState([]);
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const [alertMessage, setAlertMessage] = useState(null);
+  const tripsPerPage = 6;
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const getUserRole = useCallback(() => {
-    let role = Cookies.get("role")
-    return role || "guest"
-  }, [])
+    let role = Cookies.get("role");
+    return role || "guest";
+  }, []);
 
   const fetchUserInfo = useCallback(async () => {
-    const role = Cookies.get("role") || "guest"
-    const token = Cookies.get("jwt")
+    const role = Cookies.get("role") || "guest";
+    const token = Cookies.get("jwt");
 
     if (role === "tourist") {
       try {
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        const currencyId = response.data.preferredCurrency
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const currencyId = response.data.preferredCurrency;
 
-        const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        const currencyResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         setUserInfo({
           role,
-          preferredCurrency: currencyResponse.data
-        })
+          preferredCurrency: currencyResponse.data,
+        });
       } catch (error) {
-        console.error("Error fetching user profile:", error)
-        setUserInfo({ role })
+        console.error("Error fetching user profile:", error);
+        setUserInfo({ role });
       }
     } else {
-      setUserInfo({ role })
+      setUserInfo({ role });
     }
-  }, [])
+  }, []);
 
   const getSymbol = () => {
-    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
-      return `${userInfo.preferredCurrency.symbol}`
+    if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
+      return `${userInfo.preferredCurrency.symbol}`;
     } else {
-      return "$"
+      return "$";
     }
-  }
+  };
 
   const fetchProducts = useCallback(
     async (params = {}) => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const token = Cookies.get("jwt")
-        const role = getUserRole()
-        const url = new URL(`http://localhost:4000/${role}/products`)
+        const token = Cookies.get("jwt");
+        const role = getUserRole();
+        const url = new URL(`http://localhost:4000/${role}/products`);
 
-        if (params.searchBy) url.searchParams.append("searchBy", params.searchBy)
+        if (params.searchBy)
+          url.searchParams.append("searchBy", params.searchBy);
         if (params.sort) {
-          url.searchParams.append("sort", params.sort)
-          url.searchParams.append("asc", params.asc)
+          url.searchParams.append("sort", params.sort);
+          url.searchParams.append("asc", params.asc);
         }
-        if (params.myproducts) url.searchParams.append("myproducts", params.myproducts)
-        if (params.minPrice) url.searchParams.append("minPrice", params.minPrice)
-        if (params.maxPrice) url.searchParams.append("maxPrice", params.maxPrice)
-        if (params.rating) url.searchParams.append("rating", params.rating)
+        if (params.myproducts)
+          url.searchParams.append("myproducts", params.myproducts);
+        if (params.minPrice)
+          url.searchParams.append("minPrice", params.minPrice);
+        if (params.maxPrice)
+          url.searchParams.append("maxPrice", params.maxPrice);
+        if (params.rating) url.searchParams.append("rating", params.rating);
         if (params.categories && params.categories.length > 0) {
-          url.searchParams.append("categories", params.categories.join(','))
+          url.searchParams.append("categories", params.categories.join(","));
         }
 
         const response = await fetch(url, {
@@ -274,139 +331,145 @@ export function AllProducts() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        })
+        });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json()
-        setProducts(data)
-        setError(null)
+        const data = await response.json();
+        setProducts(data);
+        setError(null);
       } catch (error) {
-        console.error("Error fetching products:", error)
-        setError("Error fetching products")
-        setProducts([])
+        console.error("Error fetching products:", error);
+        setError("Error fetching products");
+        setProducts([]);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     },
     [getUserRole]
-  )
+  );
 
   const fetchCartItems = useCallback(async () => {
     try {
-      const token = Cookies.get("jwt")
-      const response = await fetch('http://localhost:4000/tourist/cart', {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/cart", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
       if (response.ok) {
-        const data = await response.json()
-        setCartItems(data)
+        const data = await response.json();
+        setCartItems(data);
       }
     } catch (error) {
-      console.error('Error fetching cart items:', error)
+      console.error("Error fetching cart items:", error);
     }
-  }, [])
+  }, []);
 
   const fetchWishlistItems = useCallback(async () => {
     try {
-      const token = Cookies.get("jwt")
-      const response = await fetch('http://localhost:4000/tourist/wishlist', {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/wishlist", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
       if (response.ok) {
-        const data = await response.json()
-        setWishlistItems(data)
+        const data = await response.json();
+        setWishlistItems(data);
       }
     } catch (error) {
-      console.error('Error fetching wishlist items:', error)
+      console.error("Error fetching wishlist items:", error);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (userInfo) {
-      fetchProducts()
-      fetchCartItems()
-      fetchWishlistItems()
+      fetchProducts();
+      fetchCartItems();
+      fetchWishlistItems();
     }
-  }, [userInfo, fetchProducts, fetchCartItems, fetchWishlistItems])
+  }, [userInfo, fetchProducts, fetchCartItems, fetchWishlistItems]);
 
   useEffect(() => {
-    fetchUserInfo()
-  }, [fetchUserInfo])
+    fetchUserInfo();
+  }, [fetchUserInfo]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchProducts({
         searchBy: searchTerm,
-        sort: sortBy,
-        asc: sortOrder,
         myproducts: myProducts,
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         rating: selectedRating,
-        categories: selectedCategories
-      })
-    }, 300)
+        categories: selectedCategories,
+      });
+    }, 300);
 
-    return () => clearTimeout(delayDebounceFn)
-  }, [searchTerm, sortBy, sortOrder, myProducts, priceRange, selectedRating, selectedCategories, fetchProducts])
+    return () => clearTimeout(delayDebounceFn);
+  }, [
+    searchTerm,
+    sortBy,
+    sortOrder,
+    myProducts,
+    priceRange,
+    selectedRating,
+    selectedCategories,
+    fetchProducts,
+  ]);
 
   const handleProductSelect = (id) => {
-    navigate(`/product/${id}`)
-  }
+    navigate(`/product/${id}`);
+  };
 
   const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const handleSort = (attribute) => {
-    setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1))
-    setSortBy(attribute)
-  }
+    setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1));
+    setSortBy(attribute);
+  };
 
   const handleMyProducts = (attribute) => {
-    setMyProducts(attribute)
-  }
+    setMyProducts(attribute);
+  };
 
   const clearFilters = () => {
-    setSearchTerm("")
-    setSortBy("")
-    setSortOrder(1)
-    setMyProducts(false)
-    setPriceRange([0, maxPrice])
-    setSelectedRating(null)
-    setSelectedCategories([])
-    fetchProducts()
-  }
+    setSearchTerm("");
+    setSortBy("");
+    setSortOrder(1);
+    setMyProducts(false);
+    setPriceRange([0, maxPrice]);
+    setSelectedRating(null);
+    setSelectedCategories([]);
+    fetchProducts();
+  };
 
   const toggleFilters = () => {
-    setFiltersVisible(!filtersVisible)
-  }
+    setFiltersVisible(!filtersVisible);
+  };
 
   const handleCategoryChange = (category) => {
-    setSelectedCategories(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category)
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
         : [...prev, category]
-    )
-  }
+    );
+  };
 
   const handleBuyNow = (product) => {
-    setSelectedProduct(product)
-    setShowPurchaseConfirm(true)
-  }
+    setSelectedProduct(product);
+    setShowPurchaseConfirm(true);
+  };
 
   const handleAddToCart = async (product) => {
-    
     try {
-      const token = Cookies.get("jwt")
+      const token = Cookies.get("jwt");
       const response = await fetch(
         "http://localhost:4000/tourist/product/addToCart",
         {
@@ -421,22 +484,28 @@ export function AllProducts() {
             totalAmount: product.price,
           }),
         }
-      )
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to add to cart")
+        throw new Error("Failed to add to cart");
       }
 
-      setAlertMessage({ type: 'success', message: 'Product added to cart successfully!' })
-      fetchCartItems()
+      setAlertMessage({
+        type: "success",
+        message: "Product added to cart successfully!",
+      });
+      fetchCartItems();
     } catch (error) {
-      setAlertMessage({ type: 'error', message: 'Error adding product to cart. Please try again.' })
+      setAlertMessage({
+        type: "error",
+        message: "Error adding product to cart. Please try again.",
+      });
     }
-  }
+  };
 
   const handleAddToWishlist = async (product) => {
     try {
-      const token = Cookies.get("jwt")
+      const token = Cookies.get("jwt");
       const response = await fetch(
         `http://localhost:4000/tourist/product/addToWishlist/${product._id}`,
         {
@@ -446,24 +515,30 @@ export function AllProducts() {
             Authorization: `Bearer ${token}`,
           },
         }
-      )
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to add to wishlist")
+        throw new Error("Failed to add to wishlist");
       }
 
-      setAlertMessage({ type: 'success', message: 'Product added to wishlist successfully!' })
-      fetchWishlistItems()
+      setAlertMessage({
+        type: "success",
+        message: "Product added to wishlist successfully!",
+      });
+      fetchWishlistItems();
     } catch (error) {
-      setAlertMessage({ type: 'error', message: 'Error adding product to wishlist. Please try again.' })
+      setAlertMessage({
+        type: "error",
+        message: "Error adding product to wishlist. Please try again.",
+      });
     }
-  }
+  };
 
   const handlePurchase = async () => {
     try {
-      const token = Cookies.get("jwt")
-      
-      const totalAmount = selectedProduct.price * quantity
+      const token = Cookies.get("jwt");
+
+      const totalAmount = selectedProduct.price * quantity;
 
       const response = await fetch("http://localhost:4000/tourist/purchase", {
         method: "POST",
@@ -476,30 +551,35 @@ export function AllProducts() {
             {
               product: selectedProduct._id,
               quantity: quantity,
-            }
+            },
           ],
           totalAmount,
           paymentMethod: paymentMethod,
           shippingAddress: location,
           locationType: locationType,
-          deliveryType: deliveryType,  
+          deliveryType: deliveryType,
           deliveryTime: deliveryTime,
           deliveryDate: deliveryDate,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to complete purchase")
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to complete purchase");
       }
 
-      setAlertMessage({ type: 'success', message: 'Purchase completed successfully!' })
-      setShowPurchaseConfirm(false)
-
+      setAlertMessage({
+        type: "success",
+        message: "Purchase completed successfully!",
+      });
+      setShowPurchaseConfirm(false);
     } catch (error) {
-      setAlertMessage({ type: 'error', message: 'Error completing purchase. Please try again.' })
+      setAlertMessage({
+        type: "error",
+        message: "Error completing purchase. Please try again.",
+      });
     }
-  }
+  };
 
   return (
     <div className="bg-[#E6DCCF]">
@@ -628,9 +708,9 @@ export function AllProducts() {
             <span className="text-gray-500">({products.length} items)</span>
           </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="icon" 
+                <Button
+                  variant="outline"
+                  size="icon"
                   className="rounded-full md:hidden"
                   onClick={toggleFilters}
                 >
@@ -639,11 +719,21 @@ export function AllProducts() {
               </div>
             </div>
 
-            {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+            {error && (
+              <div className="text-red-500 text-center mb-4">{error}</div>
+            )}
 
             {alertMessage && (
-              <Alert className={`mb-4 ${alertMessage.type === 'success' ? 'bg-green-100' : 'bg-red-100'}`}>
-                <AlertTitle>{alertMessage.type === 'success' ? 'Success' : 'Error'}</AlertTitle>
+              <Alert
+                className={`mb-4 ${
+                  alertMessage.type === "success"
+                    ? "bg-green-100"
+                    : "bg-red-100"
+                }`}
+              >
+                <AlertTitle>
+                  {alertMessage.type === "success" ? "Success" : "Error"}
+                </AlertTitle>
                 <AlertDescription>{alertMessage.message}</AlertDescription>
               </Alert>
             )}
@@ -655,7 +745,10 @@ export function AllProducts() {
                 {/* Product Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {products
-                    .slice((currentPage - 1) * tripsPerPage, currentPage * tripsPerPage)
+                    .slice(
+                      (currentPage - 1) * tripsPerPage,
+                      currentPage * tripsPerPage
+                    )
                     .map((product) => (
                       <ProductCard
                         key={product._id}
@@ -685,20 +778,26 @@ export function AllProducts() {
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
                       <span className="text-lg font-medium">
-                        Page {currentPage} of {Math.ceil(products.length / tripsPerPage)}
+                        Page {currentPage} of{" "}
+                        {Math.ceil(products.length / tripsPerPage)}
                       </span>
                       <Button
                         variant="outline"
                         size="icon"
                         className="rounded-full"
                         onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === Math.ceil(products.length / tripsPerPage)}
+                        disabled={
+                          currentPage ===
+                          Math.ceil(products.length / tripsPerPage)
+                        }
                       >
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </>
                   ) : (
-                    <span className="text-lg font-medium text-gray-500">No pages available</span>
+                    <span className="text-lg font-medium text-gray-500">
+                      No pages available
+                    </span>
                   )}
                 </div>
               </>
@@ -711,7 +810,9 @@ export function AllProducts() {
       <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-bold">Confirm Purchase</DialogTitle>
+            <DialogTitle className="text-3xl font-bold">
+              Confirm Purchase
+            </DialogTitle>
           </DialogHeader>
 
           {/* Product Details */}
@@ -721,7 +822,9 @@ export function AllProducts() {
               <p className="text-xl font-semibold">{selectedProduct?.name}</p>
             </div>
             <div className="my-4">
-              <label htmlFor="quantity" className="block text-lg font-medium">Quantity</label>
+              <label htmlFor="quantity" className="block text-lg font-medium">
+                Quantity
+              </label>
               <Input
                 type="number"
                 id="quantity"
@@ -737,7 +840,12 @@ export function AllProducts() {
           <div className="my-4">
             <h2 className="text-2xl font-bold">Payment & Delivery</h2>
             <div className="my-4">
-              <label htmlFor="deliveryDate" className="block text-lg font-medium">Delivery Date</label>
+              <label
+                htmlFor="deliveryDate"
+                className="block text-lg font-medium"
+              >
+                Delivery Date
+              </label>
               <Input
                 type="date"
                 id="deliveryDate"
@@ -746,20 +854,34 @@ export function AllProducts() {
               />
             </div>
             <div className="my-4">
-              <label htmlFor="deliveryTime" className="block text-lg font-medium">Delivery Time</label>
+              <label
+                htmlFor="deliveryTime"
+                className="block text-lg font-medium"
+              >
+                Delivery Time
+              </label>
               <Select value={deliveryTime} onValueChange={setDeliveryTime}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select delivery time" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="morning">Morning (8 AM - 12 PM)</SelectItem>
-                  <SelectItem value="afternoon">Afternoon (12 PM - 4 PM)</SelectItem>
+                  <SelectItem value="morning">
+                    Morning (8 AM - 12 PM)
+                  </SelectItem>
+                  <SelectItem value="afternoon">
+                    Afternoon (12 PM - 4 PM)
+                  </SelectItem>
                   <SelectItem value="evening">Evening (4 PM - 8 PM)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="my-4">
-              <label htmlFor="deliveryType" className="block text-lg font-medium">Delivery Type</label>
+              <label
+                htmlFor="deliveryType"
+                className="block text-lg font-medium"
+              >
+                Delivery Type
+              </label>
               <Select value={deliveryType} onValueChange={setDeliveryType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select delivery type" />
@@ -771,7 +893,12 @@ export function AllProducts() {
               </Select>
             </div>
             <div className="my-4">
-              <label htmlFor="paymentMethod" className="block text-lg font-medium">Payment Method</label>
+              <label
+                htmlFor="paymentMethod"
+                className="block text-lg font-medium"
+              >
+                Payment Method
+              </label>
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select payment method" />
@@ -789,7 +916,12 @@ export function AllProducts() {
           <div className="my-4">
             <h2 className="text-2xl font-bold">Location Details</h2>
             <div className="my-4">
-              <label htmlFor="locationType" className="block text-lg font-medium">Location Type</label>
+              <label
+                htmlFor="locationType"
+                className="block text-lg font-medium"
+              >
+                Location Type
+              </label>
               <Select value={locationType} onValueChange={setLocationType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select location type" />
@@ -802,7 +934,9 @@ export function AllProducts() {
               </Select>
             </div>
             <div className="my-4">
-              <label htmlFor="location" className="block text-lg font-medium">Address</label>
+              <label htmlFor="location" className="block text-lg font-medium">
+                Address
+              </label>
               <Input
                 type="text"
                 id="location"
@@ -814,15 +948,21 @@ export function AllProducts() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowPurchaseConfirm(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowPurchaseConfirm(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={handlePurchase} className="bg-orange-400 hover:bg-orange-500 text-white">
+            <Button
+              onClick={handlePurchase}
+              className="bg-orange-400 hover:bg-orange-500 text-white"
+            >
               Buy Now
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

@@ -42,7 +42,11 @@ tourGuideFileFields = [
   { name: "Certificates", maxCount: 5 },
 ];
 
-router.post("/sign-up/tourist", authController.touristSignup);
+router.post(
+  "/sign-up/tourist",
+  upload.single(""),
+  authController.touristSignup
+);
 router.post(
   "/sign-up/advertiser",
   upload.fields(advertiserSellerFileFields),

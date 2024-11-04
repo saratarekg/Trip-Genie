@@ -25,7 +25,7 @@ export function ImageCropper({ onImageCropped, currentImage }) {
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
       reader.addEventListener("load", () => setSelectedImage(reader.result));
-      //reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(e.target.files[0]);
     }
   };
 

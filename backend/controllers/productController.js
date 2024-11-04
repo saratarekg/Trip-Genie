@@ -14,10 +14,10 @@ const getAllProducts = async (req, res) => {
 
     // Build the query object dynamically
     const query = {};
-
     // Apply search filter (by name) if provided
     if (searchBy) {
       query.name = { $regex: searchBy, $options: "i" }; // Case-insensitive regex search
+      query.description = { $regex: searchBy, $options: "i" }; 
     }
 
     // Apply price range filter if provided
@@ -41,7 +41,6 @@ const getAllProducts = async (req, res) => {
     query.isArchived = false;
     query.isDeleted = false;
     let productsQuery = Product.find(query);
-
     // Apply sorting if 'asc' is defined (for sorting by rating)
     if (asc !== undefined) {
       const sortOrder = parseInt(asc, 10);
@@ -49,15 +48,12 @@ const getAllProducts = async (req, res) => {
     } else {
       productsQuery = productsQuery.sort({ createdAt: -1 });
     }
-
     // Execute the query and get the products
     const products = await productsQuery;
-
     // Check if no products match the filters
     if (!products.length) {
       return res.status(200).json([]);
     }
-
     // Return filtered products
     res.status(200).json(products);
   } catch (error) {
@@ -77,6 +73,7 @@ const getAllProductsArchive = async (req, res) => {
     // Apply search filter (by name) if provided
     if (searchBy) {
       query.name = { $regex: searchBy, $options: "i" }; // Case-insensitive regex search
+      query.description = { $regex: searchBy, $options: "i" }; 
     }
 
     // Apply price range filter if provided
