@@ -527,7 +527,7 @@ const addCommentToItinerary = async (req, res) => {
 
     const tourist = await Tourist.findById(res.locals.user_id);
     if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
+      return res.status(400).json({ message: "Tourist not found" });
     }
 
     // Determine the username to use
@@ -544,13 +544,9 @@ const addCommentToItinerary = async (req, res) => {
 
     // Find the activity by ID
     const itinerary = await Itinerary.findById(req.params.id);
-    // .populate("advertiser")
-    // .populate("category")
-    // .populate("tags")
-    // .exec();
 
     if (!itinerary) {
-      return res.status(404).json({ message: "Itinerary not found" });
+      return res.status(400).json({ message: "Itinerary not found" });
     }
     if (itinerary.isDeleted) {
       return res.status(400).json({ message: "Itinerary no longer exists" });
@@ -561,10 +557,9 @@ const addCommentToItinerary = async (req, res) => {
       username: finalUsername,
       rating,
       content,
-      date: new Date(), // Set the current date
+      date: new Date(),
+      tourist: tourist._id, // Set the current date
     };
-
-    console.log(newComment);
 
     // Add the comment to the activity's comments array
     itinerary.comments.push(newComment);
@@ -588,6 +583,79 @@ const addCommentToItinerary = async (req, res) => {
     console.error(error);
     res.status(500).json({
       message: "An error occurred while adding the comment",
+      error: error.message,
+    });
+  }
+};
+
+const updateCommentOnItinerary = async (req, res) => {
+  try {
+    const { rating, content, username } = req.body;
+    const touristId = res.locals.user_id; // Get the authenticated user's ID
+
+    // Validate the rating if it's provided
+    if (rating !== undefined && (rating < 0 || rating > 5)) {
+      return res.status(400).json({
+        message: "Rating must be a number between 0 and 5",
+      });
+    }
+
+    const tourist = await Tourist.findById(res.locals.user_id);
+    if (!tourist) {
+      return res.status(400).json({ message: "Tourist not found" });
+    }
+
+    // Find the itinerary by ID
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) {
+      return res.status(400).json({ message: "Itinerary not found" });
+    }
+    if (itinerary.isDeleted) {
+      return res.status(400).json({ message: "Itinerary no longer exists" });
+    }
+
+    // Find the comment by the tourist ID
+    const comment = itinerary.comments.find(
+      (comment) => comment.tourist.toString() === touristId
+    );
+    if (!comment) {
+      return res.status(400).json({ message: "Comment not found for this user" });
+    }
+
+    // Update fields if provided
+    let finalUsername;
+
+    if (username && username === "Anonymous") {
+      finalUsername = "Anonymous"; // Use 'anonymous' as the username
+    } else  {
+      finalUsername = tourist.username;
+    }
+    comment.username = finalUsername;
+    if (rating !== undefined) comment.rating = rating;
+    if (content) comment.content = content;
+
+    // Recalculate the average rating if the rating was updated
+    let newAverageRating;
+    if (rating !== undefined) {
+      const totalRatings = itinerary.comments.length;
+      const sumOfRatings = itinerary.comments.reduce((sum, comment) => sum + comment.rating, 0);
+      newAverageRating = sumOfRatings / totalRatings;
+      itinerary.rating = newAverageRating; // Update the itinerary's average rating
+    }
+
+    // Save the updated itinerary
+    await itinerary.save();
+
+    // Respond with success and the updated comment
+    res.status(200).json({
+      message: "Comment updated successfully",
+      comment,
+      ...(newAverageRating && { newAverageRating }), // Include new average if rating was updated
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "An error occurred while updating the comment",
       error: error.message,
     });
   }
@@ -670,4 +738,5 @@ module.exports = {
   toggleActivationStatus,
   getItinerariesByPreference,
   theHolyAntiFilter,
+  updateCommentOnItinerary,
 };

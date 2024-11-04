@@ -114,6 +114,20 @@ const ImageGallery = ({ pictures }) => {
   );
 };
 
+const RatingDistributionBar = ({ percentage, count }) => (
+  <div className="flex items-center gap-2 text-sm">
+    <span className="w-8 text-right">{count} ★</span>
+    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div 
+        className="h-full bg-primary rounded-full" 
+        style={{ width: `${percentage}%` }}
+      />
+    </div>
+    <span className="w-12 text-gray-500">{percentage}%</span>
+  </div>
+);
+
+
 const StarRating = ({ rating, setRating, readOnly = false }) => {
   return (
     <div className="flex items-center">
@@ -160,6 +174,13 @@ const ActivityDetail = () => {
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
+  const [ratingDistribution, setRatingDistribution] = useState({
+    5: 0, 4: 0, 3: 0, 2: 0, 1: 0
+  });
+  const [userComment, setUserComment] = useState(null);
+  const [quickRating, setQuickRating] = useState(0);
+  const [isRatingHovered, setIsRatingHovered] = useState(false);
+
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -282,6 +303,31 @@ const ActivityDetail = () => {
           setCurrentUser(decodedToken.id);
 
         }
+        if (data) {
+          setActivity(data);
+          // Calculate rating distribution
+          const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+          data.comments.forEach(comment => {
+            distribution[Math.floor(comment.rating)] = (distribution[Math.floor(comment.rating)] || 0) + 1;
+          });
+          setRatingDistribution(distribution);
+  
+          // Find user's comment if exists
+          if (currentUser) {
+            const userComment = data.comments.find(comment => comment.tourist === currentUser);
+            if (userComment) {
+              setUserComment(userComment);
+              setQuickRating(userComment.rating || 0);
+              setNewReview({
+                rating: userComment.rating || 0,
+                liked: userComment.content?.liked || "",
+                disliked: userComment.content?.disliked || "",
+                visitDate: userComment.visitDate || "",
+                isAnonymous: userComment.username === 'Anonymous'
+              });
+            }
+          }
+        }
       } catch (err) {
         setError("Error fetching activity details. Please try again later.");
         console.error("Error fetching activity details:", err);
@@ -290,40 +336,7 @@ const ActivityDetail = () => {
       }
     };
 
-    // const fetchUserBooking = async () => {
-    //   try {
-    //     const token = Cookies.get("jwt");
-    //     const decodedToken = jwtDecode(token);
-    //     const userId = decodedToken.id;
-    //     const response = await axios.get(`http://localhost:4000/${userRole}/touristActivityBookings`, {
-    //       headers: { Authorization: `Bearer ${token}` },
-    //     });
-    //     const userBookings = response.data;
-        
-    // const existingBooking = userBookings.find(booking => {
-    //   console.log(`Checking booking for activity: ${booking.activity._id}`);
-    //   console.log(`Comparing with id: ${id}`);
-    //   console.log(`Are they equal? ${booking.activity._id === id}`);
-
-    //   // Check if the activity ID matches the provided ID
-    //   return booking.activity._id === id;
-    // });
-
-    // if (existingBooking) {
-    //   setUserBooking(existingBooking);
-    //   setBooked(true);
-    //   console.log('Existing Booking:', existingBooking);
-    // } else {
-    //   // If no booking matches, set userBooking to an empty array or handle it as needed
-    //   setUserBooking([]);
-    //   setBooked(false);
-    //   console.log('No matching booking found, setting userBooking to an empty array.');
-    // }
-
-    //   } catch (error) {
-    //     console.error("Error fetching user booking:", error);
-    //   }
-    // };
+    
     const fetchUserBookings = async () => {
       try {
       const token = Cookies.get("jwt");
@@ -331,6 +344,7 @@ const ActivityDetail = () => {
       headers: { Authorization: `Bearer ${token}` },
       });
       setUserBookings(response.data);
+      console.log(response.data);
       } catch (error) {
       console.error("Error fetching user bookings:", error);
       }
@@ -341,7 +355,7 @@ const ActivityDetail = () => {
     if (userRole === 'tourist') {
       fetchUserBookings();
       }
-  }, [id, userRole]);
+  }, [id, userRole, currentUser]);
 
   
   const fetchExchangeRate = async () => {
@@ -520,6 +534,17 @@ const ActivityDetail = () => {
     }
   };
 
+  const getTotalRatings = () => {
+    return activity?.comments?.length || 0;
+  };
+
+
+  const getReviewsCount = () => {
+    return activity?.comments?.filter(comment => 
+      comment.content && (comment.content.liked || comment.content.disliked)
+    ).length || 0;
+  };
+
   const calculateDiscountedPrice = (originalPrice, discountPercentage) => {
     return ((originalPrice * (100 - discountPercentage)) / 100).toFixed(2);
   };
@@ -570,52 +595,74 @@ const ActivityDetail = () => {
       Math.min(activity.comments.length - 3, prev + 3)
     );
 
-  const handleAddReview = async () => {
-    try {
-      const token = Cookies.get("jwt");
-      let username = newReview.isAnonymous ? "Anonymous" : "User";
-
-      const newComment = {
-        username,
-        rating: newReview.rating,
-        content: {
-          liked: newReview.liked,
-          disliked: newReview.disliked,
-        },
-        date: new Date(),
-      };
-
-      const response = await fetch(
-        `http://localhost:4000/${userRole}/activities/comment/${id}`,
-        {
-          method: "POST",
+    const handleQuickRating = async (rating) => {
+      try {
+        const method = userComment ? 'PUT' : 'POST';
+        const url = userComment
+          ? `http://localhost:4000/${userRole}/activities/updateComment/${id}`
+          : `http://localhost:4000/${userRole}/activities/comment/${id}`;
+  
+        const response = await fetch(url, {
+          method: method,
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Cookies.get('jwt')}`,
           },
-          body: JSON.stringify(newComment),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to submit comment");
+          body: JSON.stringify({
+            rating: rating,
+            content: userComment ? userComment.content : { liked: '', disliked: '' },
+            isAnonymous: userComment ? userComment.isAnonymous : false,
+            date: new Date().toISOString(),
+            username: userComment ? userComment.username : 'User'
+          }),
+        });
+        if (!response.ok) throw new Error('Failed to submit rating');
+        setQuickRating(rating);
+        await fetchProductDetails();
+      } catch (error) {
+        console.error('Error submitting rating:', error);
       }
-
-      const data = await response.json();
-
-      setShowAddReview(false);
-      window.location.reload();
-      setNewReview({
-        rating: 0,
-        liked: "",
-        disliked: "",
-        visitDate: "",
-        isAnonymous: false,
-      });
-    } catch (error) {
-      console.error("Error submitting review:", error);
-    }
-  };
+    };
+  
+    const handleAddReview = async () => {
+      try {
+        const method = userComment ? 'PUT' : 'POST';
+        const url = userComment
+          ? `http://localhost:4000/${userRole}/activities/updateComment/${id}`
+          : `http://localhost:4000/${userRole}/activities/comment/${id}`;
+  
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Cookies.get('jwt')}`,
+          },
+          body: JSON.stringify({
+            rating: newReview.rating,
+            content: {
+              liked: newReview.liked,
+              disliked: newReview.disliked
+            },
+            isAnonymous: newReview.isAnonymous,
+            visitDate: newReview.visitDate,
+            date: new Date().toISOString(),
+            username: newReview.isAnonymous ? 'Anonymous' : 'User'
+          }),
+        });
+        if (!response.ok) throw new Error('Failed to submit review');
+        setShowAddReview(false);
+        setNewReview({
+          rating: 0,
+          liked: "",
+          disliked: "",
+          visitDate: "",
+          isAnonymous: false
+        });
+        await fetchProductDetails();
+      } catch (error) {
+        console.error('Error submitting review:', error);
+      }
+    };
 
   const isReviewValid = () => {
     return newReview.liked.trim() !== "" || newReview.disliked.trim() !== "";
@@ -941,7 +988,75 @@ const ActivityDetail = () => {
 
           {/* Comment Carousel */}
           <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4">What our customers say</h2>
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
+              <Button variant="link" className="text-primary">
+                See All
+              </Button>
+            </div>
+
+            <div className="flex gap-8 mb-6">
+              <div className="text-center">
+                <div className="text-4xl font-bold mb-1">
+                  {activity?.rating?.toFixed(1) || "0.0"}
+                </div>
+                <div className="text-sm text-gray-500">
+                  out of 5
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {activity?.comments?.length || 0} Ratings
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-1">
+                {[5, 4, 3, 2, 1].map(stars => {
+                  const count = ratingDistribution[stars] || 0;
+                  const percentage = activity?.comments?.length 
+                    ? Math.round((count / activity.comments.length) * 100) 
+                    : 0;
+                  return (
+                    <RatingDistributionBar 
+                      key={stars} 
+                      percentage={percentage} 
+                      count={stars}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
+            {userRole === "tourist" && userBookings.some(booking => booking.activity._id === activity._id) && (
+              <div className="border-t pt-4">
+                <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
+                <div 
+                  className="flex gap-2"
+                  onMouseLeave={() => setIsRatingHovered(false)}
+                >
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-8 h-8 cursor-pointer ${
+                        (isRatingHovered ? quickRating >= star : quickRating >= star)
+                          ? "text-yellow-500 fill-current"
+                          : "text-gray-300"
+                      }`}
+                      onMouseEnter={() => {
+                        setIsRatingHovered(true);
+                        setQuickRating(star);
+                      }}
+                      onClick={() => handleQuickRating(star)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="border-t pt-6"></div>
+          <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            {getTotalRatings()} overall ratings, {getReviewsCount()} with reviews
+          </p>
             {activity.comments && activity.comments.length > 0 ? (
               <>
                 <div className="flex items-center justify-between mb-4">
@@ -1022,16 +1137,17 @@ const ActivityDetail = () => {
             ) : (
               <p>No comments yet.</p>
             )}
-          {userBookings.some(booking => booking.activity._id === activity._id) && (
-  <>
-    <Button onClick={() => setShowAddReview(true)} className="mt-4">
-      Write a review
-    </Button>
-    <Button onClick={() => setShowRatingDialog(true)} className="mt-2 ml-3">
-      Rate Activity
-    </Button>
-  </>
-)}
+           {userBookings.some(booking => booking.activity._id === activity._id) && !userComment && (
+            <Button onClick={() => setShowAddReview(true)} className="mt-4 mr-4">
+              Add a Review
+            </Button>
+          )}
+          {userComment && (
+            <Button onClick={() => setShowAddReview(true)} className="mt-4 mr-4">
+              Edit Your Review
+            </Button>
+          )}
+
 
           </div>
         </div>
@@ -1239,122 +1355,82 @@ const ActivityDetail = () => {
 
       {/* Add Review Dialog */}
       <Dialog open={showAddReview} onOpenChange={setShowAddReview}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Write a Review</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Your Rating
-              </label>
-              <StarRating
-                rating={newReview.rating}
-                setRating={(rating) =>
-                  setNewReview((prev) => ({ ...prev, rating }))
-                }
-              />
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{userComment ? 'Edit Your Review' : 'Write a Review'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+                <StarRating rating={newReview.rating} setRating={(rating) => setNewReview(prev => ({ ...prev, rating }))} />
+              </div>
+              <div>
+                <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
+                  <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                  Something you liked
+                </label>
+                <Textarea
+                  id="liked"
+                  value={newReview.liked}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
+                  rows={3}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
+                  <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                  Something you didn't like
+                </label>
+                <Textarea
+                  id="disliked"
+                  value={newReview.disliked}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
+                  rows={3}
+                  className="mt-2"
+                />
+              </div>
+              {/* <div>
+                <label htmlFor="visitDate" className="block text-sm font-medium text-gray-700">
+                  When did you visit?
+                </label>
+                <select
+                  id="visitDate"
+                  value={newReview.visitDate}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, visitDate: e.target.value }))}
+                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                >
+                  <option value="">Select a time</option>
+                  <option value="weekday">Weekday</option>
+                  <option value="weekend">Weekend</option>
+                  <option value="holiday">Public holiday</option>
+                </select>
+              </div> */}
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="anonymous-mode"
+                  checked={newReview.isAnonymous}
+                  onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
+                />
+                <Label htmlFor="anonymous-mode">Post anonymously</Label>
+              </div>
             </div>
-            <div>
-              <label
-                htmlFor="liked"
-                className="block text-sm font-medium text-gray-700"
+            <DialogFooter>
+              <Button
+                onClick={() => setShowAddReview(false)}
+                className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
               >
-                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
-                Something you liked
-              </label>
-              <Textarea
-                id="liked"
-                value={newReview.liked}
-                onChange={(e) =>
-                  setNewReview((prev) => ({ ...prev, liked: e.target.value }))
-                }
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="disliked"
-                className="block text-sm font-medium text-gray-700"
+                Cancel
+              </Button>
+              <Button
+                className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
+                onClick={handleAddReview}
               >
-                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
-                Something you didn't like
-              </label>
-              <Textarea
-                id="disliked"
-                value={newReview.disliked}
-                onChange={(e) =>
-                  setNewReview((prev) => ({
-                    ...prev,
-                    disliked: e.target.value,
-                  }))
-                }
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="visitDate"
-                className="block text-sm font-medium text-gray-700"
-              >
-                When did you visit?
-              </label>
-              <select
-                id="visitDate"
-                value={newReview.visitDate}
-                onChange={(e) =>
-                  setNewReview((prev) => ({
-                    ...prev,
-                    visitDate: e.target.value,
-                  }))
-                }
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-              >
-                <option value="">Select a time</option>
-                <option value="weekday">Weekday</option>
-                <option value="weekend">Weekend</option>
-                <option value="holiday">Public holiday</option>
-              </select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="anonymous-mode"
-                checked={newReview.isAnonymous}
-                onCheckedChange={(checked) =>
-                  setNewReview((prev) => ({ ...prev, isAnonymous: checked }))
-                }
-              />
-              <Label htmlFor="anonymous-mode">Post anonymously</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={() => {
-                setShowAddReview(false);
-                setNewReview({
-                  rating: 0,
-                  liked: "",
-                  disliked: "",
-                  visitDate: "",
-                  isAnonymous: false,
-                });
-              }}
-              style={{
-                marginLeft: "10px",
-                backgroundColor: "#D3D3D3",
-                color: "black",
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleAddReview} disabled={!isReviewValid()}>
-              Post Review
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                {userComment ? 'Update Review' : 'Submit Review'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
       {/* Rate Activity Dialog */}
       <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>

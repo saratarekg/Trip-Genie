@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Loader from "../components/Loader";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -57,6 +58,22 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+
+const RatingDistributionBar = ({ percentage, count }) => (
+  <div className="flex items-center gap-2 text-sm">
+    <span className="w-8 text-right">{count} ★</span>
+    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div 
+        className="h-full bg-primary rounded-full" 
+        style={{ width: `${percentage}%` }}
+      />
+    </div>
+    <span className="w-12 text-gray-500">{percentage}%</span>
+  </div>
+);
+
 
 const StarRating = ({ rating, onRatingChange = null }) => {
   return (
@@ -166,6 +183,7 @@ const ProductDetail = () => {
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [showCommentDialog, setShowCommentDialog] = useState(false);
   const [rating, setRating] = useState(0);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const [comment, setComment] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -184,6 +202,25 @@ const characterLimit = 150; // Set your desired character limit
 const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
+  const [ratingDistribution, setRatingDistribution] = useState({
+    5: 0, 4: 0, 3: 0, 2: 0, 1: 0
+  });
+  const [userReview, setUserReview] = useState(null);
+  const [quickRating, setQuickRating] = useState(0);
+  const [isRatingHovered, setIsRatingHovered] = useState(false);
+
+  const [filteredReviews, setFilteredReviews] = useState(null); 
+  // Handle filtering reviews based on selected star rating
+  const handleFilterRating = (rating,product) => {
+    setFilteredRating(rating);
+    // If rating is 0, show all reviews; otherwise, filter by the selected rating
+    if (rating === 0) {
+      setFilteredReviews(product.reviews);
+    } else {
+      setFilteredReviews(product.reviews.filter((review) => review.rating === rating));
+    }
+  };
+
    
   const fetchExchangeRate = async () => {
     try {
@@ -362,6 +399,32 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
           }
         }
 
+        if (data) {
+          setFilteredReviews(data.reviews);
+          setProduct(data);
+          // Calculate rating distribution
+          const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+          data.reviews.forEach(review => {
+            distribution[Math.floor(review.rating)] = (distribution[Math.floor(review.rating)] || 0) + 1;
+          });
+          setRatingDistribution(distribution);
+  
+          // Find user's review if exists
+          const token = Cookies.get("jwt");
+          if (token) {
+            const decodedToken = jwtDecode(token);
+            const userReview = data.reviews.find(review => review.tourist === decodedToken.id);
+            if (userReview) {
+              setUserReview(userReview);
+              setQuickRating(userReview.rating || 0);
+              setRating(userReview.rating || 0);
+              setComment(userReview.comment || "");
+              setIsAnonymous(userReview.username?.trim() === "Anonymous");
+              console.log(userReview.user,"Anonymous",userReview.username?.trim() === "Anonymous");
+            }
+          }
+        }
+
         // Fetch user's purchases
         const purchasesResponse = await fetch(
           "http://localhost:4000/tourist/purchase",
@@ -374,10 +437,14 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
 
         if (purchasesResponse.ok) {
           const purchasesData = await purchasesResponse.json();
+          
           setHasPurchased(
-            purchasesData.some((purchase) => purchase.product && purchase.product._id === id)
-          );          
+            purchasesData.some((purchase) =>
+              purchase.products.some((item) => item.product && item.product._id === id)
+            )
+          );
         }
+        
       } catch (err) {
         setError("Error fetching product details. Please try again later.");
         console.error("Error fetching product details:", err);
@@ -393,29 +460,29 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
     navigate(`/update-product/${id}`);
   };
 
-  const handleFilterRating = async (rating) => {
-    setFilteredRating(rating);
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch(
-        `http://localhost:4000/${userRole}/products/${id}/reviews?rating=${rating}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  // const handleFilterRating = async (rating) => {
+  //   setFilteredRating(rating);
+  //   try {
+  //     const token = Cookies.get("jwt");
+  //     const response = await fetch(
+  //       `http://localhost:4000/${userRole}/products/${id}/reviews?rating=${rating}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch filtered reviews");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch filtered reviews");
+  //     }
 
-      const data = await response.json();
-      setProduct({ ...product, reviews: data });
-    } catch (error) {
-      console.error("Error fetching filtered reviews:", error);
-    }
-  };
+  //     const data = await response.json();
+  //     setProduct({ ...product, reviews: data });
+  //   } catch (error) {
+  //     console.error("Error fetching filtered reviews:", error);
+  //   }
+  // };
 
   const handleArchive = async () => {
     setShowArchiveConfirm(false);
@@ -640,47 +707,65 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
     }
   };
 
-  const handleCommentSubmit = async () => {
+  const handleQuickRating = async (rating) => {
     try {
       const token = Cookies.get("jwt");
-      const response = await fetch(
-        `http://localhost:4000/tourist/product/comment/${id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ rating, comment }),
-        }
-      );
+      const method = userReview ? 'PUT' : 'POST';
+      const url = userReview
+        ? `http://localhost:4000/tourist/product/updateComment/${id}`
+        : `http://localhost:4000/tourist/product/comment/${id}`;
 
-      if (!response.ok) {
-        throw new Error("Failed to submit comment");
-      }
-
-      setActionSuccess("Comment submitted successfully!");
-      setShowCommentDialog(false);
-      // Refresh product details to show updated comments
-      const updatedProductResponse = await fetch(
-        `http://localhost:4000/${userRole}/products/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (updatedProductResponse.ok) {
-        const updatedProduct = await updatedProductResponse.json();
-        setProduct(updatedProduct);
-      }
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ rating, username: isAnonymous }),
+      });
+      if (!response.ok) throw new Error('Failed to submit rating');
+      setQuickRating(rating);
+      window.location.reload();
     } catch (error) {
-      setActionError("Error submitting comment. Please try again.");
+      console.error('Error submitting rating:', error);
+      setActionError("Error submitting rating. Please try again.");
     }
   };
 
+  const handleCommentSubmit = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const method = userReview ? 'PUT' : 'POST';
+      const url = userReview
+        ? `http://localhost:4000/tourist/product/updateComment/${id}`
+        : `http://localhost:4000/tourist/product/comment/${id}`;
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          rating, 
+          comment,
+          username: isAnonymous 
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to submit review');
+      setActionSuccess("Review submitted successfully!");
+      setShowCommentDialog(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      setActionError("Error submitting review. Please try again.");
+    }
+  };
+
+  
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   if (error) {
@@ -756,19 +841,84 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
               </CardContent>
             </Card>
 
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold">
-                  Customer Reviews
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+           
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold">Ratings & Reviews</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-8 mb-6">
+                <div className="text-center">
+                  <div className="text-4xl font-bold mb-1">
+                    {product.rating?.toFixed(1) || "0.0"}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    out of 5
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    {product.reviews?.length || 0} Ratings
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-1">
+                  {[5, 4, 3, 2, 1].map(stars => {
+                    const count = ratingDistribution[stars] || 0;
+                    const percentage = product.reviews?.length 
+                      ? Math.round((count / product.reviews.length) * 100) 
+                      : 0;
+                    return (
+                      <RatingDistributionBar 
+                        key={stars} 
+                        percentage={percentage} 
+                        count={stars}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {hasPurchased && (
+                <div className="border-t pt-4">
+                  <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
+                  <div 
+                    className="flex gap-2"
+                    onMouseLeave={() => setIsRatingHovered(false)}
+                  >
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-8 h-8 cursor-pointer ${
+                          (isRatingHovered ? quickRating >= star : quickRating >= star)
+                            ? "text-yellow-500 fill-current"
+                            : "text-gray-300"
+                        }`}
+                        onMouseEnter={() => {
+                          setIsRatingHovered(true);
+                          setQuickRating(star);
+                        }}
+                        onClick={() => handleQuickRating(star)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {hasPurchased && (
+                <div className="mt-4 space-y-2">
+                  <Button
+                    className="w-full"
+                    onClick={() => setShowCommentDialog(true)}
+                  >
+                    {userReview ? 'Edit Your Review' : 'Write a Review'}
+                  </Button>
+                </div>
+              )}
                 <div className="space-y-6">
                   {product.reviews && product.reviews.length > 0 ? (
                     <>
                      {product.reviews.length > 5 && (
                      <span 
-                     className="text-blue-500 font-semibold justify-end hover:underline flex justify-end cursor-pointer"
+                     className="text-blue-500 font-semibold justify-end hover:underline flex justify-end cursor-pointer mt-6"
                                           onClick={() => setShowAllReviews(true)}
                    >
                      View More Reviews
@@ -1056,23 +1206,23 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
     </ul>
   </CardContent>
 
-  {hasPurchased && (
+  {/* {hasPurchased && (
     
           <CardContent className="pt-6">
               <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
 
             <div className="space-y-2">
               {/* Rate Product Button */}
-              <Button
+              {/* <Button
                 className="w-full bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 flex items-center justify-center"
                 onClick={() => setShowRatingDialog(true)}
               >
                 <Star className="w-5 h-5 mr-2" />
                 Rate Product
-              </Button>
+              </Button> */}
         
               {/* Add Review Button */}
-              <Button
+              {/* <Button
                 className="w-full border-yellow-400 text-yellow-400 hover:bg-yellow-50 font-bold py-2 flex items-center justify-center"
                 variant="outline"
                 onClick={() => setShowCommentDialog(true)}
@@ -1081,9 +1231,9 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
                 Add Review
               </Button>
             </div>
-          </CardContent>
+          </CardContent> */}
         
-            )}
+            {/* )} */} 
               <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
               {product.seller && (
                 <>
@@ -1686,7 +1836,7 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
       <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Review</DialogTitle>
+            <DialogTitle>{userReview ? 'Edit Your Review' : 'Add Review'}</DialogTitle>
             <DialogDescription>
               Share your thoughts about this product
             </DialogDescription>
@@ -1700,28 +1850,32 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="anonymous-mode"
+                checked={isAnonymous}
+                onCheckedChange={setIsAnonymous}
+              />
+              <Label htmlFor="anonymous-mode">Post anonymously</Label>
+            </div>
           </div>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
-                setRating(0);
-                setComment("");
+                setRating(userReview ? userReview.rating : 0);
+                setComment(userReview ? userReview.comment : "");
+                setIsAnonymous(userReview ? userReview.username === "Anonymous" : false);
                 setShowCommentDialog(false);
               }}
             >
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                handleCommentSubmit();
-                setRating(0);
-                setComment("");
-                setShowCommentDialog(false);
-              }}
-              disabled={rating === 0 || comment.trim() === ""}
+              onClick={handleCommentSubmit}
+              disabled={rating === 0 || comment?.trim() === ""}
             >
-              Submit Review
+              {userReview ? 'Update Review' : 'Submit Review'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1767,109 +1921,83 @@ const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
         </DialogContent>
       </Dialog>
 
-     <Dialog open={showAllReviews} onOpenChange={setShowAllReviews}>
-  <DialogContent className="max-w-2xl "> {/* Reduced max-width to fit the screen */}
-    <DialogHeader>
-      <DialogTitle>All Reviews</DialogTitle>
-      <DialogDescription>
-        {/* Top Section for Overall Rating */}
-        <div className="text-center my-4">
-          <span className="text-gray-500 uppercase text-sm">Overall</span>
-
-          {/* Overall Rating Number */}
-          <div className="flex justify-center items-center">
-            <span className="text-4xl font-bold">
-              {product.rating ? product.rating.toFixed(1) : "N/A"}
-            </span>
-
-            {/* Star Rating Display */}
-            <div className="ml-2 flex items-center">
-              {[...Array(5)].map((_, i) => {
-                if (i < Math.floor(product.rating)) {
-                  return <Star key={i} className="w-6 h-6 text-blue-500" />;
-                } else if (i === Math.floor(product.rating) && product.rating % 1 >= 0.5) {
-                  return <StarHalf key={i} className="w-6 h-6 text-blue-500" />;
-                } else {
-                  return <Star key={i} className="w-6 h-6 text-gray-300" />;
-                }
-              })}
+      <Dialog open={showAllReviews} onOpenChange={setShowAllReviews}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>All Reviews</DialogTitle>
+          <DialogDescription>
+            <div className="text-center my-4">
+              <span className="text-gray-500 uppercase text-sm">Overall</span>
+              <div className="flex justify-center items-center">
+                <span className="text-4xl font-bold">
+                  {product.rating ? product.rating.toFixed(1) : "N/A"}
+                </span>
+                <div className="ml-2 flex items-center">
+                  {[...Array(5)].map((_, i) => {
+                    if (i < Math.floor(product.rating)) {
+                      return <Star key={i} className="w-6 h-6 text-blue-500" />;
+                    } else if (i === Math.floor(product.rating) && product.rating % 1 >= 0.5) {
+                      return <StarHalf key={i} className="w-6 h-6 text-blue-500" />;
+                    } else {
+                      return <Star key={i} className="w-6 h-6 text-gray-300" />;
+                    }
+                  })}
+                </div>
+              </div>
+              <p className="text-lg font-semibold text-gray-600">
+                {product.allRatings ? `${product.allRatings.length} Ratings` : 'No Ratings Yet'}
+              </p>
+              <hr className="my-4 border-t border-gray-300" />
             </div>
-          </div>
 
-          {/* Total Ratings Count */}
-          <p className="text-lg font-semibold text-gray-600">
-            {product.allRatings ? `${product.allRatings.length} Ratings` : 'No Ratings Yet'}
-          </p>
-
-          {/* Divider Line */}
-          <hr className="my-4 border-t border-gray-300" />
-        </div>
-
-        {/* Filter by Rating Buttons */}
-        <div className="flex justify-center space-x-2 mb-4">
-          <button
-            className={`px-3 py-2 rounded-md ${filteredRating === 0 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => handleFilterRating(0)}
-          >
-            All
-          </button>
-          <button
-            className={`px-3 py-2 rounded-md ${filteredRating === 5 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => handleFilterRating(5)}
-          >
-            5 Stars
-          </button>
-          <button
-            className={`px-3 py-2 rounded-md ${filteredRating === 4 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => handleFilterRating(4)}
-          >
-            4 Stars
-          </button>
-          <button
-            className={`px-3 py-2 rounded-md ${filteredRating === 3 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => handleFilterRating(3)}
-          >
-            3 Stars
-          </button>
-          <button
-            className={`px-3 py-2 rounded-md ${filteredRating === 2 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => handleFilterRating(2)}
-          >
-            2 Stars
-          </button>
-          <button
-            className={`px-3 py-2 rounded-md ${filteredRating === 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => handleFilterRating(1)}
-          >
-            1 Star
-          </button>
-        </div>
-      </DialogDescription>
-    </DialogHeader>
-
-    {/* Reviews List */}
-    <div className="space-y-6 max-h-[40vh] overflow-y-auto">
-      {product.reviews.map((review, index) => (
-        <div key={index} className="flex space-x-4 border-b pb-4">
-          <Avatar>
-            <AvatarFallback>{review.user[0]}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <h4 className="text-lg font-semibold">{review.user}</h4>
-              <StarRating rating={review.rating} />
+            {/* Filter by Rating Buttons */}
+            <div className="flex justify-center space-x-2 mb-4">
+              <button
+                className={`px-3 py-2 rounded-md ${filteredRating === 0 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                onClick={() => handleFilterRating(0,product)}
+              >
+                All
+              </button>
+              {[5, 4, 3, 2, 1].map((star) => (
+                <button
+                  key={star}
+                  className={`px-3 py-2 rounded-md ${filteredRating === star ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                  onClick={() => handleFilterRating(star,product)}
+                >
+                  {star} Star{star > 1 ? 's' : ''}
+                </button>
+              ))}
             </div>
-            <p className="text-gray-600 mt-1">{review.comment}</p>
-          </div>
-        </div>
-      ))}
-    </div>
+          </DialogDescription>
+        </DialogHeader>
 
-    <DialogFooter>
-      <Button onClick={() => setShowAllReviews(false)}>Close</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+        {/* Reviews List */}
+        <div className="space-y-6 max-h-[40vh] overflow-y-auto">
+          {filteredReviews?.length > 0 ? (
+            filteredReviews.map((review, index) => (
+              <div key={index} className="flex space-x-4 border-b pb-4">
+                <Avatar>
+                  <AvatarFallback>{review.user[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-semibold">{review.user}</h4>
+                    <StarRating rating={review.rating} />
+                  </div>
+                  <p className="text-gray-600 mt-1">{review.comment}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500">No reviews for this rating.</p>
+          )}
+        </div>
+
+        <DialogFooter>
+          <Button onClick={() => setShowAllReviews(false)}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
 
     </div>

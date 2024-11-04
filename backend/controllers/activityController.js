@@ -366,57 +366,47 @@ const rateActivity = async (req, res) => {
 
 const addCommentToActivity = async (req, res) => {
   try {
-    const { username, rating, content } = req.body; // Get comment details from the request body
+    const { username, rating, content } = req.body;
 
     if (rating === undefined) {
       rating = 0; // Default rating
     }
 
     if (rating < 0 || rating > 5) {
-      return res
-        .status(400)
-        .json({ message: "Rating must be a number between 0 and 5" });
+      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
     }
 
     const tourist = await Tourist.findById(res.locals.user_id);
     if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
+      return res.status(400).json({ message: "Tourist not found" });
     }
 
     // Determine the username to use
     let finalUsername;
-
     if (username && username === "Anonymous") {
-      finalUsername = "Anonymous"; // Use 'anonymous' as the username
+      finalUsername = "Anonymous"; // Use 'Anonymous' as the username
     } else if (tourist.username) {
-      finalUsername = tourist.username;
-      // Use the authenticated user's username
+      finalUsername = tourist.username; // Use the authenticated user's username
     } else {
       return res.status(400).json({ message: "Valid username is required" });
     }
 
     // Find the activity by ID
-    const activity = await Activity.findById(req.params.id)
-      .populate("advertiser")
-      .populate("category")
-      .populate("tags")
-      .exec();
-
+    const activity = await Activity.findById(req.params.id);
     if (!activity) {
-      return res.status(404).json({ message: "Activity not found" });
+      return res.status(400).json({ message: "Activity not found" });
     }
     if (activity.isDeleted) {
       return res.status(400).json({ message: "Activity no longer exists" });
     }
-
-    console.log(tourist.username);
 
     // Create the new comment object
     const newComment = {
       username: finalUsername,
       rating,
       content,
-      date: new Date(), // Set the current date
+      date: new Date(),
+      tourist: tourist._id, // Tourist's ID
     };
 
     // Add the comment to the activity's comments array
@@ -446,6 +436,77 @@ const addCommentToActivity = async (req, res) => {
   }
 };
 
+const updateCommentOnActivity = async (req, res) => {
+  try {
+    const { rating, content, username } = req.body;
+    const touristId = res.locals.user_id; // Get the authenticated user's ID
+
+    // Validate the rating if it's provided
+    if (rating !== undefined && (rating < 0 || rating > 5)) {
+      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+    }
+
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(400).json({ message: "Tourist not found" });
+    }
+
+    // Find the activity by ID
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(400).json({ message: "Activity not found" });
+    }
+    if (activity.isDeleted) {
+      return res.status(400).json({ message: "Activity no longer exists" });
+    }
+
+    // Find the comment by the tourist ID
+    const comment = activity.comments.find(
+      (comment) => comment.tourist.toString() === touristId
+    );
+    if (!comment) {
+      return res.status(400).json({ message: "Comment not found for this user" });
+    }
+
+    // Update fields if provided
+    let finalUsername;
+    if (username && username === "Anonymous") {
+      finalUsername = "Anonymous"; // Use 'Anonymous' as the username
+    } else {
+      finalUsername = tourist.username;
+    }
+    comment.username = finalUsername;
+    if (rating !== undefined) comment.rating = rating;
+    if (content) comment.content = content;
+
+    // Recalculate the average rating if the rating was updated
+    let newAverageRating;
+    if (rating !== undefined) {
+      const totalRatings = activity.comments.length;
+      const sumOfRatings = activity.comments.reduce((sum, comment) => sum + comment.rating, 0);
+      newAverageRating = sumOfRatings / totalRatings;
+      activity.rating = newAverageRating; // Update the activity's average rating
+    }
+
+    // Save the updated activity
+    await activity.save();
+
+    // Respond with success and the updated comment
+    res.status(200).json({
+      message: "Comment updated successfully",
+      comment,
+      ...(newAverageRating && { newAverageRating }), // Include new average if rating was updated
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "An error occurred while updating the comment",
+      error: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   getAllActivities,
   getActivityById,
@@ -456,4 +517,5 @@ module.exports = {
   rateActivity,
   getActivitiesByPreferences,
   theHolyAntiFilter,
+  updateCommentOnActivity,
 };

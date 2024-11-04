@@ -68,15 +68,20 @@ router.get("/activities/:id", activityController.getActivityById);
 
 router.post("/activities/rate/:id", activityController.rateActivity);
 router.post("/activities/comment/:id", activityController.addCommentToActivity);
+router.put("/activities/updateComment/:id", activityController.updateCommentOnActivity);
+
 
 router.post("/tourguide/rate/:id", tourguideController.rateTourGuide);
 router.post(
   "/tourguide/comment/:id",
   tourguideController.addCommentToTourGuide
 );
+router.put("/tourguide/updateComment/:id", tourguideController.updateCommentOnTourGuide);
+
 
 router.post("/itinerary/rate/:id", itineraryController.rateItinerary);
 router.post("/itinerary/comment/:id",itineraryController.addCommentToItinerary);
+router.put("/itinerary/updateComment/:id",itineraryController.updateCommentOnItinerary);
 
 router.get(
   "/historical-places",
@@ -91,6 +96,7 @@ router.delete('/purchase/:id', purchaseController.deletePurchase);
 
 router.post("/product/rate/:id", productController.rateProduct);
 router.post("/product/comment/:id",productController.addCommentToProduct);
+router.put("/product/updateComment/:id",productController.updateCommentOnProduct);
 router.post("/product/addToCart", productController.addProductToCart);
 router.post("/product/addToWishlist/:id",productController.addProductToWishlist);
 

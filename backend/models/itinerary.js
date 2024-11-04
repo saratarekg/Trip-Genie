@@ -122,6 +122,11 @@ const itinerarySchema = new Schema(
         date: {
           type: Date,
         },
+        tourist: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Tourist",
+          required: true,
+        },
       },
     ],
     isDeleted: {
@@ -260,15 +265,12 @@ itinerarySchema.statics.filter = async function (
 };
 
 itinerarySchema.methods.addRating = async function (newRating) {
-  // Add the new rating to the allRatings array
-  this.allRatings.push(newRating);
-
-  // Calculate the new average rating
-  const totalRatings = this.allRatings.length;
-  const sumOfRatings = this.allRatings.reduce((sum, rating) => sum + rating, 0);
+  // Calculate the new average rating by iterating over all comments
+  const totalRatings = this.comments.length;
+  const sumOfRatings = this.comments.reduce((sum, comment) => sum + comment.rating, 0);
   const averageRating = sumOfRatings / totalRatings;
 
-  // Update the activity's rating
+  // Update the activity's rating with the new average
   this.rating = averageRating;
 
   // Save the updated activity document
@@ -276,6 +278,7 @@ itinerarySchema.methods.addRating = async function (newRating) {
 
   return this.rating; // Return the new average rating
 };
+
 // Method to add a comment to the activity
 itinerarySchema.methods.addComment = async function (comment) {
   // Add the new comment to the comments array

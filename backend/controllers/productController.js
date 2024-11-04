@@ -529,50 +529,52 @@ const rateProduct = async (req, res) => {
 // Add a comment (and optional rating) to a product
 const addCommentToProduct = async (req, res) => {
   try {
-    const { rating, comment } = req.body; // Get comment details from the request body
+    const { rating, comment, username } = req.body; // Get comment details from the request body
 
     if (rating !== undefined && (rating < 1 || rating > 5)) {
-      return res
-        .status(400)
-        .json({ message: "Rating must be a number between 1 and 5" });
+      return res.status(400).json({ message: "Rating must be a number between 1 and 5" });
     }
 
     const userId = res.locals.user_id; // Get user ID from locals (assuming user is authenticated)
 
     const tourist = await Tourist.findById(userId);
-
     if (!tourist) {
       return res.status(404).json({ message: "User not found" });
     }
-    const product = await Product.findById(req.params.id); // Find the product by ID
 
+    const product = await Product.findById(req.params.id); // Find the product by ID
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
     }
-
     if (product.isDeleted) {
       return res.status(400).json({ message: "Product no longer exists" });
     }
 
+    // Determine the username to use
+    let finalUsername;
+    if (username && username === "true") {
+      finalUsername = "Anonymous"; // Use 'Anonymous' as the username
+    } else {
+      finalUsername = tourist.username || "Anonymous"; // Use tourist's username or default to 'Anonymous'
+    }
+
     // Create the new review object
     const newReview = {
-      user: tourist.username || "Anonymous", // Use 'Anonymous' if no username is provided
+      user: finalUsername, // Use the determined username
       rating: rating || 0,
       comment,
       date: new Date(),
+      tourist: tourist._id,
     };
 
     // Add the review to the product's reviews array
     product.reviews.push(newReview);
 
-    // If the comment includes a rating, add the rating and recalculate the average rating
+    // If the comment includes a rating, recalculate the average rating
     let newAverageRating;
     if (rating !== undefined) {
       product.allRatings.push(rating);
-      const totalRatings = product.allRatings.reduce(
-        (sum, rating) => sum + rating,
-        0
-      );
+      const totalRatings = product.allRatings.reduce((sum, rating) => sum + rating, 0);
       newAverageRating = totalRatings / product.allRatings.length;
       product.rating = newAverageRating;
     }
@@ -592,6 +594,76 @@ const addCommentToProduct = async (req, res) => {
   }
 };
 
+
+const updateCommentOnProduct = async (req, res) => {
+  try {
+    const { rating, comment, username } = req.body; // Get the new details from the request body
+    const userId = res.locals.user_id; // Get user ID from locals (assuming user is authenticated)
+
+    // Validate the rating value if provided
+    if (rating !== undefined && (rating < 1 || rating > 5)) {
+      return res.status(400).json({
+        message: "Rating must be a number between 1 and 5",
+      });
+    }
+
+    const tourist = await Tourist.findById(userId); // Find the user
+    if (!tourist) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const product = await Product.findById(req.params.id); // Find the product by ID
+    if (!product) {
+      return res.status(400).json({ message: "Product not found" });
+    }
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product no longer exists" });
+    }
+
+    // Find the review by the tourist's ID
+    const reviewIndex = product.reviews.findIndex(
+      (review) => review.tourist.toString() === tourist._id.toString()
+    );
+
+    if (reviewIndex === -1) {
+      return res.status(404).json({ message: "Review not found for this user" });
+    }
+
+    // Determine the username to use
+    let finalUsername;
+    if (username) {
+      finalUsername = "Anonymous"; // Use 'Anonymous' as the username
+    } else {
+      finalUsername = tourist.username || "Anonymous"; // Use tourist's username or default to 'Anonymous'
+    }
+
+    // Update fields if provided
+    if (rating !== undefined) product.reviews[reviewIndex].rating = rating; // Update rating
+    if (comment) product.reviews[reviewIndex].comment = comment; // Update comment
+    product.reviews[reviewIndex].user = finalUsername; // Update the username
+
+    // Recalculate the average rating based on updated reviews
+    const totalRatings = product.reviews.reduce((sum, review) => sum + review.rating, 0); // Calculate total ratings
+    const newAverageRating = totalRatings / product.reviews.length; // Calculate new average rating
+    product.rating = newAverageRating; // Update the product's average rating
+
+    // Save the updated product
+    await product.save();
+
+    // Return the updated reviews and new average rating
+    res.status(200).json({
+      message: "Comment updated successfully",
+      reviews: product.reviews,
+      newAverageRating, // Include new average if it was updated
+    });
+  } catch (error) {
+    console.error("Error: ", error.message); // Print the error message to the console
+    return res.status(500).json({ error: error.message }); // Return the error message in the response
+  }
+};
+
+
+
 module.exports = {
   rateProduct,
   addCommentToProduct,
@@ -607,4 +679,5 @@ module.exports = {
   addProductByAdmin,
   archiveProduct,
   getAllProductsArchive,
+  updateCommentOnProduct,
 };

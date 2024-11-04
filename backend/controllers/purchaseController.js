@@ -4,7 +4,7 @@ const Tourist = require('../models/tourist'); // Assuming your Tourist model is 
 
 exports.createPurchase = async (req, res) => {
   const { products, paymentMethod, deliveryDate, deliveryType, deliveryTime, shippingAddress, locationType } = req.body;
-
+console.log(products,paymentMethod,shippingAddress);
   try {
     // Validate fields
     if (!products || products.length === 0 || !paymentMethod || !shippingAddress) {
@@ -110,7 +110,7 @@ exports.getPurchasesByTourist = async (req, res) => {
   try {
     // Fetch all purchases made by the tourist
     const purchases = await Purchase.find({ tourist: touristId })
-      .populate("product") // Populate the product details
+      .populate("products.product") // Populate the product details
       .exec();
 
     if (!purchases.length) {
@@ -119,7 +119,8 @@ exports.getPurchasesByTourist = async (req, res) => {
 
     return res.status(200).json( purchases );
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    console.error("Error fetching tourist purchases: ", error.message); // Print the error message to the console
+    return res.status(500).json({ error: error.message }); // Return the error message in the response
   }
 };
 

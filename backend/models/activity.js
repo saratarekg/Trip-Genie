@@ -120,6 +120,11 @@ const activitySchema = new Schema(
         date: {
           type: Date,
         },
+        tourist: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Tourist",
+          required: true,
+        },
       },
     ],
     isDeleted: {
@@ -297,24 +302,24 @@ activitySchema.statics.filter = async function (
 
 // Method to rate an activity and calculate the new average rating
 activitySchema.methods.addRating = async function (newRating) {
-  // Add the new rating to the allRatings array
-  this.allRatings.push(newRating);
-
-  // Calculate the new average rating
-  const totalRatings = this.allRatings.length;
-  const sumOfRatings = this.allRatings.reduce((sum, rating) => sum + rating, 0);
-  const averageRating = sumOfRatings / totalRatings;
-
-  // Round the average rating to 1 decimal place
-  const roundedRating = Math.round(averageRating * 10) / 10;
-
-  // Update the activity's rating
-  this.rating = roundedRating;
+  // Calculate the new average rating by iterating over all comments
+  const totalRatings = this.comments.length;
+  
+  // If there are no ratings yet, avoid division by zero
+  if (totalRatings === 0) {
+    this.rating = newRating; // If there are no ratings, set the rating to the new rating
+  } else {
+    const sumOfRatings = this.comments.reduce((sum, comment) => sum + comment.rating, 0);
+    // Add the new rating to the sum of existing ratings
+    const updatedSumOfRatings = sumOfRatings + newRating;
+    // Update total ratings to include the new one
+    this.rating = updatedSumOfRatings / (totalRatings + 1); // Calculate the new average rating
+  }
 
   // Save the updated activity document
   await this.save();
 
-  return this.rating;
+  return this.rating; // Return the new average rating
 };
 
 // Method to add a comment to the activity

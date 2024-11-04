@@ -297,6 +297,7 @@ const addCommentToTourGuide = async (req, res) => {
       rating,
       content,
       date: new Date(),
+      tourist: tourist._id,
     };
 
     const tourguide = await TourGuide.findByIdAndUpdate(
@@ -327,6 +328,69 @@ const addCommentToTourGuide = async (req, res) => {
     });
   }
 };
+
+const updateCommentOnTourGuide = async (req, res) => {
+  try {
+    const { rating, content, username } = req.body;
+    const touristId = res.locals.user_id; // Assume `user_id` is the ID of the authenticated user
+
+    // Validate the new rating if provided
+    if (rating !== undefined && (rating < 0 || rating > 5)) {
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 0 and 5" });
+    }
+
+    // Retrieve tourist information for username determination
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Determine the final username based on the provided username and tourist's stored username
+    let finalUsername;
+    if (username && username === "Anonymous") {
+      finalUsername = "Anonymous"; // Use 'Anonymous' as the username
+    } else if (tourist.username) {
+      finalUsername = tourist.username; // Use the tourist's stored username
+    } else {
+      return res.status(400).json({ message: "Valid username is required" });
+    }
+
+    // Find the tour guide and update the specific comment by tourist ID
+    const tourguide = await TourGuide.findOneAndUpdate(
+      { _id: req.params.id, "comments.tourist": touristId }, // Match tour guide and specific comment by tourist ID
+      {
+        $set: {
+          "comments.$.username": finalUsername, // Set the determined username
+          "comments.$.rating": rating, // Update rating if provided
+          "comments.$.content": content, // Update content if provided
+        },
+      },
+      { new: true, runValidators: true } // Return the updated document
+    );
+
+    if (!tourguide) {
+      return res.status(404).json({ message: "Tour guide or comment not found" });
+    }
+
+    // Recalculate the average rating for the tour guide
+    const newAverageRating = await tourguide.addRating(0); // Trigger rating recalculation
+
+    res.status(200).json({
+      message: "Comment updated successfully",
+      comments: tourguide.comments,
+      newAverageRating,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "An error occurred while updating the comment",
+      error: error.message,
+    });
+  }
+};
+
 
 const rateTourGuide = async (req, res) => {
   try {
@@ -428,4 +492,5 @@ module.exports = {
   getUnacceptedTourGuides,
   approveTourGuide,
   rejectTourGuide,
+  updateCommentOnTourGuide,
 };

@@ -27,22 +27,21 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
     }
 
-    let walletBalance = 0;
+    let walletBalance = user.wallet;
     // Check if payment type is "Wallet"
     if (paymentType === "Wallet") {
-      if (user.wallet < paymentAmount) {
+      if (walletBalance < paymentAmount) {
         return res
           .status(400)
           .json({ message: "Insufficient funds in wallet" });
       }
 
       // Deduct the payment amount from the user's wallet
-      walletBalance = user.wallet - paymentAmount;
-      // Save the updated wallet balance
+      walletBalance -= paymentAmount;
     }
 
-    itinerary.isBooked = true;
-    await itinerary.save();
+    // Update itinerary's `isBooked` status
+    await Itinerary.findByIdAndUpdate(itinerary, { isBooked: true }, { new: true });
 
     // Create the booking
     const newBooking = new ItineraryBooking({
@@ -82,17 +81,22 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: "Tourist not found" });
     }
 
+    // Save the booking
     await newBooking.save();
-    res
-      .status(201)
-      .json({ message: "Booking created successfully", booking: newBooking });
+
+    res.status(201).json({
+      message: "Booking created successfully",
+      booking: newBooking,
+    });
   } catch (error) {
     console.log(error.message);
-    res
-      .status(500)
-      .json({ message: "Failed to create booking", error: error.message });
+    res.status(500).json({
+      message: "Failed to create booking",
+      error: error.message,
+    });
   }
 };
+
 
 const calculateLoyaltyPoints = (paymentAmount, badgeLevel) => {
   let pointsMultiplier = 0;

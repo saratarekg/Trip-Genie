@@ -173,32 +173,12 @@ const ShoppingCart = () => {
       }
     }
 
+
     if (hasNewRates) {
       setExchangeRates(newRates);
     }
   }, [exchangeRates, userRole]);
 
-  const formatPrice = useCallback((price, productCurrency) => {
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      console.log(1,price,productCurrency);
-      if (userPreferredCurrency.code === productCurrency) {
-        console.log(2);
-        return `${userPreferredCurrency.symbol}${price.toFixed(2)}`;
-      } else {
-        console.log(3);
-        const rate = exchangeRates[`${productCurrency}-${userPreferredCurrency._id}`];
-        if (rate) {
-          console.log(4);
-          const exchangedPrice = price * rate;
-          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-        }
-
-      }
-    }
-    console.log(5);
-
-    return "NOTHING" ;
-  }, [userRole, userPreferredCurrency, exchangeRates]);
 
   const fetchCartItems = useCallback(async () => {
     try {
@@ -233,6 +213,27 @@ const ShoppingCart = () => {
       console.error('Error fetching cart items:', error);
     }
   }, [userRole, userPreferredCurrency, fetchExchangeRates]);
+
+
+  const formatPrice = useCallback((price, productCurrency) => {
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      if (userPreferredCurrency.code === productCurrency) {
+        return `${userPreferredCurrency.symbol}${price.toFixed(2)}`;
+      } else {
+        const rate = exchangeRates[`${productCurrency}-${userPreferredCurrency._id}`];
+        if (rate) {
+          const exchangedPrice = price * rate;
+          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+        }
+        else{
+          fetchExchangeRates(productCurrency,userPreferredCurrency._id);
+        }
+      }
+    }
+    return "NOTHING" ;
+  }, [userRole, userPreferredCurrency, exchangeRates]);
+
+ 
 
   const calculateTotalAmount = useCallback(() => {
     setTotalAmountLoading(true);

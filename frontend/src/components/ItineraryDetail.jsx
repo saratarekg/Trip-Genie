@@ -1,41 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { formatDistanceToNow, format, set } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { useParams, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import axios from "axios"; // Ensure axios is installed
+import axios from "axios";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import * as jwtDecode from 'jwt-decode';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
 import Loader from './Loader';
-
 import {
-  CheckCircle,
-  XCircle,
-  Star,
-  Edit,
-  Trash2,
-  Mail,
-  Phone,
-  Award,
-  Globe,
-  Accessibility,
-  MapPin,
-  Calendar,
-  Clock,
-  DollarSign,
-  Info,
-  ChevronLeft,
-  ChevronRight,
-  Share2,
-  Link,
-  MessageSquare,
-  Banknote,
-  Smile,
-  Frown
+  CheckCircle, XCircle, Star, Edit, Trash2, Mail, Phone, Award, Globe, Accessibility,
+  MapPin, Calendar, Clock, DollarSign, Info, ChevronLeft, ChevronRight, Share2, Link,
+  MessageSquare, Banknote, Smile, Frown,
+  ThumbsUp,
+  ThumbsDown
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,6 +28,18 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimelinePreviewComponent } from "@/components/timeline-preview";
 
+const RatingDistributionBar = ({ percentage, count }) => (
+  <div className="flex items-center gap-2 text-sm">
+    <span className="w-8 text-right">{count} ★</span>
+    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div 
+        className="h-full bg-primary rounded-full" 
+        style={{ width: `${percentage}%` }}
+      />
+    </div>
+    <span className="w-12 text-gray-500">{percentage}%</span>
+  </div>
+);
 
 const StarRating = ({ rating, setRating, readOnly = false }) => {
   return (
@@ -65,7 +57,11 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
   );
 };
 
-const TourguideProfileCard = ({ profile }) => (
+const getTotalRatingsTG = (profile) => {
+  return profile?.comments?.length || 0;
+};
+
+const TourguideProfileCard = ({ handleQuickTourGuideRating, setShowTourGuideReviewDialog,userTourGuideReview, tourGuideRating, profile, ratingDistribution, onReviewClick, userRole, userBookings, itinerary }) => (
   <Card className="w-full max-w-sm">
     <CardHeader>
       <CardTitle className="text-2xl font-bold text-center">Tourguide Profile</CardTitle>
@@ -97,6 +93,22 @@ const TourguideProfileCard = ({ profile }) => (
         </div>
       </div>
       <div>
+        <h4 className="font-semibold mb-2">Rating Distribution</h4>
+        {[5, 4, 3, 2, 1].map(stars => {
+                const count = ratingDistribution[stars] || 0;
+                const percentage = getTotalRatingsTG(profile) 
+                  ? Math.round((count / getTotalRatingsTG(profile)) * 100) 
+                  : 0;
+                return (
+                  <RatingDistributionBar 
+                    key={stars} 
+                    percentage={percentage} 
+                    count={stars}
+                  />
+                );
+              })}
+      </div>
+      <div>
         <h4 className="font-semibold mb-2">Languages</h4>
         <div className="flex flex-wrap gap-2">
           {profile.languages.map((lang, index) => (
@@ -112,9 +124,40 @@ const TourguideProfileCard = ({ profile }) => (
           ))}
         </div>
       </div>
+      <Button onClick={onReviewClick} className="w-full">
+        See All Reviews
+      </Button>
+      <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+
+      {userRole === "tourist" && userBookings.some(booking => booking.itinerary._id === itinerary._id) && (
+                    <div className="border-t pt-4">
+                      <div className="text-sm text-gray-500 mb-2">Rate Tour Guide:</div>
+                      <div className="flex gap-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-8 h-8 cursor-pointer ${
+                              tourGuideRating >= star
+                                ? "text-yellow-500 fill-current"
+                                : "text-gray-300"
+                            }`}
+                            onClick={() => handleQuickTourGuideRating(star)}
+                          />
+                        ))}
+                      </div>
+                      <Button 
+                        onClick={() => setShowTourGuideReviewDialog(true)} 
+                        className="w-full mt-4"
+                      >
+                        {userTourGuideReview ? 'Edit Review' : 'Write a Review'}
+                      </Button>
+                    </div>
+                  )}
+
     </CardContent>
   </Card>
 );
+
 
 const ItineraryDetail = () => {
   const { id } = useParams();
@@ -147,7 +190,7 @@ const ItineraryDetail = () => {
   const [showFullComment, setShowFullComment] = useState(null);
   const [activityRating, setActivityRating] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [isAppropriate, setIsAppropriate] = useState(true); // Track the current status
+  const [isAppropriate, setIsAppropriate] = useState(true);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [numberOfTickets, setNumberOfTickets] = useState(1);
   const [paymentType, setPaymentType] = useState("CreditCard");
@@ -161,9 +204,197 @@ const ItineraryDetail = () => {
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
-
-  const [open, setOpen] = useState(false); // Added state for popover
+  const [open, setOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
+  const [userComment, setUserComment] = useState(null);
+  const [showEditReview, setShowEditReview] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [ratingDistribution, setRatingDistribution] = useState({
+    5: 0, 4: 0, 3: 0, 2: 0, 1: 0
+  });
+  const [tourGuideRatingDistribution, setTourGuideRatingDistribution] = useState({
+    5: 0, 4: 0, 3: 0, 2: 0, 1: 0
+  });
+  const [quickRating, setQuickRating] = useState(0);
+  const [isRatingHovered, setIsRatingHovered] = useState(false);
+  const [showAllTourGuideReviews, setShowAllTourGuideReviews] = useState(false);
+  const [tourGuideRating, setTourGuideRating] = useState(0);
+  const [tourGuideReview, setTourGuideReview] = useState({
+    rating: 0,
+    liked: '',
+    disliked: '',
+    isAnonymous: false
+  });
+  const [showTourGuideReviewDialog, setShowTourGuideReviewDialog] = useState(false);
+  const [userTourGuideReview, setUserTourGuideReview] = useState(null);
+
+  useEffect(() => {
+    const token = Cookies.get("jwt");
+    if (token) {
+      const decodedToken = jwtDecode.jwtDecode(token);
+      setUserId(decodedToken.id);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (itinerary && userId) {
+      const userComment = itinerary.comments.find(comment => comment.tourist === userId);
+      if (userComment) {
+        setUserComment(userComment);
+        setQuickRating(userComment.rating || 0);
+        setNewReview({
+          rating: userComment.rating || 0,
+          liked: userComment.content?.liked || "",
+          disliked: userComment.content?.disliked || "",
+          isAnonymous: userComment.username === 'Anonymous'
+        });
+        setItineraryRating(userComment.rating || 0);
+      }
+
+      // Calculate rating distribution for itinerary
+      const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      itinerary.comments.forEach(comment => {
+        distribution[Math.floor(comment.rating)] = (distribution[Math.floor(comment.rating)] || 0) + 1;
+      });
+      setRatingDistribution(distribution);
+    }
+
+    if (tourGuideProfile) {
+      // Calculate rating distribution for tour guide
+      const tourGuideDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    
+      // Iterate over the comments array to calculate rating distribution
+      tourGuideProfile.comments.forEach(comment => {
+        if (comment.rating >= 1 && comment.rating <= 5) { // Ensure rating is within valid range
+          tourGuideDistribution[Math.floor(comment.rating)] = (tourGuideDistribution[Math.floor(comment.rating)] || 0) + 1;
+        }
+      });
+    
+      setTourGuideRatingDistribution(tourGuideDistribution);
+    }
+
+    if (tourGuideProfile && userId) {
+      const userReview = tourGuideProfile.comments.find(comment => comment.tourist === userId);
+      if (userReview) {
+        setUserTourGuideReview(userReview);
+        setTourGuideRating(userReview.rating || 0);
+        setTourGuideReview({
+          rating: userReview.rating || 0,
+          liked: userReview.content?.liked || "",
+          disliked: userReview.content?.disliked || "",
+          isAnonymous: userReview.username === 'Anonymous'
+        });
+      }
+    }
+  }, [itinerary, userId, tourGuideProfile]);
+    
+  const handleQuickTourGuideRating = async (rating) => {
+    try {
+      const method = userTourGuideReview ? 'PUT' : 'POST';
+      const url = userTourGuideReview
+        ? `http://localhost:4000/${userRole}/tourguide/updateComment/${tourGuideProfile._id}`
+        : `http://localhost:4000/${userRole}/tourguide/comment/${tourGuideProfile._id}`;
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+        body: JSON.stringify({
+          rating: rating,
+          content: userTourGuideReview ? userTourGuideReview.content : { liked: '', disliked: '' },
+          isAnonymous: userTourGuideReview ? userTourGuideReview.isAnonymous : false,
+          date: new Date().toISOString(),
+          username: userTourGuideReview ? userTourGuideReview.username : 'User'
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to submit tour guide rating');
+      setTourGuideRating(rating);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting tour guide rating:', error);
+    }
+  };
+
+  const handleRateTourGuide = async () => {
+    try {
+      const method = userTourGuideReview ? 'PUT' : 'POST';
+      const url = userTourGuideReview
+        ? `http://localhost:4000/${userRole}/tourguide/updateComment/${tourGuideProfile._id}`
+        : `http://localhost:4000/${userRole}/tourguide/comment/${tourGuideProfile._id}`;
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+        body: JSON.stringify({
+          rating: tourGuideReview.rating,
+          content: {
+            liked: tourGuideReview.liked,
+            disliked: tourGuideReview.disliked
+          },
+          isAnonymous: tourGuideReview.isAnonymous,
+          date: new Date().toISOString(),
+          username: tourGuideReview.isAnonymous ? 'Anonymous' : 'User'
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to submit tour guide review');
+      setShowTourGuideReviewDialog(false);
+      setTourGuideReview({
+        rating: 0,
+        liked: '',
+        disliked: '',
+        isAnonymous: false
+      });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting tour guide review:', error);
+    }
+  };
+
+  const handleQuickRating = async (rating) => {
+    try {
+      const method = userComment ? 'PUT' : 'POST';
+      const url = userComment
+        ? `http://localhost:4000/${userRole}/itinerary/updateComment/${itinerary._id}`
+        : `http://localhost:4000/${userRole}/itinerary/comment/${itinerary._id}`;
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Cookies.get('jwt')}`,
+        },
+        body: JSON.stringify({
+          rating: rating,
+          content: userComment ? userComment.content : { liked: '', disliked: '' },
+          isAnonymous: userComment ? userComment.isAnonymous : false,
+          date: new Date().toISOString(),
+          username: userComment ? userComment.username : 'User'
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to submit rating');
+      setQuickRating(rating);
+      window.location.reload();
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+    }
+  };
+
+  const getTotalRatings = () => {
+    return itinerary?.comments?.length || 0;
+  };
+
+
+  const getReviewsCount = () => {
+    return itinerary?.comments?.filter(comment => 
+      comment.content && (comment.content.liked || comment.content.disliked)
+    ).length || 0;
+  };
+
   
   const fetchExchangeRate = async () => {
     try {
@@ -291,7 +522,6 @@ const ItineraryDetail = () => {
     try {
     const token = Cookies.get("jwt");
     const totalPrice = calculateTotalPrice();
-    console.log(selectedTime)
     const response = await fetch(`http://localhost:4000/${userRole}/itineraryBooking`, {
     method: "POST",
     headers: {
@@ -446,7 +676,6 @@ const ItineraryDetail = () => {
 
   const isItineraryAvailable = () => {
     if (!itinerary.availableDates || itinerary.availableDates.length === 0) {
-      console.log("No available dates, returning false.");
       return false; // No dates to check, assume not passed
     }
   
@@ -455,12 +684,10 @@ const ItineraryDetail = () => {
       const currentDate = new Date().setHours(0, 0, 0, 0);
       
       const isFutureDate = itineraryDate >= currentDate;
-      console.log(`Checking date: ${dateInfo.date} | Is upcoming or today: ${isFutureDate}`);
       
       return isFutureDate;
     });
 
-    console.log(`Final result: ${hasUpcomingDate}`);
     return hasUpcomingDate;
   };
 
@@ -567,7 +794,6 @@ const ItineraryDetail = () => {
         },
         date: new Date(),
       };
-      console.log(newComment);
       const response = await fetch(`http://localhost:4000/${userRole}/tourguide/comment/${tourGuideProfile._id}`, {
         method: 'POST',
         headers: {
@@ -624,10 +850,15 @@ const ItineraryDetail = () => {
     }
   };
 
-  const handleRateItinerary = async () => {
+const handleRateItinerary = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/${userRole}/itinerary/comment/${itinerary._id}`, {
-        method: 'POST',
+      const method = userComment ? 'PUT' : 'POST';
+      const url = userComment
+        ? `http://localhost:4000/${userRole}/itinerary/updateComment/${itinerary._id}`
+        : `http://localhost:4000/${userRole}/itinerary/comment/${itinerary._id}`;
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${Cookies.get('jwt')}`,
@@ -645,6 +876,7 @@ const ItineraryDetail = () => {
       });
       if (!response.ok) throw new Error('Failed to submit itinerary rating');
       setShowRateItineraryDialog(false);
+      setShowEditReview(false);
       setNewReview({
         rating: 0,
         liked: '',
@@ -653,11 +885,8 @@ const ItineraryDetail = () => {
       });
       setItineraryRating(0);
       window.location.reload();
-
-      // Handle success (e.g., show a success message, refresh itinerary details)
     } catch (error) {
       console.error('Error submitting itinerary rating:', error);
-      // Handle error (e.g., show an error message)
     }
   };
 
@@ -990,9 +1219,19 @@ const ItineraryDetail = () => {
 
           <div className="lg:w-1/3">
             {tourGuideProfile && (
-              <TourguideProfileCard profile={tourGuideProfile} />
+              <TourguideProfileCard 
+                profile={tourGuideProfile} 
+                ratingDistribution={tourGuideRatingDistribution}
+                onReviewClick={() => setShowAllTourGuideReviews(true)}
+                userRole={userRole}
+                userBookings={userBookings}
+                itinerary={itinerary}
+                tourGuideRating={tourGuideRating}
+                userTourGuideReview={userTourGuideReview}
+                handleQuickTourGuideRating={handleQuickTourGuideRating}
+                setShowTourGuideReviewDialog = {setShowTourGuideReviewDialog}
+              />
             )}
-
             {userRole === 'tourist' && isItineraryAvailable() &&(
         isActivated ? (
           <Button
@@ -1008,27 +1247,6 @@ const ItineraryDetail = () => {
         )
       )}
       
-          {userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole !== "admin" &&  (
-              <>
-                <Card className="mt-4">
-                  <CardHeader>
-                    <CardTitle>Rate Tour Guide</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <StarRating rating={rating} setRating={handleRating} />
-                    {showRatingSubmit && (
-                      <Button onClick={submitRating} className="mt-4 mr-4">
-                        Submit Rating
-                      </Button>
-                    )}
-                    <Button onClick={() => setShowAddReview(true)} className="mt-4 ml-4">
-                      Write a Review
-                    </Button>
-                  </CardContent>
-                </Card>
-              </>
-
-            )}
 
             {userRole === "admin" && (
               <>
@@ -1078,16 +1296,85 @@ const ItineraryDetail = () => {
         </div>
 
         <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">What our customers say</h2>
-          {itinerary.comments && itinerary.comments.length > 0 ? (
-            <>
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
+            <Button variant="link" className="text-primary">
+              See All
+            </Button>
+          </div>
+
+          <div className="flex gap-8 mb-6">
+            <div className="text-center">
+              <div className="text-4xl font-bold mb-1">
+                {itinerary?.rating?.toFixed(1) || "0.0"}
+              </div>
+              <div className="text-sm text-gray-500">
+                out of 5
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                {getTotalRatings()} Ratings
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-1">
+              {[5, 4, 3, 2, 1].map(stars => {
+                const count = ratingDistribution[stars] || 0;
+                const percentage = getTotalRatings() 
+                  ? Math.round((count / getTotalRatings()) * 100) 
+                  : 0;
+                return (
+                  <RatingDistributionBar 
+                    key={stars} 
+                    percentage={percentage} 
+                    count={stars}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {userRole === "tourist" && (
+            <div className="border-t pt-4">
+              <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
+              <div 
+                className="flex gap-2"
+                onMouseLeave={() => setIsRatingHovered(false)}
+              >
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-8 h-8 cursor-pointer ${
+                      (isRatingHovered ? quickRating >= star : quickRating >= star)
+                        ? "text-yellow-500 fill-current"
+                        : "text-gray-300"
+                    }`}
+                    onMouseEnter={() => {
+                      setIsRatingHovered(true);
+                      setQuickRating(star);
+                    }}
+                    onClick={() => handleQuickRating(star)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-6">
+          <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            {getTotalRatings()} overall ratings, {getReviewsCount()} with reviews
+          </p>
+        {itinerary.comments && itinerary.comments.length > 0 ? (
+          <>
               <div className="flex items-center justify-between mb-4">
                 <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
                   <ChevronLeft />
                 </Button>
                 <div className="flex-1 flex justify-between px-4">
                   {itinerary.comments.slice(currentCommentIndex, currentCommentIndex + 3).map((comment, index) => (
-                    <Card key={index} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                    <Card key={index} className={`w-[30%] ${comment.tourist === userId ? 'bg-blue-100' : 'bg-gray-100'} shadow-none border-none p-4 rounded-lg`}>
                       <CardHeader className="flex items-start">
                         <div className="flex">
                           <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
@@ -1104,16 +1391,28 @@ const ItineraryDetail = () => {
                       </CardHeader>
                       <CardContent>
                         <p className="text-gray-700 line-clamp-3">{comment.content.liked || comment.content.disliked || "No comment provided"}</p>
-                        <a
-                          href="#"
-                          className="text-blue-500 hover:underline mt-2 inline-block"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setShowFullComment(comment);
-                          }}
-                        >
-                          View more
-                        </a>
+                        <div className="flex justify-between items-center mt-2">
+                          <a
+                            href="#"
+                            className="text-blue-500 hover:underline"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setShowFullComment(comment);
+                            }}
+                          >
+                            View more
+                          </a>
+                          {comment.tourist === userId && (
+                           <Button
+                           className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"                           size="sm"
+                           onClick={() => setShowEditReview(true)}
+                         >
+                           <Edit className="w-4 h-4 mr-2" />
+                           Edit
+                         </Button>
+                         
+                          )}
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -1131,29 +1430,119 @@ const ItineraryDetail = () => {
             <p>No comments yet.</p>
           )}
 
-{userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole!== "admin" && (
-            <>
+    
+{userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole !== "admin" && !userComment && (
               <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
                 Add a Review
               </Button>
-              <Button onClick={() => setShowRatingDialog(true)} className="mt-4">
-                Add a Rating
-              </Button>
-            </>
-          )}
-        </div>
+        )}
+      </div>
       </div>
 
+      <Dialog open={showAllTourGuideReviews} onOpenChange={setShowAllTourGuideReviews}>
+  <DialogContent className="sm:max-w-[600px]">
+    <DialogHeader>
+      <DialogTitle>All Reviews for {tourGuideProfile?.username}</DialogTitle>
+    </DialogHeader>
+    <ScrollArea className="max-h-[60vh] overflow-auto">
+      {tourGuideProfile?.comments.map((review, index) => (
+        <Card 
+          key={index} 
+          className={`mb-4 ${review.tourist === userId ? 'bg-blue-100' : ''}`} // Apply blue background if comment is from the logged-in user
+        >
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>{review.username}</CardTitle>
+              <StarRating rating={review.rating} readOnly={true} />
+            </div>
+            <CardDescription>{formatCommentDate(review.date)}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <ThumbsUp className="mr-2 text-green-500 w-4 h-4" /> {/* Positive icon next to liked */}
+              <p><strong>Liked:</strong> {review.content.liked || "Not specified"}</p>
+            </div>
+            <div className="flex items-center mt-1">
+              <ThumbsDown className="mr-2 text-red-500 w-4 h-4" /> {/* Negative icon next to disliked */}
+              <p><strong>Disliked:</strong> {review.content.disliked || "Not specified"}</p>
+            </div>
+            {/* Edit Review Button, shown only for user's comments */}
+            {review.tourist === userId && ( // Check if the comment is from the logged-in user
+              <Button 
+                onClick={() => setShowTourGuideReviewDialog(true)} 
+                className="w-full mt-4"
+              >
+                Edit Review
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </ScrollArea>
+  </DialogContent>
+</Dialog>
 
-
-      {/* {userRole === 'tourist' && (<Button
-        onClick={handleBookNowClick}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-      >
-        Book Now
-      </Button>
-      )} */}
-
+      <Dialog open={showTourGuideReviewDialog} onOpenChange={setShowTourGuideReviewDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{userTourGuideReview ? 'Edit Your Review' : 'Write a Review for Tour Guide'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+              <StarRating rating={tourGuideReview.rating} setRating={(rating) => setTourGuideReview(prev => ({ ...prev, rating }))} />
+            </div>
+            <div>
+              <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
+                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                Something you liked
+              </label>
+              <Textarea
+                id="liked"
+                value={tourGuideReview.liked}
+                onChange={(e) => setTourGuideReview(prev => ({ ...prev, liked: e.target.value }))}
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
+                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                Something you didn't like
+              </label>
+              <Textarea
+                id="disliked"
+                value={tourGuideReview.disliked}
+                onChange={(e) => setTourGuideReview(prev => ({ ...prev, disliked: e.target.value }))}
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="anonymous-mode"
+                checked={tourGuideReview.isAnonymous}
+                onCheckedChange={(checked) => setTourGuideReview(prev => ({ ...prev, isAnonymous: checked }))}
+              />
+              <Label htmlFor="anonymous-mode">Post anonymously</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setShowTourGuideReviewDialog(false)}
+              className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
+              onClick={handleRateTourGuide}
+            >
+              {userTourGuideReview ? 'Update Review' : 'Submit Review'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
 
 
@@ -1355,10 +1744,13 @@ const ItineraryDetail = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showRateItineraryDialog} onOpenChange={setShowRateItineraryDialog}>
+    <Dialog open={showRateItineraryDialog || showEditReview} onOpenChange={() => {
+        setShowRateItineraryDialog(false);
+        setShowEditReview(false);
+      }}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Write a Review for Itinerary</DialogTitle>
+            <DialogTitle>{userComment ? 'Edit Your Review' : 'Write a Review for Itinerary'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -1401,23 +1793,28 @@ const ItineraryDetail = () => {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              onClick={() => {
-                setShowRateItineraryDialog(false); // Hide the Add Review form
-                setNewReview({
-                  rating: 0,
-                  liked: "",
-                  disliked: "",
-                  visitDate: '',
-                  isAnonymous: false
-                }); // Reset the new review form
-              }}
-              style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
-            >
-              Cancel
-            </Button>
+          <Button
+  onClick={() => {
+    setShowRateItineraryDialog(false);
+    setShowEditReview(false);
+    setNewReview({
+      rating: userComment ? userComment.rating : 0,
+      liked: userComment ? userComment.content.liked : "",
+      disliked: userComment ? userComment.content.disliked : "",
+      isAnonymous: userComment ? userComment.username === 'Anonymous' : false
+    });
+  }}
+  className="bg-gray-300 text-black hover:bg-gray-400 ml-2"
+>
+  Cancel
+</Button>
 
-            <Button onClick={handleRateItinerary}>Submit Review</Button>
+            <Button
+  className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
+  onClick={handleRateItinerary}
+>
+  {userComment ? 'Update Review' : 'Submit Review'}
+</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1455,6 +1852,7 @@ const ItineraryDetail = () => {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 };
