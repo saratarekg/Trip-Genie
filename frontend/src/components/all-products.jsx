@@ -589,7 +589,7 @@ export function AllProducts() {
     </div>
   </div>
       <div className="container mx-auto px-24 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-[#1A3B47] mb-8 mt-8" >All Products</h1>
+        <h1 className="text-4xl font-bold text-[#1A3B47] mb-8" >All Products</h1>
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="hidden md:block w-64 bg-white rounded-lg shadow-lg p-6">
@@ -705,7 +705,7 @@ export function AllProducts() {
               />
               <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
             </div>
-            <span className="text-gray-500">({products.length} items)</span>
+            <span className="text-gray-500 text-sm">({products.length} items)</span>
           </div>
               <div className="flex gap-2">
                 <Button
