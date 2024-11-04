@@ -2,6 +2,7 @@ const Product = require("../models/product");
 const Seller = require("../models/seller");
 const Tourist = require("../models/tourist");
 const Purchase = require("../models/purchase");
+const cloudinary = require("../utils/cloudinary");
 
 const getAllProducts = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
@@ -118,13 +119,25 @@ const addProduct = async (req, res) => {
   const { name, price, description, quantity, currency } = req.body; // Extract the data from request
 
   try {
+    let imagesBuffer = [];
     const pictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
+    //upload multiple images using cloudinary
+    for (let i = 0; i < pictures.length; i++) {
+      const result = await cloudinary.uploader.upload(pictures[i], {
+        folder: "products",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
 
     const product = new Product({
       name,
-      pictures,
+      pictures: imagesBuffer,
       price,
       description,
       seller: res.locals.user_id,
@@ -140,24 +153,30 @@ const addProduct = async (req, res) => {
 };
 
 const addProductByAdmin = async (req, res) => {
-  const {
-    name,
-    pictures,
-    price,
-    description,
-    rating,
-    reviews,
-    quantity,
-    currency,
-  } = req.body; // Extract the data from request
+  const { name, price, description, quantity, currency } = req.body; // Extract the data from request
 
   try {
+    let imagesBuffer = [];
+
     const pictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
+
+    //upload multiple images using cloudinary
+    for (let i = 0; i < pictures.length; i++) {
+      const result = await cloudinary.uploader.upload(pictures[i], {
+        folder: products,
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
     const product = new Product({
       name,
-      pictures,
+      pictures: imagesBuffer,
       price,
       description,
       quantity,
@@ -218,7 +237,7 @@ const editProduct = async (req, res) => {
 const editProductOfSeller = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
   const { name, price, description, quantity, currency } = req.body;
-  let pictures = req.body; // Get details from request body
+
   const product = await Product.findById({ _id: id, isDeleted: false });
   if (!product) {
     return res.status(400).json({ message: "Product not found" });
@@ -229,11 +248,29 @@ const editProductOfSeller = async (req, res) => {
       .json({ message: "You are not authorized to edit this product" });
   }
   try {
-    // Find the product by ID and update its details
-    pictures = req.files.map(
-      // Convert the uploaded files to base64 strings
+    console.log("Abo Aby");
+    let { oldPictures } = req.body; // Get details from request body
+    oldPictures = JSON.parse(oldPictures);
+
+    console.log(oldPictures);
+    let newPictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
+    let imagesBuffer = [];
+    console.log(oldPictures);
+
+    for (let i = 0; i < newPictures.length; i++) {
+      const result = await cloudinary.uploader.upload(newPictures[i], {
+        folder: "products",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    const pictures = [...oldPictures, ...imagesBuffer];
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
@@ -532,7 +569,9 @@ const addCommentToProduct = async (req, res) => {
     const { rating, comment, username } = req.body; // Get comment details from the request body
 
     if (rating !== undefined && (rating < 1 || rating > 5)) {
-      return res.status(400).json({ message: "Rating must be a number between 1 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 1 and 5" });
     }
 
     const userId = res.locals.user_id; // Get user ID from locals (assuming user is authenticated)
@@ -574,7 +613,10 @@ const addCommentToProduct = async (req, res) => {
     let newAverageRating;
     if (rating !== undefined) {
       product.allRatings.push(rating);
-      const totalRatings = product.allRatings.reduce((sum, rating) => sum + rating, 0);
+      const totalRatings = product.allRatings.reduce(
+        (sum, rating) => sum + rating,
+        0
+      );
       newAverageRating = totalRatings / product.allRatings.length;
       product.rating = newAverageRating;
     }
@@ -593,7 +635,6 @@ const addCommentToProduct = async (req, res) => {
     return res.status(500).json({ error: error.message }); // Return the error message in the response
   }
 };
-
 
 const updateCommentOnProduct = async (req, res) => {
   try {
@@ -626,7 +667,9 @@ const updateCommentOnProduct = async (req, res) => {
     );
 
     if (reviewIndex === -1) {
-      return res.status(404).json({ message: "Review not found for this user" });
+      return res
+        .status(404)
+        .json({ message: "Review not found for this user" });
     }
 
     // Determine the username to use
@@ -643,7 +686,10 @@ const updateCommentOnProduct = async (req, res) => {
     product.reviews[reviewIndex].user = finalUsername; // Update the username
 
     // Recalculate the average rating based on updated reviews
-    const totalRatings = product.reviews.reduce((sum, review) => sum + review.rating, 0); // Calculate total ratings
+    const totalRatings = product.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    ); // Calculate total ratings
     const newAverageRating = totalRatings / product.reviews.length; // Calculate new average rating
     product.rating = newAverageRating; // Update the product's average rating
 
@@ -661,8 +707,6 @@ const updateCommentOnProduct = async (req, res) => {
     return res.status(500).json({ error: error.message }); // Return the error message in the response
   }
 };
-
-
 
 module.exports = {
   rateProduct,

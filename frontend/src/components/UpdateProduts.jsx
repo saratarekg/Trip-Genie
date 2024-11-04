@@ -60,6 +60,7 @@ const UpdateProduct = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [pictures, setPictures] = useState([]);
   const [newPictures, setNewPictures] = useState([]);
+  const [base64Pictures, setBase64Pictures] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [currencies, setCurrencies] = useState([]);
   const [selectedCurrency, setSelectedCurrency] = useState("");
@@ -162,15 +163,25 @@ const UpdateProduct = () => {
       );
 
       Promise.all(newBase64PicturesPromises).then((base64Pictures) => {
-        // Update the pictures state without overwriting existing ones
-        setPictures((prev) => [...prev, ...base64Pictures]); // Add new base64 previews
-        setNewPictures((prev) => [...prev, ...newFilesToUpload]); // Store new File objects for uploading
+        setBase64Pictures((prev) => [...prev, ...base64Pictures]);
+        setNewPictures((prev) => [...prev, ...newFilesToUpload]);
       });
     }
   };
 
-  const removePicture = (index) => {
-    setPictures(pictures.filter((_, i) => i !== index));
+  const removePicture = (index, isOld) => {
+    if (isOld) {
+      const newPictures = [...pictures];
+      newPictures.splice(index, 1);
+      setPictures(newPictures);
+    } else {
+      const newBase64Pictures = [...base64Pictures];
+      newBase64Pictures.splice(index, 1);
+      setBase64Pictures(newBase64Pictures);
+      const newPictures = [...newPictures];
+      newPictures.splice(index, 1);
+      setNewPictures(newPictures);
+    }
 
     setSelectedImage(null);
   };
@@ -202,11 +213,10 @@ const UpdateProduct = () => {
       formData.append("description", product.description);
       formData.append("quantity", product.quantity);
       formData.append("currency", selectedCurrency);
+      formData.append("oldPictures", JSON.stringify(pictures));
 
-      // Append existing pictures as Blob
-      pictures.forEach((picture) => {
-        const blob = base64ToBlob(picture); // Convert base64 to Blob
-        formData.append("pictures", blob, "existing_picture.jpg"); // You can customize the file name
+      newPictures.forEach((picture) => {
+        formData.append("newPictures", picture);
       });
 
       const response = await fetch(
@@ -368,13 +378,30 @@ const UpdateProduct = () => {
                   {pictures.map((picture, index) => (
                     <div key={`existing-${index}`} className="relative">
                       <img
+                        src={picture.url}
+                        alt={`Product Existing ${index + 1}`}
+                        className="w-full h-32 object-cover rounded cursor-pointer"
+                        onClick={() => setSelectedImage(picture.url)}
+                      />
+                      <button
+                        onClick={() => removePicture(index, true)}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+
+                  {base64Pictures.map((picture, index) => (
+                    <div key={`existing-${index}`} className="relative">
+                      <img
                         src={picture} // This will be the base64 string
                         alt={`Product Existing ${index + 1}`}
                         className="w-full h-32 object-cover rounded cursor-pointer"
                         onClick={() => setSelectedImage(picture)}
                       />
                       <button
-                        onClick={() => removePicture(index)} // 'false' indicates it's an existing picture
+                        onClick={() => removePicture(index, false)} // 'false' indicates it's an existing picture
                         className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                       >
                         <X size={16} />
