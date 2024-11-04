@@ -31,5 +31,6 @@ router.put(
 );
 router.put("/archiveproducts/:id", productController.archiveProduct);
 router.post("/password", sellerController.changePassword);
+router.delete("/delete-account", sellerController.deleteSellerAccount);
 
 module.exports = router;

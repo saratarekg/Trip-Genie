@@ -1,14 +1,14 @@
 const express = require("express");
 const activityController = require("../controllers/activityController");
 const advertiserController = require("../controllers/advertiserController");
-const currencyController = require('../controllers/currencyController');
+const currencyController = require("../controllers/currencyController");
 const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const router = express.Router();
 
-router.get('/getCurrency/:id', currencyController.getCurrencyById);
+router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
 router.post("/activities", activityController.createActivity);
@@ -22,5 +22,5 @@ router.put("/", upload.single("logo"), advertiserController.updateAdvertiser);
 
 router.get("/advertisers/:id", advertiserController.getAdvertiserByID);
 router.post("/password", advertiserController.changePassword);
-
+router.post("/delete-account", advertiserController.deleteAdvertiserAccount);
 module.exports = router;

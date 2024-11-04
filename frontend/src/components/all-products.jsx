@@ -318,7 +318,7 @@ export function AllProducts() {
     if (userInfo) {
       fetchProducts();
     }
-  }, [userInfo]);
+  }, [fetchProducts, userInfo]);
 
   useEffect(() => {
     fetchUserInfo();
@@ -347,7 +347,15 @@ export function AllProducts() {
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, fetchProducts]);
+  }, [
+    searchTerm,
+    fetchProducts,
+    maxPrice,
+    priceRange,
+    sortBy,
+    sortOrder,
+    myProducts,
+  ]);
 
   useEffect(() => {
     if (sortBy) {
@@ -359,7 +367,7 @@ export function AllProducts() {
         maxPrice: priceRange[1],
       });
     }
-  }, [sortBy, sortOrder, fetchProducts]);
+  }, [sortBy, sortOrder, fetchProducts, myProducts, priceRange]);
 
   useEffect(() => {
     if (myProducts) {
@@ -373,7 +381,7 @@ export function AllProducts() {
         asc: sortOrder,
       });
     }
-  }, [myProducts, fetchProducts]);
+  }, [myProducts, fetchProducts, priceRange, sortBy, sortOrder]);
 
   const handleProductSelect = (id) => {
     navigate(`/product/${id}`);
