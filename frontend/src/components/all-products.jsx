@@ -162,7 +162,7 @@ const ProductCard = ({ product, onSelect, userInfo }) => {
         >
           <CardHeader>
             <img
-              src={product.pictures[0] || defaultImage}
+              src={product?.pictures?.[0] || defaultImage}
               alt={product.name}
               className="w-full h-48 object-cover rounded-t-lg"
             />
