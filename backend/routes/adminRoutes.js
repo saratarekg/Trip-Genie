@@ -110,7 +110,7 @@ router.get(
 router.get("/productsarchive", productController.getAllProductsArchive);
 router.put(
   "/products/:id",
-  upload.array("pictures", 5),
+  upload.array("newPictures", 5),
   productController.editProduct
 );
 router.put("/archiveproducts/:id", productController.archiveProduct);
