@@ -185,17 +185,31 @@ export function ProductArchive() {
   };
   const fetchProducts = async () => {
     try {
-      setIsLoading(false);
+      setIsLoading(true);
       const token = Cookies.get("jwt");
       const role = getUserRole();
-      const response = await fetch(
-        `http://localhost:4000/${role}/productsarchive`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      let response;
+  
+      if (role === "admin") {
+        response = await fetch(
+          `http://localhost:4000/admin/productsarchive`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else {
+        response = await fetch(
+          `http://localhost:4000/seller/productsarchive`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -203,11 +217,12 @@ export function ProductArchive() {
       setProducts(data);
       setError(null);
       setCurrentPage(1);
-      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching products:", error);
       setError("Error fetching products");
       setProducts([]);
+    } finally {
+      setIsLoading(false);
     }
   };
   const clearFilters = () => {
