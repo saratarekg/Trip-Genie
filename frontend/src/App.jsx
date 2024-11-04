@@ -33,6 +33,7 @@ import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./pages/SignUp.jsx";
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
+import Checkout from "./pages/checkout.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
@@ -94,6 +95,18 @@ function AppContent() {
                 ]}
               >
                 <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkout"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "tourist"
+                ]}
+              >
+                <Checkout />
               </ProtectedRoute>
             }
           />

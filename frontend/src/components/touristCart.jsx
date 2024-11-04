@@ -60,7 +60,7 @@ const ShoppingCart = () => {
   };
 
   const isCheckoutDisabled = cartItems.some(item => 
-    item.product.quantity === 0 || item.quantity > item.product.quantity
+    item?.product?.quantity === 0 || item?.quantity > item?.product?.quantity
   );
 
   const blueButtonStyle = "bg-blue-500 hover:bg-blue-600 text-white disabled:bg-blue-300";
@@ -225,9 +225,7 @@ const ShoppingCart = () => {
           const exchangedPrice = price * rate;
           return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
         }
-        else{
-          fetchExchangeRates(productCurrency,userPreferredCurrency._id);
-        }
+
       }
     }
     return "NOTHING" ;
@@ -239,15 +237,15 @@ const ShoppingCart = () => {
     setTotalAmountLoading(true);
     let total = 0;
     for (const item of cartItems) {
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency.code !== item.product.currency) {
-        const rate = exchangeRates[`${item.product.currency}-${userPreferredCurrency._id}`];
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency.code !== item.product?.currency) {
+        const rate = exchangeRates[`${item.product?.currency}-${userPreferredCurrency._id}`];
         if (rate) {
-          total += item.product.price * rate * item.quantity;
+          total += item.product?.price * rate * item.quantity;
         } else {
-          total += item.product.price * item.quantity;
+          total += item.product?.price * item.quantity;
         }
       } else {
-        total += item.product.price * item.quantity;
+        total += item?.product?.price * item.quantity;
       }
     }
     setTotalAmount(total);
@@ -399,32 +397,32 @@ const ShoppingCart = () => {
         <Popup isOpen={popupOpen} onClose={closePopup} type={popupType} message={popupMessage}/>
       </div>
       <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
-      {cartItems.length === 0 ? (
+      {cartItems?.length === 0 ? (
         <p className="text-center text-gray-500 my-8">No items in cart</p>
       ) : (
         cartItems.map(item => (
-          <div key={item.product._id} className="flex flex-col border-b py-4">
+          <div key={item?.product?._id} className="flex flex-col border-b py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <img 
-                  src={item?.product?.pictures?.length ? item.product.pictures[0] : '/placeholder.svg'} 
+                  src={item?.product?.pictures?.length ? item?.product?.pictures?.[0] : '/placeholder.svg'} 
                 
                   alt={item?.product?.name || 'Product'} 
                   className="w-20 h-20 object-cover mr-4 cursor-pointer"
                   onClick={() => handleProductClick(item.product._id)}
                 />
                 <div>
-                  {item.product ? (
+                  {item?.product ? (
                     <>
                       <h2 
                         className="text-lg font-semibold cursor-pointer hover:underline"
                         onClick={() => handleProductClick(item.product._id)}
                       >
-                        {item.product.name}
+                        {item?.product?.name}
                       </h2>
                       <p className="text-sm text-gray-600">
-                        {item.product.description.length > 150
-                          ? `${item.product.description.slice(0, 150)}...`
+                        {item.product.description?.length > 150
+                          ? `${item.product.description?.slice(0, 150)}...`
                           : item.product.description}
                       </p>
                     </>
@@ -436,19 +434,19 @@ const ShoppingCart = () => {
               <div className="flex items-center">
                 <div className="flex items-center space-x-2">
                   <Button 
-                    onClick={() => handleQuantityChange(item.product._id, Math.max(1, item.quantity - 1))}
+                    onClick={() => handleQuantityChange(item?.product?._id, Math.max(1, item?.quantity - 1))}
                     className={`px-2 py-1 rounded ${blueButtonStyle}`}
-                    disabled={item.quantity <= 1 || item.product.quantity === 0}
-                    variant={item.quantity <= 1 || item.product.quantity === 0 ? "ghost" : "default"}
+                    disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
+                    variant={item?.quantity <= 1 || item?.product?.quantity === 0 ? "ghost" : "default"}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="px-4 py-1 bg-gray-100 rounded">{item.quantity}</span>
+                  <span className="px-4 py-1 bg-gray-100 rounded">{item?.quantity}</span>
                   <Button 
-                    onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
+                    onClick={() => handleQuantityChange(item?.product?._id, item?.quantity + 1)}
                     className={`px-2 py-1 rounded ${blueButtonStyle}`}
-                    disabled={item.quantity >= item.product.quantity}
-                    variant={item.quantity >= item.product.quantity ? "ghost" : "default"}
+                    disabled={item?.quantity >= item?.product?.quantity}
+                    variant={item?.quantity >= item?.product?.quantity ? "ghost" : "default"}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -457,11 +455,11 @@ const ShoppingCart = () => {
                   {item.priceLoading ? (
                     <div className="animate-pulse bg-gray-200 h-6 w-full rounded"></div>
                   ) : (
-                    formatPrice(item.product.price * item.quantity, item.product.currency)
+                    formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
                   )}
                 </span>
                 <Button 
-                  onClick={() => handleRemoveItem(item.product._id)}
+                  onClick={() => handleRemoveItem(item?.product?._id)}
                   className="ml-4"
                   variant="destructive"
                 >
@@ -470,14 +468,14 @@ const ShoppingCart = () => {
               </div>
             </div>
             <div className="mt-2">
-              {item.product.quantity === 0 && (
+              {item?.product?.quantity === 0 && (
                 <p className="text-red-500 text-sm">
                   This item is out of stock. Please remove it to proceed with checkout.
                 </p>
               )}
-              {item.quantity > item.product.quantity && item.product.quantity !== 0 && (
+              {item?.quantity > item?.product?.quantity && item?.product?.quantity !== 0 && (
                 <p className="text-red-500 text-sm">
-                  Only {item.product.quantity} left in stock. Please adjust the quantity.
+                  Only {item?.product?.quantity} left in stock. Please adjust the quantity.
                 </p>
               )}
             </div>
@@ -502,12 +500,12 @@ const ShoppingCart = () => {
           </Button>
         </div>
       )}
-      {cartItems.some(item => item.product.quantity === 0) && (
+      {cartItems.some(item => item?.product?.quantity === 0) && (
         <p className="text-red-500 mt-4">
           Some items in your cart are out of stock. Please remove them to proceed with checkout.
         </p>
       )}
-      {cartItems.some(item => item.quantity > item.product.quantity) && (
+      {cartItems.some(item => item?.quantity > item?.product?.quantity) && (
         <p className="text-red-500 mt-4">
           Some items in your cart exceed available stock. Please adjust quantities to proceed with checkout.
         </p>
@@ -524,36 +522,36 @@ const ShoppingCart = () => {
 
             {cartItems.map((item, index) => (
               <div key={index} className="my-4">
-                <p className="text-xl font-semibold">{item.product.name}</p>
+                <p className="text-xl font-semibold">{item?.product?.name}</p>
                 <p className="text-lg">
                   Quantity: 
                   <input
                     type="number"
-                    value={item.quantity}
+                    value={item?.quantity}
                     onChange={(e) => {
                       const value = parseInt(e.target.value, 10);
-                      if (value > item.product.quantity || value < 1) {
+                      if (value > item?.product?.quantity || value < 1) {
                         setQuantityError(true);
                       } else {
                         setQuantityError(false);
-                        handleQuantityChange(item.product._id, value);
+                        handleQuantityChange(item?.product?._id, value);
                       }
                     }}
                     className={`w-20 ml-2 border rounded-md ${quantityError ? 'border-red-500' : ''}`}
                     min="1"
-                    max={item.product.quantity}
+                    max={item?.product?.quantity}
                   />
                 </p>
                 {quantityError && (
                   <p className="text-red-500 text-sm mt-1">
-                    Unavailable amount, max is: {item.product.quantity}
+                    Unavailable amount, max is: {item?.product?.quantity}
                   </p>
                 )}
                 <p className="text-xl">
-                  Price: {item.priceLoading ? (
+                  Price: {item?.priceLoading ? (
                     <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
                   ) : (
-                    formatPrice(item.product.price * item.quantity, item.product.currency)
+                    formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
                   )}
                 </p>
               </div>
@@ -746,12 +744,12 @@ const ShoppingCart = () => {
             <div className="flex flex-col">
               {cartItems.map((item, index) => (
                 <div key={index} className="flex justify-between mt-2">
-                  <p className="text-lg">{item.product.name} x {item.quantity}</p>
+                  <p className="text-lg">{item?.product?.name} x {item?.quantity}</p>
                   <p className="text-lg">
                     {item.priceLoading ? (
                       <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
                     ) : (
-                      formatPrice(item.product.price * item.quantity, item.product.currency)
+                      formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
                     )}
                   </p>
                 </div>
