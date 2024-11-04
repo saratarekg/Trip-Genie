@@ -36,6 +36,8 @@ const deleteAdvertiserAccount = async (req, res) => {
       await Activity.findByIdAndUpdate(activity._id, { isDeleted: true });
     });
 
+    advertiser.files.IDFilename;
+
     await Advertiser.findByIdAndDelete(res.locals.user_id);
 
     res
@@ -58,15 +60,15 @@ const rejectAdvertiser = async (req, res) => {
     if (!gfs) {
       return res.status(500).send("GridFS is not initialized");
     }
-  
+
     const filenames = [];
     filenames.push(advertiser.files.IDFilename);
     filenames.push(advertiser.files.taxationRegistryCardFilename);
-    const files = await gfs.find({ filename:{$in:filenames} }).toArray();
+    const files = await gfs.find({ filename: { $in: filenames } }).toArray();
     if (!files || files.length === 0) {
       return res.status(404).json({ err: "No file exists" });
     }
-  
+
     await gfs.delete(files[0]._id);
     await gfs.delete(files[1]._id);
 
@@ -74,7 +76,6 @@ const rejectAdvertiser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-  
 };
 
 const getAllAdvertisers = async (req, res) => {

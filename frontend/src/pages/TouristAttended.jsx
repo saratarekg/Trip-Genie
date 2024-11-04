@@ -14,6 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import ActivityDetail from "./SingleActivity";
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 const fetchData = async (userRole, dataType) => {
   try {
@@ -42,12 +44,27 @@ export default function TouristAttendedActivities() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleActivityClick = (id) => {
-    navigate(`/activity/${id}`);
+  const handleActivityClick = (activity) => {
+    if (activity.isDeleted) {
+      return toast({
+        title: "Activity Unavailable",
+        description: "This activity no longer exists",
+        duration: 3000,
+      });
+    }
+    navigate(`/activity/${activity._id}`);
   };
-  const handleItineraryClick = (id) => {
-    navigate(`/itinerary/${id}`);
+  const handleItineraryClick = (itinerary) => {
+    if (itinerary.isDeleted) {
+      return toast({
+        title: "Itinerary Unavailable",
+        description: "This itinerary no longer exists",
+        duration: 3000,
+      });
+    }
+    navigate(`/itinerary/${itinerary._id}`);
   };
 
   useEffect(() => {
@@ -91,6 +108,7 @@ export default function TouristAttendedActivities() {
 
   return (
     <div>
+      <Toaster />
       <h1 className="text-3xl font-bold mb-8">My Activities and Itineraries</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1">
@@ -108,7 +126,7 @@ export default function TouristAttendedActivities() {
                           variant="ghost"
                           className="w-full justify-start"
                           onClick={() =>
-                            handleItineraryClick(booking.itinerary._id)
+                            handleItineraryClick(booking.itinerary)
                           }
                         >
                           <Calendar className="mr-2 h-4 w-4" />
@@ -138,9 +156,7 @@ export default function TouristAttendedActivities() {
                         <Button
                           variant="ghost"
                           className="w-full justify-start"
-                          onClick={() =>
-                            handleActivityClick(booking.activity._id)
-                          }
+                          onClick={() => handleActivityClick(booking.activity)}
                         >
                           <div className="flex justify-between w-full">
                             <span>{booking.activity.name}</span>
