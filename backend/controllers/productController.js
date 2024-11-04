@@ -2,9 +2,10 @@ const Product = require("../models/product");
 const Seller = require("../models/seller");
 const Tourist = require("../models/tourist");
 const Purchase = require("../models/purchase");
+const cloudinary = require("../utils/cloudinary");
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, myproducts, rating } = req.query;
   const role = res.locals.user_role;
   console.log(role);
 
@@ -17,6 +18,7 @@ const getAllProducts = async (req, res) => {
     // Apply search filter (by name) if provided
     if (searchBy) {
       query.name = { $regex: searchBy, $options: "i" }; // Case-insensitive regex search
+      query.description = { $regex: searchBy, $options: "i" }; 
     }
 
     // Apply price range filter if provided
@@ -30,6 +32,10 @@ const getAllProducts = async (req, res) => {
     if (myproducts) {
       if (role == "admin") query.seller = null;
       else query.seller = res.locals.user_id;
+    }
+
+    if (rating) {
+      query.rating = { $gte: parseInt(rating, 10) }; // Ensure rating is treated as a number
     }
 
     // Perform the query
@@ -61,7 +67,7 @@ const getAllProducts = async (req, res) => {
 };
 
 const getAllProductsArchive = async (req, res) => {
-  const { minPrice, maxPrice, searchBy, asc, myproducts } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, myproducts, rating } = req.query;
 
   try {
     // Debugging: Log incoming query parameters
@@ -72,6 +78,7 @@ const getAllProductsArchive = async (req, res) => {
     // Apply search filter (by name) if provided
     if (searchBy) {
       query.name = { $regex: searchBy, $options: "i" }; // Case-insensitive regex search
+      query.description = { $regex: searchBy, $options: "i" }; 
     }
 
     // Apply price range filter if provided
@@ -79,6 +86,10 @@ const getAllProductsArchive = async (req, res) => {
       query.price = {};
       if (minPrice) query.price.$gte = parseFloat(minPrice); // Apply minPrice if given
       if (maxPrice) query.price.$lte = parseFloat(maxPrice); // Apply maxPrice if given
+    }
+
+    if (rating) {
+      query.rating = { $gte: parseInt(rating, 10) }; // Ensure rating is treated as a number
     }
 
     // Filter by the user's products (myProducts)
@@ -118,13 +129,25 @@ const addProduct = async (req, res) => {
   const { name, price, description, quantity, currency } = req.body; // Extract the data from request
 
   try {
+    let imagesBuffer = [];
     const pictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
+    //upload multiple images using cloudinary
+    for (let i = 0; i < pictures.length; i++) {
+      const result = await cloudinary.uploader.upload(pictures[i], {
+        folder: "products",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
 
     const product = new Product({
       name,
-      pictures,
+      pictures: imagesBuffer,
       price,
       description,
       seller: res.locals.user_id,
@@ -140,24 +163,30 @@ const addProduct = async (req, res) => {
 };
 
 const addProductByAdmin = async (req, res) => {
-  const {
-    name,
-    pictures,
-    price,
-    description,
-    rating,
-    reviews,
-    quantity,
-    currency,
-  } = req.body; // Extract the data from request
+  const { name, price, description, quantity, currency } = req.body; // Extract the data from request
 
   try {
+    let imagesBuffer = [];
+
     const pictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
+
+    //upload multiple images using cloudinary
+    for (let i = 0; i < pictures.length; i++) {
+      const result = await cloudinary.uploader.upload(pictures[i], {
+        folder: "products",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
     const product = new Product({
       name,
-      pictures,
+      pictures: imagesBuffer,
       price,
       description,
       quantity,
@@ -175,17 +204,39 @@ const addProductByAdmin = async (req, res) => {
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
   const { name, price, description, quantity, currency } = req.body; // Get details from request body
-  let pictures = req.body; // Get details from request body
   try {
     const checkProduct = await Product.find({ _id: id, isDeleted: false });
     if (!checkProduct) {
       return res.status(400).json({ message: "Product not found" });
     }
-    pictures = req.files.map(
-      // Convert the uploaded files to base64 strings
+    let { oldPictures } = req.body; // Get details from request body
+    oldPictures = JSON.parse(oldPictures);
+
+    let newPictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
+    let imagesBuffer = [];
+
+    for (let i = 0; i < newPictures.length; i++) {
+      const result = await cloudinary.uploader.upload(newPictures[i], {
+        folder: "products",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    const pictures = [...oldPictures, ...imagesBuffer];
     // Find the product by ID and update its details
+    const oldPicturesIDs = oldPictures.map((pic) => pic.public_id);
+    product.pictures.forEach((pic) => {
+      if (!oldPicturesIDs.includes(pic.public_id)) {
+        cloudinary.uploader.destroy(pic.public_id);
+      }
+    });
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       { name, pictures, price, description, quantity, currency },
@@ -218,22 +269,44 @@ const editProduct = async (req, res) => {
 const editProductOfSeller = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
   const { name, price, description, quantity, currency } = req.body;
-  let pictures = req.body; // Get details from request body
-  const product = await Product.findById({ _id: id, isDeleted: false });
-  if (!product) {
-    return res.status(400).json({ message: "Product not found" });
-  }
-  if (product.seller.toString() != res.locals.user_id) {
-    return res
-      .status(403)
-      .json({ message: "You are not authorized to edit this product" });
-  }
+
   try {
-    // Find the product by ID and update its details
-    pictures = req.files.map(
-      // Convert the uploaded files to base64 strings
+    const product1 = await Product.findById({ _id: id, isDeleted: false });
+    if (!product1) {
+      return res.status(400).json({ message: "Product not found" });
+    }
+    if (product1.seller.toString() != res.locals.user_id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this product" });
+    }
+    let { oldPictures } = req.body; // Get details from request body
+
+    oldPictures = JSON.parse(oldPictures);
+    const oldPicturesIDs = oldPictures.map((pic) => pic.public_id);
+    product1.pictures.forEach((pic) => {
+      if (!oldPicturesIDs.includes(pic.public_id)) {
+        cloudinary.uploader.destroy(pic.public_id);
+      }
+    });
+
+    let newPictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
+    let imagesBuffer = [];
+
+    for (let i = 0; i < newPictures.length; i++) {
+      const result = await cloudinary.uploader.upload(newPictures[i], {
+        folder: "products",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    const pictures = [...oldPictures, ...imagesBuffer];
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
@@ -294,6 +367,10 @@ const deleteProduct = async (req, res) => {
       }
     });
     const product = await Product.findByIdAndUpdate(id, { isDeleted: true });
+    for (let i = 0; i < product.pictures.length; i++) {
+      await cloudinary.uploader.destroy(product.pictures[i].public_id);
+    }
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -313,52 +390,84 @@ const archiveProduct = async (req, res) => {
     if (product.isDeleted) {
       return res.status(400).json({ message: "Product no longer exists" });
     }
-    const purchases = await Purchase.find({ status: "pending" });
-    purchases.forEach(async (purchase) => {
-      if (purchase.products.some((prod) => prod.product.toString() === id)) {
-        res.status(400).json({ message: "Cannot archive product" });
-      }
+
+    const pendingPurchase = await Purchase.findOne({
+      status: "pending",
+      "products.product": id,
     });
+    console.log(pendingPurchase);
+    if (pendingPurchase) {
+      return res
+        .status(400)
+        .json({ message: "This product is still on pending delivery" });
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       { isArchived: !product.isArchived },
       { new: true, runValidators: true }
     );
+
     res.status(200).json({
       product: updatedProduct,
       message: "Product archived status toggled successfully",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in archiveProduct:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while processing your request" });
   }
 };
 
 const deleteProductOfSeller = async (req, res) => {
   const { id } = req.params;
-  const product = await Product.findById(id);
-  if (product.seller.toString() != res.locals.user_id) {
-    return res
-      .status(403)
-      .json({ message: "You are not authorized to delete this product" });
-  }
-  try {
-    const purchases = await Purchase.find({ status: "pending" });
-    purchases.forEach(async (purchase) => {
-      if (purchase.products.some((prod) => prod.product.toString() === id)) {
-        res.status(400).json({ message: "Cannot delete product" });
-      }
-    });
+  const sellerId = res.locals.user_id;
 
-    const product = await Product.findByIdAndUpdate(id, { isDeleted: true });
+  try {
+    const product = await Product.findById(id);
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    if (product.seller.toString() !== sellerId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this product" });
+    }
+
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product is already deleted" });
+    }
+
+    const pendingPurchase = await Purchase.findOne({
+      status: "pending",
+      "products.product": id,
+    });
+
+    if (pendingPurchase) {
+      return res
+        .status(400)
+        .json({ message: "This product is still on pending delivery" });
+    }
+
+    // Delete images from Cloudinary
+    for (const picture of product.pictures) {
+      await cloudinary.uploader.destroy(picture.public_id);
+    }
+
+    // Mark product as deleted
+    await Product.findByIdAndUpdate(id, { isDeleted: true });
+
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error in deleteProductOfSeller:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while processing your request" });
   }
 };
-
 const addProductToCart = async (req, res) => {
   const { productId, quantity } = req.body; // Extract productId and quantity from request body
   const userId = res.locals.user_id; // Assuming the logged-in user ID is stored in res.locals
@@ -532,7 +641,9 @@ const addCommentToProduct = async (req, res) => {
     const { rating, comment, username } = req.body; // Get comment details from the request body
 
     if (rating !== undefined && (rating < 1 || rating > 5)) {
-      return res.status(400).json({ message: "Rating must be a number between 1 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 1 and 5" });
     }
 
     const userId = res.locals.user_id; // Get user ID from locals (assuming user is authenticated)
@@ -574,7 +685,10 @@ const addCommentToProduct = async (req, res) => {
     let newAverageRating;
     if (rating !== undefined) {
       product.allRatings.push(rating);
-      const totalRatings = product.allRatings.reduce((sum, rating) => sum + rating, 0);
+      const totalRatings = product.allRatings.reduce(
+        (sum, rating) => sum + rating,
+        0
+      );
       newAverageRating = totalRatings / product.allRatings.length;
       product.rating = newAverageRating;
     }
@@ -593,7 +707,6 @@ const addCommentToProduct = async (req, res) => {
     return res.status(500).json({ error: error.message }); // Return the error message in the response
   }
 };
-
 
 const updateCommentOnProduct = async (req, res) => {
   try {
@@ -626,7 +739,9 @@ const updateCommentOnProduct = async (req, res) => {
     );
 
     if (reviewIndex === -1) {
-      return res.status(404).json({ message: "Review not found for this user" });
+      return res
+        .status(404)
+        .json({ message: "Review not found for this user" });
     }
 
     // Determine the username to use
@@ -643,7 +758,10 @@ const updateCommentOnProduct = async (req, res) => {
     product.reviews[reviewIndex].user = finalUsername; // Update the username
 
     // Recalculate the average rating based on updated reviews
-    const totalRatings = product.reviews.reduce((sum, review) => sum + review.rating, 0); // Calculate total ratings
+    const totalRatings = product.reviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    ); // Calculate total ratings
     const newAverageRating = totalRatings / product.reviews.length; // Calculate new average rating
     product.rating = newAverageRating; // Update the product's average rating
 
@@ -661,8 +779,6 @@ const updateCommentOnProduct = async (req, res) => {
     return res.status(500).json({ error: error.message }); // Return the error message in the response
   }
 };
-
-
 
 module.exports = {
   rateProduct,

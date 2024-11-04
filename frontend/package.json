@@ -70,6 +70,7 @@
     "react-image-crop": "^11.0.7",
     "react-katex": "^3.0.1",
     "react-latex-next": "^3.0.0",
+    "react-lazyload": "^3.2.1",
     "react-leaflet": "^4.2.1",
     "react-lottie": "^1.2.4",
     "react-phone-input-2": "^2.15.1",

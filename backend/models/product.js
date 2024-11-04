@@ -6,11 +6,12 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    pictures: {
-      type: [String],
-      required: false,
-      default: [],
-    },
+    pictures: [
+      {
+        public_id: { type: String, required: true },
+        url: { type: String, required: true },
+      },
+    ],
     price: {
       type: Number,
       required: true,
