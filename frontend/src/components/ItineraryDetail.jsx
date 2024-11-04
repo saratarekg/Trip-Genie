@@ -311,7 +311,6 @@ const ItineraryDetail = () => {
       });
       if (!response.ok) throw new Error('Failed to submit tour guide rating');
       setTourGuideRating(rating);
-      window.location.reload();
     } catch (error) {
       console.error('Error submitting tour guide rating:', error);
     }
@@ -349,7 +348,6 @@ const ItineraryDetail = () => {
         disliked: '',
         isAnonymous: false
       });
-      window.location.reload();
     } catch (error) {
       console.error('Error submitting tour guide review:', error);
     }
@@ -378,7 +376,6 @@ const ItineraryDetail = () => {
       });
       if (!response.ok) throw new Error('Failed to submit rating');
       setQuickRating(rating);
-      window.location.reload();
     } catch (error) {
       console.error('Error submitting rating:', error);
     }
@@ -811,7 +808,6 @@ const ItineraryDetail = () => {
         visitDate: '',
         isAnonymous: false
       });
-      window.location.reload();
       // Handle success (e.g., show a success message, refresh comments)
     } catch (error) {
       console.error('Error submitting review:', error);
@@ -820,8 +816,13 @@ const ItineraryDetail = () => {
   };
 
   const isReviewValid = () => {
-    return (newReview.liked.trim() !== '' || newReview.disliked.trim() !== '');
+    return (
+      newReview.liked.trim() !== '' ||
+      newReview.disliked.trim() !== '' ||
+      newReview.rating > 0
+    );
   };
+  
 
   const handlePrevComment = () => {
     setCurrentCommentIndex(Math.max(0, currentCommentIndex - 3));
@@ -905,7 +906,6 @@ const handleRateItinerary = async () => {
       if (!response.ok) throw new Error('Failed to submit activity rating');
       setShowRatingDialog(false);
       setActivityRating(0);
-      window.location.reload();
       // Handle success (e.g., show a success message, refresh activity details)
     } catch (error) {
       console.error('Error submitting activity rating:', error);
@@ -1028,7 +1028,7 @@ const handleRateItinerary = async () => {
                       </span>
                     </div>
                     <span className="text-sm font-normal ml-2">
-                      {itinerary.allRatings ? `(${itinerary.allRatings.length})` : "(0)"}
+                      {itinerary.comments ? `(${itinerary.comments.length})` : "(0)"}
                     </span>
                   </div>
                 </div>
@@ -1368,63 +1368,64 @@ const handleRateItinerary = async () => {
           </p>
         {itinerary.comments && itinerary.comments.length > 0 ? (
           <>
-              <div className="flex items-center justify-between mb-4">
-                <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
-                  <ChevronLeft />
-                </Button>
-                <div className="flex-1 flex justify-between px-4">
-                  {itinerary.comments.slice(currentCommentIndex, currentCommentIndex + 3).map((comment, index) => (
-                    <Card key={index} className={`w-[30%] ${comment.tourist === userId ? 'bg-blue-100' : 'bg-gray-100'} shadow-none border-none p-4 rounded-lg`}>
-                      <CardHeader className="flex items-start">
-                        <div className="flex">
-                          <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
-                            {comment.username.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="flex flex-col">
-                            <CardTitle className="text-xl font-semibold">{comment.username}</CardTitle>
-                            <p className="text-sm text-gray-500">{formatCommentDate(comment.date)}</p>
-                          </div>
-                        </div>
-                        <div className="mt-2">
-                          <StarRating rating={comment.rating} readOnly={true} />
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-700 line-clamp-3">{comment.content.liked || comment.content.disliked || "No comment provided"}</p>
-                        <div className="flex justify-between items-center mt-2">
-                          <a
-                            href="#"
-                            className="text-blue-500 hover:underline"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setShowFullComment(comment);
-                            }}
-                          >
-                            View more
-                          </a>
-                          {comment.tourist === userId && (
-                           <Button
-                           className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"                           size="sm"
-                           onClick={() => setShowEditReview(true)}
-                         >
-                           <Edit className="w-4 h-4 mr-2" />
-                           Edit
-                         </Button>
-                         
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-                <Button
-                  onClick={handleNextComment}
-                  variant="ghost"
-                  disabled={currentCommentIndex >= itinerary.comments.length - 3}
-                >
-                  <ChevronRight />
-                </Button>
+<div className="flex items-center justify-between mb-4">
+  <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
+    <ChevronLeft />
+  </Button>
+  <div className="flex-1 flex justify-between px-4">
+    {itinerary.comments
+      .filter(
+        (comment) => (comment.content.liked || comment.content.disliked) || comment.tourist === userId
+      ) // Filter for comments with content or by the user
+      .slice(currentCommentIndex, currentCommentIndex + 3) // Slice after filtering
+      .map((comment, index) => (
+        <Card
+          key={index}
+          className={`w-[30%] ${comment.tourist === userId ? 'bg-blue-100' : 'bg-gray-100'} shadow-none border-none p-4 rounded-lg`}
+        >
+          <CardHeader className="flex items-start">
+            <div className="flex">
+              <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+                {comment.username.charAt(0).toUpperCase()}
               </div>
+              <div className="flex flex-col">
+                <CardTitle className="text-xl font-semibold">{comment.username}</CardTitle>
+                <p className="text-sm text-gray-500">{formatCommentDate(comment.date)}</p>
+              </div>
+            </div>
+            <div className="mt-2">
+              <StarRating rating={comment.rating} readOnly={true} />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-700 line-clamp-3">
+              {comment.content.liked || comment.content.disliked || "No comment provided"}
+            </p>
+            <div className="flex justify-between items-center mt-2">
+              <a
+                href="#"
+                className="text-blue-500 hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowFullComment(comment);
+                }}
+              >
+                View more
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+  </div>
+  <Button
+    onClick={handleNextComment}
+    variant="ghost"
+    disabled={currentCommentIndex >= itinerary.comments.length - 3}
+  >
+    <ChevronRight />
+  </Button>
+</div>
+
             </>
           ) : (
             <p>No comments yet.</p>
@@ -1436,6 +1437,11 @@ const handleRateItinerary = async () => {
                 Add a Review
               </Button>
         )}
+           {userComment && (
+            <Button onClick={() => setShowEditReview(true)} className="mt-4 mr-4">
+              Edit Your Review
+            </Button>
+          )}
       </div>
       </div>
 
@@ -1687,62 +1693,6 @@ const handleRateItinerary = async () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showAddReview} onOpenChange={setShowAddReview}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Write a Review for Tour Guide</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Your Rating</label>
-              <StarRating rating={newReview.rating} setRating={(rating) => setNewReview(prev => ({ ...prev, rating }))} />
-            </div>
-            <div>
-              <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
-                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
-                Something you liked
-              </label>
-              <Textarea
-                id="liked"
-                value={newReview.liked}
-                onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-            <div>
-              <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
-                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
-                Something you didn't like
-              </label>
-              <Textarea
-                id="disliked"
-                value={newReview.disliked}
-                onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="anonymous-mode"
-                checked={newReview.isAnonymous}
-                onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
-              />
-              <Label htmlFor="anonymous-mode">Post anonymously</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={() => setShowAddReview(false)}
-              style={{ marginLeft: '10px', backgroundColor: '#D3D3D3', color: 'black' }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleAddReview} disabled={!isReviewValid()}>Post Review</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
     <Dialog open={showRateItineraryDialog || showEditReview} onOpenChange={() => {
         setShowRateItineraryDialog(false);
@@ -1801,7 +1751,7 @@ const handleRateItinerary = async () => {
       rating: userComment ? userComment.rating : 0,
       liked: userComment ? userComment.content.liked : "",
       disliked: userComment ? userComment.content.disliked : "",
-      isAnonymous: userComment ? userComment.username === 'Anonymous' : false
+      isAnonymous: userComment.username === 'Anonymous', 
     });
   }}
   className="bg-gray-300 text-black hover:bg-gray-400 ml-2"

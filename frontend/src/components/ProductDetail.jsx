@@ -477,19 +477,15 @@ const ProductDetail = () => {
           if (token) {
             const decodedToken = jwtDecode(token);
             const userReview = data.reviews.find(
-              (review) => review.tourist === decodedToken.id
+              (review) => review.tourist._id === decodedToken.id,
             );
             if (userReview) {
+              console.log(userReview);
               setUserReview(userReview);
               setQuickRating(userReview.rating || 0);
               setRating(userReview.rating || 0);
               setComment(userReview.comment || "");
-              setIsAnonymous(userReview.username?.trim() === "Anonymous");
-              console.log(
-                userReview.user,
-                "Anonymous",
-                userReview.username?.trim() === "Anonymous"
-              );
+              setIsAnonymous(!(userReview?.user === userReview.tourist.username));
             }
           }
         }
@@ -978,7 +974,7 @@ const ProductDetail = () => {
                 {hasPurchased && (
                   <div className="mt-4 space-y-2">
                     <Button
-                      className="w-full"
+                      className="w-full mb-4"
                       onClick={() => setShowCommentDialog(true)}
                     >
                       {userReview ? "Edit Your Review" : "Write a Review"}
@@ -2035,12 +2031,11 @@ const ProductDetail = () => {
           <DialogFooter>
             <Button
               variant="outline"
+              className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
               onClick={() => {
                 setRating(userReview ? userReview.rating : 0);
                 setComment(userReview ? userReview.comment : "");
-                setIsAnonymous(
-                  userReview ? userReview.username === "Anonymous" : false
-                );
+                setIsAnonymous( userReview.username === "Anonymous" );
                 setShowCommentDialog(false);
               }}
             >
@@ -2048,6 +2043,7 @@ const ProductDetail = () => {
             </Button>
             <Button
               onClick={handleCommentSubmit}
+              className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
               disabled={rating === 0 || comment?.trim() === ""}
             >
               {userReview ? "Update Review" : "Submit Review"}

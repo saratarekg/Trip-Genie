@@ -514,6 +514,7 @@ const getAllLanguages = async (req, res) => {
 const addCommentToItinerary = async (req, res) => {
   try {
     const { username, rating, content } = req.body;
+    console.log(username);
 
     if (rating === undefined) {
       rating = 0; // Default rating
@@ -592,7 +593,8 @@ const updateCommentOnItinerary = async (req, res) => {
   try {
     const { rating, content, username } = req.body;
     const touristId = res.locals.user_id; // Get the authenticated user's ID
-
+    console.log("11111111111111111111111111111111111111111111111111111111111111111");
+    console.log(username);
     // Validate the rating if it's provided
     if (rating !== undefined && (rating < 0 || rating > 5)) {
       return res.status(400).json({

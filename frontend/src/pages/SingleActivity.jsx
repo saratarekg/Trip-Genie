@@ -618,7 +618,7 @@ const ActivityDetail = () => {
         });
         if (!response.ok) throw new Error('Failed to submit rating');
         setQuickRating(rating);
-        await fetchProductDetails();
+        window.location.reload();
       } catch (error) {
         console.error('Error submitting rating:', error);
       }
@@ -658,7 +658,7 @@ const ActivityDetail = () => {
           visitDate: "",
           isAnonymous: false
         });
-        await fetchProductDetails();
+        window.location.reload();
       } catch (error) {
         console.error('Error submitting review:', error);
       }
@@ -740,8 +740,8 @@ const ActivityDetail = () => {
 
                   {/* Rating Count outside the badge */}
                   <span className="text-sm font-normal ml-2">
-                    {activity.allRatings
-                      ? `(${activity.allRatings.length})`
+                    {activity.comments
+                      ? `(${activity.comments.length})`
                       : "(0)"}
                   </span>
                 </div>
@@ -1026,7 +1026,7 @@ const ActivityDetail = () => {
               </div>
             </div>
 
-            {userRole === "tourist" && userBookings.some(booking => booking.activity._id === activity._id) && (
+            {userRole === "tourist" && userComment && (
               <div className="border-t pt-4">
                 <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
                 <div 
@@ -1068,61 +1068,61 @@ const ActivityDetail = () => {
                     <ChevronLeft />
                   </Button>
                   <div className="flex-1 flex justify-between px-4">
-                    {activity.comments
-                      .slice(currentCommentIndex, currentCommentIndex + 3)
-                      .map((comment, index) => (
-                        <Card
-                          key={index}
-                          className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
-                        >
-                          <CardHeader className="flex items-start">
-                            <div className="flex">
-                              {/* User icon with larger first letter */}
-                              <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
-                                {comment.username.charAt(0).toUpperCase()}
-                              </div>
-                              <div className="flex flex-col">
-                                {/* Larger Username */}
-                                <CardTitle className="text-xl font-semibold">
-                                  {comment.username}
-                                </CardTitle>
-                                {/* Date under the username */}
-                                <p className="text-sm text-gray-500">
-                                  {formatCommentDate(comment.date)}
-                                </p>
-                              </div>
-                            </div>
-                            {/* Star Rating below username and date */}
-                            <div className="mt-2">
-                              <StarRating
-                                rating={comment.rating}
-                                readOnly={true}
-                              />
-                            </div>
-                          </CardHeader>
+  {activity.comments
+    .filter(comment => comment.content.liked || comment.content.disliked) // Filter for comments with content
+    .slice(currentCommentIndex, currentCommentIndex + 3) // Slice the filtered comments
+    .map((comment, index) => (
+      <Card
+        key={index}
+        className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
+      >
+        <CardHeader className="flex items-start">
+          <div className="flex">
+            {/* User icon with larger first letter */}
+            <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+              {comment.username.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex flex-col">
+              {/* Larger Username */}
+              <CardTitle className="text-xl font-semibold">
+                {comment.username}
+              </CardTitle>
+              {/* Date under the username */}
+              <p className="text-sm text-gray-500">
+                {formatCommentDate(comment.date)}
+              </p>
+            </div>
+          </div>
+          {/* Star Rating below username and date */}
+          <div className="mt-2">
+            <StarRating
+              rating={comment.rating}
+              readOnly={true}
+            />
+          </div>
+        </CardHeader>
 
-                          <CardContent>
-                            {/* Liked content */}
-                            <p className="text-gray-700 line-clamp-3">
-                              {comment.content.liked ||
-                                comment.content.disliked ||
-                                "No comment provided"}
-                            </p>
-                            {/* View more link */}
-                            <a
-                              href="#"
-                              className="text-blue-500 hover:underline mt-2 inline-block"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setShowFullComment(comment);
-                              }}
-                            >
-                              View more
-                            </a>
-                          </CardContent>
-                        </Card>
-                      ))}
-                  </div>
+        <CardContent>
+          {/* Liked content */}
+          <p className="text-gray-700 line-clamp-3">
+            {comment.content.liked || comment.content.disliked || "No comment provided"}
+          </p>
+          {/* View more link */}
+          <a
+            href="#"
+            className="text-blue-500 hover:underline mt-2 inline-block"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowFullComment(comment);
+            }}
+          >
+            View more
+          </a>
+        </CardContent>
+      </Card>
+    ))}
+</div>
+
                   <Button
                     onClick={handleNextComment}
                     variant="ghost"
