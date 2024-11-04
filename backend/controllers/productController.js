@@ -34,7 +34,7 @@ const getAllProducts = async (req, res) => {
     }
 
     if (rating) {
-      query.rating = parseInt(rating, 10); // Ensure rating is treated as a number
+      query.rating = { $gte: parseInt(rating, 10) }; // Ensure rating is treated as a number
     }
 
     // Perform the query
@@ -87,15 +87,13 @@ const getAllProductsArchive = async (req, res) => {
     }
 
     if (rating) {
-      query.rating = parseInt(rating, 10); // Ensure rating is treated as a number
+      query.rating = { $gte: parseInt(rating, 10) }; // Ensure rating is treated as a number
     }
 
     // Filter by the user's products (myProducts)
     if (myproducts) {
       query.seller = res.locals.user_id;
     }
-
-
 
     // Perform the query
     query.isArchived = true;
@@ -230,6 +228,13 @@ const editProduct = async (req, res) => {
 
     const pictures = [...oldPictures, ...imagesBuffer];
     // Find the product by ID and update its details
+    const oldPicturesIDs = oldPictures.map((pic) => pic.public_id);
+    product.pictures.forEach((pic) => {
+      if (!oldPicturesIDs.includes(pic.public_id)) {
+        cloudinary.uploader.destroy(pic.public_id);
+      }
+    });
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       { name, pictures, price, description, quantity, currency },
@@ -386,11 +391,13 @@ const archiveProduct = async (req, res) => {
 
     const pendingPurchase = await Purchase.findOne({
       status: "pending",
-      "products.product": id
+      "products.product": id,
     });
     console.log(pendingPurchase);
     if (pendingPurchase) {
-      return res.status(400).json({ message: "This product is still on pending delivery" });
+      return res
+        .status(400)
+        .json({ message: "This product is still on pending delivery" });
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -404,11 +411,12 @@ const archiveProduct = async (req, res) => {
       message: "Product archived status toggled successfully",
     });
   } catch (error) {
-    console.error('Error in archiveProduct:', error);
-    res.status(500).json({ message: "An error occurred while processing your request" });
+    console.error("Error in archiveProduct:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while processing your request" });
   }
 };
-
 
 const deleteProductOfSeller = async (req, res) => {
   const { id } = req.params;
@@ -422,7 +430,9 @@ const deleteProductOfSeller = async (req, res) => {
     }
 
     if (product.seller.toString() !== sellerId) {
-      return res.status(403).json({ message: "You are not authorized to delete this product" });
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this product" });
     }
 
     if (product.isDeleted) {
@@ -431,11 +441,13 @@ const deleteProductOfSeller = async (req, res) => {
 
     const pendingPurchase = await Purchase.findOne({
       status: "pending",
-      "products.product": id
+      "products.product": id,
     });
 
     if (pendingPurchase) {
-      return res.status(400).json({ message: "This product is still on pending delivery" });
+      return res
+        .status(400)
+        .json({ message: "This product is still on pending delivery" });
     }
 
     // Delete images from Cloudinary
@@ -448,8 +460,10 @@ const deleteProductOfSeller = async (req, res) => {
 
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
-    console.error('Error in deleteProductOfSeller:', error);
-    res.status(500).json({ message: "An error occurred while processing your request" });
+    console.error("Error in deleteProductOfSeller:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while processing your request" });
   }
 };
 const addProductToCart = async (req, res) => {
