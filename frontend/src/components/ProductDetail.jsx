@@ -276,13 +276,13 @@ const ProductDetail = () => {
   };
 
   const formatPrice = (price, type) => {
-    const roundedPrice = Math.round(price);
+    const roundedPrice = price;
     if (product) {
       if (userRole === "tourist" && userPreferredCurrency) {
         if (userPreferredCurrency === product.currency) {
           return `${userPreferredCurrency.symbol}${roundedPrice}`;
         } else {
-          const exchangedPrice = Math.round(roundedPrice * exchangeRates);
+          const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2);
           return `${userPreferredCurrency.symbol}${exchangedPrice}`;
         }
       } else {
@@ -365,6 +365,57 @@ const ProductDetail = () => {
         return 0; // No additional cost
     }
   };
+
+  const updateLocation = () => {
+    const fullLocation = `
+      Street Name: ${streetName || ""}, 
+      Street Number: ${streetNumber || ""}, 
+      ${floorUnit ? `Floor/Unit: ${floorUnit},` : ""}
+      State: ${state || ""}, 
+      City: ${city || ""}, 
+      Postal Code: ${postalCode || ""} 
+      ${landmark ? `, Landmark: ${landmark}` : ""}
+    `.trim();
+    
+    setLocation(fullLocation);
+  };
+  
+  // Handlers for each input that update both the field and the location
+  const handleStreetNameChange = (e) => {
+    setStreetName(e.target.value);
+    updateLocation();
+  };
+  
+  const handleStreetNumberChange = (e) => {
+    setStreetNumber(e.target.value);
+    updateLocation();
+  };
+  
+  const handleFloorUnitChange = (e) => {
+    setFloorUnit(e.target.value);
+    updateLocation();
+  };
+  
+  const handleStateChange = (e) => {
+    setState(e.target.value);
+    updateLocation();
+  };
+  
+  const handleCityChange = (e) => {
+    setCity(e.target.value);
+    updateLocation();
+  };
+  
+  const handlePostalCodeChange = (e) => {
+    setPostalCode(e.target.value);
+    updateLocation();
+  };
+  
+  const handleLandmarkChange = (e) => {
+    setLandmark(e.target.value);
+    updateLocation();
+  };
+  
 
   // Function to toggle between expanded and collapsed states
   const toggleExpansion = () => {
@@ -632,9 +683,10 @@ const ProductDetail = () => {
     }
   };
 
-  const handlePurchase = async () => {
+  const handlePurchase = async (fullLocation) => {
     try {
       const token = Cookies.get("jwt");
+      await setLocation(fullLocation);
 
       // Calculate the total amount for this purchase
       const totalAmount = product.price * quantity;
@@ -1707,136 +1759,117 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Address Details Header */}
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Address Details</h2>
+         
+    {/* Address Details Section */}
+    <div className="my-4">
+      <h2 className="text-2xl font-bold">Address Details</h2>
 
-            {/* Street Name */}
-            <div className="my-4">
-              <label htmlFor="streetName" className="block text-lg font-medium">
-                Street Name
-              </label>
-              <input
-                type="text"
-                id="streetName"
-                value={streetName}
-                onChange={(e) => setStreetName(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter street name"
-              />
-            </div>
+      {/* Street Name */}
+      <div className="my-4">
+        <label htmlFor="streetName" className="block text-lg font-medium">
+          Street Name
+        </label>
+        <input
+          type="text"
+          id="streetName"
+          value={streetName}
+          onChange={handleStreetNameChange}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter street name"
+        />
+      </div>
 
-            {/* Street Number */}
-            <div className="my-4">
-              <label
-                htmlFor="streetNumber"
-                className="block text-lg font-medium"
-              >
-                Street Number
-              </label>
-              <input
-                type="text"
-                id="streetNumber"
-                value={streetNumber}
-                onChange={(e) => setStreetNumber(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter street number"
-              />
-            </div>
+      {/* Street Number */}
+      <div className="my-4">
+        <label htmlFor="streetNumber" className="block text-lg font-medium">
+          Street Number
+        </label>
+        <input
+          type="text"
+          id="streetNumber"
+          value={streetNumber}
+          onChange={handleStreetNumberChange}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter street number"
+        />
+      </div>
 
-            {/* Floor/Unit */}
-            <div className="my-4">
-              <label htmlFor="floorUnit" className="block text-lg font-medium">
-                Floor/Unit
-              </label>
-              <input
-                type="text"
-                id="floorUnit"
-                value={floorUnit}
-                onChange={(e) => setFloorUnit(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter floor/unit (optional)"
-              />
-            </div>
+      {/* Floor/Unit */}
+      <div className="my-4">
+        <label htmlFor="floorUnit" className="block text-lg font-medium">
+          Floor/Unit
+        </label>
+        <input
+          type="text"
+          id="floorUnit"
+          value={floorUnit}
+          onChange={handleFloorUnitChange}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter floor/unit (optional)"
+        />
+      </div>
 
-            {/* City */}
-            <div className="my-4">
-              <label htmlFor="city" className="block text-lg font-medium">
-                City
-              </label>
-              <input
-                type="text"
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter city"
-              />
-            </div>
+      {/* City */}
+      <div className="my-4">
+        <label htmlFor="city" className="block text-lg font-medium">
+          City
+        </label>
+        <input
+          type="text"
+          id="city"
+          value={city}
+          onChange={handleCityChange}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter city"
+        />
+      </div>
 
-            {/* State */}
-            <div className="my-4">
-              <label htmlFor="state" className="block text-lg font-medium">
-                State/Province/Region
-              </label>
-              <input
-                type="text"
-                id="state"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter state"
-              />
-            </div>
+      {/* State */}
+      <div className="my-4">
+        <label htmlFor="state" className="block text-lg font-medium">
+          State/Province/Region
+        </label>
+        <input
+          type="text"
+          id="state"
+          value={state}
+          onChange={handleStateChange}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter state"
+        />
+      </div>
 
-            {/* Country */}
-            <div className="my-4">
-              <label htmlFor="country" className="block text-lg font-medium">
-                Country
-              </label>
-              <input
-                type="text"
-                id="country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter country"
-              />
-            </div>
+      {/* Postal Code */}
+      <div className="my-4">
+        <label htmlFor="postalCode" className="block text-lg font-medium">
+          Postal/ZIP Code
+        </label>
+        <input
+          type="text"
+          id="postalCode"
+          value={postalCode}
+          onChange={handlePostalCodeChange}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter postal code (Optional)"
+        />
+      </div>
 
-            {/* Postal Code */}
-            <div className="my-4">
-              <label htmlFor="postalCode" className="block text-lg font-medium">
-                Postal/ZIP Code
-              </label>
-              <input
-                type="text"
-                id="postalCode"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter postal code (Optional)"
-              />
-            </div>
-
-            {/* Landmark / Additional Info */}
-            <div className="my-4">
-              <label htmlFor="landmark" className="block text-lg font-medium">
-                Landmark/Additional Info
-              </label>
-              <input
-                type="text"
-                id="landmark"
-                value={landmark}
-                onChange={(e) => setLandmark(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter landmark or additional info (optional)"
-              />
-            </div>
-
-            {/* Location Type Selector */}
-            {/* Location Type Selector */}
-            <div className="my-4">
+      {/* Landmark / Additional Info */}
+      <div className="my-4">
+        <label htmlFor="landmark" className="block text-lg font-medium">
+          Landmark/Additional Info
+        </label>
+        <input
+          type="text"
+          id="landmark"
+          value={landmark}
+          onChange={handleLandmarkChange}
+          className="w-full mt-1 px-3 py-2 border rounded-md"
+          placeholder="Enter landmark or additional info (optional)"
+        />
+      </div>
+       {/* Location Type Selector */}
+       <div className="my-4">
               <label
                 htmlFor="locationType"
                 className="block text-lg font-medium"
@@ -1867,10 +1900,17 @@ const ProductDetail = () => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
+          
+    </div>
 
-          {/* Total Price Section */}
-          <div className="my-4 border-t border-gray-300 pt-4">
+    {/* Display Location */}
+    <div className="my-4">
+      <h3 className="text-xl font-semibold">Full Location:</h3>
+      <p>{location}</p>
+    </div>
+
+              {/* Total Price Section */}
+              <div className="my-4 border-t border-gray-300 pt-4">
             <h2 className="text-2xl font-bold">Total Price</h2>
             <div className="flex justify-between mt-2">
               <p className="text-lg">
@@ -1894,56 +1934,40 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Dialog Footer */}
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowPurchaseConfirm(false);
-                resetFields();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                const fullLocation =
-                  "Street Name: " +
-                  streetName +
-                  ", Street Number: " +
-                  streetNumber +
-                  (floorUnit ? ", Floor/Unit: " + floorUnit : "") +
-                  ", State: " +
-                  state +
-                  ", City: " +
-                  city +
-                  ", Postal Code: " +
-                  postalCode +
-                  (landmark ? ", Landmark: " + landmark : "");
+    {/* Dialog Footer */}
+    <DialogFooter>
+      <Button
+        variant="outline"
+        onClick={() => {
+          setShowPurchaseConfirm(false);
+          resetFields();
+        }}
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={() => {
+          handlePurchase(location);
+          setShowPurchaseConfirm(false);
+          resetFields();
+        }}
+        disabled={
+          !paymentMethod ||
+          !deliveryDate ||
+          !deliveryTime ||
+          !quantity ||
+          quantityError || // Disable submit if quantity exceeds max
+          !locationType // Location type is required
+        }      >
+        Checkout
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 
-                setLocation(fullLocation); // Concatenate location details into a single string
-                handlePurchase();
-                setShowPurchaseConfirm(false);
-                resetFields();
-              }}
-              disabled={
-                !paymentMethod ||
-                !deliveryDate ||
-                !deliveryTime ||
-                !streetName ||
-                !streetNumber ||
-                !state ||
-                !city ||
-                !quantity ||
-                quantityError || // Disable submit if quantity exceeds max
-                !locationType // Location type is required
-              }
-            >
-              Checkout
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
+
 
       <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
         <DialogContent>
