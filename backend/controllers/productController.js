@@ -383,55 +383,75 @@ const archiveProduct = async (req, res) => {
     if (product.isDeleted) {
       return res.status(400).json({ message: "Product no longer exists" });
     }
-    const purchases = await Purchase.find({ status: "pending" });
-    purchases.forEach(async (purchase) => {
-      if (purchase.products.some((prod) => prod.product.toString() === id)) {
-        res.status(400).json({ message: "Cannot archive product" });
-      }
+
+    const pendingPurchase = await Purchase.findOne({
+      status: "pending",
+      "products.product": id
     });
+    console.log(pendingPurchase);
+    if (pendingPurchase) {
+      return res.status(400).json({ message: "This product is still on pending delivery" });
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       { isArchived: !product.isArchived },
       { new: true, runValidators: true }
     );
+
     res.status(200).json({
       product: updatedProduct,
       message: "Product archived status toggled successfully",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error in archiveProduct:', error);
+    res.status(500).json({ message: "An error occurred while processing your request" });
   }
 };
+
 
 const deleteProductOfSeller = async (req, res) => {
   const { id } = req.params;
-  const product = await Product.findById(id);
-  if (product.seller.toString() != res.locals.user_id) {
-    return res
-      .status(403)
-      .json({ message: "You are not authorized to delete this product" });
-  }
-  try {
-    const purchases = await Purchase.find({ status: "pending" });
-    purchases.forEach(async (purchase) => {
-      if (purchase.products.some((prod) => prod.product.toString() === id)) {
-        res.status(400).json({ message: "Cannot delete product" });
-      }
-    });
+  const sellerId = res.locals.user_id;
 
-    const product = await Product.findByIdAndUpdate(id, { isDeleted: true });
-    for (let i = 0; i < product.pictures.length; i++) {
-      await cloudinary.uploader.destroy(product.pictures[i].public_id);
-    }
+  try {
+    const product = await Product.findById(id);
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    if (product.seller.toString() !== sellerId) {
+      return res.status(403).json({ message: "You are not authorized to delete this product" });
+    }
+
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product is already deleted" });
+    }
+
+    const pendingPurchase = await Purchase.findOne({
+      status: "pending",
+      "products.product": id
+    });
+
+    if (pendingPurchase) {
+      return res.status(400).json({ message: "This product is still on pending delivery" });
+    }
+
+    // Delete images from Cloudinary
+    for (const picture of product.pictures) {
+      await cloudinary.uploader.destroy(picture.public_id);
+    }
+
+    // Mark product as deleted
+    await Product.findByIdAndUpdate(id, { isDeleted: true });
+
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error in deleteProductOfSeller:', error);
+    res.status(500).json({ message: "An error occurred while processing your request" });
   }
 };
-
 const addProductToCart = async (req, res) => {
   const { productId, quantity } = req.body; // Extract productId and quantity from request body
   const userId = res.locals.user_id; // Assuming the logged-in user ID is stored in res.locals
