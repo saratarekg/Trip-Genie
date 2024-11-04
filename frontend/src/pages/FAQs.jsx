@@ -51,43 +51,59 @@ const FAQ = () => {
   ];
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [message, setMessage] = useState('');
+  const [fadeOut, setFadeOut] = useState(false);
 
   const handleSubmit = (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
-    // Optionally, you can add logic here to handle the search query
-    // For now, it will just refresh the page
-    window.location.reload(); // Refresh the page
+    event.preventDefault();
+    setMessage("Your question has been submitted. We'll get back to you soon!");
+    setSearchQuery('');
+    setFadeOut(false);
+
+    setTimeout(() => {
+      setFadeOut(true);
+      setTimeout(() => {
+        setMessage('');
+      }, 400);
+    }, 5000);
   };
 
   return (
-    <div className="min-h-screen bg-[#E6DCCF]/10">
-      {/* Hero Section */}
+    <div className="min-h-screen bg-[#E6DCCF]/10 flex flex-col items-center">
+      {/* Main Content Section */}
       <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto px-4 py-12">
-        {/* Left Column - Image */}
-        <div className="relative h-[400px] bg-white rounded-2xl overflow-hidden shadow-lg">
-          <img
-            src="faq.jpg?height=400&width=600"
-            className="w-full h-full object-cover"
-            alt="Help Center"
-          />
+        {/* Left Column - FAQ Section */}
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-5xl font-bold text-[#1A3B47] mb-4">Frequently Asked Questions</h2>
+          <div className="bg-white rounded-xl overflow-hidden">
+            {/* Removed 'divide-y' class here to remove lines */}
+            <div>
+              {faqs.map((faq, index) => (
+                <FAQItem 
+                  key={index} 
+                  question={faq.question} 
+                  answer={faq.answer} 
+                />
+              ))}
+            </div>
+          </div>
         </div>
-        
+
         {/* Right Column - Help Center Header */}
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center text-center">
           <span className="text-[#F88C33] font-medium mb-2">Help center</span>
           <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">
             How can We help You
           </h1>
           <p className="text-[#1A3B47]/70 mb-8">
-            You can asking any questions you want to know and we will respond to you via email.
-          </p>
-          <form onSubmit={handleSubmit} className="relative">
+            Have a question? Just ask below, and our team will get back to you by email with all the details you need!      </p>
+          <form onSubmit={handleSubmit} className="relative w-full max-w-lg mx-auto">
             <input
               type="text"
               placeholder="What can we help you with?"
               className="w-full px-4 py-3 rounded-lg border border-[#B5D3D1] focus:outline-none focus:ring-2 focus:ring-[#388A94] focus:border-transparent"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)} // Update the input value
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button 
               type="submit"
@@ -110,23 +126,26 @@ const FAQ = () => {
               </svg>
             </button>
           </form>
+          {message && (
+            <p className={`mt-2 text-blue-500 text-md ${fadeOut ? 'animate-fade-exit' : 'animate-fade'}`}>
+              {message}
+            </p>
+          )}
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="max-w-3xl mx-auto px-4 pb-12">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="divide-y divide-[#B5D3D1]">
-            {faqs.map((faq, index) => (
-              <FAQItem 
-                key={index} 
-                question={faq.question} 
-                answer={faq.answer} 
-              />
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* CSS styles for fade animations */}
+      <style jsx>{`
+        .animate-fade {
+          opacity: 1;
+          transition: opacity 0.9s ease-in-out;
+        }
+
+        .animate-fade-exit {
+          opacity: 0;
+          transition: opacity 0.9s ease-in-out;
+        }
+      `}</style>
     </div>
   );
 };

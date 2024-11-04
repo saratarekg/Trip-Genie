@@ -50,6 +50,7 @@ import { TouristProfileComponent } from "@/components/touristProfile";
 import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";
+import FAQ from "@/pages/FAQs";
 import TouristAttendedActivities from "@/pages/TouristAttended";
 import AddCard from "@/pages/AddCard";
 import ShoppingCart from "@/components/touristCart.jsx";
@@ -70,6 +71,9 @@ const History = ({ tourist }) => <TouristAttendedActivities />;
 const Complaint = () => <FileComplaintForm />;
 
 const Preferences = () => <TravelPreferences />;
+
+const FAQs = () => <FAQ />;
+
 
 // const AddCard = () => <AddCard />;
 
@@ -561,6 +565,8 @@ export default function AccountTourist() {
         return <AddCard />;
       case "currency":
         return <CurrencyApp />;
+        case "faqs":
+          return <FAQs />;
       default:
         return <AccountInfo tourist={tourist} />;
     }
