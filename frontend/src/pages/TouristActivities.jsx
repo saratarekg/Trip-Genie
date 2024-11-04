@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { Calendar, ChevronRight, Eye, Trash2 , Clock, CheckCircle, XCircle, AlertCircle} from 'lucide-react'
+import { Calendar, ChevronRight, Eye, Trash2, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from 'react-router-dom'
-import { Ticket, Type, FileText,DollarSign, CreditCard,Wallet } from "lucide-react"; // Import icons from react-lucide
+import { Ticket, Type, FileText, DollarSign, CreditCard, Wallet } from "lucide-react"
 import {
   Dialog,
   DialogContent,

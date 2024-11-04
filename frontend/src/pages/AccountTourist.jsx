@@ -635,7 +635,12 @@ export default function AccountTourist() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-16">
+    <div>
+        <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    </div>
+  </div>
+  <div className="container mx-auto px-4 py-4 mt-4">
       <h1 className="text-3xl font-bold mb-8">My Account</h1>
 
       <div className="flex flex-col md:flex-row gap-8">
@@ -703,6 +708,8 @@ export default function AccountTourist() {
       {showDeleteAccount && (
         <DeleteAccount onClose={() => setShowDeleteAccount(false)} />
       )}
+      </div>
     </div>
+
   );
 }
