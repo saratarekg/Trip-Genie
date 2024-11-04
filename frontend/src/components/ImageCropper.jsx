@@ -15,6 +15,8 @@ export function ImageCropper({ onImageCropped, currentImage }) {
     aspect: 1,
   });
   const imageRef = React.useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => {
     onImageCropped(selectedImage);
@@ -62,13 +64,65 @@ export function ImageCropper({ onImageCropped, currentImage }) {
     }
   };
 
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => setSelectedImage(reader.result));
+      reader.readAsDataURL(files[0]);
+    }
+  };
+
+  const handleParentClick = (e) => {
+    if (
+      !selectedImage &&
+      fileInputRef.current &&
+      e.target === e.currentTarget
+    ) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-4 border-2 border-dashed rounded-lg">
+    <div
+      className={`flex flex-col items-center justify-center gap-4 p-4 border-2 border-dashed rounded-lg transition-all duration-200 ${
+        isDragging
+          ? "bg-gray-100 bg-opacity-70 border-primary"
+          : "border-gray-300 hover:border-primary hover:bg-gray-50 hover:bg-opacity-30"
+      }`}
+      style={{ zIndex: 100 }}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onClick={handleParentClick}
+    >
       {!selectedImage ? (
         <div className="text-center">
           <label
             htmlFor="file-upload"
-            className="relative cursor-pointer rounded-md bg-white font-semibold text-primary hover:text-primary/80"
+            className="relative cursor-pointer rounded-md font-semibold text-primary hover:text-primary/80"
           >
             <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
             <div className="mt-4 flex text-sm leading-6 text-gray-600">
@@ -80,6 +134,7 @@ export function ImageCropper({ onImageCropped, currentImage }) {
                 className="sr-only"
                 accept="image/*"
                 onChange={onSelectFile}
+                ref={fileInputRef}
               />
               <p className="pl-1">or drag and drop</p>
             </div>
