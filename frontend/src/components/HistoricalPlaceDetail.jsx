@@ -312,7 +312,12 @@ const HistoricalPlaceDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-8">
+    <div>
+       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        </div>
+      </div>
+      <div className="min-h-screen bg-gray-100 pt-8">
       <div className="container mx-auto px-4 py-8 ">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-6">
@@ -586,6 +591,7 @@ const HistoricalPlaceDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };
