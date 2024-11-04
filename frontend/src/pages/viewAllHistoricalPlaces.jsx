@@ -13,8 +13,9 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react"; // Import icons
 
+// HistoricalPlaceCard Component
 const HistoricalPlaceCard = ({
   historicalPlace,
   onSelect,
@@ -23,6 +24,8 @@ const HistoricalPlaceCard = ({
 }) => {
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
+  // console.log(historicalPlace);
+  // console.log(userPreferredCurrency);
 
   useEffect(() => {
     if (
@@ -44,19 +47,21 @@ const HistoricalPlaceCard = ({
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", // Ensure content type is set to JSON
           },
           body: JSON.stringify({
-            base: historicalPlace.currency,
-            target: userPreferredCurrency,
+            base: historicalPlace.currency, // Sending base currency ID
+            target: userPreferredCurrency, // Sending target currency ID
           }),
         }
       );
+      // Parse the response JSON
       const data = await response.json();
 
       if (response.ok) {
         setExchangeRates(data.conversion_rate);
       } else {
+        // Handle possible errors
         console.error("Error in fetching exchange rate:", data.message);
       }
     } catch (error) {
@@ -81,6 +86,10 @@ const HistoricalPlaceCard = ({
   };
 
   const formatPrice = (price, type) => {
+    console.log(price);
+    console.log(userPreferredCurrency); 
+    console.log(historicalPlace.currency);  
+
     if (userRole === "tourist") {
       if (userPreferredCurrency._id === historicalPlace.currency._id) {
         return `${userPreferredCurrency.symbol}${price}/Day`;
@@ -93,13 +102,6 @@ const HistoricalPlaceCard = ({
     } else {
       return `${currencySymbol.symbol}${price}/Day`;
     }
-  };
-
-  const truncateDescription = (description, maxLength) => {
-    if (description.length > maxLength) {
-      return description.substring(0, maxLength) + ".....";
-    }
-    return description;
   };
 
   return (
@@ -117,7 +119,7 @@ const HistoricalPlaceCard = ({
       <CardHeader>
         <h3 className="text-xl font-semibold mt-2">{historicalPlace.title}</h3>
         <h3 className="text-sm mt-2 text-gray-700">
-          {truncateDescription(historicalPlace.description, 100)} {/* Adjust the number here for max length */}
+          {historicalPlace.description}
         </h3>
       </CardHeader>
       <CardContent>
@@ -153,12 +155,12 @@ const HistoricalPlaceCard = ({
       <CardFooter className="p-4 pt-0">
         <div className="flex flex-wrap gap-2">
           {historicalPlace.historicalTag.map((historicalTag, index) => (
-            <Badge key={`type-${index}`} variant="secondary" className="bg-[#388A94] text-white">
+            <Badge key={`type-${index}`} variant="secondary">
               {historicalTag.type}
             </Badge>
           ))}
           {historicalPlace.historicalTag.map((historicalTag, index) => (
-            <Badge key={`period-${index}`} variant="secondary" className="bg-[#388A94] text-white">
+            <Badge key={`period-${index}`} variant="secondary">
               {historicalTag.period}
             </Badge>
           ))}
@@ -168,6 +170,7 @@ const HistoricalPlaceCard = ({
   );
 };
 
+// Main Component
 export function AllHistoricalPlacesComponent() {
   const [historicalPlaces, setHistoricalPlaces] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -184,6 +187,7 @@ export function AllHistoricalPlacesComponent() {
   const historicalPlacesContainerRef = useRef(null);
   const [typesOptions, setTypesOptions] = useState([]);
   const [periodOptions, setPeriodOptions] = useState([]);
+  // const [pageNumber, setPageNumber] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const getUserRole = () => {
@@ -201,12 +205,12 @@ export function AllHistoricalPlacesComponent() {
           fetchTypesAndPeriods(),
           fetchUserInfo(),
         ]);
-        setIsLoading(false);
+        setIsLoading(false); // Set loading to false after both requests
       } catch (error) {
         console.error("Error in fetching data:", error);
-        setIsLoading(false);
+        setIsLoading(false); // Ensure loading state is also turned off on error
       } finally {
-        setIsLoading(false);
+        setIsLoading(false); // Ensure loading state is turned off
       }
     };
 
@@ -232,6 +236,8 @@ export function AllHistoricalPlacesComponent() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const currencyId = response.data.preferredCurrency;
+
+        
 
         const response2 = await axios.get(
           `http://localhost:4000/tourist/getCurrency/${currencyId}`,
@@ -269,6 +275,7 @@ export function AllHistoricalPlacesComponent() {
     setCurrentPage(pageNumber);
   };
 
+  // Fetch historical places
   const fetchHistoricalPlace = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -295,6 +302,7 @@ export function AllHistoricalPlacesComponent() {
     }
   };
 
+  // Fetch types and periods
   const fetchTypesAndPeriods = async () => {
     const typePromise = axios
       .get("http://localhost:4000/api/getAllHistoricalTypes")
@@ -369,104 +377,115 @@ export function AllHistoricalPlacesComponent() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#E6DCCF]">
+    <div>
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="flex-grow py-12 px-4 pt-20 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-100 py-12 px-4 pt-20 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">All Historical Places</h1>
-            <div className="flex flex-col md:flex-row">
-              {/* Left side: Filter and Search */}
-              <div className="md:w-1/4 md:pr-4">
-                <div className="relative mb-4">
+            <>
+              <h1 className="text-2xl font-bold mb-4">All Historical Places</h1>
+              <div className="flex flex-col">
+                <div className="relative">
                   <input
                     type="text"
                     placeholder="Search..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="border border-gray-300 rounded-lg p-2 pl-10 w-full"
+                    className="border border-gray-300 rounded-lg p-2 pl-10 mb-4 w-full"
                   />
+                  <Search className="w-5 h-5 text-gray-500 absolute left-3 top-2" />
                 </div>
                 <FilterComponent
                   filtersVisible={filtersVisible}
                   toggleFilters={toggleFilters}
+                  //   sortOrder={sortOrder}
+                  //   sortBy={sortBy}
+                  //   handleSort={handleSort}
                   clearFilters={clearFilters}
                   myHistoricalPlaces={myHistoricalPlaces}
                   handlemyHistoricalPlaces={handlemyHistoricalPlaces}
-                  selectedTypes={selectedTypes}
-                  setSelectedTypes={setSelectedTypes}
-                  selectedPeriods={selectedPeriods}
-                  setSelectedPeriods={setSelectedPeriods}
+                  // sortItineraries={sortItineraries}
+                  //   price={price}
+                  //   setPrice={setPrice}
+                  //   dateRange={dateRange}
+                  //   setDateRange={setDateRange}
+                  selectedTypes={selectedTypes} // Pass selectedTypes array
+                  setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
+                  selectedPeriods={selectedPeriods} // Pass periods array
+                  setSelectedPeriods={setSelectedPeriods} // Pass periods function
+                  //   selectedLanguages={selectedLanguages} // Pass selectedLanguages array
+                  //   setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
                   searchHistoricalPlaces={searchHistoricalPlaces}
                   typesOptions={typesOptions}
                   periodsOptions={periodOptions}
+                  //   languagesOptions={languagesOptions}
                   role={getUserRole()}
                 />
               </div>
-              
-              {/* Right side: Historical Places */}
-              <div className="md:w-3/4">
-                {error && <div className="text-red-500 mb-4">{error}</div>}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {historicalPlaces
-                    .slice(
-                      (currentPage - 1) * tripsPerPage,
-                      currentPage * tripsPerPage
-                    )
-                    .map((historicalPlace) => (
-                      <HistoricalPlaceCard
-                        key={historicalPlace._id}
-                        
-                        historicalPlace={historicalPlace}
-                        onSelect={handleHistoricalPlaceSelect}
-                        userRole={userRole}
-                        userPreferredCurrency={userPreferredCurrency}
-                      />
-                    ))}
-                </div>
+              {error && <div className="text-red-500">{error}</div>}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {historicalPlaces
+                  .slice(
+                    (currentPage - 1) * tripsPerPage,
+                    currentPage * tripsPerPage
+                  )
+                  .map((historicalPlace) => (
+                    <HistoricalPlaceCard
+                      key={historicalPlace._id}
+                      historicalPlace={historicalPlace}
+                      onSelect={handleHistoricalPlaceSelect}
+                      userRole={userRole}
+                      userPreferredCurrency={userPreferredCurrency}
+                    />
+                  ))}
               </div>
-            </div>
+              {/* Pagination Component here */}
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <button
+                  onClick={() => {
+                    handlePageChange(currentPage - 1);
+                  }}
+                  disabled={currentPage === 1}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${
+                    currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                  }`}
+                >
+                  <ChevronLeft />
+                </button>
+
+                {/* Page X of Y */}
+                <span className="text-lg font-medium">
+                  {historicalPlaces.length > 0
+                    ? `Page ${currentPage} of ${Math.ceil(
+                        historicalPlaces.length / tripsPerPage
+                      )}`
+                    : "No pages available"}
+                </span>
+
+                <button
+                  onClick={() => {
+                    handlePageChange(currentPage + 1);
+                  }}
+                  disabled={
+                    currentPage ===
+                      Math.ceil(historicalPlaces.length / tripsPerPage) ||
+                    historicalPlaces.length === 0
+                  }
+                  className={`px-4 py-2 rounded-full bg-white shadow ${
+                    currentPage ===
+                    Math.ceil(historicalPlaces.length / tripsPerPage)
+                      ? "text-gray-300"
+                      : "text-blue-600"
+                  }`}
+                >
+                  <ChevronRight />
+                </button>
+              </div>
+            </>
           </div>
         </div>
       )}
-      {/* Pagination Component */}
-      <div className="w-full bg-[#E6DCCF] py-8">
-        <div className="flex justify-center items-center space-x-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-4 py-2 rounded-full bg-white shadow ${
-              currentPage === 1 ? "text-gray-300" : "text-orange-600"
-            }`}
-          >
-            <ChevronLeft />
-          </button>
-          <span className="text-lg font-medium text-[#1A3B47]">
-            {historicalPlaces.length > 0
-              ? `Page ${currentPage} of ${Math.ceil(
-                  historicalPlaces.length / tripsPerPage
-                )}`
-              : "No pages available"}
-          </span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={
-              currentPage ===
-                Math.ceil(historicalPlaces.length / tripsPerPage) ||
-              historicalPlaces.length === 0
-            }
-            className={`px-4 py-2 rounded-full bg-white shadow ${
-              currentPage ===
-              Math.ceil(historicalPlaces.length / tripsPerPage)
-                ? "text-gray-300"
-                : "text-orange-600"
-            }`}
-          >
-            <ChevronRight />
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

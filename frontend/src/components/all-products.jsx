@@ -1,21 +1,21 @@
-"use client"
-
-import React, { useState, useEffect, useCallback } from "react"
-import { useNavigate } from "react-router-dom"
-import Cookies from "js-cookie"
-import axios from "axios"
-import { Search, ChevronLeft, ChevronRight, Star, Filter, Plus, ContactRound, ArrowUpDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Slider } from "@/components/ui/slider"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import Loader from "./Loader"
-import defaultImage from "../assets/images/default-image.jpg"
-import DualHandleSliderComponent from "./dual-handle-slider"
+import React, { useState, useEffect, useCallback } from "react";
+import Cookies from "js-cookie";
+import { Search, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import FilterComponent from "./FilterProduct";
+import defaultImage from "../assets/images/default-image.jpg";
+import { useNavigate } from "react-router-dom";
+import LazyLoad from "react-lazyload";
+import axios from "axios";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Loader from "./Loader";
 
 const renderStars = (rating) => {
   return (
@@ -38,7 +38,11 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
-    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency !== product.currency) {
+    if (
+      userInfo &&
+      userInfo.role === "tourist" &&
+      userInfo.preferredCurrency !== product.currency
+    ) {
       fetchExchangeRate()
     } else {
       getCurrencySymbol()
@@ -46,6 +50,34 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
   }, [userInfo, product])
 
   const fetchExchangeRate = useCallback(async () => {
+    if (userInfo && userInfo.role == "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userInfo.role}/populate`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              base: product.currency,
+              target: userInfo.preferredCurrency._id,
+            }),
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setExchangeRate(data.conversion_rate);
+        } else {
+          console.error("Error in fetching exchange rate:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
+      }
+    }
+  }, [userInfo, product]);
     if(userInfo && userInfo.role === 'tourist'){
       try {
         const token = Cookies.get("jwt")
@@ -104,7 +136,7 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
     <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
       <CardHeader className="p-0" onClick={() => onSelect(product._id)}>
         <img
-          src={product?.pictures?.[0] || defaultImage}
+          src={product.pictures[0]?.url || defaultImage}
           alt={product.name}
           className="w-full h-48 object-cover"
         />
@@ -173,7 +205,7 @@ export function AllProducts() {
     const role = Cookies.get("role") || "guest"
     const token = Cookies.get("jwt")
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
         const response = await axios.get('http://localhost:4000/tourist/', {
           headers: { Authorization: `Bearer ${token}` }

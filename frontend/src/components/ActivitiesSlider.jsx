@@ -232,8 +232,8 @@ export function Activities() {
                       })}
                     </div>
                     <p className="text-sm text-gray-600 mb-2">
-                    {` ${
-                      act.description.length > 85 ? act.description.slice(0, 60) + '...' : act.description
+                    {`Description: ${
+                      act.description.length > 85 ? act.description.slice(0, 85) + '...' : act.description
                     }`}
                   </p>
                     <p className="text-sm text-gray-600 mb-2">{`Location: ${act.location.address}`}</p>

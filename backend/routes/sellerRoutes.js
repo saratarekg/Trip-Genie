@@ -26,7 +26,7 @@ router.post(
 router.delete("/products/:id", productController.deleteProductOfSeller);
 router.put(
   "/products/:id",
-  upload.array("pictures", 10),
+  upload.array("newPictures", 10),
   productController.editProductOfSeller
 );
 router.put("/archiveproducts/:id", productController.archiveProduct);
