@@ -1,21 +1,23 @@
-import React, { useState, useEffect, useCallback } from "react";
-import Cookies from "js-cookie";
-import { Search, ChevronLeft, ChevronRight, Star } from "lucide-react";
-import FilterComponent from "./FilterProduct";
-import defaultImage from "../assets/images/default-image.jpg";
-import { useNavigate } from "react-router-dom";
-import LazyLoad from "react-lazyload";
-import axios from "axios";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import Loader from "./Loader";
+"use client"
+
+import React, { useState, useEffect, useCallback } from "react"
+import { useNavigate } from "react-router-dom"
+import Cookies from "js-cookie"
+import axios from "axios"
+import { Search, ChevronLeft, ChevronRight, Star, Filter, Plus, Heart, ShoppingCart, ArrowUpDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Slider } from "@/components/ui/slider"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import Loader from "./Loader"
+import defaultImage from "../assets/images/default-image.jpg"
+import DualHandleSliderComponent from "./dual-handle-slider"
+import LazyLoad from "react-lazyload"
 
 const renderStars = (rating) => {
   return (
@@ -32,10 +34,13 @@ const renderStars = (rating) => {
   )
 }
 
-const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
+const ProductCard = ({ product, onSelect, userInfo, onBuyNow, cartItems, wishlistItems, onAddToCart, onAddToWishlist }) => {
   const [exchangeRate, setExchangeRate] = useState(null)
   const [currencySymbol, setCurrencySymbol] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  const isInCart = cartItems.some(item => item.product?._id === product._id)
+  const isInWishlist = wishlistItems.some(item => item?.product?._id === product._id)
 
   useEffect(() => {
     if (
@@ -50,9 +55,9 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
   }, [userInfo, product])
 
   const fetchExchangeRate = useCallback(async () => {
-    if (userInfo && userInfo.role == "tourist") {
+    if (userInfo && userInfo.role === "tourist") {
       try {
-        const token = Cookies.get("jwt");
+        const token = Cookies.get("jwt")
         const response = await fetch(
           `http://localhost:4000/${userInfo.role}/populate`,
           {
@@ -66,40 +71,12 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
               target: userInfo.preferredCurrency._id,
             }),
           }
-        );
-        const data = await response.json();
-        if (response.ok) {
-          setExchangeRate(data.conversion_rate);
-        } else {
-          console.error("Error in fetching exchange rate:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching exchange rate:", error);
-      }
-    }
-  }, [userInfo, product]);
-    if(userInfo && userInfo.role === 'tourist'){
-      try {
-        const token = Cookies.get("jwt")
-        const response = await fetch(
-          `http://localhost:4000/${userInfo.role}/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              base: product.currency,
-              target: userInfo.preferredCurrency._id,
-            }),
-          }
         )
         const data = await response.json()
         if (response.ok) {
           setExchangeRate(data.conversion_rate)
         } else {
-          console.error('Error in fetching exchange rate:', data.message)
+          console.error("Error in fetching exchange rate:", data.message)
         }
       } catch (error) {
         console.error("Error fetching exchange rate:", error)
@@ -133,7 +110,7 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
   }
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+    <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
       <CardHeader className="p-0" onClick={() => onSelect(product._id)}>
         <img
           src={product.pictures[0]?.url || defaultImage}
@@ -152,10 +129,8 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
       <CardFooter className="p-4 flex justify-between items-center border-t">
         <span className="text-lg font-bold text-orange-400">{formatPrice(product.price)}</span>
         {renderStars(product.rating)}
-      </CardFooter>
-      <CardFooter className="p-4 pt-0">
-        <Button 
-          className="w-full bg-orange-400 hover:bg-orange-500 text-white"
+        <Button
+          className="bg-orange-400 hover:bg-orange-500 text-white"
           onClick={(e) => {
             e.stopPropagation()
             onBuyNow(product)
@@ -164,6 +139,30 @@ const ProductCard = ({ product, onSelect, userInfo, onBuyNow }) => {
           Buy Now
         </Button>
       </CardFooter>
+      <div className="absolute top-2 right-2 flex space-x-2">
+        {!isInCart && (
+          <Button
+            className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
+            onClick={(e) => {
+              e.stopPropagation()
+              onAddToCart(product)
+            }}
+          >
+            <Plus className="w-5 h-5" />
+            <span className="sr-only">Add to Cart</span>
+          </Button>
+        )}
+        <Button
+          className={`rounded-full w-10 h-10 p-0 ${isInWishlist ? 'bg-red-400 hover:bg-red-500' : 'bg-gray-200 hover:bg-gray-300'} text-white`}
+          onClick={(e) => {
+            e.stopPropagation()
+            onAddToWishlist(product)
+          }}
+        >
+          <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current' : ''}`} />
+          <span className="sr-only">Add to Wishlist</span>
+        </Button>
+      </div>
     </Card>
   )
 }
@@ -192,6 +191,9 @@ export function AllProducts() {
   const [deliveryType, setDeliveryType] = useState("")
   const [locationType, setLocationType] = useState("")
   const [location, setLocation] = useState("")
+  const [cartItems, setCartItems] = useState([])
+  const [wishlistItems, setWishlistItems] = useState([])
+  const [alertMessage, setAlertMessage] = useState(null)
   const tripsPerPage = 6
 
   const navigate = useNavigate()
@@ -283,11 +285,47 @@ export function AllProducts() {
     [getUserRole]
   )
 
+  const fetchCartItems = useCallback(async () => {
+    try {
+      const token = Cookies.get("jwt")
+      const response = await fetch('http://localhost:4000/tourist/cart', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setCartItems(data)
+      }
+    } catch (error) {
+      console.error('Error fetching cart items:', error)
+    }
+  }, [])
+
+  const fetchWishlistItems = useCallback(async () => {
+    try {
+      const token = Cookies.get("jwt")
+      const response = await fetch('http://localhost:4000/tourist/wishlist', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setWishlistItems(data)
+      }
+    } catch (error) {
+      console.error('Error fetching wishlist items:', error)
+    }
+  }, [])
+
   useEffect(() => {
     if (userInfo) {
       fetchProducts()
+      fetchCartItems()
+      fetchWishlistItems()
     }
-  }, [userInfo, fetchProducts])
+  }, [userInfo, fetchProducts, fetchCartItems, fetchWishlistItems])
 
   useEffect(() => {
     fetchUserInfo()
@@ -356,6 +394,62 @@ export function AllProducts() {
     setShowPurchaseConfirm(true)
   }
 
+  const handleAddToCart = async (product) => {
+    
+    try {
+      const token = Cookies.get("jwt")
+      const response = await fetch(
+        "http://localhost:4000/tourist/product/addToCart",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            productId: product._id,
+            quantity: 1,
+            totalAmount: product.price,
+          }),
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error("Failed to add to cart")
+      }
+
+      setAlertMessage({ type: 'success', message: 'Product added to cart successfully!' })
+      fetchCartItems()
+    } catch (error) {
+      setAlertMessage({ type: 'error', message: 'Error adding product to cart. Please try again.' })
+    }
+  }
+
+  const handleAddToWishlist = async (product) => {
+    try {
+      const token = Cookies.get("jwt")
+      const response = await fetch(
+        `http://localhost:4000/tourist/product/addToWishlist/${product._id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error("Failed to add to wishlist")
+      }
+
+      setAlertMessage({ type: 'success', message: 'Product added to wishlist successfully!' })
+      fetchWishlistItems()
+    } catch (error) {
+      setAlertMessage({ type: 'error', message: 'Error adding product to wishlist. Please try again.' })
+    }
+  }
+
   const handlePurchase = async () => {
     try {
       const token = Cookies.get("jwt")
@@ -390,13 +484,11 @@ export function AllProducts() {
         throw new Error(errorData.message || "Failed to complete purchase")
       }
 
-      // Handle successful purchase
-      console.log("Purchase completed successfully!")
+      setAlertMessage({ type: 'success', message: 'Purchase completed successfully!' })
       setShowPurchaseConfirm(false)
 
     } catch (error) {
-      console.error("Error completing purchase:", error)
-      // Handle error (e.g., show error message to user)
+      setAlertMessage({ type: 'error', message: 'Error completing purchase. Please try again.' })
     }
   }
 
@@ -407,7 +499,17 @@ export function AllProducts() {
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="hidden md:block w-64 bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-blue-800 mb-6">Filters</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-blue-800">Filters</h2>
+              <Button 
+                onClick={clearFilters}
+                variant="outline"
+                size="sm"
+                className="text-teal-500 hover:text-teal-600 border-teal-500 hover:border-teal-600"
+              >
+                Clear
+              </Button>
+            </div>
             
             {/* Search */}
             <div className="mb-6">
@@ -423,26 +525,6 @@ export function AllProducts() {
                 <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
               </div>
             </div>
-
-            {/* Categories  */}
-            {/* <div className="mb-6">
-              <h3 className="font-medium text-blue-800 mb-2">Categories</h3>
-              <div className="space-y-2">
-                {['Vegetables', 'Fruits', 'Kitchen Accessories', 'Chefs Tips'].map((category) => (
-                  <div key={category} className="flex items-center">
-                    <Checkbox 
-                      id={category} 
-                      className="border-teal-400"
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => handleCategoryChange(category)}
-                    />
-                    <label htmlFor={category} className="ml-2 text-sm font-medium">
-                      {category}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div> */}
 
             {/* Price Range */}
             <div className="mb-6">
@@ -492,19 +574,30 @@ export function AllProducts() {
               </Button>
             </div>
 
-            {/* Clear Filters Button */}
-            <Button 
-              onClick={clearFilters}
-              className="w-full mt-4 bg-orange-400 hover:bg-orange-500 text-white"
-            >
-              Clear Filters
-            </Button>
+            {(userInfo?.role === 'admin' || userInfo?.role === 'seller') && (
+              <div className="mb-6">
+                <h3 className="font-medium text-blue-800 mb-2">My Products</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`w-full justify-between ${myProducts ? "bg-orange-400 text-white" : ""}`}
+                  onClick={() => handleMyProducts(!myProducts)}
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  {myProducts ? "Showing My Products" : "Show My Products"}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
             {/* View Toggle */}
-            <div className="flex items-center justify-end mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <h2 className="text-2xl font-semibold text-blue-800">Products</h2>
+                <span className="text-gray-500">({products.length} items)</span>
+              </div>
               <div className="flex gap-2">
                 <Button 
                   variant="outline" 
@@ -514,19 +607,17 @@ export function AllProducts() {
                 >
                   <Filter className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={`rounded-full ${myProducts ? "bg-orange-400 text-white" : ""}`}
-                  onClick={() => handleMyProducts(!myProducts)}
-                >
-                  <ContactRound className="w-4 h-4 mr-2" />
-                  My Products
-                </Button>
               </div>
             </div>
 
             {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+
+            {alertMessage && (
+              <Alert className={`mb-4 ${alertMessage.type === 'success' ? 'bg-green-100' : 'bg-red-100'}`}>
+                <AlertTitle>{alertMessage.type === 'success' ? 'Success' : 'Error'}</AlertTitle>
+                <AlertDescription>{alertMessage.message}</AlertDescription>
+              </Alert>
+            )}
 
             {isLoading ? (
               <Loader />
@@ -543,33 +634,43 @@ export function AllProducts() {
                         userInfo={userInfo}
                         onSelect={handleProductSelect}
                         onBuyNow={handleBuyNow}
+                        cartItems={cartItems}
+                        wishlistItems={wishlistItems}
+                        onAddToCart={handleAddToCart}
+                        onAddToWishlist={handleAddToWishlist}
                       />
                     ))}
                 </div>
 
                 {/* Pagination */}
                 <div className="mt-8 flex justify-center items-center space-x-4">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <span className="text-lg font-medium">
-                    Page {currentPage} of {Math.ceil(products.length / tripsPerPage)}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="rounded-full"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === Math.ceil(products.length / tripsPerPage)}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
+                  {products.length > 0 ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="rounded-full"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <span className="text-lg font-medium">
+                        Page {currentPage} of {Math.ceil(products.length / tripsPerPage)}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="rounded-full"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === Math.ceil(products.length / tripsPerPage)}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <span className="text-lg font-medium text-gray-500">No pages available</span>
+                  )}
                 </div>
               </>
             )}
@@ -688,7 +789,7 @@ export function AllProducts() {
               Cancel
             </Button>
             <Button onClick={handlePurchase} className="bg-orange-400 hover:bg-orange-500 text-white">
-              Confirm Purchase
+              Buy Now
             </Button>
           </DialogFooter>
         </DialogContent>
