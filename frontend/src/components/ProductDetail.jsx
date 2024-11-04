@@ -93,7 +93,7 @@ const StarRating = ({ rating, onRatingChange = null }) => {
 };
 
 const ImageGallery = ({ pictures }) => {
-  const [mainImage, setMainImage] = useState(pictures[0].url);
+  const [mainImage, setMainImage] = useState(pictures[0]?.url);
   const [startIndex, setStartIndex] = useState(0);
 
   const handlePrev = () => {
