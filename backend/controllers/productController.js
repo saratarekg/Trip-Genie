@@ -66,7 +66,7 @@ const getAllProducts = async (req, res) => {
 
 const getAllProductsArchive = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts, rating } = req.query;
-
+  const role = res.locals.user_role;
   try {
     // Debugging: Log incoming query parameters
 
@@ -101,7 +101,15 @@ const getAllProductsArchive = async (req, res) => {
     // Perform the query
     query.isArchived = true;
     query.isDeleted = false;
+    if(role=="admin"){
+    query.seller=null;
+    }
+    else
+    {
+    query.seller= res.locals.user_id;
+    }
     let productsQuery = Product.find(query);
+   
 
     // Apply sorting if 'asc' is defined (for sorting by rating)
     if (asc !== undefined) {
