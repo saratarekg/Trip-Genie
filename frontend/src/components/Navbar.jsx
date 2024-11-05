@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/images/tgLogofinal6.png";
+import logo from "../assets/images/TGlogo.svg";
 import {
   Menu,
   X,
@@ -10,7 +10,7 @@ import {
   HistoryIcon,
   Calendar,
   AlertTriangle,
-  LogOut
+  LogOut,
 } from "lucide-react";
 
 const NavLink = ({ to, children }) => (
@@ -37,21 +37,22 @@ export function NavbarComponent() {
 
   useEffect(() => {
     if (isMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     } else {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     }
 
     const handleScroll = () => {
-      const heroHeight = document.querySelector('.hero-section')?.offsetHeight || 0;
+      const heroHeight =
+        document.querySelector(".hero-section")?.offsetHeight || 0;
       setIsScrolled(window.scrollY > heroHeight);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [isMenuOpen]);
 
@@ -75,18 +76,21 @@ export function NavbarComponent() {
   };
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isScrolled ? 'bg-black/50' : ''}`}>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        isScrolled ? "bg-black/50" : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 ml-8">
             <Link to="/" className="flex items-center">
-              <img src={logo} alt="logo" className="h-12 w-auto" />
+              <img src={logo} alt="logo" className="h-10 w-auto" />
             </Link>
           </div>
-
           {/* Desktop Navigation */}
-          <div className="hidden md:block">
+          <div className="hidden md:block" style={{ marginRight: 30 }}>
             <div className="inline-flex items-center border border-white/20 rounded-full px-2 py-1">
               {role === "tour-guide" && (
                 <>
@@ -105,7 +109,9 @@ export function NavbarComponent() {
                 <>
                   <NavLink to="/activity">Activities</NavLink>
                   <NavLink to="/all-itineraries">Itineraries</NavLink>
-                  <NavLink to="/all-historical-places">Historical Places</NavLink>
+                  <NavLink to="/all-historical-places">
+                    Historical Places
+                  </NavLink>
                   <NavLink to="/all-products">Products</NavLink>
                 </>
               )}
@@ -122,7 +128,9 @@ export function NavbarComponent() {
               )}
               {role === "tourism-governor" && (
                 <>
-                  <NavLink to="/all-historical-places">Historical Places</NavLink>
+                  <NavLink to="/all-historical-places">
+                    Historical Places
+                  </NavLink>
                   <NavLink to="/create-historical-tag">Historical tag</NavLink>
                 </>
               )}
@@ -130,7 +138,9 @@ export function NavbarComponent() {
                 <>
                   <NavLink to="/activity">Activities</NavLink>
                   <NavLink to="/all-itineraries">Itineraries</NavLink>
-                  <NavLink to="/all-historical-places">Historical Places</NavLink>
+                  <NavLink to="/all-historical-places">
+                    Historical Places
+                  </NavLink>
                   <NavLink to="/all-products">Products</NavLink>
                 </>
               )}
