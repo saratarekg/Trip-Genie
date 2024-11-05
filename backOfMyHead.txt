@@ -11,24 +11,24 @@
 - In admin, make "my account" logout only as there is no other active button except logout
 
 Hadwa's requests:
-- Add global search bar
+- Add global search bar 
 
 Itinerary cards:
 - Add edit/delete button outside as well (Zeina --DONE!)
-- Minimize tour guide data
-- Display price next to the stars
-- Add pickup location
+- Minimize tour guide data (Amy --DONE!!)
+- Display price next to the stars (Amy --DONE!!)
+- Add pickup location (Amy --DONE!!)
 
 Tourguide activities:
 - Allow tour guide to create own activities or choose from available ones, making them clickable to show details
 
 Activity card:
 - Sort by importance
-- Move description below(jana) done
-- Remove booking open(jana) done
+- Move description below (jana) done
+- Remove booking open (jana) done
 - Highlight special discount more (jana) done
 - Ensure consistent font for subtitles (jana) done
-- Move map to the right(Ehab)
+- Move map to the right (Ehab)
 
 - Make Vtp the admin
 
