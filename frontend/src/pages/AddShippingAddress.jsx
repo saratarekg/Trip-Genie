@@ -75,7 +75,7 @@ export default function ShippingAddress() {
     if (!addressDetails.postalCode) {
       newErrors.postalCode = "Postal code is required";
     } else if (!/^\d{5}(?:[-\s]\d{4})?$/.test(addressDetails.postalCode)) {
-      newErrors.postalCode = "Please enter a valid postal code";
+      newErrors.postalCode = "Please enter a valid postal code (5 digits)";
     }
     if (!addressDetails.country.trim()) {
       newErrors.country = "Country is required";
@@ -193,50 +193,57 @@ export default function ShippingAddress() {
 
       {/* Scrollable Addresses Container */}
       <div className="max-h-[220px] overflow-y-auto space-y-4 mb-4">
-        {Array.isArray(addresses) && addresses.length > 0 ? (
-          addresses.map((address) => (
-            <div key={address._id} className="border rounded-md p-4 flex justify-between items-center bg-white shadow-sm">
-              <div className="flex flex-col">
-                <p className="font-semibold">
-                  {address.streetName}, {address.streetNumber} {address.floorUnit && `(${address.floorUnit})`}, {address.city}, {address.state}, {address.postalCode}, {address.country}
-                </p>
-                {address.default && (
-                  <span className="bg-[#B5D3D1] text-[#1A3B47] text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
-                    Default
-                  </span>
-                )}
-              </div>
-              <div className="flex space-x-2 items-center">
-                {/* Set as Default Button */}
-                {!address.default && (
-                  <button
-                    onClick={() => handleSetDefault(address._id)}
-                    className="px-2 py-1 text-white text-xs rounded-md bg-[#388A94] hover:bg-[#1A3B47] transition duration-300 ease-in-out"
-                  >
-                    Set as Default
-                  </button>
-                )}
-                {/* Edit Address Button */}
-                <button
-                  onClick={() => handleEditAddress(address)}
-                  className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 transition duration-300 ease-in-out"
-                >
-                  <Edit className="h-4 w-4 text-blue-500" />
-                </button>
-                {/* Delete Address Button */}
-                <button
-                  onClick={() => setShowRemoveConfirm(address._id)}
-                  className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>No addresses available.</p>
-        )}
+  {Array.isArray(addresses) && addresses.length > 0 ? (
+    addresses.map((address) => (
+      <div key={address._id} className="border rounded-md p-4 flex justify-between items-center bg-white shadow-sm">
+        <div className="flex flex-col">
+          {/* Location Title */}
+          <p className="text-lg font-semibold text-gray-700 mb-1">
+            {address.locationType}
+          </p>
+          {/* Address Details */}
+          <p className="font-semibold text-sm">
+            {address.streetName}, {address.streetNumber} {address.floorUnit && `(${address.floorUnit})`}, {address.city}, {address.state}, {address.postalCode}, {address.country}
+          </p>
+          {/* Default Badge */}
+          {address.default && (
+            <span className="bg-[#B5D3D1] text-[#1A3B47] text-xs font-medium px-2 py-0.5 mt-1 w-max rounded">
+              Default
+            </span>
+          )}
+        </div>
+        <div className="flex space-x-2 items-center">
+          {/* Set as Default Button */}
+          {!address.default && (
+            <button
+              onClick={() => handleSetDefault(address._id)}
+              className="px-2 py-1 text-white text-xs rounded-md bg-[#388A94] hover:bg-[#1A3B47] transition duration-300 ease-in-out"
+            >
+              Set as Default
+            </button>
+          )}
+          {/* Edit Address Button */}
+          <button
+            onClick={() => handleEditAddress(address)}
+            className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 transition duration-300 ease-in-out"
+          >
+            <Edit className="h-4 w-4 text-blue-500" />
+          </button>
+          {/* Delete Address Button */}
+          <button
+            onClick={() => setShowRemoveConfirm(address._id)}
+            className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+          >
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </button>
+        </div>
       </div>
+    ))
+  ) : (
+    <p>No addresses available.</p>
+  )}
+</div>
+
 
       {/* Confirm Removal of Address */}
       {showRemoveConfirm && (
@@ -341,6 +348,28 @@ export default function ShippingAddress() {
                 className="border border-gray-300 rounded-md p-2 w-full"
               />
             </label>
+            <label>
+  Location Type:
+  <select
+    name="locationType"
+    value={addressDetails.locationType}
+    onChange={handleInputChange}
+    className="border border-gray-300 rounded-md p-2 w-full"
+  >
+    <option value="">Select location type</option>
+    <option value="home">Home</option>
+    <option value="work">Work</option>
+    <option value="apartment">Apartment</option>
+    <option value="friend_family">Friend/Family</option>
+    <option value="po_box">PO Box</option>
+    <option value="office">Office</option>
+    <option value="pickup_point">Pickup Point</option>
+    <option value="vacation">Vacation</option>
+    <option value="school">School</option>
+    <option value="other">Other</option>
+  </select>
+</label>
+
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
