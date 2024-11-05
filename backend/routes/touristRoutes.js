@@ -29,6 +29,13 @@ router.get("/cards", touristController.getAllCards);
 router.put("/add-default-card/:id", touristController.changeDefaultCard);
 router.delete("/card/:id", touristController.deleteCard);
 
+router.put("/add-shippingAdd", touristController.addShippingAddress);
+router.get("/shippingAdds", touristController.getAllShippingAddresses);
+router.put("/add-default-shippingAdds/:id", touristController.changeDefaultShippingAddress);
+router.put("/update-shippingAdd/:id", touristController.updateShippingAddress);
+router.delete("/shippingAdds/:id", touristController.deleteShippingAddress);
+
+
 router.put("/", touristController.updateTouristProfile);
 router.put("/preferences", touristController.updatePreferences);
 router.get("/preferences", touristController.getTouristPreferences);
