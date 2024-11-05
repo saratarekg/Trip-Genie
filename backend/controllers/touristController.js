@@ -896,6 +896,194 @@ const deleteCard = async (req, res) => {
   }
 };
 
+const addShippingAddress = async (req, res) => {
+  try {
+    const { streetName, streetNumber, floorUnit, city, state, country, postalCode, landmark, locationType, default: isDefault } = req.body;
+
+    console.log(streetName,streetNumber,city,state,country);
+    if (!streetName || !streetNumber || !city || !state || !country) {
+      return res.status(400).json({ message: 'Required address fields are missing' });
+    }
+
+    // Prepare new address object
+    const newAddress = {
+      streetName,
+      streetNumber,
+      floorUnit,
+      city,
+      state,
+      country,
+      postalCode,
+      landmark,
+      locationType,
+      default: isDefault || false,
+    };
+
+    // Step 1: Add the new address
+    const result = await Tourist.findOneAndUpdate(
+      { _id: res.locals.user_id },
+      { $push: { shippingAddresses: newAddress } },
+      { new: true, runValidators: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    // Step 2: If the new address is set as default, unset other defaults
+    if (isDefault) {
+      await Tourist.updateOne(
+        { _id: res.locals.user_id },
+        { $set: { 'shippingAddresses.$[elem].default': false } },
+        {
+          arrayFilters: [{ 'elem.default': true }],
+          runValidators: true,
+        }
+      );
+
+      // Set the last added address as the default
+      const lastIndex = result.shippingAddresses.length - 1;
+      await Tourist.updateOne(
+        { _id: res.locals.user_id },
+        { $set: { [`shippingAddresses.${lastIndex}.default`]: true } }
+      );
+    }
+
+    // Return updated list of addresses
+    const updatedTourist = await Tourist.findById(res.locals.user_id);
+    return res.status(200).json({ message: 'Address added successfully', shippingAddresses: updatedTourist.shippingAddresses });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while adding the address' });
+  }
+};
+
+const getAllShippingAddresses = async (req, res) => {
+  try {
+    const tourist = await Tourist.findById(res.locals.user_id).select("shippingAddresses");
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    return res.status(200).json({ shippingAddresses: tourist.shippingAddresses });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred while retrieving addresses" });
+  }
+};
+const changeDefaultShippingAddress = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const address = tourist.shippingAddresses.find(address => address._id.toString() === id);
+    if (!address) {
+      return res.status(404).json({ message: "Address not found" });
+    }
+
+    const updateResult = await Tourist.updateOne(
+      { _id: res.locals.user_id },
+      {
+        $set: {
+          "shippingAddresses.$[selectedAddress].default": true,
+          "shippingAddresses.$[otherAddresses].default": false,
+        },
+      },
+      {
+        arrayFilters: [
+          { "selectedAddress._id": id },
+          { "otherAddresses._id": { $ne: id } },
+        ],
+      }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      return res.status(400).json({ message: "Failed to update the default address" });
+    }
+
+    const updatedTourist = await Tourist.findById(res.locals.user_id).select("shippingAddresses");
+    return res.status(200).json({ message: "Default address updated successfully", shippingAddresses: updatedTourist.shippingAddresses });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred while updating the default address" });
+  }
+};
+
+const deleteShippingAddress = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Address ID is required.' });
+    }
+
+    const result = await Tourist.findOneAndUpdate(
+      { _id: res.locals.user_id },
+      { $pull: { shippingAddresses: { _id: id } } },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    if (result.shippingAddresses.length === 0) {
+      // No addresses left, do nothing
+    } else if (result.shippingAddresses.every(address => !address.default)) {
+      // If no addresses are default, set the first one as default
+      await Tourist.updateOne(
+        { _id: res.locals.user_id },
+        { $set: { 'shippingAddresses.0.default': true } }
+      );
+    }
+
+    return res.status(200).json({ message: 'Address deleted successfully', shippingAddresses: result.shippingAddresses });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while deleting the address' });
+  }
+};
+
+const updateShippingAddress = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const addressUpdates = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: 'Address ID is required.' });
+    }
+
+    // Validate the addressUpdates object
+    if (!addressUpdates || Object.keys(addressUpdates).length === 0) {
+      return res.status(400).json({ message: 'Address updates are required.' });
+    }
+
+    const result = await Tourist.findOneAndUpdate(
+      { _id: res.locals.user_id, 'shippingAddresses._id': id },
+      { $set: { 'shippingAddresses.$': addressUpdates } },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: 'Tourist or address not found' });
+    }
+
+    return res.status(200).json({
+      message: 'Address updated successfully',
+      shippingAddresses: result.shippingAddresses,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while updating the address' });
+  }
+};
+
 
 
 
@@ -926,5 +1114,10 @@ module.exports = {
   addCard,
   getAllCards,
   changeDefaultCard,
-  deleteCard
+  deleteCard,
+  addShippingAddress,
+  getAllShippingAddresses,
+  changeDefaultShippingAddress,
+  deleteShippingAddress,
+  updateShippingAddress,
 };

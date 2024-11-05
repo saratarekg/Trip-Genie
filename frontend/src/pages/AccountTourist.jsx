@@ -22,6 +22,7 @@ import {
   Heart,
   DollarSign,
   FileText,
+  HomeIcon,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -53,6 +54,7 @@ import TouristActivities from "@/pages/TouristActivities";
 import FAQ from "@/pages/FAQs";
 import TouristAttendedActivities from "@/pages/TouristAttended";
 import AddCard from "@/pages/AddCard";
+import ShippingAddress from "@/pages/AddShippingAddress";
 import ShoppingCart from "@/components/touristCart.jsx";
 import WishlistPage from "@/components/touristWishlist.jsx";
 import { MyComplaintsComponent } from "@/components/myComplaints";
@@ -563,6 +565,8 @@ export default function AccountTourist() {
         return <Preferences />;
       case "add-card":
         return <AddCard />;
+      case "add-ship":
+        return <ShippingAddress />;
       case "currency":
         return <CurrencyApp />;
         case "faqs":
@@ -596,6 +600,7 @@ export default function AccountTourist() {
       { name: "Preferences", icon: Settings, tab: "preferences" },
       { name: "Set Currency", icon: DollarSign, tab: "currency" },
       { name: "Add credit/debit cards", icon: CreditCard, tab: "add-card" },
+      { name: "Add Shipping Address", icon: HomeIcon, tab: "add-ship" },
       { name: "Delete Account", icon: Trash2, tab: "delete-account" },
     ],
     "Help and Support": [
