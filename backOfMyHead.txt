@@ -14,7 +14,7 @@ Hadwa's requests:
 - Add global search bar
 
 Itinerary cards:
-- Add edit/delete button outside as well (Zeina)
+- Add edit/delete button outside as well (Zeina --DONE!)
 - Minimize tour guide data
 - Display price next to the stars
 - Add pickup location
