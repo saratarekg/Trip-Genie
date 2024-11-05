@@ -1,0 +1,1 @@
+teal navbar not taking up full page width

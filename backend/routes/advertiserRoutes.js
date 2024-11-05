@@ -6,6 +6,8 @@ const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
+const transportationController = require("../controllers/transportationController");
+
 const router = express.Router();
 
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
@@ -31,4 +33,13 @@ router.put("/", upload.single("logo"), advertiserController.updateAdvertiser);
 router.get("/advertisers/:id", advertiserController.getAdvertiserByID);
 router.post("/password", advertiserController.changePassword);
 router.post("/delete-account", advertiserController.deleteAdvertiserAccount);
+
+
+// crud transportation
+router.get("/transportations", transportationController.getAllTransportations);
+router.get("/transportations/:id", transportationController.getTransportationById);
+router.post("/transportations", transportationController.createTransportation);
+router.put("/transportations/:id", transportationController.updateTransportation);
+router.delete("/transportations/:id", transportationController.deleteTransportation);
+
 module.exports = router;

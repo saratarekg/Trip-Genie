@@ -17,6 +17,7 @@ const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
 const currencyController = require("../controllers/currencyController");
 
+const transportationController = require("../controllers/transportationController");
 // Route for getting a single tour guide by ID
 router.get("/", getTourGuideProfile);
 
@@ -43,5 +44,12 @@ router.put(
 );
 
 router.post("/password", changePassword);
+
+// transportation crud 
+router.get("/transportations", transportationController.getAllTransportations);
+router.get("/transportations/:id", transportationController.getTransportationById);
+router.post("/transportations", transportationController.createTransportation);
+router.put("/transportations/:id", transportationController.updateTransportation);
+router.delete("/transportations/:id", transportationController.deleteTransportation);
 
 module.exports = router;
