@@ -22,7 +22,7 @@ Itinerary cards:
 Tourguide activities:
 - Allow tour guide to create own activities or choose from available ones, making them clickable to show details
 
-Activity card:
+Activity card:JANA
 - Sort by importance
 - Move description below
 - Remove booking open
