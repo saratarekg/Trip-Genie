@@ -1,4 +1,5 @@
 const Museum = require("../models/historicalPlaces");
+const cloudinary = require("../utils/cloudinary");
 
 const createHistoricalPlace = async (req, res) => {
   const {
@@ -10,22 +11,35 @@ const createHistoricalPlace = async (req, res) => {
     ticketPrices,
     currency,
   } = req.body;
-  const pictures = req.files.map(
-    (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
-  );
-  const historicalPlace = new Museum({
-    title,
-    description,
-    location,
-    historicalTag,
-    openingHours,
-    ticketPrices,
-    currency,
-    pictures,
-    governor: res.locals.user_id,
-  });
 
   try {
+    let ImagesBuffer = [];
+    const pictures = req.files.map(
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
+    //upload multiple images using cloudinary
+    for (let i = 0; i < pictures.length; i++) {
+      const result = await cloudinary.uploader.upload(pictures[i], {
+        folder: "historicalPlaces",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    const historicalPlace = new Museum({
+      title,
+      description,
+      location,
+      historicalTag,
+      openingHours,
+      ticketPrices,
+      currency,
+      pictures: imagesBuffer,
+      governor: res.locals.user_id,
+    });
     await historicalPlace.save();
     res.status(201).json(historicalPlace);
   } catch (error) {
@@ -78,7 +92,7 @@ const getAllHistoricalPlaces = async (req, res) => {
 };
 
 const updateHistoricalPlace = async (req, res) => {
-  const { id } = req.params; // Get product ID from URL parameters
+  const { id } = req.params;
   const {
     title,
     location,
@@ -95,7 +109,34 @@ const updateHistoricalPlace = async (req, res) => {
     });
   }
   try {
-    // Find the product by ID and update its details
+    let { oldPictures } = req.body; // Get details from request body
+    oldPictures = JSON.parse(oldPictures);
+
+    let newPictures = req.files.map(
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
+    let imagesBuffer = [];
+
+    for (let i = 0; i < newPictures.length; i++) {
+      const result = await cloudinary.uploader.upload(newPictures[i], {
+        folder: "historicalPlaces",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    const pictures = [...oldPictures, ...imagesBuffer];
+
+    const oldPicturesIDs = oldPictures.map((pic) => pic.public_id);
+    museum.pictures.forEach((pic) => {
+      if (!oldPicturesIDs.includes(pic.public_id)) {
+        cloudinary.uploader.destroy(pic.public_id);
+      }
+    });
+
     const updatedHP = await Museum.findByIdAndUpdate(
       id,
       {
@@ -125,6 +166,12 @@ const deleteHistoricalPlace = async (req, res) => {
   try {
     const { id } = req.params;
     const museum = await Museum.findById(id);
+    //delete images from cloudinary
+
+    for (let i = 0; i < museum.pictures.length; i++) {
+      await cloudinary.uploader.destroy(museum.pictures[i].public_id);
+    }
+
     if (museum.governor.toString() != res.locals.user_id) {
       return res.status(403).json({
         message: "You are not authorized to delete this historical place",
