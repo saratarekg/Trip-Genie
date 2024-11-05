@@ -22,12 +22,12 @@ Itinerary cards:
 Tourguide activities:
 - Allow tour guide to create own activities or choose from available ones, making them clickable to show details
 
-Activity card:JANA
+Activity card:
 - Sort by importance
-- Move description below
-- Remove booking open
-- Highlight special discount more
-- Ensure consistent font for subtitles
+- Move description below(jana)
+- Remove booking open(jana)
+- Highlight special discount more(jana)
+- Ensure consistent font for subtitles(jana)
 - Move map to the right
 
 - Make Vtp the admin
