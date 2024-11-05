@@ -138,6 +138,7 @@ export function SignupForm() {
         data.userType === "seller"
       ) {
         if (!phoneValidator(data.mobile)) {
+          // scrollToError({ mobile: true });
           ctx.addIssue({
             path: ["mobile"],
             message:
@@ -147,6 +148,7 @@ export function SignupForm() {
       }
       if (data.userType === "tourist" || data.userType === "tour-guide") {
         if (!data.nationality) {
+          // scrollToError({ nationality: true });
           ctx.addIssue({
             path: ["nationality"],
             message: "Nationality is required.",
@@ -155,6 +157,7 @@ export function SignupForm() {
       }
       if (data.userType === "tourist") {
         if (!data.dateOfBirth) {
+          // scrollToError({ dateOfBirth: true });
           ctx.addIssue({
             path: ["dateOfBirth"],
             message: "Date of birth is required.",
@@ -165,12 +168,14 @@ export function SignupForm() {
           data.dateOfBirth >
             new Date().setFullYear(new Date().getFullYear() - 18)
         ) {
+          // scrollToError({ dateOfBirth: true });
           ctx.addIssue({
             path: ["dateOfBirth"],
             message: "You must be at least 18 years old.",
           });
         }
         if (!data.jobOrStudent) {
+          // scrollToError({ jobOrStudent: true });
           ctx.addIssue({
             path: ["jobOrStudent"],
             message: "Occupation is required.",
@@ -179,12 +184,14 @@ export function SignupForm() {
       }
       if (data.userType === "tour-guide") {
         if (data.yearsOfExperience < 0 || data.yearsOfExperience > 50) {
+          // scrollToError({ yearsOfExperience: true });
           ctx.addIssue({
             path: ["yearsOfExperience"],
             message: "Experience must be between 0 and 50 years.",
           });
         }
         if (!Number.isInteger(data.yearsOfExperience)) {
+          // scrollToError({ yearsOfExperience: true });
           ctx.addIssue({
             path: ["yearsOfExperience"],
             message: "Experience must be an integer value.",
@@ -193,18 +200,21 @@ export function SignupForm() {
         if (data.previousWorks && data.previousWorks.length > 0) {
           data.previousWorks.forEach((work, index) => {
             if (work.title === "") {
+              // scrollToError({ previousWorks: true });
               ctx.addIssue({
                 path: ["previousWorks", index, "title"],
                 message: "Please enter the title for your previous work.",
               });
             }
             if (work.company === "") {
+              // scrollToError({ previousWorks: true });
               ctx.addIssue({
                 path: ["previousWorks", index, "company"],
                 message: "Please enter the company for your previous work.",
               });
             }
             if (work.duration === "") {
+              // scrollToError({ previousWorks: true });
               ctx.addIssue({
                 path: ["previousWorks", index, "duration"],
                 message: "Please enter the duration for your previous work.",
@@ -219,6 +229,7 @@ export function SignupForm() {
         data.userType === "tour-guide"
       ) {
         if (!data.name) {
+          // scrollToError({ name: true });
           ctx.addIssue({
             path: ["name"],
             message: "Name is required.",
@@ -227,6 +238,7 @@ export function SignupForm() {
       }
       if (data.userType === "advertiser") {
         if (!data.hotline) {
+          // scrollToError({ hotline: true });
           ctx.addIssue({
             path: ["hotline"],
             message: "Hotline is required.",
@@ -234,6 +246,7 @@ export function SignupForm() {
         }
 
         if (data.hotline && !data.hotline.match(/^\d+$/)) {
+          // scrollToError({ hotline: true });
           ctx.addIssue({
             path: ["hotline"],
             message: "Hotline must be a number.",
@@ -246,6 +259,7 @@ export function SignupForm() {
             /^(https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*$/i
           )
         ) {
+          // scrollToError({ website: true });
           ctx.addIssue({
             path: ["website"],
             message: "Website must be a valid URL.",
@@ -422,6 +436,7 @@ export function SignupForm() {
   };
 
   const onSubmit = async (values) => {
+    console.log("test");
     if (stage === 1) {
       const { username, email } = values;
       try {
@@ -432,10 +447,12 @@ export function SignupForm() {
         const response = error.response;
         if (response.data.existingUsername) {
           setApiError("Username already exists");
+          scrollToError({ username: true });
           return;
         }
         if (response.data.existingEmail) {
           setApiError("Email already exists");
+          scrollToError({ email: true });
           return;
         }
       }
@@ -455,6 +472,11 @@ export function SignupForm() {
     }
 
     if (stage < totalStages) {
+      const errors = await form.trigger();
+      if (!errors) {
+        scrollToError(form.formState.errors);
+        return;
+      }
       setFormData(values);
       setStage(stage + 1);
       setApiError(null);
@@ -539,14 +561,6 @@ export function SignupForm() {
     setProfilePicture(croppedImage);
   };
 
-  const handleCheckboxClick = () => {
-    if (!canAcceptTerms) {
-      setShowScrollMessage(true);
-    } else {
-      setTermsAccepted(!termsAccepted);
-    }
-  };
-
   useEffect(() => {
     if (
       stage === 2 &&
@@ -577,7 +591,11 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Username*</FormLabel>
                   <FormControl>
-                    <Input placeholder="Username" {...field} />
+                    <Input
+                      placeholder="Username"
+                      {...field}
+                      ref={formRefs.username}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -803,6 +821,7 @@ export function SignupForm() {
                     <div
                       key={item.id}
                       className="flex flex-col space-y-2 mb-4 border p-4 rounded-md shadow-sm"
+                      ref={formRefs.previousWorks}
                     >
                       <FormControl>
                         <>
@@ -957,7 +976,6 @@ export function SignupForm() {
                 Please upload documents that prove your identity and
                 qualifications.
               </h2>
-              <h3>For example : ID card, Passport, Certificates, etc.</h3>
               <Label htmlFor="documents">Upload Required Documents*</Label>
               {requiredDocuments[userType].map((docType) => (
                 <div key={docType}>
@@ -966,6 +984,7 @@ export function SignupForm() {
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
                     {docType}
+                    {docType === "Certificates" && " (Max 5 files)"}
                   </label>
                   <label
                     htmlFor={docType}
@@ -979,7 +998,15 @@ export function SignupForm() {
                       type="file"
                       accept="image/*,.pdf"
                       onChange={(e) => {
-                        handleFileChange(e, docType);
+                        const files = Array.from(e.target.files);
+                        const limitedFiles = files.slice(0, 5); // Select only the first 5 files
+                        handleFileChange(
+                          {
+                            ...e,
+                            target: { ...e.target, files: limitedFiles },
+                          },
+                          docType
+                        );
                       }}
                       multiple={docType === "Certificates"}
                       className="hidden"

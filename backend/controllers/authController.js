@@ -13,39 +13,6 @@ const createToken = (id, role) => {
   });
 };
 
-// // File upload route
-// app.post("/api/upload-documents", (req, res) => {
-//   const uploadFields = [
-//     { name: "ID", maxCount: 1 },
-//     { name: "Taxation Registry Card", maxCount: 1 },
-//   ];
-
-//   if (req.body.userRole === "tourGuide") {
-//     uploadFields.push({ name: "Certificates", maxCount: 5 }); // Allow up to 5 certificates
-//   }
-
-//   upload.fields(uploadFields)(req, res, (err) => {
-//     if (err) {
-//       return res
-//         .status(400)
-//         .json({ message: "Error uploading files", error: err.message });
-//     }
-//     res.status(200).json({ message: "Documents uploaded successfully" });
-//   });
-// });
-
-// app.get('/api/files/:filename', (req, res) => {
-//   gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
-//     if (!file || file.length === 0) {
-//       return res.status(404).json({
-//         err: 'No file exists'
-//       });
-//     }
-//     const readstream = gfs.createReadStream(file.filename);
-//     readstream.pipe(res);
-//   });
-// });
-
 const touristSignup = async (req, res) => {
   try {
     if (await emailExists(req.body.email)) {
