@@ -48,6 +48,7 @@ import defaultImage from "../assets/images/default-image.jpg";
 import DualHandleSliderComponent from "./dual-handle-slider";
 import LazyLoad from "react-lazyload";
 
+
 const renderStars = (rating) => {
   return (
     <div className="flex items-center">
@@ -306,14 +307,18 @@ export function AllProducts() {
 
   const fetchProducts = useCallback(
     async (params = {}) => {
-      setIsLoading(true);
+   
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
         const url = new URL(`http://localhost:4000/${role}/products`);
+       
 
         if (params.searchBy)
           url.searchParams.append("searchBy", params.searchBy);
+        if(products.length>0){
+          handlePageChange(1);
+        }
         if (params.sort) {
           url.searchParams.append("sort", params.sort);
           url.searchParams.append("asc", params.asc);
@@ -328,7 +333,7 @@ export function AllProducts() {
         if (params.categories && params.categories.length > 0) {
           url.searchParams.append("categories", params.categories.join(","));
         }
-
+       
         const response = await fetch(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -347,9 +352,7 @@ export function AllProducts() {
         console.error("Error fetching products:", error);
         setError("Error fetching products");
         setProducts([]);
-      } finally {
-        setIsLoading(false);
-      }
+      } 
     },
     [getUserRole]
   );
@@ -428,10 +431,12 @@ export function AllProducts() {
     navigate(`/product/${id}`);
   };
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+
+    const handlePageChange = (pageNumber) => {
+      setCurrentPage(pageNumber);
+    };
+  
+
 
   const handleSort = (attribute) => {
     setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1));
@@ -777,40 +782,44 @@ export function AllProducts() {
 
                 {/* Pagination */}
                 <div className="mt-8 flex justify-center items-center space-x-4">
-                  {products.length > 0 ? (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </Button>
-                      <span className="text-lg font-medium">
-                        Page {currentPage} of{" "}
-                        {Math.ceil(products.length / tripsPerPage)}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="rounded-full"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={
-                          currentPage ===
-                          Math.ceil(products.length / tripsPerPage)
-                        }
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <span className="text-lg font-medium text-gray-500">
-                      No pages available
-                    </span>
-                  )}
-                </div>
+                <button
+                  onClick={() => {
+                    handlePageChange(currentPage - 1);
+                  }}
+                  disabled={currentPage === 1}
+                  className={`px-4 py-2 rounded-full bg-white shadow ${
+                    currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                  }`}
+                >
+                  <ChevronLeft />
+                </button>
+
+                {/* Page X of Y */}
+                <span className="text-lg font-medium">
+                  {products.length > 0
+                    ? `Page ${currentPage} of ${Math.ceil(
+                        products.length / tripsPerPage
+                      )}`
+                    : "No pages available"}
+                </span>
+
+                <button
+                  onClick={() => {
+                    handlePageChange(currentPage + 1);
+                  }}
+                  disabled={
+                    currentPage === Math.ceil(products.length / tripsPerPage) ||
+                    products.length === 0
+                  }
+                  className={`px-4 py-2 rounded-full bg-white shadow ${
+                    currentPage === Math.ceil(products.length / tripsPerPage)
+                      ? "text-gray-300"
+                      : "text-blue-600"
+                  }`}
+                >
+                  <ChevronRight />
+                </button>
+              </div>
               </>
             )}
           </div>
