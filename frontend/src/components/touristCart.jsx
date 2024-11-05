@@ -309,7 +309,7 @@ const ShoppingCart = () => {
       });
       if (response.ok) {
         const updatedItems = cartItems.map((item) => {
-          if (item.product._id === productId) {
+          if (item.product?._id === productId) {
             return {
               ...item,
               quantity: newQuantity,
@@ -318,6 +318,7 @@ const ShoppingCart = () => {
           }
           return item;
         });
+        
         setCartItems(updatedItems);
         calculateTotalAmount();
         
@@ -325,7 +326,7 @@ const ShoppingCart = () => {
         setTimeout(() => {
           setCartItems(prevItems => 
             prevItems.map(item => 
-              item.product._id === productId 
+              item.product?._id === productId 
                 ? { ...item, priceLoading: false }
                 : item
             )

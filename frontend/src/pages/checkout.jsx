@@ -1,13 +1,14 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Check, ChevronRight } from 'lucide-react'
+import { Check, ChevronRight, PlusCircle } from 'lucide-react'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { format } from 'date-fns'
+import { format, addDays } from 'date-fns'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,14 +30,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import AddCard from "@/pages/AddCard"
-
-const formSchema = z.object({
+const personalDetailsSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
+})
+
+const addressDetailsSchema = z.object({
   streetName: z.string().min(1, "Street name is required"),
   streetNumber: z.string().min(1, "Street number is required"),
   floorUnit: z.string().optional(),
@@ -45,10 +49,25 @@ const formSchema = z.object({
   postalCode: z.string().optional(),
   landmark: z.string().optional(),
   locationType: z.string().min(1, "Location type is required"),
-  paymentMethod: z.string().min(1, "Payment method is required"),
-  deliveryDate: z.string().min(1, "Delivery date is required"),
+})
+
+const deliveryDetailsSchema = z.object({
+  deliveryDate: z.string().refine(
+    (date) => new Date(date) > new Date(),
+    "Delivery date must be in the future"
+  ),
   deliveryTime: z.string().min(1, "Delivery time is required"),
   deliveryType: z.string().min(1, "Delivery type is required"),
+})
+
+const paymentDetailsSchema = z.object({
+  paymentMethod: z.enum(["credit_card", "debit_card", "wallet", "cash_on_delivery"], {
+    required_error: "Payment method is required",
+  }),
+  selectedCard: z.string().optional().refine((val) => val && val.length > 0, {
+    message: "Please select a card",
+    path: ["selectedCard"],
+  }),
 })
 
 const steps = [
@@ -60,23 +79,33 @@ const steps = [
 ]
 
 export default function CheckoutPage() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [userRole, setUserRole] = useState('tourist')
-  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null)
-  const [exchangeRates, setExchangeRates] = useState({})
-  const [currencySymbol, setCurrencySymbol] = useState({})
-  const [cartItems, setCartItems] = useState([])
-  const [savedCards, setSavedCards] = useState([])
-  const [totalAmount, setTotalAmount] = useState(0)
-  const [isAddCardOpen, setIsAddCardOpen] = useState(false)
-
-  const form = useForm({
-    resolver: zodResolver(formSchema),
+    const navigate = useNavigate()
+    const [currentStep, setCurrentStep] = useState(1)
+    const [userRole, setUserRole] = useState('tourist')
+    const [userPreferredCurrency, setUserPreferredCurrency] = useState(null)
+    const [exchangeRates, setExchangeRates] = useState({})
+    const [currencySymbol, setCurrencySymbol] = useState({})
+    const [cartItems, setCartItems] = useState([])
+    const [savedCards, setSavedCards] = useState([])
+    const [totalAmount, setTotalAmount] = useState(0)
+    const [isAddCardOpen, setIsAddCardOpen] = useState(false)
+    const [formData, setFormData] = useState({})
+    const [purchaseStatus, setPurchaseStatus] = useState(null)
+    const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
+  
+  const personalDetailsForm = useForm({
+    resolver: zodResolver(personalDetailsSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       phone: "",
+    },
+  })
+
+  const addressDetailsForm = useForm({
+    resolver: zodResolver(addressDetailsSchema),
+    defaultValues: {
       streetName: "",
       streetNumber: "",
       floorUnit: "",
@@ -85,10 +114,23 @@ export default function CheckoutPage() {
       postalCode: "",
       landmark: "",
       locationType: "",
-      paymentMethod: "",
-      deliveryDate: "",
+    },
+  })
+
+  const deliveryDetailsForm = useForm({
+    resolver: zodResolver(deliveryDetailsSchema),
+    defaultValues: {
+      deliveryDate: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
       deliveryTime: "",
       deliveryType: "",
+    },
+  })
+
+  const paymentDetailsForm = useForm({
+    resolver: zodResolver(paymentDetailsSchema),
+    defaultValues: {
+      paymentMethod: "",
+      selectedCard: "",
     },
   })
 
@@ -111,10 +153,10 @@ export default function CheckoutPage() {
         const currencyId = userData.preferredCurrency
         setSavedCards(userData.cards || [])
 
-        form.setValue("firstName", userData.fname || "")
-        form.setValue("lastName", userData.lname || "")
-        form.setValue("email", userData.email || "")
-        form.setValue("phone", userData.mobile || "")
+        personalDetailsForm.setValue("firstName", userData.fname || "")
+        personalDetailsForm.setValue("lastName", userData.lname || "")
+        personalDetailsForm.setValue("email", userData.email || "")
+        personalDetailsForm.setValue("phone", userData.mobile || "")
 
         const response2 = await axios.get(
           `http://localhost:4000/tourist/getCurrency/${currencyId}`,
@@ -224,28 +266,48 @@ export default function CheckoutPage() {
     }
   }, [userRole, userPreferredCurrency, cartItems])
 
-  const handleNext = () => {
-    const currentStepData = form.getValues()
-    const currentStepSchema = formSchema.pick(Object.keys(currentStepData))
-    const result = currentStepSchema.safeParse(currentStepData)
+  const handleNext = async () => {
+    let isValid = false
+    switch (currentStep) {
+      case 1:
+        isValid = await personalDetailsForm.trigger()
+        if (isValid) {
+          setFormData({ ...formData, ...personalDetailsForm.getValues() })
+        }
+        break
+      case 2:
+        isValid = await addressDetailsForm.trigger()
+        if (isValid) {
+          setFormData({ ...formData, ...addressDetailsForm.getValues() })
+        }
+        break
+      case 3:
+        isValid = await deliveryDetailsForm.trigger()
+        if (isValid) {
+          setFormData({ ...formData, ...deliveryDetailsForm.getValues() })
+        }
+        break
+      case 4:
+        isValid = await paymentDetailsForm.trigger()
+        if (isValid) {
+          setFormData({ ...formData, ...paymentDetailsForm.getValues() })
+        }
+        break
+      case 5:
+        isValid = true
+        break
+    }
 
-    if (result.success) {
+    if (isValid) {
       if (currentStep < 5) {
         setCurrentStep(currentStep + 1)
       } else {
-        handlePurchase(form.getValues())
+        handlePurchase(formData)
       }
-    } else {
-      result.error.issues.forEach((issue) => {
-        form.setError(issue.path[0], {
-          type: "manual",
-          message: issue.message,
-        })
-      })
     }
   }
 
-  const handlePurchase = async (formData) => {
+  const handlePurchase = async (data) => {
     try {
       const token = Cookies.get("jwt")
       const products = cartItems.map((item) => ({
@@ -262,12 +324,13 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           products,
           totalAmount,
-          paymentMethod: formData.paymentMethod,
-          shippingAddress: `${formData.streetNumber} ${formData.streetName}, ${formData.floorUnit}, ${formData.city}, ${formData.state} ${formData.postalCode}`,
-          locationType: formData.locationType,
-          deliveryType: formData.deliveryType,
-          deliveryTime: formData.deliveryTime,
-          deliveryDate: formData.deliveryDate,
+          paymentMethod: data.paymentMethod,
+          selectedCard: data.selectedCard,
+          shippingAddress: `${data.streetNumber} ${data.streetName}, ${data.floorUnit}, ${data.city}, ${data.state} ${data.postalCode}`,
+          locationType: data.locationType,
+          deliveryType: data.deliveryType,
+          deliveryTime: data.deliveryTime,
+          deliveryDate: data.deliveryDate,
         }),
       })
 
@@ -276,17 +339,45 @@ export default function CheckoutPage() {
         throw new Error(errorData.message)
       }
 
-      // Handle successful purchase
-      setCurrentStep(5) // Move to receipt step
+      setPurchaseStatus('success')
+      setIsStatusDialogOpen(true)
     } catch (error) {
       console.error('Error making purchase:', error)
-      // Handle error (show error message to user)
+      setPurchaseStatus('error')
+      setIsStatusDialogOpen(true)
+    }
+  }
+
+  const handleAddNewCard = async (cardData) => {
+    try {
+      const token = Cookies.get("jwt")
+      const response = await axios.post(
+        "http://localhost:4000/tourist/addCard",
+        cardData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      
+      if (response.status === 200) {
+        // Refetch user cards
+        const userResponse = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        setSavedCards(userResponse.data.cards || [])
+        
+        setIsAddCardOpen(false)
+        paymentDetailsForm.setValue("paymentMethod", cardData.cardType === "Credit Card" ? "credit_card" : "debit_card")
+        paymentDetailsForm.setValue("selectedCard", cardData.cardNumber)
+      }
+    } catch (error) {
+      console.error("Error adding new card:", error)
     }
   }
 
   return (
-    <div className="min-h-screen bg-white ">
-          <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+    <div className="min-h-screen bg-white pb-6">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         </div>
       </div>
@@ -300,7 +391,7 @@ export default function CheckoutPage() {
                 <div key={step.id} className="flex items-center">
                   <div className="relative flex-1">
                     <div
-                      className={`w-full h-16 rounded-xl flex items-center justify-center ${
+                      className={`w-16 h-16 rounded-xl flex items-center justify-center ${
                         currentStep >= step.id ? 'bg-[#1A3B47]' : 'bg-[#B5D3D1]'
                       }`}
                     >
@@ -323,14 +414,15 @@ export default function CheckoutPage() {
           {/* Main content area */}
           <div className="flex-1">
             <Card className="p-6 bg-[#B5D3D1]">
-              <Form {...form}>
-                <form className="space-y-6">
-                  {currentStep === 1 && (
+              {currentStep === 1 && (
+                <Form {...personalDetailsForm}>
+                  <form className="space-y-6">
                     <div className="space-y-4">
                       <h2 className="text-2xl font-bold text-[#1A3B47]">Personal Details</h2>
                       <div className="grid grid-cols-2 gap-4">
+                
                         <FormField
-                          control={form.control}
+                          control={personalDetailsForm.control}
                           name="firstName"
                           render={({ field }) => (
                             <FormItem>
@@ -343,7 +435,7 @@ export default function CheckoutPage() {
                           )}
                         />
                         <FormField
-                          control={form.control}
+                          control={personalDetailsForm.control}
                           name="lastName"
                           render={({ field }) => (
                             <FormItem>
@@ -357,7 +449,7 @@ export default function CheckoutPage() {
                         />
                       </div>
                       <FormField
-                        control={form.control}
+                        control={personalDetailsForm.control}
                         name="email"
                         render={({ field }) => (
                           <FormItem>
@@ -370,7 +462,7 @@ export default function CheckoutPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={personalDetailsForm.control}
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
@@ -383,13 +475,17 @@ export default function CheckoutPage() {
                         )}
                       />
                     </div>
-                  )}
+                  </form>
+                </Form>
+              )}
 
-                  {currentStep === 2 && (
+              {currentStep === 2 && (
+                <Form {...addressDetailsForm}>
+                  <form className="space-y-6">
                     <div className="space-y-4">
                       <h2 className="text-2xl font-bold text-[#1A3B47]">Address Details</h2>
                       <FormField
-                        control={form.control}
+                        control={addressDetailsForm.control}
                         name="streetName"
                         render={({ field }) => (
                           <FormItem>
@@ -402,7 +498,7 @@ export default function CheckoutPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={addressDetailsForm.control}
                         name="streetNumber"
                         render={({ field }) => (
                           <FormItem>
@@ -413,10 +509,9 @@ export default function CheckoutPage() {
                             <FormMessage />
                           </FormItem>
                         )}
-                      
                       />
                       <FormField
-                        control={form.control}
+                        control={addressDetailsForm.control}
                         name="floorUnit"
                         render={({ field }) => (
                           <FormItem>
@@ -429,7 +524,7 @@ export default function CheckoutPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={addressDetailsForm.control}
                         name="city"
                         render={({ field }) => (
                           <FormItem>
@@ -442,7 +537,7 @@ export default function CheckoutPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={addressDetailsForm.control}
                         name="state"
                         render={({ field }) => (
                           <FormItem>
@@ -455,7 +550,7 @@ export default function CheckoutPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={addressDetailsForm.control}
                         name="postalCode"
                         render={({ field }) => (
                           <FormItem>
@@ -468,7 +563,7 @@ export default function CheckoutPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={addressDetailsForm.control}
                         name="landmark"
                         render={({ field }) => (
                           <FormItem>
@@ -481,7 +576,7 @@ export default function CheckoutPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={addressDetailsForm.control}
                         name="locationType"
                         render={({ field }) => (
                           <FormItem>
@@ -510,26 +605,30 @@ export default function CheckoutPage() {
                         )}
                       />
                     </div>
-                  )}
+                  </form>
+                </Form>
+              )}
 
-                  {currentStep === 3 && (
+              {currentStep === 3 && (
+                <Form {...deliveryDetailsForm}>
+                  <form className="space-y-6">
                     <div className="space-y-4">
                       <h2 className="text-2xl font-bold text-[#1A3B47]">Delivery Details</h2>
                       <FormField
-                        control={form.control}
+                        control={deliveryDetailsForm.control}
                         name="deliveryDate"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Delivery Date</FormLabel>
                             <FormControl>
-                              <Input {...field} type="date" className="rounded-xl" />
+                              <Input {...field} type="date" className="rounded-xl" min={format(addDays(new Date(), 1), 'yyyy-MM-dd')} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={deliveryDetailsForm.control}
                         name="deliveryTime"
                         render={({ field }) => (
                           <FormItem>
@@ -552,7 +651,7 @@ export default function CheckoutPage() {
                         )}
                       />
                       <FormField
-                        control={form.control}
+                        control={deliveryDetailsForm.control}
                         name="deliveryType"
                         render={({ field }) => (
                           <FormItem>
@@ -575,30 +674,51 @@ export default function CheckoutPage() {
                         )}
                       />
                     </div>
-                  )}
+                  </form>
+                </Form>
+              )}
 
-                  {currentStep === 4 && (
+              {currentStep === 4 && (
+                <Form {...paymentDetailsForm}>
+                  <form className="space-y-6">
                     <div className="space-y-4">
                       <h2 className="text-2xl font-bold text-[#1A3B47]">Payment Details</h2>
                       <FormField
-                        control={form.control}
+                        control={paymentDetailsForm.control}
                         name="paymentMethod"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Payment Method</FormLabel>
                             <FormControl>
                               <RadioGroup
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
+                                onValueChange={(value) => {
+                                  field.onChange(value)
+                                  if (value !== "credit_card" && value !== "debit_card") {
+                                    paymentDetailsForm.setValue("selectedCard", "")
+                                  }
+                                }}
+                                value={field.value}
                                 className="space-y-4"
                               >
+                                {savedCards.some(card => card.cardType === "Credit Card") && (
+                                  <div className="flex items-center space-x-2 bg-white p-4 rounded-xl">
+                                    <RadioGroupItem value="credit_card" id="credit_card" />
+                                    <Label htmlFor="credit_card">Credit Card</Label>
+                                  </div>
+                                )}
+                                {savedCards.some(card => card.cardType === "Debit Card") && (
+                                  <div className="flex items-center space-x-2 bg-white p-4 rounded-xl">
+                                    <RadioGroupItem value="debit_card" id="debit_card" />
+                                    <Label htmlFor="debit_card">Debit Card</Label>
+                                  </div>
+                                )}
                                 <div className="flex items-center space-x-2 bg-white p-4 rounded-xl">
-                                  <RadioGroupItem value="debit" id="debit" />
-                                  <Label htmlFor="debit">Debit Card</Label>
+                                  <RadioGroupItem value="wallet" id="wallet" />
+                                  <Label htmlFor="wallet">Wallet</Label>
                                 </div>
                                 <div className="flex items-center space-x-2 bg-white p-4 rounded-xl">
-                                  <RadioGroupItem value="credit" id="credit" />
-                                  <Label htmlFor="credit">Credit Card</Label>
+                                  <RadioGroupItem value="cash_on_delivery" id="cash_on_delivery" />
+                                  <Label htmlFor="cash_on_delivery">Cash on Delivery</Label>
                                 </div>
                               </RadioGroup>
                             </FormControl>
@@ -606,87 +726,177 @@ export default function CheckoutPage() {
                           </FormItem>
                         )}
                       />
-                      {(form.watch("paymentMethod") === "debit" || form.watch("paymentMethod") === "credit") && (
-                        <div className="space-y-4">
-                          <h3 className="text-xl font-semibold text-[#1A3B47]">Select a Card</h3>
-                          <RadioGroup defaultValue={savedCards[0]?.cardNumber}>
-                            {savedCards.map((card) => (
-                              <div key={card.cardNumber} className="flex items-center space-x-2 bg-white p-4 rounded-xl">
-                                <RadioGroupItem value={card.cardNumber} id={card.cardNumber} />
-                                <Label htmlFor={card.cardNumber}>
-                                  {card.cardType} ending in {card.cardNumber.slice(-4)}
-                                </Label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                          <Dialog open={isAddCardOpen} onOpenChange={setIsAddCardOpen}>
-                            <DialogTrigger asChild>
-                              <Button variant="outline">Add New Card</Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                              <DialogHeader>
-                                <DialogTitle>Add New Card</DialogTitle>
-                              </DialogHeader>
-                              <AddCard onClose={() => setIsAddCardOpen(false)} />
-                            </DialogContent>
-                          </Dialog>
-                        </div>
+                      {(paymentDetailsForm.watch("paymentMethod") === "credit_card" || paymentDetailsForm.watch("paymentMethod") === "debit_card") && (
+                        <FormField
+                          control={paymentDetailsForm.control}
+                          name="selectedCard"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Select a Card</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a card" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {savedCards
+                                    .filter(card => card.cardType === (paymentDetailsForm.watch("paymentMethod") === "credit_card" ? "Credit Card" : "Debit Card"))
+                                    .map((card) => (
+                                      <SelectItem key={card.cardNumber} value={card.cardNumber}>
+                                        **** **** **** {card.cardNumber.slice(-4)}
+                                      </SelectItem>
+                                    ))
+                                  }
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       )}
+                      <Dialog open={isAddCardOpen} onOpenChange={setIsAddCardOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add New Card
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="w-[2000px] h-[600px]">
+                          <DialogHeader>
+                            <DialogTitle>Add New Card</DialogTitle>
+                          </DialogHeader>
+                          <AddCard onClose={handleAddNewCard} />
+                        </DialogContent>
+                      </Dialog>
                     </div>
-                  )}
+                  </form>
+                </Form>
+              )}
 
-                  {currentStep === 5 && (
-                    <div className="space-y-4">
-                      <h2 className="text-2xl font-bold text-[#1A3B47]">Receipt</h2>
-                      <div className="bg-white rounded-xl p-6 space-y-4">
-                        {cartItems.map((item, index) => (
-                          <div key={index} className="flex justify-between">
-                            <span>{item?.product?.name} x {item?.quantity}</span>
-                            <span>{formatPrice(item?.totalPrice)}</span>
-                          </div>
-                        ))}
-                        <div className="border-t pt-4">
-                          <div className="flex justify-between font-bold">
-                            <span>Total</span>
-                            <span>{formatPrice(totalAmount)}</span>
-                          </div>
-                        </div>
-                        <div className="border-t pt-4">
-                          <h3 className="font-semibold">Delivery Address:</h3>
-                          <p>{`${form.getValues("streetNumber")} ${form.getValues("streetName")}, ${form.getValues("floorUnit")}, ${form.getValues("city")}, ${form.getValues("state")} ${form.getValues("postalCode")}`}</p>
-                          <p>Location Type: {form.getValues("locationType")}</p>
-                        </div>
-                        <div className="border-t pt-4">
-                          <h3 className="font-semibold">Payment Method:</h3>
-                          <p>{form.getValues("paymentMethod")}</p>
-                        </div>
+              {currentStep === 5 && (
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-[#1A3B47]">Receipt</h2>
+                  <div className="bg-white rounded-xl p-6 space-y-4">
+                    {cartItems.map((item, index) => (
+                      <div key={index} className="flex justify-between">
+                        <span>{item?.product?.name} x {item?.quantity}</span>
+                        <span>{formatPrice(item?.totalPrice)}</span>
+                      </div>
+                    ))}
+                    <div className="border-t pt-4">
+                      <div className="flex justify-between font-bold">
+                        <span>Total</span>
+                        <span>{formatPrice(totalAmount)}</span>
                       </div>
                     </div>
-                  )}
+                    <div className="border-t pt-4">
+                      <h3 className="font-semibold">Delivery Address:</h3>
+                      <p>{`${formData.streetNumber} ${formData.streetName}, ${formData.floorUnit}, ${formData.city}, ${formData.state} ${formData.postalCode}`}</p>
+                      <p>Location Type: {formData.locationType}</p>
+                    </div>
+                    <div className="border-t pt-4">
+                      <h3 className="font-semibold">Payment Method:</h3>
+                      <p>{formData.paymentMethod}</p>
+                      {(formData.paymentMethod === "credit_card" || formData.paymentMethod === "debit_card") && (
+                        <p>**** **** **** {formData.selectedCard.slice(-4)}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
+{currentStep === 6 && (
+                <div className="space-y-4">
+                  {purchaseStatus === 'success' ? (
+                    <Alert variant="default">
+                      <AlertTitle>Purchase Successful!</AlertTitle>
+                      <AlertDescription>
+                        Your order has been placed successfully. Thank you for your purchase!
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <Alert variant="destructive">
+                      <AlertTitle>Purchase Failed</AlertTitle>
+                      <AlertDescription>
+                        There was an error processing your purchase. Please try again or contact support.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                   <div className="flex justify-between pt-6">
                     <Button
                       type="button"
-                      onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                      disabled={currentStep === 1}
+                      onClick={() => router.push('/home')}
                       className="rounded-xl bg-[#5D9297] hover:bg-[#388A94]"
                     >
-                      Back
+                      Go to Home
                     </Button>
                     <Button
                       type="button"
-                      onClick={handleNext}
+                      onClick={() => router.push('/all-products')}
                       className="rounded-xl bg-[#1A3B47] hover:bg-[#388A94]"
                     >
-                      {currentStep === 5 ? 'Complete Purchase' : 'Next'}
+                      Continue Shopping
                     </Button>
                   </div>
-                </form>
-              </Form>
+                </div>
+              )}
+
+<div className="flex justify-between pt-6">
+                <Button
+                  type="button"
+                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                  disabled={currentStep === 1}
+                  className="rounded-xl bg-[#5D9297] hover:bg-[#388A94]"
+                >
+                  Back
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  className="rounded-xl bg-[#1A3B47] hover:bg-[#388A94]"
+                >
+                  {currentStep === 5 ? 'Complete Purchase' : 'Next'}
+                </Button>
+              </div>
             </Card>
           </div>
         </div>
       </div>
+      <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {purchaseStatus === 'success' ? 'Purchase Successful!' : 'Purchase Failed'}
+            </DialogTitle>
+          </DialogHeader>
+          <p>
+            {purchaseStatus === 'success'
+              ? 'Your order has been placed successfully. Thank you for your purchase!'
+              : 'There was an error processing your purchase. Please try again or contact support.'}
+          </p>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setIsStatusDialogOpen(false)
+                navigate('/')
+              }}
+              className="rounded-xl bg-[#5D9297] hover:bg-[#388A94]"
+            >
+              Go to Home
+            </Button>
+            <Button
+              onClick={() => {
+                setIsStatusDialogOpen(false)
+                navigate('/all-products')
+              }}
+              className="rounded-xl bg-[#1A3B47] hover:bg-[#388A94]"
+            >
+              Continue Shopping
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
