@@ -18,13 +18,16 @@ import {
 } from "@/components/ui/card";
 import { set } from "date-fns";
 
-
 const ActivityCard = ({ activity, onSelect, userInfo }) => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
-    if (userInfo && userInfo.role == 'tourist' && userInfo.preferredCurrency !== activity.currency) {
+    if (
+      userInfo &&
+      userInfo.role == "tourist" &&
+      userInfo.preferredCurrency !== activity.currency
+    ) {
       // console.log("exchange rate tyb?");
       fetchExchangeRate();
     } else {
@@ -34,129 +37,134 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
   }, [userInfo, activity]);
 
   const fetchExchangeRate = useCallback(async () => {
-  if(userInfo && userInfo.role == 'tourist'){
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch(
-        `http://localhost:4000/${userInfo.role}/populate`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            base: activity.currency,
-            target: userInfo.preferredCurrency._id,
-          }),
+    if (userInfo && userInfo.role == "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userInfo.role}/populate`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              base: activity.currency,
+              target: userInfo.preferredCurrency._id,
+            }),
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setExchangeRate(data.conversion_rate);
+        } else {
+          console.error("Error in fetching exchange rate:", data.message);
         }
-      );
-      const data = await response.json();
-      if (response.ok) {
-        setExchangeRate(data.conversion_rate);
-      } else {
-        console.error('Error in fetching exchange rate:', data.message);
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
       }
-    } catch (error) {
-      console.error("Error fetching exchange rate:", error);
     }
-  }
   }, [userInfo, activity]);
 
   const getCurrencySymbol = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userInfo.role}/getCurrency/${activity.currency}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `http://localhost:4000/${userInfo.role}/getCurrency/${activity.currency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setCurrencySymbol(response.data.symbol);
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
     }
   }, [userInfo, activity]);
 
-    const formatPrice = (price) => {
-      // if (!userInfo || !price) return '';
-  
-      if (userInfo.role === 'tourist' && userInfo.preferredCurrency) {
-        if (userInfo.preferredCurrency === activity.currency) {
-          return `${userInfo.preferredCurrency.symbol}${price}`;
-        } else if (exchangeRate) {
-          const exchangedPrice = price * exchangeRate;
-          return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-        }
-      } else if (currencySymbol) {
-        // console.log("currencySymbol:", currencySymbol, "price:", price);
-        return `${currencySymbol}${price}`;
+  const formatPrice = (price) => {
+    // if (!userInfo || !price) return '';
+
+    if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
+      if (userInfo.preferredCurrency === activity.currency) {
+        return `${userInfo.preferredCurrency.symbol}${price}`;
+      } else if (exchangeRate) {
+        const exchangedPrice = price * exchangeRate;
+        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
+          2
+        )}`;
       }
+    } else if (currencySymbol) {
+      // console.log("currencySymbol:", currencySymbol, "price:", price);
+      return `${currencySymbol}${price}`;
+    }
   };
 
-return(
-  <Card
-    className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
-    onClick={() => onSelect(activity._id)}
-  >
-    <div className="relative aspect-video overflow-hidden">
-      <img
-        src={
-          activity.pictures && activity.pictures.length > 0
-            ? activity.pictures[0]
-            : defaultImage
-        }
-        alt={activity.name}
-        className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-      />
-    </div>
-    <CardHeader className="p-4">
-      <CardTitle className="text-xl font-semibold">{activity.name}</CardTitle>
-      <p className="text-sm text-muted-foreground">
-        {activity.location.address}
-      </p>
-    </CardHeader>
-    <CardContent className="p-4 pt-0 space-y-2">
-      <div className="flex items-center space-x-1">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            className={`h-4 w-4 ${
-              i < activity.rating
-                ? "text-yellow-400 fill-yellow-400"
-                : "text-gray-300"
-            }`}
-          />
-        ))}
-        <span className="text-sm text-muted-foreground ml-1">
-          {activity.rating.toFixed(1)}
-        </span>
+  return (
+    <Card
+      className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
+      onClick={() => onSelect(activity._id)}
+    >
+      <div className="relative aspect-video overflow-hidden">
+        <img
+          src={
+            activity.pictures && activity.pictures.length > 0
+              ? activity.pictures[0]?.url
+              : defaultImage
+          }
+          alt={activity.name}
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
       </div>
-      <div className="flex justify-between items-center">
-        <span className="text-lg font-bold text-primary">
-          {formatPrice(activity.price)}
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {activity.duration} hours
-        </span>
-      </div>
-      <p className="text-sm text-muted-foreground">
-        {new Date(activity.timing).toLocaleDateString()}
-      </p>
-    </CardContent>
-    <CardFooter className="p-4 pt-0">
-      <div className="flex flex-wrap gap-2">
-        {activity.tags.map((tag, index) => (
-          <Badge key={index} variant="outline">
-            {tag.type}
-          </Badge>
-        ))}
-        {activity.category.map((cat, index) => (
-          <Badge key={index} variant="secondary">
-            {cat.name}
-          </Badge>
-        ))}
-      </div>
-    </CardFooter>
-  </Card>
-);
+      <CardHeader className="p-4">
+        <CardTitle className="text-xl font-semibold">{activity.name}</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {activity.location.address}
+        </p>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-2">
+        <div className="flex items-center space-x-1">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              className={`h-4 w-4 ${
+                i < activity.rating
+                  ? "text-yellow-400 fill-yellow-400"
+                  : "text-gray-300"
+              }`}
+            />
+          ))}
+          <span className="text-sm text-muted-foreground ml-1">
+            {activity.rating.toFixed(1)}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-bold text-primary">
+            {formatPrice(activity.price)}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {activity.duration} hours
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {new Date(activity.timing).toLocaleDateString()}
+        </p>
+      </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <div className="flex flex-wrap gap-2">
+          {activity.tags.map((tag, index) => (
+            <Badge key={index} variant="outline">
+              {tag.type}
+            </Badge>
+          ))}
+          {activity.category.map((cat, index) => (
+            <Badge key={index} variant="secondary">
+              {cat.name}
+            </Badge>
+          ))}
+        </div>
+      </CardFooter>
+    </Card>
+  );
 };
 
 export function AllActivitiesComponent() {
@@ -188,20 +196,23 @@ export function AllActivitiesComponent() {
     const role = Cookies.get("role") || "guest";
     const token = Cookies.get("jwt");
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
         });
         const currencyId = response.data.preferredCurrency;
 
-        const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const currencyResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         setUserInfo({
           role,
-          preferredCurrency: currencyResponse.data
+          preferredCurrency: currencyResponse.data,
         });
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -219,12 +230,12 @@ export function AllActivitiesComponent() {
   };
 
   const getSymbol = () => {
-    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
-        return `${userInfo.preferredCurrency.symbol}`;
+    if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
+      return `${userInfo.preferredCurrency.symbol}`;
     } else {
       return "$";
     }
-};
+  };
 
   useEffect(() => {
     fetchUserInfo();
@@ -329,18 +340,24 @@ export function AllActivitiesComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
 
-      if (role === 'tourist' && !isInitialized) {
-        const preferredActivities = await fetch("http://localhost:4000/tourist/activities-preference", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }).then(res => res.json());
+      if (role === "tourist" && !isInitialized) {
+        const preferredActivities = await fetch(
+          "http://localhost:4000/tourist/activities-preference",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        ).then((res) => res.json());
 
-        const otherActivities = await fetch("http://localhost:4000/tourist/activities-not-preference", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }).then(res => res.json());
+        const otherActivities = await fetch(
+          "http://localhost:4000/tourist/activities-not-preference",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        ).then((res) => res.json());
 
         setActivities([...preferredActivities, ...otherActivities]);
         setIsSortedByPreference(true);
@@ -360,13 +377,15 @@ export function AllActivitiesComponent() {
       }
 
       // Calculate max price
-      const maxActivityPrice = Math.max(...activities.map(activity => activity.price));
+      const maxActivityPrice = Math.max(
+        ...activities.map((activity) => activity.price)
+      );
       const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
 
-      if (roundedMaxPrice > -Infinity){
-      setMaxPrice(roundedMaxPrice);
-      setInitialPriceRange([0, roundedMaxPrice]);
-      setPriceRange([0, roundedMaxPrice]);
+      if (roundedMaxPrice > -Infinity) {
+        setMaxPrice(roundedMaxPrice);
+        setInitialPriceRange([0, roundedMaxPrice]);
+        setPriceRange([0, roundedMaxPrice]);
       }
 
       setError(null);
@@ -449,18 +468,24 @@ export function AllActivitiesComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
 
-      if (role === 'tourist') {
-        const preferredActivities = await fetch("http://localhost:4000/tourist/activities-preference", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }).then(res => res.json());
+      if (role === "tourist") {
+        const preferredActivities = await fetch(
+          "http://localhost:4000/tourist/activities-preference",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        ).then((res) => res.json());
 
-        const otherActivities = await fetch("http://localhost:4000/tourist/activities-not-preference", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }).then(res => res.json());
+        const otherActivities = await fetch(
+          "http://localhost:4000/tourist/activities-not-preference",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        ).then((res) => res.json());
 
         setActivities([...preferredActivities, ...otherActivities]);
         setIsSortedByPreference(true);
@@ -479,7 +504,9 @@ export function AllActivitiesComponent() {
       }
 
       // Calculate max price
-      const maxActivityPrice = Math.max(...activities.map(activity => activity.price));
+      const maxActivityPrice = Math.max(
+        ...activities.map((activity) => activity.price)
+      );
       const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
 
       if (roundedMaxPrice > -Infinity) {
@@ -512,16 +539,12 @@ export function AllActivitiesComponent() {
     setSortOrder("");
     setMinStars(0);
     setMyActivities(false);
-    if(getUserRole() === 'tourist') {
+    if (getUserRole() === "tourist") {
       fetchActivitiesByPreference();
-    }
-    else {
+    } else {
       fetchActivities();
     }
-    
   };
-
-
 
   const toggleFilters = () => {
     setIsLoading(false);
@@ -535,17 +558,16 @@ export function AllActivitiesComponent() {
         <Loader />
       ) : (
         <div className="min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8 mb-4">
-            <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    </div>
-  </div>
+          <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+          </div>
           <div className="max-w-7xl mx-auto">
             <>
               <h1 className="text-4xl font-bold text-gray-900 mb-8 pt-4">
                 All Activities
               </h1>
 
-              {isSortedByPreference && getUserRole() === 'tourist' && (
+              {isSortedByPreference && getUserRole() === "tourist" && (
                 <h2 className="text-2xl font-semibold text-gray-700 mb-4">
                   Sorted based on your preferences
                 </h2>

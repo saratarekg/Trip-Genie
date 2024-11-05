@@ -18,10 +18,9 @@ const getAllProducts = async (req, res) => {
     if (searchBy) {
       query.$or = [
         { name: { $regex: searchBy, $options: "i" } },
-        { description: { $regex: searchBy, $options: "i" } }
+        { description: { $regex: searchBy, $options: "i" } },
       ];
     }
-    
 
     // Apply price range filter if provided
     if (minPrice || maxPrice) {
@@ -77,10 +76,9 @@ const getAllProductsArchive = async (req, res) => {
     if (searchBy) {
       query.$or = [
         { name: { $regex: searchBy, $options: "i" } },
-        { description: { $regex: searchBy, $options: "i" } }
+        { description: { $regex: searchBy, $options: "i" } },
       ];
     }
-    
 
     // Apply price range filter if provided
     if (minPrice || maxPrice) {
@@ -101,15 +99,12 @@ const getAllProductsArchive = async (req, res) => {
     // Perform the query
     query.isArchived = true;
     query.isDeleted = false;
-    if(role=="admin"){
-    query.seller=null;
-    }
-    else
-    {
-    query.seller= res.locals.user_id;
+    if (role == "admin") {
+      query.seller = null;
+    } else {
+      query.seller = res.locals.user_id;
     }
     let productsQuery = Product.find(query);
-   
 
     // Apply sorting if 'asc' is defined (for sorting by rating)
     if (asc !== undefined) {
@@ -351,7 +346,10 @@ const editProductOfSeller = async (req, res) => {
 const getProductById = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await Product.findById(id).populate("seller").populate("reviews.tourist").exec();
+    const product = await Product.findById(id)
+      .populate("seller")
+      .populate("reviews.tourist")
+      .exec();
     if (!product) {
       return res.status(400).json({ message: "Product not found" });
     }

@@ -3,6 +3,7 @@ const Category = require("../models/category");
 const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
 const ActivityBooking = require("../models/activityBooking");
+const cloudinary = require("../utils/cloudinary");
 
 const getAllActivities = async (req, res) => {
   try {
@@ -223,23 +224,41 @@ const createActivity = async (req, res) => {
     rating,
     isBookingOpen,
   } = req.body;
-  const activity = new Activity({
-    name,
-    location,
-    duration,
-    timing,
-    description,
-    price,
-    currency,
-    category,
-    tags,
-    specialDiscount,
-    rating,
-    isBookingOpen,
-    advertiser: res.locals.user_id,
-  });
 
+  let imagesBuffer = [];
   try {
+    console.log("I am here!");
+
+    const pictures = req.files.map(
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
+    //upload multiple images using cloudinary
+    for (let i = 0; i < pictures.length; i++) {
+      const result = await cloudinary.uploader.upload(pictures[i], {
+        folder: "activities",
+      });
+
+      imagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+    const activity = new Activity({
+      name,
+      location,
+      duration,
+      timing,
+      description,
+      price,
+      currency,
+      category,
+      tags,
+      specialDiscount,
+      rating,
+      isBookingOpen,
+      advertiser: res.locals.user_id,
+      pictures: imagesBuffer,
+    });
     await activity.save();
     res.status(201).json(activity);
   } catch (error) {
@@ -258,6 +277,11 @@ const deleteActivity = async (req, res) => {
       return res
         .status(403)
         .json({ message: "You are not authorized to delete this activity" });
+    }
+
+    //remove the images from cloudinary
+    for (let i = 0; i < activity.pictures.length; i++) {
+      await cloudinary.uploader.destroy(activity.pictures[i].public_id);
     }
 
     const bookings = await ActivityBooking.find({ activity: req.params.id });
@@ -308,8 +332,38 @@ const updateActivity = async (req, res) => {
       tags,
       specialDiscount,
       isBookingOpen,
-      pictures,
     } = req.body;
+    let ImagesBuffer = [];
+
+    let { oldPictures } = req.body; // Get details from request body
+    oldPictures = JSON.parse(oldPictures);
+
+    let newPictures = req.files.map(
+      (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+    );
+    //upload multiple images using cloudinary
+    for (let i = 0; i < newPictures.length; i++) {
+      const result = await cloudinary.uploader.upload(newPictures[i], {
+        folder: "activities",
+      });
+
+      ImagesBuffer.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    const pictures = [...oldPictures, ...imagesBuffer];
+
+    const oldPicturesIDs = oldPictures.map((picture) => picture.public_id);
+
+    //remove the images from cloudinary
+    activity.pictures.forEach((picture) => {
+      if (!oldPicturesIDs.includes(picture.public_id)) {
+        cloudinary.uploader.destroy(picture.public_id);
+      }
+    });
+
     await Activity.findByIdAndUpdate(
       req.params.id,
       {
@@ -373,7 +427,9 @@ const addCommentToActivity = async (req, res) => {
     }
 
     if (rating < 0 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 0 and 5" });
     }
 
     const tourist = await Tourist.findById(res.locals.user_id);
@@ -443,7 +499,9 @@ const updateCommentOnActivity = async (req, res) => {
 
     // Validate the rating if it's provided
     if (rating !== undefined && (rating < 0 || rating > 5)) {
-      return res.status(400).json({ message: "Rating must be a number between 0 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 0 and 5" });
     }
 
     const tourist = await Tourist.findById(touristId);
@@ -465,7 +523,9 @@ const updateCommentOnActivity = async (req, res) => {
       (comment) => comment.tourist.toString() === touristId
     );
     if (!comment) {
-      return res.status(400).json({ message: "Comment not found for this user" });
+      return res
+        .status(400)
+        .json({ message: "Comment not found for this user" });
     }
 
     // Update fields if provided
@@ -483,7 +543,10 @@ const updateCommentOnActivity = async (req, res) => {
     let newAverageRating;
     if (rating !== undefined) {
       const totalRatings = activity.comments.length;
-      const sumOfRatings = activity.comments.reduce((sum, comment) => sum + comment.rating, 0);
+      const sumOfRatings = activity.comments.reduce(
+        (sum, comment) => sum + comment.rating,
+        0
+      );
       newAverageRating = sumOfRatings / totalRatings;
       activity.rating = newAverageRating; // Update the activity's average rating
     }
@@ -505,7 +568,6 @@ const updateCommentOnActivity = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   getAllActivities,

@@ -172,13 +172,16 @@ const ProductCard = ({
         </p>
       </CardContent>
       <CardFooter className="p-4 flex justify-between items-center border-t">
-        <span className="text-2xl font-bold text-[#388A94]">{formatPrice(product.price)}</span>
+        <span className="text-2xl font-bold text-[#388A94]">
+          {formatPrice(product.price)}
+        </span>
         {renderStars(product.rating)}
 
         {/* Show "Buy Now" button only if user role is "tourist" */}
         {userInfo?.role === "tourist" && (
           <Button
-            className="bg-orange-400 hover:bg-[#F88C33] text-white" style={{ borderRadius: '20px' }}
+            className="bg-orange-400 hover:bg-[#F88C33] text-white"
+            style={{ borderRadius: "20px" }}
             onClick={(e) => {
               e.stopPropagation();
               onBuyNow(product);
@@ -583,19 +586,18 @@ export function AllProducts() {
 
   return (
     <div className="bg-[#E6DCCF]">
-  {/* Navbar */}
-  <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    </div>
-  </div>
+      {/* Navbar */}
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
       <div className="container mx-auto px-24 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-[#1A3B47] mb-8" >All Products</h1>
+        <h1 className="text-4xl font-bold text-[#1A3B47] mb-8">All Products</h1>
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="hidden md:block w-64 bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
-              <Button 
+              <Button
                 onClick={clearFilters}
                 size="sm"
                 className="text-gray-400 hover:text-gray-200 bg-transparent border-none"
@@ -603,7 +605,6 @@ export function AllProducts() {
                 Clear All
               </Button>
             </div>
-                  
 
             {/* Price Range */}
             <div className="mb-6">
@@ -629,7 +630,7 @@ export function AllProducts() {
                     key={rating}
                     onClick={() => setSelectedRating(rating)}
                     className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
-                      selectedRating === rating ? 'bg-[#B5D3D1]' : ''
+                      selectedRating === rating ? "bg-[#B5D3D1]" : ""
                     }`}
                   >
                     {renderStars(rating)}
@@ -640,73 +641,83 @@ export function AllProducts() {
 
             {/* Sort by Rating */}
             <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-2">Sort by Rating</h3>
+              <h3 className="font-medium text-[#1A3B47] mb-2">
+                Sort by Rating
+              </h3>
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full" 
-                style={{ borderRadius: '20px' }}
+                className="w-full"
+                style={{ borderRadius: "20px" }}
                 onClick={() => handleSort("rating")}
               >
                 <ArrowUpDown className="w-4 h-4" />
                 <span>Rating</span>
                 <div className="ml-auto">
-                {sortBy === "rating" ? (sortOrder === 1 ? "↓"  : "↑") : ""}
+                  {sortBy === "rating" ? (sortOrder === 1 ? "↓" : "↑") : ""}
                 </div>
               </Button>
             </div>
 
-            {(userInfo?.role === 'admin' || userInfo?.role === 'seller') && (
-  <div className="mb-6">
-    <h3 className="font-medium text-[#1A3B47] mb-2">My Products</h3>
-    
-    <div className="flex flex-col gap-3"> {/* Add spacing between elements */}
-      <Button
-        variant="outline"
-        size="sm"
-        className={`w-full justify-between rounded-md ${myProducts ? "bg-orange-400 text-white" : ""}`}
-        onClick={() => handleMyProducts(!myProducts)}
-      >
-        <ShoppingCart className="w-4 h-4 mr-2" />
-        {myProducts ? "Showing My Products" : "Show My Products"}
-      </Button>
+            {(userInfo?.role === "admin" || userInfo?.role === "seller") && (
+              <div className="mb-6">
+                <h3 className="font-medium text-[#1A3B47] mb-2">My Products</h3>
 
-      <Link
-        to="/create-product"
-        className={`flex items-center justify-between w-full px-4 py-2 rounded-md  ${myProducts ? "bg-orange-400 text-white" : "bg-white text-[#1A3B47] border border-gray-300"}`}
-      >
-        <Plus className="mr-2 w-4 h-4" />
-        Create Product
-      </Link>
-
-      <Link
-            to="/product-archive"
-            className={`flex items-center justify-between w-full px-4 py-2 rounded-md `}
-            >          
-             Archived Products
-          </Link>
-    </div>
-  </div>
-)}        
+                <div className="flex flex-col gap-3">
+                  {" "}
+                  {/* Add spacing between elements */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`w-full justify-between rounded-md ${
+                      myProducts ? "bg-orange-400 text-white" : ""
+                    }`}
+                    onClick={() => handleMyProducts(!myProducts)}
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    {myProducts ? "Showing My Products" : "Show My Products"}
+                  </Button>
+                  <Link
+                    to="/create-product"
+                    className={`flex items-center justify-between w-full px-4 py-2 rounded-md  ${
+                      myProducts
+                        ? "bg-orange-400 text-white"
+                        : "bg-white text-[#1A3B47] border border-gray-300"
+                    }`}
+                  >
+                    <Plus className="mr-2 w-4 h-4" />
+                    Create Product
+                  </Link>
+                  <Link
+                    to="/product-archive"
+                    className={`flex items-center justify-between w-full px-4 py-2 rounded-md `}
+                  >
+                    Archived Products
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center justify-center space-x-4">
-            <div className="relative" style={{ width: '900px' }}>
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
-            </div>
-            <span className="text-gray-500 text-sm">({products.length} items)</span>
-          </div>
+              <div className="flex items-center justify-center space-x-4">
+                <div className="relative" style={{ width: "900px" }}>
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+                </div>
+                <span className="text-gray-500 text-sm">
+                  ({products.length} items)
+                </span>
+              </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
