@@ -24,10 +24,10 @@ Tourguide activities:
 
 Activity card:
 - Sort by importance
-- Move description below(jana)
-- Remove booking open(jana)
-- Highlight special discount more(jana)
-- Ensure consistent font for subtitles(jana)
+- Move description below(jana) done
+- Remove booking open(jana) done
+- Highlight special discount more (jana) done
+- Ensure consistent font for subtitles (jana) done
 - Move map to the right(Ehab)
 
 - Make Vtp the admin
