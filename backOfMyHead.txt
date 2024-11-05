@@ -24,26 +24,25 @@ Tourguide activities:
 
 Activity card:
 - Sort by importance
-- Move description below
-- Remove booking open
-- Highlight special discount more
-- Ensure consistent font for subtitles
-- Move map to the right
+- Move description below(jana)
+- Remove booking open(jana)
+- Highlight special discount more(jana)
+- Ensure consistent font for subtitles(jana)
+- Move map to the right(Ehab)
 
 - Make Vtp the admin
 
 Pop-ups:
-- Ensure close button doesn't redirect after deletion is complete
+- Ensure close button doesn't redirect after deletion is complete (Ehab)
 
 Consistency:
 - Ensure filter stars are consistent across all sections
 
 Sign up:
-- Move login to the center after successful sign up
 - Change all previous works
 
 404 page:
-- Change "Return to home" to "Make a wish"
+- Change "Return to home" to "Make a wish" (Ehab)
 
 New page:
 - Create and view only my stuff

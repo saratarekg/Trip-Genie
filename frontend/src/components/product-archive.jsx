@@ -158,7 +158,7 @@ export function ProductArchive() {
       } else {
         fetchProducts();
       }
-    }, 300);
+    }, 0.01);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);

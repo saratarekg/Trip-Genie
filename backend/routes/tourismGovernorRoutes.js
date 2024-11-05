@@ -29,7 +29,7 @@ router.delete(
 );
 router.put(
   "/historical-places/:id",
-  upload.array("pictures", 10),
+  upload.array("newPictures", 10),
   historicalPlacesController.updateHistoricalPlace
 );
 
