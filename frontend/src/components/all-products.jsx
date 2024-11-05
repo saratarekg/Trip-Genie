@@ -410,7 +410,7 @@ export function AllProducts() {
         rating: selectedRating,
         categories: selectedCategories,
       });
-    }, 300);
+    }, 0.01);
 
     return () => clearTimeout(delayDebounceFn);
   }, [
