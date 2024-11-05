@@ -792,13 +792,16 @@ const ActivityDetail = () => {
 
               <div className="flex gap-8">
                 <div className="flex-1 space-y-4"></div>
+                
                 <div className="lg:w-2/3">
                   <ImageGallery pictures={activity.pictures} />
                   <div className="h-6"></div>
-                  <p className="text-lg text-gray-600 mb-6">
+                  <p className="text-lg text-gray-600 mt-32 mb-6">
+                 
                     {activity.description}
                   </p>
                 </div>
+             
 
                 <div className="lg:w-1/3 space-y-6">
                   <div className="space-y-4">
