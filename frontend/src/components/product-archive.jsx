@@ -104,10 +104,10 @@ export function ProductArchive() {
 
   const searchProducts = async () => {
     try {
-      setIsLoading(true);
+     
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/productsarchive`);
-
+     
       // Add the search term and filter parameters
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
@@ -126,6 +126,9 @@ export function ProductArchive() {
       if (sortOrder) {
         url.searchParams.append("asc", sortOrder);
       }
+      if(products.length!=0){
+        handlePageChange(1);
+      }
       const token = Cookies.get("jwt");
       const response = await fetch(url, {
         headers: {
@@ -143,7 +146,7 @@ export function ProductArchive() {
       setProducts(data);
       setError(null);
       setCurrentPage(1);
-      setIsLoading(false);
+   
     } catch (error) {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
