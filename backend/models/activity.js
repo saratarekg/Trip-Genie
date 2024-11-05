@@ -86,10 +86,12 @@ const activitySchema = new Schema(
         default: 0,
       },
     ],
-    pictures: {
-      type: [String],
-      default: "/src/assets/images/defaultImages.png",
-    },
+    pictures: [
+      {
+        public_id: { type: String, required: true },
+        url: { type: String, required: true },
+      },
+    ],
     advertiser: {
       // New field for the maker's ID
       type: mongoose.Schema.Types.ObjectId,
@@ -304,12 +306,15 @@ activitySchema.statics.filter = async function (
 activitySchema.methods.addRating = async function (newRating) {
   // Calculate the new average rating by iterating over all comments
   const totalRatings = this.comments.length;
-  
+
   // If there are no ratings yet, avoid division by zero
   if (totalRatings === 0) {
     this.rating = newRating; // If there are no ratings, set the rating to the new rating
   } else {
-    const sumOfRatings = this.comments.reduce((sum, comment) => sum + comment.rating, 0);
+    const sumOfRatings = this.comments.reduce(
+      (sum, comment) => sum + comment.rating,
+      0
+    );
     // Add the new rating to the sum of existing ratings
     const updatedSumOfRatings = sumOfRatings + newRating;
     // Update total ratings to include the new one
