@@ -136,8 +136,8 @@ export const ViewComplaintDetails = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 mt-8 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-      <Card className="p-8 shadow-xl rounded-lg border border-gray-100">
+    <div className="container mx-auto py-8 px-4 mt-[65px] bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <Card className="max-w-[1200px] mx-auto p-8 shadow-xl rounded-lg border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2 space-y-8">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between">
@@ -206,7 +206,8 @@ export const ViewComplaintDetails = () => {
               />
               <Button
                 onClick={handleReply}
-                className="bg-[#5D9297] hover:bg-[#388A94] text-white transition-colors duration-200"
+                className="bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 
+                text-white transition-all duration-200"
               >
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Reply to Complaint
@@ -216,14 +217,16 @@ export const ViewComplaintDetails = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 onClick={() => handleStatusChange("pending")}
-                className="bg-[#F88C33] hover:bg-orange-500 text-white transition-colors duration-200 flex-1"
+                className="bg-[#F88C33] hover:bg-orange-500 active:bg-orange-600 active:transform active:scale-95 
+                text-white transition-all duration-200 flex-1"
               >
                 <Clock className="w-4 h-4 mr-2" />
                 Mark as Pending
               </Button>
               <Button
                 onClick={() => handleStatusChange("resolved")}
-                className="bg-green-500 hover:bg-green-600 text-white transition-colors duration-200 flex-1"
+                className="bg-green-500 hover:bg-green-600 active:bg-green-700 active:transform active:scale-95 
+                text-white transition-all duration-200 flex-1"
               >
                 <CheckCircle className="w-4 h-4 mr-2" />
                 Mark as Resolved
