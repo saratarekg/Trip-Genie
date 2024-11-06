@@ -195,7 +195,9 @@ const getActivityById = async (req, res) => {
     const activity = await Activity.findById(req.params.id)
       .populate("advertiser")
       .populate("category")
-      .populate("tags");
+      .populate("tags")
+      .populate("transportations")
+      .exec();
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
     }
@@ -334,6 +336,7 @@ const updateActivity = async (req, res) => {
       tags,
       specialDiscount,
       isBookingOpen,
+      transportations,
     } = req.body;
     let ImagesBuffer = [];
 
@@ -382,6 +385,7 @@ const updateActivity = async (req, res) => {
         specialDiscount,
         isBookingOpen,
         pictures,
+        transportations,
       },
       {
         new: true,

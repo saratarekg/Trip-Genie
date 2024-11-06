@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,9 +29,52 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Select from "react-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useNavigate, useParams } from "react-router-dom";
-import { set } from "date-fns";
+
+const vehicleTypes = ["Bus", "Car", "Microbus"];
+
+const getMaxSeats = (vehicleType) => {
+  switch (vehicleType) {
+    case "Bus":
+      return 50;
+    case "Car":
+      return 5;
+    case "Microbus":
+      return 15;
+    default:
+      return 0;
+  }
+};
+
+const transportationSchema = z.object({
+  from: z.string().min(1, "From is required"),
+  to: z.string().min(1, "To is required"),
+  vehicleType: z.enum(vehicleTypes),
+  ticketCost: z.number().positive("Ticket cost must be positive"),
+  timeDeparture: z.string().min(1, "Departure time is required"),
+  estimatedDuration: z.number().positive("Duration must be positive"),
+  remainingSeats: z
+    .number()
+    .int()
+    .positive("Remaining seats must be positive")
+    .refine(
+      (val, ctx) => {
+        const maxSeats = 100;
+        return val <= maxSeats;
+      },
+      {
+        message:
+          "Remaining seats must not exceed the maximum for the selected vehicle type",
+      }
+    ),
+});
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -103,6 +148,24 @@ export default function UpdateActivity() {
   const [selectedImage, setSelectedImage] = useState(null);
   const navigate = useNavigate();
 
+  const [transportations, setTransportations] = useState([]);
+  const [showTransportationForm, setShowTransportationForm] = useState(false);
+  const [editingTransportationIndex, setEditingTransportationIndex] =
+    useState(null);
+
+  const {
+    register: registerTransportation,
+    handleSubmit: handleSubmitTransportation,
+    reset: resetTransportation,
+    setValue: setTransportationValue,
+    watch: watchTransportation,
+    formState: { errors: transportationErrors },
+  } = useForm({
+    resolver: zodResolver(transportationSchema),
+  });
+
+  const selectedVehicleType = watchTransportation("vehicleType");
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -144,6 +207,8 @@ export default function UpdateActivity() {
         setValue("pictures", activityData.pictures);
 
         setPictures(activityData.pictures);
+        setTransportations(activityData.transportations || []);
+
         // Set location for the map
         const activityLocation = activityData.location.coordinates;
         setMapCenter({
@@ -186,10 +251,8 @@ export default function UpdateActivity() {
     const token = Cookies.get("jwt");
     const role = Cookies.get("role") || "guest";
 
-    // Create a FormData instance to handle file uploads along with other data
     const formData = new FormData();
 
-    // Append fields to FormData, keeping the existing logic
     formData.append("name", data.name);
     formData.append("description", data.description);
     formData.append("timing", data.timing);
@@ -199,7 +262,6 @@ export default function UpdateActivity() {
     formData.append("isBookingOpen", data.isBookingOpen);
     formData.append("currency", data.currency);
 
-    // Append location details
     formData.append("location[address]", data.location.address);
     formData.append(
       "location[coordinates][latitude]",
@@ -210,16 +272,17 @@ export default function UpdateActivity() {
       data.location.coordinates.longitude
     );
 
-    // Append category and tags arrays
     data.category.forEach((cat) => formData.append("category[]", cat.value));
     data.tags.forEach((tag) => formData.append("tags[]", tag.value));
 
-    // Append old pictures (if any) as JSON array
     formData.append("oldPictures", JSON.stringify(pictures || []));
 
-    // Append new pictures as binary files
     newPictures.forEach((picture) => {
       formData.append("newPictures", picture);
+    });
+
+    transportations.forEach((transport) => {
+      formData.append("transportations[]", transport._id);
     });
 
     try {
@@ -253,8 +316,8 @@ export default function UpdateActivity() {
     useMapEvents({
       click: (e) => {
         const { lat, lng } = e.latlng;
-        setMarkerPosition({ lat, lng }); // Update the marker position state
-        setValue("location.coordinates", { latitude: lat, longitude: lng }); // Update the form's coordinates state
+        setMarkerPosition({ lat, lng });
+        setValue("location.coordinates", { latitude: lat, longitude: lng });
       },
     });
 
@@ -273,7 +336,6 @@ export default function UpdateActivity() {
       setCurrencies(response.data);
     } catch (err) {
       console.error("Error fetching currencies:", err.message);
-      setError("Failed to fetch currencies. Please try again.");
     }
   };
 
@@ -282,7 +344,6 @@ export default function UpdateActivity() {
     if (files) {
       const newFilePictures = Array.from(files);
 
-      // Create a Set to avoid duplicates based on file names
       const existingFileNames = new Set(newPictures.map((file) => file.name));
 
       const newFilesToUpload = newFilePictures.filter(
@@ -326,10 +387,73 @@ export default function UpdateActivity() {
     navigate("/activity");
   };
 
+  const onSubmitTransportation = async (data) => {
+    try {
+      const token = Cookies.get("jwt");
+      let response;
+      if (editingTransportationIndex !== null) {
+        // Update existing transportation
+        response = await axios.put(
+          `http://localhost:4000/advertiser/transportations/${transportations[editingTransportationIndex]._id}`,
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const updatedTransportations = [...transportations];
+        updatedTransportations[editingTransportationIndex] = response.data;
+        setTransportations(updatedTransportations);
+      } else {
+        // Create new transportation
+        response = await axios.post(
+          "http://localhost:4000/advertiser/transportations",
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setTransportations((prevTransportations) => [
+          ...prevTransportations,
+          response.data,
+        ]);
+      }
+      setShowTransportationForm(false);
+      resetTransportation();
+      setEditingTransportationIndex(null);
+    } catch (error) {
+      console.error("Failed to create/update transportation:", error);
+    }
+  };
+
+  const handleEditTransportation = (index) => {
+    const transportation = transportations[index];
+    Object.keys(transportation).forEach((key) => {
+      setTransportationValue(key, transportation[key]);
+    });
+    setEditingTransportationIndex(index);
+    setShowTransportationForm(true);
+  };
+
+  const handleDeleteTransportation = async (index) => {
+    try {
+      const token = Cookies.get("jwt");
+      await axios.delete(
+        `http://localhost:4000/advertiser/transportations/${transportations[index]._id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const updatedTransportations = transportations.filter(
+        (_, i) => i !== index
+      );
+      setTransportations(updatedTransportations);
+    } catch (error) {
+      console.error("Failed to delete transportation:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 pt-16">
-      {" "}
-      {/* Added pt-16 for top padding */}
       <div className="container mx-auto px-4 py-8">
         <Card className="w-full max-w-4xl mx-auto">
           <CardHeader>
@@ -587,13 +711,13 @@ export default function UpdateActivity() {
                   {base64Pictures.map((picture, index) => (
                     <div key={`existing-${index}`} className="relative">
                       <img
-                        src={picture} // This will be the base64 string
+                        src={picture}
                         alt={`Product Existing ${index + 1}`}
                         className="w-full h-32 object-cover rounded cursor-pointer"
                         onClick={() => setSelectedImage(picture)}
                       />
                       <button
-                        onClick={() => removePicture(index, false)} // 'false' indicates it's an existing picture
+                        onClick={() => removePicture(index, false)}
                         className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                         type="button"
                       >
@@ -621,9 +745,70 @@ export default function UpdateActivity() {
                 </div>
               </div>
 
+              <div className="space-y-4">
+                <Label>Transportation Options</Label>
+                {transportations.map((transport, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border rounded-md flex justify-between items-center"
+                  >
+                    <div>
+                      <p>
+                        <strong>From:</strong> {transport.from}
+                      </p>
+                      <p>
+                        <strong>To:</strong> {transport.to}
+                      </p>
+                      <p>
+                        <strong>Vehicle:</strong> {transport.vehicleType}
+                      </p>
+                      <p>
+                        <strong>Ticket Cost:</strong> {transport.ticketCost}
+                      </p>
+                      <p>
+                        <strong>Departure:</strong>{" "}
+                        {new Date(transport.timeDeparture).toLocaleString()}
+                      </p>
+                      <p>
+                        <strong>Duration:</strong> {transport.estimatedDuration}{" "}
+                        hours
+                      </p>
+                      <p>
+                        <strong>Remaining Seats:</strong>{" "}
+                        {transport.remainingSeats}
+                      </p>
+                    </div>
+                    <div className="space-x-2">
+                      <Button
+                        type="button"
+                        onClick={() => handleEditTransportation(index)}
+                        className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => handleDeleteTransportation(index)}
+                        className="bg-red-500 hover:bg-red-600 text-white"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                <br />
+                <Button
+                  type="button"
+                  onClick={() => setShowTransportationForm(true)}
+                  className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+                >
+                  Add Transportation
+                </Button>
+              </div>
+
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="w-full bg-[#388A94] hover:bg-[#2c6d75] text-white"
                 disabled={loading}
               >
                 {loading ? "Updating..." : "Update Activity"}
@@ -641,7 +826,12 @@ export default function UpdateActivity() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={handleGoBack}>Back to Activities</Button>
+            <Button
+              onClick={handleGoBack}
+              className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+            >
+              Back to Activities
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -659,6 +849,133 @@ export default function UpdateActivity() {
           </DialogContent>
         </Dialog>
       )}
+      <Dialog
+        open={showTransportationForm}
+        onOpenChange={setShowTransportationForm}
+      >
+        <DialogContent className="sm:max-w-[425px] sm:h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingTransportationIndex !== null
+                ? "Edit Transportation"
+                : "Add Transportation"}
+            </DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={handleSubmitTransportation(onSubmitTransportation)}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="from">From</Label>
+              <Input {...registerTransportation("from")} />
+              {transportationErrors.from && (
+                <p className="text-red-500 text-sm">
+                  {transportationErrors.from.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="to">To</Label>
+              <Input {...registerTransportation("to")} />
+              {transportationErrors.to && (
+                <p className="text-red-500 text-sm">
+                  {transportationErrors.to.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="vehicleType">Vehicle Type</Label>
+              <Select
+                onValueChange={(value) =>
+                  setTransportationValue("vehicleType", value)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select vehicle type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {vehicleTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {transportationErrors.vehicleType && (
+                <p className="text-red-500 text-sm">
+                  {transportationErrors.vehicleType.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="ticketCost">Ticket Cost</Label>
+              <Input
+                type="number"
+                step="0.01"
+                {...registerTransportation("ticketCost", {
+                  valueAsNumber: true,
+                })}
+              />
+              {transportationErrors.ticketCost && (
+                <p className="text-red-500 text-sm">
+                  {transportationErrors.ticketCost.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="timeDeparture">Departure Time</Label>
+              <Input
+                type="datetime-local"
+                {...registerTransportation("timeDeparture")}
+              />
+              {transportationErrors.timeDeparture && (
+                <p className="text-red-500 text-sm">
+                  {transportation.timeDeparture.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="estimatedDuration">
+                Estimated Duration (hours)
+              </Label>
+              <Input
+                type="number"
+                {...registerTransportation("estimatedDuration", {
+                  valueAsNumber: true,
+                })}
+              />
+              {transportationErrors.estimatedDuration && (
+                <p className="text-red-500 text-sm">
+                  {transportationErrors.estimatedDuration.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="remainingSeats">Remaining Seats</Label>
+              <Input
+                type="number"
+                {...registerTransportation("remainingSeats", {
+                  valueAsNumber: true,
+                })}
+                max={getMaxSeats(selectedVehicleType)}
+              />
+              {transportationErrors.remainingSeats && (
+                <p className="text-red-500 text-sm">
+                  {transportationErrors.remainingSeats.message}
+                </p>
+              )}
+            </div>
+            <Button
+              type="submit"
+              className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+            >
+              {editingTransportationIndex !== null
+                ? "Update Transportation"
+                : "Add Transportation"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
