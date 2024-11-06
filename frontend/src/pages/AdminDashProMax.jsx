@@ -129,11 +129,12 @@ export function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div>
+         <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div className="flex flex-col min-h-screen bg-gray-100">
       <main className="flex-1 p-6 overflow-y-auto">
-        <br />
-        <br />
-        <br />
         <p
           className="text-3xl font-bold mb-6 text-[#003f66]"
           style={{
@@ -447,6 +448,7 @@ export function Dashboard() {
           onClose={() => setIsTagCRUDOpen(false)}
         />
       </Dialog>
+    </div>
     </div>
   );
 }

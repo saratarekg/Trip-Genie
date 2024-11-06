@@ -128,12 +128,18 @@ export function NavbarComponent() {
                   
                   <div
                     className="relative"
-                    onClick={() => setIsItinerariesDropdownOpen(!isItinerariesDropdownOpen)} // Toggle the dropdown on click
                   >
-                      <button className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center">
-                        Itineraries
-                        <ChevronDown className="ml-1 h-4 w-4" /> {/* Chevron icon beside the text */}
-                      </button>
+                       <button
+                    onClick={() => setIsItinerariesDropdownOpen(!isItinerariesDropdownOpen)}
+                    className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                  >
+                    Itineraries
+                    {isItinerariesDropdownOpen ? (
+                      <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
+                    ) : (
+                      <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
+                    )}
+                  </button>
                     {isItinerariesDropdownOpen && (
                       <div
                         className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg"
@@ -230,7 +236,91 @@ export function NavbarComponent() {
               )}
               {role === "admin" && (
                 <div className="flex justify-between items-center">
-                  {/* Admin-specific navigation items can be added here */}
+                    <div
+                    className="relative"
+                  
+                  >
+                  
+                  <div
+                    className="relative"
+                  >
+                       <button
+                    onClick={() => setIsItinerariesDropdownOpen(!isItinerariesDropdownOpen)}
+                    className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                  >
+                    Itineraries
+                    {isItinerariesDropdownOpen ? (
+                      <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
+                    ) : (
+                      <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
+                    )}
+                  </button>
+                    {isItinerariesDropdownOpen && (
+                      <div
+                        className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg"
+                        style={{ minWidth: "200px" }}
+                      >
+                        <Link
+                          to="/all-itineraries"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        >
+                          <List className="mr-2 h-4 w-4" /> All Itineraries
+                        </Link>
+                        <Link
+                          to="/my-itineraries"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        >
+                          <Folder className="mr-2 h-4 w-4" /> My Itineraries
+                        </Link>
+                      </div>
+                      
+                    )}
+                  </div>
+                  </div>
+                  <div className="relative">
+                  <button
+                    onClick={() => setIsProductsDropdownOpen(!isProductsDropdownOpen)}
+                    className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                  >
+                    Products
+                    {isProductsDropdownOpen ? (
+                      <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
+                    ) : (
+                      <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
+                    )}
+                  </button>
+                    {isProductsDropdownOpen && (
+                      <div
+                      className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg"
+                      style={{ minWidth: "200px" }}
+                    >
+                      <Link
+                        to="/all-products"
+                        className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                      >
+                        <List className="mr-2 h-4 w-4" /> All Products
+                      </Link>
+                      <Link
+                        to="/my-products"
+                        className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                      >
+                        <Folder className="mr-2 h-4 w-4" /> My Products
+                      </Link>
+                      <Link
+                        to="/create-product"
+                        className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                      >
+                        <PlusCircle className="mr-2 h-4 w-4" /> Create Product
+                      </Link>
+                      <Link
+                        to="/product-archive"
+                        className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                      >
+                        <ArchiveIcon className="mr-2 h-4 w-4" /> Archived Products
+                      </Link>
+                    </div>
+                    )}
+                  </div>
                 </div>
               )}
               {role === "tourism-governor" && (
