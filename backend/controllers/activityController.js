@@ -355,7 +355,7 @@ const updateActivity = async (req, res) => {
       });
     }
 
-    const pictures = [...oldPictures, ...imagesBuffer];
+    const pictures = [...oldPictures, ...ImagesBuffer];
 
     const oldPicturesIDs = oldPictures.map((picture) => picture.public_id);
 

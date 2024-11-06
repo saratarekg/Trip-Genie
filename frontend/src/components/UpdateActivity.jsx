@@ -58,7 +58,6 @@ const schema = z.object({
     .int()
     .nonnegative("Discount must be a non-negative integer"),
   isBookingOpen: z.boolean(),
-  pictures: z.array(z.string()).optional(),
 });
 
 export default function UpdateActivity() {
@@ -85,7 +84,6 @@ export default function UpdateActivity() {
       tags: [],
       specialDiscount: 0,
       isBookingOpen: true,
-      pictures: [],
     },
   });
 
@@ -132,6 +130,7 @@ export default function UpdateActivity() {
           tagsResponse.data.map((tag) => ({ value: tag._id, label: tag.type }))
         );
 
+        console.log("Activity data:", activityData);
         // Set form values
         setValue("name", activityData.name);
         setValue("description", activityData.description);
@@ -216,10 +215,10 @@ export default function UpdateActivity() {
     data.tags.forEach((tag) => formData.append("tags[]", tag.value));
 
     // Append old pictures (if any) as JSON array
-    formData.append("oldPictures", JSON.stringify(data.oldPictures || []));
+    formData.append("oldPictures", JSON.stringify(pictures || []));
 
     // Append new pictures as binary files
-    data.newPictures.forEach((picture) => {
+    newPictures.forEach((picture) => {
       formData.append("newPictures", picture);
     });
 
@@ -315,8 +314,8 @@ export default function UpdateActivity() {
       const newBase64Pictures = [...base64Pictures];
       newBase64Pictures.splice(index, 1);
       setBase64Pictures(newBase64Pictures);
-      const newPictures = [...newPictures];
-      newPictures.splice(index, 1);
+      const newPictures2 = [...newPictures];
+      newPictures2.splice(index, 1);
       setNewPictures(newPictures);
     }
 
@@ -576,6 +575,7 @@ export default function UpdateActivity() {
                         onClick={() => setSelectedImage(picture.url)}
                       />
                       <button
+                        type="button"
                         onClick={() => removePicture(index, true)}
                         className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                       >
@@ -595,6 +595,7 @@ export default function UpdateActivity() {
                       <button
                         onClick={() => removePicture(index, false)} // 'false' indicates it's an existing picture
                         className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                        type="button"
                       >
                         <X size={16} />
                       </button>
@@ -623,7 +624,6 @@ export default function UpdateActivity() {
               <Button
                 type="submit"
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                onClick={onSubmit}
                 disabled={loading}
               >
                 {loading ? "Updating..." : "Update Activity"}
