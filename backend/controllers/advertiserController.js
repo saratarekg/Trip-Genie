@@ -10,7 +10,7 @@ const ActivityBooking = require("../models/activityBooking");
 
 const deleteAdvertiserAccount = async (req, res) => {
   try {
-    const advertiser = await Advertiser.findById(res.locals.user_id);
+    const advertiser = await Advertiser.findById(res.locals.user_id).lean();
     if (!advertiser) {
       return res.status(404).json({ message: "Advertiser not found" });
     }
@@ -36,7 +36,9 @@ const deleteAdvertiserAccount = async (req, res) => {
       await Activity.findByIdAndUpdate(activity._id, { isDeleted: true });
     });
 
-    advertiser.files.IDFilename;
+    if (advertiser.logo !== null) {
+      await cloudinary.uploader.destroy(advertiser.logo.public_id);
+    }
 
     await Advertiser.findByIdAndDelete(res.locals.user_id);
 
@@ -101,20 +103,38 @@ const getAdvertiserByID = async (req, res) => {
 
 const updateAdvertiser = async (req, res) => {
   try {
-    const advertiser1 = await Advertiser.findById(res.locals.user_id);
+    const advertiser1 = await Advertiser.findById(res.locals.user_id).lean();
     if (!advertiser1.isAccepted) {
       return res.status(400).json({
         error: "Advertiser is not accepted yet, Can not update profile",
       });
     }
 
-    const { email, username, name, description, hotline, website, logo } =
-      req.body;
+    const { email, username, name, description, hotline, website } = req.body;
+    let { logo } = req.body;
     if (username !== advertiser1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
     }
     if (email !== advertiser1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
+    }
+
+    if (logo === undefined) {
+      logo = null;
+      if (advertiser1.logo !== null) {
+        await cloudinary.uploader.destroy(advertiser1.logo.public_id);
+      }
+    } else if (logo.public_id === undefined) {
+      const result = await cloudinary.uploader.upload(logo, {
+        folder: "logos",
+      });
+      if (advertiser1.logo !== null) {
+        await cloudinary.uploader.destroy(advertiser1.logo.public_id);
+      }
+      logo = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
     }
     const advertiser = await Advertiser.findByIdAndUpdate(
       res.locals.user_id,

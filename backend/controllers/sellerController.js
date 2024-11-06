@@ -6,18 +6,20 @@ const Advertiser = require("../models/advertiser");
 const Admin = require("../models/admin");
 const TourismGovernor = require("../models/tourismGovernor");
 const Purchase = require("../models/purchase");
+const cloudinary = require("../utils/cloudinary");
 
 // Update
 const updateSeller = async (req, res) => {
   try {
-    const seller1 = await Seller.findById(res.locals.user_id);
+    const seller1 = await Seller.findById(res.locals.user_id).lean();
 
     if (!seller1.isAccepted) {
       return res
         .status(400)
         .json({ error: "Seller is not accepted yet, Can not update profile" });
     }
-    const { email, username, name, description, mobile, logo } = req.body;
+    const { email, username, name, description, mobile } = req.body;
+    let { logo } = req.body;
 
     if (username !== seller1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
@@ -25,6 +27,25 @@ const updateSeller = async (req, res) => {
     if (email !== seller1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
     }
+
+    if (logo === undefined) {
+      logo = null;
+      if (seller1.logo !== null) {
+        await cloudinary.uploader.destroy(seller1.logo.public_id);
+      }
+    } else if (logo.public_id === undefined) {
+      const result = await cloudinary.uploader.upload(logo, {
+        folder: "logos",
+      });
+      if (seller1.logo !== null) {
+        await cloudinary.uploader.destroy(seller1.logo.public_id);
+      }
+      logo = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    }
+
     const seller = await Seller.findByIdAndUpdate(
       res.locals.user_id,
       { email, username, name, description, mobile, logo },
@@ -56,7 +77,7 @@ const getUnacceptedSeller = async (req, res) => {
 
 const deleteSellerAccount = async (req, res) => {
   try {
-    const seller = await Seller.findById(res.locals.user_id);
+    const seller = await Seller.findById(res.locals.user_id).lean();
     if (!seller) {
       return res.status(404).json({ message: "Seller not found" });
     }
@@ -78,6 +99,10 @@ const deleteSellerAccount = async (req, res) => {
       await Product.findByIdAndUpdate(product._id, { isDeleted: true });
     });
 
+    if (seller.logo !== null) {
+      await cloudinary.uploader.destroy(seller.logo.public_id);
+    }
+
     await Seller.findByIdAndDelete(res.locals.user_id);
 
     res.status(200).json({ message: "Seller account deleted successfully" });
@@ -98,15 +123,15 @@ const rejectSeller = async (req, res) => {
     if (!gfs) {
       return res.status(500).send("GridFS is not initialized");
     }
-  
+
     const filenames = [];
     filenames.push(seller.files.IDFilename);
     filenames.push(seller.files.taxationRegistryCardFilename);
-    const files = await gfs.find({ filename:{$in:filenames} }).toArray();
+    const files = await gfs.find({ filename: { $in: filenames } }).toArray();
     if (!files || files.length === 0) {
       return res.status(404).json({ err: "No file exists" });
     }
-  
+
     await gfs.delete(files[0]._id);
     await gfs.delete(files[1]._id);
     res.status(200).json({ message: "Seller rejected successfully" });
