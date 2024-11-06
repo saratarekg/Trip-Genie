@@ -28,7 +28,7 @@ Activity card:
 - Remove booking open (jana) done
 - Highlight special discount more (jana) done
 - Ensure consistent font for subtitles (jana) done
-- Move map to the right (Ehab)
+- Move map to the right (Ehab) check with hadwa the updated version
 
 - Make Vtp the admin
 
@@ -57,3 +57,4 @@ Admin:
 - Move buttons to the right
 - Change hide to back and improve its appearance
 - Add filter and sort
+- Add color behind navbar at the beginning so that logo appears.
