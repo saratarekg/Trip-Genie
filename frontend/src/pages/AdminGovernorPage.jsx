@@ -91,16 +91,17 @@ const AdminGovernorPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gray-50">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      
+      <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg p-6 mt-8">
-          <h1 className="text-2xl font-bold text-blue-900 mb-6">
+          <h1 className="text-2xl font-bold text-[#003f66] mb-6">
             Add Admin/Governor
           </h1>
-          <p className="text-blue-900 mb-8">
-            Enter the details for the new admin or governor.
-          </p>
-
+          
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -108,10 +109,10 @@ const AdminGovernorPage = () => {
                 name="type"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-blue-900">Type</FormLabel>
+                    <FormLabel className="text-[#003f66]">Type</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-[#808080]">
                           <SelectValue placeholder="Select a user type" />
                         </SelectTrigger>
                       </FormControl>
@@ -124,30 +125,37 @@ const AdminGovernorPage = () => {
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="username"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-blue-900">Username</FormLabel>
+                    <FormLabel className="text-[#003f66]">Username</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter username" {...field} />
+                      <Input 
+                        placeholder="Enter username" 
+                        {...field} 
+                        className="border-[#808080]"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-blue-900">Password</FormLabel>
+                    <FormLabel className="text-[#003f66]">Password</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
                         placeholder="Enter password"
                         {...field}
+                        className="border-[#808080]"
                       />
                     </FormControl>
                     <FormMessage />
@@ -157,9 +165,9 @@ const AdminGovernorPage = () => {
               
               <Button
                 type="submit"
-                className="w-full bg-orange-500 text-white rounded-[40px] transition-transform transform hover:scale-105 focus:outline-none py-2"
+                className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
               >
-                Submit
+                Add User
               </Button>
             </form>
           </Form>
@@ -179,4 +187,4 @@ const AdminGovernorPage = () => {
   );
 };
 
-export default AdminGovernorPage;
+export default AdminGovernorPage; 

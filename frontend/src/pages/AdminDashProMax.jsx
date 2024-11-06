@@ -23,7 +23,6 @@ import {
   Ticket,
 } from "lucide-react";
 import { Pie } from "react-chartjs-2";
-import { AdminGovernorPopup } from "@/components/admin-governor-popup";
 import { CategoryCRUD } from "@/components/category-crud";
 import { TagCRUD } from "@/components/tags-crud";
 import { Dialog } from "@/components/ui/dialog";
@@ -50,8 +49,6 @@ const DashboardCard = ({ title, value, subtitle, icon }) => (
 );
 
 export function Dashboard() {
-  const [isAdminGovernorPopupOpen, setIsAdminGovernorPopupOpen] =
-    useState(false);
   const [isCategoryCRUDOpen, setIsCategoryCRUDOpen] = useState(false);
   const [isTagCRUDOpen, setIsTagCRUDOpen] = useState(false);
   const [footerHeight, setFooterHeight] = useState(0);
@@ -270,8 +267,8 @@ export function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <Button
+                    onClick={() => navigate('/add-admin-governor')}
                     className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                    onClick={() => setIsAdminGovernorPopupOpen(true)}
                   >
                     Add
                   </Button>
@@ -422,15 +419,6 @@ export function Dashboard() {
         </div>
       </main>
 
-      <Dialog
-        open={isAdminGovernorPopupOpen}
-        onOpenChange={setIsAdminGovernorPopupOpen}
-      >
-        <AdminGovernorPopup
-          isOpen={isAdminGovernorPopupOpen}
-          onClose={() => setIsAdminGovernorPopupOpen(false)}
-        />
-      </Dialog>
       <Dialog open={isCategoryCRUDOpen} onOpenChange={setIsCategoryCRUDOpen}>
         <CategoryCRUD
           isOpen={isCategoryCRUDOpen}

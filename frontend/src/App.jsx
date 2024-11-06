@@ -63,6 +63,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import FAQs from "./pages/FAQs.jsx";
 import TermsandCondition from "./pages/TermsandCondition.jsx";
 import { DeleteAccount } from "@/components/DeleteAccPopout.jsx";
+import AdminGovernorPage from "./pages/AdminGovernorPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -492,6 +493,14 @@ function AppContent() {
           <Route path="*" element={<NotFound />} />
 
           {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
+          <Route
+            path="/add-admin-governor"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminGovernorPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
       {!isAuthPage && <FooterComponent />}
