@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import  Cookies  from "js-cookie";
+import logInPicture from '../assets/images/logInPicture.jpg';
 
 let role = null;
 
@@ -106,16 +107,23 @@ const Login = () => {
   
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Login to your account
-        </h2>
+    
+      
+<div 
+    className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-4"
+    style={{
+      backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${logInPicture})`,
+    }}
+  >
+    <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-2xl flex flex-col md:flex-row">
+      <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
+        <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">Welcome Back!</h2>
+        <p className="text-s mb-6 text-[#1A3B47]">
+        We're thrilled to see you again. Explore new updates, pick up right where you left off, and let us help make your experience even better!
+        </p>
       </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+      <div className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto">
+      <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="identifier"
@@ -127,10 +135,11 @@ const Login = () => {
                 <input
                   id="identifier"
                   name="identifier"
-                  type="text" // Text input to allow both email and username
+                  type="text"
                   autoComplete="identifier"
+                  placeholder="Email/Username"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                   value={identifier}
                   onChange={(e) => {
                     setIdentifier(e.target.value);
@@ -153,8 +162,9 @@ const Login = () => {
                   name="password"
                   type="password"
                   autoComplete="current-password"
+                  placeholder="Password"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -168,23 +178,25 @@ const Login = () => {
             <div className="flex flex-col items-center justify-between">
               <button
                 type="submit"
-                className={`w-full mb-4 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 ${
-                  !isValid ? "opacity-50 cursor-not-allowed" : ""
+                className={`w-full flex justify-center mb-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5D9297] text-white hover:bg-[#1A3B47] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 ${
+                  !isValid ? "cursor-not-allowed hover:bg-[#5D9297]" : ""
                 }`}
                 disabled={!isValid} // Disable button if input is invalid
               >
                 Log in
               </button>
-
+              <p className="text-gray-600">
+              Don't have an account?{" "}
               <Link
                 to="/sign-up"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-orange-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
               >
-                Don't have an account? Sign up now!
+               Sign up now!
               </Link>
+            </p>
 
               <button
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-orange-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                className="w-full flex justify-center px-4 rounded-md font-medium text-[#5D9297] hover:text-[#B5D3D1]"
                 onClick={() => {
                     console.log("Logging out...");
                   logOut();
@@ -195,8 +207,8 @@ const Login = () => {
               </button>
             </div>
           </form>
-        </div>
       </div>
+    </div>
     </div>
   );
 };
