@@ -42,7 +42,7 @@ Sign up:
 - Change all previous works
 
 404 page:
-- Change "Return to home" to "Make a wish" (Ehab)
+- Change "Return to home" to "Make a wish" (Amy --DONE!!)
 
 New page:
 - Create and view only my stuff (almost done AMY)
