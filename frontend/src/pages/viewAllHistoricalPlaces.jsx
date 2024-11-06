@@ -87,8 +87,8 @@ const HistoricalPlaceCard = ({
 
   const formatPrice = (price, type) => {
     console.log(price);
-    console.log(userPreferredCurrency); 
-    console.log(historicalPlace.currency);  
+    console.log(userPreferredCurrency);
+    console.log(historicalPlace.currency);
 
     if (userRole === "tourist") {
       if (userPreferredCurrency._id === historicalPlace.currency._id) {
@@ -111,7 +111,7 @@ const HistoricalPlaceCard = ({
     >
       <div className="overflow-hidden">
         <img
-          src={historicalPlace.pictures?.[0] || defaultImage}
+          src={historicalPlace.pictures?.[0].url || defaultImage}
           alt={historicalPlace.title}
           className="w-full h-48 object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
         />
@@ -236,8 +236,6 @@ export function AllHistoricalPlacesComponent() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const currencyId = response.data.preferredCurrency;
-
-        
 
         const response2 = await axios.get(
           `http://localhost:4000/tourist/getCurrency/${currencyId}`,
@@ -382,113 +380,114 @@ export function AllHistoricalPlacesComponent() {
         <Loader />
       ) : (
         <div>
-           <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        </div>
-      </div>
-      <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <>
-              <h1 className="text-2xl font-bold mb-4 mt-4">All Historical Places</h1>
-              <div className="flex flex-col">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="border border-gray-300 rounded-lg p-2 pl-10 mb-4 w-full"
-                  />
-                  <Search className="w-5 h-5 text-gray-500 absolute left-3 top-2" />
-                </div>
-                <FilterComponent
-                  filtersVisible={filtersVisible}
-                  toggleFilters={toggleFilters}
-                  //   sortOrder={sortOrder}
-                  //   sortBy={sortBy}
-                  //   handleSort={handleSort}
-                  clearFilters={clearFilters}
-                  myHistoricalPlaces={myHistoricalPlaces}
-                  handlemyHistoricalPlaces={handlemyHistoricalPlaces}
-                  // sortItineraries={sortItineraries}
-                  //   price={price}
-                  //   setPrice={setPrice}
-                  //   dateRange={dateRange}
-                  //   setDateRange={setDateRange}
-                  selectedTypes={selectedTypes} // Pass selectedTypes array
-                  setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
-                  selectedPeriods={selectedPeriods} // Pass periods array
-                  setSelectedPeriods={setSelectedPeriods} // Pass periods function
-                  //   selectedLanguages={selectedLanguages} // Pass selectedLanguages array
-                  //   setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
-                  searchHistoricalPlaces={searchHistoricalPlaces}
-                  typesOptions={typesOptions}
-                  periodsOptions={periodOptions}
-                  //   languagesOptions={languagesOptions}
-                  role={getUserRole()}
-                />
-              </div>
-              {error && <div className="text-red-500">{error}</div>}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {historicalPlaces
-                  .slice(
-                    (currentPage - 1) * tripsPerPage,
-                    currentPage * tripsPerPage
-                  )
-                  .map((historicalPlace) => (
-                    <HistoricalPlaceCard
-                      key={historicalPlace._id}
-                      historicalPlace={historicalPlace}
-                      onSelect={handleHistoricalPlaceSelect}
-                      userRole={userRole}
-                      userPreferredCurrency={userPreferredCurrency}
-                    />
-                  ))}
-              </div>
-              {/* Pagination Component here */}
-              <div className="mt-8 flex justify-center items-center space-x-4">
-                <button
-                  onClick={() => {
-                    handlePageChange(currentPage - 1);
-                  }}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                  }`}
-                >
-                  <ChevronLeft />
-                </button>
-
-                {/* Page X of Y */}
-                <span className="text-lg font-medium">
-                  {historicalPlaces.length > 0
-                    ? `Page ${currentPage} of ${Math.ceil(
-                        historicalPlaces.length / tripsPerPage
-                      )}`
-                    : "No pages available"}
-                </span>
-
-                <button
-                  onClick={() => {
-                    handlePageChange(currentPage + 1);
-                  }}
-                  disabled={
-                    currentPage ===
-                      Math.ceil(historicalPlaces.length / tripsPerPage) ||
-                    historicalPlaces.length === 0
-                  }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage ===
-                    Math.ceil(historicalPlaces.length / tripsPerPage)
-                      ? "text-gray-300"
-                      : "text-blue-600"
-                  }`}
-                >
-                  <ChevronRight />
-                </button>
-              </div>
-            </>
+          <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
           </div>
+          <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto">
+              <>
+                <h1 className="text-2xl font-bold mb-4 mt-4">
+                  All Historical Places
+                </h1>
+                <div className="flex flex-col">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="border border-gray-300 rounded-lg p-2 pl-10 mb-4 w-full"
+                    />
+                    <Search className="w-5 h-5 text-gray-500 absolute left-3 top-2" />
+                  </div>
+                  <FilterComponent
+                    filtersVisible={filtersVisible}
+                    toggleFilters={toggleFilters}
+                    //   sortOrder={sortOrder}
+                    //   sortBy={sortBy}
+                    //   handleSort={handleSort}
+                    clearFilters={clearFilters}
+                    myHistoricalPlaces={myHistoricalPlaces}
+                    handlemyHistoricalPlaces={handlemyHistoricalPlaces}
+                    // sortItineraries={sortItineraries}
+                    //   price={price}
+                    //   setPrice={setPrice}
+                    //   dateRange={dateRange}
+                    //   setDateRange={setDateRange}
+                    selectedTypes={selectedTypes} // Pass selectedTypes array
+                    setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
+                    selectedPeriods={selectedPeriods} // Pass periods array
+                    setSelectedPeriods={setSelectedPeriods} // Pass periods function
+                    //   selectedLanguages={selectedLanguages} // Pass selectedLanguages array
+                    //   setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
+                    searchHistoricalPlaces={searchHistoricalPlaces}
+                    typesOptions={typesOptions}
+                    periodsOptions={periodOptions}
+                    //   languagesOptions={languagesOptions}
+                    role={getUserRole()}
+                  />
+                </div>
+                {error && <div className="text-red-500">{error}</div>}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {historicalPlaces
+                    .slice(
+                      (currentPage - 1) * tripsPerPage,
+                      currentPage * tripsPerPage
+                    )
+                    .map((historicalPlace) => (
+                      <HistoricalPlaceCard
+                        key={historicalPlace._id}
+                        historicalPlace={historicalPlace}
+                        onSelect={handleHistoricalPlaceSelect}
+                        userRole={userRole}
+                        userPreferredCurrency={userPreferredCurrency}
+                      />
+                    ))}
+                </div>
+                {/* Pagination Component here */}
+                <div className="mt-8 flex justify-center items-center space-x-4">
+                  <button
+                    onClick={() => {
+                      handlePageChange(currentPage - 1);
+                    }}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-full bg-white shadow ${
+                      currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                    }`}
+                  >
+                    <ChevronLeft />
+                  </button>
+
+                  {/* Page X of Y */}
+                  <span className="text-lg font-medium">
+                    {historicalPlaces.length > 0
+                      ? `Page ${currentPage} of ${Math.ceil(
+                          historicalPlaces.length / tripsPerPage
+                        )}`
+                      : "No pages available"}
+                  </span>
+
+                  <button
+                    onClick={() => {
+                      handlePageChange(currentPage + 1);
+                    }}
+                    disabled={
+                      currentPage ===
+                        Math.ceil(historicalPlaces.length / tripsPerPage) ||
+                      historicalPlaces.length === 0
+                    }
+                    className={`px-4 py-2 rounded-full bg-white shadow ${
+                      currentPage ===
+                      Math.ceil(historicalPlaces.length / tripsPerPage)
+                        ? "text-gray-300"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              </>
+            </div>
           </div>
         </div>
       )}

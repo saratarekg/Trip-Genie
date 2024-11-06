@@ -131,7 +131,7 @@ const getAllProductsArchive = async (req, res) => {
 };
 
 const addProduct = async (req, res) => {
-  const { name, price, description, quantity, currency } = req.body; // Extract the data from request
+  const { name, price, description, quantity } = req.body; // Extract the data from request
 
   try {
     let imagesBuffer = [];
@@ -157,7 +157,7 @@ const addProduct = async (req, res) => {
       description,
       seller: res.locals.user_id,
       quantity,
-      currency,
+      currency: "67140446ee157ee4f239d523",
     });
 
     await product.save();
@@ -168,7 +168,7 @@ const addProduct = async (req, res) => {
 };
 
 const addProductByAdmin = async (req, res) => {
-  const { name, price, description, quantity, currency } = req.body; // Extract the data from request
+  const { name, price, description, quantity } = req.body; // Extract the data from request
 
   try {
     let imagesBuffer = [];
@@ -195,7 +195,7 @@ const addProductByAdmin = async (req, res) => {
       price,
       description,
       quantity,
-      currency,
+      currency: "67140446ee157ee4f239d523",
     });
 
     // Save the product to the database
@@ -208,7 +208,7 @@ const addProductByAdmin = async (req, res) => {
 
 const editProduct = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, price, description, quantity, currency } = req.body; // Get details from request body
+  const { name, price, description, quantity } = req.body; // Get details from request body
   try {
     const checkProduct = await Product.find({ _id: id, isDeleted: false });
     if (!checkProduct) {
@@ -244,7 +244,7 @@ const editProduct = async (req, res) => {
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity, currency },
+      { name, pictures, price, description, quantity },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 
@@ -274,7 +274,7 @@ const editProduct = async (req, res) => {
 
 const editProductOfSeller = async (req, res) => {
   const { id } = req.params; // Get product ID from URL parameters
-  const { name, price, description, quantity, currency } = req.body;
+  const { name, price, description, quantity } = req.body;
 
   try {
     const product1 = await Product.findById({ _id: id, isDeleted: false });
@@ -316,7 +316,7 @@ const editProductOfSeller = async (req, res) => {
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { name, pictures, price, description, quantity, currency },
+      { name, pictures, price, description, quantity },
       { new: true, runValidators: true } // Options: return the updated document and run validation
     );
 

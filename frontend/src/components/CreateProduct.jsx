@@ -25,13 +25,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 const formSchema = z.object({
   name: z.string().min(1, "Please enter a product name"),
   price: z.number().min(1, "Please enter a valid price"),
-  description: z.string().min(1, "Please enter a description"),
+  description: z.string().min(200, "Description must be at least 200 characters"),
   quantity: z.number().min(1, "Please enter a valid quantity"),
-  currency: z.string().min(1, "Please select a currency"),
 });
 
 const CreateProductForm = () => {
@@ -56,7 +57,6 @@ const CreateProductForm = () => {
       price: "",
       description: "",
       quantity: "",
-      currency: "",
     },
   });
 
@@ -96,9 +96,8 @@ const CreateProductForm = () => {
     formData.append("price", data.price);
     formData.append("description", data.description);
     formData.append("quantity", data.quantity);
-    formData.append("currency", data.currency);
     pictures.forEach((picture, index) => {
-      formData.append("pictures", picture); // Automatically adds as binary
+      formData.append("pictures", picture);
     });
 
     const token = Cookies.get("jwt");
@@ -139,27 +138,73 @@ const CreateProductForm = () => {
 
   return (
     <div>
-       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+   <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-      <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <h2 className="text-2xl font-bold text-center mb-6">
-              Create Product
-            </h2>
-
+    <div
+      className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+      style={{
+        backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+      }}
+    >
+      
+      <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
+        <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
+          <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
+            Create New Product
+          </h2>
+          <p className="text-sm mb-6 text-[#1A3B47]">
+            Add a new product to your inventory. Fill in the details carefully to ensure accurate product information.
+          </p>
+        </div>
+        <div className="w-full md:w-3/5 p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">Product Name</Label>
+                <Input id="name" {...register("name")} />
+                {errors.name && (
+                  <p className="text-red-500 text-xs">{errors.name.message}</p>
+                )}
+              </div>
+            <div className="grid grid-cols-2 gap-4">
+             
+             
+              <div className="space-y-2">
+                <Label htmlFor="quantity" className="text-sm font-medium">Quantity</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  {...register("quantity", { valueAsNumber: true })}
+                />
+                {errors.quantity && (
+                  <p className="text-red-500 text-xs">{errors.quantity.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="price" className="text-sm font-medium">Price (in American Dollars $)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  {...register("price", { valueAsNumber: true })}
+                />
+                {errors.price && (
+                  <p className="text-red-500 text-xs">{errors.price.message}</p>
+                )}
+              </div>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="name">Product Name</Label>
-              <Input id="name" {...register("name")} />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              <Label htmlFor="description" className="text-sm font-medium">Description (min. 200 characters)</Label>
+              <Textarea 
+                id="description" 
+                {...register("description")} 
+                className="h-24"
+              />
+              {errors.description && (
+                <p className="text-red-500 text-xs">{errors.description.message}</p>
               )}
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="pictures">Pictures</Label>
+              <Label htmlFor="pictures" className="text-sm font-medium">Product Pictures</Label>
               <Input
                 id="pictures"
                 type="file"
@@ -167,80 +212,21 @@ const CreateProductForm = () => {
                 onChange={handlePicturesUpload}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                {...register("price", { valueAsNumber: true })}
-              />
-              {errors.price && (
-                <p className="text-red-500 text-sm">{errors.price.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
-              <Controller
-                name="currency"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    position="item-aligned"
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
-                      {currencies.map((currency) => (
-                        <SelectItem key={currency.code} value={currency._id}>
-                          {currency.code} - {currency.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.currency && (
-                <p className="text-red-500 text-sm">
-                  {errors.currency.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" {...register("description")} />
-              {errors.description && (
-                <p className="text-red-500 text-sm">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity</Label>
-              <Input
-                id="quantity"
-                type="number"
-                {...register("quantity", { valueAsNumber: true })}
-              />
-              {errors.quantity && (
-                <p className="text-red-500 text-sm">
-                  {errors.quantity.message}
-                </p>
-              )}
-            </div>
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Submitting..." : "Submit"}
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Button 
+              type="submit" 
+              className="w-full bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+              disabled={loading}
+            >
+              {loading ? "Creating..." : "Create Product"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>

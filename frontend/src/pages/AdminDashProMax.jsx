@@ -24,13 +24,33 @@ import {
 } from "lucide-react";
 import { Pie } from "react-chartjs-2";
 import { CategoryCRUD } from "@/components/category-crud";
-import { TagCRUD } from "@/components/tags-crud";
-import { Dialog } from "@/components/ui/dialog";
-import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  BarElement,
+} from 'chart.js';
 
-Chart.register(ArcElement, Tooltip, Legend);
+// Register all the chart elements
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  BarElement
+);
 
 // Reusable DashboardCard component
 const DashboardCard = ({ title, value, subtitle, icon }) => (
@@ -50,7 +70,6 @@ const DashboardCard = ({ title, value, subtitle, icon }) => (
 
 export function Dashboard() {
   const [isCategoryCRUDOpen, setIsCategoryCRUDOpen] = useState(false);
-  const [isTagCRUDOpen, setIsTagCRUDOpen] = useState(false);
   const [footerHeight, setFooterHeight] = useState(0);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("accounts");
@@ -68,7 +87,15 @@ export function Dashboard() {
     };
 
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    // Cleanup function
+    return () => {
+      // Destroy any existing chart instances
+      const charts = ChartJS.instances;
+      Object.keys(charts).forEach(key => {
+        charts[key].destroy();
+      });
+    };
   }, []);
 
   const dashboardData = [
@@ -325,8 +352,8 @@ export function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <Button
+                      onClick={() => navigate('/manage-tags')}
                       className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                      onClick={() => setIsTagCRUDOpen(true)}
                     >
                       Manage
                     </Button>
@@ -420,18 +447,10 @@ export function Dashboard() {
           </div>
         </main>
 
-        <Dialog open={isCategoryCRUDOpen} onOpenChange={setIsCategoryCRUDOpen}>
-          <CategoryCRUD
-            isOpen={isCategoryCRUDOpen}
-            onClose={() => setIsCategoryCRUDOpen(false)}
-          />
-        </Dialog>
-        <Dialog open={isTagCRUDOpen} onOpenChange={setIsTagCRUDOpen}>
-          <TagCRUD
-            isOpen={isTagCRUDOpen}
-            onClose={() => setIsTagCRUDOpen(false)}
-          />
-        </Dialog>
+        <CategoryCRUD
+          isOpen={isCategoryCRUDOpen}
+          onClose={() => setIsCategoryCRUDOpen(false)}
+        />
       </div>
     </div>
   );

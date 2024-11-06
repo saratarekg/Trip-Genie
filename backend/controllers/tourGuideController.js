@@ -8,6 +8,7 @@ const Nationality = require("../models/nationality");
 const mongoose = require("mongoose");
 const Itinerary = require("../models/itinerary"); // Adjust the path as needed
 const authController = require("./authController");
+const cloudinary = require("../utils/cloudinary");
 
 const { deleteItinerary } = require("./itineraryController");
 const itineraryBooking = require("../models/itineraryBooking");
@@ -34,7 +35,7 @@ const getTourGuideProfile = async (req, res) => {
 
 const updateTourGuide = async (req, res) => {
   try {
-    const tourGuide1 = await TourGuide.findById(req.params.id);
+    const tourGuide1 = await TourGuide.findById(req.params.id).lean();
     if (!tourGuide1) {
       return res.status(404).json({ message: "Tour Guide not found" });
     }
@@ -96,7 +97,7 @@ const updateTourGuide = async (req, res) => {
 
 const updateTourGuideProfile = async (req, res) => {
   try {
-    const tourGuide1 = await TourGuide.findById(res.locals.user_id);
+    const tourGuide1 = await TourGuide.findById(res.locals.user_id).lean();
     if (!tourGuide1) {
       return res.status(404).json({ message: "Tour Guide not found" });
     }
@@ -205,7 +206,7 @@ const getTourGuideByID = async (req, res) => {
 
 const deleteTourGuideAccount = async (req, res) => {
   try {
-    const tourGuide = await TourGuide.findById(res.locals.user_id);
+    const tourGuide = await TourGuide.findById(res.locals.user_id).lean();
     if (!tourGuide) {
       return res.status(404).json({ message: "TourGuide not found" });
     }
