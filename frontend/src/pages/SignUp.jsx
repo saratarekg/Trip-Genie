@@ -1316,23 +1316,20 @@ export function SignupForm() {
       backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
     }}
   >
-    <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-6xl flex flex-col md:flex-row">
-      <div className="w-full md:w-1/3 bg-[#B5D3D1] p-8">
-        <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">Create Your <br/>Account Now!</h2>
-        <p className="text-sm mb-10 text-[#1A3B47]">
-          Join us today! It only takes a few steps to set <br/>up your account and start exploring.
+    <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
+      <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
+        <h2 className="text-3xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">Create Your Account Now!</h2>
+        <p className="text-xs mb-6 text-[#1A3B47]">
+          Join us today! It only takes a few steps to set up your account and start exploring.
         </p>
         {renderStepIndicator()}
       </div>
-      <div className={cn(
-        "w-full md:w-2/3 p-8 max-h-[80vh] overflow-y-auto",
-        !userType && "md:w-1/3"
-      )}>
+      <div className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto">
         <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {!userType ? (
-              <div className="space-y-4 h-full flex flex-col justify-center">
-                <h2 className="text-2xl font-bold text-[#1A3B47] mb-6">I am a</h2>
+              <div className="space-y-3 h-full flex flex-col justify-center">
+                <h2 className="text-xl font-bold text-[#1A3B47] mb-4">I am a</h2>
                 {["tourist", "tour-guide", "advertiser", "seller"].map((role) => (
                   <Button
                     key={role}
@@ -1345,7 +1342,7 @@ export function SignupForm() {
                     )}
                     onClick={() => {
                       form.setValue("userType", role);
-                      clearAllErrors();
+                      setError("userType", { type: "manual", message: "" });
                     }}
                   >
                     {role.replace("-", " ")}
@@ -1360,13 +1357,13 @@ export function SignupForm() {
                   </Alert>
                 )}
                 {renderFormFields()}
-                <div className="flex justify-between mt-6">
+                <div className="flex justify-between mt-4">
                   {stage > 1 ? (
                     <Button
                       type="button"
                       className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
                       variant="outline"
-                      onClick={handleBack}
+                      onClick={() => setStage(stage - 1)}
                     >
                       Back
                     </Button>
@@ -1406,7 +1403,7 @@ export function SignupForm() {
         </Form>
         
         {!userType && (
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-4 text-center text-xs">
             <p className="text-gray-600">
               Already have an account?{" "}
               <Link
@@ -1433,7 +1430,7 @@ export function SignupForm() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+            <Check className="w-6 h-6 text-green-500 inline-block mr-2" />
             Successful Signup
           </DialogTitle>
           <DialogDescription>
