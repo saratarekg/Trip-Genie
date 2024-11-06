@@ -49,9 +49,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { ImageCropper } from "@/components/ImageCropper";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { PlusCircle, MinusCircle, Check, ChevronLeft } from "lucide-react"
-import signUpPicture from '../assets/images/signUpPicture.jpeg';
+import { Card, CardContent } from "@/components/ui/card";
+import { PlusCircle, MinusCircle, Check, ChevronLeft } from "lucide-react";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 const phoneValidator = (value) => {
   const phoneNumber = parsePhoneNumberFromString("+" + value);
@@ -171,7 +171,7 @@ export function SignupForm() {
         if (
           data.dateOfBirth > new Date() ||
           data.dateOfBirth >
-          new Date().setFullYear(new Date().getFullYear() - 18)
+            new Date().setFullYear(new Date().getFullYear() - 18)
         ) {
           scrollToError();
           ctx.addIssue({
@@ -337,12 +337,14 @@ export function SignupForm() {
     }
   };
 
-  const clearAllErrors = () => {
+  const clearForm = () => {
     for (const key in errors) {
-      setError(key, { type: "manual", message: "" });
-    }
-  };
-
+      setError(key, { type: "manual", message: "" });
+    }
+    form.clearErrors(); // Reset context issues
+    //clear the form
+    form.reset();
+  };
 
   // Add scroll event listener to terms container
   useEffect(() => {
@@ -609,7 +611,7 @@ export function SignupForm() {
           <div key={index} className="flex items-center gap-4">
             <div className="relative">
               {index < totalStages - 1 && (
-                <div 
+                <div
                   className={cn(
                     "absolute top-[calc(100%+4px)] left-1/2 w-0.5 h-12 -translate-x-1/2",
                     index < stage - 1 ? "bg-[#1A3B47]" : "bg-[#5D9297]"
@@ -619,32 +621,38 @@ export function SignupForm() {
               <div
                 className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium",
-                  stage > index + 1 || stage === index + 1 ? "bg-[#1A3B47] text-white" : "bg-[#5D9297] text-white"
+                  stage > index + 1 || stage === index + 1
+                    ? "bg-[#1A3B47] text-white"
+                    : "bg-[#5D9297] text-white"
                 )}
               >
-                {stage > index + 1 ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  index + 1
-                )}
+                {stage > index + 1 ? <Check className="w-5 h-5" /> : index + 1}
               </div>
             </div>
-            <span 
+            <span
               className={cn(
                 "text-sm font-medium",
-                stage > index + 1 || stage === index + 1 ? "text-[#1A3B47]" : "text-[#5D9297]"
+                stage > index + 1 || stage === index + 1
+                  ? "text-[#1A3B47]"
+                  : "text-[#5D9297]"
               )}
             >
               {index === 0 && "Personal Details"}
-              {index === 1 && (["tour-guide", "advertiser", "seller"].includes(userType) ? "Documents" : "Profile Picture")}
-              {index === 2 && (["tour-guide", "advertiser", "seller"].includes(userType) ? "Profile Picture" : "Terms")}
+              {index === 1 &&
+                (["tour-guide", "advertiser", "seller"].includes(userType)
+                  ? "Documents"
+                  : "Profile Picture")}
+              {index === 2 &&
+                (["tour-guide", "advertiser", "seller"].includes(userType)
+                  ? "Profile Picture"
+                  : "Terms")}
               {index === 3 && "Terms and Conditions"}
             </span>
           </div>
         ))}
       </div>
-    )
-  }
+    );
+  };
 
   const renderStage = () => {
     switch (stage) {
@@ -697,35 +705,35 @@ export function SignupForm() {
             {(userType === "tourist" ||
               userType === "tour-guide" ||
               userType === "seller") && (
-                <>
-                  <FormField
-                    control={control}
-                    name="mobile"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mobile*</FormLabel>
-                        <FormControl>
-                          <PhoneInput
-                            country={"eg"}
-                            value={field.value}
-                            onChange={(value) => field.onChange(value)}
-                            excludeCountries={["il"]}
-                            inputProps={{
-                              name: "mobile",
-                              required: true,
-                              autoFocus: true,
-                              placeholder: "+1234567890",
-                              ref: formRefs.mobile,
-                            }}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
+              <>
+                <FormField
+                  control={control}
+                  name="mobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mobile*</FormLabel>
+                      <FormControl>
+                        <PhoneInput
+                          country={"eg"}
+                          value={field.value}
+                          onChange={(value) => field.onChange(value)}
+                          excludeCountries={["il"]}
+                          inputProps={{
+                            name: "mobile",
+                            required: true,
+                            autoFocus: true,
+                            placeholder: "+1234567890",
+                            ref: formRefs.mobile,
+                          }}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             {(userType === "tourist" || userType === "tour-guide") && (
               <>
                 <FormField
@@ -825,26 +833,26 @@ export function SignupForm() {
             {(userType === "seller" ||
               userType === "advertiser" ||
               userType === "tour-guide") && (
-                <>
-                  <FormField
-                    control={control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name*</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Name"
-                            {...field}
-                            ref={formRefs.name}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
+              <>
+                <FormField
+                  control={control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name*</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Name"
+                          {...field}
+                          ref={formRefs.name}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
             {userType === "tour-guide" && (
               <Card className="w-full max-w-2xl mx-auto">
                 <CardContent className="space-y-6 p-6">
@@ -853,14 +861,20 @@ export function SignupForm() {
                     name="yearsOfExperience"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-base font-semibold">Years of experience*</FormLabel>
+                        <FormLabel className="text-base font-semibold">
+                          Years of experience*
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             placeholder="Enter years of experience"
                             min="0"
                             {...field}
-                            onChange={(e) => field.onChange(e.target.value === "" ? 0 : +e.target.value)}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value === "" ? 0 : +e.target.value
+                              )
+                            }
                             ref={formRefs.yearsOfExperience}
                             className="w-full p-2 border rounded-md"
                           />
@@ -871,7 +885,9 @@ export function SignupForm() {
                   />
 
                   <div className="space-y-4">
-                    <Label className="text-lg font-semibold">Previous works</Label>
+                    <Label className="text-lg font-semibold">
+                      Previous works
+                    </Label>
                     {fields.map((item, index) => (
                       <Card key={item.id} className="p-4 space-y-4 bg-gray-50">
                         <FormItem>
@@ -885,7 +901,9 @@ export function SignupForm() {
                             />
                           </FormControl>
                           {errors?.previousWorks?.[index]?.title && (
-                            <FormMessage>{errors.previousWorks[index].title.message}</FormMessage>
+                            <FormMessage>
+                              {errors.previousWorks[index].title.message}
+                            </FormMessage>
                           )}
                         </FormItem>
 
@@ -900,7 +918,9 @@ export function SignupForm() {
                             />
                           </FormControl>
                           {errors?.previousWorks?.[index]?.company && (
-                            <FormMessage>{errors.previousWorks[index].company.message}</FormMessage>
+                            <FormMessage>
+                              {errors.previousWorks[index].company.message}
+                            </FormMessage>
                           )}
                         </FormItem>
 
@@ -917,7 +937,9 @@ export function SignupForm() {
                             />
                           </FormControl>
                           {errors?.previousWorks?.[index]?.duration && (
-                            <FormMessage>{errors.previousWorks[index].duration.message}</FormMessage>
+                            <FormMessage>
+                              {errors.previousWorks[index].duration.message}
+                            </FormMessage>
                           )}
                         </FormItem>
 
@@ -926,7 +948,9 @@ export function SignupForm() {
                           <FormControl>
                             <Input
                               placeholder="Job description"
-                              {...register(`previousWorks.${index}.description`)}
+                              {...register(
+                                `previousWorks.${index}.description`
+                              )}
                               defaultValue={item.description}
                               className="w-full p-2 border rounded-md"
                             />
@@ -948,14 +972,20 @@ export function SignupForm() {
 
                     <Button
                       type="button"
-                      onClick={() => append({ title: "", company: "", duration: "", description: "" })}
+                      onClick={() =>
+                        append({
+                          title: "",
+                          company: "",
+                          duration: "",
+                          description: "",
+                        })
+                      }
                       variant="outline"
                       className="w-full mt-4 bg-[#5D9297] text-white hover:bg-[#1A3B47]"
                     >
                       <PlusCircle className="w-4 h-4 mr-2" />
                       Add Previous Work
                     </Button>
-
                   </div>
                 </CardContent>
               </Card>
@@ -1189,8 +1219,7 @@ export function SignupForm() {
                       className="mt-3"
                       style={{ color: "red", fontSize: "16px" }}
                     >
-                      Please read the terms and conditions
-                      before accepting.
+                      Please read the terms and conditions before accepting.
                     </div>
                   )}
                 </div>
@@ -1285,8 +1314,7 @@ export function SignupForm() {
                     className="mt-3"
                     style={{ color: "red", fontSize: "16px" }}
                   >
-                    Please read the terms and conditions
-                    before accepting.
+                    Please read the terms and conditions before accepting.
                   </div>
                 )}
               </div>
@@ -1297,7 +1325,6 @@ export function SignupForm() {
         return null;
     }
   };
-
 
   const renderFormFields = () => {
     const content = renderStage();
@@ -1310,145 +1337,153 @@ export function SignupForm() {
   };
 
   return (
-    <div 
-    className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-4"
-    style={{
-      backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
-    }}
-  >
-    <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
-      <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
-        <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">Create Your <br/> Account Now!</h2>
-        <p className="text-s mb-6 text-[#1A3B47]">
-          Join us today! It only takes a few steps to set <br/>up your account and start exploring.
-        </p>
-        {renderStepIndicator()}
-      </div>
-      <div className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto">
-        <Form {...form}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {!userType ? (
-              <div className="space-y-3 h-full flex flex-col justify-center">
-                <h2 className="text-xl font-bold text-[#1A3B47] mb-4">I am a</h2>
-                {["tourist", "tour-guide", "advertiser", "seller"].map((role) => (
-                  <Button
-                    key={role}
-                    type="button"
-                    className={cn(
-                      "w-full text-left justify-start capitalize transition-colors duration-200",
-                      userType === role 
-                        ? "bg-[#1A3B47] text-white" 
-                        : "bg-white text-[#1A3B47] border border-[#5D9297] hover:bg-[#5D9297] hover:text-[#B5D3D1]"
-                    )}
-                    onClick={() => {
-                      form.setValue("userType", role);
-                      setError("userType", { type: "manual", message: "" });
-                    }}
-                  >
-                    {role.replace("-", " ")}
-                  </Button>
-                ))}
-              </div>
-            ) : (
-              <>
-                {apiError && (
-                  <Alert variant="destructive" className="mb-4">
-                    <AlertDescription>{apiError}</AlertDescription>
-                  </Alert>
-                )}
-                {renderFormFields()}
-                <div className="flex justify-between mt-4">
-                  {stage > 1 ? (
-                    <Button
-                      type="button"
-                      className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
-                      variant="outline"
-                      onClick={() => setStage(stage - 1)}
-                    >
-                      Back
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
-                      variant="outline"
-                      onClick={() => {
-                        form.setValue("userType", undefined);
-                        setStage(1);
-                      }}
-                    >
-                      <ChevronLeft className="w-4 h-4 mr-2" />
-                      Change Role
-                    </Button>
-                  )}
-                  <Button 
-                    type="submit" 
-                    className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
-                  >
-                    {stage < totalStages ? (
-                      "Next"
-                    ) : isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Please wait
-                      </>
-                    ) : (
-                      "Submit"
-                    )}
-                  </Button>
-                </div>
-              </>
-            )}
-          </form>
-        </Form>
-        
-        {!userType && (
-          <div className="mt-4 text-center text-s">
-            <p className="text-gray-600">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
-              >
-                Sign in
-              </Link>
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-
-    <Dialog
-      open={showSignupSuccess}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) {
-          navigate("/");
-        }
-        setShowSignupSuccess(isOpen);
+    <div
+      className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-4"
+      style={{
+        backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
       }}
     >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            <Check className="w-6 h-6 text-green-500 inline-block mr-2" />
-            Successful Signup
-          </DialogTitle>
-          <DialogDescription>
-            Your account has been created successfully! Please log in.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="flex justify-center items-center w-full">
-          <div className="flex justify-center w-full">
-            <Button
-              className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </div>
+      <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
+        <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
+          <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">
+            Create Your <br /> Account Now!
+          </h2>
+          <p className="text-s mb-6 text-[#1A3B47]">
+            Join us today! It only takes a few steps to set <br />
+            up your account and start exploring.
+          </p>
+          {renderStepIndicator()}
+        </div>
+        <div className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto">
+          <Form {...form}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {!userType ? (
+                <div className="space-y-3 h-full flex flex-col justify-center">
+                  <h2 className="text-xl font-bold text-[#1A3B47] mb-4">
+                    I am a
+                  </h2>
+                  {["tourist", "tour-guide", "advertiser", "seller"].map(
+                    (role) => (
+                      <Button
+                        key={role}
+                        type="button"
+                        className={cn(
+                          "w-full text-left justify-start capitalize transition-colors duration-200",
+                          userType === role
+                            ? "bg-[#1A3B47] text-white"
+                            : "bg-white text-[#1A3B47] border border-[#5D9297] hover:bg-[#5D9297] hover:text-[#B5D3D1]"
+                        )}
+                        onClick={() => {
+                          form.setValue("userType", role);
+                          setError("userType", { type: "manual", message: "" });
+                        }}
+                      >
+                        {role.replace("-", " ")}
+                      </Button>
+                    )
+                  )}
+                </div>
+              ) : (
+                <>
+                  {apiError && (
+                    <Alert variant="destructive" className="mb-4">
+                      <AlertDescription>{apiError}</AlertDescription>
+                    </Alert>
+                  )}
+                  {renderFormFields()}
+                  <div className="flex justify-between mt-4">
+                    {stage > 1 ? (
+                      <Button
+                        type="button"
+                        className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                        variant="outline"
+                        onClick={() => setStage(stage - 1)}
+                      >
+                        Back
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                        variant="outline"
+                        onClick={() => {
+                          form.setValue("userType", undefined);
+                          clearForm();
+                          setStage(1);
+                        }}
+                      >
+                        <ChevronLeft className="w-4 h-4 mr-2" />
+                        Change Role
+                      </Button>
+                    )}
+                    <Button
+                      type="submit"
+                      className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                    >
+                      {stage < totalStages ? (
+                        "Next"
+                      ) : isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Please wait
+                        </>
+                      ) : (
+                        "Submit"
+                      )}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </form>
+          </Form>
+
+          {!userType && (
+            <div className="mt-4 text-center text-s">
+              <p className="text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Dialog
+        open={showSignupSuccess}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            navigate("/");
+          }
+          setShowSignupSuccess(isOpen);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <Check className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Successful Signup
+            </DialogTitle>
+            <DialogDescription>
+              Your account has been created successfully! Please log in.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-center items-center w-full">
+            <div className="flex justify-center w-full">
+              <Button
+                className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
