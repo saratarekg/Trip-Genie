@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
 import { ImageCropper } from "@/components/ImageCropper";
-
+import { X } from "lucide-react"
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,8 +38,60 @@ const phoneValidator = (value) => {
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
-const Modal = ({ show, onClose, children }) => {
+const ImageViewer = ({ imageUrl, isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+      <div className="w-full h-full relative flex flex-col">
+        <div className="flex items-center justify-between p-4 bg-gradient-to-b from-black/40 to-transparent absolute top-0 left-0 right-0 z-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20"
+            onClick={onClose}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-4">
+          <img
+            src={imageUrl}
+            alt="Full screen view"
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Modal = ({ show, onClose, children, isImageViewer = false, imageUrl = "" }) => {
   if (!show) return null;
+
+  if (isImageViewer) {
+    return (
+      <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+        <div className="absolute top-4 left-4 z-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20"
+            onClick={onClose}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+        </div>
+        <div className="w-full h-full flex items-center justify-center">
+          <img
+            src={imageUrl}
+            alt="Full screen view"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -52,7 +104,6 @@ const Modal = ({ show, onClose, children }) => {
     </div>
   );
 };
-
 export function TouristProfileComponent() {
   const [tourist, setTourist] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -69,6 +120,7 @@ export function TouristProfileComponent() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [newImage, setNewImage] = useState(false);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
 
 
@@ -167,6 +219,8 @@ export function TouristProfileComponent() {
 
   const closeModal = () => {
     setShowModal(false);
+    setModalOpen(false);
+    setImageModalOpen(false);
   };
   const handleImageCropped = (newImage) => {
     setNewImage(newImage);
@@ -309,7 +363,7 @@ export function TouristProfileComponent() {
               onClick={toggleDropdown}
               disabled={!isEditing}
             >
-              {selectedImage ? (selectedImage.public_id ? (<img src={selectedImage.url} alt="User" className="w-20 h-20 rounded-full"  />) : (<img src={selectedImage} alt="User" className="w-20 h-20 rounded-full" />))
+              {selectedImage ? (selectedImage.public_id ? (<img src={selectedImage.url} alt="User" className="w-20 h-20 rounded-full" />) : (<img src={selectedImage} alt="User" className="w-20 h-20 rounded-full" />))
                 : (
                   <User className="w-12 h-12 text-white" />
                 )}            </button>
@@ -317,7 +371,7 @@ export function TouristProfileComponent() {
             <div className="absolute top-full mt-2 left-0 bg-white  rounded-lg shadow-lg z-10 w-32">
               <Modal show={showModal} onClose={closeModal}>
                 <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
-                <ImageCropper onImageCropped={handleImageCropped} currentImage={selectedImage? (selectedImage.public_id ? selectedImage.url:(selectedImage)):null} />
+                <ImageCropper onImageCropped={handleImageCropped} currentImage={selectedImage ? (selectedImage.public_id ? selectedImage.url : (selectedImage)) : null} />
                 <div className="mt-4 flex justify-end">
                   <Button
                     onClick={handleFirstSave}
@@ -342,7 +396,11 @@ export function TouristProfileComponent() {
                   {tourist.profilePicture && (
                     <li
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={openModal}
+                      onClick={() => {
+                        setIsImageViewerOpen(true);
+
+                        setDropdownOpen(false);
+                      }}
                     >
                       View
                     </li>
@@ -555,6 +613,12 @@ export function TouristProfileComponent() {
           )}
         </div>
       </div>
+      <Modal
+        show={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+        isImageViewer={true}
+        imageUrl={selectedImage?.url || selectedImage}
+      />
     </div>
   );
 }

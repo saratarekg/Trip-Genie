@@ -125,22 +125,23 @@ export function Dashboard() {
 
   return (
     <div>
-         <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className="flex flex-col min-h-screen bg-gray-100">
-      <main className="flex-1 p-6 overflow-y-auto">
-        <p
-          className="text-3xl font-bold mb-6 text-[#003f66]"
-          style={{
-            animation: "slideRight 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards",
-            opacity: 0,
-          }}
-        >
-          Welcome to your Dashboard Genie!
-        </p>
-        <style>
-          {`
+        <main className="flex-1 p-6 overflow-y-auto">
+          <p
+            className="text-3xl font-bold mb-6 text-[#003f66]"
+            style={{
+              animation:
+                "slideRight 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards",
+              opacity: 0,
+            }}
+          >
+            Welcome to your Dashboard Genie!
+          </p>
+          <style>
+            {`
             @keyframes slideRight {
               0% {
                 opacity: 0;
@@ -152,17 +153,17 @@ export function Dashboard() {
               }
             }
           `}
-        </style>
-        <Tabs
-          defaultValue="accounts"
-          className="space-y-12"
-          value={activeTab}
-          onValueChange={setActiveTab}
-        >
-          <TabsList className="grid grid-cols-3 gap-4 bg-transparent">
-            <TabsTrigger
-              value="accounts"
-              className="bg-white text-[#1A3B47] shadow-md 
+          </style>
+          <Tabs
+            defaultValue="accounts"
+            className="space-y-12"
+            value={activeTab}
+            onValueChange={setActiveTab}
+          >
+            <TabsList className="grid grid-cols-3 gap-4 bg-transparent">
+              <TabsTrigger
+                value="accounts"
+                className="bg-white text-[#1A3B47] shadow-md 
                hover:text-[#1A3B47]
               data-[state=active]:bg-[#5D9297] data-[state=active]:text-[#1A3B47] 
               data-[state=active]:hover:bg-gray-300
@@ -174,14 +175,14 @@ export function Dashboard() {
               font-medium
               flex items-center justify-center
               cursor-pointer"
-              onClick={() => setActiveTab("accounts")}
-            >
-              <UserCircle className="w-4 h-4 mr-2" />
-              Accounts
-            </TabsTrigger>
-            <TabsTrigger
-              value="activities"
-              className="bg-white text-[#1A3B47] shadow-md 
+                onClick={() => setActiveTab("accounts")}
+              >
+                <UserCircle className="w-4 h-4 mr-2" />
+                Accounts
+              </TabsTrigger>
+              <TabsTrigger
+                value="activities"
+                className="bg-white text-[#1A3B47] shadow-md 
               hover:bg-[#B5D3D1] hover:text-[#1A3B47]
               data-[state=active]:bg-[#5D9297] data-[state=active]:text-[#1A3B47] 
               data-[state=active]:hover:bg-[#5D9297] 
@@ -193,14 +194,14 @@ export function Dashboard() {
               font-medium
               flex items-center justify-center
               cursor-pointer"
-              onClick={() => setActiveTab("activities")}
-            >
-              <Layers className="w-4 h-4 mr-2" />
-              Activities
-            </TabsTrigger>
-            <TabsTrigger
-              value="giftshop"
-              className="bg-white text-[#1A3B47] shadow-md 
+                onClick={() => setActiveTab("activities")}
+              >
+                <Layers className="w-4 h-4 mr-2" />
+                Activities
+              </TabsTrigger>
+              <TabsTrigger
+                value="giftshop"
+                className="bg-white text-[#1A3B47] shadow-md 
               hover:bg-[#B5D3D1] hover:text-[#1A3B47]
               data-[state=active]:bg-[#5D9297] data-[state=active]:text-[#1A3B47] 
               data-[state=active]:hover:bg-[#5D9297] 
@@ -212,226 +213,226 @@ export function Dashboard() {
               font-medium
               flex items-center justify-center
               cursor-pointer"
-              onClick={() => setActiveTab("giftshop")}
-            >
-              <ShoppingBag className="w-4 h-4 mr-2" />
-              Gift Shop
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="accounts" className="space-y-4 pt-4">
-            <div className="grid gap-4 md:grid-cols-4">
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <ClipboardCheck className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Review Registrations
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    onClick={() => navigate("/user-approval")}
-                    className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                  >
-                    View
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <UserCog className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Manage Accounts
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    onClick={() => navigate('/manage-accounts')}
-                    className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                  >
-                    Manage
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <UserPlus className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Add Admin/Governor
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    onClick={() => navigate('/add-admin-governor')}
-                    className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                  >
-                    Add
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <MessageSquare className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Complaints
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Link to="/complaints">
-                    <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
+                onClick={() => setActiveTab("giftshop")}
+              >
+                <ShoppingBag className="w-4 h-4 mr-2" />
+                Gift Shop
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="accounts" className="space-y-4 pt-4">
+              <div className="grid gap-4 md:grid-cols-4">
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <ClipboardCheck className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Review Registrations
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      onClick={() => navigate("/user-approval")}
+                      className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
+                    >
                       View
                     </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          <TabsContent value="activities" className="space-y-4 pt-4">
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <FolderPlus className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Manage Categories
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                    onClick={() => setIsCategoryCRUDOpen(true)}
-                  >
-                    Manage
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <Tags className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Manage Tags
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button
-                    className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                    onClick={() => setIsTagCRUDOpen(true)}
-                  >
-                    Manage
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <Map className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Manage Itineraries
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Link to="/all-itineraries">
-                    <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
+                  </CardContent>
+                </Card>
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <UserCog className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Manage Accounts
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      onClick={() => navigate("/manage-accounts")}
+                      className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
+                    >
                       Manage
                     </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          <TabsContent value="giftshop" className="space-y-4 pt-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <Package className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Manage Products
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Link to="/all-products">
-                    <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
+                  </CardContent>
+                </Card>
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <UserPlus className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Add Admin/Governor
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      onClick={() => navigate("/add-admin-governor")}
+                      className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
+                    >
+                      Add
+                    </Button>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <MessageSquare className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Complaints
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Link to="/complaints">
+                      <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
+                        View
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            <TabsContent value="activities" className="space-y-4 pt-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <FolderPlus className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Manage Categories
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
+                      onClick={() => setIsCategoryCRUDOpen(true)}
+                    >
                       Manage
                     </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-              <Card className="bg-white border-[#808080] border">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#003f66]">
-                    <div className="flex items-center">
-                      <Ticket className="w-4 h-4 mr-2 text-[#F88C33]" />
-                      Create Promo Code
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
-                    Create
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-        <hr className="my-6" />
-        <div className="flex flex-col md:flex-row justify-evenly flex-wrap">
-          <Card
-            className="bg-white border-[#808080] border mx-2 my-2"
-            style={{ width: "90%", maxWidth: "400px", height: "250px" }}
-          >
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-[#003f66]">
-                Financial Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Pie data={pieData1} options={{ maintainAspectRatio: false }} />
-            </CardContent>
-          </Card>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <Tags className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Manage Tags
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
+                      onClick={() => setIsTagCRUDOpen(true)}
+                    >
+                      Manage
+                    </Button>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <Map className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Manage Itineraries
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Link to="/all-itineraries">
+                      <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
+                        Manage
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            <TabsContent value="giftshop" className="space-y-4 pt-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <Package className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Manage Products
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Link to="/all-products">
+                      <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
+                        Manage
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <Ticket className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Create Promo Code
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
+                      Create
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+          <hr className="my-6" />
+          <div className="flex flex-col md:flex-row justify-evenly flex-wrap">
+            <Card
+              className="bg-white border-[#808080] border mx-2 my-2"
+              style={{ width: "90%", maxWidth: "400px", height: "250px" }}
+            >
+              <CardHeader>
+                <CardTitle className="text-sm font-medium text-[#003f66]">
+                  Financial Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Pie data={pieData1} options={{ maintainAspectRatio: false }} />
+              </CardContent>
+            </Card>
 
-          <Card
-            className="bg-white border-[#808080] border mx-2 my-2"
-            style={{ width: "90%", maxWidth: "400px", height: "250px" }}
-          >
-            <CardHeader>
-              <CardTitle className="text-sm font-medium text-[#003f66]">
-                User Metrics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Pie data={pieData2} options={{ maintainAspectRatio: false }} />
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+            <Card
+              className="bg-white border-[#808080] border mx-2 my-2"
+              style={{ width: "90%", maxWidth: "400px", height: "250px" }}
+            >
+              <CardHeader>
+                <CardTitle className="text-sm font-medium text-[#003f66]">
+                  User Metrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Pie data={pieData2} options={{ maintainAspectRatio: false }} />
+              </CardContent>
+            </Card>
+          </div>
+        </main>
 
-      <Dialog open={isCategoryCRUDOpen} onOpenChange={setIsCategoryCRUDOpen}>
-        <CategoryCRUD
-          isOpen={isCategoryCRUDOpen}
-          onClose={() => setIsCategoryCRUDOpen(false)}
-        />
-      </Dialog>
-      <Dialog open={isTagCRUDOpen} onOpenChange={setIsTagCRUDOpen}>
-        <TagCRUD
-          isOpen={isTagCRUDOpen}
-          onClose={() => setIsTagCRUDOpen(false)}
-        />
-      </Dialog>
-    </div>
+        <Dialog open={isCategoryCRUDOpen} onOpenChange={setIsCategoryCRUDOpen}>
+          <CategoryCRUD
+            isOpen={isCategoryCRUDOpen}
+            onClose={() => setIsCategoryCRUDOpen(false)}
+          />
+        </Dialog>
+        <Dialog open={isTagCRUDOpen} onOpenChange={setIsTagCRUDOpen}>
+          <TagCRUD
+            isOpen={isTagCRUDOpen}
+            onClose={() => setIsTagCRUDOpen(false)}
+          />
+        </Dialog>
+      </div>
     </div>
   );
 }
