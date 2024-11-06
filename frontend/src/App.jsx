@@ -26,6 +26,7 @@ import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./pages/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
 //import { MyItinerariesComponent } from "./components/myItineraries.jsx";
+import { MyProducts } from "./components/myProducts.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
 import ViewComplaints from "./components/ViewComplaints.jsx";
 import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
@@ -35,6 +36,7 @@ import { SignupForm } from "./pages/SignUp.jsx";
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import Checkout from "./pages/checkout.jsx";
+import CheckoutPage from "./pages/checkout2.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
@@ -108,6 +110,18 @@ function AppContent() {
                 ]}
               >
                 <Checkout />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/checkout2"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "tourist"
+                ]}
+              >
+                <CheckoutPage />
               </ProtectedRoute>
             }
           />
@@ -252,6 +266,17 @@ function AppContent() {
             }
           />
  */}
+
+  <Route
+            path="/my-products"
+            element={
+              <ProtectedRoute
+                allowedRoles={["seller","admin"]}
+              >
+                <MyProducts />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/all-historical-places"

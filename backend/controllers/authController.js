@@ -6,6 +6,7 @@ const Seller = require("../models/seller");
 const Advertiser = require("../models/advertiser");
 const TourGuide = require("../models/tourGuide");
 const multer = require("multer");
+const cloudinary = require("../utils/cloudinary");
 
 const createToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.SECRET, {
@@ -29,8 +30,21 @@ const touristSignup = async (req, res) => {
       mobile,
       dateOfBirth,
       jobOrStudent,
-      profilePicture,
     } = req.body;
+
+    let { profilePicture } = req.body;
+    if (profilePicture === "null") {
+      profilePicture = null;
+    } else {
+      const result = await cloudinary.uploader.upload(profilePicture, {
+        folder: "tourist-profile-pictures",
+      });
+      profilePicture = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    }
+
     const tourist = new Tourist({
       email,
       username,
@@ -139,6 +153,14 @@ const advertiserSignup = async (req, res) => {
     let { logo } = req.body;
     if (logo === "null") {
       logo = null;
+    } else {
+      const result = await cloudinary.uploader.upload(logo, {
+        folder: "logos",
+      });
+      logo = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
     }
     const advertiser = new Advertiser({
       email,
@@ -188,6 +210,14 @@ const tourGuideSignup = async (req, res) => {
     let { profilePicture } = req.body;
     if (profilePicture === "null") {
       profilePicture = null;
+    } else {
+      const result = await cloudinary.uploader.upload(profilePicture, {
+        folder: "tour-guide-profile-pictures",
+      });
+      profilePicture = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
     }
     const IDFilename = req.files.ID[0].filename;
     const certificatesFilenames = req.files.Certificates.map(
@@ -234,6 +264,14 @@ const sellerSignup = async (req, res) => {
     let { logo } = req.body;
     if (logo === "null") {
       logo = null;
+    } else {
+      const result = await cloudinary.uploader.upload(logo, {
+        folder: "logos",
+      });
+      logo = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
     }
     const IDFilename = req.files.ID[0].filename;
     const taxationRegistryCardFilename =
