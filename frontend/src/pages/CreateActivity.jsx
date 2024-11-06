@@ -16,10 +16,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -31,15 +31,15 @@ import {
 import { useNavigate } from "react-router-dom";
 import ReactSelect from "react-select";
 
-const vehicleTypes = ["bus", "car", "microbus"];
+const vehicleTypes = ["Bus", "Car", "Microbus"];
 
 const getMaxSeats = (vehicleType) => {
   switch (vehicleType) {
-    case "bus":
+    case "Bus":
       return 50;
-    case "car":
+    case "Car":
       return 5;
-    case "microbus":
+    case "Microbus":
       return 15;
     default:
       return 0;
@@ -54,7 +54,7 @@ const transportationSchema = z.object({
   timeDeparture: z.string().min(1, "Departure time is required"),
   estimatedDuration: z.number().positive("Duration must be positive"),
   remainingSeats: z.number().int().positive("Remaining seats must be positive").refine((val, ctx) => {
-    const maxSeats = 100 ; // Assuming max seats is 100
+    const maxSeats = 100;
     return val <= maxSeats;
   }, {
     message: "Remaining seats must not exceed the maximum for the selected vehicle type",
@@ -384,6 +384,7 @@ export default function CreateActivity() {
       );
       const updatedTransportations = transportations.filter((_, i) => i !== index);
       setTransportations(updatedTransportations);
+      setEditingTransportationIndex(null);  // Reset editing index
     } catch (error) {
       console.error("Failed to delete transportation:", error);
     }
@@ -707,7 +708,7 @@ export default function CreateActivity() {
       </div>
 
       <Dialog open={showTransportationForm} onOpenChange={setShowTransportationForm}>
-        <DialogContent>
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingTransportationIndex !== null ? "Edit Transportation" : "Add Transportation"}</DialogTitle>
             <DialogDescription>
