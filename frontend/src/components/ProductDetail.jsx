@@ -1171,7 +1171,7 @@ const ProductDetail = () => {
                     <p>Price includes VAT</p>
                   </div>
                   <div>
-                    <p className="text-gray-700 inline">
+                    <p className="text-gray-700 inline break-words ">
                       {isExpanded ||
                       product.description.length <= characterLimit
                         ? product.description

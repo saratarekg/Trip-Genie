@@ -173,7 +173,7 @@ const ProductCard = ({
         {/* Display rating directly below the product title */}
         <div className="mt-1">{renderStars(product.rating)}</div>
   
-        <p className="text-sm text-gray-600 mt-2">
+        <p className="text-sm text-gray-600 mt-2 break-words">
           {product.description.length > 70
             ? `${product.description.slice(0, 70)}...`
             : product.description}
