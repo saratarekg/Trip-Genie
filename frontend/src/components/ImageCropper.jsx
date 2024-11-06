@@ -20,7 +20,7 @@ export function ImageCropper({ onImageCropped, currentImage }) {
 
   useEffect(() => {
     onImageCropped(selectedImage);
-    console.log(selectedImage);
+    console.log("hi"+selectedImage);
   }, [selectedImage]);
 
   const onSelectFile = (e) => {

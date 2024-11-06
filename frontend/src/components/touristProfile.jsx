@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
+import { ImageCropper } from "@/components/ImageCropper";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,12 +29,28 @@ import {
 import { Badge } from "@/components/ui/badge";
 import "react-phone-input-2/lib/style.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import zIndex from "@mui/material/styles/zIndex";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
   console.log(value);
   const phoneNumber = parsePhoneNumberFromString("+" + value);
   return phoneNumber ? phoneNumber.isValid() : false;
+};
+
+const Modal = ({ show, onClose, children }) => {
+  if (!show) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        <button className="absolute top-2 right-2 text-gray-500" onClick={onClose}>
+          X
+        </button>
+        {children}
+      </div>
+    </div>
+  );
 };
 
 export function TouristProfileComponent() {
@@ -47,6 +65,11 @@ export function TouristProfileComponent() {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isImageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [newImage, setNewImage] = useState(false);
+
 
 
   const getUserRole = () => Cookies.get("role") || "guest";
@@ -62,6 +85,7 @@ export function TouristProfileComponent() {
         });
         setTourist(response.data);
         setEditedTourist(response.data);
+        setSelectedImage(response.data.profilePicture);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -77,9 +101,9 @@ export function TouristProfileComponent() {
     setDropdownOpen(false); // Close the dropdown when opening the modal
   };
 
-  const closeModal = () => {
-    setModalOpen(false);
-  };
+  // const closeModal = () => {
+  //   setModalOpen(false);
+  // };
 
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
@@ -136,6 +160,23 @@ export function TouristProfileComponent() {
     }
   };
 
+  const handleUpdateClick = () => {
+    setShowModal(true);
+    setDropdownOpen(false);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+  const handleImageCropped = (newImage) => {
+    setNewImage(newImage);
+    console.log("newImage");
+  };
+  const handleFirstSave = () => {
+    setSelectedImage(newImage);
+    setShowModal(false);
+
+  };
 
   useEffect(() => {
     const fetchNationalities = async () => {
@@ -261,78 +302,113 @@ export function TouristProfileComponent() {
 
 
       <div className="p-8">
-      <div className="flex items-center gap-4 mb-6 relative">
-      <div className="flex-shrink-0 relative">
-        {/* Avatar Button */}
-        <button
-          className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white"
-          onClick={toggleDropdown}
-        >
-          <User className="w-12 h-12 text-white" />
-        </button>
+        <div className="flex items-center gap-4 mb-6 relative">
+          <div className="flex-shrink-0 relative">
+            <button
+              className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white"
+              onClick={toggleDropdown}
+              disabled={!isEditing}
+            >
+              {selectedImage ? (selectedImage.public_id ? (<img src={selectedImage.url} alt="User" className="w-20 h-20 rounded-full"  />) : (<img src={selectedImage} alt="User" className="w-20 h-20 rounded-full" />))
+                : (
+                  <User className="w-12 h-12 text-white" />
+                )}            </button>
 
-        {/* Dropdown Menu positioned under the avatar */}
-        {isDropdownOpen && (
-          <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
-            <ul className="py-2">
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={openModal}
-              >
-                View
-              </li>
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => console.log("Update user")}
-              >
-                Update
-              </li>
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                onClick={() => console.log("Delete user")}
-              >
-                Delete
-              </li>
-            </ul>
+            <div className="absolute top-full mt-2 left-0 bg-white  rounded-lg shadow-lg z-10 w-32">
+              <Modal show={showModal} onClose={closeModal}>
+                <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
+                <ImageCropper onImageCropped={handleImageCropped} currentImage={selectedImage? (selectedImage.public_id ? selectedImage.url:(selectedImage)):null} />
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    onClick={handleFirstSave}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+                  >
+                    Save
+                  </Button>
+
+                  <Button
+                    onClick={closeModal}
+                    className="px-4 py-2 ml-4 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200"
+                  >
+                    Close
+                  </Button>
+
+                </div>
+              </Modal>
+            </div>
+            {isDropdownOpen && (
+              <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
+                <ul className="py-2">
+                  {tourist.profilePicture && (
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={openModal}
+                    >
+                      View
+                    </li>
+                  )}
+
+                  <div>
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={handleUpdateClick}
+                    >
+                      Update
+                    </li>
+                  </div>
+                  {tourist.profilePicture && (
+
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                      onClick={() => console.log("Delete user")}
+                    >
+                      Delete
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      <div className="flex flex-col flex-grow">
-        <h2 className="text-3xl font-bold mb-1">{tourist.username}</h2>
-        <div className="flex items-center gap-2 mb-4">
-          <AtSign className="w-4 h-4 text-gray-500" />
-          <p className="text-2xl font-semibold">{tourist.username}</p>
-        </div>
-      </div>
+          <div className="flex flex-col flex-grow">
+            <h2 className="text-3xl font-bold mb-1">{tourist.username}</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <AtSign className="w-4 h-4 text-gray-500" />
+              <p className="text-2xl font-semibold">{tourist.username}</p>
+            </div>
+          </div>
 
-      <div className="flex-shrink-0">
-        <Badge
-          className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}
-        >
-          <Award className="w-6 h-6" />
-          {tourist.loyaltyBadge}
-        </Badge>
-      </div>
+          <div className="flex-shrink-0">
+            <Badge
+              className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}
+            >
+              <Award className="w-6 h-6" />
+              {tourist.loyaltyBadge}
+            </Badge>
+          </div>
 
-      {/* Modal for Enlarged Avatar */}
-      {isModalOpen && (
+          {/* {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
+          <div className="bg-white p-6 rounded-lg shadow-lg relative">
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
               onClick={closeModal}
             >
-              X
+              <X className="w-6 h-6" />
             </button>
             <div className="w-48 h-48 bg-gray-300 rounded-full flex items-center justify-center text-4xl font-bold text-white">
               <User className="w-24 h-24 text-white" />
             </div>
+            <button
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              onClick={closeModal}
+            >
+              Close
+            </button>
           </div>
         </div>
-      )}
-    </div>
-
+      )} */}
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className="flex flex-col">
@@ -362,8 +438,9 @@ export function TouristProfileComponent() {
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-gray-500" />
               {isEditing ? (
-                <div className="w-full">
+                <div className="w-full" style={{ zIndex: 0 }}>
                   <PhoneInput
+                    style={{ zIndex: 0 }}
                     country={"eg"}
                     value={editedTourist.mobile}
                     onChange={handleInputChange}
