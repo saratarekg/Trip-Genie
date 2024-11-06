@@ -69,8 +69,8 @@ const touristSchema = new Schema(
       trim: true,
     },
     profilePicture: {
-      public_id: { type: String, required: true },
-      url: { type: String, required: true },
+      public_id: { type: String },
+      url: { type: String },
     },
     preferredCurrency: {
       type: mongoose.Schema.Types.ObjectId,

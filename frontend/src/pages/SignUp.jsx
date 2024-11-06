@@ -87,6 +87,7 @@ export function SignupForm() {
   const [canAcceptTerms, setCanAcceptTerms] = useState(false); // Track if user can accept terms
   const termsRef = useRef(null); // Reference to the terms div
   const [showScrollMessage, setShowScrollMessage] = useState(false);
+  const divRef = useRef(null);
 
   const formSchema = z
     .object({
@@ -472,7 +473,10 @@ export function SignupForm() {
             type: "manual",
             message: "Username already exists",
           });
-          scrollToHeight(0);
+          divRef.current.scrollTo({
+            top: 0, // specify the height in pixels
+            behavior: "smooth", // for smooth scrolling
+          });
           return;
         }
         if (response.data.existingEmail) {
@@ -480,7 +484,10 @@ export function SignupForm() {
             type: "manual",
             message: "Email already exists",
           });
-          scrollToHeight(100);
+          divRef.current.scrollTo({
+            top: 0, // specify the height in pixels
+            behavior: "smooth", // for smooth scrolling
+          });
           return;
         }
       }
@@ -671,6 +678,7 @@ export function SignupForm() {
                   <FormMessage />
                 </FormItem>
               )}
+              useRef={formRefs.username}
             />
             <FormField
               control={control}
@@ -1345,16 +1353,19 @@ export function SignupForm() {
     >
       <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
         <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
-          <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">
-            Create Your <br /> Account Now!
+          <h2 className="text-3xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">
+            Create Your Account Now!
           </h2>
-          <p className="text-s mb-6 text-[#1A3B47]">
-            Join us today! It only takes a few steps to set <br />
-            up your account and start exploring.
+          <p className="text-xs mb-6 text-[#1A3B47]">
+            Join us today! It only takes a few steps to set up your account and
+            start exploring.
           </p>
           {renderStepIndicator()}
         </div>
-        <div className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto">
+        <div
+          className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto"
+          ref={divRef}
+        >
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {!userType ? (
@@ -1438,7 +1449,7 @@ export function SignupForm() {
           </Form>
 
           {!userType && (
-            <div className="mt-4 text-center text-s">
+            <div className="mt-4 text-center text-xs">
               <p className="text-gray-600">
                 Already have an account?{" "}
                 <Link
