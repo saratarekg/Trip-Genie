@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/TGlogo.svg";
-// import ShoppingCart from "@/components/touristCart.jsx";
-// import WishlistPage from "@/components/touristWishlist.jsx";
 import {
   Menu,
   X,
@@ -43,29 +41,26 @@ const NavLink = ({ to, children }) => (
 );
 
 export function NavbarComponent() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isItinerariesDropdownOpen, setIsItinerariesDropdownOpen] =
-    useState(false);
-  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const role = Cookies.get("role");
   const navigate = useNavigate();
-  const dropdownRef = useRef(null);
+  const itinerariesRef = useRef(null);
+  const productsRef = useRef(null);
+  const userMenuRef = useRef(null);
 
   const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsMenuOpen(false);
-      setIsItinerariesDropdownOpen(false);
-      setIsProductsDropdownOpen(false);
+    if (
+      !itinerariesRef.current?.contains(event.target) &&
+      !productsRef.current?.contains(event.target) &&
+      !userMenuRef.current?.contains(event.target)
+    ) {
+      closeDropdown();
     }
   };
 
   useEffect(() => {
-    if (isMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("mousedown", handleClickOutside);
 
     const handleScroll = () => {
       const heroHeight =
@@ -79,7 +74,7 @@ export function NavbarComponent() {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [isMenuOpen]);
+  }, []);
 
   const logOut = async () => {
     console.log("Logging out...");
@@ -98,6 +93,16 @@ export function NavbarComponent() {
     } catch (error) {
       console.error("Error during logout:", error);
     }
+  };
+
+  const toggleDropdown = (dropdown) => {
+    setOpenDropdown((prevDropdown) =>
+      prevDropdown === dropdown ? null : dropdown
+    );
+  };
+
+  const closeDropdown = () => {
+    setOpenDropdown(null);
   };
 
   return (
@@ -128,95 +133,88 @@ export function NavbarComponent() {
                 <>
                   <NavLink to="/activity">Activities</NavLink>
 
-                  <div className="relative">
-                    <div className="relative">
-                      <button
-                        onClick={() =>
-                          setIsItinerariesDropdownOpen(
-                            !isItinerariesDropdownOpen
-                          )
-                        }
-                        className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
-                      >
-                        Itineraries
-                        {isItinerariesDropdownOpen ? (
-                          <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
-                        ) : (
-                          <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
-                        )}
-                      </button>
-                      {isItinerariesDropdownOpen && (
-                        <div
-                          className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg"
-                          style={{ minWidth: "200px" }}
-                        >
-                          <Link
-                            to="/all-itineraries"
-                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
-                          >
-                            <List className="mr-2 h-4 w-4" /> All Itineraries
-                          </Link>
-                          <Link
-                            to="/my-itineraries"
-                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
-                          >
-                            <Folder className="mr-2 h-4 w-4" /> My Itineraries
-                          </Link>
-                          <Link
-                            to="/create-itinerary"
-                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
-                          >
-                            <PlusCircle className="mr-2 h-4 w-4" /> Create
-                            Itinerary
-                          </Link>
-                        </div>
+                  <div className="relative" ref={itinerariesRef}>
+                    <button
+                      onClick={() => toggleDropdown("itineraries")}
+                      className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                    >
+                      Itineraries
+                      {openDropdown === "itineraries" ? (
+                        <ChevronUp className="ml-1 h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="ml-1 h-4 w-4" />
                       )}
-                    </div>
+                    </button>
+                    {openDropdown === "itineraries" && (
+                      <div className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg">
+                        <Link
+                          to="/all-itineraries"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <List className="mr-2 h-4 w-4" /> All Itineraries
+                        </Link>
+                        <Link
+                          to="/my-itineraries"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <Folder className="mr-2 h-4 w-4" /> My Itineraries
+                        </Link>
+                        <Link
+                          to="/create-itinerary"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <PlusCircle className="mr-2 h-4 w-4" /> Create
+                          Itinerary
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
               {role === "seller" && (
                 <>
-                  <div className="relative">
+                  <div className="relative" ref={productsRef}>
                     <button
-                      onClick={() =>
-                        setIsProductsDropdownOpen(!isProductsDropdownOpen)
-                      }
+                      onClick={() => toggleDropdown("products")}
                       className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                     >
                       Products
-                      {isProductsDropdownOpen ? (
-                        <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
+                      {openDropdown === "products" ? (
+                        <ChevronUp className="ml-1 h-4 w-4" />
                       ) : (
-                        <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
+                        <ChevronDown className="ml-1 h-4 w-4" />
                       )}
                     </button>
-                    {isProductsDropdownOpen && (
-                      <div
-                        className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg"
-                        style={{ minWidth: "200px" }}
-                      >
+                    {openDropdown === "products" && (
+                      <div className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg">
                         <Link
                           to="/all-products"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <List className="mr-2 h-4 w-4" /> All Products
                         </Link>
                         <Link
                           to="/my-products"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <Folder className="mr-2 h-4 w-4" /> My Products
                         </Link>
                         <Link
                           to="/create-product"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <PlusCircle className="mr-2 h-4 w-4" /> Create Product
                         </Link>
                         <Link
                           to="/product-archive"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <ArchiveIcon className="mr-2 h-4 w-4" /> Archived
                           Products
@@ -245,84 +243,76 @@ export function NavbarComponent() {
               )}
               {role === "admin" && (
                 <div className="flex justify-between items-center">
-                  <div className="relative">
-                    <div className="relative">
-                      <button
-                        onClick={() =>
-                          setIsItinerariesDropdownOpen(
-                            !isItinerariesDropdownOpen
-                          )
-                        }
-                        className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
-                      >
-                        Itineraries
-                        {isItinerariesDropdownOpen ? (
-                          <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
-                        ) : (
-                          <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
-                        )}
-                      </button>
-                      {isItinerariesDropdownOpen && (
-                        <div
-                          className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg"
-                          style={{ minWidth: "200px" }}
-                        >
-                          <Link
-                            to="/all-itineraries"
-                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
-                          >
-                            <List className="mr-2 h-4 w-4" /> All Itineraries
-                          </Link>
-                          <Link
-                            to="/my-itineraries"
-                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
-                          >
-                            <Folder className="mr-2 h-4 w-4" /> My Itineraries
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="relative">
+                  <div className="relative" ref={itinerariesRef}>
                     <button
-                      onClick={() =>
-                        setIsProductsDropdownOpen(!isProductsDropdownOpen)
-                      }
+                      onClick={() => toggleDropdown("adminItineraries")}
+                      className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                    >
+                      Itineraries
+                      {openDropdown === "adminItineraries" ? (
+                        <ChevronUp className="ml-1 h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="ml-1 h-4 w-4" />
+                      )}
+                    </button>
+                    {openDropdown === "adminItineraries" && (
+                      <div className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg">
+                        <Link
+                          to="/all-itineraries"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <List className="mr-2 h-4 w-4" /> All Itineraries
+                        </Link>
+                        <Link
+                          to="/my-itineraries"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <Folder className="mr-2 h-4 w-4" /> My Itineraries
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                  <div className="relative" ref={productsRef}>
+                    <button
+                      onClick={() => toggleDropdown("adminProducts")}
                       className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                     >
                       Products
-                      {isProductsDropdownOpen ? (
-                        <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
+                      {openDropdown === "adminProducts" ? (
+                        <ChevronUp className="ml-1 h-4 w-4" />
                       ) : (
-                        <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
+                        <ChevronDown className="ml-1 h-4 w-4" />
                       )}
                     </button>
-                    {isProductsDropdownOpen && (
-                      <div
-                        className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg"
-                        style={{ minWidth: "200px" }}
-                      >
+                    {openDropdown === "adminProducts" && (
+                      <div className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg">
                         <Link
                           to="/all-products"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <List className="mr-2 h-4 w-4" /> All Products
                         </Link>
                         <Link
                           to="/my-products"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <Folder className="mr-2 h-4 w-4" /> My Products
                         </Link>
                         <Link
                           to="/create-product"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <PlusCircle className="mr-2 h-4 w-4" /> Create Product
                         </Link>
                         <Link
                           to="/product-archive"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <ArchiveIcon className="mr-2 h-4 w-4" /> Archived
                           Products
@@ -390,18 +380,19 @@ export function NavbarComponent() {
                 </Link>
               </>
             ) : role !== "admin" ? (
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative" ref={userMenuRef}>
                 <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  onClick={() => toggleDropdown("userMenu")}
                   className="inline-flex items-center justify-center p-2 rounded-full text-white hover:bg-white/10 focus:outline-none transition-colors duration-200"
                 >
                   <Menu className="h-6 w-6" />
                 </button>
-                {isMenuOpen && (
+                {openDropdown === "userMenu" && (
                   <div className="absolute right-0 mt-2 w-48 bg-black/90 rounded-2xl border border-white/20 shadow-lg py-1">
                     <Link
                       to="/account/info"
                       className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                      onClick={closeDropdown}
                     >
                       <User className="mr-2 h-4 w-4" />
                       Settings & Privacy
@@ -411,6 +402,7 @@ export function NavbarComponent() {
                         <Link
                           to="/account/history"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <HistoryIcon className="mr-2 h-4 w-4" />
                           Give Feedback
@@ -418,6 +410,7 @@ export function NavbarComponent() {
                         <Link
                           to="/account/upcoming"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <Calendar className="mr-2 h-4 w-4" />
                           Dashboard
@@ -425,6 +418,7 @@ export function NavbarComponent() {
                         <Link
                           to="/account/complain"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
                         >
                           <AlertTriangle className="mr-2 h-4 w-4" />
                           Help & Support
@@ -435,6 +429,7 @@ export function NavbarComponent() {
                       <Link
                         to="/tour-guide-profile"
                         className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        onClick={closeDropdown}
                       >
                         <User className="mr-2 h-4 w-4" />
                         Profile
@@ -490,11 +485,11 @@ export function NavbarComponent() {
               </>
             )}
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => toggleDropdown("mobileMenu")}
               className="inline-flex items-center justify-center p-2 rounded-full text-white hover:bg-white/10 focus:outline-none transition-colors duration-200"
             >
               <span className="sr-only">Open main menu</span>
-              {isMenuOpen ? (
+              {openDropdown === "mobileMenu" ? (
                 <X className="block h-6 w-6" aria-hidden="true" />
               ) : (
                 <Menu className="block h-6 w-6" aria-hidden="true" />
@@ -505,7 +500,7 @@ export function NavbarComponent() {
       </div>
 
       {/* Mobile Navigation */}
-      {isMenuOpen && (
+      {openDropdown === "mobileMenu" && (
         <div className="md:hidden bg-black/90 mt-2 mx-4 rounded-2xl border border-white/20">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {role === "tour-guide" && (
@@ -514,32 +509,36 @@ export function NavbarComponent() {
                 {/* Itineraries Dropdown */}
                 <div className="relative">
                   <button
-                    onClick={() =>
-                      setIsItinerariesDropdownOpen(!isItinerariesDropdownOpen)
-                    }
+                    onClick={() => toggleDropdown("mobileItineraries")}
                     className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                   >
                     Itineraries
-                    {isItinerariesDropdownOpen ? (
-                      <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
+                    {openDropdown === "mobileItineraries" ? (
+                      <ChevronUp className="ml-1 h-4 w-4" />
                     ) : (
-                      <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
+                      <ChevronDown className="ml-1 h-4 w-4" />
                     )}
                   </button>
-                  {isItinerariesDropdownOpen && (
-                    <div className="absolute mt-2 w-40 bg-black/90 rounded-lg shadow-lg py-1 border border-white/20 z-50">
+                  {openDropdown === "mobileItineraries" && (
+                    <div className="mt-2 w-40 bg-black/90 rounded-lg shadow-lg py-1 border border-white/20 z-50">
                       <NavLink
                         to="/all-itineraries"
                         className="block px-4 py-2"
+                        onClick={closeDropdown}
                       >
                         All Itineraries
                       </NavLink>
-                      <NavLink to="/my-itineraries" className="block px-4 py-2">
+                      <NavLink
+                        to="/my-itineraries"
+                        className="block px-4 py-2"
+                        onClick={closeDropdown}
+                      >
                         My Itineraries
                       </NavLink>
                       <NavLink
                         to="/create-itinerary"
                         className="block px-4 py-2"
+                        onClick={closeDropdown}
                       >
                         Create Itinerary
                       </NavLink>
@@ -554,69 +553,102 @@ export function NavbarComponent() {
                 <NavLink to="/seller-profile">Profile</NavLink>
                 <div className="relative">
                   <button
-                    onClick={() =>
-                      setIsProductsDropdownOpen(!isProductsDropdownOpen)
-                    }
+                    onClick={() => toggleDropdown("mobileProducts")}
                     className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                   >
                     Products
-                    {isProductsDropdownOpen ? (
-                      <ChevronUp className="ml-1 h-4 w-4" /> // ChevronUp when dropdown is open
+                    {openDropdown === "mobileProducts" ? (
+                      <ChevronUp className="ml-1 h-4 w-4" />
                     ) : (
-                      <ChevronDown className="ml-1 h-4 w-4" /> // ChevronDown when dropdown is closed
+                      <ChevronDown className="ml-1 h-4 w-4" />
                     )}
                   </button>
-                  {isProductsDropdownOpen && (
-                    <div className="absolute mt-2 w-40 bg-black/90 rounded-lg shadow-lg py-1 border border-white/20 z-50">
-                      <NavLink to="/all-products" className="block px-4 py-2">
+                  {openDropdown === "mobileProducts" && (
+                    <div className="mt-2 w-40 bg-black/90 rounded-lg shadow-lg py-1 border border-white/20 z-50">
+                      <NavLink
+                        to="/all-products"
+                        className="block px-4 py-2"
+                        onClick={closeDropdown}
+                      >
                         All Products
                       </NavLink>
-                      <NavLink to="/my-products" className="block px-4 py-2">
+                      <NavLink
+                        to="/my-products"
+                        className="block px-4 py-2"
+                        onClick={closeDropdown}
+                      >
                         My Products
                       </NavLink>
-                      <NavLink to="/create-product" className="block px-4 py-2">
+                      <NavLink
+                        to="/create-product"
+                        className="block px-4 py-2"
+                        onClick={closeDropdown}
+                      >
                         Create Product
                       </NavLink>
                       <NavLink
                         to="/products-archive"
                         className="block px-4 py-2 flex items-center"
+                        onClick={closeDropdown}
                       >
-                        <ArchiveBox className="mr-2 h-5 w-5 text-gray-500" />{" "}
-                        {/* Icon with styling */}
+                        <ArchiveIcon className="mr-2 h-5 w-5 text-gray-500" />
                         Archived Products
                       </NavLink>
                     </div>
                   )}
                 </div>
-                <NavLink to="/seller-profile">Profile</NavLink>
               </>
             )}
             {role === "tourist" && (
               <>
-                <NavLink to="/activity">Activities</NavLink>
-                <NavLink to="/all-itineraries">Itineraries</NavLink>
-                <NavLink to="/all-historical-places">Historical Places</NavLink>
-                <NavLink to="/all-products">Products</NavLink>
+                <NavLink to="/activity" onClick={closeDropdown}>
+                  Activities
+                </NavLink>
+                <NavLink to="/all-itineraries" onClick={closeDropdown}>
+                  Itineraries
+                </NavLink>
+                <NavLink to="/all-historical-places" onClick={closeDropdown}>
+                  Historical Places
+                </NavLink>
+                <NavLink to="/all-products" onClick={closeDropdown}>
+                  Products
+                </NavLink>
               </>
             )}
             {role === "advertiser" && (
               <>
-                <NavLink to="/activity">Activities</NavLink>
-                <NavLink to="/advertiser-profile">Profile</NavLink>
+                <NavLink to="/activity" onClick={closeDropdown}>
+                  Activities
+                </NavLink>
+                <NavLink to="/advertiser-profile" onClick={closeDropdown}>
+                  Profile
+                </NavLink>
               </>
             )}
             {role === "tourism-governor" && (
               <>
-                <NavLink to="/all-historical-places">Historical Places</NavLink>
-                <NavLink to="/create-historical-tag">Historical tag</NavLink>
+                <NavLink to="/all-historical-places" onClick={closeDropdown}>
+                  Historical Places
+                </NavLink>
+                <NavLink to="/create-historical-tag" onClick={closeDropdown}>
+                  Historical tag
+                </NavLink>
               </>
             )}
             {(role === "guest" || role === undefined) && (
               <>
-                <NavLink to="/activity">Activities</NavLink>
-                <NavLink to="/all-itineraries">Itineraries</NavLink>
-                <NavLink to="/all-historical-places">Historical Places</NavLink>
-                <NavLink to="/all-products">Products</NavLink>
+                <NavLink to="/activity" onClick={closeDropdown}>
+                  Activities
+                </NavLink>
+                <NavLink to="/all-itineraries" onClick={closeDropdown}>
+                  Itineraries
+                </NavLink>
+                <NavLink to="/all-historical-places" onClick={closeDropdown}>
+                  Historical Places
+                </NavLink>
+                <NavLink to="/all-products" onClick={closeDropdown}>
+                  Products
+                </NavLink>
               </>
             )}
             {role !== "guest" && role !== undefined && (
@@ -624,6 +656,7 @@ export function NavbarComponent() {
                 <Link
                   to="/account/info"
                   className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                  onClick={closeDropdown}
                 >
                   <User className="mr-2 h-4 w-4" />
                   Settings & Privacy
@@ -633,6 +666,7 @@ export function NavbarComponent() {
                     <Link
                       to="/account/history"
                       className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                      onClick={closeDropdown}
                     >
                       <HistoryIcon className="mr-2 h-4 w-4" />
                       Give Feedback
@@ -640,6 +674,7 @@ export function NavbarComponent() {
                     <Link
                       to="/account/upcoming"
                       className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                      onClick={closeDropdown}
                     >
                       <Calendar className="mr-2 h-4 w-4" />
                       Dashboard
@@ -647,6 +682,7 @@ export function NavbarComponent() {
                     <Link
                       to="/account/complain"
                       className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                      onClick={closeDropdown}
                     >
                       <AlertTriangle className="mr-2 h-4 w-4" />
                       Help & Support

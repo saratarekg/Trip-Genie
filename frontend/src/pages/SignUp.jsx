@@ -1189,7 +1189,7 @@ export function SignupForm() {
                       className="mt-3"
                       style={{ color: "red", fontSize: "16px" }}
                     >
-                      Please scroll to the bottom of the terms and conditions
+                      Please read the terms and conditions
                       before accepting.
                     </div>
                   )}
@@ -1285,7 +1285,7 @@ export function SignupForm() {
                     className="mt-3"
                     style={{ color: "red", fontSize: "16px" }}
                   >
-                    Please scroll to the bottom of the terms and conditions
+                    Please read the terms and conditions
                     before accepting.
                   </div>
                 )}
