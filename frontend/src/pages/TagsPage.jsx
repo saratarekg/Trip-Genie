@@ -167,7 +167,8 @@ const TagsPage = () => {
                 <div className="flex space-x-2">
                   <Button 
                     onClick={createTag} 
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                    className="flex-1 bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] 
+                    active:transform active:scale-95 text-white transition-all duration-200"
                   >
                     Add Tag
                   </Button>
@@ -227,7 +228,10 @@ const TagsPage = () => {
                               setEditTagId(tag._id);
                               setEditTagName(tag.type);
                             }}
-                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            className="bg-blue-500 hover:bg-blue-600 text-w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
+                    hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
+                    active:transform active:scale-95 transition-all duration-200"
+                    variant="outline"
                           >
                             Edit
                           </Button>

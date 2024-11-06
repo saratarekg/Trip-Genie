@@ -51,10 +51,11 @@ New page:
 - Map: Enter latitude and longitude
 
 Admin:
-- Create new pages instead of popups
+
+- Create new pages instead of popups (done)
 - Edit and delete colors
 - Fonts
-- Move buttons to the right
-- Change hide to back and improve its appearance
-- Add filter and sort
-- Add color behind navbar at the beginning so that logo appears.
+- Move buttons to the right 
+- Change hide to back and improve its appearance (done)
+- Add filter and sort 
+- Add color behind navbar at the beginning so that logo appears.(done)
