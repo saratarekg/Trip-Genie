@@ -29,8 +29,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -71,7 +82,7 @@ const HistoricalPlaceDetail = () => {
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHistoricalPlaceDetails = async () => {
@@ -80,7 +91,7 @@ const HistoricalPlaceDetail = () => {
         setLoading(false);
         return;
       }
-  
+
       setLoading(true);
       try {
         const token = Cookies.get("jwt");
@@ -92,19 +103,18 @@ const HistoricalPlaceDetail = () => {
             },
           }
         );
-  
+
         if (!response.ok) {
           throw new Error("Failed to fetch historical place details");
         }
-  
+
         const data = await response.json();
-  
+
         // Now set the state
         setHistoricalPlace(data);
 
-  
         if (data.pictures && data.pictures.length > 0) {
-          setMainImage(data.pictures[0]);
+          setMainImage(data.pictures[0].url);
         }
         if (token) {
           const decodedToken = jwtDecode.jwtDecode(token);
@@ -124,33 +134,32 @@ const HistoricalPlaceDetail = () => {
     fetchHistoricalPlaceDetails();
   }, []);
 
-
   const fetchExchangeRate = async () => {
     try {
       const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',  // Ensure content type is set to JSON
-            },
-            body: JSON.stringify({
-              base: historicalPlace.currency,     // Sending base currency ID
-              target: userPreferredCurrency._id,      // Sending target currency ID
-            }),
-          }
-        );
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // Ensure content type is set to JSON
+          },
+          body: JSON.stringify({
+            base: historicalPlace.currency, // Sending base currency ID
+            target: userPreferredCurrency._id, // Sending target currency ID
+          }),
+        }
+      );
       // Parse the response JSON
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setExchangeRates(data.conversion_rate);
-    } else {
-      // Handle possible errors
-      console.error('Error in fetching exchange rate:', data.message);
-    }
+      if (response.ok) {
+        setExchangeRates(data.conversion_rate);
+      } else {
+        // Handle possible errors
+        console.error("Error in fetching exchange rate:", data.message);
+      }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
@@ -159,65 +168,72 @@ const HistoricalPlaceDetail = () => {
   const getCurrencySymbol = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${historicalPlace.currency}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `http://localhost:4000/${userRole}/getCurrency/${historicalPlace.currency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setCurrencySymbol(response.data);
-
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
     }
   };
 
   const formatPrice = (price, type) => {
-    if(historicalPlace){
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      if (userPreferredCurrency === historicalPlace.currency) {
-        return `${userPreferredCurrency.symbol}${price}/Day`;
+    if (historicalPlace) {
+      if (userRole === "tourist" && userPreferredCurrency) {
+        if (userPreferredCurrency === historicalPlace.currency) {
+          return `${userPreferredCurrency.symbol}${price}/Day`;
+        } else {
+          const exchangedPrice = price * exchangeRates;
+          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(
+            2
+          )}/Day`;
+        }
       } else {
-        const exchangedPrice = price * exchangeRates;
-        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}/Day`;
-      }
-    } else {
-      if(currencySymbol){
-      return `${currencySymbol.symbol}${price}/Day`;
+        if (currencySymbol) {
+          return `${currencySymbol.symbol}${price}/Day`;
+        }
       }
     }
-  }
   };
-
 
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const currencyId = response.data.preferredCurrency
+        const currencyId = response.data.preferredCurrency;
 
-        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUserPreferredCurrency(response2.data);
-
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
     }
   };
 
-
   useEffect(() => {
-    if (historicalPlace ) {
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== historicalPlace.currency) {
+    if (historicalPlace) {
+      if (
+        userRole === "tourist" &&
+        userPreferredCurrency &&
+        userPreferredCurrency !== historicalPlace.currency
+      ) {
         fetchExchangeRate();
-      }
-      else{
+      } else {
         getCurrencySymbol();
       }
     }
@@ -273,8 +289,12 @@ const HistoricalPlaceDetail = () => {
   };
 
   const handleEmailShare = () => {
-    const subject = encodeURIComponent(`Check out this historical place: ${historicalPlace.title}`);
-    const body = encodeURIComponent(`I thought you might be interested in this historical place:\n\n${historicalPlace.title}\n\n${window.location.href}`);
+    const subject = encodeURIComponent(
+      `Check out this historical place: ${historicalPlace.title}`
+    );
+    const body = encodeURIComponent(
+      `I thought you might be interested in this historical place:\n\n${historicalPlace.title}\n\n${window.location.href}`
+    );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     setOpen(false); // Close the popover
   };
@@ -313,284 +333,300 @@ const HistoricalPlaceDetail = () => {
 
   return (
     <div>
-       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        </div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className="min-h-screen bg-gray-100 pt-8">
-      <div className="container mx-auto px-4 py-8 ">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-6">
-            <div className="flex flex-col mb-6">
-              <div className="flex justify-between items-start mb-2">
-                <h1 className="text-3xl font-bold">{historicalPlace.title}</h1>
-                <div className="flex flex-wrap gap-2">
-                  {historicalPlace.historicalTag &&
-                  historicalPlace.historicalTag.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {historicalPlace.historicalTag.map(
-                        (historicalTag, index) => (
-                          <Badge
-                            key={index}
-                            variant="secondary"
-                            className="text-lg px-4 py-2 rounded-full flex items-center" // Adjust font size, padding, and make it a flex container
+        <div className="container mx-auto px-4 py-8 ">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6">
+              <div className="flex flex-col mb-6">
+                <div className="flex justify-between items-start mb-2">
+                  <h1 className="text-3xl font-bold">
+                    {historicalPlace.title}
+                  </h1>
+                  <div className="flex flex-wrap gap-2">
+                    {historicalPlace.historicalTag &&
+                    historicalPlace.historicalTag.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {historicalPlace.historicalTag.map(
+                          (historicalTag, index) => (
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-lg px-4 py-2 rounded-full flex items-center" // Adjust font size, padding, and make it a flex container
+                            >
+                              <Tag className="mr-2" />{" "}
+                              {/* Adds an icon-like tag inside the badge */}
+                              {historicalTag.type}
+                            </Badge>
+                          )
+                        )}
+                        {historicalPlace.historicalTag.map(
+                          (historicalTag, index) => (
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-lg px-4 py-2 rounded-full flex items-center" // Same styles for the period badge
+                            >
+                              <Tag className="mr-2" />{" "}
+                              {/* Tag icon for the period as well */}
+                              {historicalTag.period}
+                            </Badge>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <p>No tags available</p>
+                    )}
+                  </div>
+                </div>
+                <p className="text-gray-600 mt-2">
+                  {historicalPlace.description || "No description available."}
+                </p>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-8">
+                <div className="md:w-2/3">
+                  <div className="relative pb-[56.25%] h-0">
+                    <img
+                      src={mainImage}
+                      alt={historicalPlace.title}
+                      className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
+                    />
+                  </div>
+                  <div className="mt-4 flex gap-2 overflow-x-auto">
+                    {historicalPlace.pictures &&
+                      historicalPlace.pictures.map((pic, index) => (
+                        <img
+                          key={index}
+                          src={pic.url}
+                          alt={`${historicalPlace.title} - ${index + 1}`}
+                          className="w-24 h-24 object-cover rounded cursor-pointer"
+                          onClick={() => setMainImage(pic.url)}
+                        />
+                      ))}
+                  </div>
+                </div>
+
+                <div className="md:w-1/3 space-y-4">
+                  <ToastProvider>
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="ml-auto">
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <div className="flex flex-col">
+                          <Button
+                            variant="ghost"
+                            onClick={handleCopyLink}
+                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
                           >
-                            <Tag className="mr-2" />{" "}
-                            {/* Adds an icon-like tag inside the badge */}
-                            {historicalTag.type}
-                          </Badge>
-                        )
-                      )}
-                      {historicalPlace.historicalTag.map(
-                        (historicalTag, index) => (
-                          <Badge
-                            key={index}
-                            variant="secondary"
-                            className="text-lg px-4 py-2 rounded-full flex items-center" // Same styles for the period badge
+                            <Link className="mr-2 h-4 w-4" />
+                            Copy Link
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={handleEmailShare}
+                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
                           >
-                            <Tag className="mr-2" />{" "}
-                            {/* Tag icon for the period as well */}
-                            {historicalTag.period}
-                          </Badge>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    <p>No tags available</p>
-                  )}
-                </div>
-              </div>
-              <p className="text-gray-600 mt-2">
-                {historicalPlace.description || "No description available."}
-              </p>
-            </div>
+                            <Mail className="mr-2 h-4 w-4" />
+                            Share by Email
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
 
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="md:w-2/3">
-                <div className="relative pb-[56.25%] h-0">
-                  <img
-                    src={mainImage}
-                    alt={historicalPlace.title}
-                    className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div className="mt-4 flex gap-2 overflow-x-auto">
-                  {historicalPlace.pictures &&
-                    historicalPlace.pictures.map((pic, index) => (
-                      <img
-                        key={index}
-                        src={pic}
-                        alt={`${historicalPlace.title} - ${index + 1}`}
-                        className="w-24 h-24 object-cover rounded cursor-pointer"
-                        onClick={() => setMainImage(pic)}
-                      />
-                    ))}
-                </div>
-              </div>
+                    <ToastViewport />
 
-              <div className="md:w-1/3 space-y-4">
-
-              <ToastProvider>
-                <Popover open={open} onOpenChange={setOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="ml-auto">
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <div className="flex flex-col">
-                      <Button
-                        variant="ghost"
-                        onClick={handleCopyLink}
-                        className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                    {isToastOpen && (
+                      <Toast
+                        onOpenChange={setIsToastOpen}
+                        open={isToastOpen}
+                        duration={3000}
                       >
-                        <Link className="mr-2 h-4 w-4" />
-                        Copy Link
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={handleEmailShare}
-                        className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                      >
-                        <Mail className="mr-2 h-4 w-4" />
-                        Share by Email
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                        {" "}
+                        {/* Auto close after 3 seconds */}
+                        <ToastTitle>Link Copied</ToastTitle>
+                        <ToastDescription>
+                          The link has been copied to your clipboard.
+                        </ToastDescription>
+                        <ToastClose />
+                      </Toast>
+                    )}
+                  </ToastProvider>
 
-                <ToastViewport />
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Location</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center">
+                        <MapPin className="w-5 h-5 mr-2 text-gray-500" />
+                        <span>
+                          {historicalPlace.location?.address || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex items-center mt-2">
+                        <Globe className="w-5 h-5 mr-2 text-gray-500" />
+                        <span>
+                          {historicalPlace.location?.city},{" "}
+                          {historicalPlace.location?.country}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                {isToastOpen && (
-                  <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
-                    <ToastTitle>Link Copied</ToastTitle>
-                    <ToastDescription>
-                      The link has been copied to your clipboard.
-                    </ToastDescription>
-                    <ToastClose />
-                  </Toast>
-                )}
-              </ToastProvider>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Ticket Prices</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <span>Foreigner:</span>
+                        <span>
+                          {formatPrice(
+                            historicalPlace.ticketPrices?.foreigner,
+                            "foreigner"
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span>Native:</span>
+                        <span>
+                          {formatPrice(
+                            historicalPlace.ticketPrices?.native,
+                            "native"
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span>Student:</span>
+                        <span>
+                          {formatPrice(
+                            historicalPlace.ticketPrices?.student,
+                            "student"
+                          )}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Location</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center">
-                      <MapPin className="w-5 h-5 mr-2 text-gray-500" />
-                      <span>{historicalPlace.location?.address || "N/A"}</span>
-                    </div>
-                    <div className="flex items-center mt-2">
-                      <Globe className="w-5 h-5 mr-2 text-gray-500" />
-                      <span>
-                        {historicalPlace.location?.city},{" "}
-                        {historicalPlace.location?.country}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ticket Prices</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <span>Foreigner:</span>
-                      <span>
-                        {formatPrice(historicalPlace.ticketPrices?.foreigner, 'foreigner')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span>Native:</span>
-                      <span>
-                        {formatPrice(historicalPlace.ticketPrices?.native, 'native')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span>Student:</span>
-                      <span>
-                        {formatPrice(historicalPlace.ticketPrices?.student, 'student')}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Opening Hours</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <span>Weekdays:</span>
-                      <span>
-                        {historicalPlace.openingHours?.weekdays || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span>Weekends:</span>
-                      <span>
-                        {historicalPlace.openingHours?.weekends || "N/A"}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Opening Hours</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <span>Weekdays:</span>
+                        <span>
+                          {historicalPlace.openingHours?.weekdays || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span>Weekends:</span>
+                        <span>
+                          {historicalPlace.openingHours?.weekends || "N/A"}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
+
+              {(userRole === "admin" ||
+                (canModify && userRole === "tourism-governor")) && (
+                <div className="mt-8 flex justify-end space-x-4">
+                  <Button
+                    onClick={handleUpdate}
+                    variant="default"
+                    className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Update
+                  </Button>
+                  <Button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    variant="destructive"
+                    className="flex items-center"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              )}
             </div>
-
-            {(userRole === "admin" ||
-              (canModify && userRole === "tourism-governor")) && (
-              <div className="mt-8 flex justify-end space-x-4">
-                <Button
-                  onClick={handleUpdate}
-                  variant="default"
-                  className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Update
-                </Button>
-                <Button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="destructive"
-                  className="flex items-center"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
-                </Button>
-              </div>
-            )}
           </div>
         </div>
-      </div>
 
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Historical Place</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this historical place?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowDeleteConfirm(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Historical Place</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this historical place?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDelete}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-              Historical Place Deleted
-            </DialogTitle>
-            <DialogDescription>
-              The historical place has been successfully deleted.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="default"
-              onClick={() => navigate("/all-historical-places")}
-            >
-              Back to All Historical Places
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+                Historical Place Deleted
+              </DialogTitle>
+              <DialogDescription>
+                The historical place has been successfully deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="default"
+                onClick={() => navigate("/all-historical-places")}
+              >
+                Back to All Historical Places
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      <Dialog
-        open={deleteError !== null}
-        onOpenChange={() => setDeleteError(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
-              Failed to Delete Historical Place
-            </DialogTitle>
-            <DialogDescription>
-              {deleteError ||
-                "An error occurred while deleting the historical place."}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="default" onClick={() => setDeleteError(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <Dialog
+          open={deleteError !== null}
+          onOpenChange={() => setDeleteError(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+                Failed to Delete Historical Place
+              </DialogTitle>
+              <DialogDescription>
+                {deleteError ||
+                  "An error occurred while deleting the historical place."}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="default" onClick={() => setDeleteError(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

@@ -13,7 +13,7 @@ const createHistoricalPlace = async (req, res) => {
   } = req.body;
 
   try {
-    let ImagesBuffer = [];
+    let imagesBuffer = [];
     const pictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );

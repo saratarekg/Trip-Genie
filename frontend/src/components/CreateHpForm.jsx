@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Select from 'react-select';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Select from "react-select";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -22,48 +23,46 @@ import { Button } from "@/components/ui/button";
  * @param {boolean} isCityDisabled - Whether the city field is disabled
  * @returns {import('zod').ZodObject}
  */
-const createFormSchema = (isCityDisabled) => z.object({
-  title: z.string().min(1, 'Please enter a name'),
-  description: z.string().min(1, 'Please enter a description'),
-  location: z.object({
-    address: z.string().min(1, 'Please enter an address'),
-    city: isCityDisabled ? z.string().optional() : z.string().min(1, 'Please enter a city'),
-    country: z.string().min(1, 'Please select a country'),
-  }),
-  historicalTag: z
-    .array(
+const createFormSchema = (isCityDisabled) =>
+  z.object({
+    title: z.string().min(1, "Please enter a name"),
+    description: z.string().min(1, "Please enter a description"),
+    location: z.object({
+      address: z.string().min(1, "Please enter an address"),
+      city: isCityDisabled
+        ? z.string().optional()
+        : z.string().min(1, "Please enter a city"),
+      country: z.string().min(1, "Please select a country"),
+    }),
+    historicalTag: z.array(
       z.object({
         value: z.string(),
         label: z.string(),
       })
     ),
-  openingHours: z.object({
-    weekdays: z.string().min(1, 'Please enter weekday opening hours'),
-    weekends: z.string().min(1, 'Please enter weekend opening hours'),
-  }),
-  ticketPrices: z.object({
-    foreigner: z.string().min(1, 'Please enter foreigner ticket price'),
-    native: z.string().min(1, 'Please enter native ticket price'),
-    student: z.string().min(1, 'Please enter student ticket price'),
-  }),
-  currency: z.string().min(1, 'Please select a currency'),
-  pictures: z.string().min(1, 'Please enter at least one picture URL')
-    .refine(
-      (value) => value.split('\n').every(url => url.trim().startsWith('http')),
-      'All URLs must start with http:// or https://'
-    ),
-});
+    openingHours: z.object({
+      weekdays: z.string().min(1, "Please enter weekday opening hours"),
+      weekends: z.string().min(1, "Please enter weekend opening hours"),
+    }),
+    ticketPrices: z.object({
+      foreigner: z.string().min(1, "Please enter foreigner ticket price"),
+      native: z.string().min(1, "Please enter native ticket price"),
+      student: z.string().min(1, "Please enter student ticket price"),
+    }),
+    currency: z.string().min(1, "Please select a currency"),
+  });
 
 export default function CreateHpForm() {
   const [historicalTags, setHistoricalTags] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showDialog, setShowDialog] = useState(false);
   const [countries, setCountries] = useState([]);
   const [cities, setCities] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(false);
   const [isCityDisabled, setIsCityDisabled] = useState(true);
   const [currencies, setCurrencies] = useState([]);
+  const [pictures, setPictures] = useState([]);
   const navigate = useNavigate();
 
   const {
@@ -75,32 +74,31 @@ export default function CreateHpForm() {
   } = useForm({
     resolver: zodResolver(createFormSchema(isCityDisabled)),
     defaultValues: {
-      title: '',
-      description: '',
+      title: "",
+      description: "",
       location: {
-        address: '',
-        city: '',
-        country: '',
+        address: "",
+        city: "",
+        country: "",
       },
       historicalTag: [],
       openingHours: {
-        weekdays: '',
-        weekends: '',
+        weekdays: "",
+        weekends: "",
       },
       ticketPrices: {
-        foreigner: '',
-        native: '',
-        student: '',
+        foreigner: "",
+        native: "",
+        student: "",
       },
-      currency: '',
-      pictures: '',
+      currency: "",
     },
   });
 
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const response = await axios.get('https://restcountries.com/v3.1/all');
+        const response = await axios.get("https://restcountries.com/v3.1/all");
         const countryList = response.data
           .map((country) => ({
             name: country.name.common,
@@ -109,22 +107,25 @@ export default function CreateHpForm() {
           .sort((a, b) => a.name.localeCompare(b.name));
         setCountries(countryList);
       } catch (err) {
-        console.error('Error fetching countries:', err.message);
-        setError('Failed to fetch countries. Please try again.');
+        console.error("Error fetching countries:", err.message);
+        setError("Failed to fetch countries. Please try again.");
       }
     };
     fetchCountries();
 
     const fetchCurrencies = async () => {
       try {
-        const token = Cookies.get('jwt');
-        const response = await axios.get(`http://localhost:4000/tourism-governor/currencies`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const token = Cookies.get("jwt");
+        const response = await axios.get(
+          `http://localhost:4000/tourism-governor/currencies`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setCurrencies(response.data);
       } catch (err) {
-        console.error('Error fetching currencies:', err.message);
-        setError('Failed to fetch currencies. Please try again.');
+        console.error("Error fetching currencies:", err.message);
+        setError("Failed to fetch currencies. Please try again.");
       }
     };
 
@@ -133,47 +134,53 @@ export default function CreateHpForm() {
     fetchHistoricalTags();
   }, []);
 
-    const fetchHistoricalTags = async () => {
-      try {
-        const token = Cookies.get('jwt');
-        const response = await axios.get(`http://localhost:4000/tourism-governor/historical-tag`, {
+  const fetchHistoricalTags = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        `http://localhost:4000/tourism-governor/historical-tag`,
+        {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        setHistoricalTags(response.data);
-      } catch (err) {
-        console.error('Error fetching historical tags:', err.message);
-        setError('Failed to fetch tags. Please try again.');
-      }
-    };
+        }
+      );
+      setHistoricalTags(response.data);
+    } catch (err) {
+      console.error("Error fetching historical tags:", err.message);
+      setError("Failed to fetch tags. Please try again.");
+    }
+  };
 
   const fetchCities = async (country) => {
     setCitiesLoading(true);
     setIsCityDisabled(true);
     try {
-      const response = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ country }),
-      });
+      const response = await fetch(
+        "https://countriesnow.space/api/v0.1/countries/cities",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ country }),
+        }
+      );
 
       const data = await response.json();
 
       if (data.error) {
-        throw new Error(data.msg || 'Failed to fetch cities');
+        throw new Error(data.msg || "Failed to fetch cities");
       }
 
       const sortedCities = data.data.sort();
       setCities(sortedCities);
       setIsCityDisabled(sortedCities.length === 0);
     } catch (err) {
-      console.error('Error fetching cities: ', err);
+      console.error("Error fetching cities: ", err);
       setCities([]);
       setIsCityDisabled(true);
     } finally {
       setCitiesLoading(false);
-      trigger('location.city');
+      trigger("location.city");
     }
   };
 
@@ -181,35 +188,58 @@ export default function CreateHpForm() {
     const country = event.target.value;
     fetchCities(country);
   };
+  const handlePicturesUpload = (e) => {
+    const files = e.target.files;
+    if (files) {
+      setPictures([...pictures, ...Array.from(files)]);
+    }
+  };
 
   const onSubmit = async (data) => {
     setLoading(true);
-    setError('');
+    setError("");
 
-    const token = Cookies.get('jwt');
+    const token = Cookies.get("jwt");
+
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("location[address]", data.location.address);
+    formData.append("location[city]", data.location.city);
+    formData.append("location[country]", data.location.country);
+    data.historicalTag.forEach((tag, index) => {
+      formData.append(`historicalTag[${index}]`, tag.value);
+    });
+    formData.append("openingHours[weekdays]", data.openingHours.weekdays);
+    formData.append("openingHours[weekends]", data.openingHours.weekends);
+    formData.append("ticketPrices[foreigner]", data.ticketPrices.foreigner);
+    formData.append("ticketPrices[native]", data.ticketPrices.native);
+    formData.append("ticketPrices[student]", data.ticketPrices.student);
+    formData.append("currency", data.currency);
+
+    pictures.forEach((picture, index) => {
+      formData.append(`pictures`, picture);
+    });
 
     try {
-      const response = await fetch(`http://localhost:4000/tourism-governor/historical-places`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          historicalTag: data.historicalTag.map(tag => tag.value),
-          // currency: data.currency,
-          pictures: data.pictures.split('\n').map(url => url.trim()).filter(url => url),
-        }),
-      });
+      const response = await axios.post(
+        `http://localhost:4000/tourism-governor/historical-places`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-      if (response.ok) {
+      if (response.status === 201) {
         setShowDialog(true);
       } else {
-        throw new Error('Failed to create historical place.');
+        throw new Error("Failed to create historical place.");
       }
     } catch (err) {
-      setError('Failed to create historical place. Please try again.');
+      setError("Failed to create historical place. Please try again.");
       console.error(err.message);
     } finally {
       setLoading(false);
@@ -218,7 +248,7 @@ export default function CreateHpForm() {
 
   const handleGoBack = () => {
     setShowDialog(false);
-    navigate('/all-historical-places');
+    navigate("/all-historical-places");
   };
 
   const handleCreateNew = () => {
@@ -232,32 +262,44 @@ export default function CreateHpForm() {
         className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-20 mb-20 space-y-4"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <h2 className="text-xl font-semibold mb-4 text-center">Create Historical Place</h2>
+        <h2 className="text-xl font-semibold mb-4 text-center">
+          Create Historical Place
+        </h2>
 
         <div>
-          <label htmlFor="title" className="block text-gray-700 mb-2">Name *</label>
+          <label htmlFor="title" className="block text-gray-700 mb-2">
+            Name *
+          </label>
           <input
-            {...register('title')}
+            {...register("title")}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="title"
           />
-          {errors.title && <span className="text-red-500">{errors.title.message}</span>}
+          {errors.title && (
+            <span className="text-red-500">{errors.title.message}</span>
+          )}
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-gray-700 mb-2">Description *</label>
+          <label htmlFor="description" className="block text-gray-700 mb-2">
+            Description *
+          </label>
           <textarea
-            {...register('description')}
+            {...register("description")}
             className="border border-gray-300 rounded-xl p-2 w-full h-24 mb-4"
             id="description"
           />
-          {errors.description && <span className="text-red-500">{errors.description.message}</span>}
+          {errors.description && (
+            <span className="text-red-500">{errors.description.message}</span>
+          )}
         </div>
 
         <div>
-          <label htmlFor="country" className="block text-gray-700 mb-2">Country *</label>
+          <label htmlFor="country" className="block text-gray-700 mb-2">
+            Country *
+          </label>
           <select
-            {...register('location.country')}
+            {...register("location.country")}
             onChange={handleCountryChange}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="country"
@@ -269,13 +311,19 @@ export default function CreateHpForm() {
               </option>
             ))}
           </select>
-          {errors.location?.country && <span className="text-red-500">{errors.location.country.message}</span>}
+          {errors.location?.country && (
+            <span className="text-red-500">
+              {errors.location.country.message}
+            </span>
+          )}
         </div>
 
         <div>
-          <label htmlFor="city" className="block text-gray-700 mb-2">City {isCityDisabled ? '' : '*'}</label>
+          <label htmlFor="city" className="block text-gray-700 mb-2">
+            City {isCityDisabled ? "" : "*"}
+          </label>
           <select
-            {...register('location.city')}
+            {...register("location.city")}
             disabled={isCityDisabled}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="city"
@@ -287,21 +335,32 @@ export default function CreateHpForm() {
               </option>
             ))}
           </select>
-          {errors.location?.city && <span className="text-red-500">{errors.location.city.message}</span>}
+          {errors.location?.city && (
+            <span className="text-red-500">{errors.location.city.message}</span>
+          )}
           {isCityDisabled && (
-            <span className="text-blue-500">No cities available for this country. You can proceed without selecting a city.</span>
+            <span className="text-blue-500">
+              No cities available for this country. You can proceed without
+              selecting a city.
+            </span>
           )}
         </div>
 
         <div>
-          <label htmlFor="address" className="block text-gray-700 mb-2">Address *</label>
+          <label htmlFor="address" className="block text-gray-700 mb-2">
+            Address *
+          </label>
           <input
-            {...register('location.address')}
+            {...register("location.address")}
             placeholder="Address"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="address"
           />
-          {errors.location?.address && <span className="text-red-500">{errors.location.address.message}</span>}
+          {errors.location?.address && (
+            <span className="text-red-500">
+              {errors.location.address.message}
+            </span>
+          )}
         </div>
 
         <div>
@@ -322,104 +381,136 @@ export default function CreateHpForm() {
               />
             )}
           />
-          {errors.historicalTag && <span className="text-red-500">{errors.historicalTag.message}</span>}
+          {errors.historicalTag && (
+            <span className="text-red-500">{errors.historicalTag.message}</span>
+          )}
         </div>
 
         <div>
-          <label htmlFor="weekdays" className="block text-gray-700 mb-2">Opening Hours (Weekdays) *</label>
+          <label htmlFor="weekdays" className="block text-gray-700 mb-2">
+            Opening Hours (Weekdays) *
+          </label>
           <input
-            {...register('openingHours.weekdays')}
+            {...register("openingHours.weekdays")}
             placeholder="e.g., 9 AM - 5 PM"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="weekdays"
           />
-          {errors.openingHours?.weekdays && <span className="text-red-500">{errors.openingHours.weekdays.message}</span>}
+          {errors.openingHours?.weekdays && (
+            <span className="text-red-500">
+              {errors.openingHours.weekdays.message}
+            </span>
+          )}
         </div>
 
         <div>
-          <label htmlFor="weekends" className="block text-gray-700 mb-2">Opening Hours (Weekends) *</label>
+          <label htmlFor="weekends" className="block text-gray-700 mb-2">
+            Opening Hours (Weekends) *
+          </label>
           <input
-            {...register('openingHours.weekends')}
+            {...register("openingHours.weekends")}
             placeholder="e.g., 10 AM - 4 PM"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="weekends"
           />
-          {errors.openingHours?.weekends && <span className="text-red-500">{errors.openingHours.weekends.message}</span>}
+          {errors.openingHours?.weekends && (
+            <span className="text-red-500">
+              {errors.openingHours.weekends.message}
+            </span>
+          )}
         </div>
 
         <div>
-          <label htmlFor="foreigner" className="block text-gray-700 mb-2">Ticket Prices (Foreigner) *</label>
+          <label htmlFor="foreigner" className="block text-gray-700 mb-2">
+            Ticket Prices (Foreigner) *
+          </label>
           <input
-            {...register('ticketPrices.foreigner')}
+            {...register("ticketPrices.foreigner")}
             placeholder="Enter foreigner ticket price"
             type="number"
             min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="foreigner"
           />
-          {errors.ticketPrices?.foreigner && <span className="text-red-500">{errors.ticketPrices.foreigner.message}</span>}
+          {errors.ticketPrices?.foreigner && (
+            <span className="text-red-500">
+              {errors.ticketPrices.foreigner.message}
+            </span>
+          )}
         </div>
 
         <div>
-          <label htmlFor="native" className="block text-gray-700 mb-2">Ticket Prices (Native) *</label>
+          <label htmlFor="native" className="block text-gray-700 mb-2">
+            Ticket Prices (Native) *
+          </label>
           <input
-            {...register('ticketPrices.native')}
+            {...register("ticketPrices.native")}
             placeholder="Enter native ticket price"
             type="number"
             min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="native"
           />
-          {errors.ticketPrices?.native && <span className="text-red-500">{errors.ticketPrices.native.message}</span>}
+          {errors.ticketPrices?.native && (
+            <span className="text-red-500">
+              {errors.ticketPrices.native.message}
+            </span>
+          )}
         </div>
 
         <div>
-          <label htmlFor="student" className="block text-gray-700 mb-2">Ticket Prices (Student) *</label>
+          <label htmlFor="student" className="block text-gray-700 mb-2">
+            Ticket Prices (Student) *
+          </label>
           <input
-            {...register('ticketPrices.student')}
+            {...register("ticketPrices.student")}
             placeholder="Enter student ticket price"
             type="number"
             min="0"
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="student"
           />
-          {errors.ticketPrices?.student && <span className="text-red-500">{errors.ticketPrices.student.message}</span>}
+          {errors.ticketPrices?.student && (
+            <span className="text-red-500">
+              {errors.ticketPrices.student.message}
+            </span>
+          )}
         </div>
 
         <div>
           <Label htmlFor="currency">Currency *</Label>
           <select
-            {...register('currency')}
+            {...register("currency")}
             className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
             id="currency"
           >
             <option value="">Select currency</option>
             {currencies.map((currency) => (
               <option key={currency._id} value={currency._id}>
-                {currency.code} - {currency.name}  ({currency.symbol})
+                {currency.code} - {currency.name} ({currency.symbol})
               </option>
             ))}
           </select>
-          {errors.currency && <span className="text-red-500">{errors.currency.message}</span>}
+          {errors.currency && (
+            <span className="text-red-500">{errors.currency.message}</span>
+          )}
         </div>
 
-        <div>
-          <label htmlFor="pictures" className="block text-gray-700 mb-2">Picture URLs</label>
-          <textarea
-            {...register('pictures')}
-            placeholder="Enter picture URLs (one per line)"
-            className="border border-gray-300 rounded-xl p-2 w-full h-32 mb-4"
+        <div className="space-y-2">
+          <Label htmlFor="pictures">Pictures</Label>
+          <Input
             id="pictures"
+            type="file"
+            multiple
+            onChange={handlePicturesUpload}
           />
-          {errors.pictures && <span className="text-red-500">{errors.pictures.message}</span>}
         </div>
-
         <button
           type="submit"
           className="w-full bg-orange-500 text-white rounded-xl p-2 h-12 mt-4"
           disabled={loading}
         >
-          {loading ? 'Creating...' : 'Create Historical Place'}
+          {loading ? "Creating..." : "Create Historical Place"}
         </button>
 
         {error && <div className="text-red-500 mb-4">{error}</div>}
@@ -429,15 +520,15 @@ export default function CreateHpForm() {
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Success!</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">
+              Success!
+            </DialogTitle>
             <DialogDescription className="text-gray-600 mt-2">
               The historical place was created successfully.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-4 flex justify-end space-x-4">
-            <Button onClick={handleGoBack}>
-              Go to All Historical Places
-            </Button>
+            <Button onClick={handleGoBack}>Go to All Historical Places</Button>
             <Button variant="outline" onClick={handleCreateNew}>
               Create Another
             </Button>

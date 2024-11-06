@@ -1,399 +1,499 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react'
-import axios from 'axios';
-import Cookies from 'js-cookie'
-import { Check, Plus, XCircle, X, CheckCircle } from 'lucide-react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Card, CardContent } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { Check, Plus, XCircle, X, CheckCircle } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
-    <svg className="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-      <circle className="path" fill="none" strokeWidth="6" strokeLinecap="round" cx="33" cy="33" r="30"></circle>
+    <svg
+      className="spinner"
+      width="65px"
+      height="65px"
+      viewBox="0 0 66 66"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        className="path"
+        fill="none"
+        strokeWidth="6"
+        strokeLinecap="round"
+        cx="33"
+        cy="33"
+        r="30"
+      ></circle>
     </svg>
   </div>
-)
+);
 
 export default function UpdateHistoricalPlace() {
-  const { id } = useParams()
+  const { id } = useParams();
   const [historicalPlace, setHistoricalPlace] = useState({
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     location: {
-      address: '',
-      city: '',
-      country: '',
+      address: "",
+      city: "",
+      country: "",
     },
     openingHours: {
-      weekdays: '',
-      weekends: '',
+      weekdays: "",
+      weekends: "",
     },
     ticketPrices: {
       native: 0,
       student: 0,
       foreigner: 0,
     },
-    currency: '',
+    currency: "",
     historicalTag: [],
     pictures: [],
-  })
-  const [loading, setLoading] = useState(true)
-  const [citiesLoading, setCitiesLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [userRole, setUserRole] = useState(Cookies.get('role') || 'guest')
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
-  const [newPictureUrl, setNewPictureUrl] = useState('')
-  const [countries, setCountries] = useState([])
-  const [cities, setCities] = useState([])
-  const [formErrors, setFormErrors] = useState({})
-  const [showErrorPopup, setShowErrorPopup] = useState(null)
-  const [availableTags, setAvailableTags] = useState([])
-  const [newTag, setNewTag] = useState('')
+  });
+  const [loading, setLoading] = useState(true);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [formErrors, setFormErrors] = useState({});
+  const [showErrorPopup, setShowErrorPopup] = useState(null);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [newTag, setNewTag] = useState("");
   const [currencies, setCurrencies] = useState([]);
-  const navigate = useNavigate()
+  const [pictures, setPictures] = useState([]);
+  const [newPictures, setNewPictures] = useState([]);
+  const [base64Pictures, setBase64Pictures] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const navigate = useNavigate();
 
-  const titleRef = useRef(null)
-  const descriptionRef = useRef(null)
-  const addressRef = useRef(null)
-  const countryRef = useRef(null)
-  const cityRef = useRef(null)
-  const nativePriceRef = useRef(null)
-  const studentPriceRef = useRef(null)
-  const foreignerPriceRef = useRef(null)
-  const pictureUrlRef = useRef(null)
+  const titleRef = useRef(null);
+  const descriptionRef = useRef(null);
+  const addressRef = useRef(null);
+  const countryRef = useRef(null);
+  const cityRef = useRef(null);
+  const nativePriceRef = useRef(null);
+  const studentPriceRef = useRef(null);
+  const foreignerPriceRef = useRef(null);
+  const pictureUrlRef = useRef(null);
 
   useEffect(() => {
     const fetchCurrencies = async () => {
       try {
-        const token = Cookies.get('jwt')
-        const response = await axios.get(`http://localhost:4000/tourism-governor/currencies`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        setCurrencies(response.data)
+        const token = Cookies.get("jwt");
+        const response = await axios.get(
+          `http://localhost:4000/tourism-governor/currencies`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setCurrencies(response.data);
       } catch (err) {
-        console.error('Error fetching currencies:', err.message)
-        setError('Failed to fetch currencies. Please try again.')
+        console.error("Error fetching currencies:", err.message);
+        setError("Failed to fetch currencies. Please try again.");
       }
-    }
+    };
 
-    fetchCurrencies()
-  }, [])
+    fetchCurrencies();
+  }, []);
 
   useEffect(() => {
     const fetchHistoricalPlaceDetails = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
-        const token = Cookies.get('jwt')
-        const response = await fetch(`http://localhost:4000/${userRole}/historical-places/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
+        const token = Cookies.get("jwt");
+        const response = await fetch(
+          `http://localhost:4000/${userRole}/historical-places/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch data')
+          throw new Error("Failed to fetch data");
         }
 
-        const historicalPlaceData = await response.json()
+        const historicalPlaceData = await response.json();
+        setPictures(historicalPlaceData.pictures);
         if (!historicalPlaceData.historicalTag) {
-          historicalPlaceData.historicalTag = []
+          historicalPlaceData.historicalTag = [];
         }
-        setHistoricalPlace(historicalPlaceData)
-        setError(null)
+        setHistoricalPlace(historicalPlaceData);
+        setError(null);
       } catch (err) {
-        setError('Error fetching data. Please try again later.')
-        console.error('Error fetching data:', err)
+        setError("Error fetching data. Please try again later.");
+        console.error("Error fetching data:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchHistoricalPlaceDetails()
-    fetchCountries()
-    fetchAvailableTags()
-  }, [id, userRole])
+    fetchHistoricalPlaceDetails();
+    fetchCountries();
+    fetchAvailableTags();
+  }, [id, userRole]);
 
   useEffect(() => {
     if (historicalPlace.location.country) {
-      fetchCities(historicalPlace.location.country)
+      fetchCities(historicalPlace.location.country);
     } else {
-      setCities([])
+      setCities([]);
     }
-  }, [historicalPlace.location.country])
+  }, [historicalPlace.location.country]);
 
   const fetchCountries = async () => {
     try {
-      const response = await fetch('https://restcountries.com/v3.1/all')
-      const data = await response.json()
-      const sortedCountries = data.map(country => country.name.common).sort()
-      setCountries(sortedCountries)
+      const response = await fetch("https://restcountries.com/v3.1/all");
+      const data = await response.json();
+      const sortedCountries = data.map((country) => country.name.common).sort();
+      setCountries(sortedCountries);
     } catch (error) {
-      console.error('Error fetching countries:', error)
+      console.error("Error fetching countries:", error);
     }
-  }
+  };
 
   const fetchCities = async (country) => {
-
-    setCitiesLoading(true)
+    setCitiesLoading(true);
     try {
-      const response = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ country }),
-      })
+      const response = await fetch(
+        "https://countriesnow.space/api/v0.1/countries/cities",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ country }),
+        }
+      );
 
-      const data = await response.json()
-
-      
+      const data = await response.json();
 
       if (data.error) {
-        throw new Error(data.msg || 'Failed to fetch cities ')
+        throw new Error(data.msg || "Failed to fetch cities ");
       }
 
-      const sortedCities = data.data.sort()
-      setCities(sortedCities)
+      const sortedCities = data.data.sort();
+      setCities(sortedCities);
     } catch (err) {
-      if (err.status===404){
-        setCities([])
+      if (err.status === 404) {
+        setCities([]);
       }
       //setError('Error fetching cities. Please try again later. ')
-      console.error('Error fetching cities: ', err)
-      setCities([])
+      console.error("Error fetching cities: ", err);
+      setCities([]);
     } finally {
-      setCitiesLoading(false)
+      setCitiesLoading(false);
     }
-  }
+  };
 
   const fetchAvailableTags = async () => {
     try {
-      const token = Cookies.get('jwt')
-      const response = await fetch(`http://localhost:4000/${userRole}/historical-tag`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/historical-tag`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch tags')
+        throw new Error("Failed to fetch tags");
       }
 
-      const tags = await response.json()
-      setAvailableTags(tags)
+      const tags = await response.json();
+      setAvailableTags(tags);
     } catch (err) {
-      console.error('Error fetching tags:', err)
+      console.error("Error fetching tags:", err);
     }
-  }
+  };
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
 
     setHistoricalPlace((prev) => {
-      const newState = { ...prev }
-      if (name.includes('.')) {
-        const [parent, child] = name.split('.')
-        newState[parent] = { ...newState[parent], [child]: value }
+      const newState = { ...prev };
+      if (name.includes(".")) {
+        const [parent, child] = name.split(".");
+        newState[parent] = { ...newState[parent], [child]: value };
       } else {
-        newState[name] = value
+        newState[name] = value;
       }
 
-      if (name.startsWith('ticketPrices.')) {
-        const price = parseFloat(value)
+      if (name.startsWith("ticketPrices.")) {
+        const price = parseFloat(value);
         if (isNaN(price) || price < 0) {
-          newState.ticketPrices = { ...newState.ticketPrices, [name.split('.')[1]]: 0 }
+          newState.ticketPrices = {
+            ...newState.ticketPrices,
+            [name.split(".")[1]]: 0,
+          };
         }
       }
 
-      return newState
-    })
+      return newState;
+    });
 
-    setFormErrors((prev) => ({ ...prev, [name]: '' }))
-  }
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+  const handlePicturesUpload = (e) => {
+    const files = e.target.files;
+    if (files) {
+      const newFilePictures = Array.from(files);
+
+      // Create a Set to avoid duplicates based on file names
+      const existingFileNames = new Set(newPictures.map((file) => file.name));
+
+      const newFilesToUpload = newFilePictures.filter(
+        (file) => !existingFileNames.has(file.name)
+      );
+
+      const newBase64PicturesPromises = newFilesToUpload.map(
+        (file) =>
+          new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = () => resolve(reader.result);
+          })
+      );
+
+      Promise.all(newBase64PicturesPromises).then((base64Pictures) => {
+        setBase64Pictures((prev) => [...prev, ...base64Pictures]);
+        setNewPictures((prev) => [...prev, ...newFilesToUpload]);
+      });
+    }
+  };
+
+  const removePicture = (index, isOld) => {
+    if (isOld) {
+      const newPictures = [...pictures];
+      newPictures.splice(index, 1);
+      setPictures(newPictures);
+    } else {
+      const newBase64Pictures = [...base64Pictures];
+      newBase64Pictures.splice(index, 1);
+      setBase64Pictures(newBase64Pictures);
+      const newPictures2 = [...newPictures];
+      newPictures2.splice(index, 1);
+      setNewPictures(newPictures);
+    }
+
+    setSelectedImage(null);
+  };
 
   const handleSelectChange = (name, value) => {
     setHistoricalPlace((prev) => {
-      const newState = { ...prev }
-      if (name.includes('.')) {
-        const [parent, child] = name.split('.')
-        newState[parent] = { ...newState[parent], [child]: value }
+      const newState = { ...prev };
+      if (name.includes(".")) {
+        const [parent, child] = name.split(".");
+        newState[parent] = { ...newState[parent], [child]: value };
       } else {
-        newState[name] = value
+        newState[name] = value;
       }
-      return newState
-    })
+      return newState;
+    });
 
-    setFormErrors((prev) => ({ ...prev, [name]: '' }))
-  }
+    setFormErrors((prev) => ({ ...prev, [name]: "" }));
+  };
 
   const validateForm = () => {
-    const errors = {}
-  
+    const errors = {};
+
     if (!historicalPlace.title.trim()) {
-      errors.title = 'Title is required'
+      errors.title = "Title is required";
     }
     if (!historicalPlace.description.trim()) {
-      errors.description = 'Description is required'
+      errors.description = "Description is required";
     }
     if (!historicalPlace.location.address.trim()) {
-      errors.address = 'Address is required'
+      errors.address = "Address is required";
     }
     if (!historicalPlace.location.country) {
-      errors.country = 'Country is required'
+      errors.country = "Country is required";
     }
     if (!historicalPlace.location.city) {
-      errors.city = 'City is required'
+      errors.city = "City is required";
     }
-    
+
     if (historicalPlace.ticketPrices.native < 0) {
-      errors.nativePrice = 'Native ticket price cannot be negative'
+      errors.nativePrice = "Native ticket price cannot be negative";
     }
     if (historicalPlace.ticketPrices.student < 0) {
-      errors.studentPrice = 'Student ticket price cannot be negative'
+      errors.studentPrice = "Student ticket price cannot be negative";
     }
     if (historicalPlace.ticketPrices.foreigner < 0) {
-      errors.foreignerPrice = 'Foreigner ticket price cannot be negative'
+      errors.foreignerPrice = "Foreigner ticket price cannot be negative";
     }
-  
+
     // Validate opening hours
     if (!historicalPlace.openingHours.weekdays.trim()) {
-      errors.weekdays = 'Weekdays opening hours are required'
+      errors.weekdays = "Weekdays opening hours are required";
     }
     if (!historicalPlace.openingHours.weekends.trim()) {
-      errors.weekends = 'Weekends opening hours are required'
+      errors.weekends = "Weekends opening hours are required";
     }
-  
-    if (newPictureUrl && !/^https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp)$/i.test(newPictureUrl)) {
-      errors.pictureUrl = 'Invalid picture URL. Must be a valid image URL.'
-    }
-  
-    setFormErrors(errors)
-  
-    return Object.keys(errors).length === 0
-  }
-  
+
+    setFormErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
 
   const handleUpdate = async () => {
     if (!validateForm()) {
-      const firstErrorField = Object.keys(formErrors)[0]
+      const firstErrorField = Object.keys(formErrors)[0];
       if (firstErrorField) {
         const refMap = {
           title: titleRef,
           description: descriptionRef,
-          'location.address': addressRef,
-          'location.country': countryRef,
-          'location.city': cityRef,
-          'ticketPrices.native': nativePriceRef,
-          'ticketPrices.student': studentPriceRef,
-          'ticketPrices.foreigner': foreignerPriceRef,
-          pictureUrl: pictureUrlRef,
-        }
-        const fieldRef = refMap[firstErrorField]
+          "location.address": addressRef,
+          "location.country": countryRef,
+          "location.city": cityRef,
+          "ticketPrices.native": nativePriceRef,
+          "ticketPrices.student": studentPriceRef,
+          "ticketPrices.foreigner": foreignerPriceRef,
+        };
+        const fieldRef = refMap[firstErrorField];
         if (fieldRef && fieldRef.current) {
-          fieldRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          fieldRef.current.focus()
+          fieldRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          fieldRef.current.focus();
         }
       }
-      return
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const token = Cookies.get('jwt')
-      const response = await fetch(`http://localhost:4000/${userRole}/historical-places/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(historicalPlace),
-      })
+      const token = Cookies.get("jwt");
+      const formData = new FormData();
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        if (response.status === 400) {
-          setShowErrorPopup(errorData.message)
-          return
+      // Append all the historical place data to formData
+      formData.append("title", historicalPlace.title);
+      formData.append("description", historicalPlace.description);
+      formData.append("location[address]", historicalPlace.location.address);
+      formData.append("location[city]", historicalPlace.location.city);
+      formData.append("location[country]", historicalPlace.location.country);
+      formData.append(
+        "openingHours[weekdays]",
+        historicalPlace.openingHours.weekdays
+      );
+      formData.append(
+        "openingHours[weekends]",
+        historicalPlace.openingHours.weekends
+      );
+      formData.append(
+        "ticketPrices[native]",
+        historicalPlace.ticketPrices.native.toString()
+      );
+      formData.append(
+        "ticketPrices[student]",
+        historicalPlace.ticketPrices.student.toString()
+      );
+      formData.append(
+        "ticketPrices[foreigner]",
+        historicalPlace.ticketPrices.foreigner.toString()
+      );
+      formData.append("currency", historicalPlace.currency);
+
+      historicalPlace.historicalTag.forEach((tag, index) => {
+        formData.append(`historicalTag[${index}]`, tag._id);
+      });
+
+      // Append old pictures as JSON array
+      formData.append("oldPictures", JSON.stringify(pictures));
+
+      // Append new pictures as binary files
+      newPictures.forEach((picture) => {
+        formData.append("newPictures", picture);
+      });
+
+      const response = await axios.put(
+        `http://localhost:4000/${userRole}/historical-places/${id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
-        if (response.status === 403) {
-          setShowErrorPopup(errorData.message)
-          return
-        }
-        throw new Error('Failed to update historical place')
+      );
+
+      if (response.status === 200) {
+        setShowSuccessPopup(true);
+      } else {
+        throw new Error("Failed to update historical place");
       }
-
-      setShowSuccessPopup(true)
     } catch (err) {
-      setError('Error updating historical place. Please try again later.')
-      console.error('Error updating historical place:', err)
+      console.error("Error updating historical place:", err);
+      setShowErrorPopup(
+        err.response?.data?.message ||
+          "Error updating historical place. Please try again later."
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
-  const handleAddPicture = () => {
-    const urlPattern = /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|webp))$/i
-    if (!urlPattern.test(newPictureUrl)) {
-      setFormErrors((prev) => ({ ...prev, pictureUrl: 'Invalid picture URL. Must be a valid image URL.' }))
-      if (pictureUrlRef.current) {
-        pictureUrlRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        pictureUrlRef.current.focus()
-      }
-      return
-    }
-
-    if (newPictureUrl.trim()) {
-      setHistoricalPlace((prev) => ({
-        ...prev,
-        pictures: [...prev.pictures, newPictureUrl.trim()],
-      }))
-      setNewPictureUrl('')
-      setFormErrors((prev) => ({ ...prev, pictureUrl: '' }))
-    }
-  }
-
-  const handleRemovePicture = (index) => {
-    setHistoricalPlace((prev) => ({
-      ...prev,
-      pictures: prev.pictures.filter((_, i) => i !== index),
-    }))
-  }
+  };
 
   const handleAddTag = () => {
-    if (newTag && !historicalPlace.historicalTag.some(tag => tag._id === newTag)) {
-      const tagToAdd = availableTags.find(tag => tag._id === newTag)
+    if (
+      newTag &&
+      !historicalPlace.historicalTag.some((tag) => tag._id === newTag)
+    ) {
+      const tagToAdd = availableTags.find((tag) => tag._id === newTag);
       if (tagToAdd) {
         setHistoricalPlace((prev) => ({
           ...prev,
           historicalTag: [...prev.historicalTag, tagToAdd],
-        }))
-        setNewTag('')
+        }));
+        setNewTag("");
       }
     }
-  }
+  };
 
   const handleRemoveTag = (tagId) => {
     setHistoricalPlace((prev) => ({
       ...prev,
       historicalTag: prev.historicalTag.filter((tag) => tag._id !== tagId),
-    }))
-  }
+    }));
+  };
 
   if (loading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
           <strong className="font-bold">Error!</strong>
           <span className="block sm:inline"> {error}</span>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -411,9 +511,11 @@ export default function UpdateHistoricalPlace() {
                   value={historicalPlace.title}
                   onChange={handleChange}
                   ref={titleRef}
-                  className={formErrors.title ? 'border-red-500' : ''}
+                  className={formErrors.title ? "border-red-500" : ""}
                 />
-                {formErrors.title && <p className="text-red-500">{formErrors.title}</p>}
+                {formErrors.title && (
+                  <p className="text-red-500">{formErrors.title}</p>
+                )}
               </div>
 
               <div>
@@ -425,9 +527,11 @@ export default function UpdateHistoricalPlace() {
                   onChange={handleChange}
                   rows={5}
                   ref={descriptionRef}
-                  className={formErrors.description ? 'border-red-500' : ''}
+                  className={formErrors.description ? "border-red-500" : ""}
                 />
-                {formErrors.description && <p className="text-red-500">{formErrors.description}</p>}
+                {formErrors.description && (
+                  <p className="text-red-500">{formErrors.description}</p>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -440,18 +544,22 @@ export default function UpdateHistoricalPlace() {
                     value={historicalPlace.location.address}
                     onChange={handleChange}
                     ref={addressRef}
-                    className={formErrors.address ? 'border-red-500'  : ''}
+                    className={formErrors.address ? "border-red-500" : ""}
                   />
-                  {formErrors.address && <p className="text-red-500">{formErrors.address}</p>}
+                  {formErrors.address && (
+                    <p className="text-red-500">{formErrors.address}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="location.country">Country</Label>
                   <Select
                     name="location.country"
-                    onValueChange={(value) => handleSelectChange('location.country', value)}
+                    onValueChange={(value) =>
+                      handleSelectChange("location.country", value)
+                    }
                     value={historicalPlace.location.country}
                     ref={countryRef}
-                    className={formErrors.country ? 'border-red-500' : ''}
+                    className={formErrors.country ? "border-red-500" : ""}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a country" />
@@ -464,26 +572,44 @@ export default function UpdateHistoricalPlace() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {formErrors.country && <p className="text-red-500">{formErrors.country}</p>}
+                  {formErrors.country && (
+                    <p className="text-red-500">{formErrors.country}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="location.city">City</Label>
-                  {historicalPlace.location.country && cities.length === 0 && !citiesLoading && (
-                    <p className="text-red-500">No cities available for the selected country.</p>
-                  )}
+                  {historicalPlace.location.country &&
+                    cities.length === 0 &&
+                    !citiesLoading && (
+                      <p className="text-red-500">
+                        No cities available for the selected country.
+                      </p>
+                    )}
                   {citiesLoading ? (
                     <p>Loading cities...</p>
                   ) : (
                     <Select
                       name="location.city"
-                      onValueChange={(value) => handleSelectChange('location.city', value)}
+                      onValueChange={(value) =>
+                        handleSelectChange("location.city", value)
+                      }
                       value={historicalPlace.location.city}
                       ref={cityRef}
-                      className={formErrors.city ? 'border-red-500' : ''}
-                      disabled={!historicalPlace.location.country || cities.length === 0 || citiesLoading}
+                      className={formErrors.city ? "border-red-500" : ""}
+                      disabled={
+                        !historicalPlace.location.country ||
+                        cities.length === 0 ||
+                        citiesLoading
+                      }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={citiesLoading ? "Loading cities..." : "Select a city"} />
+                        <SelectValue
+                          placeholder={
+                            citiesLoading
+                              ? "Loading cities..."
+                              : "Select a city"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {cities.map((city) => (
@@ -494,35 +620,41 @@ export default function UpdateHistoricalPlace() {
                       </SelectContent>
                     </Select>
                   )}
-                  {formErrors.city && <p className="text-red-500">{formErrors.city}</p>}
+                  {formErrors.city && (
+                    <p className="text-red-500">{formErrors.city}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-4">
-  <h2 className="text-2xl font-semibold">Opening Hours</h2>
-  <div>
-    <Label htmlFor="openingHours.weekdays">Weekdays</Label>
-    <Input
-      id="openingHours.weekdays"
-      name="openingHours.weekdays"
-      value={historicalPlace.openingHours.weekdays}
-      onChange={handleChange}
-      className={formErrors.weekdays ? 'border-red-500' : ''}
-    />
-    {formErrors.weekdays && <p className="text-red-500">{formErrors.weekdays}</p>}
-  </div>
-  <div>
-    <Label htmlFor="openingHours.weekends">Weekends</Label>
-    <Input
-      id="openingHours.weekends"
-      name="openingHours.weekends"
-      value={historicalPlace.openingHours.weekends}
-      onChange={handleChange}
-      className={formErrors.weekends ? 'border-red-500' : ''}
-    />
-    {formErrors.weekends && <p className="text-red-500">{formErrors.weekends}</p>}
-  </div>
-</div>
+                <h2 className="text-2xl font-semibold">Opening Hours</h2>
+                <div>
+                  <Label htmlFor="openingHours.weekdays">Weekdays</Label>
+                  <Input
+                    id="openingHours.weekdays"
+                    name="openingHours.weekdays"
+                    value={historicalPlace.openingHours.weekdays}
+                    onChange={handleChange}
+                    className={formErrors.weekdays ? "border-red-500" : ""}
+                  />
+                  {formErrors.weekdays && (
+                    <p className="text-red-500">{formErrors.weekdays}</p>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="openingHours.weekends">Weekends</Label>
+                  <Input
+                    id="openingHours.weekends"
+                    name="openingHours.weekends"
+                    value={historicalPlace.openingHours.weekends}
+                    onChange={handleChange}
+                    className={formErrors.weekends ? "border-red-500" : ""}
+                  />
+                  {formErrors.weekends && (
+                    <p className="text-red-500">{formErrors.weekends}</p>
+                  )}
+                </div>
+              </div>
 
               <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Ticket Prices</h2>
@@ -536,9 +668,11 @@ export default function UpdateHistoricalPlace() {
                     onChange={handleChange}
                     min="0"
                     ref={nativePriceRef}
-                    className={formErrors.nativePrice ? 'border-red-500' : ''}
+                    className={formErrors.nativePrice ? "border-red-500" : ""}
                   />
-                  {formErrors.nativePrice && <p className="text-red-500">{formErrors.nativePrice}</p>}
+                  {formErrors.nativePrice && (
+                    <p className="text-red-500">{formErrors.nativePrice}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="ticketPrices.student">Student</Label>
@@ -550,9 +684,11 @@ export default function UpdateHistoricalPlace() {
                     onChange={handleChange}
                     min="0"
                     ref={studentPriceRef}
-                    className={formErrors.studentPrice ? 'border-red-500' : ''}
+                    className={formErrors.studentPrice ? "border-red-500" : ""}
                   />
-                  {formErrors.studentPrice && <p className="text-red-500">{formErrors.studentPrice}</p>}
+                  {formErrors.studentPrice && (
+                    <p className="text-red-500">{formErrors.studentPrice}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="ticketPrices.foreigner">Foreigner</Label>
@@ -564,15 +700,21 @@ export default function UpdateHistoricalPlace() {
                     onChange={handleChange}
                     min="0"
                     ref={foreignerPriceRef}
-                    className={formErrors.foreignerPrice ? 'border-red-500' : ''}
+                    className={
+                      formErrors.foreignerPrice ? "border-red-500" : ""
+                    }
                   />
-                  {formErrors.foreignerPrice && <p className="text-red-500">{formErrors.foreignerPrice}</p>}
+                  {formErrors.foreignerPrice && (
+                    <p className="text-red-500">{formErrors.foreignerPrice}</p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="currency">Currency</Label>
                   <Select
                     name="currency"
-                    onValueChange={(value) => handleSelectChange('currency', value)}
+                    onValueChange={(value) =>
+                      handleSelectChange("currency", value)
+                    }
                     value={historicalPlace.currency}
                   >
                     <SelectTrigger className="w-full">
@@ -586,7 +728,9 @@ export default function UpdateHistoricalPlace() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {formErrors.currency && <p className="text-red-500">{formErrors.currency}</p>}
+                  {formErrors.currency && (
+                    <p className="text-red-500">{formErrors.currency}</p>
+                  )}
                 </div>
               </div>
 
@@ -594,8 +738,13 @@ export default function UpdateHistoricalPlace() {
                 <h2 className="text-2xl font-semibold">Tags</h2>
                 <div className="flex flex-wrap gap-2">
                   {historicalPlace.historicalTag.map((tag) => (
-                    <div key={tag._id} className="flex items-center bg-gray-200 rounded-full px-3 py-1">
-                      <span>{tag.type} - {tag.period}</span>
+                    <div
+                      key={tag._id}
+                      className="flex items-center bg-gray-200 rounded-full px-3 py-1"
+                    >
+                      <span>
+                        {tag.type} - {tag.period}
+                      </span>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -608,10 +757,7 @@ export default function UpdateHistoricalPlace() {
                   ))}
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Select
-                    value={newTag}
-                    onValueChange={setNewTag}
-                  >
+                  <Select value={newTag} onValueChange={setNewTag}>
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Select a tag" />
                     </SelectTrigger>
@@ -629,41 +775,52 @@ export default function UpdateHistoricalPlace() {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold">Pictures</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {historicalPlace.pictures.map((pic, index) => (
-                    <Card key={index} className="relative">
-                      <CardContent className="p-2">
-                        <img src={pic} alt={`Historical Place ${index + 1}`} className="w-full h-32 object-cover rounded" />
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2"
-                          onClick={() => handleRemovePicture(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </CardContent>
-                    </Card>
+              <div>
+                <Label htmlFor="pictures">Add New Pictures</Label>
+                <Input
+                  id="pictures"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePicturesUpload}
+                  className="mb-2"
+                />
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  {pictures.map((picture, index) => (
+                    <div key={`existing-${index}`} className="relative">
+                      <img
+                        src={picture.url}
+                        alt={`Product Existing ${index + 1}`}
+                        className="w-full h-32 object-cover rounded cursor-pointer"
+                        onClick={() => setSelectedImage(picture.url)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePicture(index, true)}
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
                   ))}
-                  <Card>
-                    <CardContent className="p-2">
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          placeholder="New picture URL"
-                          value={newPictureUrl}
-                          onChange={(e) => setNewPictureUrl(e.target.value)}
-                          ref={pictureUrlRef}
-                          className={formErrors.pictureUrl ? 'border-red-500' : ''}
-                        />
-                        <Button onClick={handleAddPicture} size="icon" disabled={!newPictureUrl.trim()}>
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      {formErrors.pictureUrl && <p className="text-red-500">{formErrors.pictureUrl}</p>}
-                    </CardContent>
-                  </Card>
+
+                  {base64Pictures.map((picture, index) => (
+                    <div key={`existing-${index}`} className="relative">
+                      <img
+                        src={picture} // This will be the base64 string
+                        alt={`Product Existing ${index + 1}`}
+                        className="w-full h-32 object-cover rounded cursor-pointer"
+                        onClick={() => setSelectedImage(picture)}
+                      />
+                      <button
+                        onClick={() => removePicture(index, false)} // 'false' indicates it's an existing picture
+                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                        type="button"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -689,14 +846,17 @@ export default function UpdateHistoricalPlace() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate('/all-historical-places')}>
+            <Button onClick={() => navigate("/all-historical-places")}>
               Back to All Historical Places
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showErrorPopup !== null} onOpenChange={() => setShowErrorPopup(null)}>
+      <Dialog
+        open={showErrorPopup !== null}
+        onOpenChange={() => setShowErrorPopup(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -704,7 +864,8 @@ export default function UpdateHistoricalPlace() {
               Failed to Update Historical Place
             </DialogTitle>
             <DialogDescription>
-              {showErrorPopup || 'An error occurred while updating the historical place.'}
+              {showErrorPopup ||
+                "An error occurred while updating the historical place."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -715,5 +876,5 @@ export default function UpdateHistoricalPlace() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
