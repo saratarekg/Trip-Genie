@@ -162,6 +162,7 @@ export function ProductArchive() {
         fetchProducts();
       }
     }, 0.01);
+    setCurrentPage(1);
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);

@@ -164,7 +164,7 @@ const ProductCard = ({
         <img
           src={product.pictures[0]?.url || defaultImage}
           alt={product.name}
-          className="w-full h-48 object-cover"
+          className="w-full h-40 object-cover"
         />
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(product._id)}>
@@ -174,8 +174,8 @@ const ProductCard = ({
         <div className="mt-1">{renderStars(product.rating)}</div>
   
         <p className="text-sm text-gray-600 mt-2">
-          {product.description.length > 100
-            ? `${product.description.slice(0, 100)}...`
+          {product.description.length > 70
+            ? `${product.description.slice(0, 70)}...`
             : product.description}
         </p>
       </CardContent>
@@ -445,6 +445,7 @@ export function AllProducts() {
         categories: selectedCategories,
       });
     }, 0.01);
+    setCurrentPage(1);
 
     return () => clearTimeout(delayDebounceFn);
   }, [
@@ -662,9 +663,9 @@ export function AllProducts() {
         <h1 className="text-4xl font-bold text-[#1A3B47] mb-8">All Products</h1>
         <div className="flex gap-8">
           {/* Sidebar Filters */}
-          <div className="hidden md:block w-200 bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6"> {/* Wider filter section */}
+    <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button
                 onClick={clearFilters}
                 size="sm"
@@ -734,9 +735,9 @@ export function AllProducts() {
           <div className="flex-1">
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center justify-center space-x-4">
-                <div className="relative" style={{ width: "900px" }}>
-                  <input
+      <div className="flex items-center justify-center space-x-4">
+        <div className="relative" style={{ width: "790px" }}> {/* Smaller search bar */}
+        <input
                     type="text"
                     placeholder="Search products..."
                     className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
@@ -791,7 +792,7 @@ export function AllProducts() {
                       currentPage * tripsPerPage
                     )
                     .map((product) => (
-                      <ProductCard
+                      <ProductCard 
                         key={product._id}
                         product={product}
                         userInfo={userInfo}

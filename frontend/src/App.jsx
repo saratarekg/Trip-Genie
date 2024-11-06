@@ -62,6 +62,8 @@ import UserApproval from "./components/userApproval.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import FAQs from "./pages/FAQs.jsx";
 import TermsandCondition from "./pages/TermsandCondition.jsx";
+import { DeleteAccount } from "@/components/DeleteAccPopout.jsx";
+import AdminGovernorPage from "./pages/AdminGovernorPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -104,23 +106,15 @@ function AppContent() {
           <Route
             path="/checkout"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "tourist"
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["tourist"]}>
                 <Checkout />
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/checkout2"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "tourist"
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["tourist"]}>
                 <CheckoutPage />
               </ProtectedRoute>
             }
@@ -255,7 +249,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-           {/* <Route
+          {/* <Route
             path="/my-itineraries"
             element={
               <ProtectedRoute
@@ -267,12 +261,10 @@ function AppContent() {
           />
  */}
 
-  <Route
+          <Route
             path="/my-products"
             element={
-              <ProtectedRoute
-                allowedRoles={["seller","admin"]}
-              >
+              <ProtectedRoute allowedRoles={["seller", "admin"]}>
                 <MyProducts />
               </ProtectedRoute>
             }
@@ -296,12 +288,20 @@ function AppContent() {
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          ></Route>
           <Route
             path="/complaints"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ViewComplaints />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-accounts"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <DeleteAccount />
               </ProtectedRoute>
             }
           />
@@ -363,7 +363,8 @@ function AppContent() {
             path="/privacy"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+              >
                 <PrivacyPolicy />
               </ProtectedRoute>
             }
@@ -372,17 +373,19 @@ function AppContent() {
             path="/faqs"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+              >
                 <FAQs />
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/terms"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
-                <TermsandCondition/>
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+              >
+                <TermsandCondition />
               </ProtectedRoute>
             }
           />
@@ -490,6 +493,14 @@ function AppContent() {
           <Route path="*" element={<NotFound />} />
 
           {/* <Route path = '/museums' element = {<HistoricalPlaceList/>}/> */}
+          <Route
+            path="/add-admin-governor"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminGovernorPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </div>
       {!isAuthPage && <FooterComponent />}
