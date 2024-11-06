@@ -36,6 +36,7 @@ import {
   Smile,
   Frown,
 } from "lucide-react";
+import { X } from "lucide-react"
 
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
@@ -59,6 +60,7 @@ import {
 import "react-phone-input-2/lib/style.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { ImageCropper } from "@/components/ImageCropper";
+// import { profile } from "console";
 
 const phoneValidator = (value) => {
   // Check if the input starts with a "+"
@@ -89,8 +91,32 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
   );
 };
 
-const Modal = ({ show, onClose, children }) => {
+const Modal = ({ show, onClose, children, isImageViewer = false, imageUrl = "" }) => {
   if (!show) return null;
+
+  if (isImageViewer) {
+    return (
+      <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+        <div className="absolute top-4 left-4 z-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:bg-white/20"
+            onClick={onClose}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+        </div>
+        <div className="w-full h-full flex items-center justify-center">
+          <img
+            src={imageUrl}
+            alt="Full screen view"
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -125,6 +151,7 @@ export function TourGuideProfileComponent() {
   const [showModal, setShowModal] = useState(false);
   const [newImage, setNewImage] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
 
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
@@ -393,6 +420,8 @@ export function TourGuideProfileComponent() {
 
   const closeModal = () => {
     setShowModal(false);
+    setModalOpen(false);
+    setImageModalOpen(false);
   };
   const handleImageCropped = (newImage) => {
     setNewImage(newImage);
@@ -455,28 +484,35 @@ export function TourGuideProfileComponent() {
               {isDropdownOpen && (
                 <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
                   <ul className="py-2">
-                    {tourGuide.profilePicture && (
+                    {profilePicture && (
                       <li
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                        onClick={openModal}
-                      >
-                        View
-                      </li>
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        setIsImageViewerOpen(true);
+
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      View
+                    </li>
                     )}
 
                     <div>
                       <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         onClick={handleUpdateClick}
+                        
                       >
                         Update
                       </li>
                     </div>
-                    {tourGuide.profilePicture && (
+                    {profilePicture && (
 
                       <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                        onClick={() => console.log("Delete user")}
+                        
+                        onClick={() => {
+                       setProfilePicture(null)                        }}
                       >
                         Delete
                       </li>
@@ -960,6 +996,12 @@ export function TourGuideProfileComponent() {
           </Dialog>
         </div>
       </div>
+      <Modal
+        show={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+        isImageViewer={true}
+        imageUrl={profilePicture?.url || profilePicture}
+      />
     </div>
   );
 }

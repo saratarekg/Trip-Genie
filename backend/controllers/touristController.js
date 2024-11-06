@@ -48,7 +48,7 @@ const getTourist = async (req, res) => {
 
 const updateTourist = async (req, res) => {
   try {
-    const tourist1 = await Tourist.findById(res.locals.user_id);
+    const tourist1 = await Tourist.findById(res.locals.user_id).lean();
     let picture = tourist1.profilePicture;
 
     const {
@@ -67,10 +67,11 @@ const updateTourist = async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    if (profilePicture === undefined) {
+    if (profilePicture === null) {
       picture = null;
       if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+        console.log("Profile picture deleted");
       }
     } else if (profilePicture.public_id === undefined) {
       const result = await cloudinary.uploader.upload(profilePicture, {
@@ -78,6 +79,7 @@ const updateTourist = async (req, res) => {
       });
       if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+        console.log("Profile picture xxxxx");
       }
       picture = {
         public_id: result.public_id,
@@ -185,9 +187,10 @@ const updatePreferences = async (req, res) => {
 
 const updateTouristProfile = async (req, res) => {
   try {
-    const tourist1 = await Tourist.findById(res.locals.user_id);
+    const tourist1 = await Tourist.findById(res.locals.user_id).lean();
+    console.log(tourist1);
     let picture = tourist1.profilePicture;
-
+console.log(picture);
     const {
       email,
       username,
@@ -204,22 +207,29 @@ const updateTouristProfile = async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    if (profilePicture === undefined) {
+    if (profilePicture === null) {
       picture = null;
       if (tourist1.profilePicture !== null) {
+
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+
       }
     } else if (profilePicture.public_id === undefined) {
+
       const result = await cloudinary.uploader.upload(profilePicture, {
         folder: "tourist-profile-pictures",
       });
-      if (tourist1.profilePicture !== null) {
+      if (tourist1.profilePicture !== null ) {
+        
+
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
       }
       picture = {
         public_id: result.public_id,
         url: result.secure_url,
       };
+
+
     }
     // Find the Tourist by their ID and update with new data
     const tourist = await Tourist.findByIdAndUpdate(
@@ -715,7 +725,7 @@ const moveProductToCart = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(res.locals.user_id);
+    const tourist = await Tourist.findById(res.locals.user_id).lean();
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
@@ -769,7 +779,7 @@ const deleteAccount = async (req, res) => {
 
 const deleteTouristAccount = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(req.params.id);
+    const tourist = await Tourist.findById(req.params.id).lean();
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
