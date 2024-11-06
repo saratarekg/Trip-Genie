@@ -1348,7 +1348,7 @@ export function SignupForm() {
     <div
       className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-4"
       style={{
-        backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+        backgroundImage: `url(${signUpPicture})`,
       }}
     >
       <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
