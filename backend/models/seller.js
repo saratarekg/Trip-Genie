@@ -44,9 +44,8 @@ const sellerSchema = new mongoose.Schema({
     ],
   },
   logo: {
-    type: String,
-    default: null,
-    required: false,
+    public_id: { type: String, required: true },
+    url: { type: String, required: true },
   },
   isAccepted: {
     type: Boolean,

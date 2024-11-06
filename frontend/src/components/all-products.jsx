@@ -73,6 +73,7 @@ const ProductCard = ({
   wishlistItems,
   onAddToCart,
   onAddToWishlist,
+  onRemoveFromWishlist
 }) => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
@@ -140,6 +141,8 @@ const ProductCard = ({
     }
   }, [userInfo, product]);
 
+
+
   const formatPrice = (price) => {
     if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
       if (userInfo.preferredCurrency === product.currency) {
@@ -161,14 +164,18 @@ const ProductCard = ({
         <img
           src={product.pictures[0]?.url || defaultImage}
           alt={product.name}
-          className="w-full h-48 object-cover"
+          className="w-full h-40 object-cover"
         />
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(product._id)}>
         <CardTitle className="text-lg text-[#1A3B47]">{product.name}</CardTitle>
+        
+        {/* Display rating directly below the product title */}
+        <div className="mt-1">{renderStars(product.rating)}</div>
+  
         <p className="text-sm text-gray-600 mt-2">
-          {product.description.length > 100
-            ? `${product.description.slice(0, 100)}...`
+          {product.description.length > 70
+            ? `${product.description.slice(0, 70)}...`
             : product.description}
         </p>
       </CardContent>
@@ -176,13 +183,16 @@ const ProductCard = ({
         <span className="text-2xl font-bold text-[#388A94]">
           {formatPrice(product.price)}
         </span>
-        {renderStars(product.rating)}
-
+  
         {/* Show "Buy Now" button only if user role is "tourist" */}
         {userInfo?.role === "tourist" && (
           <Button
             className="bg-orange-400 hover:bg-[#F88C33] text-white"
-            style={{ borderRadius: "20px" }}
+            style={{
+              borderRadius: "20px",
+              padding: "4px 12px", // Adjust padding for a thinner button
+              fontSize: "14px",
+            }}
             onClick={(e) => {
               e.stopPropagation();
               onBuyNow(product);
@@ -192,7 +202,7 @@ const ProductCard = ({
           </Button>
         )}
       </CardFooter>
-
+  
       {/* Show "Add to Cart" and "Add to Wishlist" buttons only if user role is "tourist" */}
       {userInfo?.role === "tourist" && (
         <div className="absolute top-2 right-2 flex space-x-2">
@@ -216,7 +226,13 @@ const ProductCard = ({
             } text-white`}
             onClick={(e) => {
               e.stopPropagation();
-              onAddToWishlist(product);
+              if (isInWishlist) {
+                // Call "remove from wishlist" API if the item is already in the wishlist
+                onRemoveFromWishlist(product);
+              } else {
+                // Call "add to wishlist" API if the item is not in the wishlist
+                onAddToWishlist(product);
+              }
             }}
           >
             <Heart
@@ -228,6 +244,7 @@ const ProductCard = ({
       )}
     </Card>
   );
+  
 };
 
 export function AllProducts() {
@@ -260,6 +277,18 @@ export function AllProducts() {
   const tripsPerPage = 6;
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (alertMessage) {
+      // Set a timer to clear the alert message after 2 seconds
+      const timer = setTimeout(() => {
+        setAlertMessage(null); // Clear alert message
+      }, 2000);
+  
+      // Clear the timer if the component unmounts or alertMessage changes
+      return () => clearTimeout(timer);
+    }
+  }, [alertMessage]);
 
   const getUserRole = useCallback(() => {
     let role = Cookies.get("role");
@@ -544,6 +573,38 @@ export function AllProducts() {
     }
   };
 
+  const handleRemoveFromWishlist = async (product) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/tourist/remove/wishlist/${product._id}`,
+        {
+          method: "DELETE", // Use DELETE method for removing from wishlist
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Failed to remove from wishlist");
+      }
+  
+      setAlertMessage({
+        type: "success",
+        message: "Product removed from wishlist successfully!",
+      });
+      fetchWishlistItems(); // Update the wishlist after removal
+    } catch (error) {
+      setAlertMessage({
+        type: "error",
+        message: "Error removing product from wishlist. Please try again.",
+      });
+    }
+  };
+  
+
   const handlePurchase = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -592,7 +653,7 @@ export function AllProducts() {
   };
 
   return (
-    <div className="bg-[#E6DCCF]">
+    <div className="bg-[#B5D3D1]">
       {/* Navbar */}
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
@@ -601,9 +662,9 @@ export function AllProducts() {
         <h1 className="text-4xl font-bold text-[#1A3B47] mb-8">All Products</h1>
         <div className="flex gap-8">
           {/* Sidebar Filters */}
-          <div className="hidden md:block w-64 bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6"> {/* Wider filter section */}
+    <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button
                 onClick={clearFilters}
                 size="sm"
@@ -666,53 +727,16 @@ export function AllProducts() {
               </Button>
             </div>
 
-            {(userInfo?.role === "admin" || userInfo?.role === "seller") && (
-              <div className="mb-6">
-                <h3 className="font-medium text-[#1A3B47] mb-2">My Products</h3>
-
-                <div className="flex flex-col gap-3">
-                  {" "}
-                  {/* Add spacing between elements */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`w-full justify-between rounded-md ${
-                      myProducts ? "bg-orange-400 text-white" : ""
-                    }`}
-                    onClick={() => handleMyProducts(!myProducts)}
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    {myProducts ? "Showing My Products" : "Show My Products"}
-                  </Button>
-                  <Link
-                    to="/create-product"
-                    className={`flex items-center justify-between w-full px-4 py-2 rounded-md  ${
-                      myProducts
-                        ? "bg-orange-400 text-white"
-                        : "bg-white text-[#1A3B47] border border-gray-300"
-                    }`}
-                  >
-                    <Plus className="mr-2 w-4 h-4" />
-                    Create Product
-                  </Link>
-                  <Link
-                    to="/product-archive"
-                    className={`flex items-center justify-between w-full px-4 py-2 rounded-md `}
-                  >
-                    Archived Products
-                  </Link>
-                </div>
-              </div>
-            )}
+           
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center justify-center space-x-4">
-                <div className="relative" style={{ width: "900px" }}>
-                  <input
+      <div className="flex items-center justify-center space-x-4">
+        <div className="relative" style={{ width: "790px" }}> {/* Smaller search bar */}
+        <input
                     type="text"
                     placeholder="Search products..."
                     className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
@@ -741,21 +765,20 @@ export function AllProducts() {
               <div className="text-red-500 text-center mb-4">{error}</div>
             )}
 
-            {alertMessage && (
-              <Alert
-                className={`mb-4 ${
-                  alertMessage.type === "success"
-                    ? "bg-green-100"
-                    : "bg-red-100"
-                }`}
-              >
-                <AlertTitle>
-                  {alertMessage.type === "success" ? "Success" : "Error"}
-                </AlertTitle>
-                <AlertDescription>{alertMessage.message}</AlertDescription>
-              </Alert>
-            )}
-
+{alertMessage && (
+      <Alert
+        className={`mb-4 ${
+          alertMessage.type === "success"
+            ? "bg-green-100"
+            : "bg-red-100"
+        }`}
+      >
+        <AlertTitle>
+          {alertMessage.type === "success" ? "Success" : "Error"}
+        </AlertTitle>
+        <AlertDescription>{alertMessage.message}</AlertDescription>
+      </Alert>
+    )}
             {isLoading ? (
               <Loader />
             ) : (
@@ -768,7 +791,7 @@ export function AllProducts() {
                       currentPage * tripsPerPage
                     )
                     .map((product) => (
-                      <ProductCard
+                      <ProductCard 
                         key={product._id}
                         product={product}
                         userInfo={userInfo}
@@ -778,6 +801,7 @@ export function AllProducts() {
                         wishlistItems={wishlistItems}
                         onAddToCart={handleAddToCart}
                         onAddToWishlist={handleAddToWishlist}
+                        onRemoveFromWishlist={handleRemoveFromWishlist}
                       />
                     ))}
                 </div>

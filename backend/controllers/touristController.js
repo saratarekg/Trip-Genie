@@ -11,6 +11,7 @@ const Purchase = require("../models/purchase");
 const ItineraryBooking = require("../models/itineraryBooking");
 const Currency = require("../models/currency");
 const Complaint = require("../models/complaints");
+const cloudinary = require("../utils/cloudinary");
 
 const getAllTourists = async (req, res) => {
   try {
@@ -48,8 +49,16 @@ const getTourist = async (req, res) => {
 const updateTourist = async (req, res) => {
   try {
     const tourist1 = await Tourist.findById(res.locals.user_id);
+    let picture = tourist1.profilePicture;
 
-    const { username, email, nationality, mobile, jobOrStudent } = req.body; // Data to update
+    const {
+      username,
+      email,
+      nationality,
+      mobile,
+      jobOrStudent,
+      profilePicture,
+    } = req.body; // Data to update
 
     if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
@@ -57,10 +66,31 @@ const updateTourist = async (req, res) => {
     if (email !== tourist1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
     }
-    // console.log(email, nationality, mobile, jobOrStudent);
+
+    if (profilePicture === undefined) {
+      picture = null;
+      await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+    } else if (profilePicture.public_id === undefined) {
+      const result = await cloudinary.uploader.upload(profilePicture, {
+        folder: "tourist-profile-pictures",
+      });
+      await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      picture = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    }
+
     const tourist = await Tourist.findByIdAndUpdate(
       res.locals.user_id,
-      { username, email, nationality, mobile, jobOrStudent },
+      {
+        username,
+        email,
+        nationality,
+        mobile,
+        jobOrStudent,
+        profilePicture: picture,
+      },
       { new: true, runValidators: true }
     );
     if (!tourist) {
@@ -152,15 +182,15 @@ const updatePreferences = async (req, res) => {
 const updateTouristProfile = async (req, res) => {
   try {
     const tourist1 = await Tourist.findById(res.locals.user_id);
+    let picture = tourist1.profilePicture;
 
     const {
       email,
       username,
       nationality,
       mobile,
-      dateOfBirth,
       jobOrStudent,
-      wallet,
+      profilePicture,
     } = req.body;
 
     if (username !== tourist1.username && (await usernameExists(username))) {
@@ -168,6 +198,20 @@ const updateTouristProfile = async (req, res) => {
     }
     if (email !== tourist1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
+    }
+
+    if (profilePicture === undefined) {
+      picture = null;
+      await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+    } else if (profilePicture.public_id === undefined) {
+      const result = await cloudinary.uploader.upload(profilePicture, {
+        folder: "tourist-profile-pictures",
+      });
+      await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      picture = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
     }
     // Find the Tourist by their ID and update with new data
     const tourist = await Tourist.findByIdAndUpdate(
@@ -177,6 +221,7 @@ const updateTouristProfile = async (req, res) => {
         nationality,
         mobile,
         jobOrStudent,
+        profilePicture: picture,
       },
       { new: true }
     )
@@ -704,6 +749,7 @@ const deleteAccount = async (req, res) => {
 
     await Complaint.deleteMany({ tourist: res.locals.user_id });
 
+    await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
     await Tourist.findByIdAndDelete(res.locals.user_id);
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
@@ -713,28 +759,74 @@ const deleteAccount = async (req, res) => {
 
 const deleteTouristAccount = async (req, res) => {
   try {
-    const tourist = await Tourist.findByIdAndDelete(req.params.id);
+    const tourist = await Tourist.findById(req.params.id);
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
-    res.status(200).json({ message: "Tourist account deleted successfully" });
+
+    const today = new Date(); // Get today's date
+    const tomorrow = new Date(today); // Clone today's date
+    tomorrow.setDate(today.getDate() + 1);
+
+    const bookedActivities = await ActivityBooking.find({
+      user: req.params.id,
+    }).populate("activity");
+    bookedActivities.forEach((activity) => {
+      if (activity.timing > Date.now()) {
+        return res
+          .status(400)
+          .json({ message: "Cannot delete account with active bookings" });
+      }
+    });
+
+    const bookedItineraries = await ItineraryBooking.find({
+      user: req.params.id,
+      date: { $gte: tomorrow.toISOString() },
+    });
+    if (bookedItineraries.length > 0) {
+      return res
+        .status(400)
+        .json({ message: "Cannot delete account with active bookings" });
+    }
+
+    const purchases = await Purchase.find({
+      tourist: req.params.id,
+      status: "pending",
+    });
+    if (purchases.length > 0) {
+      return res
+        .status(400)
+        .json({ message: "Cannot delete account with pending purchases" });
+    }
+
+    await Complaint.deleteMany({ tourist: req.params.id });
+
+    await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
+    await Tourist.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-
 const addCard = async (req, res) => {
   try {
-    const { cardType, cardNumber, expiryDate, holderName, cvv, default: isDefault } = req.body;
+    const {
+      cardType,
+      cardNumber,
+      expiryDate,
+      holderName,
+      cvv,
+      default: isDefault,
+    } = req.body;
 
     // Validate input
     if (!cardType || !cardNumber || !expiryDate || !holderName || !cvv) {
-      return res.status(400).json({ message: 'All card fields are required' });
+      return res.status(400).json({ message: "All card fields are required" });
     }
 
-    if (!['Credit Card', 'Debit Card'].includes(cardType)) {
-      return res.status(400).json({ message: 'Invalid card type' });
+    if (!["Credit Card", "Debit Card"].includes(cardType)) {
+      return res.status(400).json({ message: "Invalid card type" });
     }
 
     // Prepare the new card object
@@ -744,7 +836,7 @@ const addCard = async (req, res) => {
       expiryDate,
       holderName,
       cvv,
-      default: isDefault || false, 
+      default: isDefault || false,
     };
 
     // Step 1: Add the new card to the cards array
@@ -755,17 +847,17 @@ const addCard = async (req, res) => {
     );
 
     if (!result) {
-      return res.status(404).json({ message: 'Tourist not found' });
+      return res.status(404).json({ message: "Tourist not found" });
     }
 
     // Step 2: If the new card is set as default, unset other defaults
     if (isDefault) {
       await Tourist.updateOne(
         { _id: res.locals.user_id },
-        { $set: { 'cards.$[elem].default': false } },
+        { $set: { "cards.$[elem].default": false } },
         {
-          arrayFilters: [{ 'elem.default': true }],
-          runValidators: true
+          arrayFilters: [{ "elem.default": true }],
+          runValidators: true,
         }
       );
 
@@ -780,16 +872,22 @@ const addCard = async (req, res) => {
     // Refetch the updated list of cards to return in the response
     const updatedTourist = await Tourist.findById(res.locals.user_id);
 
-    return res.status(200).json({ message: 'Card added successfully', cards: updatedTourist.cards });
+    return res.status(200).json({
+      message: "Card added successfully",
+      cards: updatedTourist.cards,
+    });
   } catch (error) {
     console.error(error);
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Invalid card data', errors: error.errors });
+    if (error.name === "ValidationError") {
+      return res
+        .status(400)
+        .json({ message: "Invalid card data", errors: error.errors });
     }
-    return res.status(500).json({ message: 'An error occurred while adding the card' });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while adding the card" });
   }
 };
-
 
 const getAllCards = async (req, res) => {
   try {
@@ -805,7 +903,9 @@ const getAllCards = async (req, res) => {
     return res.status(200).json({ cards: tourist.cards });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "An error occurred while retrieving cards" });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while retrieving cards" });
   }
 };
 
@@ -822,7 +922,7 @@ const changeDefaultCard = async (req, res) => {
     }
 
     // Check if the card exists
-    const card = tourist.cards.find(card => card._id.toString() === id);
+    const card = tourist.cards.find((card) => card._id.toString() === id);
     if (!card) {
       return res.status(404).json({ message: "Card not found" });
     }
@@ -833,28 +933,37 @@ const changeDefaultCard = async (req, res) => {
       {
         // Set the selected card as default and all others to not default
         $set: {
-          "cards.$[selectedCard].default": true,  // Set the selected card to default
-          "cards.$[otherCards].default": false     // Set all other cards to not default
-        }
+          "cards.$[selectedCard].default": true, // Set the selected card to default
+          "cards.$[otherCards].default": false, // Set all other cards to not default
+        },
       },
       {
         arrayFilters: [
           { "selectedCard._id": id }, // Filter for the selected card
-          { "otherCards._id": { $ne: id } } // Filter for all other cards
-        ]
+          { "otherCards._id": { $ne: id } }, // Filter for all other cards
+        ],
       }
     );
     if (updateResult.modifiedCount === 0) {
-      return res.status(400).json({ message: "Failed to update the default card" });
+      return res
+        .status(400)
+        .json({ message: "Failed to update the default card" });
     }
 
     // Retrieve the updated tourist document to return the updated cards
-    const updatedTourist = await Tourist.findById(res.locals.user_id).select("cards");
-    
-    return res.status(200).json({ message: "Default card updated successfully", cards: updatedTourist.cards });
+    const updatedTourist = await Tourist.findById(res.locals.user_id).select(
+      "cards"
+    );
+
+    return res.status(200).json({
+      message: "Default card updated successfully",
+      cards: updatedTourist.cards,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "An error occurred while updating the default card" });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while updating the default card" });
   }
 };
 
@@ -864,7 +973,7 @@ const deleteCard = async (req, res) => {
 
     // Validate the cardId parameter
     if (!id) {
-      return res.status(400).json({ message: 'Card ID is required.' });
+      return res.status(400).json({ message: "Card ID is required." });
     }
 
     // Remove the card from the tourist's cards array
@@ -875,34 +984,51 @@ const deleteCard = async (req, res) => {
     );
 
     if (!result) {
-      return res.status(404).json({ message: 'Tourist not found' });
+      return res.status(404).json({ message: "Tourist not found" });
     }
 
     // If the deleted card was the default card, set another card as default if available
     if (result.cards.length === 0) {
       // No cards left, do nothing
-    } else if (result.cards.every(card => !card.default)) {
+    } else if (result.cards.every((card) => !card.default)) {
       // If there are cards left but none are marked as default, set the first one as default
       await Tourist.updateOne(
         { _id: res.locals.user_id },
-        { $set: { 'cards.0.default': true } }  // Set the first card as default
+        { $set: { "cards.0.default": true } } // Set the first card as default
       );
     }
 
-    return res.status(200).json({ message: 'Card deleted successfully', cards: result.cards });
+    return res
+      .status(200)
+      .json({ message: "Card deleted successfully", cards: result.cards });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'An error occurred while deleting the card' });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while deleting the card" });
   }
 };
 
 const addShippingAddress = async (req, res) => {
   try {
-    const { streetName, streetNumber, floorUnit, city, state, country, postalCode, landmark, locationType, default: isDefault } = req.body;
+    const {
+      streetName,
+      streetNumber,
+      floorUnit,
+      city,
+      state,
+      country,
+      postalCode,
+      landmark,
+      locationType,
+      default: isDefault,
+    } = req.body;
 
-    console.log(streetName,streetNumber,city,state,country);
+    console.log(streetName, streetNumber, city, state, country);
     if (!streetName || !streetNumber || !city || !state || !country) {
-      return res.status(400).json({ message: 'Required address fields are missing' });
+      return res
+        .status(400)
+        .json({ message: "Required address fields are missing" });
     }
 
     // Prepare new address object
@@ -927,16 +1053,16 @@ const addShippingAddress = async (req, res) => {
     );
 
     if (!result) {
-      return res.status(404).json({ message: 'Tourist not found' });
+      return res.status(404).json({ message: "Tourist not found" });
     }
 
     // Step 2: If the new address is set as default, unset other defaults
     if (isDefault) {
       await Tourist.updateOne(
         { _id: res.locals.user_id },
-        { $set: { 'shippingAddresses.$[elem].default': false } },
+        { $set: { "shippingAddresses.$[elem].default": false } },
         {
-          arrayFilters: [{ 'elem.default': true }],
+          arrayFilters: [{ "elem.default": true }],
           runValidators: true,
         }
       );
@@ -951,25 +1077,36 @@ const addShippingAddress = async (req, res) => {
 
     // Return updated list of addresses
     const updatedTourist = await Tourist.findById(res.locals.user_id);
-    return res.status(200).json({ message: 'Address added successfully', shippingAddresses: updatedTourist.shippingAddresses });
+    return res.status(200).json({
+      message: "Address added successfully",
+      shippingAddresses: updatedTourist.shippingAddresses,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'An error occurred while adding the address' });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while adding the address" });
   }
 };
 
 const getAllShippingAddresses = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(res.locals.user_id).select("shippingAddresses");
+    const tourist = await Tourist.findById(res.locals.user_id).select(
+      "shippingAddresses"
+    );
 
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    return res.status(200).json({ shippingAddresses: tourist.shippingAddresses });
+    return res
+      .status(200)
+      .json({ shippingAddresses: tourist.shippingAddresses });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "An error occurred while retrieving addresses" });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while retrieving addresses" });
   }
 };
 const changeDefaultShippingAddress = async (req, res) => {
@@ -982,7 +1119,9 @@ const changeDefaultShippingAddress = async (req, res) => {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    const address = tourist.shippingAddresses.find(address => address._id.toString() === id);
+    const address = tourist.shippingAddresses.find(
+      (address) => address._id.toString() === id
+    );
     if (!address) {
       return res.status(404).json({ message: "Address not found" });
     }
@@ -1004,14 +1143,23 @@ const changeDefaultShippingAddress = async (req, res) => {
     );
 
     if (updateResult.modifiedCount === 0) {
-      return res.status(400).json({ message: "Failed to update the default address" });
+      return res
+        .status(400)
+        .json({ message: "Failed to update the default address" });
     }
 
-    const updatedTourist = await Tourist.findById(res.locals.user_id).select("shippingAddresses");
-    return res.status(200).json({ message: "Default address updated successfully", shippingAddresses: updatedTourist.shippingAddresses });
+    const updatedTourist = await Tourist.findById(res.locals.user_id).select(
+      "shippingAddresses"
+    );
+    return res.status(200).json({
+      message: "Default address updated successfully",
+      shippingAddresses: updatedTourist.shippingAddresses,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "An error occurred while updating the default address" });
+    return res.status(500).json({
+      message: "An error occurred while updating the default address",
+    });
   }
 };
 
@@ -1020,7 +1168,7 @@ const deleteShippingAddress = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({ message: 'Address ID is required.' });
+      return res.status(400).json({ message: "Address ID is required." });
     }
 
     const result = await Tourist.findOneAndUpdate(
@@ -1030,23 +1178,28 @@ const deleteShippingAddress = async (req, res) => {
     );
 
     if (!result) {
-      return res.status(404).json({ message: 'Tourist not found' });
+      return res.status(404).json({ message: "Tourist not found" });
     }
 
     if (result.shippingAddresses.length === 0) {
       // No addresses left, do nothing
-    } else if (result.shippingAddresses.every(address => !address.default)) {
+    } else if (result.shippingAddresses.every((address) => !address.default)) {
       // If no addresses are default, set the first one as default
       await Tourist.updateOne(
         { _id: res.locals.user_id },
-        { $set: { 'shippingAddresses.0.default': true } }
+        { $set: { "shippingAddresses.0.default": true } }
       );
     }
 
-    return res.status(200).json({ message: 'Address deleted successfully', shippingAddresses: result.shippingAddresses });
+    return res.status(200).json({
+      message: "Address deleted successfully",
+      shippingAddresses: result.shippingAddresses,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'An error occurred while deleting the address' });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while deleting the address" });
   }
 };
 
@@ -1056,37 +1209,35 @@ const updateShippingAddress = async (req, res) => {
     const addressUpdates = req.body;
 
     if (!id) {
-      return res.status(400).json({ message: 'Address ID is required.' });
+      return res.status(400).json({ message: "Address ID is required." });
     }
 
     // Validate the addressUpdates object
     if (!addressUpdates || Object.keys(addressUpdates).length === 0) {
-      return res.status(400).json({ message: 'Address updates are required.' });
+      return res.status(400).json({ message: "Address updates are required." });
     }
 
     const result = await Tourist.findOneAndUpdate(
-      { _id: res.locals.user_id, 'shippingAddresses._id': id },
-      { $set: { 'shippingAddresses.$': addressUpdates } },
+      { _id: res.locals.user_id, "shippingAddresses._id": id },
+      { $set: { "shippingAddresses.$": addressUpdates } },
       { new: true }
     );
 
     if (!result) {
-      return res.status(404).json({ message: 'Tourist or address not found' });
+      return res.status(404).json({ message: "Tourist or address not found" });
     }
 
     return res.status(200).json({
-      message: 'Address updated successfully',
+      message: "Address updated successfully",
       shippingAddresses: result.shippingAddresses,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'An error occurred while updating the address' });
+    return res
+      .status(500)
+      .json({ message: "An error occurred while updating the address" });
   }
 };
-
-
-
-
 
 module.exports = {
   removeProductFromWishlist,

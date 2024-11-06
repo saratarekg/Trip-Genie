@@ -6,6 +6,7 @@ const cloudinary = require("../utils/cloudinary");
 
 const getAllProducts = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts, rating } = req.query;
+  console.log(myproducts);
   const role = res.locals.user_role;
   console.log(role);
 
@@ -235,7 +236,7 @@ const editProduct = async (req, res) => {
     const pictures = [...oldPictures, ...imagesBuffer];
     // Find the product by ID and update its details
     const oldPicturesIDs = oldPictures.map((pic) => pic.public_id);
-    product.pictures.forEach((pic) => {
+    checkProduct?.pictures?.forEach((pic) => {
       if (!oldPicturesIDs.includes(pic.public_id)) {
         cloudinary.uploader.destroy(pic.public_id);
       }
@@ -266,6 +267,7 @@ const editProduct = async (req, res) => {
 
     res.status(200).json(updatedProduct);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -600,6 +602,61 @@ const addProductToWishlist = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+const removeProductFromWishlist = async (req, res) => {
+  const productId = req.params.id; // Extract productId from the request params
+  const userId = res.locals.user_id; // Assuming the logged-in user ID is stored in res.locals
+
+  try {
+    // Find the user (tourist)
+    const user = await Tourist.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Find the product
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(400).json({ message: "Product not found" });
+    }
+
+    if (product.isDeleted) {
+      return res.status(400).json({ message: "Product no longer exists" });
+    }
+
+    // Check if the product exists in the wishlist
+    const existingWishlistItem = user.wishlist.find((item) => {
+      return item.product._id.toString() === productId;
+    });
+
+    if (!existingWishlistItem) {
+      return res.status(400).json({ message: "Product is not in the wishlist" });
+    }
+
+    // If the product exists, remove it from the wishlist
+    await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $pull: {
+          wishlist: { product: productId }, // Removes the product from the wishlist array
+        },
+      },
+      { new: true } // Return the updated document
+    );
+
+    // Fetch the updated user data with the wishlist
+    const updatedUser = await Tourist.findById(userId);
+    
+    res.status(200).json({
+      message: "Product removed from wishlist",
+      updatedWishlist: updatedUser.wishlist, // Optional: you can send back the updated wishlist
+    });
+  } catch (error) {
+    console.error("Error: ", error); // Log the full error to the console
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 const rateProduct = async (req, res) => {
   try {

@@ -26,6 +26,7 @@ import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./pages/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
 //import { MyItinerariesComponent } from "./components/myItineraries.jsx";
+import { MyProducts } from "./components/myProducts.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
 import ViewComplaints from "./components/ViewComplaints.jsx";
 import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
@@ -35,6 +36,7 @@ import { SignupForm } from "./pages/SignUp.jsx";
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import Checkout from "./pages/checkout.jsx";
+import CheckoutPage from "./pages/checkout2.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
@@ -60,6 +62,7 @@ import UserApproval from "./components/userApproval.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import FAQs from "./pages/FAQs.jsx";
 import TermsandCondition from "./pages/TermsandCondition.jsx";
+import { DeleteAccount } from "@/components/DeleteAccPopout.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -102,12 +105,16 @@ function AppContent() {
           <Route
             path="/checkout"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "tourist"
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["tourist"]}>
                 <Checkout />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkout2"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <CheckoutPage />
               </ProtectedRoute>
             }
           />
@@ -241,7 +248,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-           {/* <Route
+          {/* <Route
             path="/my-itineraries"
             element={
               <ProtectedRoute
@@ -252,6 +259,15 @@ function AppContent() {
             }
           />
  */}
+
+          <Route
+            path="/my-products"
+            element={
+              <ProtectedRoute allowedRoles={["seller", "admin"]}>
+                <MyProducts />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/all-historical-places"
@@ -271,12 +287,20 @@ function AppContent() {
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          ></Route>
           <Route
             path="/complaints"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <ViewComplaints />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-accounts"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <DeleteAccount />
               </ProtectedRoute>
             }
           />
@@ -338,7 +362,8 @@ function AppContent() {
             path="/privacy"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+              >
                 <PrivacyPolicy />
               </ProtectedRoute>
             }
@@ -347,17 +372,19 @@ function AppContent() {
             path="/faqs"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+              >
                 <FAQs />
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/terms"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}>
-                <TermsandCondition/>
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+              >
+                <TermsandCondition />
               </ProtectedRoute>
             }
           />

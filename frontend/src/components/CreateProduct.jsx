@@ -138,7 +138,11 @@ const CreateProductForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div>
+       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
       <Card className="w-full max-w-md">
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -254,6 +258,7 @@ const CreateProductForm = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 };

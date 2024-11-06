@@ -50,9 +50,8 @@ const tourGuideSchema = new Schema(
       ],
     },
     profilePicture: {
-      type: String,
-      default: null,
-      required: false,
+      public_id: { type: String, required: true },
+      url: { type: String, required: true },
     },
     yearsOfExperience: {
       type: Number,
@@ -177,21 +176,21 @@ tourGuideSchema.statics.login = async function (username, password) {
 tourGuideSchema.methods.addRating = async function (newRating) {
   // Calculate the new average rating based on all current ratings in comments plus the new rating
   const totalRatings = this.comments.length + 1; // Account for the new rating
-  const sumOfRatings = this.comments.reduce((sum, comment) => sum + comment.rating, 0) + newRating;
+  const sumOfRatings =
+    this.comments.reduce((sum, comment) => sum + comment.rating, 0) + newRating;
   const averageRating = sumOfRatings / totalRatings;
 
   // Update only the average rating
   const updatedTourGuide = await this.constructor.findByIdAndUpdate(
     this._id,
     {
-      rating: averageRating // Update the average rating only
+      rating: averageRating, // Update the average rating only
     },
     { new: true, runValidators: true } // Return the updated document
   );
 
   return updatedTourGuide.rating; // Return the new average rating
 };
-
 
 tourGuideSchema.methods.addComment = async function (comment) {
   // Add the new comment to the comments array

@@ -24,7 +24,6 @@ import {
 } from "lucide-react";
 import { Pie } from "react-chartjs-2";
 import { AdminGovernorPopup } from "@/components/admin-governor-popup";
-import { DeleteAccount } from "@/components/DeleteAccPopout";
 import { CategoryCRUD } from "@/components/category-crud";
 import { TagCRUD } from "@/components/tags-crud";
 import { Dialog } from "@/components/ui/dialog";
@@ -51,7 +50,6 @@ const DashboardCard = ({ title, value, subtitle, icon }) => (
 );
 
 export function Dashboard() {
-  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
   const [isAdminGovernorPopupOpen, setIsAdminGovernorPopupOpen] =
     useState(false);
   const [isCategoryCRUDOpen, setIsCategoryCRUDOpen] = useState(false);
@@ -129,11 +127,12 @@ export function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div>
+         <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div className="flex flex-col min-h-screen bg-gray-100">
       <main className="flex-1 p-6 overflow-y-auto">
-        <br />
-        <br />
-        <br />
         <p
           className="text-3xl font-bold mb-6 text-[#003f66]"
           style={{
@@ -252,9 +251,9 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button
+                  <Button 
+                    onClick={() => navigate('/manage-accounts')}
                     className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                    onClick={() => setIsDeleteAccountOpen(true)}
                   >
                     Manage
                   </Button>
@@ -423,9 +422,6 @@ export function Dashboard() {
         </div>
       </main>
 
-      {isDeleteAccountOpen && (
-        <DeleteAccount onClose={() => setIsDeleteAccountOpen(false)} />
-      )}
       <Dialog
         open={isAdminGovernorPopupOpen}
         onOpenChange={setIsAdminGovernorPopupOpen}
@@ -447,6 +443,7 @@ export function Dashboard() {
           onClose={() => setIsTagCRUDOpen(false)}
         />
       </Dialog>
+    </div>
     </div>
   );
 }
