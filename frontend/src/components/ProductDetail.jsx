@@ -477,7 +477,7 @@ const ProductDetail = () => {
           if (token) {
             const decodedToken = jwtDecode(token);
             const userReview = data.reviews.find(
-              (review) => review.tourist._id === decodedToken.id,
+              (review) => review.tourist?._id === decodedToken.id,
             );
             if (userReview) {
               console.log(userReview);

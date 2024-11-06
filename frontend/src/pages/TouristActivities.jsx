@@ -331,10 +331,10 @@ export default function Component() {
                         <Button
                           variant="ghost"
                           className="w-full justify-start mr-2"
-                          onClick={() => handleItineraryClick(booking.itinerary._id)}
+                          onClick={() => handleItineraryClick(booking.itinerary?._id)}
                         >
                           <Calendar className="mr-2 h-4 w-4" />
-                          {booking.itinerary.title}
+                          {booking.itinerary?.title}
                         </Button>
                         <Button
                           variant="ghost"
@@ -376,10 +376,10 @@ export default function Component() {
                         <Button
                           variant="ghost"
                           className="w-full justify-start mr-2"
-                          onClick={() => handleActivityClick(booking.activity._id)}
+                          onClick={() => handleActivityClick(booking.activity?._id)}
                         >
                           <div className="flex justify-between w-full">
-                            <span>{booking.activity.name}</span>
+                            <span>{booking.activity?.name}</span>
                          </div>
                           <ChevronRight className="ml-2 h-4 w-4" />
                         </Button>
