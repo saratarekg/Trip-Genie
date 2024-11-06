@@ -25,6 +25,7 @@ import { NavbarComponent } from "./components/navbar.jsx";
 import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./pages/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
+//import { MyItinerariesComponent } from "./components/myItineraries.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
 import ViewComplaints from "./components/ViewComplaints.jsx";
 import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
@@ -240,6 +241,17 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+           {/* <Route
+            path="/my-itineraries"
+            element={
+              <ProtectedRoute
+                allowedRoles={["tour-guide"]}
+              >
+                <MyItinerariesComponent />
+              </ProtectedRoute>
+            }
+          />
+ */}
 
           <Route
             path="/all-historical-places"

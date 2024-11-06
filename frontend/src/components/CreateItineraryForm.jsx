@@ -158,9 +158,14 @@ const ItineraryForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div>
+       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        </div>
+      </div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form
-        className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-20 mb-20"
+        className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-10 mb-10"
         onSubmit={handleSubmit(onSubmit)}
       >
         <h2 className="text-xl font-semibold mb-4 text-center">
@@ -433,6 +438,7 @@ const ItineraryForm = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 };

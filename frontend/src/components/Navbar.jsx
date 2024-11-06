@@ -11,6 +11,10 @@ import {
   Calendar,
   AlertTriangle,
   LogOut,
+  ChevronDown,
+  List,
+  Folder,
+  PlusCircle,
 } from "lucide-react";
 
 const NavLink = ({ to, children }) => (
@@ -24,6 +28,7 @@ const NavLink = ({ to, children }) => (
 
 export function NavbarComponent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isItinerariesDropdownOpen, setIsItinerariesDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const role = Cookies.get("role");
   const navigate = useNavigate();
@@ -32,6 +37,7 @@ export function NavbarComponent() {
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsMenuOpen(false);
+      setIsItinerariesDropdownOpen(false);
     }
   };
 
@@ -92,10 +98,49 @@ export function NavbarComponent() {
           {/* Desktop Navigation */}
           <div className="hidden md:block" style={{ marginRight: 30 }}>
             <div className="inline-flex items-center border border-white/20 rounded-full px-2 py-1">
-              {role === "tour-guide" && (
+            {role === "tour-guide" && (
                 <>
                   <NavLink to="/activity">Activities</NavLink>
-                  <NavLink to="/all-itineraries">Itineraries</NavLink>
+
+                    <div
+                    className="relative"
+                  
+                  >
+                  
+                  <div
+                    className="relative"
+                    onClick={() => setIsItinerariesDropdownOpen(!isItinerariesDropdownOpen)} // Toggle the dropdown on click
+                  >
+                    <button className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center">
+                      Itineraries
+                    </button>
+                    {isItinerariesDropdownOpen && (
+                      <div
+                        className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg"
+                        style={{ minWidth: "200px" }}
+                      >
+                        <Link
+                          to="/all-itineraries"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        >
+                          <List className="mr-2 h-4 w-4" /> All Itineraries
+                        </Link>
+                        <Link
+                          to="/my-itineraries"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        >
+                          <Folder className="mr-2 h-4 w-4" /> My Itineraries
+                        </Link>
+                        <Link
+                          to="/create-itinerary"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                        >
+                          <PlusCircle className="mr-2 h-4 w-4" /> Create Itinerary
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                  </div>
                   <NavLink to="/tour-guide-profile">Profile</NavLink>
                 </>
               )}
@@ -235,13 +280,28 @@ export function NavbarComponent() {
       {isMenuOpen && (
         <div className="md:hidden bg-black/90 mt-2 mx-4 rounded-2xl border border-white/20">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            {role === "tour-guide" && (
-              <>
-                <NavLink to="/activity">Activities</NavLink>
-                <NavLink to="/all-itineraries">Itineraries</NavLink>
-                <NavLink to="/tour-guide-profile">Profile</NavLink>
-              </>
-            )}
+          {role === "tour-guide" && (
+                <>
+                  <NavLink to="/activity">Activities</NavLink>
+                  {/* Itineraries Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsItinerariesDropdownOpen(!isItinerariesDropdownOpen)}
+                      className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                    >
+                      Itineraries <ChevronDown className="ml-1 h-4 w-4" />
+                    </button>
+                    {isItinerariesDropdownOpen && (
+                      <div className="absolute mt-2 w-40 bg-black/90 rounded-lg shadow-lg py-1 border border-white/20 z-50">
+                        <NavLink to="/all-itineraries" className="block px-4 py-2">All Itineraries</NavLink>
+                        <NavLink to="/my-itineraries" className="block px-4 py-2">My Itineraries</NavLink>
+                        <NavLink to="/create-itinerary" className="block px-4 py-2">Create Itinerary</NavLink>
+                      </div>
+                    )}
+                  </div>
+                  <NavLink to="/tour-guide-profile">Profile</NavLink>
+                </>
+              )}
             {role === "seller" && (
               <>
                 <NavLink to="/all-products">Products</NavLink>
