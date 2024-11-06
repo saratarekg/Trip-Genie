@@ -360,8 +360,14 @@ export default function HotelBookingPage() {
   };
 
   return (
-    <div className="bg-white-100 min-h-screen p-4 space-y-4 mt-5">
-      <h1 className="text-3xl font-bold text-blue-900 text-center">
+    <div className="bg-white-100 min-h-screen">
+    {/* Navbar */}
+    <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      </div>
+    </div>
+    <div className="h-16"></div>
+      <h1 className="text-3xl font-bold text-[#1A3B47] text-center">
         Hotel Booking
       </h1>
 
@@ -428,7 +434,7 @@ export default function HotelBookingPage() {
           <Button
             onClick={handleSearch}
             disabled={isLoading || !city || !checkInDate || !checkOutDate}
-            className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-8 w-full mt-4"
+            className="bg-[#1A3B47] hover:bg-blue-800 text-white font-semibold px-8 w-full mt-4"
           >
             {isLoading ? "Searching..." : "Search Hotels"}
           </Button>
@@ -472,7 +478,7 @@ export default function HotelBookingPage() {
                 <CardContent className="p-3">
                   <div className="flex flex-col h-full">
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2 bg-blue-900 text-white rounded">
+                      <div className="p-2 bg-[#1A3B47] text-white rounded">
                         <Bed className="h-5 w-5" />
                       </div>
                       <h3 className="text-base font-semibold">
@@ -495,7 +501,7 @@ export default function HotelBookingPage() {
                     
                     <div className="mt-auto pt-3 flex items-center justify-between">
                       <Button
-                        className="bg-blue-900 hover:bg-blue-800 text-white"
+                        className="bg-[#1A3B47] hover:bg-blue-800 text-white"
                         onClick={() => handleOpenDialog(hotel)}
                       >
                         See Details
@@ -647,7 +653,7 @@ export default function HotelBookingPage() {
               </div>
 
               <Button
-                className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white"
+                className="mt-4 w-full bg-[#1A3B47] hover:bg-blue-800 text-white"
                 onClick={handleBookNow}
                 disabled={!isBookingFormValid()}
               >
@@ -673,7 +679,7 @@ export default function HotelBookingPage() {
           <DialogClose asChild>
             <Button
               onClick={handleCloseAllPopups}
-              className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white"
+              className="mt-4 w-full bg-[#1A3B47] hover:bg-blue-800 text-white"
             >
               Close
             </Button>
