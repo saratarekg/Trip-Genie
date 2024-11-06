@@ -445,6 +445,7 @@ export function AllProducts() {
         categories: selectedCategories,
       });
     }, 0.01);
+    setCurrentPage(1);
 
     return () => clearTimeout(delayDebounceFn);
   }, [
