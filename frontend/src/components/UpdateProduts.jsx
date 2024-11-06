@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useMemo } from "react";
-import Cookies from "js-cookie";
-import { ChevronLeft, Check, X } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+'use client'
+
+import React, { useState, useEffect, useMemo } from "react"
+import Cookies from "js-cookie"
+import { ChevronLeft, Check, X } from "lucide-react"
+import { useNavigate, useParams } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
 import {
   Dialog,
   DialogContent,
@@ -13,15 +15,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import signUpPicture from "../assets/images/signUpPicture.jpeg"
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -43,148 +39,108 @@ const LoadingSpinner = () => (
       ></circle>
     </svg>
   </div>
-);
+)
 
 const UpdateProduct = () => {
-  const { id } = useParams();
+  const { id } = useParams()
   const [product, setProduct] = useState({
     name: "",
     price: "",
     description: "",
     quantity: "",
-    currency: "",
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [pictures, setPictures] = useState([]);
-  const [newPictures, setNewPictures] = useState([]);
-  const [base64Pictures, setBase64Pictures] = useState([]);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [currencies, setCurrencies] = useState([]);
-  const [selectedCurrency, setSelectedCurrency] = useState("");
-  const navigate = useNavigate();
-
-  const base64ToBlob = (base64, type = "image/jpeg") => {
-    const byteCharacters = atob(base64.split(",")[1]); // Decode base64 string
-    const byteNumbers = new Array(byteCharacters.length);
-
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-
-    const byteArray = new Uint8Array(byteNumbers);
-    return new Blob([byteArray], { type });
-  };
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest")
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
+  const [pictures, setPictures] = useState([])
+  const [newPictures, setNewPictures] = useState([])
+  const [base64Pictures, setBase64Pictures] = useState([])
+  const [selectedImage, setSelectedImage] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchProductDetails = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const token = Cookies.get("jwt");
+        const token = Cookies.get("jwt")
         const response = await fetch(
           `http://localhost:4000/${userRole}/products/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
-        );
+        )
 
         if (!response.ok) {
-          throw new Error("Failed to fetch data");
+          throw new Error("Failed to fetch data")
         }
 
-        const productData = await response.json();
+        const productData = await response.json()
         setProduct({
           name: productData.name,
           price: productData.price.toString(),
           description: productData.description,
           quantity: productData.quantity.toString(),
-          currency: productData.currency,
-        });
-        setSelectedCurrency(productData.currency);
-        setPictures(productData.pictures || []);
-        setError(null);
+        })
+        setPictures(productData.pictures || [])
+        setError(null)
       } catch (err) {
-        setError("Error fetching data. Please try again later.");
-        console.error("Error fetching data:", err);
+        setError("Error fetching data. Please try again later.")
+        console.error("Error fetching data:", err)
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    const fetchSupportedCurrencies = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/currencies`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch currencies");
-        }
-        const data = await response.json();
-        setCurrencies(data);
-      } catch (error) {
-        console.error("Error fetching supported currencies:", error);
-      }
-    };
-
-    fetchProductDetails();
-    fetchSupportedCurrencies();
-  }, [id, userRole]);
+    fetchProductDetails()
+  }, [id, userRole])
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setProduct((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handlePicturesUpload = (e) => {
-    const files = e.target.files;
+    const files = e.target.files
     if (files) {
-      const newFilePictures = Array.from(files);
-
-      // Create a Set to avoid duplicates based on file names
-      const existingFileNames = new Set(newPictures.map((file) => file.name));
-
+      const newFilePictures = Array.from(files)
+      const existingFileNames = new Set(newPictures.map((file) => file.name))
       const newFilesToUpload = newFilePictures.filter(
         (file) => !existingFileNames.has(file.name)
-      );
+      )
 
       const newBase64PicturesPromises = newFilesToUpload.map(
         (file) =>
           new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onloadend = () => resolve(reader.result);
+            const reader = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onloadend = () => resolve(reader.result)
           })
-      );
+      )
 
       Promise.all(newBase64PicturesPromises).then((base64Pictures) => {
-        setBase64Pictures((prev) => [...prev, ...base64Pictures]);
-        setNewPictures((prev) => [...prev, ...newFilesToUpload]);
-      });
+        setBase64Pictures((prev) => [...prev, ...base64Pictures])
+        setNewPictures((prev) => [...prev, ...newFilesToUpload])
+      })
     }
-  };
+  }
 
   const removePicture = (index, isOld) => {
     if (isOld) {
-      const newPictures = [...pictures];
-      newPictures.splice(index, 1);
-      setPictures(newPictures);
+      const newPictures = [...pictures]
+      newPictures.splice(index, 1)
+      setPictures(newPictures)
     } else {
-      const newBase64Pictures = [...base64Pictures];
-      newBase64Pictures.splice(index, 1);
-      setBase64Pictures(newBase64Pictures);
-      const newPictures = [...newPictures];
-      newPictures.splice(index, 1);
-      setNewPictures(newPictures);
+      const newBase64Pictures = [...base64Pictures]
+      newBase64Pictures.splice(index, 1)
+      setBase64Pictures(newBase64Pictures)
+      const newPictures = [...newPictures]
+      newPictures.splice(index, 1)
+      setNewPictures(newPictures)
     }
 
-    setSelectedImage(null);
-  };
+    setSelectedImage(null)
+  }
 
   const isFormValid = useMemo(() => {
     return (
@@ -193,31 +149,29 @@ const UpdateProduct = () => {
       product.price !== "" &&
       product.quantity !== "" &&
       !isNaN(parseFloat(product.price)) &&
-      parseFloat(product.price) >= 0 &&
-      selectedCurrency !== ""
-    );
-  }, [product, selectedCurrency]);
+      parseFloat(product.price) >= 0
+    )
+  }, [product])
 
   const handleUpdate = async () => {
     if (!isFormValid) {
-      setError("Please fill in all fields correctly before updating.");
-      return;
+      setError("Please fill in all fields correctly before updating.")
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
-      const token = Cookies.get("jwt");
-      const formData = new FormData();
-      formData.append("name", product.name);
-      formData.append("price", product.price);
-      formData.append("description", product.description);
-      formData.append("quantity", product.quantity);
-      formData.append("currency", selectedCurrency);
-      formData.append("oldPictures", JSON.stringify(pictures));
+      const token = Cookies.get("jwt")
+      const formData = new FormData()
+      formData.append("name", product.name)
+      formData.append("price", product.price)
+      formData.append("description", product.description)
+      formData.append("quantity", product.quantity)
+      formData.append("oldPictures", JSON.stringify(pictures))
 
       newPictures.forEach((picture) => {
-        formData.append("newPictures", picture);
-      });
+        formData.append("newPictures", picture)
+      })
 
       const response = await fetch(
         `http://localhost:4000/${userRole}/products/${id}`,
@@ -228,199 +182,163 @@ const UpdateProduct = () => {
           },
           body: formData,
         }
-      );
+      )
 
       if (!response.ok) {
-        throw new Error("Failed to update product");
+        throw new Error("Failed to update product")
       }
 
-      setShowSuccessPopup(true);
-      setError(null);
+      setShowSuccessPopup(true)
+      setError(null)
     } catch (err) {
-      setError("Error updating product. Please try again later.");
-      console.error("Error updating product:", err);
+      setError("Error updating product. Please try again later.")
+      console.error("Error updating product:", err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-8">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8">Update Product</h1>
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Name</Label>
+    <div>
+   <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div
+        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2 "
+        style={{
+          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+        }}
+      >
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
+          <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
+            <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
+              Update Product
+            </h2>
+            <p className="text-sm mb-6 text-[#1A3B47]">
+              Update your product details. Fill in the information carefully to ensure accurate product information.
+            </p>
+          </div>
+          <div className="w-full md:w-3/5 p-6">
+            <form onSubmit={(e) => { e.preventDefault(); handleUpdate(); }} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">Product Name</Label>
                 <Input
                   id="name"
                   name="name"
                   value={product.name}
                   onChange={handleChange}
-                  className={product.name.trim() === "" ? "border-red-500" : ""}
                 />
                 {product.name.trim() === "" && (
-                  <p className="text-red-500 text-sm mt-1">Name is required</p>
+                  <p className="text-red-500 text-xs">Name is required</p>
                 )}
               </div>
-              <div>
-                <Label htmlFor="price">Price</Label>
-                <Input
-                  id="price"
-                  name="price"
-                  type="number"
-                  value={product.price}
-                  onChange={handleChange}
-                  className={
-                    product.price === "" ||
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="text-sm font-medium">Price (in American Dollars $)</Label>
+                  <Input
+                    id="price"
+                    name="price"
+                    type="number"
+                    value={product.price}
+                    onChange={handleChange}
+                  />
+                  {(product.price === "" ||
                     isNaN(parseFloat(product.price)) ||
-                    parseFloat(product.price) < 0
-                      ? "border-red-500"
-                      : ""
-                  }
-                />
-                {(product.price === "" ||
-                  isNaN(parseFloat(product.price)) ||
-                  parseFloat(product.price) < 0) && (
-                  <p className="text-red-500 text-sm mt-1">
-                    Price must be a non-negative number
-                  </p>
-                )}
+                    parseFloat(product.price) < 0) && (
+                    <p className="text-red-500 text-xs">
+                      Price must be a non-negative number
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="quantity" className="text-sm font-medium">Quantity</Label>
+                  <Input
+                    id="quantity"
+                    name="quantity"
+                    type="number"
+                    value={product.quantity}
+                    onChange={handleChange}
+                  />
+                  {product.quantity === "" && (
+                    <p className="text-red-500 text-xs">
+                      Quantity is required
+                    </p>
+                  )}
+                </div>
               </div>
-              <div>
-                <Label htmlFor="currency">Currency</Label>
-                <Select
-                  value={selectedCurrency}
-                  onValueChange={(value) => setSelectedCurrency(value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue
-                      placeholder={`${product.currency} - ${
-                        currencies.find((c) => c.code === product.currency)
-                          ?.name || ""
-                      }`}
-                    />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[200px] overflow-y-auto">
-                    {currencies.map((currency) => (
-                      <SelectItem key={currency.code} value={currency._id}>
-                        {currency.code} - {currency.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedCurrency === "" && (
-                  <p className="text-red-500 text-sm mt-1">
-                    Currency is required
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-sm font-medium">Description (min. 200 characters)</Label>
+                <Textarea 
+                  id="description" 
                   name="description"
                   value={product.description}
                   onChange={handleChange}
-                  rows={5}
-                  className={
-                    product.description.trim() === "" ? "border-red-500" : ""
-                  }
+                  className="h-24"
                 />
                 {product.description.trim() === "" && (
-                  <p className="text-red-500 text-sm mt-1">
-                    Description is required
-                  </p>
+                  <p className="text-red-500 text-xs">Description is required</p>
                 )}
               </div>
-              <div>
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input
-                  id="quantity"
-                  name="quantity"
-                  type="number"
-                  value={product.quantity}
-                  onChange={handleChange}
-                  className={product.quantity === "" ? "border-red-500" : ""}
-                />
-                {product.quantity === "" && (
-                  <p className="text-red-500 text-sm mt-1">
-                    Quantity is required
-                  </p>
-                )}
-                {product.quantity !== "" && parseInt(product.quantity) < 0 && (
-                  <p className="text-red-500 text-sm mt-1">
-                    Quantity must be a non-negative number
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="pictures">Add New Pictures</Label>
+              <div className="space-y-2">
+                <Label htmlFor="pictures" className="text-sm font-medium">Product Pictures</Label>
                 <Input
                   id="pictures"
                   type="file"
-                  accept="image/*"
                   multiple
                   onChange={handlePicturesUpload}
-                  className="mb-2"
                 />
-                <div className="grid grid-cols-3 gap-4 mt-4">
-                  {pictures.map((picture, index) => (
-                    <div key={`existing-${index}`} className="relative">
-                      <img
-                        src={picture.url}
-                        alt={`Product Existing ${index + 1}`}
-                        className="w-full h-32 object-cover rounded cursor-pointer"
-                        onClick={() => setSelectedImage(picture.url)}
-                      />
-                      <button
-                        onClick={() => removePicture(index, true)}
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ))}
-
-                  {base64Pictures.map((picture, index) => (
-                    <div key={`existing-${index}`} className="relative">
-                      <img
-                        src={picture} // This will be the base64 string
-                        alt={`Product Existing ${index + 1}`}
-                        className="w-full h-32 object-cover rounded cursor-pointer"
-                        onClick={() => setSelectedImage(picture)}
-                      />
-                      <button
-                        onClick={() => removePicture(index, false)} // 'false' indicates it's an existing picture
-                        className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-
-            <div className="mt-8 flex justify-end">
-              <Button
-                variant="default"
-                onClick={handleUpdate}
-                disabled={!isFormValid}
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                {pictures.map((picture, index) => (
+                  <div key={`existing-${index}`} className="relative">
+                    <img
+                      src={picture.url}
+                      alt={`Product Existing ${index + 1}`}
+                      className="w-full h-32 object-cover rounded cursor-pointer"
+                      onClick={() => setSelectedImage(picture.url)}
+                    />
+                    <button
+                      onClick={() => removePicture(index, true)}
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+                {base64Pictures.map((picture, index) => (
+                  <div key={`new-${index}`} className="relative">
+                    <img
+                      src={picture}
+                      alt={`Product New ${index + 1}`}
+                      className="w-full h-32 object-cover rounded cursor-pointer"
+                      onClick={() => setSelectedImage(picture)}
+                    />
+                    <button
+                      onClick={() => removePicture(index, false)}
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <Button 
+                type="submit" 
+                className="w-full bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                disabled={!isFormValid || loading}
               >
-                Update Product
+                {loading ? "Updating..." : "Update Product"}
               </Button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
@@ -459,7 +377,7 @@ const UpdateProduct = () => {
         </Dialog>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default UpdateProduct;
+export default UpdateProduct
