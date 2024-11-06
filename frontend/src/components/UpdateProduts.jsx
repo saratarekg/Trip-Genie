@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect, useMemo } from "react"
-import Cookies from "js-cookie"
-import { ChevronLeft, Check, X } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+import React, { useState, useEffect, useMemo } from "react";
+import Cookies from "js-cookie";
+import { ChevronLeft, Check, X } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -15,9 +15,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import signUpPicture from "../assets/images/signUpPicture.jpeg"
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -39,108 +39,108 @@ const LoadingSpinner = () => (
       ></circle>
     </svg>
   </div>
-)
+);
 
 const UpdateProduct = () => {
-  const { id } = useParams()
+  const { id } = useParams();
   const [product, setProduct] = useState({
     name: "",
     price: "",
     description: "",
     quantity: "",
-  })
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest")
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
-  const [pictures, setPictures] = useState([])
-  const [newPictures, setNewPictures] = useState([])
-  const [base64Pictures, setBase64Pictures] = useState([])
-  const [selectedImage, setSelectedImage] = useState(null)
-  const navigate = useNavigate()
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [pictures, setPictures] = useState([]);
+  const [newPictures, setNewPictures] = useState([]);
+  const [base64Pictures, setBase64Pictures] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProductDetails = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
-        const token = Cookies.get("jwt")
+        const token = Cookies.get("jwt");
         const response = await fetch(
           `http://localhost:4000/${userRole}/products/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
-        )
+        );
 
         if (!response.ok) {
-          throw new Error("Failed to fetch data")
+          throw new Error("Failed to fetch data");
         }
 
-        const productData = await response.json()
+        const productData = await response.json();
         setProduct({
           name: productData.name,
           price: productData.price.toString(),
           description: productData.description,
           quantity: productData.quantity.toString(),
-        })
-        setPictures(productData.pictures || [])
-        setError(null)
+        });
+        setPictures(productData.pictures || []);
+        setError(null);
       } catch (err) {
-        setError("Error fetching data. Please try again later.")
-        console.error("Error fetching data:", err)
+        setError("Error fetching data. Please try again later.");
+        console.error("Error fetching data:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchProductDetails()
-  }, [id, userRole])
+    fetchProductDetails();
+  }, [id, userRole]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setProduct((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setProduct((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handlePicturesUpload = (e) => {
-    const files = e.target.files
+    const files = e.target.files;
     if (files) {
-      const newFilePictures = Array.from(files)
-      const existingFileNames = new Set(newPictures.map((file) => file.name))
+      const newFilePictures = Array.from(files);
+      const existingFileNames = new Set(newPictures.map((file) => file.name));
       const newFilesToUpload = newFilePictures.filter(
         (file) => !existingFileNames.has(file.name)
-      )
+      );
 
       const newBase64PicturesPromises = newFilesToUpload.map(
         (file) =>
           new Promise((resolve) => {
-            const reader = new FileReader()
-            reader.readAsDataURL(file)
-            reader.onloadend = () => resolve(reader.result)
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = () => resolve(reader.result);
           })
-      )
+      );
 
       Promise.all(newBase64PicturesPromises).then((base64Pictures) => {
-        setBase64Pictures((prev) => [...prev, ...base64Pictures])
-        setNewPictures((prev) => [...prev, ...newFilesToUpload])
-      })
+        setBase64Pictures((prev) => [...prev, ...base64Pictures]);
+        setNewPictures((prev) => [...prev, ...newFilesToUpload]);
+      });
     }
-  }
+  };
 
   const removePicture = (index, isOld) => {
     if (isOld) {
-      const newPictures = [...pictures]
-      newPictures.splice(index, 1)
-      setPictures(newPictures)
+      const newPictures = [...pictures];
+      newPictures.splice(index, 1);
+      setPictures(newPictures);
     } else {
-      const newBase64Pictures = [...base64Pictures]
-      newBase64Pictures.splice(index, 1)
-      setBase64Pictures(newBase64Pictures)
-      const newPictures = [...newPictures]
-      newPictures.splice(index, 1)
-      setNewPictures(newPictures)
+      const newBase64Pictures = [...base64Pictures];
+      newBase64Pictures.splice(index, 1);
+      setBase64Pictures(newBase64Pictures);
+      const newPictures = [...newPictures];
+      newPictures.splice(index, 1);
+      setNewPictures(newPictures);
     }
 
-    setSelectedImage(null)
-  }
+    setSelectedImage(null);
+  };
 
   const isFormValid = useMemo(() => {
     return (
@@ -150,28 +150,28 @@ const UpdateProduct = () => {
       product.quantity !== "" &&
       !isNaN(parseFloat(product.price)) &&
       parseFloat(product.price) >= 0
-    )
-  }, [product])
+    );
+  }, [product]);
 
   const handleUpdate = async () => {
     if (!isFormValid) {
-      setError("Please fill in all fields correctly before updating.")
-      return
+      setError("Please fill in all fields correctly before updating.");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const token = Cookies.get("jwt")
-      const formData = new FormData()
-      formData.append("name", product.name)
-      formData.append("price", product.price)
-      formData.append("description", product.description)
-      formData.append("quantity", product.quantity)
-      formData.append("oldPictures", JSON.stringify(pictures))
+      const token = Cookies.get("jwt");
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("price", product.price);
+      formData.append("description", product.description);
+      formData.append("quantity", product.quantity);
+      formData.append("oldPictures", JSON.stringify(pictures));
 
       newPictures.forEach((picture) => {
-        formData.append("newPictures", picture)
-      })
+        formData.append("newPictures", picture);
+      });
 
       const response = await fetch(
         `http://localhost:4000/${userRole}/products/${id}`,
@@ -182,29 +182,29 @@ const UpdateProduct = () => {
           },
           body: formData,
         }
-      )
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to update product")
+        throw new Error("Failed to update product");
       }
 
-      setShowSuccessPopup(true)
-      setError(null)
+      setShowSuccessPopup(true);
+      setError(null);
     } catch (err) {
-      setError("Error updating product. Please try again later.")
-      console.error("Error updating product:", err)
+      setError("Error updating product. Please try again later.");
+      console.error("Error updating product:", err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (loading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   return (
     <div>
-   <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div
@@ -219,13 +219,22 @@ const UpdateProduct = () => {
               Update Product
             </h2>
             <p className="text-sm mb-6 text-[#1A3B47]">
-              Update your product details. Fill in the information carefully to ensure accurate product information.
+              Update your product details. Fill in the information carefully to
+              ensure accurate product information.
             </p>
           </div>
           <div className="w-full md:w-3/5 p-6">
-            <form onSubmit={(e) => { e.preventDefault(); handleUpdate(); }} className="space-y-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleUpdate();
+              }}
+              className="space-y-6"
+            >
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">Product Name</Label>
+                <Label htmlFor="name" className="text-sm font-medium">
+                  Product Name
+                </Label>
                 <Input
                   id="name"
                   name="name"
@@ -238,7 +247,9 @@ const UpdateProduct = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price" className="text-sm font-medium">Price (in American Dollars $)</Label>
+                  <Label htmlFor="price" className="text-sm font-medium">
+                    Price (in American Dollars $)
+                  </Label>
                   <Input
                     id="price"
                     name="price"
@@ -255,7 +266,9 @@ const UpdateProduct = () => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="quantity" className="text-sm font-medium">Quantity</Label>
+                  <Label htmlFor="quantity" className="text-sm font-medium">
+                    Quantity
+                  </Label>
                   <Input
                     id="quantity"
                     name="quantity"
@@ -264,27 +277,31 @@ const UpdateProduct = () => {
                     onChange={handleChange}
                   />
                   {product.quantity === "" && (
-                    <p className="text-red-500 text-xs">
-                      Quantity is required
-                    </p>
+                    <p className="text-red-500 text-xs">Quantity is required</p>
                   )}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium">Description (min. 200 characters)</Label>
-                <Textarea 
-                  id="description" 
+                <Label htmlFor="description" className="text-sm font-medium">
+                  Description (min. 200 characters)
+                </Label>
+                <Textarea
+                  id="description"
                   name="description"
                   value={product.description}
                   onChange={handleChange}
                   className="h-24"
                 />
                 {product.description.trim() === "" && (
-                  <p className="text-red-500 text-xs">Description is required</p>
+                  <p className="text-red-500 text-xs">
+                    Description is required
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pictures" className="text-sm font-medium">Product Pictures</Label>
+                <Label htmlFor="pictures" className="text-sm font-medium">
+                  Add Product Pictures
+                </Label>
                 <Input
                   id="pictures"
                   type="file"
@@ -302,6 +319,7 @@ const UpdateProduct = () => {
                       onClick={() => setSelectedImage(picture.url)}
                     />
                     <button
+                      type="button"
                       onClick={() => removePicture(index, true)}
                       className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                     >
@@ -318,6 +336,7 @@ const UpdateProduct = () => {
                       onClick={() => setSelectedImage(picture)}
                     />
                     <button
+                      type="button"
                       onClick={() => removePicture(index, false)}
                       className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                     >
@@ -331,8 +350,8 @@ const UpdateProduct = () => {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-[#5D9297] text-white hover:bg-[#1A3B47]"
                 disabled={!isFormValid || loading}
               >
@@ -377,7 +396,7 @@ const UpdateProduct = () => {
         </Dialog>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default UpdateProduct
+export default UpdateProduct;
