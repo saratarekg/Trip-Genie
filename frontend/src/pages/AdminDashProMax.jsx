@@ -166,9 +166,9 @@ export function Dashboard() {
             <TabsTrigger
               value="accounts"
               className="bg-white text-[#1A3B47] shadow-md 
-              hover:bg-[#B5D3D1] hover:text-[#1A3B47]
+               hover:text-[#1A3B47]
               data-[state=active]:bg-[#5D9297] data-[state=active]:text-[#1A3B47] 
-              data-[state=active]:hover:bg-[#5D9297] 
+              data-[state=active]:hover:bg-gray-300
               data-[state=active]:hover:scale-100
               transition-all duration-200 
               hover:scale-105 active:scale-95

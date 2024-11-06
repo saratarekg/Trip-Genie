@@ -473,6 +473,10 @@ const BookingForm = () => {
               <option value="2">2 Adults</option>
               <option value="3">3 Adults</option>
               <option value="4">4 Adults</option>
+              <option value="5">5 Adults</option>
+              <option value="6">6 Adults</option>
+              <option value="7">7 Adults</option>
+              <option value="8">8 Adults</option>
             </select>
           </div>
 

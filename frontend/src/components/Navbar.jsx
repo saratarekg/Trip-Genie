@@ -355,7 +355,7 @@ export function NavbarComponent() {
 
           {/* Login, Sign Up, Notifications, and Menu Button */}
           <div className="hidden md:flex items-center">
-            {role !== undefined && role !== "guest" && (
+            {role !== undefined && role !== "guest" && role !== "admin" && (
               <>
                 <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
                   <Bell className="h-5 w-5" />
@@ -389,7 +389,7 @@ export function NavbarComponent() {
                   Sign up
                 </Link>
               </>
-            ) : (
+            ) : role !== "admin" ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -449,6 +449,16 @@ export function NavbarComponent() {
                     </button>
                   </div>
                 )}
+              </div>
+            ) : (
+              <div className="pt-4 pb-3 border-t border-white/20">
+                <div className="flex items-center px-5">
+                  <Link to="/login">
+                    <button className="ml-3 bg-white text-black hover:bg-white/90 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200">
+                      Logout
+                    </button>
+                  </Link>
+                </div>
               </div>
             )}
           </div>
