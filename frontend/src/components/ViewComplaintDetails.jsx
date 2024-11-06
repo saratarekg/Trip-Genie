@@ -17,6 +17,8 @@ import {
   Flag,
   Briefcase,
   AlertCircle,
+  MessageSquare,
+  CheckCircle,
 } from "lucide-react";
 
 export const ViewComplaintDetails = () => {
@@ -94,6 +96,19 @@ export const ViewComplaintDetails = () => {
     }
   };
 
+  const getStatusBadgeVariant = (status) => {
+    switch (status.toLowerCase()) {
+      case "resolved":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "pending":
+        return "bg-orange-100 text-orange-800 border-orange-300";
+      case "new":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -120,113 +135,108 @@ export const ViewComplaintDetails = () => {
     );
   }
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "resolved":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
-
   return (
-    <div className="container mx-auto py-12 px-4 mt-12 bg-gray-50">
-      <Card className="p-8 shadow-lg rounded-lg">
+    <div className="container mx-auto py-8 px-4 mt-8 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+      <Card className="p-8 shadow-xl rounded-lg border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2">
-            <h1 className="text-4xl font-bold mb-4 text-gray-800">
-              {complaint.title}
-            </h1>
-            <Badge
-              className={`text-sm py-1 px-3 rounded-full font-semibold mb-6 ${getStatusColor(
-                complaint.status
-              )}`}
-            >
-              {complaint.status}
-            </Badge>
-            <p className="text-gray-600 mb-6 text-lg leading-relaxed">
-              {complaint.body}
-            </p>
-
-            <div className="flex flex-wrap gap-6 mb-6 text-sm text-gray-500">
-              <div className="flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-gray-400" />
-                <span>
-                  {new Date(complaint.createdAt).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
+          <div className="md:col-span-2 space-y-8">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+              <div className="flex-1">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3 leading-tight">
+                  {complaint.title}
+                </h1>
+                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <span className="flex items-center">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    {new Date(complaint.createdAt).toLocaleDateString()}
+                  </span>
+                  <span className="flex items-center">
+                    <Clock className="w-4 h-4 mr-1" />
+                    {new Date(complaint.createdAt).toLocaleTimeString()}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-gray-400" />
-                <span>
-                  {new Date(complaint.createdAt).toLocaleTimeString()}
-                </span>
+              <Badge
+                variant="static"
+                className={`${getStatusBadgeVariant(complaint.status)} 
+                text-sm py-1.5 px-4 rounded-full font-semibold whitespace-nowrap`}
+              >
+                {complaint.status}
+              </Badge>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+              <div className="prose prose-lg max-w-none">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {complaint.body}
+                </p>
               </div>
             </div>
 
-            {/* Replies Section */}
-            <div className="mb-6">
-              <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+            <div className="space-y-4">
+              <h3 className="text-2xl font-semibold text-gray-800 flex items-center">
+                <MessageSquare className="w-5 h-5 mr-2" />
                 Replies
               </h3>
               {complaint.replies.length ? (
                 complaint.replies.map((reply, index) => (
                   <div
                     key={index}
-                    className="mb-4 p-4 bg-gray-100 rounded-lg shadow-sm"
+                    className="p-6 bg-white rounded-lg shadow-sm border border-[#B5D3D1] 
+                    hover:shadow-md transition-shadow duration-200"
                   >
-                    <p className="text-gray-700">{reply.content}</p>
-                    <span className="text-sm text-gray-500">
+                    <p className="text-[#1A3B47] mb-2">{reply.content}</p>
+                    <span className="text-sm text-[#5D9297] flex items-center">
+                      <Clock className="w-4 h-4 mr-1" />
                       {new Date(reply.createdAt).toLocaleString()}
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500">No replies yet</p>
+                <p className="text-gray-500 italic p-6">No replies yet</p>
               )}
             </div>
 
-            {/* Add Reply Section */}
-            <div className="mb-6">
+            <div className="space-y-4">
               <Textarea
                 placeholder="Add your reply..."
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
-                className="mb-4"
+                className="min-h-[120px] focus:ring-2 focus:ring-[#5D9297]"
               />
-              <Button onClick={handleReply} className="bg-blue-500 text-white">
+              <Button
+                onClick={handleReply}
+                className="bg-[#5D9297] hover:bg-[#388A94] text-white transition-colors duration-200"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
                 Reply to Complaint
               </Button>
             </div>
 
-            {/* Status Change Buttons */}
-            <div className="flex gap-4 mt-6">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 onClick={() => handleStatusChange("pending")}
-                className="bg-yellow-500 text-white"
+                className="bg-[#F88C33] hover:bg-orange-500 text-white transition-colors duration-200 flex-1"
               >
+                <Clock className="w-4 h-4 mr-2" />
                 Mark as Pending
               </Button>
               <Button
                 onClick={() => handleStatusChange("resolved")}
-                className="bg-green-500 text-white"
+                className="bg-green-500 hover:bg-green-600 text-white transition-colors duration-200 flex-1"
               >
+                <CheckCircle className="w-4 h-4 mr-2" />
                 Mark as Resolved
               </Button>
             </div>
           </div>
 
           <div>
-            <Card className="p-6 bg-white shadow-md rounded-lg mb-6">
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+            <Card className="p-6 bg-white shadow-md rounded-lg border border-[#B5D3D1]">
+              <h2 className="text-2xl font-semibold mb-6 text-[#1A3B47] border-b border-[#B5D3D1] pb-4">
                 Tourist Profile
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="flex items-center">
                   <User className="w-5 h-5 mr-3 text-gray-400" />
                   <span className="text-gray-700">
