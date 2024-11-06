@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Bed, Calendar, ArrowUpDown, AlertCircle } from "lucide-react";
+import { Bed, Calendar, ArrowUpDown, AlertCircle, ArrowRight } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -33,12 +33,193 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
+import { useSearchParams } from 'react-router-dom';
+
+const cities = [
+  { code: 'CAI', name: 'Cairo', region: 'Egypt' },
+  { code: 'PAR', name: 'Paris', region: 'France' },
+  { code: 'DXB', name: 'Dubai', region: 'United Arab Emirates' },
+  { code: 'NYC', name: 'New York', region: 'USA' },
+  { code: 'LON', name: 'London', region: 'UK' },
+  { code: 'TKY', name: 'Tokyo', region: 'Japan' },
+  { code: 'PEK', name: 'Beijing', region: 'China' },
+  { code: 'SYD', name: 'Sydney', region: 'Australia' },
+  { code: 'BER', name: 'Berlin', region: 'Germany' },
+  { code: 'SIN', name: 'Singapore', region: 'Singapore' },
+  { code: 'AMS', name: 'Amsterdam', region: 'Netherlands' },
+  { code: 'CHI', name: 'Chicago', region: 'USA' },
+  { code: 'MEX', name: 'Mexico City', region: 'Mexico' },
+  { code: 'SAO', name: 'São Paulo', region: 'Brazil' },
+  { code: 'HKG', name: 'Hong Kong', region: 'Hong Kong' },
+  { code: 'SEL', name: 'Seoul', region: 'South Korea' },
+  { code: 'JNB', name: 'Johannesburg', region: 'South Africa' },
+  { code: 'TOR', name: 'Toronto', region: 'Canada' },
+  { code: 'MAD', name: 'Madrid', region: 'Spain' },
+  { code: 'MOW', name: 'Moscow', region: 'Russia' },
+  { code: 'LAX', name: 'Los Angeles', region: 'USA' },
+  { code: 'IST', name: 'Istanbul', region: 'Turkey' },
+  { code: 'BCN', name: 'Barcelona', region: 'Spain' },
+  { code: 'MUM', name: 'Mumbai', region: 'India' },
+  { code: 'ATL', name: 'Atlanta', region: 'USA' },
+  { code: 'MUN', name: 'Munich', region: 'Germany' },
+  { code: 'ROM', name: 'Rome', region: 'Italy' },
+  { code: 'DME', name: 'Moscow (Domodedovo)', region: 'Russia' },
+];  
+
+const styles = {
+  container: {
+    fontFamily: 'Arial, sans-serif',
+    maxWidth: '100%',
+    margin: '0 auto',
+    backgroundColor: '#1A3B47',
+    borderRadius: '8px',
+    overflow: 'hidden',
+  },
+  tabsContainer: {
+    display: 'flex',
+    backgroundColor: '#388A94',
+    padding: '10px 10px 0',
+  },
+  tab: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    cursor: 'pointer',
+    border: 'none',
+    borderTopLeftRadius: '8px',
+    borderTopRightRadius: '8px',
+    color: '#E6DCCF',
+    backgroundColor: 'transparent',
+    fontSize: '14px',
+    marginRight: '4px',
+    transition: 'background-color 0.3s, color 0.3s',
+  },
+  closeButton: {
+      position: 'absolute',
+      top: '10px',
+      right: '10px',
+      fontSize: '20px',
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      color: '#888',
+    },
+  activeTab: {
+    backgroundColor: 'white',
+    color: '#388A94',
+  },
+  formContainer: {
+    backgroundColor: 'white',
+    borderRadius: '8px',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+    padding: '20px',
+    transition: 'opacity 0.3s',
+  },
+  form: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '15px',
+  },
+  fieldGroup: {
+    flex: 1,
+    minWidth: '150px',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  label: {
+    fontSize: '12px',
+    color: '#666',
+    marginBottom: '4px',
+  },
+  select: {
+    width: '100%',
+    padding: '8px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '14px',
+    backgroundColor: 'white',
+  },
+  input: {
+    width: '100%',
+    padding: '8px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '14px',
+  },
+  locationDisplay: {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    marginTop: '4px',
+  },
+  locationSubtext: {
+    fontSize: '12px',
+    color: '#666',
+  },
+  button: {
+    padding: '12px 24px',
+    backgroundColor: '#1A3B47',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    alignSelf: 'flex-end',
+    marginTop: '24px',
+  },
+  modal: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+},
+modalContent: {
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'column',
+    borderRadius: '10px', // Rounded edges
+    overflow: 'hidden', // Ensures rounded corners display correctly
+    padding: '20px',
+    maxWidth: '380px',
+    width: '100%',
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.2)',
+    position: 'relative', // For positioning the close button if needed
+},
+modalButtons: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '10px',
+},
+}
+
+// const formatDate = (date) => {
+//   return date.toISOString().split('T')[0];
+// };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
 export default function HotelBookingPage() {
-  const [city, setCity] = useState("");
-  const [checkInDate, setCheckInDate] = useState("");
-  const [checkOutDate, setCheckOutDate] = useState("");
-  const [adults, setAdults] = useState("1");
+  const [searchParams] = useSearchParams();
+  const [city, setCity] = useState(searchParams.get('city') || 'CAI');
+  const [checkInDate, setCheckInDate] = useState(searchParams.get('checkIn') || formatDate(new Date()));
+  const [checkOutDate, setCheckOutDate] = useState(searchParams.get('checkOut') || formatDate(new Date(Date.now() + 86400000)));
+  const [activeTab, setActiveTab] = useState('hotels');
+  const [adults, setAdults] = useState(searchParams.get('adults') || '1');
   const [hotels, setHotels] = useState([]);
   const [accessToken, setAccessToken] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -138,6 +319,13 @@ export default function HotelBookingPage() {
     getCurrencyCode();
     getExchangeRates();
   }, [refreshToken, getCurrencyCode, getExchangeRates]);
+
+  useEffect(() => {
+    // Ensure check-out date is after check-in date
+    if (new Date(checkOutDate) <= new Date(checkInDate)) {
+        setCheckOutDate(formatDate(new Date(new Date(prev.checkIn).getTime() + 86400000)));
+    }
+  }, [checkInDate, checkOutDate]);
 
   const convertCurrency = (amount, fromCurrency, toCurrency) => {
     if (fromCurrency === toCurrency) return amount;
@@ -253,13 +441,13 @@ export default function HotelBookingPage() {
 
   const totalPages = Math.ceil(filterHotels(hotels).length / itemsPerPage);
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  // const formatDate = (dateString) => {
+  //   return new Date(dateString).toLocaleDateString("en-US", {
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //   });
+  // };
 
   const handleOpenDialog = async (hotel) => {
     setSelectedHotel(hotel);
@@ -328,6 +516,17 @@ export default function HotelBookingPage() {
 
   const today = new Date().toISOString().split("T")[0];
 
+  const renderLocationDisplay = (code) => {
+    const list = cities;
+    const location = list.find(item => item.code === code);
+    return location ? (
+      <>
+        <div style={styles.locationDisplay}>{location.name}</div>
+        <div style={styles.locationSubtext}>{location.code}, {location.region}</div>
+      </>
+    ) : null;
+  };
+
   const handleCheckInDateChange = (e) => {
     const selectedDate = e.target.value;
     setCheckInDate(selectedDate);
@@ -360,86 +559,120 @@ export default function HotelBookingPage() {
   };
 
   return (
-    <div className="bg-white-100 min-h-screen">
+    <div className="bg-[#E6DCCF]">
     {/* Navbar */}
     <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       </div>
     </div>
     <div className="h-16"></div>
-      <h1 className="text-3xl font-bold text-[#1A3B47] text-center">
+    <div className="bg-[#E6DCCF] min-h-screen mx-auto px-24">
+      <h1 className="text-5xl font-bold text-[#1A3B47]">
         Hotel Booking
       </h1>
+      <div className="h-10"></div>
 
-      <Card className="bg-white shadow-lg mt-2">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                City (IATA Code)
-              </label>
-              <Input
-                id="city"
-                type="text"
-                placeholder="e.g., CAI"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="border-2 border-amber-400"
-              />
-            </div>
-            <div>
-              <label htmlFor="checkInDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Check-in Date
-              </label>
+      <div className="mx-auto mb-12">
+      <div style={{
+        ...styles.formContainer,
+        opacity: activeTab === 'hotels' ? 1 : 0,
+        position: activeTab === 'hotels' ? 'static' : 'absolute',
+        pointerEvents: activeTab === 'hotels' ? 'auto' : 'none',
+      }}>
+        <form style={styles.form}>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>CITY</label>
+            <select
+              style={styles.select}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+            >
+              {cities.map((city) => (
+                <option key={city.code} value={city.code}>
+                  {city.name} ({city.code}) - {city.region}
+                </option>
+              ))}
+            </select>
+            {renderLocationDisplay(city)}
+          </div>
+
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>CHECK IN</label>
+            <div style={{ position: 'relative' }}>
               <Input
                 id="checkInDate"
                 type="date"
                 value={checkInDate}
                 onChange={handleCheckInDateChange}
                 min={today}
-                className="border-2 border-amber-400"
+                style={styles.input}
+                required
               />
+              {/* <Calendar size={16} style={{ position: 'absolute', right: '8px', top: '8px', pointerEvents: 'none' }} /> */}
             </div>
-            <div>
-              <label htmlFor="checkOutDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Check-out Date
-              </label>
+            <div style={styles.locationDisplay}>
+              {new Date(checkInDate).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' })}
+            </div>
+          </div>
+
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>CHECK OUT</label>
+            <div style={{ position: 'relative' }}>
               <Input
                 id="checkOutDate"
                 type="date"
                 value={checkOutDate}
                 onChange={(e) => setCheckOutDate(e.target.value)}
-                min={checkInDate || today}
-                className="border-2 border-amber-400"
+                min={checkInDate}
+                style={styles.input}
+                required
               />
+              {/* <Calendar size={16} style={{ position: 'absolute',   right: '8px', top: '8px', pointerEvents: 'none' }} /> */}
             </div>
-            <div>
-              <label htmlFor="adults" className="block text-sm font-medium text-gray-700  mb-1">
-                Number of Adults
-              </label>
-              <Select value={adults} onValueChange={setAdults}>
-                <SelectTrigger id="adults" className="border-2 border-amber-400">
+            <div style={styles.locationDisplay}>
+              {new Date(checkOutDate).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' })}
+            </div>
+          </div>
+
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>ADULTS</label>
+            <Select
+              style={styles.select}
+              value={adults}
+              onValueChange={setAdults}
+              required
+            >
+              <SelectTrigger id="adults">
                   <SelectValue placeholder="Select number of adults" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[...Array(9)].map((_, i) => (
+                  {[...Array(8)].map((_, i) => (
                     <SelectItem key={i + 1} value={(i + 1).toString()}>
                       {i + 1}
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
-            </div>
+            </Select>
           </div>
+          {/* <Button type="submit" style={styles.button} onClick={handleSearch}>
+          {isLoading ? "Searching..." : "Search Hotels"}
+          </Button> */}
+          
+        </form>
+        <div className="mt-8 mr-2 ml-2">
           <Button
             onClick={handleSearch}
-            disabled={isLoading || !city || !checkInDate || !checkOutDate}
-            className="bg-[#1A3B47] hover:bg-blue-800 text-white font-semibold px-8 w-full mt-4"
+            className="bg-[#1A3B47] hover:bg-[#388A94] text-white font-semibold px-8 w-full"
           >
             {isLoading ? "Searching..." : "Search Hotels"}
           </Button>
-        </CardContent>
-      </Card>
+          </div>
+      </div>
+      </div>
+
+      
+       
 
       {error && (
         <Alert variant="destructive" className="bg-red-50 border-red-200">
@@ -487,21 +720,21 @@ export default function HotelBookingPage() {
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-blue-400" />
+                        <Calendar className="h-4 w-4 text-[#B5D3D1]" />
                         <span>Check-in: {formatDate(hotel.offers[0].checkInDate)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-green-400" />
+                        <Calendar className="h-4 w-4 text-[#5D9297]" />
                         <span>Check-out: {formatDate(hotel.offers[0].checkOutDate)}</span>
                       </div>
-                      <div className="flex items-center gap-2 font-semibold text-lg">
-                        <span>Price: {convertCurrency(hotel.offers[0].price.total, hotel.offers[0].price.currency, currencyCode).toFixed(2)} {currencyCode}</span>
+                      <div className="flex items-center gap-2 font-semibold text-lg text-[#F88C33]">
+                        <span> {convertCurrency(hotel.offers[0].price.total, hotel.offers[0].price.currency, currencyCode).toFixed(2)} {currencyCode}</span>
                       </div>
                     </div>
                     
                     <div className="mt-auto pt-3 flex items-center justify-between">
                       <Button
-                        className="bg-[#1A3B47] hover:bg-blue-800 text-white"
+                        className="bg-[#388A94] hover:bg-[#1A3B47] text-white"
                         onClick={() => handleOpenDialog(hotel)}
                       >
                         See Details
@@ -653,7 +886,7 @@ export default function HotelBookingPage() {
               </div>
 
               <Button
-                className="mt-4 w-full bg-[#1A3B47] hover:bg-blue-800 text-white"
+                className="mt-4 w-full bg-[#388A94] hover:bg-[#1A3B47] text-white"
                 onClick={handleBookNow}
                 disabled={!isBookingFormValid()}
               >
@@ -679,13 +912,14 @@ export default function HotelBookingPage() {
           <DialogClose asChild>
             <Button
               onClick={handleCloseAllPopups}
-              className="mt-4 w-full bg-[#1A3B47] hover:bg-blue-800 text-white"
+              className="mt-4 w-full bg-[#388A94] hover:bg-[#1A3B47] text-white"
             >
               Close
             </Button>
           </DialogClose>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

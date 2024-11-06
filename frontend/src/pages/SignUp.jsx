@@ -50,8 +50,8 @@ import TermsAndConditions from "@/components/TermsAndConditions";
 import { ImageCropper } from "@/components/ImageCropper";
 
 import { Card, CardContent } from "@/components/ui/card"
-import { PlusCircle, MinusCircle } from "lucide-react"
-
+import { PlusCircle, MinusCircle, Check, ChevronLeft } from "lucide-react"
+import signUpPicture from '../assets/images/signUpPicture.jpeg';
 
 const phoneValidator = (value) => {
   const phoneNumber = parsePhoneNumberFromString("+" + value);
@@ -337,6 +337,13 @@ export function SignupForm() {
     }
   };
 
+  const clearAllErrors = () => {
+    for (const key in errors) {
+      setError(key, { type: "manual", message: "" });
+    }
+  };
+
+
   // Add scroll event listener to terms container
   useEffect(() => {
     const termsDiv = termsRef.current;
@@ -592,6 +599,52 @@ export function SignupForm() {
       }
     }
   }, [uploadedDocuments, stage, userType]);
+
+  const renderStepIndicator = () => {
+    if (!userType) return null;
+
+    return (
+      <div className="flex flex-col gap-8">
+        {Array.from({ length: totalStages }).map((_, index) => (
+          <div key={index} className="flex items-center gap-4">
+            <div className="relative">
+              {index < totalStages - 1 && (
+                <div 
+                  className={cn(
+                    "absolute top-[calc(100%+4px)] left-1/2 w-0.5 h-12 -translate-x-1/2",
+                    index < stage - 1 ? "bg-[#1A3B47]" : "bg-[#5D9297]"
+                  )}
+                />
+              )}
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium",
+                  stage > index + 1 || stage === index + 1 ? "bg-[#1A3B47] text-white" : "bg-[#5D9297] text-white"
+                )}
+              >
+                {stage > index + 1 ? (
+                  <Check className="w-5 h-5" />
+                ) : (
+                  index + 1
+                )}
+              </div>
+            </div>
+            <span 
+              className={cn(
+                "text-sm font-medium",
+                stage > index + 1 || stage === index + 1 ? "text-[#1A3B47]" : "text-[#5D9297]"
+              )}
+            >
+              {index === 0 && "Personal Details"}
+              {index === 1 && (["tour-guide", "advertiser", "seller"].includes(userType) ? "Documents" : "Profile Picture")}
+              {index === 2 && (["tour-guide", "advertiser", "seller"].includes(userType) ? "Profile Picture" : "Terms")}
+              {index === 3 && "Terms and Conditions"}
+            </span>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   const renderStage = () => {
     switch (stage) {
@@ -1245,79 +1298,98 @@ export function SignupForm() {
     }
   };
 
+
+  const renderFormFields = () => {
+    const content = renderStage();
+    if (!content) return null;
+
+    const fields = Array.isArray(content) ? content : [content];
+
+    // Always use a single column layout
+    return <div className="space-y-6">{fields}</div>;
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg mt-20 mb-20">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
-            Create an account
-          </h2>
-        </div>
+    <div 
+    className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-4"
+    style={{
+      backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+    }}
+  >
+    <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-6xl flex flex-col md:flex-row">
+      <div className="w-full md:w-1/3 bg-[#B5D3D1] p-8">
+        <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">Create Your <br/>Account Now!</h2>
+        <p className="text-sm mb-10 text-[#1A3B47]">
+          Join us today! It only takes a few steps to set <br/>up your account and start exploring.
+        </p>
+        {renderStepIndicator()}
+      </div>
+      <div className={cn(
+        "w-full md:w-2/3 p-8 max-h-[80vh] overflow-y-auto",
+        !userType && "md:w-1/3"
+      )}>
         <Form {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={control}
-              name="userType"
-              render={({ field }) => (
-                <FormItem className={stage !== 1 ? "hidden" : ""}>
-                  <FormLabel>I am a*</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+            {!userType ? (
+              <div className="space-y-4 h-full flex flex-col justify-center">
+                <h2 className="text-2xl font-bold text-[#1A3B47] mb-6">I am a</h2>
+                {["tourist", "tour-guide", "advertiser", "seller"].map((role) => (
+                  <Button
+                    key={role}
+                    type="button"
+                    className={cn(
+                      "w-full text-left justify-start capitalize transition-colors duration-200",
+                      userType === role 
+                        ? "bg-[#1A3B47] text-white" 
+                        : "bg-white text-[#1A3B47] border border-[#5D9297] hover:bg-[#5D9297] hover:text-[#B5D3D1]"
+                    )}
+                    onClick={() => {
+                      form.setValue("userType", role);
+                      clearAllErrors();
+                    }}
                   >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Please choose your role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="tourist">Tourist</SelectItem>
-                      <SelectItem value="tour-guide">Tour Guide</SelectItem>
-                      <SelectItem value="advertiser">Advertiser</SelectItem>
-                      <SelectItem value="seller">Seller</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {userType && (
+                    {role.replace("-", " ")}
+                  </Button>
+                ))}
+              </div>
+            ) : (
               <>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">
-                    Step {stage} of {totalStages}
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                    <div
-                      className="bg-[#1A3B47] h-2.5 rounded-full"
-                      style={{ width: `${progress}%` }}
-                    ></div>
-                  </div>
-                </div>
                 {apiError && (
                   <Alert variant="destructive" className="mb-4">
                     <AlertDescription>{apiError}</AlertDescription>
                   </Alert>
                 )}
-                {renderStage()}
-                <div className="flex justify-between">
+                {renderFormFields()}
+                <div className="flex justify-between mt-6">
                   {stage > 1 ? (
                     <Button
                       type="button"
                       className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
-
                       variant="outline"
                       onClick={handleBack}
                     >
                       Back
                     </Button>
                   ) : (
-                    <div></div>
+                    <Button
+                      type="button"
+                      className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                      variant="outline"
+                      onClick={() => {
+                        form.setValue("userType", undefined);
+                        setStage(1);
+                      }}
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-2" />
+                      Change Role
+                    </Button>
                   )}
-                  <Button type="submit" className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                  <Button 
+                    type="submit" 
+                    className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
                   >
                     {stage < totalStages ? (
-                      `Next`
+                      "Next"
                     ) : isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1327,23 +1399,19 @@ export function SignupForm() {
                       "Submit"
                     )}
                   </Button>
-                  {/* {stage < totalStages ? (
-                <Button type="submit">Next</Button>
-              ) : (
-                <Button type="submit">Sign up</Button>
-              )} */}
                 </div>
               </>
             )}
           </form>
         </Form>
-        {stage === 1 && (
+        
+        {!userType && (
           <div className="mt-4 text-center text-sm">
             <p className="text-gray-600">
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="font-medium text-5D9297 hover:text-[#1A3B47]"
+                className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
               >
                 Sign in
               </Link>
@@ -1351,39 +1419,39 @@ export function SignupForm() {
           </div>
         )}
       </div>
-
-      <Dialog
-        open={showSignupSuccess}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) {
-            navigate("/");
-          }
-          setShowSignupSuccess(isOpen);
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-              Successful Signup
-            </DialogTitle>
-            <DialogDescription>
-              Your account has been created successfully! Please log in.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex justify-center items-center w-full">
-            <div className="flex justify-center w-full">
-              <Button
-                className="bg-[#5D9297] mr-4"
-                variant="default"
-                onClick={() => navigate("/login")}
-              >
-                Login
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
+
+    <Dialog
+      open={showSignupSuccess}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          navigate("/");
+        }
+        setShowSignupSuccess(isOpen);
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+            Successful Signup
+          </DialogTitle>
+          <DialogDescription>
+            Your account has been created successfully! Please log in.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="flex justify-center items-center w-full">
+          <div className="flex justify-center w-full">
+            <Button
+              className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
   );
 }
