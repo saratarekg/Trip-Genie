@@ -319,9 +319,10 @@ export function AllProducts() {
         if(products.length>0){
           handlePageChange(1);
         }
-        if (params.sort) {
-          url.searchParams.append("sort", params.sort);
+        if (params.asc) {
+         
           url.searchParams.append("asc", params.asc);
+          console.log(params);
         }
         if (params.myproducts)
           url.searchParams.append("myproducts", params.myproducts);
@@ -411,6 +412,7 @@ export function AllProducts() {
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         rating: selectedRating,
+        asc: sortOrder,
         categories: selectedCategories,
       });
     }, 0.01);
