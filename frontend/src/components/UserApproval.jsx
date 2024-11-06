@@ -166,7 +166,7 @@ export default function UserApproval() {
           <div className="flex space-x-2">
             <Button
               onClick={() => handleConfirm("reject", user, role)}
-              className="flex-1 text-sm sm:text-base bg-red-500 hover:bg-red-600 active:bg-red-700 
+              className="flex-1 bg-red-500 hover:bg-red-600 active:bg-red-700 
               active:transform active:scale-95 text-white transition-all duration-200"
             >
               Reject
