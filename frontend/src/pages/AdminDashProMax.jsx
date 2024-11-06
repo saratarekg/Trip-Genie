@@ -24,7 +24,6 @@ import {
 } from "lucide-react";
 import { Pie } from "react-chartjs-2";
 import { AdminGovernorPopup } from "@/components/admin-governor-popup";
-import { DeleteAccount } from "@/components/DeleteAccPopout";
 import { CategoryCRUD } from "@/components/category-crud";
 import { TagCRUD } from "@/components/tags-crud";
 import { Dialog } from "@/components/ui/dialog";
@@ -51,7 +50,6 @@ const DashboardCard = ({ title, value, subtitle, icon }) => (
 );
 
 export function Dashboard() {
-  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
   const [isAdminGovernorPopupOpen, setIsAdminGovernorPopupOpen] =
     useState(false);
   const [isCategoryCRUDOpen, setIsCategoryCRUDOpen] = useState(false);
@@ -253,9 +251,9 @@ export function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button
+                  <Button 
+                    onClick={() => navigate('/manage-accounts')}
                     className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                    onClick={() => setIsDeleteAccountOpen(true)}
                   >
                     Manage
                   </Button>
@@ -424,9 +422,6 @@ export function Dashboard() {
         </div>
       </main>
 
-      {isDeleteAccountOpen && (
-        <DeleteAccount onClose={() => setIsDeleteAccountOpen(false)} />
-      )}
       <Dialog
         open={isAdminGovernorPopupOpen}
         onOpenChange={setIsAdminGovernorPopupOpen}

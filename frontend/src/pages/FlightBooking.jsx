@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,7 +32,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import Cookies from "js-cookie";
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 const airports = [
   { code: 'CAI', name: 'Cairo International Airport', region: 'Egypt' },
@@ -522,12 +522,12 @@ function BookingPage() {
 
     <div className="bg-[#E6DCCF] min-h-screen mx-auto px-24">
       <div ref={mainContentRef}>
-        <h1 className="text-4xl font-bold text-[#1A3B47] text-center">
+        <h1 className="text-5xl font-bold text-[#1A3B47]">
           Flight Booking
         </h1>
         <div className="h-10"></div>
 
-        <div className="mx-auto px-24 mb-12">
+        <div className="mx-auto mb-12">
   <div style={styles.container}>
     <div style={{
       ...styles.formContainer,
