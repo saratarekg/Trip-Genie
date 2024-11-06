@@ -48,6 +48,11 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import TermsAndConditions from "@/components/TermsAndConditions";
 import { ImageCropper } from "@/components/ImageCropper";
+
+import { Card, CardContent } from "@/components/ui/card"
+import { PlusCircle, MinusCircle } from "lucide-react"
+
+
 const phoneValidator = (value) => {
   const phoneNumber = parsePhoneNumberFromString("+" + value);
   if (!phoneNumber || !phoneNumber.isValid()) {
@@ -166,7 +171,7 @@ export function SignupForm() {
         if (
           data.dateOfBirth > new Date() ||
           data.dateOfBirth >
-            new Date().setFullYear(new Date().getFullYear() - 18)
+          new Date().setFullYear(new Date().getFullYear() - 18)
         ) {
           scrollToError();
           ctx.addIssue({
@@ -639,35 +644,35 @@ export function SignupForm() {
             {(userType === "tourist" ||
               userType === "tour-guide" ||
               userType === "seller") && (
-              <>
-                <FormField
-                  control={control}
-                  name="mobile"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mobile*</FormLabel>
-                      <FormControl>
-                        <PhoneInput
-                          country={"eg"}
-                          value={field.value}
-                          onChange={(value) => field.onChange(value)}
-                          excludeCountries={["il"]}
-                          inputProps={{
-                            name: "mobile",
-                            required: true,
-                            autoFocus: true,
-                            placeholder: "+1234567890",
-                            ref: formRefs.mobile,
-                          }}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
+                <>
+                  <FormField
+                    control={control}
+                    name="mobile"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mobile*</FormLabel>
+                        <FormControl>
+                          <PhoneInput
+                            country={"eg"}
+                            value={field.value}
+                            onChange={(value) => field.onChange(value)}
+                            excludeCountries={["il"]}
+                            inputProps={{
+                              name: "mobile",
+                              required: true,
+                              autoFocus: true,
+                              placeholder: "+1234567890",
+                              ref: formRefs.mobile,
+                            }}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             {(userType === "tourist" || userType === "tour-guide") && (
               <>
                 <FormField
@@ -767,145 +772,140 @@ export function SignupForm() {
             {(userType === "seller" ||
               userType === "advertiser" ||
               userType === "tour-guide") && (
-              <>
-                <FormField
-                  control={control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name*</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Name"
-                          {...field}
-                          ref={formRefs.name}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
+                <>
+                  <FormField
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name*</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Name"
+                            {...field}
+                            ref={formRefs.name}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             {userType === "tour-guide" && (
-              <>
-                <FormField
-                  control={control}
-                  name="yearsOfExperience"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Years of experience*</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Years of experience"
-                          min="0"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === "" ? 0 : +e.target.value
-                            )
-                          }
-                          ref={formRefs.yearsOfExperience}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormItem className="space-y-4">
-                  <FormLabel className="text-lg font-semibold">
-                    Previous works
-                  </FormLabel>
-                  {fields.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="flex flex-col space-y-2 mb-4 border p-4 rounded-md shadow-sm"
-                      ref={formRefs.previousWorks}
-                    >
-                      <FormControl>
-                        <>
-                          <Input
-                            placeholder="Title"
-                            {...register(`previousWorks.${index}.title`)}
-                            defaultValue={item.title}
-                            className="border rounded-md p-2"
-                          />
-                          {errors?.previousWorks?.[index]?.title && (
-                            <p className="text-red-500 text-sm">
-                              {errors.previousWorks[index].title.message}
-                            </p>
-                          )}
-                        </>
-                      </FormControl>
-                      <FormControl>
-                        <>
-                          <Input
-                            placeholder="Company"
-                            {...register(`previousWorks.${index}.company`)}
-                            defaultValue={item.company}
-                            className="border rounded-md p-2"
-                          />
-                          {errors?.previousWorks?.[index]?.company && (
-                            <p className="text-red-500 text-sm">
-                              {errors.previousWorks[index].company.message}
-                            </p>
-                          )}
-                        </>
-                      </FormControl>
-                      <FormControl>
-                        <>
+              <Card className="w-full max-w-2xl mx-auto">
+                <CardContent className="space-y-6 p-6">
+                  <FormField
+                    control={control}
+                    name="yearsOfExperience"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-semibold">Years of experience*</FormLabel>
+                        <FormControl>
                           <Input
                             type="number"
-                            placeholder="Duration in years"
+                            placeholder="Enter years of experience"
                             min="0"
-                            {...register(`previousWorks.${index}.duration`)}
-                            defaultValue={item.duration}
-                            className="border rounded-md p-2"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value === "" ? 0 : +e.target.value)}
+                            ref={formRefs.yearsOfExperience}
+                            className="w-full p-2 border rounded-md"
                           />
-                          {errors?.previousWorks?.[index]?.duration && (
-                            <p className="text-red-500 text-sm">
-                              {errors.previousWorks[index].duration.message}
-                            </p>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="space-y-4">
+                    <Label className="text-lg font-semibold">Previous works</Label>
+                    {fields.map((item, index) => (
+                      <Card key={item.id} className="p-4 space-y-4 bg-gray-50">
+                        <FormItem>
+                          <FormLabel>Title</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Job title"
+                              {...register(`previousWorks.${index}.title`)}
+                              defaultValue={item.title}
+                              className="w-full p-2 border rounded-md"
+                            />
+                          </FormControl>
+                          {errors?.previousWorks?.[index]?.title && (
+                            <FormMessage>{errors.previousWorks[index].title.message}</FormMessage>
                           )}
-                        </>
-                      </FormControl>
-                      <FormControl>
-                        <Input
-                          placeholder="Description"
-                          {...register(`previousWorks.${index}.description`)}
-                          defaultValue={item.description}
-                          className="border rounded-md p-2"
-                        />
-                      </FormControl>
-                      <Button
-                        type="button"
-                        onClick={() => remove(index)}
-                        className="self-end bg-orange-500 text-white p-2 rounded-md"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                  <div>
+                        </FormItem>
+
+                        <FormItem>
+                          <FormLabel>Company</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Company name"
+                              {...register(`previousWorks.${index}.company`)}
+                              defaultValue={item.company}
+                              className="w-full p-2 border rounded-md"
+                            />
+                          </FormControl>
+                          {errors?.previousWorks?.[index]?.company && (
+                            <FormMessage>{errors.previousWorks[index].company.message}</FormMessage>
+                          )}
+                        </FormItem>
+
+                        <FormItem>
+                          <FormLabel>Duration (years)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Duration in years"
+                              min="0"
+                              {...register(`previousWorks.${index}.duration`)}
+                              defaultValue={item.duration}
+                              className="w-full p-2 border rounded-md"
+                            />
+                          </FormControl>
+                          {errors?.previousWorks?.[index]?.duration && (
+                            <FormMessage>{errors.previousWorks[index].duration.message}</FormMessage>
+                          )}
+                        </FormItem>
+
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Job description"
+                              {...register(`previousWorks.${index}.description`)}
+                              defaultValue={item.description}
+                              className="w-full p-2 border rounded-md"
+                            />
+                          </FormControl>
+                        </FormItem>
+
+                        <Button
+                          type="button"
+                          onClick={() => remove(index)}
+                          variant="destructive"
+                          size="sm"
+                          className="mt-2"
+                        >
+                          <MinusCircle className="w-4 h-4 mr-2" />
+                          Remove
+                        </Button>
+                      </Card>
+                    ))}
+
                     <Button
                       type="button"
-                      onClick={() =>
-                        append({
-                          title: "",
-                          company: "",
-                          duration: "",
-                          description: "",
-                        })
-                      }
-                      className="bg-purple-900 text-white p-2 rounded-md"
+                      onClick={() => append({ title: "", company: "", duration: "", description: "" })}
+                      variant="outline"
+                      className="w-full mt-4 bg-[#5D9297] text-white hover:bg-[#1A3B47]"
                     >
+                      <PlusCircle className="w-4 h-4 mr-2" />
                       Add Previous Work
                     </Button>
+
                   </div>
-                  <FormMessage />
-                </FormItem>
-              </>
+                </CardContent>
+              </Card>
             )}
             {(userType === "seller" || userType === "advertiser") && (
               <>
@@ -990,7 +990,7 @@ export function SignupForm() {
                     htmlFor={docType}
                     className="inline-block cursor-pointer bg-gray-100 px-4 py-2 rounded-lg text-violet-700"
                   >
-                    <div className="text-sm">
+                    <div className="text-sm  text-[#1A3B47] ">
                       {uploadedDocuments[docType]?.name || "Select a file..."}
                     </div>
                     <Input
@@ -1289,7 +1289,7 @@ export function SignupForm() {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
                     <div
-                      className="bg-orange-500 h-2.5 rounded-full"
+                      className="bg-[#1A3B47] h-2.5 rounded-full"
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
@@ -1304,6 +1304,8 @@ export function SignupForm() {
                   {stage > 1 ? (
                     <Button
                       type="button"
+                      className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+
                       variant="outline"
                       onClick={handleBack}
                     >
@@ -1312,7 +1314,8 @@ export function SignupForm() {
                   ) : (
                     <div></div>
                   )}
-                  <Button type="submit">
+                  <Button type="submit" className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                  >
                     {stage < totalStages ? (
                       `Next`
                     ) : isLoading ? (
@@ -1340,7 +1343,7 @@ export function SignupForm() {
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="font-medium text-orange-500 hover:text-orange-600"
+                className="font-medium text-5D9297 hover:text-[#1A3B47]"
               >
                 Sign in
               </Link>
@@ -1371,7 +1374,7 @@ export function SignupForm() {
           <DialogFooter className="flex justify-center items-center w-full">
             <div className="flex justify-center w-full">
               <Button
-                className="bg-orange-500 mr-4"
+                className="bg-[#5D9297] mr-4"
                 variant="default"
                 onClick={() => navigate("/login")}
               >
