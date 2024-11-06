@@ -38,33 +38,6 @@ const phoneValidator = (value) => {
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
-const ImageViewer = ({ imageUrl, isOpen, onClose }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-      <div className="w-full h-full relative flex flex-col">
-        <div className="flex items-center justify-between p-4 bg-gradient-to-b from-black/40 to-transparent absolute top-0 left-0 right-0 z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-            onClick={onClose}
-          >
-            <X className="h-6 w-6" />
-          </Button>
-        </div>
-        <div className="flex-1 flex items-center justify-center p-4">
-          <img
-            src={imageUrl}
-            alt="Full screen view"
-            className="max-h-full max-w-full object-contain"
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const Modal = ({ show, onClose, children, isImageViewer = false, imageUrl = "" }) => {
   if (!show) return null;
@@ -294,6 +267,8 @@ export function TouristProfileComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const api = `http://localhost:4000/${role}`;
+      editedTourist.profilePicture = selectedImage;
+
       const response = await axios.put(api, editedTourist, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -393,7 +368,7 @@ export function TouristProfileComponent() {
             {isDropdownOpen && (
               <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
                 <ul className="py-2">
-                  {tourist.profilePicture && (
+                  {selectedImage && (
                     <li
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => {
@@ -406,19 +381,21 @@ export function TouristProfileComponent() {
                     </li>
                   )}
 
-                  <div>
-                    <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={handleUpdateClick}
-                    >
-                      Update
-                    </li>
-                  </div>
-                  {tourist.profilePicture && (
+                  <li
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={handleUpdateClick}
+                  >
+                    Update
+                  </li>
 
+                  {selectedImage && (
                     <li
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                      onClick={() => console.log("Delete user")}
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setDropdownOpen(false);
+
+                      }}
                     >
                       Delete
                     </li>
