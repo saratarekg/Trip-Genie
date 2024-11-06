@@ -68,6 +68,10 @@ const touristSchema = new Schema(
       type: String,
       trim: true,
     },
+    profilePicture: {
+      public_id: { type: String, required: true },
+      url: { type: String, required: true },
+    },
     preferredCurrency: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Currency",
@@ -91,17 +95,21 @@ const touristSchema = new Schema(
     },
     cart: [
       {
-        product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
         quantity: { type: Number, required: true, min: 1 },
         totalPrice: { type: Number, required: true },
       },
     ],
     wishlist: [
       {
-        product: { 
-          type: mongoose.Schema.Types.ObjectId, 
-          ref: "Product", 
-          required: true 
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
         },
       },
     ],
@@ -111,24 +119,31 @@ const touristSchema = new Schema(
         cardType: {
           type: String,
           required: true,
-          enum: ['Credit Card', 'Debit Card'],
+          enum: ["Credit Card", "Debit Card"],
         },
         cardNumber: {
           type: String,
-          required: function() {
-            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
+          required: function () {
+            return (
+              this.cardType === "Credit Card" || this.cardType === "Debit Card"
+            );
           },
           match: [/^[0-9]{16}$/, "Please enter a valid 16-digit card number"],
         },
         expiryDate: {
           type: String,
           required: function () {
-            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
+            return (
+              this.cardType === "Credit Card" || this.cardType === "Debit Card"
+            );
           },
-          match: [/^(0[1-9]|1[0-2])\/[0-9]{2}$/, "Please enter a valid expiry date in MM/YY format"],
+          match: [
+            /^(0[1-9]|1[0-2])\/[0-9]{2}$/,
+            "Please enter a valid expiry date in MM/YY format",
+          ],
           validate: {
             validator: function (v) {
-              const [month, year] = v.split('/');
+              const [month, year] = v.split("/");
               const expiryDate = new Date(`20${year}`, month - 1);
               const currentDate = new Date();
               currentDate.setDate(1);
@@ -139,15 +154,19 @@ const touristSchema = new Schema(
         },
         holderName: {
           type: String,
-          required: function() {
-            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
+          required: function () {
+            return (
+              this.cardType === "Credit Card" || this.cardType === "Debit Card"
+            );
           },
           trim: true,
         },
         cvv: {
           type: String,
-          required: function() {
-            return this.cardType === 'Credit Card' || this.cardType === 'Debit Card';
+          required: function () {
+            return (
+              this.cardType === "Credit Card" || this.cardType === "Debit Card"
+            );
           },
           match: [/^[0-9]{3,4}$/, "Please enter a valid 3 or 4 digit CVV"],
         },
@@ -158,11 +177,13 @@ const touristSchema = new Schema(
       },
     ],
     preference: {
-      budget: {  // max price
+      budget: {
+        // max price
         type: Number,
         default: Infinity, // Default value set to Infinity
       },
-      price: { // min price
+      price: {
+        // min price
         type: Number,
         default: Infinity, // Default value set to Infinity
       },

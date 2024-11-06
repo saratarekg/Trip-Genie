@@ -45,6 +45,9 @@ export function TouristProfileComponent() {
   const [nationalities, setNationalities] = useState([]);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
@@ -69,8 +72,21 @@ export function TouristProfileComponent() {
     fetchTouristProfile();
   }, []);
 
+  const openModal = () => {
+    setModalOpen(true);
+    setDropdownOpen(false); // Close the dropdown when opening the modal
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!isDropdownOpen);
+  };
+
   const fetchExchangeRate = useCallback(async () => {
-    if(tourist){
+    if (tourist) {
       try {
         const token = Cookies.get("jwt");
         const response = await fetch(
@@ -97,29 +113,29 @@ export function TouristProfileComponent() {
         console.error("Error fetching exchange rate:", error);
       }
     }
-    }, [tourist]);
+  }, [tourist]);
 
-    const getCurrencySymbol = useCallback(async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get(`http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setCurrencySymbol(response.data.symbol);
-      } catch (error) {
-        console.error("Error fetching currency symbol:", error);
-      }
-    }, [tourist]);
-  
-    const formatWallet = (price) => {
-      fetchExchangeRate();
-      getCurrencySymbol();
-      if (tourist && exchangeRate && currencySymbol){
-          const exchangedPrice = price * exchangeRate;
-            return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
-      }
-    };
-  
+  const getCurrencySymbol = useCallback(async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(`http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setCurrencySymbol(response.data.symbol);
+    } catch (error) {
+      console.error("Error fetching currency symbol:", error);
+    }
+  }, [tourist]);
+
+  const formatWallet = (price) => {
+    fetchExchangeRate();
+    getCurrencySymbol();
+    if (tourist && exchangeRate && currencySymbol) {
+      const exchangedPrice = price * exchangeRate;
+      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+    }
+  };
+
 
   useEffect(() => {
     const fetchNationalities = async () => {
@@ -242,33 +258,80 @@ export function TouristProfileComponent() {
 
   return (
     <div >
-      
+
 
       <div className="p-8">
-      <div className="flex items-center gap-4 mb-6">
-    <div className="flex-shrink-0">
-        <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white">
-            <User className="w-12 h-12 text-white" />
-        </div>
-    </div>
+      <div className="flex items-center gap-4 mb-6 relative">
+      <div className="flex-shrink-0 relative">
+        {/* Avatar Button */}
+        <button
+          className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white"
+          onClick={toggleDropdown}
+        >
+          <User className="w-12 h-12 text-white" />
+        </button>
 
-    <div className="flex flex-col flex-grow">
+        {/* Dropdown Menu positioned under the avatar */}
+        {isDropdownOpen && (
+          <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
+            <ul className="py-2">
+              <li
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={openModal}
+              >
+                View
+              </li>
+              <li
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => console.log("Update user")}
+              >
+                Update
+              </li>
+              <li
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                onClick={() => console.log("Delete user")}
+              >
+                Delete
+              </li>
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col flex-grow">
         <h2 className="text-3xl font-bold mb-1">{tourist.username}</h2>
         <div className="flex items-center gap-2 mb-4">
-            <AtSign className="w-4 h-4 text-gray-500" />
-            <p className="text-2xl font-semibold">{tourist.username}</p>
+          <AtSign className="w-4 h-4 text-gray-500" />
+          <p className="text-2xl font-semibold">{tourist.username}</p>
         </div>
-    </div>
+      </div>
 
-    <div className="flex-shrink-0">
+      <div className="flex-shrink-0">
         <Badge
-            className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}
+          className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}
         >
-            <Award className="w-6 h-6" />
-            {tourist.loyaltyBadge}
+          <Award className="w-6 h-6" />
+          {tourist.loyaltyBadge}
         </Badge>
+      </div>
+
+      {/* Modal for Enlarged Avatar */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              onClick={closeModal}
+            >
+              X
+            </button>
+            <div className="w-48 h-48 bg-gray-300 rounded-full flex items-center justify-center text-4xl font-bold text-white">
+              <User className="w-24 h-24 text-white" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-</div>
 
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -309,11 +372,10 @@ export function TouristProfileComponent() {
                       name: "mobile",
                       required: true,
                       placeholder: tourist.mobile,
-                      className: `w-full p-2 ${
-                        validationMessages.mobile
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`,
+                      className: `w-full p-2 ${validationMessages.mobile
+                        ? "border-red-500"
+                        : "border-gray-300"
+                        }`,
                     }}
                     containerClass="w-full"
                     inputStyle={{ width: "60%", marginLeft: "45px" }}

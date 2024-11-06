@@ -46,9 +46,8 @@ const advertiserSchema = new Schema(
       required: true,
     },
     logo: {
-      type: String,
-      default: null,
-      required: false,
+      public_id: { type: String, required: true },
+      url: { type: String, required: true },
     },
     isAccepted: {
       type: Boolean,
