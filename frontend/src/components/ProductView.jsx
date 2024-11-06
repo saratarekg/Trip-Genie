@@ -156,7 +156,7 @@ export function ProductViewer() {
           <Star
             key={star}
             className={`w-5 h-5 ${
-              star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
+              star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
             }`}
           />
         ))}
@@ -202,7 +202,7 @@ export function ProductViewer() {
               </div>
               <h2 className="text-sm mb-2 truncate">{product.name}</h2>
               <div className="flex justify-between items-center">
-                <div className="text-yellow-400 text-xs">
+                <div className="text-[#F88C33] text-xs">
                   {renderStars(product.rating)}
                 </div>
                 <span className="text-xs text-gray-600">{product.rating} stars</span>

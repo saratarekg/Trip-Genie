@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/TGlogo.svg";
+// import ShoppingCart from "@/components/touristCart.jsx";
+// import WishlistPage from "@/components/touristWishlist.jsx";
 import {
   Menu,
   X,
@@ -15,7 +17,19 @@ import {
   List,
   Folder,
   PlusCircle,
+  ShoppingCart,
+  Heart,
+  Bell,
 } from "lucide-react";
+
+const NavLinkIcon = ({ to, children }) => (
+  <Link
+    to={to}
+    className="text-white rounded-full transition-colors duration-200 text-sm font-medium"
+  >
+    {children}
+  </Link>
+);
 
 const NavLink = ({ to, children }) => (
   <Link
@@ -95,6 +109,7 @@ export function NavbarComponent() {
               <img src={logo} alt="logo" className="h-10 w-auto" />
             </Link>
           </div>
+
           {/* Desktop Navigation */}
           <div className="hidden md:block" style={{ marginRight: 30 }}>
             <div className="inline-flex items-center border border-white/20 rounded-full px-2 py-1">
@@ -192,8 +207,32 @@ export function NavbarComponent() {
             </div>
           </div>
 
-          {/* Login, Sign Up, and Menu Button */}
+          {/* Login, Sign Up, Notifications, and Menu Button */}
           <div className="hidden md:flex items-center">
+            {role !== undefined && role !== "guest" && (
+              <>
+                <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                  <Bell className="h-5 w-5" />
+                  <span className="sr-only">Notifications</span>
+                </button>
+                {role === "tourist" && (
+                  <>
+                  <NavLinkIcon to="/account/cart">
+                    <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                      <ShoppingCart className="h-5 w-5" />
+                      <span className="sr-only">Cart</span>
+                    </button>
+                    </NavLinkIcon>
+                    <NavLinkIcon to="/account/wishlist">
+                    <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                      <Heart className="h-5 w-5" />
+                      <span className="sr-only">Wishlist</span>
+                    </button>
+                    </NavLinkIcon>
+                  </>
+                )}
+              </>
+            )}
             {role === undefined ? (
               <>
                 <NavLink to="/login">Login</NavLink>
@@ -260,7 +299,31 @@ export function NavbarComponent() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center">
+            {role !== undefined && role !== "guest" && (
+              <>
+                <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                  <Bell className="h-5 w-5" />
+                  <span className="sr-only">Notifications</span>
+                </button>
+                {role === "tourist" && (
+                  <>
+                  <NavLinkIcon to="/account/cart">
+                    <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                      <ShoppingCart className="h-5 w-5" />
+                      <span className="sr-only">Cart</span>
+                    </button>
+                    </NavLinkIcon>
+                    <NavLinkIcon to="/account/wishlist">
+                    <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                      <Heart className="h-5 w-5" />
+                      <span className="sr-only">Wishlist</span>
+                    </button>
+                    </NavLinkIcon>
+                  </>
+                )}
+              </>
+            )}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-full text-white hover:bg-white/10 focus:outline-none transition-colors duration-200"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowUpDown, Calendar, Plane, AlertCircle } from "lucide-react";
+import { ArrowUpDown, Calendar, Plane, AlertCircle, Building2, ArrowRight } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -32,13 +32,177 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import Cookies from "js-cookie";
+import { useSearchParams, useNavigate } from 'react-router-dom';
+
+const airports = [
+  { code: 'CAI', name: 'Cairo International Airport', region: 'Egypt' },
+  { code: 'CDG', name: 'Charles de Gaulle Airport', region: 'France' },
+  { code: 'DXB', name: 'Dubai International Airport', region: 'United Arab Emirates' },
+  { code: 'JFK', name: 'John F. Kennedy International Airport', region: 'USA' },
+  { code: 'LHR', name: 'Heathrow Airport', region: 'UK' },
+  { code: 'HND', name: 'Tokyo Haneda Airport', region: 'Japan' },
+  { code: 'PEK', name: 'Beijing Capital International Airport', region: 'China' },
+  { code: 'SYD', name: 'Sydney Kingsford Smith Airport', region: 'Australia' },
+  { code: 'FRA', name: 'Frankfurt Airport', region: 'Germany' },
+  { code: 'SIN', name: 'Singapore Changi Airport', region: 'Singapore' },
+  { code: 'AMS', name: 'Amsterdam Schiphol Airport', region: 'Netherlands' },
+  { code: 'ORD', name: 'O’Hare International Airport', region: 'USA' },
+  { code: 'MEX', name: 'Mexico City International Airport', region: 'Mexico' },
+  { code: 'GRU', name: 'São Paulo–Guarulhos International Airport', region: 'Brazil' },
+  { code: 'HKG', name: 'Hong Kong International Airport', region: 'Hong Kong' },
+  { code: 'ICN', name: 'Incheon International Airport', region: 'South Korea' },
+  { code: 'JNB', name: 'O.R. Tambo International Airport', region: 'South Africa' },
+  { code: 'YYZ', name: 'Toronto Pearson International Airport', region: 'Canada' },
+  { code: 'MAD', name: 'Adolfo Suárez Madrid–Barajas Airport', region: 'Spain' },
+  { code: 'SVO', name: 'Sheremetyevo International Airport', region: 'Russia' },
+  { code: 'LAX', name: 'Los Angeles International Airport', region: 'USA' },
+  { code: 'IST', name: 'Istanbul Airport', region: 'Turkey' },
+  { code: 'BCN', name: 'Barcelona-El Prat Airport', region: 'Spain' },
+  { code: 'BOM', name: 'Chhatrapati Shivaji Maharaj International Airport', region: 'India' },
+  { code: 'ATL', name: 'Hartsfield-Jackson Atlanta International Airport', region: 'USA' },
+  { code: 'MUC', name: 'Munich Airport', region: 'Germany' },
+  { code: 'FCO', name: 'Leonardo da Vinci–Fiumicino Airport', region: 'Italy' },
+  { code: 'DME', name: 'Domodedovo International Airport', region: 'Russia' },
+];
+
+const styles = {
+  container: {
+    fontFamily: 'Arial, sans-serif',
+    maxWidth: '100%',
+    margin: '0 auto',
+    backgroundColor: '#1A3B47',
+    borderRadius: '8px',
+    overflow: 'hidden',
+  },
+  tabsContainer: {
+    display: 'flex',
+    backgroundColor: '#388A94',
+    padding: '10px 10px 0',
+  },
+  tab: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    cursor: 'pointer',
+    border: 'none',
+    borderTopLeftRadius: '8px',
+    borderTopRightRadius: '8px',
+    color: '#E6DCCF',
+    backgroundColor: 'transparent',
+    fontSize: '14px',
+    marginRight: '4px',
+    transition: 'background-color 0.3s, color 0.3s',
+  },
+  activeTab: {
+    backgroundColor: 'white',
+    color: '#388A94',
+  },
+  formContainer: {
+    backgroundColor: 'white',
+    padding: '20px',
+    transition: 'opacity 0.3s',
+  },
+  form: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '15px',
+  },
+  fieldGroup: {
+    flex: 1,
+    minWidth: '150px',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  label: {
+    fontSize: '12px',
+    color: '#666',
+    marginBottom: '4px',
+  },
+  select: {
+    width: '100%',
+    padding: '8px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '14px',
+    backgroundColor: 'white',
+  },
+  input: {
+    width: '100%',
+    padding: '8px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '14px',
+  },
+  locationDisplay: {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    marginTop: '4px',
+  },
+  locationSubtext: {
+    fontSize: '12px',
+    color: '#666',
+  },
+  button: {
+    padding: '12px 24px',
+    backgroundColor: '#1A3B47',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    alignSelf: 'flex-end',
+    marginTop: '24px',
+  },
+  modal: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: '20px',
+    borderRadius: '8px',
+    maxWidth: '400px',
+    width: '100%',
+  },
+  modalButtons: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '10px',
+    marginTop: '20px',
+  },
+  tripTypeSelect: {
+    padding: '8px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    fontSize: '14px',
+    marginRight: '15px',
+  },
+};
+
+const formatDate = (date) => {
+return date.toISOString().split('T')[0];
+};
 
 function BookingPage() {
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [departureDate, setDepartureDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
-  const [tripType, setTripType] = useState("round-trip");
+  const [searchParams] = useSearchParams();
+  const [from, setFrom] = useState(searchParams.get('from') || 'CAI');
+  const [to, setTo] = useState(searchParams.get('to') || 'CDG');
+  const [departureDate, setDepartureDate] = useState(searchParams.get('departDate') || formatDate(new Date()));
+  const [returnDate, setReturnDate] = useState(searchParams.get('returnDate') || formatDate(new Date(Date.now())));
+  const [activeTab, setActiveTab] = useState('flights');
+  const [tripType, setTripType] = useState(searchParams.get('tripType') || 'roundTrip');
   const [flights, setFlights] = useState([]);
   const [accessToken, setAccessToken] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -56,6 +220,37 @@ function BookingPage() {
   const mainContentRef = useRef(null);
 
   const itemsPerPage = 9;
+
+  useEffect(() => {
+    // Ensure return date is after depart date
+    if (new Date(returnDate) <= new Date(departureDate)) {
+      setReturnDate(formatDate(new Date(new Date(departureDate).getTime())));
+    }
+  }, [departureDate, returnDate]);
+
+  // useEffect(() => {
+  //   if (from && to && departureDate && (tripType === 'oneWay' || returnDate)) {
+  //     handleSearchFromParameters();
+  //   }
+  // }, [from, to, departureDate, returnDate, tripType]);
+
+  // useEffect(() => {
+  //   // Auto-trigger search if parameters are provided
+  //   if (searchParams.get('from') && searchParams.get('to')) {
+  //     handleSearch();
+  //   }
+  // }, [searchParams]);
+  
+  const renderLocationDisplay = (code) => {
+    const list = airports;
+    const location = list.find(item => item.code === code);
+    return location ? (
+      <>
+        <div style={styles.locationDisplay}>{location.name}</div>
+        <div style={styles.locationSubtext}>{location.code}, {location.region}</div>
+      </>
+    ) : null;
+  };
 
   async function refreshToken() {
     try {
@@ -114,6 +309,9 @@ function BookingPage() {
 
   useEffect(() => {
     Promise.all([refreshToken(), getCurrencyCode()]);
+    // if (searchParams && from && to && departureDate && (tripType === 'oneWay' || returnDate)) {
+    //   handleSearch();
+    // }
   }, []);
 
   const handleSearch = async () => {
@@ -127,7 +325,7 @@ function BookingPage() {
     try {
       const response = await fetch(
         `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}${
-          tripType === "round-trip" ? `&returnDate=${returnDate}` : ""
+          tripType === "roundTrip" ? `&returnDate=${returnDate}` : ""
         }&adults=1&nonStop=true&currencyCode=${currencyCode}`,
         {
           headers: {
@@ -160,6 +358,52 @@ function BookingPage() {
       setIsLoading(false);
     }
   };
+
+  // const handleSearchFromParameters = useCallback(async () => {
+  //   if (returnDate && new Date(returnDate) < new Date(departureDate)) {
+  //     setError("Return date cannot be before departure date.");
+  //     return;
+  //   }
+
+  //   setIsLoading(true);
+  //   setError("");
+  //   try {
+  //     const response = await fetch(
+  //       `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}${
+  //         tripType === "roundTrip" ? `&returnDate=${returnDate}` : ""
+  //       }&adults=1&nonStop=true&currencyCode=${currencyCode}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${accessToken}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch flights");
+  //     }
+
+  //     const data = await response.json();
+
+  //     if (!data.data || data.data.length === 0) {
+  //       setError("No flights found for your search criteria.");
+  //       setFlights([]);
+  //     } else {
+  //       setFlights(data.data);
+  //       setCurrentPage(1);
+  //       const prices = data.data.map((flight) =>
+  //         parseFloat(flight.price.total)
+  //       );
+  //       setMaxPrice(Math.max(...prices));
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to fetch flights. Please try again later.");
+  //     setFlights([]);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // },[]);
+
 
   const filterFlights = (flights) => {
     let filtered = [...flights];
@@ -261,19 +505,136 @@ function BookingPage() {
   const handleDepartureDateChange = (e) => {
     const selectedDate = e.target.value;
     setDepartureDate(selectedDate);
-    if (returnDate && new Date(returnDate) < new Date(selectedDate)) {
-      setReturnDate(selectedDate);
-    }
+    // if (returnDate && new Date(returnDate) < new Date(selectedDate)) {
+    //   setReturnDate(selectedDate);
+    // }
   };
 
   return (
-    <div className="bg-white-100 min-h-screen p-4 space-y-4 mt-5">
+    // <div className="bg-white-100 min-h-screen p-4 space-y-4 mt-5">
+    <div className="bg-[#E6DCCF] ">
+    {/* Navbar */}
+    <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      </div>
+    </div>
+    <div className="h-16"></div>
+
+    <div className="bg-[#E6DCCF] min-h-screen mx-auto px-24">
       <div ref={mainContentRef}>
-        <h1 className="text-3xl font-bold text-blue-900 text-center">
+        <h1 className="text-4xl font-bold text-[#1A3B47] text-center">
           Flight Booking
         </h1>
+        <div className="h-10"></div>
 
-        <Card className="bg-white shadow-lg mt-2">
+        <div className="mx-auto px-24 mb-12">
+  <div style={styles.container}>
+    <div style={{
+      ...styles.formContainer,
+      opacity: activeTab === 'flights' ? 1 : 0,
+      position: activeTab === 'flights' ? 'static' : 'absolute',
+      pointerEvents: activeTab === 'flights' ? 'auto' : 'none',
+    }}>
+      <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+      style={styles.form}>
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>TRIP TYPE</label>
+          <select
+            style={styles.select}
+            value={tripType}
+            onChange={(e) => setTripType(e.target.value)}
+          >
+            <option value="roundTrip">Round Trip</option>
+            <option value="oneWay">One Way</option>
+          </select>
+        </div>
+
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>FROM</label>
+          <select
+            style={styles.select}
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            required
+          >
+            {airports.map((airport) => (
+              <option key={airport.code} value={airport.code}>
+                {airport.name} ({airport.code}) - {airport.region}
+              </option>
+            ))}
+          </select>
+          {renderLocationDisplay(from,)}
+        </div>
+
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>TO</label>
+          <select
+            style={styles.select}
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            required
+          >
+            {airports.map((airport) => (
+              <option key={airport.code} value={airport.code}>
+                {airport.name} ({airport.code}) - {airport.region}
+              </option>
+            ))}
+          </select>
+          {renderLocationDisplay(to)}
+        </div>
+
+        <div style={styles.fieldGroup}>
+          <label style={styles.label}>DEPARTURE</label>
+          <div style={{ position: 'relative' }}>
+            <Input
+                  id="departureDate"
+                  type="date"
+                  style={styles.input}
+                  value={departureDate}
+                  onChange={handleDepartureDateChange}
+                  min={today}
+                  required
+                />
+            {/* <Calendar size={16} style={{ position: 'absolute', right: '8px', top: '8px', pointerEvents: 'none' }} /> */}
+          </div>
+          <div style={styles.locationDisplay}>
+            {new Date(departureDate).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' })}
+          </div>
+        </div>
+
+        {tripType === 'roundTrip' && (
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>RETURN</label>
+            <div style={{ position: 'relative' }}>
+              <Input
+                    id="returnDate"
+                    type="date"
+                    value={returnDate}
+                    onChange={(e) => setReturnDate(e.target.value)}
+                    min={departureDate || today}
+                    style={styles.input}
+                  />
+              {/* <Calendar size={16} style={{ position: 'absolute', right: '8px', top: '8px', pointerEvents: 'none' }} /> */}
+            </div>
+            <div style={styles.locationDisplay}>
+              {new Date(returnDate).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: 'short' })}
+            </div>
+          </div>
+        )}
+        <button 
+        style={styles.button}
+        // onClick={handleSearch}
+                disabled={isLoading}
+                className="bg-[#1A3B47] hover:bg-[#1A3B47] text-white font-semibold px-8"
+                >
+          {isLoading ? "Searching..." : "Search Flights"}
+        </button>
+      </form>
+    </div>
+  </div>
+  </div>
+
+        {/* <Card className="bg-white shadow-lg mt-2">
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div>
@@ -324,7 +685,7 @@ function BookingPage() {
                   className="border-2 border-amber-400"
                 />
               </div>
-              {tripType === "round-trip" && (
+              {tripType === "roundTrip" && (
                 <div>
                   <label
                     htmlFor="returnDate"
@@ -356,8 +717,8 @@ function BookingPage() {
                   <SelectValue placeholder="Trip Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="round-trip">Round Trip</SelectItem>
-                  <SelectItem value="one-way">One Way</SelectItem>
+                  <SelectItem value="roundTrip">Round Trip</SelectItem>
+                  <SelectItem value="oneWay">One Way</SelectItem>
                 </SelectContent>
               </Select>
               </div>
@@ -366,19 +727,23 @@ function BookingPage() {
               <Button
                 onClick={handleSearch}
                 disabled={isLoading}
-                className="bg-blue-900 hover:bg-blue-800 text-white font-semibold px-8"
+                className="bg-[#1A3B47] hover:bg-[#1A3B47] text-white font-semibold px-8"
               >
                 {isLoading ? "Searching..." : "Search Flights"}
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {error && (
-          <Alert variant="destructive" className="bg-red-50 border-red-200">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant="destructive" className="bg-red-50 border-red-200 mr-24 ml-24 w-200">
+          <div className="flex items-center space-x-3">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+            <div className="flex flex-col space-y-1">
+              <AlertTitle className="text-red-600 font-semibold text-lg">Error</AlertTitle>
+              <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
+            </div>
+            </div>
           </Alert>
         )}
 
@@ -427,7 +792,7 @@ function BookingPage() {
                   <CardContent className="p-3">
                     <div className="flex flex-col h-full">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-900 text-white rounded">
+                        <div className="p-2 bg-[#388A94] text-white rounded">
                           <Plane className="h-5 w-5" />
                         </div>
                         <h3 className="text-base font-semibold">
@@ -487,11 +852,11 @@ function BookingPage() {
                         )}
                       </div>
                       <div className="mt-auto pt-3 flex items-center justify-between">
-                        <p className="text-xl font-bold  text-amber-600">
+                        <p className="text-xl font-bold  text-[#F88C33]">
                           {flight.price.total} {flight.price.currency}
                         </p>
                         <Button
-                          className="bg-blue-900 hover:bg-blue-800 text-white"
+                          className="bg-[#388A94] hover:bg-[#1A3B47] text-white"
                           onClick={() => handleOpenDialog(flight)}
                         >
                           See Flight
@@ -610,7 +975,7 @@ function BookingPage() {
                 {selectedFlight.price.currency}
               </p>
               <Button
-                className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white"
+                className="mt-4 w-full bg-[#388A94] hover:bg-[#1A3B47] text-white"
                 onClick={handleBookNow}
               >
                 Book Now
@@ -635,13 +1000,14 @@ function BookingPage() {
           <DialogClose asChild>
             <Button
               onClick={handleCloseAllPopups}
-              className="mt-4 w-full bg-blue-900 hover:bg-blue-800 text-white"
+              className="mt-4 w-full bg-[#388A94] hover:bg-[#1A3B47] text-white"
             >
               Close
             </Button>
           </DialogClose>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   );
 }

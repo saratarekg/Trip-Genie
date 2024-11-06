@@ -223,9 +223,9 @@ export function Activities() {
                     <div className="flex mb-2">
                       {Array.from({ length: 5 }, (_, i) => {
                         if (i < Math.floor(act.rating)) {
-                          return <span key={i} className="text-yellow-400">★</span>;
+                          return <span key={i} className="text-[#F88C33]">★</span>;
                         } else if (i < act.rating) {
-                          return <span key={i} className="text-yellow-400">☆</span>;
+                          return <span key={i} className="text-y[#F88C33]">☆</span>;
                         } else {
                           return <span key={i} className="text-gray-300">☆</span>;
                         }
