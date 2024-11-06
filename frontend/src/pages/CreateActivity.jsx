@@ -11,7 +11,6 @@ import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,8 +21,45 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Select from "react-select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
+import ReactSelect from "react-select";
+
+const vehicleTypes = ["bus", "car", "microbus"];
+
+const getMaxSeats = (vehicleType) => {
+  switch (vehicleType) {
+    case "bus":
+      return 50;
+    case "car":
+      return 5;
+    case "microbus":
+      return 15;
+    default:
+      return 0;
+  }
+};
+
+const transportationSchema = z.object({
+  from: z.string().min(1, "From is required"),
+  to: z.string().min(1, "To is required"),
+  vehicleType: z.enum(vehicleTypes),
+  ticketCost: z.number().positive("Ticket cost must be positive"),
+  timeDeparture: z.string().min(1, "Departure time is required"),
+  estimatedDuration: z.number().positive("Duration must be positive"),
+  remainingSeats: z.number().int().positive("Remaining seats must be positive").refine((val, ctx) => {
+    const maxSeats = 100 ; // Assuming max seats is 100
+    return val <= maxSeats;
+  }, {
+    message: "Remaining seats must not exceed the maximum for the selected vehicle type",
+  }),
+});
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -51,8 +87,8 @@ const schema = z.object({
     .number()
     .int()
     .nonnegative("Discount must be a non-negative integer"),
- // isBookingOpen: z.boolean(),
   pictures: z.array(z.string()).optional(),
+  transportations: z.array(z.string()).optional(),
 });
 
 export default function CreateActivity() {
@@ -71,8 +107,8 @@ export default function CreateActivity() {
       },
       category: [],
       tags: [],
-    //  isBookingOpen: true,
       pictures: [],
+      transportations: [],
     },
   });
 
@@ -93,6 +129,23 @@ export default function CreateActivity() {
   const [citiesLoading, setCitiesLoading] = useState(false);
   const [currencies, setCurrencies] = useState([]);
   const [pictures, setPictures] = useState([]);
+
+  const [transportations, setTransportations] = useState([]);
+  const [showTransportationForm, setShowTransportationForm] = useState(false);
+  const [editingTransportationIndex, setEditingTransportationIndex] = useState(null);
+
+  const {
+    register: registerTransportation,
+    handleSubmit: handleSubmitTransportation,
+    reset: resetTransportation,
+    setValue: setTransportationValue,
+    watch: watchTransportation,
+    formState: { errors: transportationErrors },
+  } = useForm({
+    resolver: zodResolver(transportationSchema),
+  });
+
+  const selectedVehicleType = watchTransportation("vehicleType");
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -139,6 +192,7 @@ export default function CreateActivity() {
       setPictures([...pictures, ...Array.from(files)]);
     }
   };
+
   const fetchCities = async (country) => {
     setCitiesLoading(true);
     try {
@@ -187,7 +241,44 @@ export default function CreateActivity() {
       setCurrencies(response.data);
     } catch (err) {
       console.error("Error fetching currencies:", err.message);
-      setError("Failed to fetch currencies. Please try again.");
+    }
+  };
+
+  const onSubmitTransportation = async (data) => {
+    try {
+      if (!data.vehicleType) {
+        throw new Error("Please select a vehicle type");
+      }
+      const token = Cookies.get("jwt");
+      let response;
+      if (editingTransportationIndex !== null) {
+        // Update existing transportation
+        response = await axios.put(
+          `http://localhost:4000/advertiser/transportations/${transportations[editingTransportationIndex]._id}`,
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const updatedTransportations = [...transportations];
+        updatedTransportations[editingTransportationIndex] = response.data;
+        setTransportations(updatedTransportations);
+      } else {
+        // Create new transportation
+        response = await axios.post(
+          "http://localhost:4000/advertiser/transportations",
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setTransportations((prevTransportations) => [...prevTransportations, response.data]);
+      }
+      setShowTransportationForm(false);
+      resetTransportation();
+      setEditingTransportationIndex(null);
+    } catch (error) {
+      console.error("Failed to create/update transportation:", error);
     }
   };
 
@@ -196,30 +287,30 @@ export default function CreateActivity() {
     const token = Cookies.get("jwt");
     const role = Cookies.get("role") || "guest";
 
-    // Prepare FormData
     const formData = new FormData();
 
-    // Append each picture file to the FormData
-    pictures.forEach((picture, index) => {
-      formData.append("pictures", picture); // The name "pictures" should match what your backend expects
-    });
-
-    // Add other form data fields
     formData.append("name", data.name);
     formData.append("description", data.description);
     formData.append("timing", data.timing.toISOString());
     formData.append("duration", data.duration);
     formData.append("price", data.price);
     formData.append("specialDiscount", data.specialDiscount);
-   // formData.append("isBookingOpen", data.isBookingOpen);
     formData.append("currency", data.currency);
     formData.append("location[address]", data.location.address);
     formData.append("location[coordinates][longitude]", location.longitude);
     formData.append("location[coordinates][latitude]", location.latitude);
 
-    // Append arrays for category and tags
     data.category.forEach((cat) => formData.append("category[]", cat.value));
     data.tags.forEach((tag) => formData.append("tags[]", tag.value));
+
+    pictures.forEach((picture, index) => {
+      formData.append("pictures", picture);
+    });
+
+    // Append transportation IDs
+    transportations.forEach((transport) => {
+      formData.append("transportations[]", transport._id);
+    });
 
     try {
       const response = await axios.post(
@@ -241,23 +332,6 @@ export default function CreateActivity() {
     }
   };
 
-  const MapClick = () => {
-    useMapEvents({
-      click: (e) => {
-        setLocation({ latitude: e.latlng.lat, longitude: e.latlng.lng });
-      },
-    });
-    return null;
-  };
-
-  const handleGoBack = () => {
-    navigate("/activity");
-  };
-
-  const handleCreateNew = () => {
-    window.location.reload();
-  };
-
   const handleCountryChange = (selectedOption) => {
     setSelectedCountry(selectedOption);
     setSelectedCity(null);
@@ -271,6 +345,48 @@ export default function CreateActivity() {
       "location.address",
       `${selectedOption.value}, ${selectedCountry.value}`
     );
+  };
+
+  const handleGoBack = () => {
+    navigate("/activity");
+  };
+
+  const handleCreateNew = () => {
+    window.location.reload();
+  };
+
+  const MapClick = () => {
+    useMapEvents({
+      click: (e) => {
+        setLocation({ latitude: e.latlng.lat, longitude: e.latlng.lng });
+      },
+    });
+    return null;
+  };
+
+  const handleEditTransportation = (index) => {
+    const transportation = transportations[index];
+    Object.keys(transportation).forEach((key) => {
+      setTransportationValue(key, transportation[key]);
+    });
+    setEditingTransportationIndex(index);
+    setShowTransportationForm(true);
+  };
+
+  const handleDeleteTransportation = async (index) => {
+    try {
+      const token = Cookies.get("jwt");
+      await axios.delete(
+        `http://localhost:4000/advertiser/transportations/${transportations[index]._id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const updatedTransportations = transportations.filter((_, i) => i !== index);
+      setTransportations(updatedTransportations);
+    } catch (error) {
+      console.error("Failed to delete transportation:", error);
+    }
   };
 
   return (
@@ -315,25 +431,41 @@ export default function CreateActivity() {
               <div className="space-y-2">
                 <Label htmlFor="country">Country</Label>
                 <Select
-                  options={countries}
-                  value={selectedCountry}
-                  onChange={handleCountryChange}
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                />
+                  onValueChange={(value) => handleCountryChange({ value, label: value })}
+                  value={selectedCountry?.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.value} value={country.value}>
+                        {country.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
                 <Select
-                  options={cities}
-                  value={selectedCity}
-                  onChange={handleCityChange}
-                  isLoading={citiesLoading}
-                  isDisabled={!selectedCountry || citiesLoading}
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                />
+                  onValueChange={(value) => handleCityChange({ value, label: value })
+                  }
+                  value={selectedCity?.value}
+                  disabled={!selectedCountry || citiesLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map((city) => (
+                      <SelectItem key={city.value} value={city.value}>
+                        {city.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -435,18 +567,18 @@ export default function CreateActivity() {
 
               <div>
                 <Label htmlFor="currency">Currency </Label>
-                <select
-                  {...register("currency")}
-                  className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-                  id="currency"
-                >
-                  <option value="">Select currency</option>
-                  {currencies.map((currency) => (
-                    <option key={currency._id} value={currency._id}>
-                      {currency.code} - {currency.name} ({currency.symbol})
-                    </option>
-                  ))}
-                </select>
+                <Select onValueChange={(value) => setValue("currency", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map((currency) => (
+                      <SelectItem key={currency._id} value={currency._id}>
+                        {currency.code} - {currency.name} ({currency.symbol})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {errors.currency && (
                   <span className="text-red-500">
                     {errors.currency.message}
@@ -460,7 +592,7 @@ export default function CreateActivity() {
                   name="category"
                   control={control}
                   render={({ field }) => (
-                    <Select
+                    <ReactSelect
                       {...field}
                       options={categories}
                       isMulti
@@ -482,7 +614,7 @@ export default function CreateActivity() {
                   name="tags"
                   control={control}
                   render={({ field }) => (
-                    <Select
+                    <ReactSelect
                       {...field}
                       options={tags}
                       isMulti
@@ -495,21 +627,6 @@ export default function CreateActivity() {
                   <p className="text-red-500 text-sm">{errors.tags.message}</p>
                 )}
               </div>
-
-              {/* <div className="flex items-center space-x-2">
-                <Controller
-                  name="isBookingOpen"
-                  control={control}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="isBookingOpen"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-                <Label htmlFor="isBookingOpen">Is Booking Open?</Label>
-              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="pictures">Pictures</Label>
@@ -541,9 +658,45 @@ export default function CreateActivity() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label>Transportation Options</Label>
+                {transportations.map((transport, index) => (
+                  <div key={index} className="p-2 border rounded flex justify-between items-center">
+                    <div>
+                      <p>From: {transport.from}</p>
+                      <p>To: {transport.to}</p>
+                      <p>Vehicle: {transport.vehicleType}</p>
+                    </div>
+                    <div>
+                      <Button
+                        type="button"
+                        onClick={() => handleEditTransportation(index)}
+                        className="bg-[#388A94] hover:bg-[#2c6d75] text-white mr-2"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => handleDeleteTransportation(index)}
+                        className="bg-red-500 hover:bg-red-600 text-white"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  onClick={() => setShowTransportationForm(true)}
+                  className="bg-[#388A94] hover:bg-[#2c6d75] text-white w-full mt-2"
+                >
+                  Add Transportation
+                </Button>
+              </div>
+
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="w-full bg-[#388A94] hover:bg-[#2c6d75] text-white"
                 disabled={loading}
               >
                 {loading ? "Creating..." : "Create Activity"}
@@ -552,6 +705,72 @@ export default function CreateActivity() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={showTransportationForm} onOpenChange={setShowTransportationForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingTransportationIndex !== null ? "Edit Transportation" : "Add Transportation"}</DialogTitle>
+            <DialogDescription>
+              Please fill in the details for the transportation option.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmitTransportation(onSubmitTransportation)} className="space-y-4">
+            <div>
+              <Label htmlFor="from">From</Label>
+              <Input {...registerTransportation("from")} />
+              {transportationErrors.from && <p className="text-red-500">{transportationErrors.from.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="to">To</Label>
+              <Input {...registerTransportation("to")} />
+              {transportationErrors.to && <p className="text-red-500">{transportationErrors.to.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="vehicleType">Vehicle Type</Label>
+              <Select onValueChange={(value) => setTransportationValue("vehicleType", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select vehicle type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {vehicleTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {transportationErrors.vehicleType && <p className="text-red-500">{transportationErrors.vehicleType.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="ticketCost">Ticket Cost</Label>
+              <Input type="number" step="0.01" {...registerTransportation("ticketCost", { valueAsNumber: true })} />
+              {transportationErrors.ticketCost && <p className="text-red-500">{transportationErrors.ticketCost.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="timeDeparture">Departure Time</Label>
+              <Input type="datetime-local" {...registerTransportation("timeDeparture")} />
+              {transportationErrors.timeDeparture && <p className="text-red-500">{transportationErrors.timeDeparture.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="estimatedDuration">Estimated Duration (hours)</Label>
+              <Input type="number" step="0.1" {...registerTransportation("estimatedDuration", { valueAsNumber: true })} />
+              {transportationErrors.estimatedDuration && <p className="text-red-500">{transportationErrors.estimatedDuration.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="remainingSeats">Remaining Seats</Label>
+              <Input 
+                type="number" 
+                {...registerTransportation("remainingSeats", { valueAsNumber: true })} 
+                max={getMaxSeats(selectedVehicleType)}
+              />
+              {transportationErrors.remainingSeats && <p className="text-red-500">{transportationErrors.remainingSeats.message}</p>}
+            </div>
+            <Button type="submit" className="bg-[#388A94] hover:bg-[#2c6d75] text-white">
+              {editingTransportationIndex !== null ? "Update Transportation" : "Add Transportation"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
@@ -562,7 +781,7 @@ export default function CreateActivity() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={handleGoBack}>Go to All Activities</Button>
+            <Button onClick={handleGoBack} className="bg-[#388A94] hover:bg-[#2c6d75] text-white">Go to All Activities</Button>
             <Button variant="outline" onClick={handleCreateNew}>
               Create New Activity
             </Button>
