@@ -69,12 +69,16 @@ const updateTourist = async (req, res) => {
 
     if (profilePicture === undefined) {
       picture = null;
-      await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      if (tourist1.profilePicture !== null) {
+        await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      }
     } else if (profilePicture.public_id === undefined) {
       const result = await cloudinary.uploader.upload(profilePicture, {
         folder: "tourist-profile-pictures",
       });
-      await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      if (tourist1.profilePicture !== null) {
+        await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      }
       picture = {
         public_id: result.public_id,
         url: result.secure_url,
@@ -202,12 +206,16 @@ const updateTouristProfile = async (req, res) => {
 
     if (profilePicture === undefined) {
       picture = null;
-      await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      if (tourist1.profilePicture !== null) {
+        await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      }
     } else if (profilePicture.public_id === undefined) {
       const result = await cloudinary.uploader.upload(profilePicture, {
         folder: "tourist-profile-pictures",
       });
-      await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      if (tourist1.profilePicture !== null) {
+        await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
+      }
       picture = {
         public_id: result.public_id,
         url: result.secure_url,
@@ -749,7 +757,9 @@ const deleteAccount = async (req, res) => {
 
     await Complaint.deleteMany({ tourist: res.locals.user_id });
 
-    await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
+    if (tourist.profilePicture !== null) {
+      await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
+    }
     await Tourist.findByIdAndDelete(res.locals.user_id);
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
@@ -801,7 +811,9 @@ const deleteTouristAccount = async (req, res) => {
 
     await Complaint.deleteMany({ tourist: req.params.id });
 
-    await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
+    if (tourist.profilePicture !== null) {
+      await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
+    }
     await Tourist.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {

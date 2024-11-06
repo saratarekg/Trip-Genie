@@ -34,6 +34,11 @@ const getTourGuideProfile = async (req, res) => {
 
 const updateTourGuide = async (req, res) => {
   try {
+    const tourGuide1 = await TourGuide.findById(req.params.id);
+    if (!tourGuide1) {
+      return res.status(404).json({ message: "Tour Guide not found" });
+    }
+
     const {
       name,
       email,
@@ -44,6 +49,26 @@ const updateTourGuide = async (req, res) => {
       previousWorks,
     } = req.body; // Data to update
     const { id } = req.params;
+
+    let { profilePicture } = req.body;
+
+    if (profilePicture === undefined) {
+      profilePicture = null;
+      if (tourGuide1.profilePicture !== null) {
+        await cloudinary.uploader.destroy(tourGuide1.profilePicture.public_id);
+      }
+    } else if (profilePicture.public_id === undefined) {
+      const result = await cloudinary.uploader.upload(profilePicture, {
+        folder: "tour-guide-profile-pictures",
+      });
+      if (tourGuide1.profilePicture !== null) {
+        await cloudinary.uploader.destroy(tourGuide1.profilePicture.public_id);
+      }
+      profilePicture = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    }
 
     // Find the TourGuide by ID and update it with the provided data
     const tourGuide = await TourGuide.findByIdAndUpdate(
@@ -56,13 +81,10 @@ const updateTourGuide = async (req, res) => {
         mobile,
         yearsOfExperience,
         previousWorks,
+        profilePicture,
       },
       { new: true, runValidators: true }
     );
-
-    if (!tourGuide) {
-      return res.status(404).json({ message: "Tour Guide not found" });
-    }
 
     res
       .status(200)
@@ -75,6 +97,9 @@ const updateTourGuide = async (req, res) => {
 const updateTourGuideProfile = async (req, res) => {
   try {
     const tourGuide1 = await TourGuide.findById(res.locals.user_id);
+    if (!tourGuide1) {
+      return res.status(404).json({ message: "Tour Guide not found" });
+    }
 
     const {
       name,
@@ -84,8 +109,9 @@ const updateTourGuideProfile = async (req, res) => {
       mobile,
       yearsOfExperience,
       previousWorks,
-      profilePicture,
     } = req.body;
+
+    let { profilePicture } = req.body;
 
     const nat = await Nationality.findOne({ _id: nationality });
 
@@ -94,6 +120,24 @@ const updateTourGuideProfile = async (req, res) => {
     }
     if (email !== tourGuide1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
+    }
+
+    if (profilePicture === undefined) {
+      profilePicture = null;
+      if (tourGuide1.profilePicture !== null) {
+        await cloudinary.uploader.destroy(tourGuide1.profilePicture.public_id);
+      }
+    } else if (profilePicture.public_id === undefined) {
+      const result = await cloudinary.uploader.upload(profilePicture, {
+        folder: "tour-guide-profile-pictures",
+      });
+      if (tourGuide1.profilePicture !== null) {
+        await cloudinary.uploader.destroy(tourGuide1.profilePicture.public_id);
+      }
+      profilePicture = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
     }
     // Find the TourGuide by their ID and update with new data
     const tourGuide = await TourGuide.findByIdAndUpdate(
@@ -186,6 +230,10 @@ const deleteTourGuideAccount = async (req, res) => {
       await Itinerary.findByIdAndUpdate(itinerary._id, { isDeleted: true });
     });
 
+    if (tourGuide.profilePicture !== null) {
+      await cloudinary.uploader.destroy(tourGuide.profilePicture.public_id);
+    }
+
     await TourGuide.findByIdAndDelete(res.locals.user_id);
 
     res
@@ -209,19 +257,18 @@ const rejectTourGuide = async (req, res) => {
     if (!gfs) {
       return res.status(500).send("GridFS is not initialized");
     }
-  
+
     const filenames = [];
     filenames.push(tourGuide.files.IDFilename);
     filenames.push(...tourGuide.files.certificatesFilenames);
-    const files = await gfs.find({ filename:{$in:filenames} }).toArray();
+    const files = await gfs.find({ filename: { $in: filenames } }).toArray();
     if (!files || files.length === 0) {
       return res.status(404).json({ err: "No file exists" });
     }
-  
+
     files.forEach(async (file) => {
       await gfs.delete(file._id);
     });
-
 
     res.status(200).json({ message: "TourGuide rejected successfully" });
   } catch (error) {
@@ -371,7 +418,9 @@ const updateCommentOnTourGuide = async (req, res) => {
     );
 
     if (!tourguide) {
-      return res.status(404).json({ message: "Tour guide or comment not found" });
+      return res
+        .status(404)
+        .json({ message: "Tour guide or comment not found" });
     }
 
     // Recalculate the average rating for the tour guide
@@ -390,7 +439,6 @@ const updateCommentOnTourGuide = async (req, res) => {
     });
   }
 };
-
 
 const rateTourGuide = async (req, res) => {
   try {
