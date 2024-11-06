@@ -51,7 +51,7 @@ const schema = z.object({
     .number()
     .int()
     .nonnegative("Discount must be a non-negative integer"),
-  isBookingOpen: z.boolean(),
+ // isBookingOpen: z.boolean(),
   pictures: z.array(z.string()).optional(),
 });
 
@@ -71,7 +71,7 @@ export default function CreateActivity() {
       },
       category: [],
       tags: [],
-      isBookingOpen: true,
+    //  isBookingOpen: true,
       pictures: [],
     },
   });
@@ -211,7 +211,7 @@ export default function CreateActivity() {
     formData.append("duration", data.duration);
     formData.append("price", data.price);
     formData.append("specialDiscount", data.specialDiscount);
-    formData.append("isBookingOpen", data.isBookingOpen);
+   // formData.append("isBookingOpen", data.isBookingOpen);
     formData.append("currency", data.currency);
     formData.append("location[address]", data.location.address);
     formData.append("location[coordinates][longitude]", location.longitude);
@@ -496,7 +496,7 @@ export default function CreateActivity() {
                 )}
               </div>
 
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <Controller
                   name="isBookingOpen"
                   control={control}
@@ -509,7 +509,7 @@ export default function CreateActivity() {
                   )}
                 />
                 <Label htmlFor="isBookingOpen">Is Booking Open?</Label>
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <Label htmlFor="pictures">Pictures</Label>

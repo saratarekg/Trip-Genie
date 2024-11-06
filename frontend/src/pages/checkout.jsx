@@ -33,6 +33,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import AddCard from "@/pages/AddCard"
+import ShippingAddress from "@/pages/AddShippingAddress"
+
 const personalDetailsSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -87,11 +89,14 @@ export default function CheckoutPage() {
     const [currencySymbol, setCurrencySymbol] = useState({})
     const [cartItems, setCartItems] = useState([])
     const [savedCards, setSavedCards] = useState([])
+    const [savedAddresses, setSavedAddresses] = useState([])
     const [totalAmount, setTotalAmount] = useState(0)
     const [isAddCardOpen, setIsAddCardOpen] = useState(false)
+    const [isAddAddressOpen, setIsAddAddressOpen] = useState(false)
     const [formData, setFormData] = useState({})
     const [purchaseStatus, setPurchaseStatus] = useState(null)
     const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
+  
   
   const personalDetailsForm = useForm({
     resolver: zodResolver(personalDetailsSchema),
@@ -152,6 +157,17 @@ export default function CheckoutPage() {
         const userData = response.data
         const currencyId = userData.preferredCurrency
         setSavedCards(userData.cards || [])
+        setSavedAddresses(userData.shippingAddresses || [])
+
+        // Set default address if available
+        const defaultAddress = userData.shippingAddresses?.find(addr => addr.default)
+        if (defaultAddress) {
+          Object.keys(defaultAddress).forEach(key => {
+            if (key !== 'default') {
+              addressDetailsForm.setValue(key, defaultAddress[key])
+            }
+          })
+        }
 
         personalDetailsForm.setValue("firstName", userData.fname || "")
         personalDetailsForm.setValue("lastName", userData.lname || "")
@@ -168,6 +184,33 @@ export default function CheckoutPage() {
       } catch (error) {
         console.error("Error fetching user profile:", error)
       }
+    }
+  }
+
+  const handleAddNewAddress = async (addressData) => {
+    try {
+      const token = Cookies.get("jwt")
+      const response = await axios.post(
+        "http://localhost:4000/tourist/addAddress",
+        addressData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      
+      if (response.status === 200) {
+        const userResponse = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        setSavedAddresses(userResponse.data.shippingAddresses || [])
+        
+        setIsAddAddressOpen(false)
+        Object.keys(addressData).forEach(key => {
+          addressDetailsForm.setValue(key, addressData[key])
+        })
+      }
+    } catch (error) {
+      console.error("Error adding new address:", error)
     }
   }
 
@@ -348,6 +391,36 @@ export default function CheckoutPage() {
     }
   }
 
+  useEffect(() => {
+    if (purchaseStatus === 'success') {
+      emptyCart();
+    } else {
+      console.error('Failed to complete purchase for some items.');
+    }
+  }, [purchaseStatus]);
+
+  const emptyCart = async () => {
+    try {
+      setCartItems([]);
+
+      const token = Cookies.get("jwt");
+      const emptyCartResponse = await fetch("http://localhost:4000/tourist/empty/cart", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (emptyCartResponse.ok) {
+        console.log('Cart emptied successfully.');
+      } else {
+        console.error('Failed to empty the cart.');
+      }
+    } catch (error) {
+      console.error('Error emptying cart items:', error);
+    }
+  };
+
   const handleAddNewCard = async (cardData) => {
     try {
       const token = Cookies.get("jwt")
@@ -376,238 +449,278 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-6">
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        </div>
-      </div>
-      <div className="max-w-6xl mx-auto pt-6">
-        <h1 className="text-4xl font-bold mb-8 text-center text-[#1A3B47]">Checkout</h1>
-        <div className="flex gap-12">
-          {/* Left sidebar with steps */}
-          <div className="w-64 bg-white rounded-xl p-4 shadow-md">
-            <div className="space-y-4">
-              {steps.map((step) => (
-                <div key={step.id} className="flex items-center">
-                  <div className="relative flex-1">
-                    <div
-                      className={`w-16 h-16 rounded-xl flex items-center justify-center ${
-                        currentStep >= step.id ? 'bg-[#1A3B47]' : 'bg-[#B5D3D1]'
-                      }`}
-                    >
-                      {currentStep > step.id ? (
-                        <Check className="w-6 h-6 text-white" />
-                      ) : (
-                        <span className="text-white text-lg">{step.id}</span>
-                      )}
-                    </div>
-                    {step.id < steps.length && (
-                      <div className="absolute left-1/2 top-16 h-4 w-0.5 bg-[#B5D3D1]" />
-                    )}
-                  </div>
-                  <span className="ml-4 text-[#1A3B47] font-medium">{step?.name}</span>
-                </div>
-              ))}
-            </div>
+        <div className="min-h-screen bg-white pb-6">
+          <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
           </div>
+          <div className="max-w-6xl mx-auto pt-6">
+            <h1 className="text-4xl font-bold mb-8 text-center text-[#1A3B47]">Checkout</h1>
+            <div className="flex gap-12">
+              {/* Left sidebar with steps */}
+              <div className="w-64 bg-white rounded-xl p-4 shadow-md">
+  <div className="space-y-8">
+    {steps.map((step) => (
+      <div key={step.id} className="flex items-center">
+        <div className="relative flex-1">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              currentStep >= step.id ? 'bg-[#1A3B47]' : 'bg-[#B5D3D1]'
+            }`}
+          >
+            {currentStep > step.id ? (
+              <Check className="w-4 h-4 text-white" />
+            ) : (
+              <span className="text-white text-sm">{step.id}</span>
+            )}
+          </div>
+          {step.id < steps.length && (
+            <div className="absolute left-[21%] top-10 h-6 w-0.5 -translate-x-1/2 translate-y-[-15%] bg-[#B5D3D1]" />
+          )}
+        </div>
+        <span className="ml-4 text-[#1A3B47] font-medium">{step?.name}</span>
+      </div>
+    ))}
+  </div>
+</div>
 
-          {/* Main content area */}
-          <div className="flex-1">
-            <Card className="p-6 bg-[#B5D3D1]">
-              {currentStep === 1 && (
-                <Form {...personalDetailsForm}>
-                  <form className="space-y-6">
-                    <div className="space-y-4">
-                      <h2 className="text-2xl font-bold text-[#1A3B47]">Personal Details</h2>
-                      <div className="grid grid-cols-2 gap-4">
-                
-                        <FormField
-                          control={personalDetailsForm.control}
-                          name="firstName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>First Name</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="rounded-xl" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
+    
+              {/* Main content area */}
+              <div className="flex-1">
+                <Card className="p-6 bg-[#B5D3D1]">
+                  {currentStep === 1 && (
+                    <Form {...personalDetailsForm}>
+                      <form className="space-y-6">
+                        <div className="space-y-4">
+                          <h2 className="text-2xl font-bold text-[#1A3B47]">Personal Details</h2>
+                          <div className="grid grid-cols-2 gap-8">
+                            <div className="space-y-4">
+                              <FormField
+                                control={personalDetailsForm.control}
+                                name="firstName"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">First Name</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={personalDetailsForm.control}
+                                name="email"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">Email Address</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} type="email" className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <FormField
+                                control={personalDetailsForm.control}
+                                name="lastName"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">Last Name</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={personalDetailsForm.control}
+                                name="phone"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">Phone Number</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} type="tel" className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </Form>
+                  )}
+    
+                  {currentStep === 2 && (
+                    <Form {...addressDetailsForm}>
+                      <form className="space-y-6">
+                        <div className="space-y-4">
+                          <h2 className="text-2xl font-bold text-[#1A3B47]">Address Details</h2>
+                          
+                          {savedAddresses.length > 0 && (
+                            <FormField
+                              control={addressDetailsForm.control}
+                              name="selectedAddress"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Saved Addresses</FormLabel>
+                                  <RadioGroup
+                                    onValueChange={(value) => {
+                                      const address = savedAddresses.find(addr => 
+                                        addr.streetNumber === value.split('|')[0] && 
+                                        addr.streetName === value.split('|')[1]
+                                      )
+                                      if (address) {
+                                        Object.keys(address).forEach(key => {
+                                          if (key !== 'default') {
+                                            addressDetailsForm.setValue(key, address[key])
+                                          }
+                                        })
+                                      }
+                                    }}
+                                    className="space-y-4"
+                                  >
+                                    {savedAddresses.map((address, index) => (
+                                      <div key={index} className="flex items-center space-x-2 bg-white p-4 rounded-xl">
+                                        <RadioGroupItem 
+                                          value={`${address.streetNumber}|${address.streetName}`} 
+                                          id={`address-${index}`} 
+                                        />
+                                        <Label htmlFor={`address-${index}`}>
+                                          {`${address.streetNumber} ${address.streetName}, ${address.city}, ${address.state} ${address.postalCode}`}
+                                          {address.default && " (Default)"}
+                                        </Label>
+                                      </div>
+                                    ))}
+                                  </RadioGroup>
+                                </FormItem>
+                              )}
+                            />
                           )}
-                        />
-                        <FormField
-                          control={personalDetailsForm.control}
-                          name="lastName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Last Name</FormLabel>
-                              <FormControl>
-                                <Input {...field} className="rounded-xl" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <FormField
-                        control={personalDetailsForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="email" className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={personalDetailsForm.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="tel" className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </form>
-                </Form>
-              )}
-
-              {currentStep === 2 && (
-                <Form {...addressDetailsForm}>
-                  <form className="space-y-6">
-                    <div className="space-y-4">
-                      <h2 className="text-2xl font-bold text-[#1A3B47]">Address Details</h2>
-                      <FormField
-                        control={addressDetailsForm.control}
-                        name="streetName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Street Name</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addressDetailsForm.control}
-                        name="streetNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Street Number</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addressDetailsForm.control}
-                        name="floorUnit"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Floor/Unit</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addressDetailsForm.control}
-                        name="city"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>City</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addressDetailsForm.control}
-                        name="state"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>State/Province/Region</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addressDetailsForm.control}
-                        name="postalCode"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Postal/ZIP Code</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addressDetailsForm.control}
-                        name="landmark"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Landmark/Additional Info</FormLabel>
-                            <FormControl>
-                              <Input {...field} className="rounded-xl" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={addressDetailsForm.control}
-                        name="locationType"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Location Type</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select location type" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="home">Home</SelectItem>
-                                <SelectItem value="work">Work</SelectItem>
-                                <SelectItem value="apartment">Apartment/Condo</SelectItem>
-                                <SelectItem value="friend_family">Friend/Family's Address</SelectItem>
-                                <SelectItem value="po_box">PO Box</SelectItem>
-                                <SelectItem value="office">Office/Business</SelectItem>
-                                <SelectItem value="pickup_point">Pickup Point</SelectItem>
-                                <SelectItem value="vacation">Vacation/Temporary Address</SelectItem>
-                                <SelectItem value="school">School/University</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </form>
-                </Form>
-              )}
+    
+                          <Dialog open={isAddAddressOpen} onOpenChange={setIsAddAddressOpen}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" className="w-full">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add New Address
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="w-[2000px] h-[600px]">
+                              <DialogHeader>
+                                <DialogTitle>Add New Address</DialogTitle>
+                              </DialogHeader>
+                              <ShippingAddress onClose={handleAddNewAddress} />
+                            </DialogContent>
+                          </Dialog>
+    
+                          <div className="grid grid-cols-2 gap-8">
+                            <div className="space-y-4">
+                              <FormField
+                                control={addressDetailsForm.control}
+                                name="streetName"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">Street Name</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={addressDetailsForm.control}
+                                name="city"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">City</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={addressDetailsForm.control}
+                                name="postalCode"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">Postal Code</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            <div className="space-y-4">
+                              <FormField
+                                control={addressDetailsForm.control}
+                                name="streetNumber"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">Street Number</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={addressDetailsForm.control}
+                                name="state"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">State</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} className="rounded-md mt-1" />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={addressDetailsForm.control}
+                                name="locationType"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel className="text-sm font-medium">Location Type</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger className="rounded-md mt-1">
+                                          <SelectValue placeholder="Select location type" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="home">Home</SelectItem>
+                                        <SelectItem value="work">Work</SelectItem>
+                                        <SelectItem value="apartment">Apartment/Condo</SelectItem>
+                                        <SelectItem value="friend_family">Friend/Family's Address</SelectItem>
+                                        <SelectItem value="po_box">PO Box</SelectItem>
+                                        <SelectItem value="office">Office/Business</SelectItem>
+                                        <SelectItem value="pickup_point">Pickup Point</SelectItem>
+                                        <SelectItem value="vacation">Vacation/Temporary Address</SelectItem>
+                                        <SelectItem value="school">School/University</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </Form>
+                  )}
 
               {currentStep === 3 && (
                 <Form {...deliveryDetailsForm}>
@@ -826,7 +939,7 @@ export default function CheckoutPage() {
                   <div className="flex justify-between pt-6">
                     <Button
                       type="button"
-                      onClick={() => router.push('/home')}
+                      onClick={() => router.push('/')}
                       className="rounded-xl bg-[#5D9297] hover:bg-[#388A94]"
                     >
                       Go to Home
@@ -842,27 +955,31 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-<div className="flex justify-between pt-6">
-                <Button
-                  type="button"
-                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-                  disabled={currentStep === 1}
-                  className="rounded-xl bg-[#5D9297] hover:bg-[#388A94]"
-                >
-                  Back
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  className="rounded-xl bg-[#1A3B47] hover:bg-[#388A94]"
-                >
-                  {currentStep === 5 ? 'Complete Purchase' : 'Next'}
-                </Button>
+<div className="mt-8 pt-6 border-t border-[#5D9297]">
+                <div className="flex justify-between">
+                  <Button
+                    type="button"
+                    onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                    disabled={currentStep === 1}
+                    className="rounded-xl bg-[#5D9297] hover:bg-[#388A94]"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    className="rounded-xl bg-[#1A3B47] hover:bg-[#388A94]"
+                  >
+                    {currentStep === 5 ? 'Complete Purchase' : 'Next'}
+                  </Button>
+                </div>
               </div>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Status Dialog */}
       <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
         <DialogContent>
           <DialogHeader>

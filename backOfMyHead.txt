@@ -11,42 +11,41 @@
 - In admin, make "my account" logout only as there is no other active button except logout
 
 Hadwa's requests:
-- Add global search bar
+- Add global search bar 
 
 Itinerary cards:
-- Add edit/delete button outside as well
-- Minimize tour guide data
-- Display price next to the stars
-- Add pickup location
+- Add edit/delete button outside as well (Zeina --DONE!)
+- Minimize tour guide data (Amy --DONE!!)
+- Display price next to the stars (Amy --DONE!!)
+- Add pickup location (Amy --DONE!!)
 
 Tourguide activities:
 - Allow tour guide to create own activities or choose from available ones, making them clickable to show details
 
 Activity card:
 - Sort by importance
-- Move description below
-- Remove booking open
-- Highlight special discount more
-- Ensure consistent font for subtitles
-- Move map to the right
+- Move description below (jana) done
+- Remove booking open (jana) done
+- Highlight special discount more (jana) done
+- Ensure consistent font for subtitles (jana) done
+- Move map to the right (Ehab) check with hadwa the updated version
 
 - Make Vtp the admin
 
 Pop-ups:
-- Ensure close button doesn't redirect after deletion is complete
+- Ensure close button doesn't redirect after deletion is complete (Ehab)
 
 Consistency:
 - Ensure filter stars are consistent across all sections
 
 Sign up:
-- Move login to the center after successful sign up
-- Change all previous works
+- Change all previous works (Zeina)
 
 404 page:
-- Change "Return to home" to "Make a wish"
+- Change "Return to home" to "Make a wish" (Amy --DONE!!)
 
 New page:
-- Create and view only my stuff
+- Create and view only my stuff (almost done AMY)
 - Select activities to add to itineraries by either creating own or dragging and dropping
 - Reduce white space
 - Map: Enter latitude and longitude
@@ -58,3 +57,4 @@ Admin:
 - Move buttons to the right
 - Change hide to back and improve its appearance
 - Add filter and sort
+- Add color behind navbar at the beginning so that logo appears.
