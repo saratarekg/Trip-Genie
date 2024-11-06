@@ -223,6 +223,7 @@ const createActivity = async (req, res) => {
     specialDiscount,
     rating,
     isBookingOpen,
+    transportations,
   } = req.body;
 
   let imagesBuffer = [];
@@ -258,6 +259,7 @@ const createActivity = async (req, res) => {
       isBookingOpen,
       advertiser: res.locals.user_id,
       pictures: imagesBuffer,
+      transportations,
     });
     await activity.save();
     res.status(201).json(activity);
