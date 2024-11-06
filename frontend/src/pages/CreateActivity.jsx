@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from "react"
-import { useForm, Controller } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import axios from "axios"
-import Cookies from "js-cookie"
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet"
-import "leaflet/dist/leaflet.css"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import React, { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -21,9 +21,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import Select from "react-select"
-import { useNavigate } from "react-router-dom"
+} from "@/components/ui/dialog";
+import Select from "react-select";
+import { useNavigate } from "react-router-dom";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -40,7 +40,7 @@ const schema = z.object({
     message: "Timing must be a future date",
   }),
   price: z.number().int().positive("Price must be a positive integer"),
-  currency: z.string().min(1, 'Please select a currency'),
+  currency: z.string().min(1, "Please select a currency"),
   category: z
     .array(z.object({ value: z.string(), label: z.string() }))
     .nonempty("At least one category is required"),
@@ -51,9 +51,9 @@ const schema = z.object({
     .number()
     .int()
     .nonnegative("Discount must be a non-negative integer"),
-  isBookingOpen: z.boolean(),
+ // isBookingOpen: z.boolean(),
   pictures: z.array(z.string()).optional(),
-})
+});
 
 export default function CreateActivity() {
   const {
@@ -71,178 +71,207 @@ export default function CreateActivity() {
       },
       category: [],
       tags: [],
-      isBookingOpen: true,
+    //  isBookingOpen: true,
       pictures: [],
     },
-  })
+  });
 
-  const [categories, setCategories] = useState([])
-  const [tags, setTags] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [categories, setCategories] = useState([]);
+  const [tags, setTags] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState({
     longitude: 31.1342,
     latitude: 29.9792,
-  })
-  const [showDialog, setShowDialog] = useState(false)
-  const navigate = useNavigate()
+  });
+  const [showDialog, setShowDialog] = useState(false);
+  const navigate = useNavigate();
 
-  const [countries, setCountries] = useState([])
-  const [cities, setCities] = useState([])
-  const [selectedCountry, setSelectedCountry] = useState(null)
-  const [selectedCity, setSelectedCity] = useState(null)
-  const [citiesLoading, setCitiesLoading] = useState(false)
+  const [countries, setCountries] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [citiesLoading, setCitiesLoading] = useState(false);
   const [currencies, setCurrencies] = useState([]);
+  const [pictures, setPictures] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       const response = await axios.get(
         "http://localhost:4000/api/getAllCategories"
-      )
+      );
       setCategories(
         response.data.map((cat) => ({ value: cat._id, label: cat.name }))
-      )
-    }
+      );
+    };
 
     const fetchTags = async () => {
-      const response = await axios.get("http://localhost:4000/api/getAllTags")
+      const response = await axios.get("http://localhost:4000/api/getAllTags");
       setTags(
         response.data.map((tag) => ({ value: tag._id, label: tag.type }))
-      )
-    }
+      );
+    };
 
-    fetchCategories()
-    fetchTags()
+    fetchCategories();
+    fetchTags();
     fetchCurrencies();
-    fetchCountries()
-  }, [])
+    fetchCountries();
+  }, []);
 
   const fetchCountries = async () => {
     try {
-      const response = await fetch('https://restcountries.com/v3.1/all')
-      const data = await response.json()
-      const sortedCountries = data.map(country => ({
-        value: country.name.common,
-        label: country.name.common
-      })).sort((a, b) => a.label.localeCompare(b.label))
-      setCountries(sortedCountries)
+      const response = await fetch("https://restcountries.com/v3.1/all");
+      const data = await response.json();
+      const sortedCountries = data
+        .map((country) => ({
+          value: country.name.common,
+          label: country.name.common,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+      setCountries(sortedCountries);
     } catch (error) {
-      console.error('Error fetching countries:', error)
-    }
-  }
-
-  const fetchCities = async (country) => {
-    setCitiesLoading(true)
-    try {
-      const response = await fetch('https://countriesnow.space/api/v0.1/countries/cities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ country }),
-      })
-
-      const data = await response.json()
-
-      if (data.error) {
-        throw new Error(data.msg || 'Failed to fetch cities')
-      }
-
-      const sortedCities = data.data.sort().map(city => ({
-        value: city,
-        label: city
-      }))
-      setCities(sortedCities)
-    } catch (err) {
-      if (err.status === 404) {
-        setCities([])
-      }
-      console.error('Error fetching cities: ', err)
-      setCities([])
-    } finally {
-      setCitiesLoading(false)
-    }
-  }
-
-  const fetchCurrencies = async () => {
-    try {
-      const token = Cookies.get('jwt');
-      const response = await axios.get(`http://localhost:4000/advertiser/currencies`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCurrencies(response.data);
-    } catch (err) {
-      console.error('Error fetching currencies:', err.message);
-      setError('Failed to fetch currencies. Please try again.');
+      console.error("Error fetching countries:", error);
     }
   };
 
-
-  
-  const onSubmit = async (data) => {
-    console.log("Submitted data:", data)
-    setLoading(true)
-    const token = Cookies.get("jwt")
-    const role = Cookies.get("role") || "guest"
-
-    const activityData = {
-      ...data,
-      timing: new Date(data.timing),
-      duration: Number(data.duration),
-      price: Number(data.price),
-      specialDiscount: Number(data.specialDiscount),
-      location: {
-        ...data.location,
-        coordinates: location,
-      },
-      category: data.category.map((cat) => cat.value),
-      tags: data.tags.map((tag) => tag.value),
+  const handlePicturesUpload = (e) => {
+    const files = e.target.files;
+    if (files) {
+      setPictures([...pictures, ...Array.from(files)]);
     }
+  };
+  const fetchCities = async (country) => {
+    setCitiesLoading(true);
+    try {
+      const response = await fetch(
+        "https://countriesnow.space/api/v0.1/countries/cities",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ country }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.msg || "Failed to fetch cities");
+      }
+
+      const sortedCities = data.data.sort().map((city) => ({
+        value: city,
+        label: city,
+      }));
+      setCities(sortedCities);
+    } catch (err) {
+      if (err.status === 404) {
+        setCities([]);
+      }
+      console.error("Error fetching cities: ", err);
+      setCities([]);
+    } finally {
+      setCitiesLoading(false);
+    }
+  };
+
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        `http://localhost:4000/advertiser/currencies`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setCurrencies(response.data);
+    } catch (err) {
+      console.error("Error fetching currencies:", err.message);
+      setError("Failed to fetch currencies. Please try again.");
+    }
+  };
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    const token = Cookies.get("jwt");
+    const role = Cookies.get("role") || "guest";
+
+    // Prepare FormData
+    const formData = new FormData();
+
+    // Append each picture file to the FormData
+    pictures.forEach((picture, index) => {
+      formData.append("pictures", picture); // The name "pictures" should match what your backend expects
+    });
+
+    // Add other form data fields
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+    formData.append("timing", data.timing.toISOString());
+    formData.append("duration", data.duration);
+    formData.append("price", data.price);
+    formData.append("specialDiscount", data.specialDiscount);
+   // formData.append("isBookingOpen", data.isBookingOpen);
+    formData.append("currency", data.currency);
+    formData.append("location[address]", data.location.address);
+    formData.append("location[coordinates][longitude]", location.longitude);
+    formData.append("location[coordinates][latitude]", location.latitude);
+
+    // Append arrays for category and tags
+    data.category.forEach((cat) => formData.append("category[]", cat.value));
+    data.tags.forEach((tag) => formData.append("tags[]", tag.value));
 
     try {
       const response = await axios.post(
         `http://localhost:4000/${role}/activities`,
-        activityData,
+        formData,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
-      )
-      console.log("Created activity:", response.data)
-      setShowDialog(true)
+      );
+      console.log("Created activity:", response.data);
+      setShowDialog(true);
     } catch (error) {
-      console.error("Failed to create activity:", error.message)
+      console.error("Failed to create activity:", error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const MapClick = () => {
     useMapEvents({
       click: (e) => {
-        setLocation({ latitude: e.latlng.lat, longitude: e.latlng.lng })
+        setLocation({ latitude: e.latlng.lat, longitude: e.latlng.lng });
       },
-    })
-    return null
-  }
+    });
+    return null;
+  };
 
   const handleGoBack = () => {
-    navigate("/activity")
-  }
+    navigate("/activity");
+  };
 
   const handleCreateNew = () => {
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   const handleCountryChange = (selectedOption) => {
-    setSelectedCountry(selectedOption)
-    setSelectedCity(null)
-    setCities([])
-    fetchCities(selectedOption.value)
-  }
+    setSelectedCountry(selectedOption);
+    setSelectedCity(null);
+    setCities([]);
+    fetchCities(selectedOption.value);
+  };
 
   const handleCityChange = (selectedOption) => {
-    setSelectedCity(selectedOption)
-    setValue('location.address', `${selectedOption.value}, ${selectedCountry.value}`)
-  }
+    setSelectedCity(selectedOption);
+    setValue(
+      "location.address",
+      `${selectedOption.value}, ${selectedCountry.value}`
+    );
+  };
 
   return (
     <>
@@ -344,8 +373,8 @@ export default function CreateActivity() {
                             : ""
                         }
                         onChange={(e) => {
-                          const dateValue = new Date(e.target.value)
-                          field.onChange(dateValue)
+                          const dateValue = new Date(e.target.value);
+                          field.onChange(dateValue);
                         }}
                       />
                     )}
@@ -367,7 +396,7 @@ export default function CreateActivity() {
                     render={({ field }) => (
                       <Input
                         type="number"
-                        min='0'
+                        min="0"
                         id="price"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
@@ -390,7 +419,7 @@ export default function CreateActivity() {
                       <Input
                         type="number"
                         id="specialDiscount"
-                        min='0'
+                        min="0"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
@@ -405,21 +434,25 @@ export default function CreateActivity() {
               </div>
 
               <div>
-          <Label htmlFor="currency">Currency </Label>
-          <select
-            {...register('currency')}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="currency"
-          >
-            <option value="">Select currency</option>
-            {currencies.map((currency) => (
-              <option key={currency._id} value={currency._id}>
-                {currency.code} - {currency.name}  ({currency.symbol})
-              </option>
-            ))}
-          </select>
-          {errors.currency && <span className="text-red-500">{errors.currency.message}</span>}
-        </div>
+                <Label htmlFor="currency">Currency </Label>
+                <select
+                  {...register("currency")}
+                  className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
+                  id="currency"
+                >
+                  <option value="">Select currency</option>
+                  {currencies.map((currency) => (
+                    <option key={currency._id} value={currency._id}>
+                      {currency.code} - {currency.name} ({currency.symbol})
+                    </option>
+                  ))}
+                </select>
+                {errors.currency && (
+                  <span className="text-red-500">
+                    {errors.currency.message}
+                  </span>
+                )}
+              </div>
 
               <div className="space-y-2">
                 <Label>Categories</Label>
@@ -463,7 +496,7 @@ export default function CreateActivity() {
                 )}
               </div>
 
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <Controller
                   name="isBookingOpen"
                   control={control}
@@ -476,25 +509,15 @@ export default function CreateActivity() {
                   )}
                 />
                 <Label htmlFor="isBookingOpen">Is Booking Open?</Label>
-              </div>
+              </div> */}
 
               <div className="space-y-2">
-                <Label htmlFor="pictures">Pictures (URLs)</Label>
-                <Controller
-                  name="pictures"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="pictures"
-                      value={field.value.join(", ")}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value.split(",").map((url) => url.trim())
-                        )
-                      }
-                      placeholder="Enter picture URLs separated by commas"
-                    />
-                  )}
+                <Label htmlFor="pictures">Pictures</Label>
+                <Input
+                  id="pictures"
+                  type="file"
+                  multiple
+                  onChange={handlePicturesUpload}
                 />
               </div>
 
@@ -540,10 +563,12 @@ export default function CreateActivity() {
           </DialogHeader>
           <DialogFooter>
             <Button onClick={handleGoBack}>Go to All Activities</Button>
-            <Button variant = "outline" onClick={handleCreateNew}>Create New Activity</Button>
+            <Button variant="outline" onClick={handleCreateNew}>
+              Create New Activity
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

@@ -138,7 +138,7 @@ export function SignupForm() {
         data.userType === "seller"
       ) {
         if (!phoneValidator(data.mobile)) {
-          // scrollToError({ mobile: true });
+          scrollToError();
           ctx.addIssue({
             path: ["mobile"],
             message:
@@ -148,7 +148,7 @@ export function SignupForm() {
       }
       if (data.userType === "tourist" || data.userType === "tour-guide") {
         if (!data.nationality) {
-          // scrollToError({ nationality: true });
+          scrollToError();
           ctx.addIssue({
             path: ["nationality"],
             message: "Nationality is required.",
@@ -157,7 +157,7 @@ export function SignupForm() {
       }
       if (data.userType === "tourist") {
         if (!data.dateOfBirth) {
-          // scrollToError({ dateOfBirth: true });
+          scrollToError();
           ctx.addIssue({
             path: ["dateOfBirth"],
             message: "Date of birth is required.",
@@ -168,14 +168,14 @@ export function SignupForm() {
           data.dateOfBirth >
             new Date().setFullYear(new Date().getFullYear() - 18)
         ) {
-          // scrollToError({ dateOfBirth: true });
+          scrollToError();
           ctx.addIssue({
             path: ["dateOfBirth"],
             message: "You must be at least 18 years old.",
           });
         }
         if (!data.jobOrStudent) {
-          // scrollToError({ jobOrStudent: true });
+          scrollToError();
           ctx.addIssue({
             path: ["jobOrStudent"],
             message: "Occupation is required.",
@@ -184,14 +184,14 @@ export function SignupForm() {
       }
       if (data.userType === "tour-guide") {
         if (data.yearsOfExperience < 0 || data.yearsOfExperience > 50) {
-          // scrollToError({ yearsOfExperience: true });
+          scrollToError();
           ctx.addIssue({
             path: ["yearsOfExperience"],
             message: "Experience must be between 0 and 50 years.",
           });
         }
         if (!Number.isInteger(data.yearsOfExperience)) {
-          // scrollToError({ yearsOfExperience: true });
+          scrollToError();
           ctx.addIssue({
             path: ["yearsOfExperience"],
             message: "Experience must be an integer value.",
@@ -200,21 +200,21 @@ export function SignupForm() {
         if (data.previousWorks && data.previousWorks.length > 0) {
           data.previousWorks.forEach((work, index) => {
             if (work.title === "") {
-              // scrollToError({ previousWorks: true });
+              scrollToError();
               ctx.addIssue({
                 path: ["previousWorks", index, "title"],
                 message: "Please enter the title for your previous work.",
               });
             }
             if (work.company === "") {
-              // scrollToError({ previousWorks: true });
+              scrollToError();
               ctx.addIssue({
                 path: ["previousWorks", index, "company"],
                 message: "Please enter the company for your previous work.",
               });
             }
             if (work.duration === "") {
-              // scrollToError({ previousWorks: true });
+              scrollToError();
               ctx.addIssue({
                 path: ["previousWorks", index, "duration"],
                 message: "Please enter the duration for your previous work.",
@@ -229,7 +229,7 @@ export function SignupForm() {
         data.userType === "tour-guide"
       ) {
         if (!data.name) {
-          // scrollToError({ name: true });
+          scrollToError();
           ctx.addIssue({
             path: ["name"],
             message: "Name is required.",
@@ -238,7 +238,7 @@ export function SignupForm() {
       }
       if (data.userType === "advertiser") {
         if (!data.hotline) {
-          // scrollToError({ hotline: true });
+          scrollToError();
           ctx.addIssue({
             path: ["hotline"],
             message: "Hotline is required.",
@@ -246,7 +246,7 @@ export function SignupForm() {
         }
 
         if (data.hotline && !data.hotline.match(/^\d+$/)) {
-          // scrollToError({ hotline: true });
+          scrollToError();
           ctx.addIssue({
             path: ["hotline"],
             message: "Hotline must be a number.",
@@ -259,7 +259,7 @@ export function SignupForm() {
             /^(https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*$/i
           )
         ) {
-          // scrollToError({ website: true });
+          scrollToError();
           ctx.addIssue({
             path: ["website"],
             message: "Website must be a valid URL.",
@@ -310,6 +310,7 @@ export function SignupForm() {
     handleSubmit,
     watch,
     formState: { errors },
+    setError,
   } = form;
 
   const { fields, append, remove } = useFieldArray({
@@ -365,16 +366,23 @@ export function SignupForm() {
     }
   }, [apiError]);
 
-  const scrollToError = (errors) => {
-    for (const field in errors) {
-      if (formRefs[field] && formRefs[field].current) {
-        formRefs[field].current.scrollIntoView({
+  const scrollToError = () => {
+    console.log("Errors:", errors);
+    if (Object.keys(errors).length > 0) {
+      const firstErrorField = Object.keys(errors)[0];
+      console.log("First error field:", firstErrorField);
+      if (formRefs[firstErrorField] && formRefs[firstErrorField].current) {
+        console.log("Scrolling to:", firstErrorField);
+        formRefs[firstErrorField].current.scrollIntoView({
           behavior: "smooth",
           block: "center",
         });
-        break;
       }
     }
+  };
+
+  const scrollToHeight = (height) => {
+    window.scrollTo({ top: height, behavior: "smooth" });
   };
 
   const handleBack = () => {
@@ -446,13 +454,19 @@ export function SignupForm() {
       } catch (error) {
         const response = error.response;
         if (response.data.existingUsername) {
-          setApiError("Username already exists");
-          scrollToError({ username: true });
+          setError("username", {
+            type: "manual",
+            message: "Username already exists",
+          });
+          scrollToHeight(0);
           return;
         }
         if (response.data.existingEmail) {
-          setApiError("Email already exists");
-          scrollToError({ email: true });
+          setError("email", {
+            type: "manual",
+            message: "Email already exists",
+          });
+          scrollToHeight(100);
           return;
         }
       }
@@ -472,11 +486,6 @@ export function SignupForm() {
     }
 
     if (stage < totalStages) {
-      const errors = await form.trigger();
-      if (!errors) {
-        scrollToError(form.formState.errors);
-        return;
-      }
       setFormData(values);
       setStage(stage + 1);
       setApiError(null);
@@ -591,11 +600,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Username*</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Username"
-                      {...field}
-                      ref={formRefs.username}
-                    />
+                    <Input placeholder="Username" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -612,7 +617,6 @@ export function SignupForm() {
                       type="email"
                       placeholder="mail@example.com"
                       {...field}
-                      ref={formRefs.email}
                     />
                   </FormControl>
                   <FormMessage />
@@ -626,12 +630,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Password*</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Password"
-                      {...field}
-                      ref={formRefs.password}
-                    />
+                    <Input type="password" placeholder="Password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -660,6 +659,7 @@ export function SignupForm() {
                             placeholder: "+1234567890",
                             ref: formRefs.mobile,
                           }}
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -1266,7 +1266,7 @@ export function SignupForm() {
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger ref={formRefs.userType}>
+                      <SelectTrigger>
                         <SelectValue placeholder="Please choose your role" />
                       </SelectTrigger>
                     </FormControl>

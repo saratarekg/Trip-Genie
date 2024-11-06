@@ -9,8 +9,19 @@ import Loader from "../components/Loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -55,7 +66,7 @@ import {
 } from "lucide-react";
 
 const ImageGallery = ({ pictures }) => {
-  const [mainImage, setMainImage] = useState(pictures[0]);
+  const [mainImage, setMainImage] = useState(pictures[0]?.url);
   const [startIndex, setStartIndex] = useState(0);
 
   const handlePrev = () => {
@@ -84,10 +95,10 @@ const ImageGallery = ({ pictures }) => {
             {pictures.slice(startIndex, startIndex + 5).map((pic, index) => (
               <img
                 key={index}
-                src={pic}
+                src={pic.url}
                 alt={`Activity image ${startIndex + index + 1}`}
                 className="w-full h-[calc(20%-8px)] object-cover rounded-lg cursor-pointer"
-                onClick={() => setMainImage(pic)}
+                onClick={() => setMainImage(pic.url)}
               />
             ))}
           </div>
@@ -118,15 +129,14 @@ const RatingDistributionBar = ({ percentage, count }) => (
   <div className="flex items-center gap-2 text-sm">
     <span className="w-8 text-right">{count} ★</span>
     <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-      <div 
-        className="h-full bg-primary rounded-full" 
+      <div
+        className="h-full bg-primary rounded-full"
         style={{ width: `${percentage}%` }}
       />
     </div>
     <span className="w-12 text-gray-500">{percentage}%</span>
   </div>
 );
-
 
 const StarRating = ({ rating, setRating, readOnly = false }) => {
   return (
@@ -175,12 +185,15 @@ const ActivityDetail = () => {
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
   const [ratingDistribution, setRatingDistribution] = useState({
-    5: 0, 4: 0, 3: 0, 2: 0, 1: 0
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0,
   });
   const [userComment, setUserComment] = useState(null);
   const [quickRating, setQuickRating] = useState(0);
   const [isRatingHovered, setIsRatingHovered] = useState(false);
-
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -189,8 +202,12 @@ const ActivityDetail = () => {
   };
 
   const handleEmailShare = () => {
-    const subject = encodeURIComponent(`Check out this activity: ${activity.name}`);
-    const body = encodeURIComponent(`I thought you might be interested in this activity:\n\n${activity.name}\n\n${window.location.href}`);
+    const subject = encodeURIComponent(
+      `Check out this activity: ${activity.name}`
+    );
+    const body = encodeURIComponent(
+      `I thought you might be interested in this activity:\n\n${activity.name}\n\n${window.location.href}`
+    );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     setOpen(false); // Close the popover
   };
@@ -206,7 +223,10 @@ const ActivityDetail = () => {
   };
 
   const calculateTotalPrice = () => {
-    const discountedPrice = calculateDiscountedPrice(activity.price, activity.specialDiscount);
+    const discountedPrice = calculateDiscountedPrice(
+      activity.price,
+      activity.specialDiscount
+    );
     return (discountedPrice * numberOfTickets).toFixed(2);
   };
 
@@ -217,24 +237,29 @@ const ActivityDetail = () => {
       const token = Cookies.get("jwt");
       const totalPrice = calculateTotalPrice();
 
-      const response = await fetch(`http://localhost:4000/${userRole}/activityBooking`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          activity: id,
-          paymentType,
-          paymentAmount: totalPrice,
-          numberOfTickets,
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/activityBooking`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            activity: id,
+            paymentType,
+            paymentAmount: totalPrice,
+            numberOfTickets,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.message === "Insufficient funds in wallet") {
-          setBookingError("Insufficient funds, please choose a different payment method or update your wallet.");
+          setBookingError(
+            "Insufficient funds, please choose a different payment method or update your wallet."
+          );
         } else {
           throw new Error(errorData.message || "Failed to book activity");
         }
@@ -245,12 +270,13 @@ const ActivityDetail = () => {
       }
     } catch (error) {
       console.error("Error booking activity:", error);
-      setBookingError(error.message || "An error occurred while booking. Please try again.");
+      setBookingError(
+        error.message || "An error occurred while booking. Please try again."
+      );
     } finally {
       setIsBooking(false);
     }
   };
-
 
   // Comment Carousel State
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
@@ -301,20 +327,22 @@ const ActivityDetail = () => {
           const decodedToken = jwtDecode(token);
           setCanModify(decodedToken.id === data.advertiser._id);
           setCurrentUser(decodedToken.id);
-
         }
         if (data) {
           setActivity(data);
           // Calculate rating distribution
           const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-          data.comments.forEach(comment => {
-            distribution[Math.floor(comment.rating)] = (distribution[Math.floor(comment.rating)] || 0) + 1;
+          data.comments.forEach((comment) => {
+            distribution[Math.floor(comment.rating)] =
+              (distribution[Math.floor(comment.rating)] || 0) + 1;
           });
           setRatingDistribution(distribution);
-  
+
           // Find user's comment if exists
           if (currentUser) {
-            const userComment = data.comments.find(comment => comment.tourist === currentUser);
+            const userComment = data.comments.find(
+              (comment) => comment.tourist === currentUser
+            );
             if (userComment) {
               setUserComment(userComment);
               setQuickRating(userComment.rating || 0);
@@ -323,7 +351,7 @@ const ActivityDetail = () => {
                 liked: userComment.content?.liked || "",
                 disliked: userComment.content?.disliked || "",
                 visitDate: userComment.visitDate || "",
-                isAnonymous: userComment.username === 'Anonymous'
+                isAnonymous: userComment.username === "Anonymous",
               });
             }
           }
@@ -336,54 +364,55 @@ const ActivityDetail = () => {
       }
     };
 
-    
     const fetchUserBookings = async () => {
       try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/touristActivityAttendedBookings`, {
-      headers: { Authorization: `Bearer ${token}` },
-      });
-      setUserBookings(response.data);
-      console.log(response.data);
+        const token = Cookies.get("jwt");
+        const response = await axios.get(
+          `http://localhost:4000/${userRole}/touristActivityAttendedBookings`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUserBookings(response.data);
+        console.log(response.data);
       } catch (error) {
-      console.error("Error fetching user bookings:", error);
+        console.error("Error fetching user bookings:", error);
       }
-      };
+    };
 
     fetchUserInfo();
     fetchActivityDetails();
-    if (userRole === 'tourist') {
+    if (userRole === "tourist") {
       fetchUserBookings();
-      }
+    }
   }, [id, userRole, currentUser]);
 
-  
   const fetchExchangeRate = async () => {
     try {
       const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',  // Ensure content type is set to JSON
-            },
-            body: JSON.stringify({
-              base: activity.currency,     // Sending base currency ID
-              target: userPreferredCurrency._id,      // Sending target currency ID
-            }),
-          }
-        );
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json", // Ensure content type is set to JSON
+          },
+          body: JSON.stringify({
+            base: activity.currency, // Sending base currency ID
+            target: userPreferredCurrency._id, // Sending target currency ID
+          }),
+        }
+      );
       // Parse the response JSON
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setExchangeRates(data.conversion_rate);
-    } else {
-      // Handle possible errors
-      console.error('Error in fetching exchange rate:', data.message);
-    }
+      if (response.ok) {
+        setExchangeRates(data.conversion_rate);
+      } else {
+        // Handle possible errors
+        console.error("Error in fetching exchange rate:", data.message);
+      }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
@@ -392,71 +421,75 @@ const ActivityDetail = () => {
   const getCurrencySymbol = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${activity.currency}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `http://localhost:4000/${userRole}/getCurrency/${activity.currency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setCurrencySymbol(response.data);
-
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
     }
   };
 
   const formatPrice = (price, type) => {
-    if(activity){
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      if (userPreferredCurrency === activity.currency) {
-        return `${userPreferredCurrency.symbol}${price}`;
+    if (activity) {
+      if (userRole === "tourist" && userPreferredCurrency) {
+        if (userPreferredCurrency === activity.currency) {
+          return `${userPreferredCurrency.symbol}${price}`;
+        } else {
+          const exchangedPrice = price * exchangeRates;
+          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+        }
       } else {
-        const exchangedPrice = price * exchangeRates;
-        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-      }
-    } else {
-      if(currencySymbol){
-      return `${currencySymbol.symbol}${price}`;
+        if (currencySymbol) {
+          return `${currencySymbol.symbol}${price}`;
+        }
       }
     }
-  }
   };
-
 
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const currencyId = response.data.preferredCurrency
+        const currencyId = response.data.preferredCurrency;
 
-        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setUserPreferredCurrency(response2.data);
-
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
     }
   };
 
-
   useEffect(() => {
     if (activity) {
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== activity.currency) {
+      if (
+        userRole === "tourist" &&
+        userPreferredCurrency &&
+        userPreferredCurrency !== activity.currency
+      ) {
         fetchExchangeRate();
-      }
-      else{
+      } else {
         getCurrencySymbol();
       }
     }
   }, [userRole, userPreferredCurrency, activity]);
 
-  
   const isActivityPassed = () => {
     return new Date(activity.timing) < new Date();
   };
@@ -465,40 +498,46 @@ const ActivityDetail = () => {
     console.log(userBooking, "final booking list after state update");
   }, [userBooking]);
 
-
   const handleUpdateBooking = async () => {
     setIsBooking(true);
     setBookingError("");
     try {
       const token = Cookies.get("jwt");
       const additionalTickets = numberOfTickets + userBooking.numberOfTickets;
-      const additionalPrice = userBooking.paymentAmount + calculateDiscountedPrice(activity.price, activity.specialDiscount) * additionalTickets;
+      const additionalPrice =
+        userBooking.paymentAmount +
+        calculateDiscountedPrice(activity.price, activity.specialDiscount) *
+          additionalTickets;
 
-      const response = await axios.put(`http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`, {
-        numberOfTickets,
-        paymentAmount: additionalPrice,
-        paymentType,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.put(
+        `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
+        {
+          numberOfTickets,
+          paymentAmount: additionalPrice,
+          paymentType,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setShowUpdateBookingDialog(false);
       setShowSuccessDialog(true);
       setUserBooking(response.data);
     } catch (error) {
       console.error("Error updating booking:", error);
-      setBookingError(error.response?.data?.message || "An error occurred while updating the booking.");
+      setBookingError(
+        error.response?.data?.message ||
+          "An error occurred while updating the booking."
+      );
     } finally {
       setIsBooking(false);
     }
   };
 
-
   const handleUpdate = () => {
     navigate(`/update-activity/${id}`);
   };
-
-  
 
   const handleDelete = async () => {
     setShowDeleteConfirm(false);
@@ -538,11 +577,13 @@ const ActivityDetail = () => {
     return activity?.comments?.length || 0;
   };
 
-
   const getReviewsCount = () => {
-    return activity?.comments?.filter(comment => 
-      comment.content && (comment.content.liked || comment.content.disliked)
-    ).length || 0;
+    return (
+      activity?.comments?.filter(
+        (comment) =>
+          comment.content && (comment.content.liked || comment.content.disliked)
+      ).length || 0
+    );
   };
 
   const calculateDiscountedPrice = (originalPrice, discountPercentage) => {
@@ -595,74 +636,76 @@ const ActivityDetail = () => {
       Math.min(activity.comments.length - 3, prev + 3)
     );
 
-    const handleQuickRating = async (rating) => {
-      try {
-        const method = userComment ? 'PUT' : 'POST';
-        const url = userComment
-          ? `http://localhost:4000/${userRole}/activities/updateComment/${id}`
-          : `http://localhost:4000/${userRole}/activities/comment/${id}`;
-  
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Cookies.get('jwt')}`,
+  const handleQuickRating = async (rating) => {
+    try {
+      const method = userComment ? "PUT" : "POST";
+      const url = userComment
+        ? `http://localhost:4000/${userRole}/activities/updateComment/${id}`
+        : `http://localhost:4000/${userRole}/activities/comment/${id}`;
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("jwt")}`,
+        },
+        body: JSON.stringify({
+          rating: rating,
+          content: userComment
+            ? userComment.content
+            : { liked: "", disliked: "" },
+          isAnonymous: userComment ? userComment.isAnonymous : false,
+          date: new Date().toISOString(),
+          username: userComment ? userComment.username : "User",
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to submit rating");
+      setQuickRating(rating);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error submitting rating:", error);
+    }
+  };
+
+  const handleAddReview = async () => {
+    try {
+      const method = userComment ? "PUT" : "POST";
+      const url = userComment
+        ? `http://localhost:4000/${userRole}/activities/updateComment/${id}`
+        : `http://localhost:4000/${userRole}/activities/comment/${id}`;
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("jwt")}`,
+        },
+        body: JSON.stringify({
+          rating: newReview.rating,
+          content: {
+            liked: newReview.liked,
+            disliked: newReview.disliked,
           },
-          body: JSON.stringify({
-            rating: rating,
-            content: userComment ? userComment.content : { liked: '', disliked: '' },
-            isAnonymous: userComment ? userComment.isAnonymous : false,
-            date: new Date().toISOString(),
-            username: userComment ? userComment.username : 'User'
-          }),
-        });
-        if (!response.ok) throw new Error('Failed to submit rating');
-        setQuickRating(rating);
-        window.location.reload();
-      } catch (error) {
-        console.error('Error submitting rating:', error);
-      }
-    };
-  
-    const handleAddReview = async () => {
-      try {
-        const method = userComment ? 'PUT' : 'POST';
-        const url = userComment
-          ? `http://localhost:4000/${userRole}/activities/updateComment/${id}`
-          : `http://localhost:4000/${userRole}/activities/comment/${id}`;
-  
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Cookies.get('jwt')}`,
-          },
-          body: JSON.stringify({
-            rating: newReview.rating,
-            content: {
-              liked: newReview.liked,
-              disliked: newReview.disliked
-            },
-            isAnonymous: newReview.isAnonymous,
-            visitDate: newReview.visitDate,
-            date: new Date().toISOString(),
-            username: newReview.isAnonymous ? 'Anonymous' : 'User'
-          }),
-        });
-        if (!response.ok) throw new Error('Failed to submit review');
-        setShowAddReview(false);
-        setNewReview({
-          rating: 0,
-          liked: "",
-          disliked: "",
-          visitDate: "",
-          isAnonymous: false
-        });
-        window.location.reload();
-      } catch (error) {
-        console.error('Error submitting review:', error);
-      }
-    };
+          isAnonymous: newReview.isAnonymous,
+          visitDate: newReview.visitDate,
+          date: new Date().toISOString(),
+          username: newReview.isAnonymous ? "Anonymous" : "User",
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to submit review");
+      setShowAddReview(false);
+      setNewReview({
+        rating: 0,
+        liked: "",
+        disliked: "",
+        visitDate: "",
+        isAnonymous: false,
+      });
+      window.location.reload();
+    } catch (error) {
+      console.error("Error submitting review:", error);
+    }
+  };
 
   const isReviewValid = () => {
     return newReview.liked.trim() !== "" || newReview.disliked.trim() !== "";
@@ -749,13 +792,16 @@ const ActivityDetail = () => {
 
               <div className="flex gap-8">
                 <div className="flex-1 space-y-4"></div>
+                
                 <div className="lg:w-2/3">
                   <ImageGallery pictures={activity.pictures} />
                   <div className="h-6"></div>
-                  <p className="text-lg text-gray-600 mb-6">
+                  <p className="text-lg text-gray-600 mt-32 mb-6">
+                 
                     {activity.description}
                   </p>
                 </div>
+             
 
                 <div className="lg:w-1/3 space-y-6">
                   <div className="space-y-4">
@@ -769,9 +815,10 @@ const ActivityDetail = () => {
                             <span className="text-4xl font-bold text-gray-900">
                               {formatPrice(
                                 calculateDiscountedPrice(
-                                activity.price,
-                                activity.specialDiscount
-                              ))}
+                                  activity.price,
+                                  activity.specialDiscount
+                                )
+                              )}
                             </span>
                             <span className="ml-3  text-xl font-semibold text-red-600">
                               -{activity.specialDiscount}% Discount
@@ -809,53 +856,59 @@ const ActivityDetail = () => {
                       </span>
                     </div>
 
-
-
                     <div>
-                    <ToastProvider>
-                <Popover open={open} onOpenChange={setOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="ml-auto">
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <div className="flex flex-col">
-                      <Button
-                        variant="ghost"
-                        onClick={handleCopyLink}
-                        className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                      >
-                        <Link className="mr-2 h-4 w-4" />
-                        Copy Link
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={handleEmailShare}
-                        className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                      >
-                        <Mail className="mr-2 h-4 w-4" />
-                        Share by Email
-                      </Button>
+                      <ToastProvider>
+                        <Popover open={open} onOpenChange={setOpen}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="ml-auto"
+                            >
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <div className="flex flex-col">
+                              <Button
+                                variant="ghost"
+                                onClick={handleCopyLink}
+                                className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                              >
+                                <Link className="mr-2 h-4 w-4" />
+                                Copy Link
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                onClick={handleEmailShare}
+                                className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                              >
+                                <Mail className="mr-2 h-4 w-4" />
+                                Share by Email
+                              </Button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+
+                        <ToastViewport />
+
+                        {isToastOpen && (
+                          <Toast
+                            onOpenChange={setIsToastOpen}
+                            open={isToastOpen}
+                            duration={3000}
+                          >
+                            {" "}
+                            {/* Auto close after 3 seconds */}
+                            <ToastTitle>Link Copied</ToastTitle>
+                            <ToastDescription>
+                              The link has been copied to your clipboard.
+                            </ToastDescription>
+                            <ToastClose />
+                          </Toast>
+                        )}
+                      </ToastProvider>
                     </div>
-                  </PopoverContent>
-                </Popover>
-
-                <ToastViewport />
-
-                {isToastOpen && (
-                  <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
-                    <ToastTitle>Link Copied</ToastTitle>
-                    <ToastDescription>
-                      The link has been copied to your clipboard.
-                    </ToastDescription>
-                    <ToastClose />
-                  </Toast>
-                )}
-              </ToastProvider>
-                    </div>
-
-
 
                     <div className="flex items-center">
                       <Map
@@ -961,11 +1014,9 @@ const ActivityDetail = () => {
                       )}
                     </div>
                   </div>
-                  
                 </div>
-                
               </div>
-               {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
+              {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
           <Button
           onClick={handleUpdateNowClick}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
@@ -973,90 +1024,91 @@ const ActivityDetail = () => {
           {"Update Booking"}
           </Button>
           )} */}
-          {userRole === 'tourist' && !isActivityPassed() &&(
-          <Button
-          onClick={handleBookNowClick}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-          >
-          {"Book Now"}
-          </Button>
-          )}
-
+              {userRole === "tourist" && !isActivityPassed() && (
+                <Button
+                  onClick={handleBookNowClick}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
+                >
+                  {"Book Now"}
+                </Button>
+              )}
             </div>
-            
           </div>
 
           {/* Comment Carousel */}
           <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
-              <Button variant="link" className="text-primary">
-                See All
-              </Button>
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
+                <Button variant="link" className="text-primary">
+                  See All
+                </Button>
+              </div>
+
+              <div className="flex gap-8 mb-6">
+                <div className="text-center">
+                  <div className="text-4xl font-bold mb-1">
+                    {activity?.rating?.toFixed(1) || "0.0"}
+                  </div>
+                  <div className="text-sm text-gray-500">out of 5</div>
+                  <div className="text-sm text-gray-500 mt-1">
+                    {activity?.comments?.length || 0} Ratings
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-1">
+                  {[5, 4, 3, 2, 1].map((stars) => {
+                    const count = ratingDistribution[stars] || 0;
+                    const percentage = activity?.comments?.length
+                      ? Math.round((count / activity.comments.length) * 100)
+                      : 0;
+                    return (
+                      <RatingDistributionBar
+                        key={stars}
+                        percentage={percentage}
+                        count={stars}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {userRole === "tourist" && userComment && (
+                <div className="border-t pt-4">
+                  <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
+                  <div
+                    className="flex gap-2"
+                    onMouseLeave={() => setIsRatingHovered(false)}
+                  >
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-8 h-8 cursor-pointer ${
+                          (
+                            isRatingHovered
+                              ? quickRating >= star
+                              : quickRating >= star
+                          )
+                            ? "text-yellow-500 fill-current"
+                            : "text-gray-300"
+                        }`}
+                        onMouseEnter={() => {
+                          setIsRatingHovered(true);
+                          setQuickRating(star);
+                        }}
+                        onClick={() => handleQuickRating(star)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-
-            <div className="flex gap-8 mb-6">
-              <div className="text-center">
-                <div className="text-4xl font-bold mb-1">
-                  {activity?.rating?.toFixed(1) || "0.0"}
-                </div>
-                <div className="text-sm text-gray-500">
-                  out of 5
-                </div>
-                <div className="text-sm text-gray-500 mt-1">
-                  {activity?.comments?.length || 0} Ratings
-                </div>
-              </div>
-
-              <div className="flex-1 space-y-1">
-                {[5, 4, 3, 2, 1].map(stars => {
-                  const count = ratingDistribution[stars] || 0;
-                  const percentage = activity?.comments?.length 
-                    ? Math.round((count / activity.comments.length) * 100) 
-                    : 0;
-                  return (
-                    <RatingDistributionBar 
-                      key={stars} 
-                      percentage={percentage} 
-                      count={stars}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            {userRole === "tourist" && userComment && (
-              <div className="border-t pt-4">
-                <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
-                <div 
-                  className="flex gap-2"
-                  onMouseLeave={() => setIsRatingHovered(false)}
-                >
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-8 h-8 cursor-pointer ${
-                        (isRatingHovered ? quickRating >= star : quickRating >= star)
-                          ? "text-yellow-500 fill-current"
-                          : "text-gray-300"
-                      }`}
-                      onMouseEnter={() => {
-                        setIsRatingHovered(true);
-                        setQuickRating(star);
-                      }}
-                      onClick={() => handleQuickRating(star)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="border-t pt-6"></div>
-          <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            {getTotalRatings()} overall ratings, {getReviewsCount()} with reviews
-          </p>
+            <div className="border-t pt-6"></div>
+            <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {getTotalRatings()} overall ratings, {getReviewsCount()} with
+              reviews
+            </p>
             {activity.comments && activity.comments.length > 0 ? (
               <>
                 <div className="flex items-center justify-between mb-4">
@@ -1068,60 +1120,65 @@ const ActivityDetail = () => {
                     <ChevronLeft />
                   </Button>
                   <div className="flex-1 flex justify-between px-4">
-  {activity.comments
-    .filter(comment => comment.content.liked || comment.content.disliked) // Filter for comments with content
-    .slice(currentCommentIndex, currentCommentIndex + 3) // Slice the filtered comments
-    .map((comment, index) => (
-      <Card
-        key={index}
-        className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
-      >
-        <CardHeader className="flex items-start">
-          <div className="flex">
-            {/* User icon with larger first letter */}
-            <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
-              {comment.username.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex flex-col">
-              {/* Larger Username */}
-              <CardTitle className="text-xl font-semibold">
-                {comment.username}
-              </CardTitle>
-              {/* Date under the username */}
-              <p className="text-sm text-gray-500">
-                {formatCommentDate(comment.date)}
-              </p>
-            </div>
-          </div>
-          {/* Star Rating below username and date */}
-          <div className="mt-2">
-            <StarRating
-              rating={comment.rating}
-              readOnly={true}
-            />
-          </div>
-        </CardHeader>
+                    {activity.comments
+                      .filter(
+                        (comment) =>
+                          comment.content.liked || comment.content.disliked
+                      ) // Filter for comments with content
+                      .slice(currentCommentIndex, currentCommentIndex + 3) // Slice the filtered comments
+                      .map((comment, index) => (
+                        <Card
+                          key={index}
+                          className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
+                        >
+                          <CardHeader className="flex items-start">
+                            <div className="flex">
+                              {/* User icon with larger first letter */}
+                              <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+                                {comment.username.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                {/* Larger Username */}
+                                <CardTitle className="text-xl font-semibold">
+                                  {comment.username}
+                                </CardTitle>
+                                {/* Date under the username */}
+                                <p className="text-sm text-gray-500">
+                                  {formatCommentDate(comment.date)}
+                                </p>
+                              </div>
+                            </div>
+                            {/* Star Rating below username and date */}
+                            <div className="mt-2">
+                              <StarRating
+                                rating={comment.rating}
+                                readOnly={true}
+                              />
+                            </div>
+                          </CardHeader>
 
-        <CardContent>
-          {/* Liked content */}
-          <p className="text-gray-700 line-clamp-3">
-            {comment.content.liked || comment.content.disliked || "No comment provided"}
-          </p>
-          {/* View more link */}
-          <a
-            href="#"
-            className="text-blue-500 hover:underline mt-2 inline-block"
-            onClick={(e) => {
-              e.preventDefault();
-              setShowFullComment(comment);
-            }}
-          >
-            View more
-          </a>
-        </CardContent>
-      </Card>
-    ))}
-</div>
+                          <CardContent>
+                            {/* Liked content */}
+                            <p className="text-gray-700 line-clamp-3">
+                              {comment.content.liked ||
+                                comment.content.disliked ||
+                                "No comment provided"}
+                            </p>
+                            {/* View more link */}
+                            <a
+                              href="#"
+                              className="text-blue-500 hover:underline mt-2 inline-block"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowFullComment(comment);
+                              }}
+                            >
+                              View more
+                            </a>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
 
                   <Button
                     onClick={handleNextComment}
@@ -1137,18 +1194,25 @@ const ActivityDetail = () => {
             ) : (
               <p>No comments yet.</p>
             )}
-           {userBookings.some(booking => booking.activity._id === activity._id) && !userComment && (
-            <Button onClick={() => setShowAddReview(true)} className="mt-4 mr-4">
-              Add a Review
-            </Button>
-          )}
-          {userComment && (
-            <Button onClick={() => setShowAddReview(true)} className="mt-4 mr-4">
-              Edit Your Review
-            </Button>
-          )}
-
-
+            {userBookings.some(
+              (booking) => booking.activity._id === activity._id
+            ) &&
+              !userComment && (
+                <Button
+                  onClick={() => setShowAddReview(true)}
+                  className="mt-4 mr-4"
+                >
+                  Add a Review
+                </Button>
+              )}
+            {userComment && (
+              <Button
+                onClick={() => setShowAddReview(true)}
+                className="mt-4 mr-4"
+              >
+                Edit Your Review
+              </Button>
+            )}
           </div>
         </div>
 
@@ -1170,149 +1234,174 @@ const ActivityDetail = () => {
           </div>
         </div>
 
-       
-
-
-<Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Book Activity: {activity.name}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="tickets" className="text-right">
-                Tickets
-              </Label>
-              <Input
-                id="tickets"
-                type="number"
-                value={numberOfTickets}
-                onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Total Price</Label>
-              <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Payment Type</Label>
-              <RadioGroup
-                value={paymentType}
-                onValueChange={setPaymentType}
-                className="col-span-3"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="CreditCard" id="CreditCard" />
-                  <Label htmlFor="CreditCard">Credit Card</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="DebitCard" id="DebitCard" />
-                  <Label htmlFor="DebitCard">Debit Card</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Wallet" id="Wallet" />
-                  <Label htmlFor="Wallet">Wallet</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            {bookingError && (
-              <div className="text-red-500 text-sm">{bookingError}</div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowBookingDialog(false)} variant="outline">
-              Cancel
-            </Button>
-            <Button onClick={handleBooking} disabled={isBooking}>
-              {isBooking ? "Booking..." : "Confirm Booking"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showUpdateBookingDialog} onOpenChange={setShowUpdateBookingDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Update Booking: {activity.name}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="tickets" className="text-right">
-                Tickets
-              </Label>
-              <Input
-                id="tickets"
-                type="number"
-                value={numberOfTickets}
-                onChange={(e) => setNumberOfTickets(Math.max(userBooking.numberOfTickets, parseInt(e.target.value)))}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Additional Price</Label>
-              <div className="col-span-3">
-                {(calculateDiscountedPrice(activity.price, activity.specialDiscount) * (numberOfTickets - userBooking.numberOfTickets)).toFixed(2)}
+        <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Book Activity: {activity.name}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="tickets" className="text-right">
+                  Tickets
+                </Label>
+                <Input
+                  id="tickets"
+                  type="number"
+                  value={numberOfTickets}
+                  onChange={(e) =>
+                    setNumberOfTickets(Math.max(1, parseInt(e.target.value)))
+                  }
+                  className="col-span-3"
+                />
               </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Total Price</Label>
+                <div className="col-span-3">
+                  {formatPrice(calculateTotalPrice())}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Payment Type</Label>
+                <RadioGroup
+                  value={paymentType}
+                  onValueChange={setPaymentType}
+                  className="col-span-3"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="CreditCard" id="CreditCard" />
+                    <Label htmlFor="CreditCard">Credit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="DebitCard" id="DebitCard" />
+                    <Label htmlFor="DebitCard">Debit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Wallet" id="Wallet" />
+                    <Label htmlFor="Wallet">Wallet</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              {bookingError && (
+                <div className="text-red-500 text-sm">{bookingError}</div>
+              )}
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Payment Type</Label>
-              <RadioGroup
-                value={paymentType}
-                onValueChange={setPaymentType}
-                className="col-span-3"
+            <DialogFooter>
+              <Button
+                onClick={() => setShowBookingDialog(false)}
+                variant="outline"
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="CreditCard" id="CreditCard" />
-                  <Label htmlFor="CreditCard">Credit Card</Label>
+                Cancel
+              </Button>
+              <Button onClick={handleBooking} disabled={isBooking}>
+                {isBooking ? "Booking..." : "Confirm Booking"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={showUpdateBookingDialog}
+          onOpenChange={setShowUpdateBookingDialog}
+        >
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Update Booking: {activity.name}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="tickets" className="text-right">
+                  Tickets
+                </Label>
+                <Input
+                  id="tickets"
+                  type="number"
+                  value={numberOfTickets}
+                  onChange={(e) =>
+                    setNumberOfTickets(
+                      Math.max(
+                        userBooking.numberOfTickets,
+                        parseInt(e.target.value)
+                      )
+                    )
+                  }
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Additional Price</Label>
+                <div className="col-span-3">
+                  {(
+                    calculateDiscountedPrice(
+                      activity.price,
+                      activity.specialDiscount
+                    ) *
+                    (numberOfTickets - userBooking.numberOfTickets)
+                  ).toFixed(2)}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="DebitCard" id="DebitCard" />
-                  <Label htmlFor="DebitCard">Debit Card</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Wallet" id="Wallet" />
-                  <Label htmlFor="Wallet">Wallet</Label>
-                </div>
-              </RadioGroup>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Payment Type</Label>
+                <RadioGroup
+                  value={paymentType}
+                  onValueChange={setPaymentType}
+                  className="col-span-3"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="CreditCard" id="CreditCard" />
+                    <Label htmlFor="CreditCard">Credit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="DebitCard" id="DebitCard" />
+                    <Label htmlFor="DebitCard">Debit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Wallet" id="Wallet" />
+                    <Label htmlFor="Wallet">Wallet</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              {bookingError && (
+                <div className="text-red-500 text-sm">{bookingError}</div>
+              )}
             </div>
-            {bookingError && (
-              <div className="text-red-500 text-sm">{bookingError}</div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setShowUpdateBookingDialog(false)} variant="outline">
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateBooking} disabled={isBooking}>
-              {isBooking ? "Updating..." : "Confirm Update"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button
+                onClick={() => setShowUpdateBookingDialog(false)}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateBooking} disabled={isBooking}>
+                {isBooking ? "Updating..." : "Confirm Update"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-  <DialogContent className="sm:max-w-[425px]">
-    <DialogHeader>
-      {/* Flexbox container to align icon and title horizontally */}
-      <div className="flex items-center">
-        {/* Check Circle Icon */}
-        <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-        {/* Title */}
-        <DialogTitle>Booking Successful</DialogTitle>
-      </div>
-    </DialogHeader>
-    
-    <div className="py-4">
-      <p>You have successfully booked {numberOfTickets} ticket(s) for {activity.name}.</p>
-    </div>
-    
-    <DialogFooter>
-      <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+        <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              {/* Flexbox container to align icon and title horizontally */}
+              <div className="flex items-center">
+                {/* Check Circle Icon */}
+                <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                {/* Title */}
+                <DialogTitle>Booking Successful</DialogTitle>
+              </div>
+            </DialogHeader>
 
+            <div className="py-4">
+              <p>
+                You have successfully booked {numberOfTickets} ticket(s) for{" "}
+                {activity.name}.
+              </p>
+            </div>
+
+            <DialogFooter>
+              <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Full Comment Dialog */}
@@ -1355,42 +1444,64 @@ const ActivityDetail = () => {
 
       {/* Add Review Dialog */}
       <Dialog open={showAddReview} onOpenChange={setShowAddReview}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>{userComment ? 'Edit Your Review' : 'Write a Review'}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Your Rating</label>
-                <StarRating rating={newReview.rating} setRating={(rating) => setNewReview(prev => ({ ...prev, rating }))} />
-              </div>
-              <div>
-                <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
-                  <Smile className="w-5 h-5 inline mr-2 text-green-500" />
-                  Something you liked
-                </label>
-                <Textarea
-                  id="liked"
-                  value={newReview.liked}
-                  onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
-                  rows={3}
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
-                  <Frown className="w-5 h-5 inline mr-2 text-red-500" />
-                  Something you didn't like
-                </label>
-                <Textarea
-                  id="disliked"
-                  value={newReview.disliked}
-                  onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
-                  rows={3}
-                  className="mt-2"
-                />
-              </div>
-              {/* <div>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {userComment ? "Edit Your Review" : "Write a Review"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Your Rating
+              </label>
+              <StarRating
+                rating={newReview.rating}
+                setRating={(rating) =>
+                  setNewReview((prev) => ({ ...prev, rating }))
+                }
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="liked"
+                className="block text-sm font-medium text-gray-700"
+              >
+                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                Something you liked
+              </label>
+              <Textarea
+                id="liked"
+                value={newReview.liked}
+                onChange={(e) =>
+                  setNewReview((prev) => ({ ...prev, liked: e.target.value }))
+                }
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="disliked"
+                className="block text-sm font-medium text-gray-700"
+              >
+                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                Something you didn't like
+              </label>
+              <Textarea
+                id="disliked"
+                value={newReview.disliked}
+                onChange={(e) =>
+                  setNewReview((prev) => ({
+                    ...prev,
+                    disliked: e.target.value,
+                  }))
+                }
+                rows={3}
+                className="mt-2"
+              />
+            </div>
+            {/* <div>
                 <label htmlFor="visitDate" className="block text-sm font-medium text-gray-700">
                   When did you visit?
                 </label>
@@ -1406,31 +1517,33 @@ const ActivityDetail = () => {
                   <option value="holiday">Public holiday</option>
                 </select>
               </div> */}
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="anonymous-mode"
-                  checked={newReview.isAnonymous}
-                  onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
-                />
-                <Label htmlFor="anonymous-mode">Post anonymously</Label>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="anonymous-mode"
+                checked={newReview.isAnonymous}
+                onCheckedChange={(checked) =>
+                  setNewReview((prev) => ({ ...prev, isAnonymous: checked }))
+                }
+              />
+              <Label htmlFor="anonymous-mode">Post anonymously</Label>
             </div>
-            <DialogFooter>
-              <Button
-                onClick={() => setShowAddReview(false)}
-                className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
-              >
-                Cancel
-              </Button>
-              <Button
-                className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
-                onClick={handleAddReview}
-              >
-                {userComment ? 'Update Review' : 'Submit Review'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setShowAddReview(false)}
+              className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
+              onClick={handleAddReview}
+            >
+              {userComment ? "Update Review" : "Submit Review"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Rate Activity Dialog */}
       <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>

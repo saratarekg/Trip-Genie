@@ -51,7 +51,7 @@ const ActivityList = () => {
                             <p>Advertiser: {activity.advertiser.username}</p>
                         )} */}
 
-                        <p>Booking Open: {activity.isBookingOpen ? 'Yes' : 'No'}</p>
+                      
                         <p>Start Time: {new Date(activity.timeline.start).toLocaleString()}</p>
                         <p>End Time: {new Date(activity.timeline.end).toLocaleString()}</p>
                     </li>

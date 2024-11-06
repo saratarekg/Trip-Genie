@@ -15,7 +15,8 @@ import {
   MapPin, Calendar, Clock, DollarSign, Info, ChevronLeft, ChevronRight, Share2, Link,
   MessageSquare, Banknote, Smile, Frown,
   ThumbsUp,
-  ThumbsDown
+  ThumbsDown,
+  StarHalf
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,102 +62,133 @@ const getTotalRatingsTG = (profile) => {
   return profile?.comments?.length || 0;
 };
 
-const TourguideProfileCard = ({ handleQuickTourGuideRating, setShowTourGuideReviewDialog,userTourGuideReview, tourGuideRating, profile, ratingDistribution, onReviewClick, userRole, userBookings, itinerary }) => (
-  <Card className="w-full max-w-sm">
-    <CardHeader>
-      <CardTitle className="text-2xl font-bold text-center">Tourguide Profile</CardTitle>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      <div className="flex flex-col items-center">
-        <Avatar className="w-24 h-24">
-          <AvatarImage src={profile.avatarUrl} alt={profile.username} />
-          <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-        </Avatar>
-        <h3 className="mt-2 text-xl font-semibold">{profile.username}</h3>
-      </div>
-      <div className="space-y-2">
+
+const TourguideProfileCard = ({
+  handleQuickTourGuideRating,
+  setShowTourGuideReviewDialog,
+  userTourGuideReview,
+  tourGuideRating,
+  profile,
+  onReviewClick,
+  userRole,
+  userBookings,
+  itinerary,
+}) => {
+  const [showMore, setShowMore] = useState(false);
+
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <span className="text-3xl font-bold">Tour Guide</span>
+          <Badge
+            variant="secondary"
+            className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+          >
+            Verified Guide
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
         <div className="flex items-center">
-          <Mail className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
-          <span>{profile.email}</span>
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={profile.avatarUrl} alt={profile.username} />
+            <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <div className="ml-4">
+            <h3 className="text-2xl font-bold">{profile.username}</h3>
+            <div className="flex items-center text-sm text-gray-500 mt-1">
+              <span className="font-semibold text-xs">
+                95% positive
+              </span>
+              <span className="mx-2">|</span>
+              <span className="font-semibold text-xs">
+                {profile.yearsOfExperience} years of experience
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center">
-          <Phone className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
-          <span>{profile.mobile}</span>
+
+<div className="flex items-center mt-2">
+      <span>
+        <StarRating rating={profile.rating} readOnly={true} />
+      </span>
+
+  <span className="ml-2 text-lg font-semibold">{profile.rating.toFixed(1)}</span>
+</div>
+
+
+        {showMore && (
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center text-sm">
+              <Mail className="h-5 w-5 mr-2 text-gray-500" />
+              <span>{profile.email}</span>
+            </div>
+            <div className="flex items-center text-sm">
+              <Phone className="h-5 w-5 mr-2 text-gray-500" />
+              <span>{profile.mobile}</span>
+            </div>
+            <div className="mt-2">
+              <h4 className="font-semibold mb-2">Languages</h4>
+              <div className="flex flex-wrap gap-2">
+                {profile.languages.map((lang, index) => (
+                  <Badge key={index} variant="secondary">{lang}</Badge>
+                ))}
+              </div>
+            </div>
+            <div className="mt-2">
+              <h4 className="font-semibold mb-2">Specialties</h4>
+              <div className="flex flex-wrap gap-2">
+                {profile.specialties.map((specialty, index) => (
+                  <Badge key={index} variant="outline">{specialty}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-4">
+          <Button
+            variant="link"
+            className="w-full p-0 h-auto font-normal text-blue-500 hover:text-blue-700"
+            onClick={() => setShowMore(!showMore)}
+          >
+            {showMore ? 'Less Info' : 'More Info'}
+          </Button>
         </div>
-        <div className="flex items-center">
-          <Award className="w-5 h-5 mr-2 text-gray-500" aria-hidden="true" />
-          <span>{profile.yearsOfExperience} years of experience</span>
-        </div>
-        <div className="flex items-center">
-          <Star className="w-6 h-6 text-yellow-500 " />
-          <span className="ml-2">{profile.rating.toFixed(1)} / 5.0</span>
-        </div>
-      </div>
-      <div>
-        <h4 className="font-semibold mb-2">Rating Distribution</h4>
-        {[5, 4, 3, 2, 1].map(stars => {
-                const count = ratingDistribution[stars] || 0;
-                const percentage = getTotalRatingsTG(profile) 
-                  ? Math.round((count / getTotalRatingsTG(profile)) * 100) 
-                  : 0;
-                return (
-                  <RatingDistributionBar 
-                    key={stars} 
-                    percentage={percentage} 
-                    count={stars}
-                  />
-                );
-              })}
-      </div>
-      <div>
-        <h4 className="font-semibold mb-2">Languages</h4>
-        <div className="flex flex-wrap gap-2">
-          {profile.languages.map((lang, index) => (
-            <Badge key={index} variant="secondary">{lang}</Badge>
-          ))}
-        </div>
-      </div>
-      <div>
-        <h4 className="font-semibold mb-2">Specialties</h4>
-        <div className="flex flex-wrap gap-2">
-          {profile.specialties.map((specialty, index) => (
-            <Badge key={index} variant="outline">{specialty}</Badge>
-          ))}
-        </div>
-      </div>
-      <Button onClick={onReviewClick} className="w-full">
+
+
+
+        {userRole === 'tourist' && userBookings.some(booking => booking.itinerary._id === itinerary._id) && (
+          <div className="border-t pt-4 mt-4">
+            <div className="text-sm text-gray-500 mb-2">Rate Tour Guide:</div>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map(star => (
+                <Star
+                  key={star}
+                  className={`w-8 h-8 cursor-pointer ${
+                    tourGuideRating >= star ? 'text-yellow-500 fill-current' : 'text-gray-300'
+                  }`}
+                  onClick={() => handleQuickTourGuideRating(star)}
+                />
+              ))}
+            </div>
+            <Button 
+              onClick={() => setShowTourGuideReviewDialog(true)} 
+              className="w-full mt-4 mb-2"
+            >
+              {userTourGuideReview ? 'Edit Review' : 'Write a Review'}
+            </Button>
+          </div>
+        )}
+              <Button onClick={onReviewClick} className="w-full">
         See All Reviews
       </Button>
-      <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
-
-      {userRole === "tourist" && userBookings.some(booking => booking.itinerary._id === itinerary._id) && (
-                    <div className="border-t pt-4">
-                      <div className="text-sm text-gray-500 mb-2">Rate Tour Guide:</div>
-                      <div className="flex gap-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`w-8 h-8 cursor-pointer ${
-                              tourGuideRating >= star
-                                ? "text-yellow-500 fill-current"
-                                : "text-gray-300"
-                            }`}
-                            onClick={() => handleQuickTourGuideRating(star)}
-                          />
-                        ))}
-                      </div>
-                      <Button 
-                        onClick={() => setShowTourGuideReviewDialog(true)} 
-                        className="w-full mt-4"
-                      >
-                        {userTourGuideReview ? 'Edit Review' : 'Write a Review'}
-                      </Button>
-                    </div>
-                  )}
-
-    </CardContent>
-  </Card>
-);
+      <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4 pt-8"></div>
+      </CardContent>
+    </Card>
+  );
+};
 
 
 const ItineraryDetail = () => {
@@ -311,6 +343,7 @@ const ItineraryDetail = () => {
       });
       if (!response.ok) throw new Error('Failed to submit tour guide rating');
       setTourGuideRating(rating);
+      window.location.reload();
     } catch (error) {
       console.error('Error submitting tour guide rating:', error);
     }
@@ -348,6 +381,7 @@ const ItineraryDetail = () => {
         disliked: '',
         isAnonymous: false
       });
+      window.location.reload();
     } catch (error) {
       console.error('Error submitting tour guide review:', error);
     }
@@ -376,6 +410,7 @@ const ItineraryDetail = () => {
       });
       if (!response.ok) throw new Error('Failed to submit rating');
       setQuickRating(rating);
+      window.location.reload();
     } catch (error) {
       console.error('Error submitting rating:', error);
     }

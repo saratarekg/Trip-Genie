@@ -1,0 +1,59 @@
+- Refresh on products page and pagination and products archive
+- Products search refreshes every 300ms
+- Filter itinerary based on tour guide based on archived or not
+- Add deleted flag on products to keep deleted products in purchase history
+- Send confirmation mail after booking a flight/hotel/transportation
+- Provide the user with a City code list to choose from
+- Allow user to enter shipping address and delivery preferences once in settings and auto-fill them later
+- Sort products by price
+- Remove white highlight from admin and add a highlight in its place
+- Add payment details in booking flight and choose payment method in booking hotels from available credit cards
+- In admin, make "my account" logout only as there is no other active button except logout
+
+Hadwa's requests:
+- Add global search bar 
+
+Itinerary cards:
+- Add edit/delete button outside as well (Zeina --DONE!)
+- Minimize tour guide data (Amy --DONE!!)
+- Display price next to the stars (Amy --DONE!!)
+- Add pickup location (Amy --DONE!!)
+
+Tourguide activities:
+- Allow tour guide to create own activities or choose from available ones, making them clickable to show details
+
+Activity card:
+- Sort by importance
+- Move description below (jana) done
+- Remove booking open (jana) done
+- Highlight special discount more (jana) done
+- Ensure consistent font for subtitles (jana) done
+- Move map to the right (Ehab)
+
+- Make Vtp the admin
+
+Pop-ups:
+- Ensure close button doesn't redirect after deletion is complete (Ehab)
+
+Consistency:
+- Ensure filter stars are consistent across all sections
+
+Sign up:
+- Change all previous works
+
+404 page:
+- Change "Return to home" to "Make a wish" (Ehab)
+
+New page:
+- Create and view only my stuff
+- Select activities to add to itineraries by either creating own or dragging and dropping
+- Reduce white space
+- Map: Enter latitude and longitude
+
+Admin:
+- Create new pages instead of popups
+- Edit and delete colors
+- Fonts
+- Move buttons to the right
+- Change hide to back and improve its appearance
+- Add filter and sort

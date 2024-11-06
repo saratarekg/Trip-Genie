@@ -187,6 +187,62 @@ const touristSchema = new Schema(
         default: [], // Default to an empty array for historical place periods
       },
     },
+    shippingAddresses: [
+      {
+        streetName: {
+          type: String,
+          trim: true,
+        },
+        streetNumber: {
+          type: String,
+          trim: true,
+        },
+        floorUnit: {
+          type: String,
+          trim: true,
+        },
+        city: {
+          type: String,
+          trim: true,
+        },
+        state: {
+          type: String,
+          trim: true,
+        },
+        country: {
+          type: String,
+          trim: true,
+        },
+        postalCode: {
+          type: String,
+          trim: true,
+        },
+        landmark: {
+          type: String,
+          trim: true,
+        },
+        locationType: {
+          type: String,
+          enum: [
+            "home",
+            "work",
+            "apartment",
+            "friend_family",
+            "po_box",
+            "office",
+            "pickup_point",
+            "vacation",
+            "school",
+            "other",
+          ],
+          default: "home",
+        },
+        default: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -33,17 +33,46 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itineraryTitle }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
+        <p className="mb-6">Are you sure you want to delete the itinerary "{itineraryTitle}"?</p>
+        <div className="flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            onClick={onConfirm}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ItineraryCard = ({
   itinerary,
   onSelect,
   role,
-  canModify,
   setShowDeleteConfirm,
   setSelectedItinerary,
   userInfo,
-}) =>{
+  onDeleteConfirm
+}) => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [userId, setUserId] = useState(null);
+
 
   const fetchExchangeRate = useCallback(async () => {
     if (!userInfo || !userInfo.preferredCurrency) return;
@@ -108,103 +137,88 @@ const ItineraryCard = ({
     }
   };
 
+  useEffect(() => {
+    const token = Cookies.get("jwt");
+    if (token) {
+      const decodedToken = jwtDecode.jwtDecode(token);
+      setUserId(decodedToken.id);
+
+    }
+  }, []); 
+
+
+
   return (
-  <Card
-    className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
-    onClick={() => onSelect(itinerary._id)}
-  >
-    <div className="relative aspect-video overflow-hidden">
-      <img
-        src={
-          itinerary.activities &&
-          itinerary.activities.length > 0 &&
-          itinerary.activities[0].pictures &&
-          itinerary.activities[0].pictures.length > 0
-            ? itinerary.activities[0].pictures[0]
-            : defaultImage
-        }
-        alt={itinerary.title}
-        className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-      />
-    </div>
-    <CardHeader className="p-4">
-      <div className="flex items-center justify-between">
-        <CardTitle className="text-xl font-semibold">
-          {itinerary.title}
-        </CardTitle>
-        {!itinerary.isActivated && role === "tour-guide" && (
-          <Badge className="bg-red-500 text-white hover:bg-red-500 hover:text-white">
-            Deactivated
-          </Badge>
-        )}
-        {!itinerary.isActivated && role === "tourist" && (
-          <Badge className="bg-red-500 text-white hover:bg-red-500 hover:text-white">
-            Currently Unavailable
-          </Badge>
-        )}
+    <div className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative" onClick={() => onSelect(itinerary._id)}>
+      <div className="relative aspect-video overflow-hidden">
+        <img
+          src={itinerary.activities?.[0]?.pictures?.[0] || defaultImage}
+          alt={itinerary.title}
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
       </div>
-      <p className="text-sm text-muted-foreground">{itinerary.timeline}</p>
-    </CardHeader>
-    <CardContent className="p-4 pt-0 space-y-2">
-      <div className="flex justify-between items-center">
-        <span className="text-lg font-bold text-primary">
-          {formatPrice(itinerary.price)}/Day
-        </span>
-        <span className="text-sm text-muted-foreground">
-          {itinerary.language}
-        </span>
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xl font-semibold">{itinerary.title}</h3>
+          {!itinerary.isActivated && (
+            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-gray-600 mb-2">{itinerary.timeline}</p>
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-lg font-bold text-blue-600">
+            {formatPrice(itinerary.price)}/Day
+          </span>
+          <span className="text-sm text-gray-600">
+            {itinerary.language}
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {itinerary.activities?.flatMap((activity, index) => [
+            ...(activity.category?.map((cat) => (
+              <span key={`cat-${index}-${cat.id || cat.name}`} className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">
+                {cat.name}
+              </span>
+            )) || []),
+            ...(activity.tags?.map((tag) => (
+              <span key={`tag-${index}-${tag.id || tag.type}`} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+                {tag.type}
+              </span>
+            )) || [])
+          ])}
+        </div>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {itinerary.activities &&
-          itinerary.activities.map((activity, index) => (
-            <React.Fragment key={index}>
-              {activity.category &&
-                activity.category.map((cat) => (
-                  <Badge key={cat.id || cat.name} variant="secondary">
-                    {cat.name}
-                  </Badge>
-                ))}
-              {activity.tags &&
-                activity.tags.map((tag) => (
-                  <Badge key={tag.id || tag.type} variant="outline">
-                    {tag.type}
-                  </Badge>
-                ))}
-            </React.Fragment>
-          ))}
-      </div>
-    </CardContent>
-    {role === "tour-guide" && canModify && (
-      <CardFooter className="p-4 pt-0">
-        <div className="flex justify-end space-x-4 w-full">
-          <Button
+
+      {role === "tour-guide" && userId === itinerary.tourGuide._id && (
+
+        <div className="absolute top-2 right-2 flex space-x-2">
+          <button
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               window.location.href = `/update-itinerary/${itinerary._id}`;
             }}
-            variant="default"
-            className="flex items-center bg-primary hover:bg-primary/90"
+            aria-label="Edit itinerary"
           >
-            <Edit className="w-4 h-4 mr-2" />
-            Update
-          </Button>
-          <Button
+            <Edit className="h-4 w-4" />
+          </button>
+          <button
+            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
-              setSelectedItinerary(itinerary._id);
-              setShowDeleteConfirm(true);
+              onDeleteConfirm(itinerary._id, itinerary.title);
             }}
-            variant="destructive"
-            className="flex items-center"
+            aria-label="Delete itinerary"
           >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete
-          </Button>
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
-      </CardFooter>
-    )}
-  </Card>
-);
+      )}
+    </div>
+  );
+
 }
 
 export function AllItinerariesComponent() {
@@ -234,6 +248,9 @@ export function AllItinerariesComponent() {
   const [deleteError, setDeleteError] = useState(null);
   const [isSortedByPreference, setIsSortedByPreference] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itineraryToDelete, setItineraryToDelete] = useState(null);
 
   const navigate = useNavigate();
 
@@ -273,36 +290,36 @@ export function AllItinerariesComponent() {
 
   const getSymbol = () => {
     if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
-        return `${userInfo.preferredCurrency.symbol}`;
+      return `${userInfo.preferredCurrency.symbol}`;
     } else {
       return "$";
     }
-};
+  };
 
   const handleSortByPreference = async () => {
     try {
       setIsLoading(true);
       const newSortedByPreference = !isSortedByPreference;
       setIsSortedByPreference(newSortedByPreference);
-  
+
       const token = Cookies.get("jwt");
       const url = newSortedByPreference
         ? "http://localhost:4000/tourist/itineraries-preference"
         : "http://localhost:4000/tourist/itineraries";
-  
+
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
-  
+
       if (newSortedByPreference) {
         const otherItineraries = await fetch(
           "http://localhost:4000/tourist/itineraries-not-preference",
@@ -312,12 +329,12 @@ export function AllItinerariesComponent() {
             },
           }
         ).then((res) => res.json());
-  
+
         setItineraries([...data, ...otherItineraries]);
       } else {
         setItineraries(data);
       }
-  
+
       setError(null);
       setCurrentPage(1);
     } catch (error) {
@@ -538,14 +555,57 @@ export function AllItinerariesComponent() {
     setFiltersVisible(!filtersVisible);
   };
 
+  // const handleDelete = async () => {
+  //   setShowDeleteConfirm(false);
+  //   setIsLoading(true);
+  //   setDeleteError(null);
+  //   try {
+  //     const token = Cookies.get("jwt");
+  //     const response = await fetch(
+  //       `http://localhost:4000/${getUserRole()}/itineraries/${selectedItinerary}`,
+  //       {
+  //         method: "DELETE",
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       if (response.status === 400 || response.status === 403) {
+  //         setDeleteError(errorData.message);
+  //         return;
+  //       }
+  //       throw new Error("Failed to delete itinerary");
+  //     }
+
+  //     setShowDeleteSuccess(true);
+  //     fetchItineraries();
+  //   } catch (err) {
+  //     setError("Error deleting itinerary. Please try again later.");
+  //     console.error("Error deleting itinerary:", err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
+  const handleDeleteConfirm = (id, title) => {
+    setItineraryToDelete({ id, title });
+    setShowDeleteModal(true);
+  };
+
   const handleDelete = async () => {
-    setShowDeleteConfirm(false);
+    if (!itineraryToDelete) return;
+
     setIsLoading(true);
     setDeleteError(null);
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${getUserRole()}/itineraries/${selectedItinerary}`,
+        `http://localhost:4000/${getUserRole()}/itineraries/${itineraryToDelete.id}`,
+
         {
           method: "DELETE",
           headers: {
@@ -570,8 +630,11 @@ export function AllItinerariesComponent() {
       console.error("Error deleting itinerary:", err);
     } finally {
       setIsLoading(false);
+      setShowDeleteModal(false);
+      setItineraryToDelete(null);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -579,10 +642,10 @@ export function AllItinerariesComponent() {
         <Loader />
       ) : (
         <div className=" px-4 sm:px-6 lg:px-8 mb-4">
-            <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    </div>
-  </div>
+          <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            </div>
+          </div>
           <div className="max-w-7xl mx-auto">
             <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
               All Trip Plans
@@ -658,6 +721,8 @@ export function AllItinerariesComponent() {
                     canModify={canModify}
                     setShowDeleteConfirm={setShowDeleteConfirm}
                     setSelectedItinerary={setSelectedItinerary}
+                    onDeleteConfirm={handleDeleteConfirm}
+
                   />
                 ))}
             </div>
@@ -666,9 +731,8 @@ export function AllItinerariesComponent() {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-full bg-white shadow ${
-                  currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                }`}
+                className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                  }`}
               >
                 <ChevronLeft />
               </button>
@@ -676,8 +740,8 @@ export function AllItinerariesComponent() {
               <span className="text-lg font-medium">
                 {itineraries.length > 0
                   ? `Page ${currentPage} of ${Math.ceil(
-                      itineraries.length / tripsPerPage
-                    )}`
+                    itineraries.length / tripsPerPage
+                  )}`
                   : "No pages available"}
               </span>
 
@@ -685,14 +749,13 @@ export function AllItinerariesComponent() {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={
                   currentPage ===
-                    Math.ceil(itineraries.length / tripsPerPage) ||
+                  Math.ceil(itineraries.length / tripsPerPage) ||
                   itineraries.length === 0
                 }
-                className={`px-4 py-2 rounded-full bg-white shadow ${
-                  currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                    ? "text-gray-300"
-                    : "text-blue-600"
-                }`}
+                className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                  ? "text-gray-300"
+                  : "text-blue-600"
+                  }`}
               >
                 <ChevronRight />
               </button>
@@ -700,6 +763,13 @@ export function AllItinerariesComponent() {
           </div>
         </div>
       )}
+
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        itineraryTitle={itineraryToDelete?.title}
+      />
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
