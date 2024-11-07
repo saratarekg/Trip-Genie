@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -5,6 +7,8 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
+import ReactSelect from "react-select";
+import { format, parseISO } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +26,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Trash, Plus, Trash2, CheckCircle } from "lucide-react";
+import { PlusCircle, Trash, Plus, Trash2, CheckCircle, Edit } from "lucide-react";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 const worldLanguages = [
@@ -47,6 +51,21 @@ const worldLanguages = [
   "Zhuang", "Zulu"
 ];
 
+const vehicleTypes = ["Bus", "Car", "Microbus"];
+
+const getMaxSeats = (vehicleType) => {
+  switch (vehicleType) {
+    case "Bus":
+      return 50;
+    case "Car":
+      return 5;
+    case "Microbus":
+      return 15;
+    default:
+      return 0;
+  }
+};
+
 const activitySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
@@ -62,6 +81,21 @@ const activitySchema = z.object({
   tags: z.array(z.string()).optional(),
   categories: z.array(z.string()).optional(),
   transportations: z.array(z.string()).optional(),
+});
+
+const transportationSchema = z.object({
+  from: z.string().min(1, "From is required"),
+  to: z.string().min(1, "To is required"),
+  vehicleType: z.enum(vehicleTypes),
+  ticketCost: z.number().positive("Ticket cost must be positive"),
+  timeDeparture: z.string().min(1, "Departure time is required"),
+  estimatedDuration: z.number().positive("Duration must be positive"),
+  remainingSeats: z.number().int().positive("Remaining seats must be positive").refine((val, ctx) => {
+    const maxSeats = 100;
+    return val <= maxSeats;
+  }, {
+    message: "Remaining seats must not exceed the maximum for the selected vehicle type",
+  }),
 });
 
 const formSchema = z.object({
@@ -88,177 +122,332 @@ const formSchema = z.object({
   accessibility: z.boolean(),
 });
 
-const ActivityForm = ({ onSave, onClose }) => {
-  const [tags, setTags] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [transportations, setTransportations] = useState([]);
-  const [selectedTags, setSelectedTags] = useState([]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedTransportations, setSelectedTransportations] = useState([]);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    resolver: zodResolver(activitySchema),
-  });
-
-  useEffect(() => {
-    fetchTags();
-    fetchCategories();
-    fetchTransportations();
-  }, []);
-
-  const fetchTags = async () => {
-    const response = await axios.get("http://localhost:4000/api/getAllTags");
-    setTags(
-      response.data.map((tag) => ({ value: tag._id, label: tag.type }))
-    );
-  };
-
-  const fetchCategories = async () => {
-    const response = await axios.get("http://localhost:4000/api/getAllCategories");
-    setCategories(
-      response.data.map((cat) => ({ value: cat._id, label: cat.name }))
-    );
-  };
-
-  const fetchTransportations = async () => {
-    const token = Cookies.get('jwt');
-    const response = await axios.get("http://localhost:4000/tour-guide/transportations", {
-      headers: { Authorization: `Bearer ${token}` },
+const ActivityForm = ({ onSave, onClose, initialData = null }) => 
+{
+    const [tags, setTags] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [showTransportationForm, setShowTransportationForm] = useState(false);
+    const [editingTransportationIndex, setEditingTransportationIndex] = useState(null);
+    const [newTransportations, setNewTransportations] = useState([]);
+  
+    const {
+      register,
+      handleSubmit,
+      control,
+      formState: { errors },
+      setValue,
+      watch,
+    } = useForm({
+      resolver: zodResolver(activitySchema),
+      defaultValues: initialData || {
+        transportations: [],
+      },
     });
-    console.log(response);
-    setTransportations(
-      response.data.map((transport) => ({
-        value: transport._id,
-        label: `${transport.from} - ${transport.to} (${transport.vehicleType})`, // Combine multiple values
-      }))
-    );
-  };
-
-  const handleAddActivity = (data) => {
-    onSave({
-      ...data,
-      tags: selectedTags,
-      categories: selectedCategories,
-      transportations: selectedTransportations,
+  
+    const {
+      register: registerTransportation,
+      handleSubmit: handleSubmitTransportation,
+      reset: resetTransportation,
+      control: controlTransportation,
+      formState: { errors: transportationErrors },
+    } = useForm({
+      resolver: zodResolver(transportationSchema),
     });
-    onClose();
-  };
-
-  return (
-    <form onSubmit={handleSubmit(handleAddActivity)} className="space-y-4">
-      <div>
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" {...register("name")} />
-        {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
-      </div>
-
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" {...register("description")} />
-        {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
-      </div>
-
-      <div>
-        <Label htmlFor="address">Address</Label>
-        <Input id="address" {...register("location.address")} />
-        {errors.location?.address && <p className="text-red-500 text-xs">{errors.location.address.message}</p>}
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
+  
+    const watchedTransportations = watch('transportations') || [];
+  
+    useEffect(() => {
+      fetchTags();
+      fetchCategories();
+    }, []);
+  
+    const fetchTags = async () => {
+      const response = await fetch("http://localhost:4000/api/getAllTags");
+      const data = await response.json();
+      setTags(data.map((tag) => ({ value: tag._id, label: tag.type })));
+    };
+  
+    const fetchCategories = async () => {
+      const response = await fetch("http://localhost:4000/api/getAllCategories");
+      const data = await response.json();
+      setCategories(data.map((cat) => ({ value: cat._id, label: cat.name })));
+    };
+  
+    const handleAddActivity = (data) => {
+      const activityData = {
+        ...data,
+        transportations: watchedTransportations,
+      };
+      onSave(activityData);
+      onClose();
+    };
+  
+    const onSubmitTransportation = async (data, event) => {
+      event.preventDefault();
+      try {
+        const token = Cookies.get("jwt");
+        let response;
+        if (editingTransportationIndex !== null) {
+          response = await axios.put(
+            `http://localhost:4000/tour-guide/transportations/${newTransportations[editingTransportationIndex]._id}`,
+            data,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const updatedTransportations = [...newTransportations];
+          updatedTransportations[editingTransportationIndex] = response.data;
+          setNewTransportations(updatedTransportations);
+        } else {
+          response = await axios.post(
+            "http://localhost:4000/tour-guide/transportations",
+            data,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setNewTransportations([...newTransportations, response.data]);
+        }
+        setValue('transportations', [...watchedTransportations, response.data._id]);
+        setShowTransportationForm(false);
+        resetTransportation();
+        setEditingTransportationIndex(null);
+      } catch (error) {
+        console.error("Failed to create/update transportation:", error);
+      }
+    };
+  
+    const handleEditTransportation = (index) => {
+      const transportationToEdit = newTransportations[index];
+      if (transportationToEdit) {
+        resetTransportation({
+          ...transportationToEdit,
+          timeDeparture: format(parseISO(transportationToEdit.timeDeparture), "yyyy-MM-dd'T'HH:mm"),
+        });
+        setEditingTransportationIndex(index);
+        setShowTransportationForm(true);
+      }
+    };
+  
+    const handleDeleteTransportation = (index) => {
+      const updatedTransportations = newTransportations.filter((_, i) => i !== index);
+      setNewTransportations(updatedTransportations);
+      setValue('transportations', updatedTransportations.map(t => t._id));
+    };
+  
+    return (
+      <form onSubmit={handleSubmit(handleAddActivity)} className="space-y-4">
         <div>
-          <Label htmlFor="longitude">Longitude</Label>
-          <Input id="longitude" type="number" step="any" {...register("location.coordinates.longitude", { valueAsNumber: true })} />
+          <Label htmlFor="name">Name</Label>
+          <Input id="name" {...register("name")} />
+          {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
         </div>
+  
         <div>
-          <Label htmlFor="latitude">Latitude</Label>
-          <Input id="latitude" type="number" step="any" {...register("location.coordinates.latitude", { valueAsNumber: true })} />
+          <Label htmlFor="description">Description</Label>
+          <Textarea id="description" {...register("description")} />
+          {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
         </div>
-      </div>
-
-      <div>
-        <Label htmlFor="duration">Duration (minutes)</Label>
-        <Input id="duration" type="number" {...register("duration", { valueAsNumber: true })} />
-        {errors.duration && <p className="text-red-500 text-xs">{errors.duration.message}</p>}
-      </div>
-
-      <div>
-        <Label htmlFor="timing">Timing</Label>
-        <Input id="timing" type="datetime-local" {...register("timing")} />
-        {errors.timing && <p className="text-red-500 text-xs">{errors.timing.message}</p>}
-      </div>
-
-      <div>
-        <Label>Tags</Label>
+  
+        <div>
+          <Label htmlFor="address">Address</Label>
+          <Input id="address" {...register("location.address")} />
+          {errors.location?.address && <p className="text-red-500 text-xs">{errors.location.address.message}</p>}
+        </div>
+  
         <div className="grid grid-cols-2 gap-2">
-          {tags.map((tag) => (
-            <label key={tag.value} className="flex items-center space-x-2">
-              <Checkbox
-                checked={selectedTags.includes(tag.value)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedTags([...selectedTags, tag.value]);
-                  } else {
-                    setSelectedTags(selectedTags.filter((id) => id !== tag.value));
-                  }
-                }}
-              />
-              <span>{tag.label}</span>
-            </label>
-          ))}
+          <div>
+            <Label htmlFor="longitude">Longitude</Label>
+            <Input id="longitude" type="number" step="any" {...register("location.coordinates.longitude", { valueAsNumber: true })} />
+          </div>
+          <div>
+            <Label htmlFor="latitude">Latitude</Label>
+            <Input id="latitude" type="number" step="any" {...register("location.coordinates.latitude", { valueAsNumber: true })} />
+          </div>
         </div>
-      </div>
-
-      <div>
-        <Label>Categories</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {categories.map((category) => (
-            <label key={category.value} className="flex items-center space-x-2">
-              <Checkbox
-                checked={selectedCategories.includes(category.value)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedCategories([...selectedCategories, category.value]);
-                  } else {
-                    setSelectedCategories(selectedCategories.filter((id) => id !== category.value));
-                  }
-                }}
-              />
-              <span>{category.label}</span>
-            </label>
-          ))}
+  
+        <div>
+          <Label htmlFor="duration">Duration (minutes)</Label>
+          <Input id="duration" type="number" {...register("duration", { valueAsNumber: true })} />
+          {errors.duration && <p className="text-red-500 text-xs">{errors.duration.message}</p>}
         </div>
-      </div>
-
-      <div>
-        <Label>Transportations</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {transportations.map((transport) => (
-            <label key={transport.value} className="flex items-center space-x-2">
-              <Checkbox
-                checked={selectedTransportations.includes(transport.value)}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setSelectedTransportations([...selectedTransportations, transport.value]);
-                  } else {
-                    setSelectedTransportations(selectedTransportations.filter((id) => id !== transport.value));
-                  }
-                }}
-              />
-              <span>{transport.label}</span>
-            </label>
-          ))}
+  
+        <div>
+          <Label htmlFor="timing">Timing</Label>
+          <Input id="timing" type="datetime-local" {...register("timing")} />
+          {errors.timing && <p className="text-red-500 text-xs">{errors.timing.message}</p>}
         </div>
-      </div>
-
-      <Button type="submit">Save Activity</Button>
-    </form>
-  );
-};
-
+  
+        <div className="col-span-2">
+          <Label>Categories</Label>
+          <Controller
+            name="categories"
+            control={control}
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={categories}
+                isMulti
+                className="react-select-container"
+                classNamePrefix="react-select"
+                value={categories.filter(option => field.value?.includes(option.value))}
+                onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value))}
+              />
+            )}
+          />
+        </div>
+  
+        <div className="col-span-2">
+          <Label>Tags</Label>
+          <Controller
+            name="tags"
+            control={control}
+            render={({ field }) => (
+              <ReactSelect
+                {...field}
+                options={tags}
+                isMulti
+                className="react-select-container"
+                classNamePrefix="react-select"
+                value={tags.filter(option => field.value?.includes(option.value))}
+                onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value))}
+              />
+            )}
+          />
+        </div>
+  
+        <div>
+          <Label>Transportations</Label>
+          {newTransportations.map((transport, index) => (
+            <div key={index} className="p-2 border rounded flex justify-between items-center mb-2">
+              <div>
+                <p>From: {transport.from}</p>
+                <p>To: {transport.to}</p>
+                <p>Vehicle: {transport.vehicleType}</p>
+              </div>
+              <div>
+                <Button
+                  type="button"
+                  onClick={() => handleEditTransportation(index)}
+                  className="p-2 h-10 w-10 rounded-full bg-[#B5D3D1] hover:bg-[#5D9297] transition duration-300 ease-in-out mr-2"
+                >
+                  <Edit className="h-4 w-4 text-[#1A3B47]" />
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleDeleteTransportation(index)}
+                  className="p-2 h-10 w-10 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                >
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            </div>
+          ))}
+          <Button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              setEditingTransportationIndex(null);
+              resetTransportation();
+              setShowTransportationForm(true);
+            }}
+            className="bg-[#5D9297] hover:bg-[#1A3B47] text-white w-full mt-2 rounded-full"
+          >
+            Create Transportation
+          </Button>
+        </div>
+  
+        <Button type="submit" className="bg-[#1A3B47] hover:bg-[#388A94] rounded-full">Save Activity</Button>
+  
+        <Dialog open={showTransportationForm} onOpenChange={setShowTransportationForm}>
+          <DialogContent className="max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingTransportationIndex !== null ? "Edit Transportation" : "Add Transportation"}</DialogTitle>
+              <DialogDescription>
+                Please fill in the details for the transportation option.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmitTransportation((data, event) => onSubmitTransportation(data, event))} className="space-y-4">
+              <div>
+                <Label htmlFor="from">From</Label>
+                <Input {...registerTransportation("from")} />
+                {transportationErrors.from && <p className="text-red-500">{transportationErrors.from.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="to">To</Label>
+                <Input {...registerTransportation("to")} />
+                {transportationErrors.to && <p className="text-red-500">{transportationErrors.to.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="vehicleType">Vehicle Type</Label>
+                <Controller
+                  name="vehicleType"
+                  control={controlTransportation}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select vehicle type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {vehicleTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {transportationErrors.vehicleType && <p className="text-red-500">{transportationErrors.vehicleType.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="ticketCost">Ticket Cost</Label>
+                <Input type="number" step="0.01" {...registerTransportation("ticketCost", { valueAsNumber: true })} />
+                {transportationErrors.ticketCost && <p className="text-red-500">{transportationErrors.ticketCost.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="timeDeparture">Departure Time</Label>
+                <Controller
+                  name="timeDeparture"
+                  control={controlTransportation}
+                  render={({ field }) => (
+                    <Input
+                      type="datetime-local"
+                      {...field}
+                      value={field.value}
+                      onChange={(e) => {
+                        const localDate = new Date(e.target.value);
+                        const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+                        field.onChange(utcDate.toISOString().slice(0, 16));
+                      }}
+                    />
+                  )}
+                />
+                {transportationErrors.timeDeparture && <p className="text-red-500">{transportationErrors.timeDeparture.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="estimatedDuration">Estimated Duration (hours)</Label>
+                <Input type="number" step="0.1" {...registerTransportation("estimatedDuration", { valueAsNumber: true })} />
+                {transportationErrors.estimatedDuration && <p className="text-red-500">{transportationErrors.estimatedDuration.message}</p>}
+              </div>
+              <div>
+                <Label htmlFor="remainingSeats">Remaining Seats</Label>
+                <Input 
+                  type="number" 
+                  {...registerTransportation("remainingSeats", { valueAsNumber: true })} 
+                  max={getMaxSeats(controlTransportation._formValues.vehicleType)}
+                />
+                {transportationErrors.remainingSeats && <p className="text-red-500">{transportationErrors.remainingSeats.message}</p>}
+              </div>
+              <Button type="submit" className="bg-[#388A94] hover:bg-[#2c6d75] text-white rounded-full">
+                {editingTransportationIndex !== null ? "Update Transportation" : "Add Transportation"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </form>
+    );
+  }
 const ItineraryForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -266,6 +455,7 @@ const ItineraryForm = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [activities, setActivities] = useState([]);
+  const [editingActivityIndex, setEditingActivityIndex] = useState(null);
   const navigate = useNavigate();
 
   const {
@@ -347,9 +537,27 @@ const ItineraryForm = () => {
   };
 
   const handleAddActivity = (activity) => {
-    setActivities([...activities, activity]);
-    setValue("activities", [...activities, activity]);
+    if (editingActivityIndex !== null) {
+      const updatedActivities = [...activities];
+      updatedActivities[editingActivityIndex] = activity;
+      setActivities(updatedActivities);
+      setEditingActivityIndex(null);
+    } else {
+      setActivities([...activities, activity]);
+    }
+    setValue("activities", activities);
     setShowActivityForm(false);
+  };
+
+  const handleEditActivity = (index) => {
+    setEditingActivityIndex(index);
+    setShowActivityForm(true);
+  };
+
+  const handleDeleteActivity = (index) => {
+    const updatedActivities = activities.filter((_, i) => i !== index);
+    setActivities(updatedActivities);
+    setValue("activities", updatedActivities);
   };
 
   const addDate = () => {
@@ -404,7 +612,7 @@ const ItineraryForm = () => {
           </div>
           <div className="w-full md:w-3/4 p-6">
             <form onSubmit={handleSubmit(handleCreateItinerary)} className="grid grid-cols-4 gap-4">
-              <div className="col-span-2">
+                   <div className="col-span-2">
                 <Label htmlFor="title" className="text-sm font-medium">Itinerary Title</Label>
                 <Input id="title" {...register("title")} />
                 {errors.title && (
@@ -536,16 +744,35 @@ const ItineraryForm = () => {
                 {errors.availableDates && <span className="text-red-500 block mt-2">{errors.availableDates.message}</span>}
               </div>
 
-              <div className="col-span-1">
+              <div className="col-span-4">
                 <Label className="text-sm font-medium">Activities</Label>
-                <ul className="list-disc pl-5 space-y-1">
-                  {activities.map((activity, index) => (
-                    <li key={index}>{activity.name}</li>
-                  ))}
-                </ul>
+                {activities.map((activity, index) => (
+                  <div key={index} className="mb-2 p-2 border rounded flex justify-between items-center">
+                    <span>{activity.name}</span>
+                    <div>
+                      <Button
+                        type="button"
+                        onClick={() => handleEditActivity(index)}
+                        className="p-2 h-10 w-10 rounded-full bg-[#B5D3D1] hover:bg-[#5D9297] transition duration-300 ease-in-out mr-2"
+                      >
+                        <Edit className="h-4 w-4 text-[#1A3B47]" />
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => handleDeleteActivity(index)}
+                        className="p-2 h-10 w-10 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
                 <Button
                   type="button"
-                  onClick={() => setShowActivityForm(true)}
+                  onClick={() => {
+                    setEditingActivityIndex(null);
+                    setShowActivityForm(true);
+                  }}
                   className="w-full mt-2 bg-[#1A3B47]"
                 >
                   <PlusCircle className="w-4 h-4 mr-2" />
@@ -555,6 +782,7 @@ const ItineraryForm = () => {
                   <p className="text-red-500 text-xs mt-2">Please add at least one activity</p>
                 )}
               </div>
+
 
               <div className="col-span-4 flex items-center space-x-2">
                 <Controller
@@ -578,8 +806,7 @@ const ItineraryForm = () => {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-
-              <Button 
+  <Button 
                 type="submit"
                 className="col-span-4 bg-[#5D9297] text-white hover:bg-[#1A3B47]"
                 disabled={loading}
@@ -622,10 +849,14 @@ const ItineraryForm = () => {
         <Dialog open={showActivityForm} onOpenChange={setShowActivityForm}>
           <DialogContent className="sm:max-w-[700px]">
             <DialogHeader>
-              <DialogTitle>Add New Activity</DialogTitle>
+              <DialogTitle>{editingActivityIndex !== null ? "Edit Activity" : "Add New Activity"}</DialogTitle>
             </DialogHeader>
             <ScrollArea className="max-h-[80vh]">
-              <ActivityForm onSave={handleAddActivity} onClose={() => setShowActivityForm(false)} />
+              <ActivityForm
+                onSave={handleAddActivity}
+                onClose={() => setShowActivityForm(false)}
+                initialData={editingActivityIndex !== null ? activities[editingActivityIndex] : null}
+              />
             </ScrollArea>
           </DialogContent>
         </Dialog>

@@ -338,6 +338,7 @@ const createItinerary = async (req, res) => {
     dropOffLocation,
     rating,
   } = req.body;
+  console.log(activities);
   const itinerary = new Itinerary({
     title,
     timeline,
