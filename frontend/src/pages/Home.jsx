@@ -10,6 +10,7 @@ import { ProductViewer } from '../components/ProductView'
 import { AboutUs } from '../components/AboutUs'
 import { BookingForm } from '../pages/FlightsandHotels'
 import Cookies from 'js-cookie'
+import { TestimonialBannerJsx } from '../components/testimonial-banner'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('activities')
@@ -80,6 +81,7 @@ export default function Home() {
         return (
           <>
             <AboutUs />
+            <TestimonialBannerJsx />
             <HistoricalPlaces />
             <div className="text-center max-w-2xl mx-auto mb-4 mt-24">
               <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">
@@ -126,6 +128,7 @@ export default function Home() {
         return (
           <>
             <AboutUs />
+            <TestimonialBannerJsx />
             <BookingForm />
             <HistoricalPlaces />
             <div className="text-center max-w-2xl mx-auto mb-4 mt-24">
