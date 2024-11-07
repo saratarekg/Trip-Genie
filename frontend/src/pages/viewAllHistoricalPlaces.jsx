@@ -223,7 +223,7 @@ export function AllHistoricalPlacesComponent() {
 
   useEffect(() => {
     searchHistoricalPlaces();
-  }, [myHistoricalPlaces]);
+  }, [myHistoricalPlaces, searchTerm]);
 
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest";
@@ -393,37 +393,27 @@ export function AllHistoricalPlacesComponent() {
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search..."
+                      placeholder="Search products..."
+                      className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="border border-gray-300 rounded-lg p-2 pl-10 mb-4 w-full"
                     />
                     <Search className="w-5 h-5 text-gray-500 absolute left-3 top-2" />
                   </div>
+                  <br></br>
                   <FilterComponent
                     filtersVisible={filtersVisible}
                     toggleFilters={toggleFilters}
-                    //   sortOrder={sortOrder}
-                    //   sortBy={sortBy}
-                    //   handleSort={handleSort}
                     clearFilters={clearFilters}
                     myHistoricalPlaces={myHistoricalPlaces}
                     handlemyHistoricalPlaces={handlemyHistoricalPlaces}
-                    // sortItineraries={sortItineraries}
-                    //   price={price}
-                    //   setPrice={setPrice}
-                    //   dateRange={dateRange}
-                    //   setDateRange={setDateRange}
                     selectedTypes={selectedTypes} // Pass selectedTypes array
                     setSelectedTypes={setSelectedTypes} // Pass setSelectedTypes function
                     selectedPeriods={selectedPeriods} // Pass periods array
                     setSelectedPeriods={setSelectedPeriods} // Pass periods function
-                    //   selectedLanguages={selectedLanguages} // Pass selectedLanguages array
-                    //   setSelectedLanguages={setSelectedLanguages} // Pass setSelectedLanguages function
                     searchHistoricalPlaces={searchHistoricalPlaces}
                     typesOptions={typesOptions}
                     periodsOptions={periodOptions}
-                    //   languagesOptions={languagesOptions}
                     role={getUserRole()}
                   />
                 </div>
