@@ -332,7 +332,6 @@ const createItinerary = async (req, res) => {
     activities,
     language,
     price,
-    currency,
     availableDates,
     accessibility,
     pickUpLocation,
@@ -345,7 +344,7 @@ const createItinerary = async (req, res) => {
     activities,
     language,
     price,
-    currency,
+    currency:"67140446ee157ee4f239d523",
     availableDates,
     accessibility,
     pickUpLocation,
@@ -358,6 +357,7 @@ const createItinerary = async (req, res) => {
     await itinerary.save();
     res.status(201).json(itinerary);
   } catch (error) {
+    console.log(error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -385,7 +385,7 @@ const updateItinerary = async (req, res) => {
     const itinerary = await Itinerary.findById(req.params.id);
 
     if (!itinerary) {
-      return res.status(404).json({ message: "Itinerary not found" });
+      return res.status(400).json({ message: "Itinerary not found" });
     }
 
     if (itinerary.isDeleted) {
@@ -406,7 +406,6 @@ const updateItinerary = async (req, res) => {
       title,
       availableDates,
       price,
-      currency,
       language,
       timeline,
       activities,
@@ -420,7 +419,6 @@ const updateItinerary = async (req, res) => {
       title,
       availableDates,
       price,
-      currency,
       language,
       timeline,
       activities,
@@ -726,6 +724,65 @@ const toggleActivationStatus = async (req, res) => {
   }
 };
 
+// Add an activity to an itinerary
+const addActivityToItinerary = async (req, res) => {
+  try {
+    const { itineraryId } = req.params;
+    const activityData = req.body; // Activity data sent in the request body
+
+    const itinerary = await Itinerary.findById(itineraryId);
+    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+
+    itinerary.activities.push(activityData); // Add new activity
+    await itinerary.save();
+
+    res.status(200).json(itinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Edit an activity in an itinerary
+const editActivityInItinerary = async (req, res) => {
+  try {
+    const { itineraryId, activityId } = req.params;
+    const updatedData = req.body; // Updated data for the activity
+
+    const itinerary = await Itinerary.findById(itineraryId);
+    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+
+    const activity = itinerary.activities.id(activityId);
+    if (!activity) return res.status(404).json({ error: "Activity not found" });
+
+    Object.assign(activity, updatedData); // Merge new data into the existing activity
+    await itinerary.save();
+
+    res.status(200).json(itinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+// Remove an activity from an itinerary
+const removeActivityFromItinerary = async (req, res) => {
+  try {
+    const { itineraryId, activityId } = req.params;
+
+    const itinerary = await Itinerary.findById(itineraryId);
+    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+
+    const activity = itinerary.activities.id(activityId);
+    if (!activity) return res.status(404).json({ error: "Activity not found" });
+
+    activity.remove(); // Remove the activity using Mongoose's subdocument method
+    await itinerary.save();
+
+    res.status(200).json(itinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 module.exports = {
   getAllItineraries,
   getAllItinerariesAdmin,
@@ -741,4 +798,7 @@ module.exports = {
   getItinerariesByPreference,
   theHolyAntiFilter,
   updateCommentOnItinerary,
+  removeActivityFromItinerary,
+  editActivityInItinerary,
+  addActivityToItinerary
 };

@@ -10,8 +10,62 @@ const itinerarySchema = new Schema(
     },
     activities: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Activity",
+        name: {
+          type: String,
+          required: true,
+        },
+        description: {
+          type: String,
+          required: true,
+        },
+        location: {
+          address: {
+            type: String,
+            required: true,
+          },
+          coordinates: {
+            longitude: {
+              type: Number,
+              required: true,
+            },
+            latitude: {
+              type: Number,
+              required: true,
+            },
+          },
+        },
+        duration: {
+          type: Number,
+          required: true,
+        },
+        timing: {
+          type: Date,
+          required: true,
+        },
+        category: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Category",
+          },
+        ],
+        tags: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Tag",
+          },
+        ],
+        pictures: [
+          {
+            public_id: { type: String, required: true },
+            url: { type: String, required: true },
+          },
+        ],
+        transportations: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Transportation",
+          },
+        ],
       },
     ],
     timeline: {

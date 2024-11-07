@@ -11,8 +11,10 @@ const sellerController = require("../controllers/sellerController");
 const complaintsController = require("../controllers/complaintsController.js");
 const purchaseController = require("../controllers/purchaseController.js");
 const currencyController = require("../controllers/currencyController");
+const transportationController = require("../controllers/transportationController.js")
 
 const router = express.Router();
+
 
 router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
@@ -66,6 +68,10 @@ router.get(
   "/itineraries-not-preference",
   itineraryController.theHolyAntiFilter
 );
+router.post("/itineraries/:itineraryId/activities", itineraryController.addActivityToItinerary);
+router.put("/itineraries/:itineraryId/activities/:activityId", itineraryController.editActivityInItinerary);
+router.delete("/itineraries/:itineraryId/activities/:activityId", itineraryController.removeActivityFromItinerary);
+
 
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);

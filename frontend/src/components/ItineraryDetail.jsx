@@ -34,7 +34,7 @@ const RatingDistributionBar = ({ percentage, count }) => (
     <span className="w-8 text-right">{count} ★</span>
     <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
       <div 
-        className="h-full bg-primary rounded-full" 
+        className="h-full bg-[#1A3B47]  rounded-full" 
         style={{ width: `${percentage}%` }}
       />
     </div>
@@ -83,7 +83,7 @@ const TourguideProfileCard = ({
           <span className="text-3xl font-bold">Tour Guide</span>
           <Badge
             variant="secondary"
-            className="px-2 py-1 text-xs font-medium rounded-full bg-[#5D9297] hover:[#388A94] text-white hover:text-white"
+            className="px-2 py-1 text-xs font-medium rounded-full bg-[#5D9297] hover:bg-[#5D9297]  text-white hover:text-white"
           >
             Verified Guide
           </Badge>
@@ -1155,7 +1155,7 @@ const handleRateItinerary = async () => {
                             <div className="space-y-2">
                               <div className="flex items-center">
                                 <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-                                <span className="text-sm">{activity.location.address}</span>
+                                <span className="text-sm">{activity.location?.address}</span>
                               </div>
                               <div className="flex items-center">
                                 <Clock className="w-4 h-4 mr-2 text-gray-500" />
@@ -1169,7 +1169,7 @@ const handleRateItinerary = async () => {
                                   {new Date(activity.timing).toLocaleString()}
                                 </span>
                               </div>
-                              <div className="flex items-center">
+                              {/* <div className="flex items-center">
                                 <Banknote className="w-4 h-4 mr-2 text-gray-500" />
                                 <span className="text-sm">
                                   Price: {formatPrice(activity.price)}
@@ -1189,7 +1189,7 @@ const handleRateItinerary = async () => {
                                 <span className="text-sm">
                                   Rating: {activity.rating || "N/A"}
                                 </span>
-                              </div>
+                              </div> */}
                               <div className="flex flex-wrap gap-2 mt-2">
                                 {activity.category &&
                                   activity.category.map((cat, catIndex) => (
@@ -1580,6 +1580,55 @@ const handleRateItinerary = async () => {
               onClick={handleRateTourGuide}
             >
               {userTourGuideReview ? 'Update Review' : 'Submit Review'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Itinerary</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this itinerary?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteConfirm(false)}
+              className = "bg-gray-300 hover:bg-gray-400"
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} className = "bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Itinerary Deleted
+            </DialogTitle>
+            <DialogDescription>
+              The itinerary has been successfully deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="default"
+              onClick={() => {
+                setShowDeleteSuccess(false);
+                navigate("/all-itineraries");
+              }}
+            >
+              Back to All Itineraries
             </Button>
           </DialogFooter>
         </DialogContent>

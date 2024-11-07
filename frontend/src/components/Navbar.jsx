@@ -243,37 +243,8 @@ export function NavbarComponent() {
               )}
               {role === "admin" && (
                 <div className="flex justify-between items-center">
-                  <div className="relative" ref={itinerariesRef}>
-                    <button
-                      onClick={() => toggleDropdown("adminItineraries")}
-                      className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
-                    >
-                      Itineraries
-                      {openDropdown === "adminItineraries" ? (
-                        <ChevronUp className="ml-1 h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="ml-1 h-4 w-4" />
-                      )}
-                    </button>
-                    {openDropdown === "adminItineraries" && (
-                      <div className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg">
-                        <Link
-                          to="/all-itineraries"
-                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
-                          onClick={closeDropdown}
-                        >
-                          <List className="mr-2 h-4 w-4" /> All Itineraries
-                        </Link>
-                        <Link
-                          to="/my-itineraries"
-                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
-                          onClick={closeDropdown}
-                        >
-                          <Folder className="mr-2 h-4 w-4" /> My Itineraries
-                        </Link>
-                      </div>
-                    )}
-                  </div>
+                                    <NavLink to="/all-itineraries">Itineraries</NavLink>
+
                   <div className="relative" ref={productsRef}>
                     <button
                       onClick={() => toggleDropdown("adminProducts")}
