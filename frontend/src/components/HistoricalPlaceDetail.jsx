@@ -536,7 +536,7 @@ const HistoricalPlaceDetail = () => {
                 </div>
               </div>
 
-              {(userRole === "admin" ||
+              {(
                 (canModify && userRole === "tourism-governor")) && (
                 <div className="mt-8 flex justify-end space-x-4">
                   <Button

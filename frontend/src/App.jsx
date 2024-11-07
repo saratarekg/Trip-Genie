@@ -216,7 +216,7 @@ function AppContent() {
             path="/historical-place/:id"
             element={
               <ProtectedRoute
-                allowedRoles={["tourism-governor", "guest", "tourist"]}
+                allowedRoles={["tourism-governor", "guest", "tourist","admin"]}
               >
                 <HistoricalPlaceDetail />
               </ProtectedRoute>
@@ -302,7 +302,7 @@ function AppContent() {
             path="/all-historical-places"
             element={
               <ProtectedRoute
-                allowedRoles={["tourism-governor", "guest", "tourist"]}
+                allowedRoles={["tourism-governor", "guest", "tourist", "admin"]}
               >
                 <AllHistoricalPlacesComponent />
               </ProtectedRoute>

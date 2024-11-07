@@ -10,28 +10,13 @@ const upload = multer({ storage: storage });
 
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
-router.post(
-  "/historical-places",
-  upload.array("pictures", 10),
-  historicalPlacesController.createHistoricalPlace
-);
-router.get(
-  "/historical-places",
-  historicalPlacesController.getAllHistoricalPlaces
-);
-router.get(
-  "/historical-places/:id",
-  historicalPlacesController.getHistoricalPlace
-);
-router.delete(
-  "/historical-places/:id",
-  historicalPlacesController.deleteHistoricalPlace
-);
-router.put(
-  "/historical-places/:id",
-  upload.array("newPictures", 10),
-  historicalPlacesController.updateHistoricalPlace
-);
+
+
+router.post("/historical-places",upload.array("pictures", 10),historicalPlacesController.createHistoricalPlace);
+router.get("/historical-places",historicalPlacesController.getAllHistoricalPlaces);
+router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);
+router.delete("/historical-places/:id",historicalPlacesController.deleteHistoricalPlace);
+router.put("/historical-places/:id",upload.array("newPictures", 10),historicalPlacesController.updateHistoricalPlace);
 
 router.post("/historical-tag", historicalTagController.addHistoricalTag);
 router.get("/historical-tag", historicalTagController.getAlltags);
