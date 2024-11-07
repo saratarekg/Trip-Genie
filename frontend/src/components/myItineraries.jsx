@@ -221,7 +221,7 @@ const ItineraryCard = ({
 
 }
 
-export function AllItinerariesComponent() {
+export function MyItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
@@ -378,7 +378,7 @@ export function AllItinerariesComponent() {
         setItineraries([...preferredItineraries, ...otherItineraries]);
         setIsSortedByPreference(true);
       } else {
-        const url = new URL(`http://localhost:4000/${role}/itineraries`);
+        const url = new URL(`http://localhost:4000/${role}/itineraries?myItineraries=true`);
         const response = await fetch(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -419,14 +419,11 @@ export function AllItinerariesComponent() {
     try {
       setIsLoading(true);
       const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/itineraries`);
+      const url = new URL(`http://localhost:4000/${role}/itineraries?myItineraries=true`);
 
       if (priceRange[0] !== 0 || priceRange[1] !== maxPrice) {
         url.searchParams.append("minPrice", priceRange[0].toString());
         url.searchParams.append("maxPrice", priceRange[1].toString());
-      }
-      if (myItineraries) {
-        url.searchParams.append("myItineraries", myItineraries);
       }
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
@@ -843,4 +840,4 @@ export function AllItinerariesComponent() {
   );
 }
 
-export default AllItinerariesComponent;
+export default MyItinerariesComponent;

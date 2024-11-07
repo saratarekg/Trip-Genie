@@ -158,7 +158,12 @@ const ItineraryCard = ({
       const decodedToken = jwtDecode.jwtDecode(token);
       setUserId(decodedToken.id);
     }
-  }, []);
+  }, []); 
+
+  const uniqueCategories = new Set();
+  const uniqueTags = new Set();
+
+
 
   return (
     <div
@@ -189,25 +194,38 @@ const ItineraryCard = ({
           <span className="text-sm text-gray-600">{itinerary.language}</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          {itinerary.activities?.flatMap((activity, index) => [
-            ...(activity.category?.map((cat) => (
-              <span
-                key={`cat-${index}-${cat.id || cat.name}`}
-                className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full"
-              >
-                {cat.name}
-              </span>
-            )) || []),
-            ...(activity.tags?.map((tag) => (
-              <span
-                key={`tag-${index}-${tag.id || tag.type}`}
-                className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
-              >
-                {tag.type}
-              </span>
-            )) || []),
-          ])}
-        </div>
+      {itinerary.activities?.flatMap((activity, index) => [
+        ...(activity.category?.filter((cat) => {
+          if (uniqueCategories.has(cat.name)) {
+            return false;
+          }
+          uniqueCategories.add(cat.name);
+          return true;
+        }).map((cat) => (
+          <span
+            key={`cat-${index}-${cat.id || cat.name}`}
+            className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full"
+          >
+            {cat.name}
+          </span>
+        )) || []),
+
+        ...(activity.tags?.filter((tag) => {
+          if (uniqueTags.has(tag.type)) {
+            return false;
+          }
+          uniqueTags.add(tag.type);
+          return true;
+        }).map((tag) => (
+          <span
+            key={`tag-${index}-${tag.id || tag.type}`}
+            className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
+          >
+            {tag.type}
+          </span>
+        )) || [])
+      ])}
+    </div>
       </div>
 
       {role === "tour-guide" && userId === itinerary.tourGuide._id && (

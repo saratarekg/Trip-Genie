@@ -77,9 +77,10 @@ const activitySchema = z.object({
     }),
   }),
   duration: z.number().min(1, "Duration is required"),
-  timing: z.string().min(1, "Timing is required"),
-  tags: z.array(z.string()).min(1, "Tags is required"),
-  categories: z.array(z.string()).min(1, "Categories is required"),
+  activityDate: z.string().min(1, "Date is required"),
+  activityTime: z.string().min(1, "Time is required"),
+  tags: z.array(z.string()).min(1, "Choose at least one Tag"),
+  category: z.array(z.string()).min(1, "Choose at least one Category"),
 });
 
 
@@ -107,29 +108,37 @@ const formSchema = z.object({
   accessibility: z.boolean(),
 });
 
-const ActivityForm = ({ onSave, onClose, initialData = null }) => 
-{
-    const [tags, setTags] = useState([]);
-    const [categories, setCategories] = useState([]);
+const ActivityForm = ({ onSave, onClose, initialData = null }) => {
+  const [tags, setTags] = useState([]);
+  const [category, setCategory] = useState([]);
 
-    const {
-      register,
-      handleSubmit,
-      control,
-      formState: { errors },
-      setValue,
-      watch,
-    } = useForm({
-      resolver: zodResolver(activitySchema),
-      defaultValues: initialData || {
-      },
-    });
-  
- 
-    useEffect(() => {
-      fetchTags();
-      fetchCategories();
-    }, []);
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    setValue,
+  } = useForm({
+    resolver: zodResolver(activitySchema),
+    defaultValues: initialData || {},
+  });
+
+  useEffect(() => {
+    fetchTags();
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    if (initialData) {
+      if (initialData.timing) {
+        const dateTime = new Date(initialData.timing);
+        setValue('activityDate', format(dateTime, 'yyyy-MM-dd'));
+        setValue('activityTime', format(dateTime, 'HH:mm'));
+      }
+      setValue('tags', initialData.tags);
+      setValue('category', initialData.category);
+    }
+  }, [initialData, setValue]);
   
     const fetchTags = async () => {
       const response = await fetch("http://localhost:4000/api/getAllTags");
@@ -140,18 +149,17 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
     const fetchCategories = async () => {
       const response = await fetch("http://localhost:4000/api/getAllCategories");
       const data = await response.json();
-      setCategories(data.map((cat) => ({ value: cat._id, label: cat.name })));
+      setCategory(data.map((cat) => ({ value: cat._id, label: cat.name })));
     };
   
     const handleAddActivity = (data) => {
-      console.log(data);
-      const activityData = {
+      const formattedData = {
         ...data,
+        timing: `${data.activityDate}T${data.activityTime}`,
       };
-      onSave(activityData);
+      onSave(formattedData);
       onClose();
     };
-  
     
 
   
@@ -192,31 +200,37 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
           {errors.duration && <p className="text-red-500 text-xs">{errors.duration.message}</p>}
         </div>
   
-        <div>
-          <Label htmlFor="timing">Timing</Label>
-          <Input id="timing" type="datetime-local" {...register("timing")} />
-          {errors.timing && <p className="text-red-500 text-xs">{errors.timing.message}</p>}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label htmlFor="activityDate">Date</Label>
+            <Input id="activityDate" type="date" {...register("activityDate")} />
+            {errors.activityDate && <p className="text-red-500 text-xs">{errors.activityDate.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="activityTime">Time</Label>
+            <Input id="activityTime" type="time" {...register("activityTime")} />
+            {errors.activityTime && <p className="text-red-500 text-xs">{errors.activityTime.message}</p>}
+          </div>
         </div>
   
         <div className="col-span-2">
           <Label>Categories</Label>
           <Controller
-            name="categories"
+            name="category"
             control={control}
             render={({ field }) => (
               <ReactSelect
                 {...field}
-                options={categories}
+                options={category}
                 isMulti
                 className="react-select-container"
                 classNamePrefix="react-select"
-                value={categories.filter(option => field.value?.includes(option.value))}
-                onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value),
-                  console.log(selectedOptions))}
+                value={category.filter(option => field.value?.includes(option.value))}
+                onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value))}
               />
             )}
           />
-          {errors.categories && <p className="text-red-500 text-xs">{errors.categories.message}</p>}
+          {errors.category && <p className="text-red-500 text-xs">{errors.category.message}</p>}
         </div>
   
         <div className="col-span-2">
@@ -236,17 +250,15 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
               />
             )}
           />
-                    {errors.tags && <p className="text-red-500 text-xs">{errors.tags.message}</p>}
+          {errors.tags && <p className="text-red-500 text-xs">{errors.tags.message}</p>}
         </div>
   
-     
-  
         <Button type="submit" className="bg-[#1A3B47] hover:bg-[#388A94] rounded-full">Save Activity</Button>
-  
-      
       </form>
     );
   }
+  
+  
 const ItineraryForm = () => {
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
@@ -341,25 +353,29 @@ const ItineraryForm = () => {
     window.location.reload();
   };
 
-  const handleAddActivity = (activity) => { 
-    console.log(activity);
+  const handleAddActivity = (activity) => {
+    const newActivity = {
+      ...activity,
+      timing: `${activity.activityDate}T${activity.activityTime}`,
+    };
     if (editingActivityIndex !== null) {
       const updatedActivities = [...activities];
-      updatedActivities[editingActivityIndex] = activity;
+      updatedActivities[editingActivityIndex] = newActivity;
       setActivities(updatedActivities);
       setEditingActivityIndex(null);
     } else {
-      setActivities([...activities, activity]);
+      setActivities([...activities, newActivity]);
     }
     setValue("activities", activities);
     setShowActivityForm(false);
   };
 
   const handleEditActivity = (index) => {
+    const activityToEdit = activities[index];
+    const dateTime = new Date(activityToEdit.timing);
     setEditingActivityIndex(index);
     setShowActivityForm(true);
   };
-
   const handleDeleteActivity = (index) => {
     const updatedActivities = activities.filter((_, i) => i !== index);
     setActivities(updatedActivities);
@@ -685,19 +701,20 @@ const ItineraryForm = () => {
         </Dialog>
 
         <Dialog open={showActivityForm} onOpenChange={setShowActivityForm}>
-          <DialogContent className="sm:max-w-[700px]">
-            <DialogHeader>
-              <DialogTitle>{editingActivityIndex !== null ? "Edit Activity" : "Add New Activity"}</DialogTitle>
-            </DialogHeader>
-            <ScrollArea className="max-h-[80vh]">
-              <ActivityForm
-                onSave={handleAddActivity}
-                onClose={() => setShowActivityForm(false)}
-                initialData={editingActivityIndex !== null ? activities[editingActivityIndex] : null}
-              />
-            </ScrollArea>
-          </DialogContent>
-        </Dialog>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader>
+          <DialogTitle>{editingActivityIndex !== null ? "Edit Activity" : "Add New Activity"}</DialogTitle>
+        </DialogHeader>
+        <ScrollArea className="max-h-[80vh]">
+          <ActivityForm
+            onSave={handleAddActivity}
+            onClose={() => setShowActivityForm(false)}
+            initialData={editingActivityIndex !== null ? activities[editingActivityIndex] : null}
+          />
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+
       </div>
     </div>
   );

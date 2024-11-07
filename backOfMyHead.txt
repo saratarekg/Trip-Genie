@@ -2,7 +2,7 @@
 
 - Refresh on products page and pagination and products archive(Habiba) done
 - Products search refreshes every 300ms(Habiba) done
-- Filter itinerary based on tour guide based on archived or not
+- Filter itinerary based on tour guide based on archived or not(done)
 - Add deleted flag on products to keep deleted products in purchase history(done)
 - Send confirmation mail after booking a flight/hotel/transportation
 - Provide the user with a City code list to choose from
@@ -39,7 +39,7 @@ Activity card:
 - Ensure consistent font for subtitles (jana) done
 - Move map to the right (Ehab) check with hadwa the updated version
 
-- Make Vtp the admin
+- Make Vtp the admin(done)
 
 Pop-ups:
 - Ensure close button doesn't redirect after deletion is complete (Ehab)
@@ -66,5 +66,5 @@ Admin:
 - Fonts
 - Move buttons to the right 
 - Change hide to back and improve its appearance (done)
-- Add filter and sort 
+- Add filter and sort (khaleeha search bas when he is deleting sort w filter malhomsh lazma ll admin )
 - Add color behind navbar at the beginning so that logo appears.(done)
