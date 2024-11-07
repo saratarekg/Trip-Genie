@@ -44,7 +44,16 @@ const worldLanguages = [
 ];
 
 const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
-  const [activity, setActivity] = useState(initialData);
+  const [activity, setActivity] = useState({
+    name: '',
+    description: '',
+    location: { address: '', coordinates: { longitude: '', latitude: '' } },
+    duration: '',
+    timing: '',
+    tags: [],
+    categories: [],
+    ...initialData, // This allows initialData to overwrite the defaults, but will fall back to the defaults if missing
+  });
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
 
@@ -54,7 +63,10 @@ const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
   }, []);
 
   useEffect(() => {
-    setActivity(initialData);
+    setActivity((prevActivity) => ({
+      ...prevActivity,
+      ...initialData, // Ensure that initialData properly updates activity if changed
+    }));
   }, [initialData]);
 
   const fetchTags = async () => {
@@ -67,14 +79,22 @@ const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
     setCategories(response.data.map((cat) => ({ value: cat._id, label: cat.name })));
   };
 
-
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setActivity(prev => {
+
+    // Helper function to handle deeply nested updates
+    const updateNestedValue = (obj, path, value) => {
+      const keys = path.split('.');
+      const lastKey = keys.pop();
+      const lastObj = keys.reduce((acc, key) => acc[key] = acc[key] || {}, obj);
+      lastObj[lastKey] = value;
+      return { ...obj };
+    };
+
+    setActivity((prev) => {
+      // Check if the name includes dots, indicating nested structure
       if (name.includes('.')) {
-        const [parent, child] = name.split('.');
-        return { ...prev, [parent]: { ...prev[parent], [child]: value } };
+        return updateNestedValue(prev, name, value);
       }
       return { ...prev, [name]: value };
     });
@@ -161,6 +181,7 @@ const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
     </form>
   );
 };
+
 
 export default function UpdateItinerary() {
   const { id } = useParams();
