@@ -135,9 +135,12 @@ export default function UserApproval() {
   const rejectUser = async (user, role) => {
     try {
       const token = Cookies.get("jwt");
-      await axios.delete(`http://localhost:4000/admin/${role}s/${user._id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `http://localhost:4000/admin/reject/${role}s/${user._id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       showDialog(`Successfully rejected the ${role}.`);
       // Re-fetch the user type list after rejection
       if (role === "advertiser") {
@@ -155,11 +158,16 @@ export default function UserApproval() {
 
   const renderUserCards = (users, role) =>
     users.map((user) => (
-      <Card key={user._id} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+      <Card
+        key={user._id}
+        className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+      >
         <CardHeader className="border-b bg-gray-50 py-2 sm:py-3 px-3 sm:px-4">
           <CardTitle className="text-base sm:text-lg font-semibold text-[#003f66]">
             {user.name}
-            <span className="text-[#5D9297] text-xs sm:text-sm ml-2">({role})</span>
+            <span className="text-[#5D9297] text-xs sm:text-sm ml-2">
+              ({role})
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-4 space-y-2 sm:space-y-3">
@@ -195,7 +203,9 @@ export default function UserApproval() {
               )}
               {user.files.taxationRegistryCardFilename && (
                 <Button
-                  onClick={() => fetchFile(user.files.taxationRegistryCardFilename)}
+                  onClick={() =>
+                    fetchFile(user.files.taxationRegistryCardFilename)
+                  }
                   className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
                   hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
                   active:transform active:scale-95 transition-all duration-200"
@@ -236,14 +246,16 @@ export default function UserApproval() {
             <h1 className="text-xl sm:text-2xl font-bold text-[#003f66] mb-4 sm:mb-6">
               User Approval Dashboard
             </h1>
-            
+
             {error && (
               <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md text-sm sm:text-base">
                 {error}
               </div>
             )}
 
-            {advertisers.length === 0 && sellers.length === 0 && tourGuides.length === 0 ? (
+            {advertisers.length === 0 &&
+            sellers.length === 0 &&
+            tourGuides.length === 0 ? (
               <div className="flex items-center justify-center h-24 sm:h-32">
                 <p className="text-base sm:text-lg text-[#003f66] text-center px-4">
                   No users to Accept/Reject. Please check again later!

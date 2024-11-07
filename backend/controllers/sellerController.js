@@ -127,6 +127,59 @@ const deleteSellerAccount = async (req, res) => {
   }
 };
 
+const deleteSeller = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const seller = await Seller.findById(id).lean();
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    const products = await Product.find({ seller: id });
+    const productIDs = products.map((product) => product._id);
+    const purchases = await Purchase.find({ status: "pending" });
+    purchases.forEach(async (purchase) => {
+      if (
+        purchase.products.some((prod) => productIDs.includes(prod.product._id))
+      ) {
+        res.status(400).json({
+          message: "Cannot delete seller account, there are pending purchases",
+        });
+      }
+    });
+
+    products.forEach(async (product) => {
+      await Product.findByIdAndUpdate(product._id, { isDeleted: true });
+    });
+
+    if (seller.logo !== null) {
+      await cloudinary.uploader.destroy(seller.logo.public_id);
+    }
+
+    const gfs = req.app.locals.gfs;
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+    const fileNames = [
+      seller.files.IDFilename,
+      seller.files.taxationRegistryCardFilename,
+    ];
+    const files = await gfs.find({ filename: { $in: fileNames } }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+    files.forEach(async (file) => {
+      await gfs.delete(file._id);
+    });
+
+    await Seller.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Seller account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const rejectSeller = async (req, res) => {
   const { id } = req.params;
   try {
@@ -281,6 +334,7 @@ const usernameExists = async (username) => {
 
 module.exports = {
   deleteSellerAccount,
+  deleteSeller,
   getAllSellers,
   getSellerByID,
   updateSeller,

@@ -66,6 +66,65 @@ const deleteAdvertiserAccount = async (req, res) => {
   }
 };
 
+const deleteAdvertiser = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const advertiser = await Advertiser.findById(id).lean();
+    if (!advertiser) {
+      return res.status(404).json({ message: "Advertiser not found" });
+    }
+
+    // Find all activities associated with the advertiser
+    const activities = await Activity.find({
+      advertiser: id,
+      timing: { $gte: new Date() },
+    });
+    const activityIDs = activities.map((activity) => activity._id);
+    const bookedActivities = await ActivityBooking.find({
+      activity: { $in: activityIDs },
+    });
+
+    if (bookedActivities.length > 0) {
+      return res.status(400).json({
+        message: "Advertiser has upcoming activities, can not delete account",
+      });
+    }
+
+    // Delete all activities associated with the advertiser
+    activities.forEach(async (activity) => {
+      await Activity.findByIdAndUpdate(activity._id, { isDeleted: true });
+    });
+
+    if (advertiser.logo !== null) {
+      await cloudinary.uploader.destroy(advertiser.logo.public_id);
+    }
+
+    const gfs = req.app.locals.gfs;
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+    const fileNames = [
+      advertiser.files.IDFilename,
+      advertiser.files.taxationRegistryCardFilename,
+    ];
+    const files = await gfs.find({ filename: { $in: fileNames } }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+    files.forEach(async (file) => {
+      await gfs.delete(file._id);
+    });
+
+    await Advertiser.findByIdAndDelete(id);
+
+    res
+      .status(200)
+      .json({ message: "Advertiser account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const rejectAdvertiser = async (req, res) => {
   const { id } = req.params;
   try {
@@ -294,6 +353,7 @@ const usernameExists = async (username) => {
 
 module.exports = {
   deleteAdvertiserAccount,
+  deleteAdvertiser,
   getAllAdvertisers,
   getAdvertiserByID,
   updateAdvertiser,
