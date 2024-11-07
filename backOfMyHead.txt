@@ -29,7 +29,8 @@ Itinerary cards:
 - Add pickup location (Amy --DONE!!)
 
 Tourguide activities:
-- Allow tour guide to create own activities or choose from available ones, making them clickable to show details
+- Allow tour guide to create own activities or choose from available ones (sprint 3),
+ making them clickable to show details (Amy --DONE!!)
 
 Activity card:
 - Sort by importance
@@ -54,10 +55,10 @@ Sign up:
 - Change "Return to home" to "Make a wish" (Amy --DONE!!)
 
 New page:
-- Create and view only my stuff (almost done AMY)
-- Select activities to add to itineraries by either creating own or dragging and dropping
+- Create and view only my stuff (Amy --DONE!!)
+- Select activities to add to itineraries by either creating own (Amy --DONE!!) or dragging and dropping
 - Reduce white space
-- Map: Enter latitude and longitude
+- Map: Enter latitude and longitude 
 
 Admin:
 
