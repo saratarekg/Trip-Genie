@@ -3,7 +3,7 @@ const Transportation = require("../models/transportation");
 // Get all transportations
 const getAllTransportations = async (req, res) => {
   try {
-    const transportations = await Transportation.find();
+    const transportations = await Transportation.find({ isStandAlone: true });
     res.status(200).json(transportations);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -25,8 +25,16 @@ const getTransportationById = async (req, res) => {
 
 // Create new transportation
 const createTransportation = async (req, res) => {
-  const { from, to, vehicleType, ticketCost, timeDeparture, estimatedDuration, remainingSeats } = req.body;
-  
+  const {
+    from,
+    to,
+    vehicleType,
+    ticketCost,
+    timeDeparture,
+    estimatedDuration,
+    remainingSeats,
+  } = req.body;
+
   const newTransportation = new Transportation({
     from,
     to,
@@ -34,7 +42,7 @@ const createTransportation = async (req, res) => {
     ticketCost,
     timeDeparture,
     estimatedDuration,
-    remainingSeats
+    remainingSeats,
   });
 
   try {
@@ -51,7 +59,11 @@ const updateTransportation = async (req, res) => {
   const updates = req.body;
 
   try {
-    const updatedTransportation = await Transportation.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
+    const updatedTransportation = await Transportation.findByIdAndUpdate(
+      id,
+      updates,
+      { new: true, runValidators: true }
+    );
     if (!updatedTransportation) {
       return res.status(404).json({ message: "Transportation not found" });
     }
@@ -64,7 +76,9 @@ const updateTransportation = async (req, res) => {
 // Delete transportation
 const deleteTransportation = async (req, res) => {
   try {
-    const deletedTransportation = await Transportation.findByIdAndDelete(req.params.id);
+    const deletedTransportation = await Transportation.findByIdAndDelete(
+      req.params.id
+    );
     if (!deletedTransportation) {
       return res.status(404).json({ message: "Transportation not found" });
     }
@@ -75,9 +89,9 @@ const deleteTransportation = async (req, res) => {
 };
 
 module.exports = {
-    getAllTransportations,
-    getTransportationById,
-    createTransportation,
-    updateTransportation,
-    deleteTransportation
+  getAllTransportations,
+  getTransportationById,
+  createTransportation,
+  updateTransportation,
+  deleteTransportation,
 };
