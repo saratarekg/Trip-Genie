@@ -235,7 +235,7 @@ export default function UserApproval() {
     ));
 
   return (
-    <div className="bg-gray-50 min-h-screen flex flex-col">
+    <div className="bg-[#E6DCCF] min-h-screen flex flex-col">
       <div className="w-full bg-[#1A3B47] py-6 sm:py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
