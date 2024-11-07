@@ -121,6 +121,7 @@ export function NavbarComponent() {
           ? "bg-black/50"
           : ""
       }`}
+      style={{ backdropFilter: "saturate(180%) blur(8px)" }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -285,7 +286,7 @@ export function NavbarComponent() {
               )}
               {role === "admin" && (
                 <div className="flex justify-between items-center">
-                                    <NavLink to="/all-itineraries">Itineraries</NavLink>
+                  <NavLink to="/all-itineraries">Itineraries</NavLink>
 
                   <div className="relative" ref={productsRef}>
                     <button
@@ -497,8 +498,10 @@ export function NavbarComponent() {
               <div className="pt-4 pb-3 border-t border-white/20">
                 <div className="flex items-center px-5">
                   <Link to="/login">
-                    <button className="bg-[#1A3B47] text-white hover:bg-white/10 px-4 py-2 rounded-full 
-                    transition-colors duration-200 text-sm font-medium border-2 border-white/30">
+                    <button
+                      className="bg-[#1A3B47] text-white hover:bg-white/10 px-4 py-2 rounded-full 
+                    transition-colors duration-200 text-sm font-medium border-2 border-white/30"
+                    >
                       Logout
                     </button>
                   </Link>

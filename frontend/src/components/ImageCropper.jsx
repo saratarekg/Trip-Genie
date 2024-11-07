@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ImageIcon } from "lucide-react";
 import ReactCrop from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export function ImageCropper({ onImageCropped, currentImage }) {
   const [selectedImage, setSelectedImage] = useState(currentImage);
@@ -24,9 +26,15 @@ export function ImageCropper({ onImageCropped, currentImage }) {
 
   const onSelectFile = (e) => {
     if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file.size > 500 * 1024) {
+        console.log("File too large");
+        toast.error("Please select an image smaller than 500KB.");
+        return;
+      }
       const reader = new FileReader();
       reader.addEventListener("load", () => setSelectedImage(reader.result));
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -104,69 +112,72 @@ export function ImageCropper({ onImageCropped, currentImage }) {
   };
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center gap-4 p-4 border-2 border-dashed rounded-lg transition-all duration-200 ${
-        isDragging
-          ? "bg-gray-100 bg-opacity-70 border-primary"
-          : "border-gray-300 hover:border-primary hover:bg-gray-50 hover:bg-opacity-30"
-      }`}
-      style={{ zIndex: 100 }}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onClick={handleParentClick}
-    >
-      {!selectedImage ? (
-        <div className="text-center">
-          <label
-            htmlFor="file-upload"
-            className="relative cursor-pointer rounded-md font-semibold text-primary hover:text-primary/80"
-          >
-            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <div className="mt-4 flex text-sm leading-6 text-gray-600">
-              <span>Upload a file</span>
-              <input
-                id="file-upload"
-                name="file-upload"
-                type="file"
-                className="sr-only"
-                accept="image/*"
-                onChange={onSelectFile}
-                ref={fileInputRef}
+    <div>
+      <ToastContainer style={{ zIndex: 9999 }} />
+      <div
+        className={`flex flex-col items-center justify-center gap-4 p-4 border-2 border-dashed rounded-lg transition-all duration-200 ${
+          isDragging
+            ? "bg-gray-100 bg-opacity-70 border-primary"
+            : "border-gray-300 hover:border-primary hover:bg-gray-50 hover:bg-opacity-30"
+        }`}
+        style={{ zIndex: 100 }}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        onClick={handleParentClick}
+      >
+        {!selectedImage ? (
+          <div className="text-center">
+            <label
+              htmlFor="file-upload"
+              className="relative cursor-pointer rounded-md font-semibold text-primary hover:text-primary/80"
+            >
+              <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+              <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                <span>Upload a file</span>
+                <input
+                  id="file-upload"
+                  name="file-upload"
+                  type="file"
+                  className="sr-only"
+                  accept="image/*"
+                  onChange={onSelectFile}
+                  ref={fileInputRef}
+                />
+                <p className="pl-1">or drag and drop</p>
+              </div>
+              <p className="text-xs leading-5 text-gray-600">
+                PNG, JPG, GIF up to 500KB
+              </p>
+            </label>
+          </div>
+        ) : (
+          <div className="w-full max-w-sm">
+            <ReactCrop
+              crop={crop}
+              onChange={(c) => setCrop(c)}
+              onComplete={handleCropComplete}
+              aspect={1}
+              circularCrop
+            >
+              <img
+                ref={imageRef}
+                src={selectedImage}
+                alt="Crop preview"
+                className="max-w-full h-auto"
               />
-              <p className="pl-1">or drag and drop</p>
-            </div>
-            <p className="text-xs leading-5 text-gray-600">
-              PNG, JPG, GIF up to 10MB
-            </p>
-          </label>
-        </div>
-      ) : (
-        <div className="w-full max-w-sm">
-          <ReactCrop
-            crop={crop}
-            onChange={(c) => setCrop(c)}
-            onComplete={handleCropComplete}
-            aspect={1}
-            circularCrop
-          >
-            <img
-              ref={imageRef}
-              src={selectedImage}
-              alt="Crop preview"
-              className="max-w-full h-auto"
-            />
-          </ReactCrop>
-          <Button
-            className="mt-4 w-full"
-            onClick={() => setSelectedImage(null)}
-            variant="outline"
-          >
-            Choose Different Image
-          </Button>
-        </div>
-      )}
+            </ReactCrop>
+            <Button
+              className="mt-4 w-full"
+              onClick={() => setSelectedImage(null)}
+              variant="outline"
+            >
+              Choose Different Image
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
