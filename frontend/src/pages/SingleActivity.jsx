@@ -184,6 +184,8 @@ const ActivityDetail = () => {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [userBookings, setUserBookings] = useState([]);
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [isActivityBooked, setIsActivityBooked] = useState(false);
+
   const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
     useState(false);
 
@@ -306,7 +308,7 @@ const ActivityDetail = () => {
                 </p>
               </div>
               {userRole === "tourist" &&
-                userBooking &&
+                isActivityBooked &&
                 transport.remainingSeats > 0 && (
                   <Button
                     onClick={() => {
@@ -511,10 +513,31 @@ const ActivityDetail = () => {
       }
     };
 
+    const fetchMyBookings = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get(
+          "http://localhost:4000/tourist/touristActivityBookings",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const bookings = response.data;
+        console.log(bookings);
+        //search through all bookin.activity._id and check if it matches the current activity id
+        const isBooked = bookings.some((booking) => booking.activity._id === id);
+        console.log(isBooked);
+        setIsActivityBooked(isBooked);
+      } catch (error) {
+        console.error("Error fetching user bookings:", error);
+      }
+    };
+
     fetchUserInfo();
     fetchActivityDetails();
     if (userRole === "tourist") {
       fetchUserBookings();
+      fetchMyBookings();
     }
   }, [id, userRole, currentUser]);
 
@@ -1361,10 +1384,7 @@ const ActivityDetail = () => {
                 <Button onClick={handleUpdate} variant="default">
                   <Edit className="mr-2" /> Update
                 </Button>
-                <Button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="destructive"
-                >
+                <Button onClick={handleDelete} variant="destructive">
                   <Trash2 className="mr-2" /> Delete
                 </Button>
               </div>
