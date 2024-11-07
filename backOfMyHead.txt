@@ -13,6 +13,11 @@
 - Book transport cost is added to activity cost 
 - In admin, make "my account" logout only as there is no other active button except logout(habiba) done
 - show booked transportation in history
+- booking a transportation using wallet actually uses the tourist's wallet 
+- enter removes available dates in create itinerary
+- categories and tags are optional in create activity inside create itinerary 
+-pagination not working in activities
+
 
 Hadwa's requests:
 - Add global search bar 

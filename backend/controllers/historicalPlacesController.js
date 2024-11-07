@@ -163,16 +163,16 @@ const deleteHistoricalPlace = async (req, res) => {
   try {
     const { id } = req.params;
     const museum = await Museum.findById(id);
-    //delete images from cloudinary
-
-    for (let i = 0; i < museum.pictures.length; i++) {
-      await cloudinary.uploader.destroy(museum.pictures[i].public_id);
-    }
 
     if (museum.governor.toString() != res.locals.user_id) {
       return res.status(403).json({
         message: "You are not authorized to delete this historical place",
       });
+    }
+
+    //delete images from cloudinary
+    for (let i = 0; i < museum.pictures.length; i++) {
+      await cloudinary.uploader.destroy(museum.pictures[i].public_id);
     }
 
     const museum2 = await Museum.findByIdAndDelete(id);
