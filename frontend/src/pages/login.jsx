@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import  Cookies  from "js-cookie";
-import logInPicture from '../assets/images/logInPicture.jpg';
+import Cookies from "js-cookie";
+import logInPicture from "../assets/images/logInPicture.jpg";
+import { EyeIcon, EyeOffIcon } from "@heroicons/react/outline";
 
 let role = null;
 
 const Login = () => {
   const [identifier, setIdentifier] = useState(""); // This holds either email or username
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isValid, setIsValid] = useState(false); // Keeps track of whether the input is valid
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ const Login = () => {
     console.log("Logging out...");
     try {
       const response = await fetch("http://localhost:4000/auth/logout");
-  
+
       if (response.ok) {
         Cookies.set("jwt", "");
         Cookies.set("role", "");
@@ -24,7 +26,6 @@ const Login = () => {
         Cookies.remove("role");
         console.log("Logged out successfully");
         window.location.reload();
-
       } else {
         console.error("Logout failed.");
       }
@@ -32,8 +33,6 @@ const Login = () => {
       console.error("Error during logout:", error);
     }
   };
-  
-  
 
   // Helper function to check if the input is a valid email
   const isValidEmail = (input) => {
@@ -56,19 +55,19 @@ const Login = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     // Only proceed if input is valid
     if (!isValid) {
       setErrorMessage("Please fix the errors before submitting.");
       return;
     }
-  
+
     // Create the request body (determine if it's an email or username)
     const requestBody = {
       username: identifier,
       password,
     };
-  
+
     try {
       const response = await fetch("http://localhost:4000/auth/login", {
         method: "POST",
@@ -78,11 +77,11 @@ const Login = () => {
         },
         body: JSON.stringify(requestBody), // Send only the non-empty fields
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         role = data.role;
-  
+
         if (role === "admin") {
           navigate("/admin");
         } else {
@@ -92,7 +91,7 @@ const Login = () => {
         window.location.reload();
       } else {
         const errorData = await response.json();
-        
+
         // Check for the specific message from the backend
         if (errorData.message === "Your account is not accepted yet") {
           setErrorMessage("Login failed. Your account is not accepted yet.");
@@ -104,26 +103,27 @@ const Login = () => {
       setErrorMessage("An error occurred during login. Please try again.");
     }
   };
-  
 
   return (
-    
-      
-<div 
-    className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-4"
-    style={{
-      backgroundImage: `url(${logInPicture})`,
-    }}
-  >
-    <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-2xl flex flex-col md:flex-row">
-      <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
-        <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">Welcome Back!</h2>
-        <p className="text-s mb-6 text-[#1A3B47]">
-        We're thrilled to see you again. Explore new updates, pick up right where you left off, and let us help make your experience even better!
-        </p>
-      </div>
-      <div className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto">
-      <form className="space-y-6" onSubmit={handleSubmit}>
+    <div
+      className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-4"
+      style={{
+        backgroundImage: `url(${logInPicture})`,
+      }}
+    >
+      <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-2xl flex flex-col md:flex-row">
+        <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
+          <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">
+            Welcome Back!
+          </h2>
+          <p className="text-s mb-6 text-[#1A3B47]">
+            We're thrilled to see you again. Explore new updates, pick up right
+            where you left off, and let us help make your experience even
+            better!
+          </p>
+        </div>
+        <div className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
                 htmlFor="identifier"
@@ -156,11 +156,11 @@ const Login = () => {
               >
                 Password
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="Password"
                   required
@@ -168,6 +168,18 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="h-5 w-5" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5" />
+                  )}
+                </button>
               </div>
             </div>
 
@@ -186,19 +198,19 @@ const Login = () => {
                 Log in
               </button>
               <p className="text-gray-600">
-              Don't have an account?{" "}
-              <Link
-                to="/sign-up"
-                className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
-              >
-               Sign up now!
-              </Link>
-            </p>
+                Don't have an account?{" "}
+                <Link
+                  to="/sign-up"
+                  className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
+                >
+                  Sign up now!
+                </Link>
+              </p>
 
               <button
                 className="w-full flex justify-center px-4 rounded-md font-medium text-[#5D9297] hover:text-[#B5D3D1]"
                 onClick={() => {
-                    console.log("Logging out...");
+                  console.log("Logging out...");
                   logOut();
                   navigate("/");
                 }}
@@ -207,8 +219,8 @@ const Login = () => {
               </button>
             </div>
           </form>
+        </div>
       </div>
-    </div>
     </div>
   );
 };
