@@ -25,7 +25,7 @@ import { NavbarComponent } from "./components/navbar.jsx";
 import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./pages/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
-//import { MyItinerariesComponent } from "./components/myItineraries.jsx";
+import { MyItinerariesComponent } from "./components/myItineraries.jsx";
 import { MyProducts } from "./components/myProducts.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
 import ViewComplaints from "./components/ViewComplaints.jsx";
@@ -254,7 +254,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          {/* <Route
+           <Route
             path="/my-itineraries"
             element={
               <ProtectedRoute
@@ -264,7 +264,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
- */}
+ 
 
           <Route
             path="/my-products"

@@ -149,7 +149,7 @@ const FilterComponent = ({
             </button>
           )}
 
-          {role === "tour-guide" && (
+          {/* {role === "tour-guide" && (
             <button
               onClick={() => handlemyItineraries(!myItineraries)}
               className={`flex items-center px-4 py-2 rounded-full shadow ${
@@ -161,7 +161,7 @@ const FilterComponent = ({
               <ContactRound strokeWidth={1.25} />
               My Itineraries
             </button>
-          )}
+          )} */}
 
           <button
             onClick={clearFilters}
@@ -171,7 +171,7 @@ const FilterComponent = ({
           </button>
         </div>
 
-        {role === "tour-guide" ? (
+        {/* {role === "tour-guide" ? (
           <Link
             to="/create-itinerary"
             className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
@@ -179,7 +179,7 @@ const FilterComponent = ({
             <Plus className="mr-2" size={18} />
             Create
           </Link>
-        ) : null}
+        ) : null} */}
       </div>
 
       {filtersVisible && (
