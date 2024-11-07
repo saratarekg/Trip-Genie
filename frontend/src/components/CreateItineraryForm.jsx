@@ -78,25 +78,10 @@ const activitySchema = z.object({
   }),
   duration: z.number().min(1, "Duration is required"),
   timing: z.string().min(1, "Timing is required"),
-  tags: z.array(z.string()).optional(),
-  categories: z.array(z.string()).optional(),
-  transportations: z.array(z.string()).optional(),
+  tags: z.array(z.string()).min(1, "Tags is required"),
+  categories: z.array(z.string()).min(1, "Categories is required"),
 });
 
-const transportationSchema = z.object({
-  from: z.string().min(1, "From is required"),
-  to: z.string().min(1, "To is required"),
-  vehicleType: z.enum(vehicleTypes),
-  ticketCost: z.number().positive("Ticket cost must be positive"),
-  timeDeparture: z.string().min(1, "Departure time is required"),
-  estimatedDuration: z.number().positive("Duration must be positive"),
-  remainingSeats: z.number().int().positive("Remaining seats must be positive").refine((val, ctx) => {
-    const maxSeats = 100;
-    return val <= maxSeats;
-  }, {
-    message: "Remaining seats must not exceed the maximum for the selected vehicle type",
-  }),
-});
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -126,10 +111,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
 {
     const [tags, setTags] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [showTransportationForm, setShowTransportationForm] = useState(false);
-    const [editingTransportationIndex, setEditingTransportationIndex] = useState(null);
-    const [newTransportations, setNewTransportations] = useState([]);
-  
+
     const {
       register,
       handleSubmit,
@@ -140,22 +122,10 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
     } = useForm({
       resolver: zodResolver(activitySchema),
       defaultValues: initialData || {
-        transportations: [],
       },
     });
   
-    const {
-      register: registerTransportation,
-      handleSubmit: handleSubmitTransportation,
-      reset: resetTransportation,
-      control: controlTransportation,
-      formState: { errors: transportationErrors },
-    } = useForm({
-      resolver: zodResolver(transportationSchema),
-    });
-  
-    const watchedTransportations = watch('transportations') || [];
-  
+ 
     useEffect(() => {
       fetchTags();
       fetchCategories();
@@ -174,66 +144,15 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
     };
   
     const handleAddActivity = (data) => {
+      console.log(data);
       const activityData = {
         ...data,
-        transportations: watchedTransportations,
       };
       onSave(activityData);
       onClose();
     };
   
-    const onSubmitTransportation = async (data, event) => {
-      event.preventDefault();
-      try {
-        const token = Cookies.get("jwt");
-        let response;
-        if (editingTransportationIndex !== null) {
-          response = await axios.put(
-            `http://localhost:4000/tour-guide/transportations/${newTransportations[editingTransportationIndex]._id}`,
-            data,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          const updatedTransportations = [...newTransportations];
-          updatedTransportations[editingTransportationIndex] = response.data;
-          setNewTransportations(updatedTransportations);
-        } else {
-          response = await axios.post(
-            "http://localhost:4000/tour-guide/transportations",
-            data,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
-          setNewTransportations([...newTransportations, response.data]);
-        }
-        setValue('transportations', [...watchedTransportations, response.data._id]);
-        setShowTransportationForm(false);
-        resetTransportation();
-        setEditingTransportationIndex(null);
-      } catch (error) {
-        console.error("Failed to create/update transportation:", error);
-      }
-    };
-  
-    const handleEditTransportation = (index) => {
-      const transportationToEdit = newTransportations[index];
-      if (transportationToEdit) {
-        resetTransportation({
-          ...transportationToEdit,
-          timeDeparture: format(parseISO(transportationToEdit.timeDeparture), "yyyy-MM-dd'T'HH:mm"),
-        });
-        setEditingTransportationIndex(index);
-        setShowTransportationForm(true);
-      }
-    };
-  
-    const handleDeleteTransportation = (index) => {
-      const updatedTransportations = newTransportations.filter((_, i) => i !== index);
-      setNewTransportations(updatedTransportations);
-      setValue('transportations', updatedTransportations.map(t => t._id));
-    };
+
   
     return (
       <form onSubmit={handleSubmit(handleAddActivity)} className="space-y-4">
@@ -319,135 +238,11 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
                     {errors.tags && <p className="text-red-500 text-xs">{errors.tags.message}</p>}
         </div>
   
-        <div>
-          <Label>Transportations</Label>
-          {newTransportations.map((transport, index) => (
-            <div key={index} className="p-2 border rounded flex justify-between items-center mb-2">
-              <div>
-                <p>From: {transport.from}</p>
-                <p>To: {transport.to}</p>
-                <p>Vehicle: {transport.vehicleType}</p>
-              </div>
-              <div>
-                <Button
-                  type="button"
-                  onClick={() => handleEditTransportation(index)}
-                  className="p-2 h-10 w-10 rounded-full bg-[#B5D3D1] hover:bg-[#5D9297] transition duration-300 ease-in-out mr-2"
-                >
-                  <Edit className="h-4 w-4 text-[#1A3B47]" />
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => handleDeleteTransportation(index)}
-                  className="p-2 h-10 w-10 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              </div>
-            </div>
-          ))}
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              setEditingTransportationIndex(null);
-              resetTransportation();
-              setShowTransportationForm(true);
-            }}
-            className="bg-[#5D9297] hover:bg-[#1A3B47] text-white w-full mt-2 rounded-full"
-          >
-            Create Transportation
-          </Button>
-        </div>
+     
   
         <Button type="submit" className="bg-[#1A3B47] hover:bg-[#388A94] rounded-full">Save Activity</Button>
   
-        <Dialog open={showTransportationForm} onOpenChange={setShowTransportationForm}>
-          <DialogContent className="max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingTransportationIndex !== null ? "Edit Transportation" : "Add Transportation"}</DialogTitle>
-              <DialogDescription>
-                Please fill in the details for the transportation option.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmitTransportation((data, event) => onSubmitTransportation(data, event))} className="space-y-4">
-              <div>
-                <Label htmlFor="from">From</Label>
-                <Input {...registerTransportation("from")} />
-                {transportationErrors.from && <p className="text-red-500">{transportationErrors.from.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="to">To</Label>
-                <Input {...registerTransportation("to")} />
-                {transportationErrors.to && <p className="text-red-500">{transportationErrors.to.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="vehicleType">Vehicle Type</Label>
-                <Controller
-                  name="vehicleType"
-                  control={controlTransportation}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select vehicle type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {vehicleTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {transportationErrors.vehicleType && <p className="text-red-500">{transportationErrors.vehicleType.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="ticketCost">Ticket Cost</Label>
-                <Input type="number" step="0.01" {...registerTransportation("ticketCost", { valueAsNumber: true })} />
-                {transportationErrors.ticketCost && <p className="text-red-500">{transportationErrors.ticketCost.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="timeDeparture">Departure Time</Label>
-                <Controller
-                  name="timeDeparture"
-                  control={controlTransportation}
-                  render={({ field }) => (
-                    <Input
-                      type="datetime-local"
-                      {...field}
-                      value={field.value}
-                      onChange={(e) => {
-                        const localDate = new Date(e.target.value);
-                        const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
-                        field.onChange(utcDate.toISOString().slice(0, 16));
-                      }}
-                    />
-                  )}
-                />
-                {transportationErrors.timeDeparture && <p className="text-red-500">{transportationErrors.timeDeparture.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="estimatedDuration">Estimated Duration (hours)</Label>
-                <Input type="number" step="0.1" {...registerTransportation("estimatedDuration", { valueAsNumber: true })} />
-                {transportationErrors.estimatedDuration && <p className="text-red-500">{transportationErrors.estimatedDuration.message}</p>}
-              </div>
-              <div>
-                <Label htmlFor="remainingSeats">Remaining Seats</Label>
-                <Input 
-                  type="number" 
-                  {...registerTransportation("remainingSeats", { valueAsNumber: true })} 
-                  max={getMaxSeats(controlTransportation._formValues.vehicleType)}
-                />
-                {transportationErrors.remainingSeats && <p className="text-red-500">{transportationErrors.remainingSeats.message}</p>}
-              </div>
-              <Button type="submit" className="bg-[#388A94] hover:bg-[#2c6d75] text-white rounded-full">
-                {editingTransportationIndex !== null ? "Update Transportation" : "Add Transportation"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+      
       </form>
     );
   }
@@ -539,7 +334,8 @@ const ItineraryForm = () => {
     window.location.reload();
   };
 
-  const handleAddActivity = (activity) => {
+  const handleAddActivity = (activity) => { 
+    console.log(activity);
     if (editingActivityIndex !== null) {
       const updatedActivities = [...activities];
       updatedActivities[editingActivityIndex] = activity;
@@ -685,67 +481,93 @@ const ItineraryForm = () => {
               </div>
 
               <div className="col-span-3 space-y-1">
-                <Label className="text-sm font-medium">Available Dates</Label>
-                {availableDates.map((dateObj, dateIndex) => (
-                  <div key={dateIndex} className="mb-4 p-4 border rounded">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Controller
-                        name={`availableDates.${dateIndex}.date`}
-                        control={control}
-                        render={({ field}) => (
-                          <Input
-                            type="date"
-                            {...field}
-                            className={`w-40 ${errors.availableDates?.[dateIndex]?.date ? 'border-red-500' : ''}`}
-                          />
-                        )}
-                      />
-                      <Button variant="destructive" size="icon" onClick={() => removeDate(dateIndex)}           
-                        className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                    {dateObj.times.map((timeObj, timeIndex) => (
-                      <div key={timeIndex} className="flex items-center space-x-2 mb-2">
-                        <Controller
-                          name={`availableDates.${dateIndex}.times.${timeIndex}.startTime`}
-                          control={control}
-                          render={({field}) => (
-                            <Input
-                              type="time"
-                              {...field}
-                              className={`w-32 ${errors.availableDates?.[dateIndex]?.times?.[timeIndex]?.startTime ? 'border-red-500' : ''}`}
-                            />
-                          )}
-                        />
-                        <Controller
-                          name={`availableDates.${dateIndex}.times.${timeIndex}.endTime`}
-                          control={control}
-                          render={({field}) => (
-                            <Input
-                              type="time"
-                              {...field}
-                              className={`w-32 ${errors.availableDates?.[dateIndex]?.times?.[timeIndex]?.endTime ? 'border-red-500' : ''}`}
-                            />
-                          )}
-                        />
-                        <Button variant="destructive" size="icon" onClick={() => removeTime(dateIndex, timeIndex)}                         className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))}
-                    <Button variant="outline" onClick={() => addTime(dateIndex)}>
-                      <Plus className="mr-2 h-4 w-4" /> Add Time
-                    </Button>
-                  </div>
-                ))}
-                <Button variant="outline" onClick={addDate}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Date
-                </Button>
-                {errors.availableDates && <span className="text-red-500 block mt-2">{errors.availableDates.message}</span>}
-              </div>
+  <Label className="text-sm font-medium">Available Dates</Label>
+  {availableDates.map((dateObj, dateIndex) => (
+    <div key={dateIndex} className="mb-4 p-4 border rounded">
+      <div className="flex items-center space-x-2 mb-2">
+        <Controller
+          name={`availableDates.${dateIndex}.date`}
+          control={control}
+          render={({ field }) => (
+            <Input
+              type="date"
+              {...field}
+              className={`w-40 ${errors.availableDates?.[dateIndex]?.date ? 'border-red-500' : ''}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();  // Prevent the "Enter" key's default behavior
+                  e.stopPropagation(); // Stop the event from bubbling up
+                }
+              }}
+            />
+          )}
+        />
+        <Button
+          variant="destructive"
+          size="icon"
+          onClick={() => removeDate(dateIndex)}
+          className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+        >
+          <Trash2 className="h-4 w-4 text-red-500" />
+        </Button>
+      </div>
+      {dateObj.times.map((timeObj, timeIndex) => (
+        <div key={timeIndex} className="flex items-center space-x-2 mb-2">
+          <Controller
+            name={`availableDates.${dateIndex}.times.${timeIndex}.startTime`}
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="time"
+                {...field}
+                className={`w-32 ${errors.availableDates?.[dateIndex]?.times?.[timeIndex]?.startTime ? 'border-red-500' : ''}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();  // Prevent the "Enter" key's default behavior
+                    e.stopPropagation(); // Stop the event from bubbling up
+                  }
+                }}
+              />
+            )}
+          />
+          <Controller
+            name={`availableDates.${dateIndex}.times.${timeIndex}.endTime`}
+            control={control}
+            render={({ field }) => (
+              <Input
+                type="time"
+                {...field}
+                className={`w-32 ${errors.availableDates?.[dateIndex]?.times?.[timeIndex]?.endTime ? 'border-red-500' : ''}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();  // Prevent the "Enter" key's default behavior
+                    e.stopPropagation(); // Stop the event from bubbling up
+                  }
+                }}
+              />
+            )}
+          />
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={() => removeTime(dateIndex, timeIndex)}
+            className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+          >
+            <Trash2 className="h-4 w-4 text-red-500" />
+          </Button>
+        </div>
+      ))}
+      <Button variant="outline" onClick={() => addTime(dateIndex)}>
+        <Plus className="mr-2 h-4 w-4" /> Add Time
+      </Button>
+    </div>
+  ))}
+  <Button variant="outline" onClick={addDate}>
+    <Plus className="mr-2 h-4 w-4" /> Add Date
+  </Button>
+  {errors.availableDates && <span className="text-red-500 block mt-2">{errors.availableDates.message}</span>}
+</div>
+
 
               <div className="col-span-1">
                 <Label className="text-sm font-medium">Activities</Label>
