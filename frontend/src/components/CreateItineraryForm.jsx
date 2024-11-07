@@ -62,7 +62,7 @@ const getMaxSeats = (vehicleType) => {
     case "Microbus":
       return 15;
     default:
-      return 0;
+      return 50;
   }
 };
 
@@ -291,10 +291,12 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
                 className="react-select-container"
                 classNamePrefix="react-select"
                 value={categories.filter(option => field.value?.includes(option.value))}
-                onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value))}
+                onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value),
+                  console.log(selectedOptions))}
               />
             )}
           />
+          {errors.categories && <p className="text-red-500 text-xs">{errors.categories.message}</p>}
         </div>
   
         <div className="col-span-2">
@@ -314,6 +316,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
               />
             )}
           />
+                    {errors.tags && <p className="text-red-500 text-xs">{errors.tags.message}</p>}
         </div>
   
         <div>
@@ -681,7 +684,7 @@ const ItineraryForm = () => {
                 )}
               </div>
 
-              <div className="col-span-3 space-y-4">
+              <div className="col-span-3 space-y-1">
                 <Label className="text-sm font-medium">Available Dates</Label>
                 {availableDates.map((dateObj, dateIndex) => (
                   <div key={dateIndex} className="mb-4 p-4 border rounded">
@@ -744,7 +747,7 @@ const ItineraryForm = () => {
                 {errors.availableDates && <span className="text-red-500 block mt-2">{errors.availableDates.message}</span>}
               </div>
 
-              <div className="col-span-4">
+              <div className="col-span-1">
                 <Label className="text-sm font-medium">Activities</Label>
                 {activities.map((activity, index) => (
                   <div key={index} className="mb-2 p-2 border rounded flex justify-between items-center">
