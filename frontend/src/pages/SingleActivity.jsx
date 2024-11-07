@@ -184,6 +184,8 @@ const ActivityDetail = () => {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [userBookings, setUserBookings] = useState([]);
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
+    useState(false);
 
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
@@ -200,6 +202,51 @@ const ActivityDetail = () => {
   const [selectedTransportation, setSelectedTransportation] = useState(null);
   const [transportationBookingDialog, setTransportationBookingDialog] =
     useState(false);
+  const [seatsToBook, setSeatsToBook] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState("creditCard");
+
+  const handleTransportationBooking = async () => {
+    if (!selectedTransportation) return;
+
+    setIsBooking(true);
+    setBookingError("");
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.post(
+        "http://localhost:4000/tourist/book-transportation",
+        {
+          touristID: currentUser,
+          transportationID: selectedTransportation._id,
+          seatsToBook: seatsToBook,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.message === "Transportation Booking successful") {
+        setShowTransportationSuccessDialog(true);
+        const updatedTransportations = activity.transportations.map((t) =>
+          t._id === selectedTransportation._id
+            ? { ...t, remainingSeats: response.data.remainingSeats }
+            : t
+        );
+        setActivity({ ...activity, transportations: updatedTransportations });
+      } else {
+        setBookingError(
+          response.data.message || "Failed to book transportation"
+        );
+      }
+    } catch (error) {
+      console.error("Error booking transportation:", error);
+      setBookingError(
+        error.response?.data?.message || "An error occurred while booking"
+      );
+    } finally {
+      setIsBooking(false);
+      setTransportationBookingDialog(false);
+    }
+  };
 
   const renderTransportationOptions = () => {
     if (!activity.transportations || activity.transportations.length === 0) {
@@ -1688,6 +1735,106 @@ const ActivityDetail = () => {
           <DialogFooter>
             <Button onClick={() => navigate("/activity")} variant="default">
               OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={transportationBookingDialog}
+        onOpenChange={setTransportationBookingDialog}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Book Transportation</DialogTitle>
+            <DialogDescription>
+              Please select the number of seats and payment method.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="seats" className="text-right">
+                Seats
+              </Label>
+              <Input
+                id="seats"
+                type="number"
+                className="col-span-3"
+                value={seatsToBook}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  setSeatsToBook(
+                    Math.max(
+                      0,
+                      Math.min(
+                        value,
+                        selectedTransportation?.remainingSeats || 0
+                      )
+                    )
+                  );
+                }}
+                min="0"
+                max={selectedTransportation?.remainingSeats}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Total Price</Label>
+              <div className="col-span-3">
+                {formatPrice(
+                  (selectedTransportation?.ticketCost || 0) * seatsToBook
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Payment</Label>
+              <RadioGroup
+                defaultValue="creditCard"
+                className="col-span-3"
+                onValueChange={setPaymentMethod}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="creditCard" id="creditCard" />
+                  <Label htmlFor="creditCard">Credit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="debitCard" id="debitCard" />
+                  <Label htmlFor="debitCard">Debit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="wallet" id="wallet" />
+                  <Label htmlFor="wallet">Wallet</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setTransportationBookingDialog(false)}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleTransportationBooking} disabled={isBooking}>
+              {isBooking ? "Booking..." : "Confirm Booking"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showTransportationSuccessDialog}
+        onOpenChange={setShowTransportationSuccessDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transportation Booked Successfully</DialogTitle>
+            <DialogDescription>
+              Your transportation has been booked. Thank you for your purchase!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowTransportationSuccessDialog(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
