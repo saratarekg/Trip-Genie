@@ -67,130 +67,137 @@ export function ViewComplaints() {
     setStatus(newStatus);
   };
 
-  if (error) {
-    return <div className="text-red-500">Error: {error}</div>;
-  }
-
   return (
-    <div className="container mx-auto py-8 my-12">
-      <h1 className="text-3xl font-bold mb-6">Complaints</h1>
-      {complaints.length === 0 ? (
-        <p>No complaints found.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white">
-            <thead className="bg-sky-200">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Complaint No.
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Tourist
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Subject
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Date
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={toggleSortOrder}
-                          className="ml-1"
-                        >
-                          <ArrowUpDown className="h-3 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                    </Tooltip>
-                  </TooltipProvider>
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Status
-                  <DropdownMenu>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="ml-1"
+    <div className="bg-gray-50 min-h-screen">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h1 className="text-2xl font-bold text-[#003f66] mb-6">Complaints Dashboard</h1>
+
+          {error ? (
+            <div className="text-red-500 p-4 rounded-md bg-red-50 mb-4">{error}</div>
+          ) : complaints.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No complaints found.</div>
+          ) : (
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Complaint No.
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tourist
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Subject
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={toggleSortOrder}
+                                className="ml-1 hover:bg-gray-100"
+                              >
+                                <ArrowUpDown className="h-3 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                        <DropdownMenu>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="ml-1 hover:bg-gray-100"
+                                  >
+                                    <Filter className="h-3 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                              </TooltipTrigger>
+                            </Tooltip>
+                          </TooltipProvider>
+                          <DropdownMenuContent align="end" className="bg-white">
+                            <DropdownMenuItem onClick={() => handleStatusFilter("all")}>
+                              All
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusFilter("pending")}>
+                              Pending
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusFilter("resolved")}>
+                              Resolved
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {complaints.map((complaint, index) => (
+                      <tr
+                        key={complaint._id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#2D6F77]">
+                          {complaint.number}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {complaint.tourist.username}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {complaint.title}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {formatDate(complaint.createdAt)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              complaint.status === "resolved"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {complaint.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <Link to={`/complaint/${complaint._id}`}>
+                            <Button 
+                              className="!bg-white !text-[#2D6F77] border !border-[#2D6F77] 
+                              hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
+                              active:transform active:scale-95 transition-all duration-200"
                             >
-                              <Filter className="h-3 w-4" />
+                              View
                             </Button>
-                          </DropdownMenuTrigger>
-                        </TooltipTrigger>
-                      </Tooltip>
-                    </TooltipProvider>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() => handleStatusFilter("all")}
-                      >
-                        All
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleStatusFilter("pending")}
-                      >
-                        Pending
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleStatusFilter("resolved")}
-                      >
-                        Resolved
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {complaints.map((complaint, index) => (
-                <tr
-                  key={complaint._id}
-                  className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {complaint.number}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {complaint.tourist.username}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {complaint.title}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(complaint.createdAt)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        complaint.status === "resolved"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {complaint.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Link to={`/complaint/${complaint._id}`}>
-                      <Button variant="outline" size="sm">
-                        View
-                      </Button>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

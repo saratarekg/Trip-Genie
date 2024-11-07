@@ -128,7 +128,7 @@ export function NavbarComponent() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:block" style={{ marginRight: 30 }}>
-            <div className="inline-flex items-center border border-white/20 rounded-full px-2 py-1">
+            <div className="inline-flex items-center border-2 border-white/30 rounded-full px-2 py-1">
               {role === "tour-guide" && (
                 <>
                   <NavLink to="/activity">Activities</NavLink>
@@ -420,7 +420,8 @@ export function NavbarComponent() {
               <div className="pt-4 pb-3 border-t border-white/20">
                 <div className="flex items-center px-5">
                   <Link to="/login">
-                    <button className="ml-3 bg-white text-black hover:bg-white/90 px-6 py-2 rounded-full text-sm font-medium transition-colors duration-200">
+                    <button className="bg-[#1A3B47] text-white hover:bg-white/10 px-4 py-2 rounded-full 
+                    transition-colors duration-200 text-sm font-medium border-2 border-white/30">
                       Logout
                     </button>
                   </Link>

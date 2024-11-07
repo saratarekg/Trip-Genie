@@ -140,17 +140,13 @@ export default function UserApproval() {
       });
       showDialog(`Successfully rejected the ${role}.`);
       // Re-fetch the user type list after rejection
-      if(role === "advertiser"){
+      if (role === "advertiser") {
         fetchAdvertisers();
-        
-
-      }else if(role === "seller"){
+      } else if (role === "seller") {
         fetchSellers();
-
-      }else{
+      } else {
         fetchTourGuides();
       }
-  
     } catch (err) {
       setError(`Failed to reject ${role}`);
       console.error(err);
@@ -159,103 +155,128 @@ export default function UserApproval() {
 
   const renderUserCards = (users, role) =>
     users.map((user) => (
-      <Card key={user._id} className="w-full">
-        <CardHeader>
-          <CardTitle className="text-xl">
-            {user.name} <span className="text-muted-foreground">({role})</span>
+      <Card key={user._id} className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        <CardHeader className="border-b bg-gray-50 py-2 sm:py-3 px-3 sm:px-4">
+          <CardTitle className="text-base sm:text-lg font-semibold text-[#003f66]">
+            {user.name}
+            <span className="text-[#5D9297] text-xs sm:text-sm ml-2">({role})</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
+        <CardContent className="p-3 sm:p-4 space-y-2 sm:space-y-3">
+          <div className="flex space-x-2">
             <Button
               onClick={() => handleConfirm("reject", user, role)}
-              variant="destructive"
+              className="flex-1 bg-red-500 hover:bg-red-600 active:bg-red-700 
+              active:transform active:scale-95 text-white transition-all duration-200"
             >
               Reject
             </Button>
             <Button
               onClick={() => handleConfirm("approve", user, role)}
-              variant="default"
+              className="flex-1 text-sm sm:text-base bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] 
+              active:transform active:scale-95 text-white transition-all duration-200"
             >
               Accept
             </Button>
-            <div className="grid gap-4 mt-2">
-              {user.files ? (
-                <div>
-                  {user.files.IDFilename && (
-                    <Button
-                      onClick={() => fetchFile(user.files.IDFilename)}
-                      className="bg-gray-300 hover:bg-gray-500 text-black mt-2 mr-1 ml-1"
-                    >
-                      View ID Document
-                    </Button>
-                  )}
-                  {user.files.taxationRegistryCardFilename && (
-                    <Button
-                      onClick={() =>
-                        fetchFile(user.files.taxationRegistryCardFilename)
-                      }
-                      className="bg-gray-300 hover:bg-gray-500 text-black mt-2 mr-1 ml-1"
-                    >
-                      View Taxation Registry Card
-                    </Button>
-                  )}
-                  {user.files.certificatesFilenames &&
-                    user.files.certificatesFilenames.length > 0 &&
-                    user.files.certificatesFilenames.map(
-                      (certificate, index) => (
-                        <Button
-                          key={index}
-                          onClick={() => fetchFile(certificate)}
-                          className="bg-gray-300 hover:bg-gray-500 text-black mt-2 mr-1 ml-1"
-                        >
-                          View Certificate {index + 1}
-                        </Button>
-                      )
-                    )}
-                </div>
-              ) : (
-                <p className="text-gray-500">No documents available</p>
-              )}
-            </div>
           </div>
+
+          {user.files && (
+            <div className="flex flex-col items-center space-y-2 w-full">
+              {user.files.IDFilename && (
+                <Button
+                  onClick={() => fetchFile(user.files.IDFilename)}
+                  className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
+                  hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
+                  active:transform active:scale-95 transition-all duration-200"
+                  variant="outline"
+                >
+                  View ID Document
+                </Button>
+              )}
+              {user.files.taxationRegistryCardFilename && (
+                <Button
+                  onClick={() => fetchFile(user.files.taxationRegistryCardFilename)}
+                  className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
+                  hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
+                  active:transform active:scale-95 transition-all duration-200"
+                  variant="outline"
+                >
+                  View Taxation Registry Card
+                </Button>
+              )}
+              {user.files.certificatesFilenames &&
+                user.files.certificatesFilenames.length > 0 &&
+                user.files.certificatesFilenames.map((certificate, index) => (
+                  <Button
+                    key={index}
+                    onClick={() => fetchFile(certificate)}
+                    className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
+                    hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
+                    active:transform active:scale-95 transition-all duration-200"
+                    variant="outline"
+                  >
+                    View Certificate {index + 1}
+                  </Button>
+                ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     ));
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4 mt-10">Approval Dashboard</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+    <div className="bg-gray-50 min-h-screen flex flex-col">
+      <div className="w-full bg-[#1A3B47] py-6 sm:py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
 
-      {advertisers.length === 0 &&
-      sellers.length === 0 &&
-      tourGuides.length === 0 ? (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-lg font-semibold text-gray-700 bg-gray-300 p-4 rounded shadow-md">
-            No users to Accept/Reject. Please check again later!
-          </p>
+      <div className="flex-grow container mx-auto px-4 py-6 sm:py-8 flex items-center justify-center">
+        <div className="w-full max-w-4xl">
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+            <h1 className="text-xl sm:text-2xl font-bold text-[#003f66] mb-4 sm:mb-6">
+              User Approval Dashboard
+            </h1>
+            
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md text-sm sm:text-base">
+                {error}
+              </div>
+            )}
+
+            {advertisers.length === 0 && sellers.length === 0 && tourGuides.length === 0 ? (
+              <div className="flex items-center justify-center h-24 sm:h-32">
+                <p className="text-base sm:text-lg text-[#003f66] text-center px-4">
+                  No users to Accept/Reject. Please check again later!
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2 auto-rows-auto">
+                {renderUserCards(advertisers, "advertiser")}
+                {renderUserCards(sellers, "seller")}
+                {renderUserCards(tourGuides, "tourGuide")}
+              </div>
+            )}
+          </div>
         </div>
-      ) : (
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          {renderUserCards(advertisers, "advertiser")}
-          {renderUserCards(sellers, "seller")}
-          {renderUserCards(tourGuides, "tourGuide")}
-        </div>
-      )}
+      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">
-              Success!
+            <DialogTitle className="text-lg font-semibold text-[#003f66]">
+              Success
             </DialogTitle>
             <DialogDescription className="text-gray-600 mt-2">
               {dialogMessage}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4 flex justify-end space-x-4">
-            <Button onClick={() => setDialogOpen(false)}>Close</Button>
+          <DialogFooter className="mt-4">
+            <Button
+              onClick={() => setDialogOpen(false)}
+              className="bg-[#5D9297] hover:bg-[#388A94] text-white"
+            >
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -263,26 +284,27 @@ export default function UserApproval() {
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">
+            <DialogTitle className="text-lg font-semibold text-[#003f66]">
               Confirm Action
             </DialogTitle>
             <DialogDescription className="text-gray-600 mt-2">
               Are you sure you want to proceed with this action?
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4 flex justify-end space-x-4">
+          <DialogFooter className="mt-4 space-x-2">
             <Button
               onClick={() => {
                 confirmAction();
                 setConfirmDialogOpen(false);
               }}
-              variant="default"
+              className="bg-[#5D9297] hover:bg-[#388A94] text-white"
             >
               Yes
             </Button>
             <Button
               onClick={() => setConfirmDialogOpen(false)}
               variant="outline"
+              className="border-[#808080] text-[#003f66] hover:bg-gray-100"
             >
               Cancel
             </Button>

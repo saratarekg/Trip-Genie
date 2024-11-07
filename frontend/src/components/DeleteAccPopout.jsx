@@ -114,104 +114,115 @@ export function DeleteAccount() {
   const filteredUsers = users.filter((user) => user.role === filter);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-[#003f66] mb-8">
-          Manage User Accounts
-        </h1>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex flex-col items-center mb-6">
-            <Select
-              onValueChange={handleRoleChange}
-              className="w-full max-w-[280px] mb-4"
-            >
-              <SelectTrigger className="text-lg bg-[#f7f7f7] rounded-lg border-[#808080]">
-                <SelectValue
-                  placeholder="Choose an account type"
-                  className="text-lg"
-                />
-              </SelectTrigger>
-              <SelectContent className="bg-[#f7f7f7]">
-                <SelectItem className="text-lg text-[#003f66]" value="admin">Admin</SelectItem>
-                <SelectItem className="text-lg text-[#003f66]" value="tourist">Tourist</SelectItem>
-                <SelectItem className="text-lg text-[#003f66]" value="governor">Governor</SelectItem>
-                <SelectItem className="text-lg text-[#003f66]" value="seller">Seller</SelectItem>
-                <SelectItem className="text-lg text-[#003f66]" value="tourGuide">Tour Guide</SelectItem>
-                <SelectItem className="text-lg text-[#003f66]" value="advertiser">Advertiser</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="bg-gray-50 min-h-screen">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
 
-          {filter && (
-            <div className="mb-4">
-              <div className="flex justify-between font-bold text-[#003f66] py-2 text-lg border-b">
-                <span>Username</span>
-              </div>
-              <div className="mt-4">
+      <div className="flex-grow container mx-auto px-4 py-8 flex items-center justify-center">
+        <div className="w-full max-w-4xl">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h1 className="text-2xl font-bold text-[#003f66] mb-6">
+              Manage User Accounts
+            </h1>
+            
+            <div className="flex flex-col items-center mb-6">
+              <Select
+                onValueChange={handleRoleChange}
+                className="w-full max-w-[280px]"
+              >
+                <SelectTrigger className="bg-white border-[#2D6F77] text-[#2D6F77] hover:bg-gray-50">
+                  <SelectValue placeholder="Choose an account type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="tourist">Tourist</SelectItem>
+                  <SelectItem value="governor">Governor</SelectItem>
+                  <SelectItem value="seller">Seller</SelectItem>
+                  <SelectItem value="tourGuide">Tour Guide</SelectItem>
+                  <SelectItem value="advertiser">Advertiser</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {filter && (
+              <div className="space-y-4">
+                <div className="flex justify-between font-semibold text-[#003f66] py-2 border-b">
+                  <span>Username</span>
+                </div>
+                
                 {filteredUsers.length > 0 ? (
-                  <ul className="space-y-3 max-h-[60vh] overflow-y-auto">
+                  <div className="space-y-3">
                     {filteredUsers.map((user) => (
-                      <li
+                      <div
                         key={user._id}
-                        className="flex justify-between items-center py-3 px-4 bg-[#f7f7f7] rounded-lg border border-[#808080]"
+                        className="flex justify-between items-center py-3 px-4 bg-white rounded-lg border border-gray-200 hover:border-[#2D6F77] transition-colors"
                       >
-                        <span className="text-lg">{user.username}</span>
+                        <span className="text-[#2D6F77] font-medium">{user.username}</span>
                         <Button
                           onClick={() => setConfirmDelete(user._id)}
-                          className="bg-[#ED8936] hover:bg-[#D6782D] text-white"
+                          className="bg-red-500 hover:bg-red-600 active:bg-red-700 
+                          active:transform active:scale-95 text-white transition-all duration-200 px-6"
                         >
                           Delete
                         </Button>
-                      </li>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : (
-                  <p className="text-center text-gray-500 py-4">No users found.</p>
+                  <div className="text-center py-8 text-gray-500">
+                    No users found for this account type.
+                  </div>
                 )}
               </div>
-            </div>
-          )}
+            )}
 
-          {feedbackMessage && (
-            <div className="mt-4 text-center text-red-500">
-              {feedbackMessage}
-            </div>
-          )}
-          {deleteSuccessMessage && (
-            <div className="mt-4 text-center text-green-500">
-              {deleteSuccessMessage}
-            </div>
-          )}
+            {feedbackMessage && (
+              <div className="mt-4 p-3 bg-red-100 text-red-800 rounded-md text-center">
+                {feedbackMessage}
+              </div>
+            )}
+            
+            {deleteSuccessMessage && (
+              <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md text-center">
+                {deleteSuccessMessage}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {confirmDelete && (
-        <Dialog open onOpenChange={() => setConfirmDelete(null)}>
-          <DialogContent className="sm:max-w-[400px] bg-white rounded-lg shadow-lg border border-gray-300">
-            <DialogHeader>
-              <DialogTitle className="text-lg">Confirm Deletion</DialogTitle>
-            </DialogHeader>
-            <p className="text-lg">
-              Are you sure you want to delete this account?
-            </p>
-            <div className="flex justify-end mt-4">
-              <Button onClick={() => setConfirmDelete(null)} className="mr-2 bg-gray-500 text-white">
-                Cancel
-              </Button>
-              <Button
-                onClick={async () => {
-                  await handleDelete(confirmDelete);
-                  setConfirmDelete(null);
-                }}
-                className="bg-red-500 hover:bg-red-600 text-white"
-              >
-                Delete
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <Dialog open={confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
+        <DialogContent className="sm:max-w-[400px] bg-white p-6 rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-[#003f66]">
+              Confirm Deletion
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600 py-4">
+            Are you sure you want to delete this account? This action cannot be undone.
+          </p>
+          <div className="flex justify-end space-x-3 mt-4">
+            <Button 
+              onClick={() => setConfirmDelete(null)}
+              className="bg-gray-500 hover:bg-gray-600 active:bg-gray-700 
+              active:transform active:scale-95 text-white transition-all duration-200"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                await handleDelete(confirmDelete);
+                setConfirmDelete(null);
+              }}
+              className="bg-red-500 hover:bg-red-600 active:bg-red-700 
+              active:transform active:scale-95 text-white transition-all duration-200"
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

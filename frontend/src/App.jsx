@@ -65,6 +65,7 @@ import TermsandCondition from "./pages/TermsandCondition.jsx";
 import { DeleteAccount } from "@/components/DeleteAccPopout.jsx";
 import AdminGovernorPage from "./pages/AdminGovernorPage";
 import TagsPage from "./pages/TagsPage";
+import CategoriesPage from "./pages/CategoriesPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -507,6 +508,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <TagsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manage-categories"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <CategoriesPage />
               </ProtectedRoute>
             }
           />

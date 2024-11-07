@@ -23,7 +23,6 @@ import {
   Ticket,
 } from "lucide-react";
 import { Pie } from "react-chartjs-2";
-import { CategoryCRUD } from "@/components/category-crud";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import {
@@ -69,28 +68,12 @@ const DashboardCard = ({ title, value, subtitle, icon }) => (
 );
 
 export function Dashboard() {
-  const [isCategoryCRUDOpen, setIsCategoryCRUDOpen] = useState(false);
-  const [footerHeight, setFooterHeight] = useState(0);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("accounts");
 
   useEffect(() => {
-    const footer = document.querySelector("footer");
-    if (footer) {
-      setFooterHeight(footer.offsetHeight);
-    }
-
-    const handleResize = () => {
-      if (footer) {
-        setFooterHeight(footer.offsetHeight);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    // Cleanup function
     return () => {
-      // Destroy any existing chart instances
+      // Cleanup function
       const charts = ChartJS.instances;
       Object.keys(charts).forEach(key => {
         charts[key].destroy();
@@ -334,8 +317,9 @@ export function Dashboard() {
                   </CardHeader>
                   <CardContent>
                     <Button
-                      className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
-                      onClick={() => setIsCategoryCRUDOpen(true)}
+                      onClick={() => navigate('/manage-categories')}
+                      className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 
+                      text-white transition-all duration-200"
                     >
                       Manage
                     </Button>
@@ -446,11 +430,6 @@ export function Dashboard() {
             </Card>
           </div>
         </main>
-
-        <CategoryCRUD
-          isOpen={isCategoryCRUDOpen}
-          onClose={() => setIsCategoryCRUDOpen(false)}
-        />
       </div>
     </div>
   );

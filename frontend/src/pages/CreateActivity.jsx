@@ -7,6 +7,7 @@ import * as z from "zod";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { format, parseISO } from "date-fns";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -139,6 +140,7 @@ export default function CreateActivity() {
     handleSubmit: handleSubmitTransportation,
     reset: resetTransportation,
     setValue: setTransportationValue,
+    control: controlTransportation,
     watch: watchTransportation,
     formState: { errors: transportationErrors },
   } = useForm({
@@ -366,11 +368,16 @@ export default function CreateActivity() {
 
   const handleEditTransportation = (index) => {
     const transportation = transportations[index];
-    Object.keys(transportation).forEach((key) => {
-      setTransportationValue(key, transportation[key]);
+    resetTransportation({
+      ...transportation,
+      timeDeparture: format(parseISO(transportation.timeDeparture), "yyyy-MM-dd'T'HH:mm"),
     });
     setEditingTransportationIndex(index);
     setShowTransportationForm(true);
+  };
+
+  const formatDate = (dateString) => {
+    return format(parseISO(dateString), "dd/MM/yyyy HH:mm");
   };
 
   const handleDeleteTransportation = async (index) => {
@@ -667,6 +674,9 @@ export default function CreateActivity() {
                       <p>From: {transport.from}</p>
                       <p>To: {transport.to}</p>
                       <p>Vehicle: {transport.vehicleType}</p>
+                      <p>Departure: {formatDate(transport.timeDeparture)}</p>
+                      <p>Duration: {transport.estimatedDuration} hours</p>
+                      <p>Remaining Seats: {transport.remainingSeats}</p>
                     </div>
                     <div>
                       <Button
@@ -686,10 +696,11 @@ export default function CreateActivity() {
                     </div>
                   </div>
                 ))}
+                <br />
                 <Button
                   type="button"
                   onClick={() => setShowTransportationForm(true)}
-                  className="bg-[#388A94] hover:bg-[#2c6d75] text-white w-full mt-2"
+                  className="bg-[#388A94] hover:bg-[#2c6d75] text-white w mt-2"
                 >
                   Add Transportation
                 </Button>
@@ -728,18 +739,24 @@ export default function CreateActivity() {
             </div>
             <div>
               <Label htmlFor="vehicleType">Vehicle Type</Label>
-              <Select onValueChange={(value) => setTransportationValue("vehicleType", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select vehicle type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {vehicleTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                name="vehicleType"
+                control={controlTransportation}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select vehicle type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicleTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {transportationErrors.vehicleType && <p className="text-red-500">{transportationErrors.vehicleType.message}</p>}
             </div>
             <div>
@@ -749,7 +766,22 @@ export default function CreateActivity() {
             </div>
             <div>
               <Label htmlFor="timeDeparture">Departure Time</Label>
-              <Input type="datetime-local" {...registerTransportation("timeDeparture")} />
+              <Controller
+                name="timeDeparture"
+                control={controlTransportation}
+                render={({ field }) => (
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                    value={field.value}
+                    onChange={(e) => {
+                      const localDate = new Date(e.target.value);
+                      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+                      field.onChange(utcDate.toISOString().slice(0, 16));
+                    }}
+                  />
+                )}
+              />
               {transportationErrors.timeDeparture && <p className="text-red-500">{transportationErrors.timeDeparture.message}</p>}
             </div>
             <div>

@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { format, parseISO } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -157,6 +158,7 @@ export default function UpdateActivity() {
     register: registerTransportation,
     handleSubmit: handleSubmitTransportation,
     reset: resetTransportation,
+    control: controlTransportation,
     setValue: setTransportationValue,
     watch: watchTransportation,
     formState: { errors: transportationErrors },
@@ -427,12 +429,18 @@ export default function UpdateActivity() {
 
   const handleEditTransportation = (index) => {
     const transportation = transportations[index];
-    Object.keys(transportation).forEach((key) => {
-      setTransportationValue(key, transportation[key]);
+    resetTransportation({
+      ...transportation,
+      timeDeparture: format(parseISO(transportation.timeDeparture), "yyyy-MM-dd'T'HH:mm"),
     });
     setEditingTransportationIndex(index);
     setShowTransportationForm(true);
   };
+
+  const formatDate = (dateString) => {
+    return format(parseISO(dateString), "dd/MM/yyyy HH:mm");
+  };
+
 
   const handleDeleteTransportation = async (index) => {
     try {
@@ -767,7 +775,7 @@ export default function UpdateActivity() {
                       </p>
                       <p>
                         <strong>Departure:</strong>{" "}
-                        {new Date(transport.timeDeparture).toLocaleString()}
+                         {formatDate(transport.timeDeparture)}
                       </p>
                       <p>
                         <strong>Duration:</strong> {transport.estimatedDuration}{" "}
@@ -884,29 +892,31 @@ export default function UpdateActivity() {
               )}
             </div>
             <div>
-              <Label htmlFor="vehicleType">Vehicle Type</Label>
-              <Select
-                onValueChange={(value) =>
-                  setTransportationValue("vehicleType", value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select vehicle type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {vehicleTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {transportationErrors.vehicleType && (
-                <p className="text-red-500 text-sm">
-                  {transportationErrors.vehicleType.message}
-                </p>
+            <Label htmlFor="vehicleType">Vehicle Type</Label>
+            <Controller
+              name="vehicleType"
+              control={controlTransportation}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select vehicle type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicleTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
-            </div>
+            />
+            {transportationErrors.vehicleType && (
+              <p className="text-red-500 text-sm">
+                {transportationErrors.vehicleType.message}
+              </p>
+            )}
+          </div>
             <div>
               <Label htmlFor="ticketCost">Ticket Cost</Label>
               <Input
@@ -924,15 +934,23 @@ export default function UpdateActivity() {
             </div>
             <div>
               <Label htmlFor="timeDeparture">Departure Time</Label>
-              <Input
-                type="datetime-local"
-                {...registerTransportation("timeDeparture")}
+              <Controller
+                name="timeDeparture"
+                control={controlTransportation}
+                render={({ field }) => (
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                    value={field.value}
+                    onChange={(e) => {
+                      const localDate = new Date(e.target.value);
+                      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+                      field.onChange(utcDate.toISOString().slice(0, 16));
+                    }}
+                  />
+                )}
               />
-              {transportationErrors.timeDeparture && (
-                <p className="text-red-500 text-sm">
-                  {transportation.timeDeparture.message}
-                </p>
-              )}
+              {transportationErrors.timeDeparture && <p className="text-red-500">{transportationErrors.timeDeparture.message}</p>}
             </div>
             <div>
               <Label htmlFor="estimatedDuration">
