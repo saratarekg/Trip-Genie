@@ -1353,11 +1353,11 @@ export function SignupForm() {
     >
       <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
         <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
-          <h2 className="text-3xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">
-            Create Your Account Now!
+          <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">
+            Create Your <br/> Account Now!
           </h2>
-          <p className="text-xs mb-6 text-[#1A3B47]">
-            Join us today! It only takes a few steps to set up your account and
+          <p className="text-s mb-6 text-[#1A3B47]">
+            Join us today! It only takes a few steps to set <br/>up your account and
             start exploring.
           </p>
           {renderStepIndicator()}
@@ -1449,7 +1449,7 @@ export function SignupForm() {
           </Form>
 
           {!userType && (
-            <div className="mt-4 text-center text-xs">
+            <div className="mt-4 text-center text-s">
               <p className="text-gray-600">
                 Already have an account?{" "}
                 <Link
