@@ -252,7 +252,7 @@ const createActivity = async (req, res) => {
       timing,
       description,
       price,
-      currency:"67140446ee157ee4f239d523",
+      currency: "67140446ee157ee4f239d523",
       category,
       tags,
       specialDiscount,
@@ -282,24 +282,18 @@ const deleteActivity = async (req, res) => {
         .json({ message: "You are not authorized to delete this activity" });
     }
 
-    //remove the images from cloudinary
-    for (let i = 0; i < activity.pictures.length; i++) {
-      await cloudinary.uploader.destroy(activity.pictures[i].public_id);
-    }
-
     const bookings = await ActivityBooking.find({ activity: req.params.id });
     if (bookings.length > 0 && activity.timing > new Date()) {
       return res.status(400).json({
         message: "Cannot delete activity with existing bookings",
       });
     }
-    await Activity.findByIdAndUpdate(req.params.id, { isDeleted: true });
 
-    // Remove the deleted activity from the 'activities' array in the Itinerary model
-    await Itinerary.updateMany(
-      { activities: req.params.id }, // Find itineraries with this activity
-      { $pull: { activities: req.params.id } } // Remove the activity from the array
-    );
+    //remove the images from cloudinary
+    for (let i = 0; i < activity.pictures.length; i++) {
+      await cloudinary.uploader.destroy(activity.pictures[i].public_id);
+    }
+    await Activity.findByIdAndUpdate(req.params.id, { isDeleted: true });
 
     res.status(204).json();
   } catch (error) {
