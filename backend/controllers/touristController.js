@@ -260,8 +260,10 @@ console.log(picture);
 };
 
 const bookTransportation = async (req, res) => {
-  const { touristID, transportationID, seatsToBook } = req.body;
+  const { transportationID, seatsToBook } = req.body;
 
+  const touristID = res.locals.user_id;
+  
   try {
     // Step 1: Find the transportation and check available seats
     const transportation = await Transportation.findById(transportationID);

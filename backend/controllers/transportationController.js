@@ -33,6 +33,7 @@ const createTransportation = async (req, res) => {
     timeDeparture,
     estimatedDuration,
     remainingSeats,
+    isStandAlone,
   } = req.body;
 
   const newTransportation = new Transportation({
@@ -43,6 +44,7 @@ const createTransportation = async (req, res) => {
     timeDeparture,
     estimatedDuration,
     remainingSeats,
+    isStandAlone,
   });
 
   try {
