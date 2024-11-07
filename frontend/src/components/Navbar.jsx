@@ -239,6 +239,8 @@ export function NavbarComponent() {
                     Historical Places
                   </NavLink>
                   <NavLink to="/all-products">Products</NavLink>
+                  <NavLink to="/transportation">Transportation</NavLink>
+
                 </>
               )}
               {role === "advertiser" && (
@@ -281,6 +283,8 @@ export function NavbarComponent() {
                       </div>
                     )}
                   </div>
+                  <NavLink to="/transportation">Transportation</NavLink>
+
                   <NavLink to="/advertiser-profile">Profile</NavLink>
                 </>
               )}
