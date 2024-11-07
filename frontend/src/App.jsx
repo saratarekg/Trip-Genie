@@ -166,7 +166,7 @@ function AppContent() {
           <Route
             path="/account/*"
             element={
-              <ProtectedRoute allowedRoles={["tourist"]}>
+              <ProtectedRoute allowedRoles={["tourist" , "advertiser" , "seller" , "tour-guide"]}>
                 <AccountTourist />
               </ProtectedRoute>
             }
