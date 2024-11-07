@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react"
 import {
   Search,
   Plus,
@@ -8,60 +8,59 @@ import {
   Trash,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+  CalendarIcon,
+  Clock
+} from "lucide-react"
+import axios from "axios"
+import Cookies from "js-cookie"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/select"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-
+} from "@/components/ui/dialog"
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-} from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { format, set } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
+} from "@/components/ui/form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import { format, parse, set } from "date-fns"
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/popover"
 
 const formSchema = z.object({
   from: z.string().min(1, "From location is required"),
   to: z.string().min(1, "To location is required"),
-  vehicleType: z.string().min(1, "Vehicle type is required"),
+  vehicleType: z.enum(["Bus", "Car", "Microbus"], {
+    required_error: "Vehicle type is required",
+  }),
   ticketCost: z.number().min(0, "Ticket cost must be a positive number"),
   timeDeparture: z.date(),
   estimatedDuration: z.number().min(0, "Duration must be a positive number"),
@@ -69,153 +68,220 @@ const formSchema = z.object({
     .number()
     .int()
     .min(0, "Remaining seats must be a non-negative integer"),
-});
+})
 
 export default function TransportationPage() {
-  const [transportations, setTransportations] = useState([]);
-  const [userRole, setUserRole] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [fromLocations, setFromLocations] = useState([]);
-  const [toLocations, setToLocations] = useState([]);
-  const [selectedFrom, setSelectedFrom] = useState("");
-  const [selectedTo, setSelectedTo] = useState("");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editTransportationId, setEditTransportationId] = useState(null);
-  const transportationsPerPage = 6;
+  const [transportations, setTransportations] = useState([])
+  const [userRole, setUserRole] = useState("")
+  const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [sortBy, setSortBy] = useState("")
+  const [sortOrder, setSortOrder] = useState("asc")
+  const [fromLocations, setFromLocations] = useState([])
+  const [toLocations, setToLocations] = useState([])
+  const [selectedFrom, setSelectedFrom] = useState("")
+  const [selectedTo, setSelectedTo] = useState("")
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [editingTransportation, setEditingTransportation] = useState(null)
+  const transportationsPerPage = 6
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       from: "",
       to: "",
-      vehicleType: "",
+      vehicleType: "Bus",
       ticketCost: 0,
       timeDeparture: new Date(),
       estimatedDuration: 0,
       remainingSeats: 0,
     },
-  });
+  })
 
   useEffect(() => {
-    const role = Cookies.get("role");
-    setUserRole(role);
-    fetchTransportations();
-  }, []);
+    const role = Cookies.get("role")
+    setUserRole(role)
+    fetchTransportations()
+  }, [])
 
   const fetchTransportations = async () => {
     try {
-      const token = Cookies.get("jwt");
-      const role = Cookies.get("role");
+      const token = Cookies.get("jwt")
+      const role = Cookies.get("role")
       const response = await axios.get(
         `http://localhost:4000/${role}/transportations`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      );
-      setTransportations(response.data);
-      // set from location from the attribute 'from' in the response
-      setFromLocations([...new Set(response.data.map((t) => t.from))]);
-      // set to location from the attribute 'to' in the response
-      setToLocations([...new Set(response.data.map((t) => t.to))]);
+      )
+      setTransportations(response.data)
+      setFromLocations([...new Set(response.data.map((t) => t.from))])
+      setToLocations([...new Set(response.data.map((t) => t.to))])
     } catch (error) {
-      console.error("Error fetching transportations:", error);
+      console.error("Error fetching transportations:", error)
     }
-  };
+  }
+
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
+    setCurrentPage(1)
+  }, [searchTerm])
 
   const handleSearch = useCallback(() => {
     // Implement search logic here
-  }, [searchTerm, selectedFrom, selectedTo, selectedDate]);
+  }, [searchTerm, selectedFrom, selectedTo, selectedDate])
 
   const handleSort = (attribute) => {
     if (sortBy === attribute) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
     } else {
-      setSortBy(attribute);
-      setSortOrder("asc");
+      setSortBy(attribute)
+      setSortOrder("asc")
     }
-  };
+  }
 
   const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+    setCurrentPage(pageNumber)
+  }
 
   const handleAdd = async (data) => {
     try {
-      const token = Cookies.get("jwt");
-      const role = Cookies.get("role");
+      const token = Cookies.get("jwt")
+      const role = Cookies.get("role")
       await axios.post(`http://localhost:4000/${role}/transportations`, data, {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      fetchTransportations();
-      setIsAddDialogOpen(false);
+      })
+      fetchTransportations()
+      setIsAddDialogOpen(false)
     } catch (error) {
-      console.error("Error adding transportation:", error);
+      console.error("Error adding transportation:", error)
     }
-  };
+  }
 
   const handleEdit = async (data) => {
     try {
-      const token = Cookies.get("jwt");
-      const role = Cookies.get("role");
+      const token = Cookies.get("jwt")
+      const role = Cookies.get("role")
 
       await axios.put(
-        `http://localhost:4000/${role}/transportations/${editTransportationId}`,
+        `http://localhost:4000/${role}/transportations/${editingTransportation._id}`,
         data,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      );
-      fetchTransportations();
-      setIsEditDialogOpen(false);
+      )
+      fetchTransportations()
+      setEditingTransportation(null)
     } catch (error) {
-      console.error("Error editing transportation:", error);
+      console.error("Error editing transportation:", error)
     }
-  };
+  }
 
   const handleDelete = async (id) => {
     try {
-      const token = Cookies.get("jwt");
-      const role = Cookies.get("role");
+      const token = Cookies.get("jwt")
+      const role = Cookies.get("role")
       await axios.delete(
         `http://localhost:4000/${role}/transportations/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      );
-      fetchTransportations();
+      )
+      fetchTransportations()
     } catch (error) {
-      console.error("Error deleting transportation:", error);
+      console.error("Error deleting transportation:", error)
     }
-  };
+  }
 
   const filteredTransportations = transportations.filter(
     (t) =>
       t.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.to.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.vehicleType.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  )
 
   const sortedTransportations = [...filteredTransportations].sort((a, b) => {
-    if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1;
-    if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
+    if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1
+    if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1
+    return 0
+  })
 
-  const indexOfLastTransportation = currentPage * transportationsPerPage;
+  const indexOfLastTransportation = currentPage * transportationsPerPage
   const indexOfFirstTransportation =
-    indexOfLastTransportation - transportationsPerPage;
+    indexOfLastTransportation - transportationsPerPage
   const currentTransportations = sortedTransportations.slice(
     indexOfFirstTransportation,
     indexOfLastTransportation
-  );
+  )
+
+  const handleEditClick = (transportation) => {
+    setEditingTransportation(transportation)
+    form.reset({
+      ...transportation,
+      timeDeparture: new Date(transportation.timeDeparture),
+    })
+  }
+
+  const handleEditClose = () => {
+    setEditingTransportation(null)
+  }
+
+  const DateTimePicker = ({ field }) => {
+    const [date, setDate] = useState(field.value)
+    const [time, setTime] = useState(format(field.value, "HH:mm"))
+
+    const handleDateChange = (newDate) => {
+      setDate(newDate)
+      updateDateTime(newDate, time)
+    }
+
+    const handleTimeChange = (e) => {
+      setTime(e.target.value)
+      updateDateTime(date, e.target.value)
+    }
+
+    const updateDateTime = (newDate, newTime) => {
+      const [hours, minutes] = newTime.split(':')
+      const updatedDate = set(newDate, { hours: parseInt(hours), minutes: parseInt(minutes) })
+      field.onChange(updatedDate)
+    }
+
+    return (
+      <div className="flex flex-col space-y-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !date && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date ? format(date, "PPP") : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={handleDateChange}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+        <div className="flex items-center">
+          <Clock className="mr-2 h-4 w-4" />
+          <Input
+            type="time"
+            value={time}
+            onChange={handleTimeChange}
+            className="w-full"
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto p-4 mt-5">
@@ -256,6 +322,7 @@ export default function TransportationPage() {
         <Popover>
           <PopoverTrigger asChild>
             <Button
+              type="button"
               variant={"outline"}
               className={cn(
                 "w-[280px] justify-start text-left font-normal",
@@ -287,7 +354,7 @@ export default function TransportationPage() {
                 <Plus className="mr-2 h-4 w-4" /> Add Transportation
               </Button>
             </DialogTrigger>
-            <DialogContent className = "max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Transportation</DialogTitle>
               </DialogHeader>
@@ -326,9 +393,18 @@ export default function TransportationPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Vehicle Type</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Vehicle type" {...field} />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select vehicle type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Bus">Bus</SelectItem>
+                            <SelectItem value="Car">Car</SelectItem>
+                            <SelectItem value="Microbus">Microbus</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )}
                   />
@@ -353,40 +429,11 @@ export default function TransportationPage() {
                     control={form.control}
                     name="timeDeparture"
                     render={({ field }) => (
-                      <FormItem className="flex flex-col">
+                      <FormItem>
                         <FormLabel>Departure Time</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={"outline"}
-                                className={cn(
-                                  "w-[240px] pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "PPP")
-                                ) : (
-                                  <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date < new Date() ||
-                                date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
+                        <FormControl>
+                          <DateTimePicker field={field} />
+                        </FormControl>
                       </FormItem>
                     )}
                   />
@@ -464,203 +511,156 @@ export default function TransportationPage() {
               {userRole === "advertiser" && (
                 <>
                   <Dialog
-                    open={isEditDialogOpen}
-                    onOpenChange={setIsEditDialogOpen}
+                    open={editingTransportation === transportation}
+                    onOpenChange={(open) => {
+                      if (!open) handleEditClose()
+                    }}
                   >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
-                        onClick={() => {
-                          setEditTransportationId(transportation._id);
-                          form.reset(transportation);
-                        }}
+                        onClick={() => handleEditClick(transportation)}
                       >
                         <Edit className="mr-2 h-4 w-4" /> Edit
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className = "max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Edit Transportation</DialogTitle>
-                      </DialogHeader>
-                      <Form {...form}>
-                        <form
-                          onSubmit={form.handleSubmit(handleEdit)}
-                          className="space-y-8"
-                        >
-                          {/* Same form fields as in Add Transportation dialog */}
-                          <FormField
-                            control={form.control}
-                            name="from"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>From</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="From location"
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="to"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>To</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="To location" {...field} />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="vehicleType"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Vehicle Type</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Vehicle type"
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="ticketCost"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Ticket Cost</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    placeholder="Ticket cost"
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(+e.target.value)
-                                    }
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          {/* add date formField and time in hours,mins and seconds */}
-                          <FormField
-                            control={form.control}
-                            name="timeDeparture"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-col">
-                                <FormLabel>Departure Time</FormLabel>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant="outline"
-                                        className={cn(
-                                          "w-full md:w-[240px] pl-3 text-left font-normal",
-                                          !field.value &&
-                                            "text-muted-foreground"
-                                        )}
-                                      >
-                                        {field.value ? (
-                                          format(field.value, "PPP p")
-                                        ) : (
-                                          <span>Pick a date and time</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent
-                                    className="w-auto p-0"
-                                    align="start"
-                                  >
-                                    <DatePicker
-                                      selected={field.value}
-                                      onChange={(date) => field.onChange(date)}
-                                      showTimeSelect
-                                      timeFormat="HH:mm:ss"
-                                      timeIntervals={1}
-                                      timeCaption="Time"
-                                      dateFormat="MMMM d, yyyy h:mm:ss aa"
-                                      wrapperClassName="w-full"
-                                      customInput={<div />}
-                                      popperPlacement="bottom-start"
-                                      popperModifiers={[
-                                        {
-                                          name: "offset",
-                                          options: {
-                                            offset: [0, 0],
-                                          },
-                                        },
-                                        {
-                                          name: "preventOverflow",
-                                          options: {
-                                            rootBoundary: "viewport",
-                                            tether: false,
-                                            altAxis: true,
-                                          },
-                                        },
-                                      ]}
+                    {editingTransportation === transportation && (
+                      <DialogContent className="max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Edit Transportation</DialogTitle>
+                        </DialogHeader>
+                        <Form {...form}>
+                          <form
+                            onSubmit={form.handleSubmit(handleEdit)}
+                            className="space-y-8"
+                          >
+                            <FormField
+                              control={form.control}
+                              name="from"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>From</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="From location"
+                                      {...field}
                                     />
-                                  </PopoverContent>
-                                </Popover>
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="estimatedDuration"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>
-                                  Estimated Duration (hours)
-                                </FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    placeholder="Estimated duration"
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(+e.target.value)
-                                    }
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="remainingSeats"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Remaining Seats</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    placeholder="Remaining seats"
-                                    {...field}
-                                    onChange={(e) =>
-                                      field.onChange(+e.target.value)
-                                    }
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-
-                          {/* Update button */}
-
-                          <Button type="submit">Update Transportation</Button>
-                        </form>
-                      </Form>
-                    </DialogContent>
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="to"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>To</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="To location"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="vehicleType"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Vehicle Type</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select vehicle type" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="Bus">Bus</SelectItem>
+                                      <SelectItem value="Car">Car</SelectItem>
+                                      <SelectItem value="Microbus">Microbus</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="ticketCost"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Ticket Cost</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      placeholder="Ticket cost"
+                                      {...field}
+                                      onChange={(e) =>
+                                        field.onChange(+e.target.value)
+                                      }
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="timeDeparture"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Departure Time</FormLabel>
+                                  <FormControl>
+                                    <DateTimePicker field={field} />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="estimatedDuration"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Estimated Duration (hours)
+                                  </FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      placeholder="Estimated duration"
+                                      {...field}
+                                      onChange={(e) =>
+                                        field.onChange(+e.target.value)
+                                      }
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="remainingSeats"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Remaining Seats</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      placeholder="Remaining seats"
+                                      {...field}
+                                      onChange={(e) =>
+                                        field.onChange(+e.target.value)
+                                      }
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                            <Button type="submit">Update Transportation</Button>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    )}
                   </Dialog>
                   <Button
                     variant="destructive"
@@ -708,5 +708,5 @@ export default function TransportationPage() {
         </Button>
       </div>
     </div>
-  );
+  )
 }
