@@ -287,7 +287,7 @@ export default function TransportationPage() {
                 <Plus className="mr-2 h-4 w-4" /> Add Transportation
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className = "max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Transportation</DialogTitle>
               </DialogHeader>
@@ -478,7 +478,7 @@ export default function TransportationPage() {
                         <Edit className="mr-2 h-4 w-4" /> Edit
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className = "max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Edit Transportation</DialogTitle>
                       </DialogHeader>
