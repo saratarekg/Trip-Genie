@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   CalendarIcon,
-  Clock
+  Clock,
+  CheckCircle
 } from "lucide-react"
 import axios from "axios"
 import Cookies from "js-cookie"
@@ -35,6 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog"
 import {
   Form,
@@ -54,6 +56,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+
 
 const formSchema = z.object({
   from: z.string().min(1, "From location is required"),
@@ -71,7 +76,7 @@ const formSchema = z.object({
 })
 
 export default function TransportationPage() {
-  const [transportations, setTransportations] = useState([])
+    const [transportations, setTransportations] = useState([])
   const [userRole, setUserRole] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
@@ -84,6 +89,13 @@ export default function TransportationPage() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editingTransportation, setEditingTransportation] = useState(null)
+  const [selectedTransportation, setSelectedTransportation] = useState(null)
+  const [seatsToBook, setSeatsToBook] = useState(1)
+  const [paymentMethod, setPaymentMethod] = useState("creditCard")
+  const [showTransportationBookingDialog, setShowTransportationBookingDialog] = useState(false)
+  const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] = useState(false)
+  const [isBooking, setIsBooking] = useState(false)
+  const [bookingError, setBookingError] = useState("")
   const transportationsPerPage = 6
 
   const form = useForm({
@@ -140,6 +152,52 @@ export default function TransportationPage() {
     }
   }
 
+  const handleTransportationBooking = async () => {
+    if (!selectedTransportation) return;
+
+    setIsBooking(true);
+    setBookingError("");
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.post(
+        "http://localhost:4000/tourist/book-transportation",
+        {
+          transportationID: selectedTransportation._id,
+          seatsToBook: seatsToBook,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.message === "Transportation Booking successful") {
+        setShowTransportationSuccessDialog(true);
+        const updatedTransportations = transportations.map((t) =>
+          t._id === selectedTransportation._id
+            ? { ...t, remainingSeats: response.data.remainingSeats }
+            : t
+        );
+        setTransportations(updatedTransportations);
+      } else {
+        setBookingError(
+          response.data.message || "Failed to book transportation"
+        );
+      }
+    } catch (error) {
+      console.error("Error booking transportation:", error);
+      setBookingError(
+        error.response?.data?.message || "An error occurred while booking"
+      );
+    } finally {
+      setIsBooking(false);
+      setShowTransportationBookingDialog(false);
+    }
+  };
+
+  const formatPrice = (price) => {
+    return `$${price.toFixed(2)}`;
+  }
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber)
   }
@@ -148,6 +206,9 @@ export default function TransportationPage() {
     try {
       const token = Cookies.get("jwt")
       const role = Cookies.get("role")
+      // add isStandAlone to be true when creating here 
+      data.isStandAlone = true
+
       await axios.post(`http://localhost:4000/${role}/transportations`, data, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -670,13 +731,15 @@ export default function TransportationPage() {
                   </Button>
                 </>
               )}
-              {userRole === "tourist" && (
+               {userRole === "tourist" && transportation.remainingSeats > 0 && (
                 <Button
-                  onClick={() =>
-                    router.push(`/book-transportation/${transportation._id}`)
-                  }
+                  onClick={() => {
+                    setSelectedTransportation(transportation);
+                    setShowTransportationBookingDialog(true);
+                  }}
+                  className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
                 >
-                  Book Now
+                  Book Transportation
                 </Button>
               )}
             </CardFooter>
@@ -707,6 +770,111 @@ export default function TransportationPage() {
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
+
+      <Dialog
+        open={showTransportationBookingDialog}
+        onOpenChange={setShowTransportationBookingDialog}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Book Transportation</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="seats" className="text-right">
+                Seats
+              </Label>
+              <Input
+                id="seats"
+                type="number"
+                className="col-span-3"
+                value={seatsToBook}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  setSeatsToBook(
+                    Math.max(
+                      0,
+                      Math.min(
+                        value,
+                        selectedTransportation?.remainingSeats || 0
+                      )
+                    )
+                  );
+                }}
+                min="0"
+                max={selectedTransportation?.remainingSeats}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Total Price</Label>
+              <div className="col-span-3">
+                {formatPrice(
+                  (selectedTransportation?.ticketCost || 0) * seatsToBook
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Payment</Label>
+              <RadioGroup
+                defaultValue="creditCard"
+                className="col-span-3"
+                onValueChange={setPaymentMethod}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="creditCard" id="creditCard" />
+                  <Label htmlFor="creditCard">Credit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="debitCard" id="debitCard" />
+                  <Label htmlFor="debitCard">Debit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="wallet" id="wallet" />
+                  <Label htmlFor="wallet">Wallet</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setShowTransportationBookingDialog(false)}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleTransportationBooking} disabled={isBooking}>
+              {isBooking ? "Booking..." : "Confirm Booking"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showTransportationSuccessDialog}
+        onOpenChange={setShowTransportationSuccessDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <div className="flex items-center">
+                <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                Transportation Booked Successfully
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>
+              You have successfully booked {seatsToBook} seat(s) for the transportation from {selectedTransportation?.from} to {selectedTransportation?.to}.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowTransportationSuccessDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }
