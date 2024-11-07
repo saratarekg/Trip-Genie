@@ -38,6 +38,7 @@ import CreateHpPage from "./pages/CreateHpPage.jsx";
 import Checkout from "./pages/checkout.jsx";
 import CheckoutPage from "./pages/checkout2.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
+import { MyActivitiesComponent } from "./pages/myActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
 // import {Cart} from "./pages/AccountTourist.jsx";
@@ -67,6 +68,7 @@ import AdminGovernorPage from "./pages/AdminGovernorPage";
 import TagsPage from "./pages/TagsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import TransportationPage from "./pages/TransportationPage.jsx";
+import MyHistoricalPlacesComponent from "./pages/myHP.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -264,6 +266,27 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+           <Route
+            path="/my-activities"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser"]}
+              >
+                <MyActivitiesComponent />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/my-historical-places"
+            element={
+              <ProtectedRoute
+                allowedRoles={["tourism-governor"]}
+              >
+                <MyHistoricalPlacesComponent />
+              </ProtectedRoute>
+            }
+          />
+ 
  
 
           <Route

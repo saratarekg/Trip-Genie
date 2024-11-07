@@ -219,7 +219,7 @@ const FilterComponent = ({
             </button>
           )}
 
-          {role === "advertiser" && ( // Check if role is "tour-guide"
+          {/* {role === "advertiser" && ( // Check if role is "tour-guide"
             <button
               onClick={() => handlemyActivities(!myActivities)} // Toggle myActivities state
               className={`flex items-center px-4 py-2 rounded-full shadow ${
@@ -231,7 +231,7 @@ const FilterComponent = ({
               <ContactRound strokeWidth={1.25} />
               My Activities
             </button>
-          )}
+          )} */}
 
           <button
             onClick={clearFilters}
@@ -240,7 +240,7 @@ const FilterComponent = ({
             Clear Filters
           </button>
         </div>
-        {role === "advertiser" ? (
+        {/* {role === "advertiser" ? (
           <Link
             to="/create-activity"
             className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
@@ -248,7 +248,7 @@ const FilterComponent = ({
             <Plus className="mr-2" size={18} />
             Create
           </Link>
-        ) : null}
+        ) : null} */}
       </div>
 
       {filtersVisible && (

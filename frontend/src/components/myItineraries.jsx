@@ -305,7 +305,7 @@ export function MyItinerariesComponent() {
       const token = Cookies.get("jwt");
       const url = newSortedByPreference
         ? "http://localhost:4000/tourist/itineraries-preference"
-        : "http://localhost:4000/tourist/itineraries";
+        : "http://localhost:4000/tourist/itineraries?myItineraries=true";
 
       const response = await fetch(url, {
         headers: {
@@ -645,7 +645,7 @@ export function MyItinerariesComponent() {
           </div>
           <div className="max-w-7xl mx-auto">
             <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
-              All Trip Plans
+              My Trip Plans
             </h1>
 
             {isSortedByPreference && getUserRole() === "tourist" && (

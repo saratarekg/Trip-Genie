@@ -106,7 +106,7 @@ const FilterComponent = ({
             Sort by Ratings {sortBy === 'rating' ? (sortOrder === 1 ? '(Low to High)' : '(High to Low)') : ''}
           </button> */}
 
-          {role === 'tourism-governor' ? (
+          {/* {role === 'tourism-governor' ? (
 
           <button
             onClick={() => handlemyHistoricalPlaces(!myHistoricalPlaces)}
@@ -116,7 +116,7 @@ const FilterComponent = ({
             My Places 
           </button>
 
-           ) : null}
+           ) : null} */}
           <button onClick={clearFilters} className="flex items-center px-4 py-2 bg-white rounded-full shadow">
             Clear Filters 
           </button>
@@ -125,12 +125,12 @@ const FilterComponent = ({
 
 
 
-        {role === 'tourism-governor' ? (
+        {/* {role === 'tourism-governor' ? (
           <Link to="/create-historicalPlace" className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto">
             <Plus className="mr-2" size={18} />
             Create
           </Link>
-        ) : null}
+        ) : null} */}
 
 
       </div>

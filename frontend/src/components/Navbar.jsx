@@ -48,11 +48,16 @@ export function NavbarComponent() {
   const itinerariesRef = useRef(null);
   const productsRef = useRef(null);
   const userMenuRef = useRef(null);
+  const activitiesRef = useRef(null);
+  const historicalRef = useRef(null);
+
 
   const handleClickOutside = (event) => {
     if (
       !itinerariesRef.current?.contains(event.target) &&
       !productsRef.current?.contains(event.target) &&
+      !activitiesRef.current?.contains(event.target) &&
+      !historicalRef.current?.contains(event.target) &&
       !userMenuRef.current?.contains(event.target)
     ) {
       closeDropdown();
@@ -237,7 +242,44 @@ export function NavbarComponent() {
               )}
               {role === "advertiser" && (
                 <>
-                  <NavLink to="/activity">Activities</NavLink>
+                  <div className="relative" ref={activitiesRef}>
+                    <button
+                      onClick={() => toggleDropdown("activities")}
+                      className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                    >
+                      Activities
+                      {openDropdown === "activities" ? (
+                        <ChevronUp className="ml-1 h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="ml-1 h-4 w-4" />
+                      )}
+                    </button>
+                    {openDropdown === "activities" && (
+                      <div className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg">
+                        <Link
+                          to="/activity"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <List className="mr-2 h-4 w-4" /> All activities
+                        </Link>
+                        <Link
+                          to="/my-activities"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <Folder className="mr-2 h-4 w-4" /> My activities
+                        </Link>
+                        <Link
+                          to="/create-activity"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <PlusCircle className="mr-2 h-4 w-4" /> Create activities
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                   <NavLink to="/advertiser-profile">Profile</NavLink>
                 </>
               )}
@@ -295,10 +337,45 @@ export function NavbarComponent() {
               )}
               {role === "tourism-governor" && (
                 <>
-                  <NavLink to="/all-historical-places">
-                    Historical Places
-                  </NavLink>
-                  <NavLink to="/create-historical-tag">Historical tag</NavLink>
+                  <div className="relative" ref={historicalRef}>
+                    <button
+                      onClick={() => toggleDropdown("historical")}
+                      className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                    >
+                      Historical Places
+                      {openDropdown === "historical" ? (
+                        <ChevronUp className="ml-1 h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="ml-1 h-4 w-4" />
+                      )}
+                    </button>
+                    {openDropdown === "historical" && (
+                      <div className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg">
+                        <Link
+                          to="/all-historical-places"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <List className="mr-2 h-4 w-4" /> All Historical Places
+                        </Link>
+                        <Link
+                          to="/my-historical-places"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <Folder className="mr-2 h-4 w-4" /> My Historical Places
+                        </Link>
+                        <Link
+                          to="/create-historicalPlace"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <PlusCircle className="mr-2 h-4 w-4" /> Create Historical Place
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                  <NavLink to="/create-historical-tag">Create Historical Tag</NavLink>
                 </>
               )}
               {(role === "guest" || role === undefined) && (
