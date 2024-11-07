@@ -66,6 +66,7 @@ import { DeleteAccount } from "@/components/DeleteAccPopout.jsx";
 import AdminGovernorPage from "./pages/AdminGovernorPage";
 import TagsPage from "./pages/TagsPage";
 import CategoriesPage from "./pages/CategoriesPage";
+import TransportationPage from "./pages/TransportationPage.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -166,7 +167,9 @@ function AppContent() {
           <Route
             path="/account/*"
             element={
-              <ProtectedRoute allowedRoles={["tourist" , "advertiser" , "seller" , "tour-guide"]}>
+              <ProtectedRoute
+                allowedRoles={["tourist", "advertiser", "seller", "tour-guide"]}
+              >
                 <AccountTourist />
               </ProtectedRoute>
             }
@@ -516,6 +519,15 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/transportation"
+            element={
+              <ProtectedRoute allowedRoles={["tourist", "advertiser"]}>
+                <TransportationPage />
               </ProtectedRoute>
             }
           />

@@ -152,6 +152,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
       onClose();
     };
   
+    
 
   
     return (
@@ -247,6 +248,12 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) =>
     );
   }
 const ItineraryForm = () => {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevent the default Enter behavior
+    }
+  };
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -413,7 +420,7 @@ const ItineraryForm = () => {
             <form onSubmit={handleSubmit(handleCreateItinerary)} className="grid grid-cols-4 gap-4">
                    <div className="col-span-2">
                 <Label htmlFor="title" className="text-sm font-medium">Itinerary Title</Label>
-                <Input id="title" {...register("title")} />
+                <Input id="title" {...register("title")} onKeyDown={handleKeyDown} />
                 {errors.title && (
                   <p className="text-red-500 text-xs">{errors.title.message}</p>
                 )}
@@ -421,7 +428,7 @@ const ItineraryForm = () => {
 
               <div className="col-span-2">
                 <Label htmlFor="timeline" className="text-sm font-medium">Timeline</Label>
-                <Input id="timeline" {...register("timeline")} />
+                <Input id="timeline" {...register("timeline")} onKeyDown={handleKeyDown}/>
                 {errors.timeline && (
                   <p className="text-red-500 text-xs">{errors.timeline.message}</p>
                 )}
@@ -457,16 +464,16 @@ const ItineraryForm = () => {
                 <Input
                   id="price"
                   type="number"
-                  {...register("price", { valueAsNumber: true })}
-                />
+                  {...register("price", { valueAsNumber: true })}onKeyDown={handleKeyDown}/>
                 {errors.price && (
                   <p className="text-red-500 text-xs">{errors.price.message}</p>
                 )}
+                
               </div>
 
               <div>
                 <Label htmlFor="pickUpLocation" className="text-sm font-medium">Pick-Up Location</Label>
-                <Input id="pickUpLocation" {...register("pickUpLocation")} />
+                <Input id="pickUpLocation" {...register("pickUpLocation")} onKeyDown={handleKeyDown} />
                 {errors.pickUpLocation && (
                   <p className="text-red-500 text-xs">{errors.pickUpLocation.message}</p>
                 )}
@@ -474,7 +481,7 @@ const ItineraryForm = () => {
 
               <div>
                 <Label htmlFor="dropOffLocation" className="text-sm font-medium">Drop-Off Location</Label>
-                <Input id="dropOffLocation" {...register("dropOffLocation")} />
+                <Input id="dropOffLocation" {...register("dropOffLocation")} onKeyDown={handleKeyDown}/>
                 {errors.dropOffLocation && (
                   <p className="text-red-500 text-xs">{errors.dropOffLocation.message}</p>
                 )}
@@ -560,11 +567,17 @@ const ItineraryForm = () => {
       <Button variant="outline" onClick={() => addTime(dateIndex)}>
         <Plus className="mr-2 h-4 w-4" /> Add Time
       </Button>
+      {dateObj.times.length === 0 && (
+        <p className="text-red-500 text-xs mt-2">Please add at least one time</p>
+      )}
     </div>
   ))}
   <Button variant="outline" onClick={addDate}>
     <Plus className="mr-2 h-4 w-4" /> Add Date
   </Button>
+  {availableDates.length === 0 && (
+    <p className="text-red-500 text-xs mt-2">Please add at least one date</p>
+  )}
   {errors.availableDates && <span className="text-red-500 block mt-2">{errors.availableDates.message}</span>}
 </div>
 
