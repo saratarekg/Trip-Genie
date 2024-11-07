@@ -235,6 +235,24 @@ const deleteTourGuideAccount = async (req, res) => {
       await cloudinary.uploader.destroy(tourGuide.profilePicture.public_id);
     }
 
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+
+    const filenames = [
+      tourGuide.files.IDFilename,
+      ...tourGuide.files.certificatesFilenames,
+    ];
+    const files = await gfs.find({ filename: { $in: filenames } }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+    files.forEach(async (file) => {
+      await gfs.delete(file._id);
+    });
+
     await TourGuide.findByIdAndDelete(res.locals.user_id);
 
     res

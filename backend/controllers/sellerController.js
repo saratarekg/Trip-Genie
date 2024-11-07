@@ -103,6 +103,22 @@ const deleteSellerAccount = async (req, res) => {
       await cloudinary.uploader.destroy(seller.logo.public_id);
     }
 
+    const gfs = req.app.locals.gfs;
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+    const fileNames = [
+      seller.files.IDFilename,
+      seller.files.taxationRegistryCardFilename,
+    ];
+    const files = await gfs.find({ filename: { $in: fileNames } }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+    files.forEach(async (file) => {
+      await gfs.delete(file._id);
+    });
+
     await Seller.findByIdAndDelete(res.locals.user_id);
 
     res.status(200).json({ message: "Seller account deleted successfully" });
