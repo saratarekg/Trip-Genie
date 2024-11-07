@@ -12,6 +12,8 @@ const ItineraryBooking = require("../models/itineraryBooking");
 const Currency = require("../models/currency");
 const Complaint = require("../models/complaints");
 const cloudinary = require("../utils/cloudinary");
+const TouristTransportation = require("../models/touristTransportation");
+const Transportation = require("../models/transportation");
 
 const getAllTourists = async (req, res) => {
   try {
@@ -254,6 +256,45 @@ console.log(picture);
     res.status(200).json({ message: "Profile updated successfully", tourist });
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+const bookTransportation = async (req, res) => {
+  const { touristID, transportationID, seatsToBook } = req.body;
+
+  try {
+    // Step 1: Find the transportation and check available seats
+    const transportation = await Transportation.findById(transportationID);
+
+    if (!transportation) {
+      return res.status(404).json({ message: "Transportation not found" });
+    }
+
+    if (transportation.remainingSeats < seatsToBook) {
+      return res.status(400).json({ message: "Not enough seats available" });
+    }
+
+    // Step 2: Decrease the remaining seats
+    transportation.remainingSeats -= seatsToBook;
+
+    // Step 3: Save the updated transportation data
+    await transportation.save();
+
+    // Step 4: Create a new booking record in TouristTransportation
+    const booking = new TouristTransportation({
+      touristID,
+      transportationID,
+    });
+
+    const savedBooking = await booking.save();
+
+    res.status(201).json({
+      message: "Transportation Booking successful",
+      booking: savedBooking,
+      remainingSeats: transportation.remainingSeats,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -1293,4 +1334,5 @@ module.exports = {
   changeDefaultShippingAddress,
   deleteShippingAddress,
   updateShippingAddress,
+  bookTransportation,
 };
