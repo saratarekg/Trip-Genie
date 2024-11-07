@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Search,
   Plus,
@@ -10,26 +10,26 @@ import {
   ChevronRight,
   CalendarIcon,
   Clock,
-  CheckCircle
-} from "lucide-react"
-import axios from "axios"
-import Cookies from "js-cookie"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+  CheckCircle,
+} from "lucide-react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -37,28 +37,27 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-} from "@/components/ui/form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { format, parse, set } from "date-fns"
-import { cn } from "@/lib/utils"
-import { Calendar } from "@/components/ui/calendar"
+} from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { format, parse, set } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-
+} from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   from: z.string().min(1, "From location is required"),
@@ -73,30 +72,70 @@ const formSchema = z.object({
     .number()
     .int()
     .min(0, "Remaining seats must be a non-negative integer"),
-})
+});
 
 export default function TransportationPage() {
-    const [transportations, setTransportations] = useState([])
-  const [userRole, setUserRole] = useState("")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [sortBy, setSortBy] = useState("")
-  const [sortOrder, setSortOrder] = useState("asc")
-  const [fromLocations, setFromLocations] = useState([])
-  const [toLocations, setToLocations] = useState([])
-  const [selectedFrom, setSelectedFrom] = useState("")
-  const [selectedTo, setSelectedTo] = useState("")
-  const [selectedDate, setSelectedDate] = useState(null)
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [editingTransportation, setEditingTransportation] = useState(null)
-  const [selectedTransportation, setSelectedTransportation] = useState(null)
-  const [seatsToBook, setSeatsToBook] = useState(1)
-  const [paymentMethod, setPaymentMethod] = useState("creditCard")
-  const [showTransportationBookingDialog, setShowTransportationBookingDialog] = useState(false)
-  const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] = useState(false)
-  const [isBooking, setIsBooking] = useState(false)
-  const [bookingError, setBookingError] = useState("")
-  const transportationsPerPage = 6
+  const [transportations, setTransportations] = useState([]);
+  const [userRole, setUserRole] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [fromLocations, setFromLocations] = useState([]);
+  const [toLocations, setToLocations] = useState([]);
+  const [selectedFrom, setSelectedFrom] = useState("");
+  const [selectedTo, setSelectedTo] = useState("");
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editingTransportation, setEditingTransportation] = useState(null);
+  const [selectedTransportation, setSelectedTransportation] = useState(null);
+  const [seatsToBook, setSeatsToBook] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState("creditCard");
+  const [showTransportationBookingDialog, setShowTransportationBookingDialog] =
+    useState(false);
+  const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
+    useState(false);
+  const [rates, setRates] = useState({});
+  const [currencyCode, setCurrencyCode] = useState("");
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [isBooking, setIsBooking] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+  const transportationsPerPage = 6;
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+    setUserRole(role);
+
+    if (role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const currencyId = response.data.preferredCurrency;
+
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+  // get today's current exchange rates using localhost:4000/rates
+  const fetchRates = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/rates");
+      setRates(response.data.rates);
+    } catch (error) {
+      console.error("Error fetching rates:", error);
+    }
+  };
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -109,48 +148,57 @@ export default function TransportationPage() {
       estimatedDuration: 0,
       remainingSeats: 0,
     },
-  })
+  });
 
   useEffect(() => {
-    const role = Cookies.get("role")
-    setUserRole(role)
-    fetchTransportations()
-  }, [])
+    const role = Cookies.get("role");
+    setUserRole(role);
+    fetchTransportations();
+    fetchUserInfo();
+    fetchRates();
+  }, []);
+
+
+  const displayPrice = (priceUSD) => {
+    if (!userPreferredCurrency) return `$${priceUSD}`;
+    const rate = rates[userPreferredCurrency.code];
+    return `${userPreferredCurrency.symbol}${(priceUSD * rate).toFixed(2)}`;
+  };
 
   const fetchTransportations = async () => {
     try {
-      const token = Cookies.get("jwt")
-      const role = Cookies.get("role")
+      const token = Cookies.get("jwt");
+      const role = Cookies.get("role");
       const response = await axios.get(
         `http://localhost:4000/${role}/transportations`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      )
-      setTransportations(response.data)
-      setFromLocations([...new Set(response.data.map((t) => t.from))])
-      setToLocations([...new Set(response.data.map((t) => t.to))])
+      );
+      setTransportations(response.data);
+      setFromLocations([...new Set(response.data.map((t) => t.from))]);
+      setToLocations([...new Set(response.data.map((t) => t.to))]);
     } catch (error) {
-      console.error("Error fetching transportations:", error)
+      console.error("Error fetching transportations:", error);
     }
-  }
+  };
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm])
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const handleSearch = useCallback(() => {
     // Implement search logic here
-  }, [searchTerm, selectedFrom, selectedTo, selectedDate])
+  }, [searchTerm, selectedFrom, selectedTo, selectedDate]);
 
   const handleSort = (attribute) => {
     if (sortBy === attribute) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      setSortBy(attribute)
-      setSortOrder("asc")
+      setSortBy(attribute);
+      setSortOrder("asc");
     }
-  }
+  };
 
   const handleTransportationBooking = async () => {
     if (!selectedTransportation) return;
@@ -196,33 +244,33 @@ export default function TransportationPage() {
 
   const formatPrice = (price) => {
     return `$${price.toFixed(2)}`;
-  }
+  };
 
   const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber)
-  }
+    setCurrentPage(pageNumber);
+  };
 
   const handleAdd = async (data) => {
     try {
-      const token = Cookies.get("jwt")
-      const role = Cookies.get("role")
-      // add isStandAlone to be true when creating here 
-      data.isStandAlone = true
+      const token = Cookies.get("jwt");
+      const role = Cookies.get("role");
+      // add isStandAlone to be true when creating here
+      data.isStandAlone = true;
 
       await axios.post(`http://localhost:4000/${role}/transportations`, data, {
         headers: { Authorization: `Bearer ${token}` },
-      })
-      fetchTransportations()
-      setIsAddDialogOpen(false)
+      });
+      fetchTransportations();
+      setIsAddDialogOpen(false);
     } catch (error) {
-      console.error("Error adding transportation:", error)
+      console.error("Error adding transportation:", error);
     }
-  }
+  };
 
   const handleEdit = async (data) => {
     try {
-      const token = Cookies.get("jwt")
-      const role = Cookies.get("role")
+      const token = Cookies.get("jwt");
+      const role = Cookies.get("role");
 
       await axios.put(
         `http://localhost:4000/${role}/transportations/${editingTransportation._id}`,
@@ -230,82 +278,85 @@ export default function TransportationPage() {
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      )
-      fetchTransportations()
-      setEditingTransportation(null)
+      );
+      fetchTransportations();
+      setEditingTransportation(null);
     } catch (error) {
-      console.error("Error editing transportation:", error)
+      console.error("Error editing transportation:", error);
     }
-  }
+  };
 
   const handleDelete = async (id) => {
     try {
-      const token = Cookies.get("jwt")
-      const role = Cookies.get("role")
+      const token = Cookies.get("jwt");
+      const role = Cookies.get("role");
       await axios.delete(
         `http://localhost:4000/${role}/transportations/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      )
-      fetchTransportations()
+      );
+      fetchTransportations();
     } catch (error) {
-      console.error("Error deleting transportation:", error)
+      console.error("Error deleting transportation:", error);
     }
-  }
+  };
 
   const filteredTransportations = transportations.filter(
     (t) =>
       t.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.to.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.vehicleType.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  );
 
   const sortedTransportations = [...filteredTransportations].sort((a, b) => {
-    if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1
-    if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1
-    return 0
-  })
+    if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1;
+    if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
 
-  const indexOfLastTransportation = currentPage * transportationsPerPage
+  const indexOfLastTransportation = currentPage * transportationsPerPage;
   const indexOfFirstTransportation =
-    indexOfLastTransportation - transportationsPerPage
+    indexOfLastTransportation - transportationsPerPage;
   const currentTransportations = sortedTransportations.slice(
     indexOfFirstTransportation,
     indexOfLastTransportation
-  )
+  );
 
   const handleEditClick = (transportation) => {
-    setEditingTransportation(transportation)
+    setEditingTransportation(transportation);
     form.reset({
       ...transportation,
       timeDeparture: new Date(transportation.timeDeparture),
-    })
-  }
+    });
+  };
 
   const handleEditClose = () => {
-    setEditingTransportation(null)
-  }
+    setEditingTransportation(null);
+  };
 
   const DateTimePicker = ({ field }) => {
-    const [date, setDate] = useState(field.value)
-    const [time, setTime] = useState(format(field.value, "HH:mm"))
+    const [date, setDate] = useState(field.value);
+    const [time, setTime] = useState(format(field.value, "HH:mm"));
 
     const handleDateChange = (newDate) => {
-      setDate(newDate)
-      updateDateTime(newDate, time)
-    }
+      setDate(newDate);
+      updateDateTime(newDate, time);
+    };
 
     const handleTimeChange = (e) => {
-      setTime(e.target.value)
-      updateDateTime(date, e.target.value)
-    }
+      setTime(e.target.value);
+      updateDateTime(date, e.target.value);
+    };
 
     const updateDateTime = (newDate, newTime) => {
-      const [hours, minutes] = newTime.split(':')
-      const updatedDate = set(newDate, { hours: parseInt(hours), minutes: parseInt(minutes) })
-      field.onChange(updatedDate)
-    }
+      const [hours, minutes] = newTime.split(":");
+      const updatedDate = set(newDate, {
+        hours: parseInt(hours),
+        minutes: parseInt(minutes),
+      });
+      field.onChange(updatedDate);
+    };
 
     return (
       <div className="flex flex-col space-y-2">
@@ -341,8 +392,8 @@ export default function TransportationPage() {
           />
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="container mx-auto p-4 mt-5">
@@ -454,7 +505,10 @@ export default function TransportationPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Vehicle Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select vehicle type" />
@@ -553,7 +607,8 @@ export default function TransportationPage() {
                 <strong>Vehicle Type:</strong> {transportation.vehicleType}
               </p>
               <p>
-                <strong>Ticket Cost:</strong> ${transportation.ticketCost}
+                <strong>Ticket Cost:</strong>{" "}
+                {displayPrice(transportation.ticketCost)}
               </p>
               <p>
                 <strong>Departure:</strong>{" "}
@@ -574,7 +629,7 @@ export default function TransportationPage() {
                   <Dialog
                     open={editingTransportation === transportation}
                     onOpenChange={(open) => {
-                      if (!open) handleEditClose()
+                      if (!open) handleEditClose();
                     }}
                   >
                     <DialogTrigger asChild>
@@ -631,7 +686,10 @@ export default function TransportationPage() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Vehicle Type</FormLabel>
-                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                  >
                                     <FormControl>
                                       <SelectTrigger>
                                         <SelectValue placeholder="Select vehicle type" />
@@ -640,7 +698,9 @@ export default function TransportationPage() {
                                     <SelectContent>
                                       <SelectItem value="Bus">Bus</SelectItem>
                                       <SelectItem value="Car">Car</SelectItem>
-                                      <SelectItem value="Microbus">Microbus</SelectItem>
+                                      <SelectItem value="Microbus">
+                                        Microbus
+                                      </SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </FormItem>
@@ -731,7 +791,7 @@ export default function TransportationPage() {
                   </Button>
                 </>
               )}
-               {userRole === "tourist" && transportation.remainingSeats > 0 && (
+              {userRole === "tourist" && transportation.remainingSeats > 0 && (
                 <Button
                   onClick={() => {
                     setSelectedTransportation(transportation);
@@ -808,9 +868,7 @@ export default function TransportationPage() {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Total Price</Label>
               <div className="col-span-3">
-                {formatPrice(
-                  (selectedTransportation?.ticketCost || 0) * seatsToBook
-                )}
+                {displayPrice(seatsToBook * selectedTransportation?.ticketCost)}
               </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -864,7 +922,9 @@ export default function TransportationPage() {
           </DialogHeader>
           <div className="py-4">
             <p>
-              You have successfully booked {seatsToBook} seat(s) for the transportation from {selectedTransportation?.from} to {selectedTransportation?.to}.
+              You have successfully booked {seatsToBook} seat(s) for the
+              transportation from {selectedTransportation?.from} to{" "}
+              {selectedTransportation?.to}.
             </p>
           </div>
           <DialogFooter>
@@ -874,7 +934,6 @@ export default function TransportationPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
-  )
+  );
 }
