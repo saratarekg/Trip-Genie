@@ -49,7 +49,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  const { register, handleSubmit, control, setValue } = useForm({
+  const { register, handleSubmit, control, setValue, formState: { errors } } = useForm({
     defaultValues: initialData || {}
   });
 
@@ -60,9 +60,15 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
 
   useEffect(() => {
     if (initialData) {
-      // Set the initial values for tags and categories
-      setValue('tags', initialData?.tags?.map(tag => tag._id));
-      setValue('categories', initialData?.categories?.map(category => category._id));
+      setValue('tags', initialData.tags.map(tag => tag._id));
+      setValue('category', initialData.category.map(category => category._id));
+      
+      // Split the timing into date and time
+      if (initialData.timing) {
+        const dateTime = new Date(initialData.timing);
+        setValue('activityDate', dateTime.toISOString().split('T')[0]);
+        setValue('activityTime', dateTime.toTimeString().split(' ')[0].slice(0, 5));
+      }
     }
   }, [initialData, setValue]);
 
@@ -85,11 +91,11 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   };
 
   const onSubmit = (data) => {
-    // Ensure tags and categories are arrays of IDs
     const formattedData = {
       ...data,
       tags: data.tags || [],
-      categories: data.categories || []
+      category: data.category || [],
+      timing: new Date(`${data.activityDate}T${data.activityTime}`).toISOString()
     };
     onSave(formattedData);
     onClose();
@@ -99,38 +105,83 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <Label htmlFor="name">Name</Label>
-        <Input id="name" {...register("name", { required: true })} />
+        <Input 
+          id="name" 
+          {...register("name", { required: "Name is required" })} 
+        />
+        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
       </div>
 
       <div>
         <Label htmlFor="description">Description</Label>
-        <Textarea id="description" {...register("description")} />
+        <Textarea 
+          id="description" 
+          {...register("description", { required: "Description is required" })} 
+        />
+        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
       </div>
 
       <div>
         <Label htmlFor="address">Address</Label>
-        <Input id="address" {...register("location.address")} />
+        <Input 
+          id="address" 
+          {...register("location.address", { required: "Address is required" })} 
+        />
+        {errors.location?.address && <p className="text-red-500 text-xs mt-1">{errors.location.address.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label htmlFor="longitude">Longitude</Label>
-          <Input id="longitude" type="number" step="any" {...register("location.coordinates.longitude")} />
+          <Input 
+            id="longitude" 
+            type="number" 
+            step="any" 
+            {...register("location.coordinates.longitude", { required: "Longitude is required" })} 
+          />
+          {errors.location?.coordinates?.longitude && <p className="text-red-500 text-xs mt-1">{errors.location.coordinates.longitude.message}</p>}
         </div>
         <div>
           <Label htmlFor="latitude">Latitude</Label>
-          <Input id="latitude" type="number" step="any" {...register("location.coordinates.latitude")} />
+          <Input 
+            id="latitude" 
+            type="number" 
+            step="any" 
+            {...register("location.coordinates.latitude", { required: "Latitude is required" })} 
+          />
+          {errors.location?.coordinates?.latitude && <p className="text-red-500 text-xs mt-1">{errors.location.coordinates.latitude.message}</p>}
         </div>
       </div>
 
       <div>
         <Label htmlFor="duration">Duration (minutes)</Label>
-        <Input id="duration" type="number" {...register("duration")} />
+        <Input 
+          id="duration" 
+          type="number" 
+          {...register("duration", { required: "Duration is required" })} 
+        />
+        {errors.duration && <p className="text-red-500 text-xs mt-1">{errors.duration.message}</p>}
       </div>
 
-      <div>
-        <Label htmlFor="timing">Timing</Label>
-        <Input id="timing" type="datetime-local" {...register("timing")} />
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor="activityDate">Date</Label>
+          <Input 
+            id="activityDate" 
+            type="date" 
+            {...register("activityDate", { required: "Date is required" })} 
+          />
+          {errors.activityDate && <p className="text-red-500 text-xs mt-1">{errors.activityDate.message}</p>}
+        </div>
+        <div>
+          <Label htmlFor="activityTime">Time</Label>
+          <Input 
+            id="activityTime" 
+            type="time" 
+            {...register("activityTime", { required: "Time is required" })} 
+          />
+          {errors.activityTime && <p className="text-red-500 text-xs mt-1">{errors.activityTime.message}</p>}
+        </div>
       </div>
 
       <div>
@@ -138,41 +189,42 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
         <Controller
           name="tags"
           control={control}
+          rules={{ required: "At least one tag is required" }}
           render={({ field }) => (
             <ReactSelect
               {...field}
               options={tags}
               isMulti
-              defaultValue={[]}
               className="react-select-container"
               classNamePrefix="react-select"
-              value={tags.filter(option => field?.value?.includes(option.value))}
-              onChange={(selectedOptions) => field?.onChange(selectedOptions.map(option => option.value))}
+              value={tags.filter(option => field.value?.includes(option.value))}
+              onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value))}
             />
           )}
         />
+        {errors.tags && <p className="text-red-500 text-xs mt-1">{errors.tags.message}</p>}
       </div>
 
       <div>
         <Label>Categories</Label>
         <Controller
-          name="categories"
+          name="category"
           control={control}
+          rules={{ required: "At least one category is required" }}
           render={({ field }) => (
             <ReactSelect
               {...field}
               options={categories}
               isMulti
-              defaultValue={[]}
               className="react-select-container"
               classNamePrefix="react-select"
-              value={categories.filter(option => field?.value?.includes(option.value))}
-              onChange={(selectedOptions) => field?.onChange(selectedOptions.map(option => option.value))}
+              value={categories.filter(option => field.value?.includes(option.value))}
+              onChange={(selectedOptions) => field.onChange(selectedOptions.map(option => option.value))}
             />
           )}
         />
+        {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category.message}</p>}
       </div>
-
 
       <Button type="submit">Save Activity</Button>
     </form>
@@ -286,7 +338,7 @@ export default function UpdateItinerary() {
     const newActivity = { 
       ...activity, 
       tags: activity.tags.map(tagId => ({ _id: tagId })),
-      categories: activity.categories.map(categoryId => ({ _id: categoryId }))
+      category: activity.category.map(categoryId => ({ _id: categoryId }))
     };
     setItinerary((prev) => ({
       ...prev,
@@ -303,7 +355,7 @@ export default function UpdateItinerary() {
           ...updatedActivity,
           _id: a._id,
           tags: updatedActivity.tags.map(tagId => ({ _id: tagId })),
-          category: updatedActivity.categories.map(categoryId => ({ _id: categoryId }))
+          category: updatedActivity.category.map(categoryId => ({ _id: categoryId }))
         } : a
       ),
     }));
