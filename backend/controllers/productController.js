@@ -5,7 +5,8 @@ const Purchase = require("../models/purchase");
 const cloudinary = require("../utils/cloudinary");
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, maxPrice, searchBy, asc, myproducts, rating } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, sort, myproducts, rating } =
+    req.query;
   console.log(myproducts);
   const role = res.locals.user_role;
   console.log(role);
@@ -45,9 +46,10 @@ const getAllProducts = async (req, res) => {
     query.isDeleted = false;
     let productsQuery = Product.find(query);
     // Apply sorting if 'asc' is defined (for sorting by rating)
-    if (asc !== undefined) {
-      const sortOrder = parseInt(asc, 10);
-      productsQuery = productsQuery.sort({ rating: sortOrder });
+    if (sort) {
+      const sortBy = {};
+      sortBy[sort] = parseInt(asc);
+      productsQuery = productsQuery.sort(sortBy);
     } else {
       productsQuery = productsQuery.sort({ createdAt: -1 });
     }
@@ -65,7 +67,8 @@ const getAllProducts = async (req, res) => {
 };
 
 const getAllProductsArchive = async (req, res) => {
-  const { minPrice, maxPrice, searchBy, asc, myproducts, rating } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, myproducts, rating, sort } =
+    req.query;
   const role = res.locals.user_role;
   try {
     // Debugging: Log incoming query parameters
@@ -108,9 +111,10 @@ const getAllProductsArchive = async (req, res) => {
     let productsQuery = Product.find(query);
 
     // Apply sorting if 'asc' is defined (for sorting by rating)
-    if (asc !== undefined) {
-      const sortOrder = parseInt(asc, 10);
-      productsQuery = productsQuery.sort({ rating: sortOrder });
+    if (sort) {
+      const sortBy = {};
+      sortBy[sort] = parseInt(asc);
+      productsQuery = productsQuery.sort(sortBy);
     } else {
       productsQuery = productsQuery.sort({ createdAt: -1 });
     }
@@ -630,7 +634,9 @@ const removeProductFromWishlist = async (req, res) => {
     });
 
     if (!existingWishlistItem) {
-      return res.status(400).json({ message: "Product is not in the wishlist" });
+      return res
+        .status(400)
+        .json({ message: "Product is not in the wishlist" });
     }
 
     // If the product exists, remove it from the wishlist
@@ -646,7 +652,7 @@ const removeProductFromWishlist = async (req, res) => {
 
     // Fetch the updated user data with the wishlist
     const updatedUser = await Tourist.findById(userId);
-    
+
     res.status(200).json({
       message: "Product removed from wishlist",
       updatedWishlist: updatedUser.wishlist, // Optional: you can send back the updated wishlist
@@ -656,7 +662,6 @@ const removeProductFromWishlist = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 const rateProduct = async (req, res) => {
   try {

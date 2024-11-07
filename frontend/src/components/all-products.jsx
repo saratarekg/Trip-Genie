@@ -48,7 +48,6 @@ import defaultImage from "../assets/images/default-image.jpg";
 import DualHandleSliderComponent from "./dual-handle-slider";
 import LazyLoad from "react-lazyload";
 
-
 const renderStars = (rating) => {
   return (
     <div className="flex items-center">
@@ -73,7 +72,7 @@ const ProductCard = ({
   wishlistItems,
   onAddToCart,
   onAddToWishlist,
-  onRemoveFromWishlist
+  onRemoveFromWishlist,
 }) => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
@@ -141,8 +140,6 @@ const ProductCard = ({
     }
   }, [userInfo, product]);
 
-
-
   const formatPrice = (price) => {
     if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
       if (userInfo.preferredCurrency === product.currency) {
@@ -169,10 +166,10 @@ const ProductCard = ({
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(product._id)}>
         <CardTitle className="text-lg text-[#1A3B47]">{product.name}</CardTitle>
-        
+
         {/* Display rating directly below the product title */}
         <div className="mt-1">{renderStars(product.rating)}</div>
-  
+
         <p className="text-sm text-gray-600 mt-2 break-words">
           {product.description.length > 70
             ? `${product.description.slice(0, 70)}...`
@@ -183,7 +180,7 @@ const ProductCard = ({
         <span className="text-2xl font-bold text-[#388A94]">
           {formatPrice(product.price)}
         </span>
-  
+
         {/* Show "Buy Now" button only if user role is "tourist" */}
         {userInfo?.role === "tourist" && (
           <Button
@@ -202,7 +199,7 @@ const ProductCard = ({
           </Button>
         )}
       </CardFooter>
-  
+
       {/* Show "Add to Cart" and "Add to Wishlist" buttons only if user role is "tourist" */}
       {userInfo?.role === "tourist" && (
         <div className="absolute top-2 right-2 flex space-x-2">
@@ -244,7 +241,6 @@ const ProductCard = ({
       )}
     </Card>
   );
-  
 };
 
 export function AllProducts() {
@@ -284,7 +280,7 @@ export function AllProducts() {
       const timer = setTimeout(() => {
         setAlertMessage(null); // Clear alert message
       }, 2000);
-  
+
       // Clear the timer if the component unmounts or alertMessage changes
       return () => clearTimeout(timer);
     }
@@ -336,23 +332,19 @@ export function AllProducts() {
 
   const fetchProducts = useCallback(
     async (params = {}) => {
-   
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
         const url = new URL(`http://localhost:4000/${role}/products`);
-       
 
         if (params.searchBy)
           url.searchParams.append("searchBy", params.searchBy);
-        if(products.length>0){
+        if (products.length > 0) {
           handlePageChange(1);
         }
-        if (params.asc) {
-         
+        if (params.sort) url.searchParams.append("sort", params.sort);
+        if (params.asc !== undefined)
           url.searchParams.append("asc", params.asc);
-          console.log(params);
-        }
         if (params.myproducts)
           url.searchParams.append("myproducts", params.myproducts);
         if (params.minPrice)
@@ -363,7 +355,7 @@ export function AllProducts() {
         if (params.categories && params.categories.length > 0) {
           url.searchParams.append("categories", params.categories.join(","));
         }
-       
+
         const response = await fetch(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -382,7 +374,7 @@ export function AllProducts() {
         console.error("Error fetching products:", error);
         setError("Error fetching products");
         setProducts([]);
-      } 
+      }
     },
     [getUserRole]
   );
@@ -441,6 +433,7 @@ export function AllProducts() {
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         rating: selectedRating,
+        sort: sortBy,
         asc: sortOrder,
         categories: selectedCategories,
       });
@@ -463,12 +456,9 @@ export function AllProducts() {
     navigate(`/product/${id}`);
   };
 
-
-    const handlePageChange = (pageNumber) => {
-      setCurrentPage(pageNumber);
-    };
-  
-
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleSort = (attribute) => {
     setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1));
@@ -587,11 +577,11 @@ export function AllProducts() {
           },
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to remove from wishlist");
       }
-  
+
       setAlertMessage({
         type: "success",
         message: "Product removed from wishlist successfully!",
@@ -604,7 +594,6 @@ export function AllProducts() {
       });
     }
   };
-  
 
   const handlePurchase = async () => {
     try {
@@ -663,9 +652,11 @@ export function AllProducts() {
         <h1 className="text-4xl font-bold text-[#1A3B47] mb-8">All Products</h1>
         <div className="flex gap-8">
           {/* Sidebar Filters */}
-          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6"> {/* Wider filter section */}
-    <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
+            {" "}
+            {/* Wider filter section */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button
                 onClick={clearFilters}
                 size="sm"
@@ -674,7 +665,6 @@ export function AllProducts() {
                 Clear All
               </Button>
             </div>
-
             {/* Price Range */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
@@ -689,7 +679,6 @@ export function AllProducts() {
                 onChange={(values) => setPriceRange(values)}
               />
             </div>
-
             {/* Rating Filter */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Rating</h3>
@@ -707,7 +696,6 @@ export function AllProducts() {
                 ))}
               </div>
             </div>
-
             {/* Sort by Rating */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">
@@ -727,17 +715,34 @@ export function AllProducts() {
                 </div>
               </Button>
             </div>
-
-           
+            {/* Sort by Price */}
+            <div className="mb-6">
+              <h3 className="font-medium text-[#1A3B47] mb-2">Sort by Price</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                style={{ borderRadius: "20px" }}
+                onClick={() => handleSort("price")}
+              >
+                <ArrowUpDown className="w-4 h-4" />
+                <span>Price</span>
+                <div className="ml-auto">
+                  {sortBy === "price" ? (sortOrder === 1 ? "↓" : "↑") : ""}
+                </div>
+              </Button>
+            </div>
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
             {/* View Toggle */}
             <div className="flex items-center justify-between mb-6">
-      <div className="flex items-center justify-center space-x-4">
-        <div className="relative" style={{ width: "790px" }}> {/* Smaller search bar */}
-        <input
+              <div className="flex items-center justify-center space-x-4">
+                <div className="relative" style={{ width: "790px" }}>
+                  {" "}
+                  {/* Smaller search bar */}
+                  <input
                     type="text"
                     placeholder="Search products..."
                     className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
@@ -766,20 +771,20 @@ export function AllProducts() {
               <div className="text-red-500 text-center mb-4">{error}</div>
             )}
 
-{alertMessage && (
-      <Alert
-        className={`mb-4 ${
-          alertMessage.type === "success"
-            ? "bg-green-100"
-            : "bg-red-100"
-        }`}
-      >
-        <AlertTitle>
-          {alertMessage.type === "success" ? "Success" : "Error"}
-        </AlertTitle>
-        <AlertDescription>{alertMessage.message}</AlertDescription>
-      </Alert>
-    )}
+            {alertMessage && (
+              <Alert
+                className={`mb-4 ${
+                  alertMessage.type === "success"
+                    ? "bg-green-100"
+                    : "bg-red-100"
+                }`}
+              >
+                <AlertTitle>
+                  {alertMessage.type === "success" ? "Success" : "Error"}
+                </AlertTitle>
+                <AlertDescription>{alertMessage.message}</AlertDescription>
+              </Alert>
+            )}
             {isLoading ? (
               <Loader />
             ) : (
@@ -792,7 +797,7 @@ export function AllProducts() {
                       currentPage * tripsPerPage
                     )
                     .map((product) => (
-                      <ProductCard 
+                      <ProductCard
                         key={product._id}
                         product={product}
                         userInfo={userInfo}
@@ -809,44 +814,45 @@ export function AllProducts() {
 
                 {/* Pagination */}
                 <div className="mt-8 flex justify-center items-center space-x-4">
-                <button
-                  onClick={() => {
-                    handlePageChange(currentPage - 1);
-                  }}
-                  disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                  }`}
-                >
-                  <ChevronLeft />
-                </button>
+                  <button
+                    onClick={() => {
+                      handlePageChange(currentPage - 1);
+                    }}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-full bg-white shadow ${
+                      currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                    }`}
+                  >
+                    <ChevronLeft />
+                  </button>
 
-                {/* Page X of Y */}
-                <span className="text-lg font-medium">
-                  {products.length > 0
-                    ? `Page ${currentPage} of ${Math.ceil(
-                        products.length / tripsPerPage
-                      )}`
-                    : "No pages available"}
-                </span>
+                  {/* Page X of Y */}
+                  <span className="text-lg font-medium">
+                    {products.length > 0
+                      ? `Page ${currentPage} of ${Math.ceil(
+                          products.length / tripsPerPage
+                        )}`
+                      : "No pages available"}
+                  </span>
 
-                <button
-                  onClick={() => {
-                    handlePageChange(currentPage + 1);
-                  }}
-                  disabled={
-                    currentPage === Math.ceil(products.length / tripsPerPage) ||
-                    products.length === 0
-                  }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === Math.ceil(products.length / tripsPerPage)
-                      ? "text-gray-300"
-                      : "text-blue-600"
-                  }`}
-                >
-                  <ChevronRight />
-                </button>
-              </div>
+                  <button
+                    onClick={() => {
+                      handlePageChange(currentPage + 1);
+                    }}
+                    disabled={
+                      currentPage ===
+                        Math.ceil(products.length / tripsPerPage) ||
+                      products.length === 0
+                    }
+                    className={`px-4 py-2 rounded-full bg-white shadow ${
+                      currentPage === Math.ceil(products.length / tripsPerPage)
+                        ? "text-gray-300"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
               </>
             )}
           </div>
