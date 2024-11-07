@@ -235,7 +235,85 @@ const deleteTourGuideAccount = async (req, res) => {
       await cloudinary.uploader.destroy(tourGuide.profilePicture.public_id);
     }
 
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+
+    const filenames = [
+      tourGuide.files.IDFilename,
+      ...tourGuide.files.certificatesFilenames,
+    ];
+    const files = await gfs.find({ filename: { $in: filenames } }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+    files.forEach(async (file) => {
+      await gfs.delete(file._id);
+    });
+
     await TourGuide.findByIdAndDelete(res.locals.user_id);
+
+    res
+      .status(201)
+      .json({ message: "Tour guide account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteTourGuide = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tourGuide = await TourGuide.findById(id).lean();
+    if (!tourGuide) {
+      return res.status(404).json({ message: "TourGuide not found" });
+    }
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const itineraries = await Itinerary.find({ tourGuide: id });
+    const itinerariesIds = itineraries.map((itinerary) => itinerary._id);
+    const bookedItineraries = await itineraryBooking.find({
+      itinerary: { $in: itinerariesIds },
+      date: { $gte: tomorrow.toISOString() },
+    });
+
+    if (bookedItineraries.length > 0) {
+      return res.status(400).json({
+        message: "You cannot delete your account because you have bookings",
+      });
+    }
+
+    itineraries.forEach(async (itinerary) => {
+      await Itinerary.findByIdAndUpdate(itinerary._id, { isDeleted: true });
+    });
+
+    if (tourGuide.profilePicture !== null) {
+      await cloudinary.uploader.destroy(tourGuide.profilePicture.public_id);
+    }
+
+    const gfs = req.app.locals.gfs;
+
+    if (!gfs) {
+      return res.status(500).send("GridFS is not initialized");
+    }
+
+    const filenames = [
+      tourGuide.files.IDFilename,
+      ...tourGuide.files.certificatesFilenames,
+    ];
+    const files = await gfs.find({ filename: { $in: filenames } }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ err: "No file exists" });
+    }
+    files.forEach(async (file) => {
+      await gfs.delete(file._id);
+    });
+
+    await TourGuide.findByIdAndDelete(id);
 
     res
       .status(201)
@@ -532,6 +610,7 @@ module.exports = {
   getTourGuideProfile,
   updateTourGuideProfile,
   deleteTourGuideAccount,
+  deleteTourGuide,
   getTourGuideByID,
   getAllTourGuides,
   getTourGuideByID,

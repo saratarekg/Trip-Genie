@@ -32,13 +32,13 @@ router.post("/admins", adminController.addAdmin);
 router.post("/governors", tourismGovernorController.addTourismGovernor);
 
 // Route to delete an Advertiser
-router.delete("/advertisers/:id", advertiserController.rejectAdvertiser);
+router.delete("/reject/advertisers/:id", advertiserController.rejectAdvertiser);
 
 // Route to delete a Seller
-router.delete("/sellers/:id", sellerController.rejectSeller);
+router.delete("/reject/sellers/:id", sellerController.rejectSeller);
 
 // Route to delete a Tour Guide
-router.delete("/tourGuides/:id", tourGuideController.rejectTourGuide);
+router.delete("/reject/tourGuides/:id", tourGuideController.rejectTourGuide);
 
 // Route to delete a Tourist
 router.delete("/tourists/:id", touristController.deleteTouristAccount);
@@ -51,6 +51,15 @@ router.delete(
   "/governors/:id",
   tourismGovernorController.deleteTourismGovAccount
 );
+
+// Route to delete a Tour Guide
+router.delete("/tourGuides/:id", tourGuideController.deleteTourGuide);
+
+// Route to delete an Advertiser
+router.delete("/advertisers/:id", advertiserController.deleteAdvertiser);
+
+// Route to delete a Seller
+router.delete("/sellers/:id", sellerController.deleteSeller);
 
 router.get("/governors/:id", tourismGovernorController.getTourismGovByID);
 

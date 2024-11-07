@@ -24,9 +24,9 @@ const FilterComponent = ({
   symbol,
   myProducts,
   handlemyProducts,
-  currentPage
+  currentPage,
 }) => {
-  const isAllProductsPage = currentPage === "all-products"
+  const isAllProductsPage = currentPage === "all-products";
 
   return (
     <>
@@ -56,7 +56,20 @@ const FilterComponent = ({
               : ""}
           </button>
 
-          {isAllProductsPage && (role === "seller"|| role === "admin")  && (
+          <button
+            onClick={() => handleSort("price")}
+            className="flex items-center px-4 py-2 bg-white rounded-full shadow"
+          >
+            <ArrowUpDown className="mr-2" size={18} />
+            Sort by Price{" "}
+            {sortBy === "price"
+              ? sortOrder === 1
+                ? "(Low to High)"
+                : "(High to Low)"
+              : ""}
+          </button>
+
+          {isAllProductsPage && (role === "seller" || role === "admin") && (
             <button
               onClick={() => handlemyProducts(!myProducts)} // Toggle myProducts state
               className={`flex items-center px-4 py-2 rounded-full shadow ${
@@ -85,34 +98,25 @@ const FilterComponent = ({
             Create
           </Link>
         ) : null}
-
       </div>
 
-
       {isAllProductsPage && (role === "seller" || role === "admin") ? (
-          <Link
-            to="/product-archive"
-            className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
-          >
-          
-             Archived Products
-          </Link>
-        ) : null}
-        
+        <Link
+          to="/product-archive"
+          className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
+        >
+          Archived Products
+        </Link>
+      ) : null}
+
       {!isAllProductsPage && (role === "seller" || role === "admin") ? (
-          <Link
-            to="/all-products"
-            className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
-          >
-          
-             All Products
-          </Link>
-        ) : null}
-   
-
-   
-
-      
+        <Link
+          to="/all-products"
+          className="flex items-center px-4 py-2 bg-white rounded-full shadow ml-auto"
+        >
+          All Products
+        </Link>
+      ) : null}
 
       {filtersVisible && (
         <div className="mt-4 bg-white p-4 rounded-lg shadow-lg">

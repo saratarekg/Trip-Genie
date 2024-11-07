@@ -63,6 +63,8 @@ import {
   Link,
   Smile,
   Frown,
+  Car,
+  Bus,
 } from "lucide-react";
 
 const ImageGallery = ({ pictures }) => {
@@ -182,6 +184,9 @@ const ActivityDetail = () => {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [userBookings, setUserBookings] = useState([]);
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
+    useState(false);
+
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
   const [ratingDistribution, setRatingDistribution] = useState({
@@ -194,6 +199,131 @@ const ActivityDetail = () => {
   const [userComment, setUserComment] = useState(null);
   const [quickRating, setQuickRating] = useState(0);
   const [isRatingHovered, setIsRatingHovered] = useState(false);
+  const [selectedTransportation, setSelectedTransportation] = useState(null);
+  const [transportationBookingDialog, setTransportationBookingDialog] =
+    useState(false);
+  const [seatsToBook, setSeatsToBook] = useState(1);
+  const [paymentMethod, setPaymentMethod] = useState("creditCard");
+
+  const handleTransportationBooking = async () => {
+    if (!selectedTransportation) return;
+
+    setIsBooking(true);
+    setBookingError("");
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.post(
+        "http://localhost:4000/tourist/book-transportation",
+        {
+          touristID: currentUser,
+          transportationID: selectedTransportation._id,
+          seatsToBook: seatsToBook,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.message === "Transportation Booking successful") {
+        setShowTransportationSuccessDialog(true);
+        const updatedTransportations = activity.transportations.map((t) =>
+          t._id === selectedTransportation._id
+            ? { ...t, remainingSeats: response.data.remainingSeats }
+            : t
+        );
+        setActivity({ ...activity, transportations: updatedTransportations });
+      } else {
+        setBookingError(
+          response.data.message || "Failed to book transportation"
+        );
+      }
+    } catch (error) {
+      console.error("Error booking transportation:", error);
+      setBookingError(
+        error.response?.data?.message || "An error occurred while booking"
+      );
+    } finally {
+      setIsBooking(false);
+      setTransportationBookingDialog(false);
+    }
+  };
+
+  const renderTransportationOptions = () => {
+    if (!activity.transportations || activity.transportations.length === 0) {
+      return <p>No transportation options available for this activity.</p>;
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {activity.transportations.map((transport) => (
+          <Card key={transport._id} className="overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  {transport.vehicleType === "Bus" ||
+                  transport.vehicleType === "Microbus" ? (
+                    <Bus className="w-5 h-5 mr-2 text-blue-500" />
+                  ) : (
+                    <Car className="w-5 h-5 mr-2 text-green-500" />
+                  )}
+                  <h3 className="text-base font-semibold">
+                    {transport.vehicleType}
+                  </h3>
+                </div>
+                <span className="text-sm font-medium text-green-600">
+                  {formatPrice(transport.ticketCost)}
+                </span>
+              </div>
+              <div className="space-y-1 text-sm">
+                <p className="flex justify-between">
+                  <span className="text-gray-600">From:</span>
+                  <span className="font-medium">{transport.from}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-gray-600">To:</span>
+                  <span className="font-medium">{transport.to}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-gray-600">Departure:</span>
+                  <span className="font-medium">
+                    {format(
+                      new Date(transport.timeDeparture),
+                      "MMM d, yyyy HH:mm"
+                    )}
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-gray-600">Duration:</span>
+                  <span className="font-medium">
+                    {transport.estimatedDuration} hours
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-gray-600">Seats left:</span>
+                  <span className="font-medium">
+                    {transport.remainingSeats}
+                  </span>
+                </p>
+              </div>
+              {userRole === "tourist" &&
+                userBooking &&
+                transport.remainingSeats > 0 && (
+                  <Button
+                    onClick={() => {
+                      setSelectedTransportation(transport);
+                      setTransportationBookingDialog(true);
+                    }}
+                    className="w-full mt-4 bg-[#388A94] hover:bg-[#2c6d75] text-white"
+                  >
+                    Book Transportation
+                  </Button>
+                )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -374,6 +504,7 @@ const ActivityDetail = () => {
           }
         );
         setUserBookings(response.data);
+
         console.log(response.data);
       } catch (error) {
         console.error("Error fetching user bookings:", error);
@@ -792,16 +923,14 @@ const ActivityDetail = () => {
 
               <div className="flex gap-8">
                 <div className="flex-1 space-y-4"></div>
-                
+
                 <div className="lg:w-2/3">
                   <ImageGallery pictures={activity.pictures} />
                   <div className="h-6"></div>
                   <p className="text-lg text-gray-600 mt-32 mb-6">
-                 
                     {activity.description}
                   </p>
                 </div>
-             
 
                 <div className="lg:w-1/3 space-y-6">
                   <div className="space-y-4">
@@ -1034,6 +1163,15 @@ const ActivityDetail = () => {
               )}
             </div>
           </div>
+
+          {(userRole === "advertiser" || userRole === "tourist") && (
+            <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-2xl font-bold mb-4">
+                Transportation Options
+              </h2>
+              {renderTransportationOptions()}
+            </div>
+          )}
 
           {/* Comment Carousel */}
           <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
@@ -1597,6 +1735,106 @@ const ActivityDetail = () => {
           <DialogFooter>
             <Button onClick={() => navigate("/activity")} variant="default">
               OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={transportationBookingDialog}
+        onOpenChange={setTransportationBookingDialog}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Book Transportation</DialogTitle>
+            <DialogDescription>
+              Please select the number of seats and payment method.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="seats" className="text-right">
+                Seats
+              </Label>
+              <Input
+                id="seats"
+                type="number"
+                className="col-span-3"
+                value={seatsToBook}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  setSeatsToBook(
+                    Math.max(
+                      0,
+                      Math.min(
+                        value,
+                        selectedTransportation?.remainingSeats || 0
+                      )
+                    )
+                  );
+                }}
+                min="0"
+                max={selectedTransportation?.remainingSeats}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Total Price</Label>
+              <div className="col-span-3">
+                {formatPrice(
+                  (selectedTransportation?.ticketCost || 0) * seatsToBook
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Payment</Label>
+              <RadioGroup
+                defaultValue="creditCard"
+                className="col-span-3"
+                onValueChange={setPaymentMethod}
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="creditCard" id="creditCard" />
+                  <Label htmlFor="creditCard">Credit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="debitCard" id="debitCard" />
+                  <Label htmlFor="debitCard">Debit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="wallet" id="wallet" />
+                  <Label htmlFor="wallet">Wallet</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setTransportationBookingDialog(false)}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleTransportationBooking} disabled={isBooking}>
+              {isBooking ? "Booking..." : "Confirm Booking"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showTransportationSuccessDialog}
+        onOpenChange={setShowTransportationSuccessDialog}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Transportation Booked Successfully</DialogTitle>
+            <DialogDescription>
+              Your transportation has been booked. Thank you for your purchase!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setShowTransportationSuccessDialog(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
