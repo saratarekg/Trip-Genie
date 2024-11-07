@@ -451,7 +451,7 @@ export function AllActivitiesComponent() {
       }
 
       const data = await response.json();
-
+      console.log(data);
       setActivities(data);
       setError(null);
       setCurrentPage(1);
@@ -562,127 +562,126 @@ export function AllActivitiesComponent() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
           </div>
           <div className="min-h-screen bg-gray-100 px-4 sm:px-6 lg:px-8 mb-4">
-          <div className="max-w-7xl mx-auto">
-            <>
-              <h1 className="text-4xl font-bold text-gray-900 mb-8 pt-4">
-                All Activities
-              </h1>
+            <div className="max-w-7xl mx-auto">
+              <>
+                <h1 className="text-4xl font-bold text-gray-900 mb-8 pt-4">
+                  All Activities
+                </h1>
 
-              {isSortedByPreference && getUserRole() === "tourist" && (
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                  Sorted based on your preferences
-                </h2>
-              )}
-
-              <div className="flex flex-col mb-8">
-                <div className="relative w-full mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search activities..."
-                    className="w-full pl-10 pr-4 py-2 border rounded-full"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <Search className="absolute left-3 top-2.5 text-gray-400" />
-                </div>
-
-                <FilterComponent
-                  filtersVisible={filtersVisible}
-                  toggleFilters={toggleFilters}
-                  sortOrder={sortOrder}
-                  sortBy={sortBy}
-                  handleSort={handleSort}
-                  clearFilters={clearFilters}
-                  priceRange={priceRange}
-                  setPriceRange={setPriceRange}
-                  dateRange={dateRange}
-                  setDateRange={setDateRange}
-                  minStars={minStars}
-                  setMinStars={setMinStars}
-                  categoriesOptions={categoryOptions}
-                  searchActivites={searchActivities}
-                  selectedCategories={selectedCategories}
-                  setSelectedCategories={setSelectedCategories}
-                  myActivities={myActivities}
-                  symbol={getSymbol()}
-                  handlemyActivities={handlemyActivities}
-                  maxPrice={maxPrice} // Pass maxPrice as a prop
-                  initialPriceRange={initialPriceRange}
-                  isSortedByPreference={isSortedByPreference}
-                  handleSortByPreference={handleSortByPreference}
-                />
-
-                {activities.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {activities
-                      .slice(
-                        (currentPage - 1) * activitiesPerPage,
-                        currentPage * activitiesPerPage
-                      )
-                      .map((activity) => (
-                        <ActivityCard
-                          key={activity._id}
-                          userInfo={userInfo}
-                          activity={activity}
-                          onSelect={handleActivitySelect}
-                        />
-                      ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-gray-500">
-                    No activities found.
-                  </p>
+                {isSortedByPreference && getUserRole() === "tourist" && (
+                  <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                    Sorted based on your preferences
+                  </h2>
                 )}
 
-                {/* Pagination Section */}
-                <div className="mt-8 flex justify-center items-center space-x-4">
-                  <button
-                    onClick={() => {
-                      handlePageChange(currentPage - 1);
-                    }}
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                    }`}
-                  >
-                    <ChevronLeft />
-                  </button>
+                <div className="flex flex-col mb-8">
+                  <div className="relative w-full mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search activities..."
+                      className="w-full pl-10 pr-4 py-2 border rounded-full"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400" />
+                  </div>
 
-                  {/* Page X of Y */}
-                  <span className="text-lg font-medium">
-                    {activities.length > 0
-                      ? `Page ${currentPage} of ${Math.ceil(
-                          activities.length / activitiesPerPage
-                        )}`
-                      : "No pages available"}
-                  </span>
+                  <FilterComponent
+                    filtersVisible={filtersVisible}
+                    toggleFilters={toggleFilters}
+                    sortOrder={sortOrder}
+                    sortBy={sortBy}
+                    handleSort={handleSort}
+                    clearFilters={clearFilters}
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                    dateRange={dateRange}
+                    setDateRange={setDateRange}
+                    minStars={minStars}
+                    setMinStars={setMinStars}
+                    categoriesOptions={categoryOptions}
+                    searchActivites={searchActivities}
+                    selectedCategories={selectedCategories}
+                    setSelectedCategories={setSelectedCategories}
+                    myActivities={myActivities}
+                    symbol={getSymbol()}
+                    handlemyActivities={handlemyActivities}
+                    maxPrice={maxPrice} // Pass maxPrice as a prop
+                    initialPriceRange={initialPriceRange}
+                    isSortedByPreference={isSortedByPreference}
+                    handleSortByPreference={handleSortByPreference}
+                  />
 
-                  <button
-                    onClick={() => {
-                      handlePageChange(currentPage + 1);
-                    }}
-                    disabled={
-                      currentPage ===
-                        Math.ceil(activities.length / activitiesPerPage) ||
-                      activities.length === 0
-                    }
-                    className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage ===
-                      Math.ceil(activities.length / activitiesPerPage)
-                        ? "text-gray-300"
-                        : "text-blue-600"
-                    }`}
-                  >
-                    <ChevronRight />
-                  </button>
+                  {activities.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {activities
+                        .slice(
+                          (currentPage - 1) * activitiesPerPage,
+                          currentPage * activitiesPerPage
+                        )
+                        .map((activity) => (
+                          <ActivityCard
+                            key={activity._id}
+                            userInfo={userInfo}
+                            activity={activity}
+                            onSelect={handleActivitySelect}
+                          />
+                        ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-gray-500">
+                      No activities found.
+                    </p>
+                  )}
+
+                  {/* Pagination Section */}
+                  <div className="mt-8 flex justify-center items-center space-x-4">
+                    <button
+                      onClick={() => {
+                        handlePageChange(currentPage - 1);
+                      }}
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 rounded-full bg-white shadow ${
+                        currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                      }`}
+                    >
+                      <ChevronLeft />
+                    </button>
+
+                    {/* Page X of Y */}
+                    <span className="text-lg font-medium">
+                      {activities.length > 0
+                        ? `Page ${currentPage} of ${Math.ceil(
+                            activities.length / activitiesPerPage
+                          )}`
+                        : "No pages available"}
+                    </span>
+
+                    <button
+                      onClick={() => {
+                        handlePageChange(currentPage + 1);
+                      }}
+                      disabled={
+                        currentPage ===
+                          Math.ceil(activities.length / activitiesPerPage) ||
+                        activities.length === 0
+                      }
+                      className={`px-4 py-2 rounded-full bg-white shadow ${
+                        currentPage ===
+                        Math.ceil(activities.length / activitiesPerPage)
+                          ? "text-gray-300"
+                          : "text-blue-600"
+                      }`}
+                    >
+                      <ChevronRight />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </>
+              </>
+            </div>
           </div>
         </div>
-        </div>
       )}
-   
     </div>
   );
 }

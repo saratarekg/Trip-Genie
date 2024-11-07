@@ -1384,10 +1384,7 @@ const ActivityDetail = () => {
                 <Button onClick={handleUpdate} variant="default">
                   <Edit className="mr-2" /> Update
                 </Button>
-                <Button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  variant="destructive"
-                >
+                <Button onClick={handleDelete} variant="destructive">
                   <Trash2 className="mr-2" /> Delete
                 </Button>
               </div>
