@@ -47,12 +47,10 @@ const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
   const [activity, setActivity] = useState(initialData);
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [transportations, setTransportations] = useState([]);
 
   useEffect(() => {
     fetchTags();
     fetchCategories();
-    fetchTransportations();
   }, []);
 
   useEffect(() => {
@@ -69,18 +67,7 @@ const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
     setCategories(response.data.map((cat) => ({ value: cat._id, label: cat.name })));
   };
 
-  const fetchTransportations = async () => {
-    const token = Cookies.get('jwt');
-    const response = await axios.get("http://localhost:4000/tour-guide/transportations", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setTransportations(
-      response.data.map((transport) => ({
-        value: transport._id,
-        label: `${transport.from} - ${transport.to} (${transport.vehicleType})`,
-      }))
-    );
-  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -169,20 +156,7 @@ const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
           ))}
         </div>
       </div>
-      <div>
-        <Label>Transportations</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {transportations.map((transport) => (
-            <label key={transport.value} className="flex items-center space-x-2">
-              <Checkbox
-                checked={activity?.transportations?.includes(transport.value)}
-                onCheckedChange={(checked) => handleCheckboxChange('transportations', transport.value)}
-              />
-              <span>{transport.label}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+    
       <Button type="submit">Save Activity</Button>
     </form>
   );
