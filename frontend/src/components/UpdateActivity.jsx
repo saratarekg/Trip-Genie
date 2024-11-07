@@ -7,13 +7,7 @@ import { ChevronLeft, Check, X } from "lucide-react";
 import * as z from "zod";
 import axios from "axios";
 import Cookies from "js-cookie";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-  useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +32,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useNavigate, useParams } from "react-router-dom";
+import ReactSelect from "react-select";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 const vehicleTypes = ["Bus", "Car", "Microbus"];
 
@@ -92,7 +88,6 @@ const schema = z.object({
     message: "Timing must be a future date",
   }),
   price: z.number().int().positive("Price must be a positive integer"),
-  currency: z.string().min(1, "Please select a currency"),
   category: z
     .array(z.object({ value: z.string(), label: z.string() }))
     .nonempty("At least one category is required"),
@@ -203,7 +198,6 @@ export default function UpdateActivity() {
         setValue("duration", activityData.duration);
         setValue("timing", new Date(activityData.timing));
         setValue("price", activityData.price);
-        setValue("currency", activityData.currency);
         setValue("specialDiscount", activityData.specialDiscount);
         setValue("isBookingOpen", activityData.isBookingOpen);
         setValue("pictures", activityData.pictures);
@@ -262,7 +256,6 @@ export default function UpdateActivity() {
     formData.append("price", Number(data.price));
     formData.append("specialDiscount", Number(data.specialDiscount));
     formData.append("isBookingOpen", data.isBookingOpen);
-    formData.append("currency", data.currency);
 
     formData.append("location[address]", data.location.address);
     formData.append(
@@ -461,17 +454,28 @@ export default function UpdateActivity() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-16">
-      <div className="container mx-auto px-4 py-8">
-        <Card className="w-full max-w-4xl mx-auto">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">
+    <div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div
+        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+        style={{
+          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+        }}
+      >
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-7xl flex flex-col md:flex-row">
+          <div className="w-full md:w-1/4 bg-[#B5D3D1] p-6">
+            <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
               Update Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-2">
+            </h2>
+            <p className="text-sm mb-6 text-[#1A3B47]">
+              Update the details of your activity. Make sure all information is accurate and up-to-date.
+            </p>
+          </div>
+          <div className="w-full md:w-3/4 p-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-4 gap-4">
+              <div className="col-span-2">
                 <Label htmlFor="name">Name</Label>
                 <Controller
                   name="name"
@@ -479,11 +483,11 @@ export default function UpdateActivity() {
                   render={({ field }) => <Input id="name" {...field} />}
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                  <p className="text-red-500 text-xs">{errors.name.message}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-2">
                 <Label htmlFor="description">Description</Label>
                 <Controller
                   name="description"
@@ -493,13 +497,13 @@ export default function UpdateActivity() {
                   )}
                 />
                 {errors.description && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-xs">
                     {errors.description.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-4">
                 <Label htmlFor="address">Address</Label>
                 <Controller
                   name="location.address"
@@ -507,136 +511,113 @@ export default function UpdateActivity() {
                   render={({ field }) => <Input id="address" {...field} />}
                 />
                 {errors.location?.address && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-xs">
                     {errors.location.address.message}
                   </p>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (hours)</Label>
-                  <Controller
-                    name="duration"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        id="duration"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    )}
-                  />
-                  {errors.duration && (
-                    <p className="text-red-500 text-sm">
-                      {errors.duration.message}
-                    </p>
+              <div className="col-span-1">
+                <Label htmlFor="duration">Duration (hours)</Label>
+                <Controller
+                  name="duration"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      id="duration"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="timing">Timing</Label>
-                  <Controller
-                    name="timing"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="datetime-local"
-                        id="timing"
-                        {...field}
-                        onChange={(e) => {
-                          const dateValue = new Date(e.target.value);
-                          field.onChange(dateValue);
-                        }}
-                        value={
-                          field.value instanceof Date
-                            ? field.value.toISOString().slice(0, 16)
-                            : ""
-                        }
-                      />
-                    )}
-                  />
-                  {errors.timing && (
-                    <p className="text-red-500 text-sm">
-                      {errors.timing.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price</Label>
-                  <Controller
-                    name="price"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        id="price"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    )}
-                  />
-                  {errors.price && (
-                    <p className="text-red-500 text-sm">
-                      {errors.price.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="specialDiscount">Special Discount (%)</Label>
-                  <Controller
-                    name="specialDiscount"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        id="specialDiscount"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    )}
-                  />
-                  {errors.specialDiscount && (
-                    <p className="text-red-500 text-sm">
-                      {errors.specialDiscount.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="currency">Currency </Label>
-                <select
-                  {...register("currency")}
-                  className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-                  id="currency"
-                >
-                  <option value="">Select currency</option>
-                  {currencies.map((currency) => (
-                    <option key={currency._id} value={currency._id}>
-                      {currency.code} - {currency.name} ({currency.symbol})
-                    </option>
-                  ))}
-                </select>
-                {errors.currency && (
-                  <span className="text-red-500">
-                    {errors.currency.message}
-                  </span>
+                />
+                {errors.duration && (
+                  <p className="text-red-500 text-xs">
+                    {errors.duration.message}
+                  </p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-1">
+                <Label htmlFor="timing">Timing</Label>
+                <Controller
+                  name="timing"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="datetime-local"
+                      id="timing"
+                      {...field}
+                      onChange={(e) => {
+                        const dateValue = new Date(e.target.value);
+                        field.onChange(dateValue);
+                      }}
+                      value={
+                        field.value instanceof Date
+                          ? field.value.toISOString().slice(0, 16)
+                          : ""
+                      }
+                    />
+                  )}
+                />
+                {errors.timing && (
+                  <p className="text-red-500 text-xs">
+                    {errors.timing.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="col-span-1">
+                <Label htmlFor="price">Price</Label>
+                <Controller
+                  name="price"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      id="price"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  )}
+                />
+                {errors.price && (
+                  <p className="text-red-500 text-xs">
+                    {errors.price.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="col-span-1">
+                <Label htmlFor="specialDiscount">Special Discount (%)</Label>
+                <Controller
+                  name="specialDiscount"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      id="specialDiscount"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  )}
+                />
+                {errors.specialDiscount && (
+                  <p className="text-red-500 text-xs">
+                    {errors.specialDiscount.message}
+                  </p>
+                )}
+              </div>
+
+             
+
+              <div className="col-span-2">
                 <Label>Categories</Label>
                 <Controller
                   name="category"
                   control={control}
                   render={({ field }) => (
-                    <Select
+                    <ReactSelect
                       {...field}
                       options={categories}
                       isMulti
@@ -646,19 +627,19 @@ export default function UpdateActivity() {
                   )}
                 />
                 {errors.category && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-xs">
                     {errors.category.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-2">
                 <Label>Tags</Label>
                 <Controller
                   name="tags"
                   control={control}
                   render={({ field }) => (
-                    <Select
+                    <ReactSelect
                       {...field}
                       options={tags}
                       isMulti
@@ -668,11 +649,11 @@ export default function UpdateActivity() {
                   )}
                 />
                 {errors.tags && (
-                  <p className="text-red-500 text-sm">{errors.tags.message}</p>
+                  <p className="text-red-500 text-xs">{errors.tags.message}</p>
                 )}
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="col-span-4 flex items-center space-x-2">
                 <Controller
                   name="isBookingOpen"
                   control={control}
@@ -687,7 +668,7 @@ export default function UpdateActivity() {
                 <Label htmlFor="isBookingOpen">Is Booking Open?</Label>
               </div>
 
-              <div>
+              <div className="col-span-4">
                 <Label htmlFor="pictures">Add New Pictures</Label>
                 <Input
                   id="pictures"
@@ -717,10 +698,10 @@ export default function UpdateActivity() {
                   ))}
 
                   {base64Pictures.map((picture, index) => (
-                    <div key={`existing-${index}`} className="relative">
+                    <div key={`new-${index}`} className="relative">
                       <img
                         src={picture}
-                        alt={`Product Existing ${index + 1}`}
+                        alt={`Product New ${index + 1}`}
                         className="w-full h-32 object-cover rounded cursor-pointer"
                         onClick={() => setSelectedImage(picture)}
                       />
@@ -736,7 +717,7 @@ export default function UpdateActivity() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-4">
                 <Label>Location (click to update)</Label>
                 <div className="h-64 w-full rounded-md overflow-hidden">
                   <MapContainer
@@ -753,7 +734,7 @@ export default function UpdateActivity() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="col-span-4 space-y-4">
                 <Label>Transportation Options</Label>
                 {transportations.map((transport, index) => (
                   <div
@@ -761,36 +742,19 @@ export default function UpdateActivity() {
                     className="p-4 border rounded-md flex justify-between items-center"
                   >
                     <div>
-                      <p>
-                        <strong>From:</strong> {transport.from}
-                      </p>
-                      <p>
-                        <strong>To:</strong> {transport.to}
-                      </p>
-                      <p>
-                        <strong>Vehicle:</strong> {transport.vehicleType}
-                      </p>
-                      <p>
-                        <strong>Ticket Cost:</strong> {transport.ticketCost}
-                      </p>
-                      <p>
-                        <strong>Departure:</strong>{" "}
-                         {formatDate(transport.timeDeparture)}
-                      </p>
-                      <p>
-                        <strong>Duration:</strong> {transport.estimatedDuration}{" "}
-                        hours
-                      </p>
-                      <p>
-                        <strong>Remaining Seats:</strong>{" "}
-                        {transport.remainingSeats}
-                      </p>
+                      <p><strong>From:</strong> {transport.from}</p>
+                      <p><strong>To:</strong> {transport.to}</p>
+                      <p><strong>Vehicle:</strong> {transport.vehicleType}</p>
+                      <p><strong>Ticket Cost:</strong> {transport.ticketCost}</p>
+                      <p><strong>Departure:</strong> {formatDate(transport.timeDeparture)}</p>
+                      <p><strong>Duration:</strong> {transport.estimatedDuration} hours</p>
+                      <p><strong>Remaining Seats:</strong> {transport.remainingSeats}</p>
                     </div>
                     <div className="space-x-2">
                       <Button
                         type="button"
                         onClick={() => handleEditTransportation(index)}
-                        className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+                        className="bg-[#5D9297] hover:bg-[#1A3B47] text-white"
                       >
                         Edit
                       </Button>
@@ -804,11 +768,10 @@ export default function UpdateActivity() {
                     </div>
                   </div>
                 ))}
-                <br />
                 <Button
                   type="button"
                   onClick={() => setShowTransportationForm(true)}
-                  className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+                  className="bg-[#5D9297] hover:bg-[#1A3B47] text-white w-full"
                 >
                   Add Transportation
                 </Button>
@@ -816,15 +779,16 @@ export default function UpdateActivity() {
 
               <Button
                 type="submit"
-                className="w-full bg-[#388A94] hover:bg-[#2c6d75] text-white"
+                className="col-span-4 bg-[#5D9297] text-white hover:bg-[#1A3B47]"
                 disabled={loading}
               >
                 {loading ? "Updating..." : "Update Activity"}
               </Button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
+
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <DialogHeader>

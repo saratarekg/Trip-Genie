@@ -181,7 +181,7 @@ const CreateProductForm = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-sm font-medium">Price (in American Dollars $)</Label>
+                <Label htmlFor="price" className="text-sm font-medium">Price (in USD)</Label>
                 <Input
                   id="price"
                   type="number"

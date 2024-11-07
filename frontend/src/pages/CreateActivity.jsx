@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import ReactSelect from "react-select";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 const vehicleTypes = ["Bus", "Car", "Microbus"];
 
@@ -77,7 +78,6 @@ const schema = z.object({
     message: "Timing must be a future date",
   }),
   price: z.number().int().positive("Price must be a positive integer"),
-  currency: z.string().min(1, "Please select a currency"),
   category: z
     .array(z.object({ value: z.string(), label: z.string() }))
     .nonempty("At least one category is required"),
@@ -128,7 +128,6 @@ export default function CreateActivity() {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [citiesLoading, setCitiesLoading] = useState(false);
-  const [currencies, setCurrencies] = useState([]);
   const [pictures, setPictures] = useState([]);
 
   const [transportations, setTransportations] = useState([]);
@@ -168,7 +167,6 @@ export default function CreateActivity() {
 
     fetchCategories();
     fetchTags();
-    fetchCurrencies();
     fetchCountries();
   }, []);
 
@@ -231,20 +229,6 @@ export default function CreateActivity() {
     }
   };
 
-  const fetchCurrencies = async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/advertiser/currencies`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCurrencies(response.data);
-    } catch (err) {
-      console.error("Error fetching currencies:", err.message);
-    }
-  };
 
   const onSubmitTransportation = async (data) => {
     try {
@@ -297,7 +281,6 @@ export default function CreateActivity() {
     formData.append("duration", data.duration);
     formData.append("price", data.price);
     formData.append("specialDiscount", data.specialDiscount);
-    formData.append("currency", data.currency);
     formData.append("location[address]", data.location.address);
     formData.append("location[coordinates][longitude]", location.longitude);
     formData.append("location[coordinates][latitude]", location.latitude);
@@ -398,29 +381,40 @@ export default function CreateActivity() {
   };
 
   return (
-    <>
-      <div className="pt-[100px] pb-[40px]">
-        <Card className="w-full max-w-4xl mx-auto shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">
+    <div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div
+        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+        style={{
+          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+        }}
+      >
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-7xl flex flex-col md:flex-row">
+          <div className="w-full md:w-1/4 bg-[#B5D3D1] p-6">
+            <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
               Create New Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+            </h2>
+            <p className="text-sm mb-6 text-[#1A3B47]">
+              Create a new activity for your tours. Fill in the details carefully to ensure accurate information for your customers.
+            </p>
+          </div>
+          <div className="w-full md:w-3/4 p-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-4 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="name">Activity Name</Label>
                 <Controller
                   name="name"
                   control={control}
                   render={({ field }) => <Input id="name" {...field} />}
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                  <p className="text-red-500 text-xs">{errors.name.message}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-2">
                 <Label htmlFor="description">Description</Label>
                 <Controller
                   name="description"
@@ -430,13 +424,13 @@ export default function CreateActivity() {
                   )}
                 />
                 {errors.description && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-xs">
                     {errors.description.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-2">
                 <Label htmlFor="country">Country</Label>
                 <Select
                   onValueChange={(value) => handleCountryChange({ value, label: value })}
@@ -455,11 +449,10 @@ export default function CreateActivity() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-2">
                 <Label htmlFor="city">City</Label>
                 <Select
-                  onValueChange={(value) => handleCityChange({ value, label: value })
-                  }
+                  onValueChange={(value) => handleCityChange({ value, label: value })}
                   value={selectedCity?.value}
                   disabled={!selectedCountry || citiesLoading}
                 >
@@ -476,125 +469,101 @@ export default function CreateActivity() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (hours)</Label>
-                  <Controller
-                    name="duration"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        id="duration"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    )}
-                  />
-                  {errors.duration && (
-                    <p className="text-red-500 text-sm">
-                      {errors.duration.message}
-                    </p>
+              <div className="col-span-1">
+                <Label htmlFor="duration">Duration (hours)</Label>
+                <Controller
+                  name="duration"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      id="duration"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="timing">Timing</Label>
-                  <Controller
-                    name="timing"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="datetime-local"
-                        id="timing"
-                        value={
-                          field.value
-                            ? field.value.toISOString().slice(0, 16)
-                            : ""
-                        }
-                        onChange={(e) => {
-                          const dateValue = new Date(e.target.value);
-                          field.onChange(dateValue);
-                        }}
-                      />
-                    )}
-                  />
-                  {errors.timing && (
-                    <p className="text-red-500 text-sm">
-                      {errors.timing.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">Price</Label>
-                  <Controller
-                    name="price"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        min="0"
-                        id="price"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    )}
-                  />
-                  {errors.price && (
-                    <p className="text-red-500 text-sm">
-                      {errors.price.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="specialDiscount">Special Discount (%)</Label>
-                  <Controller
-                    name="specialDiscount"
-                    control={control}
-                    render={({ field }) => (
-                      <Input
-                        type="number"
-                        id="specialDiscount"
-                        min="0"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    )}
-                  />
-                  {errors.specialDiscount && (
-                    <p className="text-red-500 text-sm">
-                      {errors.specialDiscount.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="currency">Currency </Label>
-                <Select onValueChange={(value) => setValue("currency", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies.map((currency) => (
-                      <SelectItem key={currency._id} value={currency._id}>
-                        {currency.code} - {currency.name} ({currency.symbol})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.currency && (
-                  <span className="text-red-500">
-                    {errors.currency.message}
-                  </span>
+                />
+                {errors.duration && (
+                  <p className="text-red-500 text-xs">
+                    {errors.duration.message}
+                  </p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-1">
+                <Label htmlFor="timing">Timing</Label>
+                <Controller
+                  name="timing"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="datetime-local"
+                      id="timing"
+                      value={
+                        field.value
+                          ? field.value.toISOString().slice(0, 16)
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const dateValue = new Date(e.target.value);
+                        field.onChange(dateValue);
+                      }}
+                    />
+                  )}
+                />
+                {errors.timing && (
+                  <p className="text-red-500 text-xs">
+                    {errors.timing.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="col-span-1">
+                <Label htmlFor="price">Price (in USD)</Label>
+                <Controller
+                  name="price"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      min="0"
+                      id="price"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  )}
+                />
+                {errors.price && (
+                  <p className="text-red-500 text-xs">
+                    {errors.price.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="col-span-1">
+                <Label htmlFor="specialDiscount">Special Discount (%)</Label>
+                <Controller
+                  name="specialDiscount"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="number"
+                      id="specialDiscount"
+                      min="0"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  )}
+                />
+                {errors.specialDiscount && (
+                  <p className="text-red-500 text-xs">
+                    {errors.specialDiscount.message}
+                  </p>
+                )}
+              </div>
+
+
+              <div className="col-span-2">
                 <Label>Categories</Label>
                 <Controller
                   name="category"
@@ -610,13 +579,13 @@ export default function CreateActivity() {
                   )}
                 />
                 {errors.category && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-xs">
                     {errors.category.message}
                   </p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-2">
                 <Label>Tags</Label>
                 <Controller
                   name="tags"
@@ -632,11 +601,11 @@ export default function CreateActivity() {
                   )}
                 />
                 {errors.tags && (
-                  <p className="text-red-500 text-sm">{errors.tags.message}</p>
+                  <p className="text-red-500 text-xs">{errors.tags.message}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-2">
                 <Label htmlFor="pictures">Pictures</Label>
                 <Input
                   id="pictures"
@@ -646,7 +615,7 @@ export default function CreateActivity() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-4">
                 <Label>Location (click to set)</Label>
                 <div className="h-64 w-full rounded-md overflow-hidden">
                   <MapContainer
@@ -666,10 +635,10 @@ export default function CreateActivity() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="col-span-4">
                 <Label>Transportation Options</Label>
                 {transportations.map((transport, index) => (
-                  <div key={index} className="p-2 border rounded flex justify-between items-center">
+                  <div key={index} className="p-2 border rounded flex justify-between items-center mb-2">
                     <div>
                       <p>From: {transport.from}</p>
                       <p>To: {transport.to}</p>
@@ -682,7 +651,7 @@ export default function CreateActivity() {
                       <Button
                         type="button"
                         onClick={() => handleEditTransportation(index)}
-                        className="bg-[#388A94] hover:bg-[#2c6d75] text-white mr-2"
+                        className="bg-[#5D9297] hover:bg-[#1A3B47] text-white mr-2"
                       >
                         Edit
                       </Button>
@@ -696,11 +665,10 @@ export default function CreateActivity() {
                     </div>
                   </div>
                 ))}
-                <br />
                 <Button
                   type="button"
                   onClick={() => setShowTransportationForm(true)}
-                  className="bg-[#388A94] hover:bg-[#2c6d75] text-white w mt-2"
+                  className="bg-[#5D9297] hover:bg-[#1A3B47] text-white w-full mt-2"
                 >
                   Add Transportation
                 </Button>
@@ -708,14 +676,14 @@ export default function CreateActivity() {
 
               <Button
                 type="submit"
-                className="w-full bg-[#388A94] hover:bg-[#2c6d75] text-white"
+                className="col-span-4 bg-[#5D9297] text-white hover:bg-[#1A3B47]"
                 disabled={loading}
               >
                 {loading ? "Creating..." : "Create Activity"}
               </Button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <Dialog open={showTransportationForm} onOpenChange={setShowTransportationForm}>
@@ -821,6 +789,8 @@ export default function CreateActivity() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+      </div>
+   
+    
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -8,6 +10,7 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -17,12 +20,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
-/**
- * Creates a Zod schema for the form
- * @param {boolean} isCityDisabled - Whether the city field is disabled
- * @returns {import('zod').ZodObject}
- */
 const createFormSchema = (isCityDisabled) =>
   z.object({
     title: z.string().min(1, "Please enter a name"),
@@ -49,7 +48,6 @@ const createFormSchema = (isCityDisabled) =>
       native: z.string().min(1, "Please enter native ticket price"),
       student: z.string().min(1, "Please enter student ticket price"),
     }),
-    currency: z.string().min(1, "Please select a currency"),
   });
 
 export default function CreateHpForm() {
@@ -91,7 +89,7 @@ export default function CreateHpForm() {
         native: "",
         student: "",
       },
-      currency: "",
+    
     },
   });
 
@@ -188,6 +186,7 @@ export default function CreateHpForm() {
     const country = event.target.value;
     fetchCities(country);
   };
+
   const handlePicturesUpload = (e) => {
     const files = e.target.files;
     if (files) {
@@ -215,7 +214,6 @@ export default function CreateHpForm() {
     formData.append("ticketPrices[foreigner]", data.ticketPrices.foreigner);
     formData.append("ticketPrices[native]", data.ticketPrices.native);
     formData.append("ticketPrices[student]", data.ticketPrices.student);
-    formData.append("currency", data.currency);
 
     pictures.forEach((picture, index) => {
       formData.append(`pictures`, picture);
@@ -257,278 +255,197 @@ export default function CreateHpForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-20 mb-20 space-y-4"
-        onSubmit={handleSubmit(onSubmit)}
+    <div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div
+        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+        style={{
+          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+        }}
       >
-        <h2 className="text-xl font-semibold mb-4 text-center">
-          Create Historical Place
-        </h2>
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-7xl flex flex-col md:flex-row">
+          <div className="w-full md:w-1/4 bg-[#B5D3D1] p-6">
+            <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
+              Create Historical Place
+            </h2>
+            <p className="text-sm mb-6 text-[#1A3B47]">
+              Add a new historical place to your collection. Fill in all the details carefully to ensure accurate information for visitors.
+            </p>
+          </div>
+          <div className="w-full md:w-3/4 p-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-4 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="title">Name</Label>
+                <Input id="title" {...register("title")} />
+                {errors.title && (
+                  <p className="text-red-500 text-xs">{errors.title.message}</p>
+                )}
+              </div>
 
-        <div>
-          <label htmlFor="title" className="block text-gray-700 mb-2">
-            Name *
-          </label>
-          <input
-            {...register("title")}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="title"
-          />
-          {errors.title && (
-            <span className="text-red-500">{errors.title.message}</span>
-          )}
+              <div className="col-span-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea id="description" {...register("description")} />
+                {errors.description && (
+                  <p className="text-red-500 text-xs">{errors.description.message}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="country">Country</Label>
+                <select
+                  {...register("location.country")}
+                  onChange={handleCountryChange}
+                  className="w-full h-10 border border-gray-300 rounded-md"
+                  id="country"
+                >
+                  <option value="">Select a country</option>
+                  {countries.map((country) => (
+                    <option key={country.name} value={country.name}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.location?.country && (
+                  <p className="text-red-500 text-xs">{errors.location.country.message}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="city">City {isCityDisabled ? "" : "*"}</Label>
+                <select
+                  {...register("location.city")}
+                  disabled={isCityDisabled}
+                  className="w-full h-10 border border-gray-300 rounded-md"
+                  id="city"
+                >
+                  <option value="">Select a city</option>
+                  {cities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+                {errors.location?.city && (
+                  <p className="text-red-500 text-xs">{errors.location.city.message}</p>
+                )}
+                {isCityDisabled && (
+                  <p className="text-blue-500 text-xs">
+                    No cities available for this country. You can proceed without selecting a city.
+                  </p>
+                )}
+              </div>
+
+              <div className="col-span-4">
+                <Label htmlFor="address">Address</Label>
+                <Input id="address" {...register("location.address")} placeholder="Address" />
+                {errors.location?.address && (
+                  <p className="text-red-500 text-xs">{errors.location.address.message}</p>
+                )}
+              </div>
+
+              <div className="col-span-4">
+                <Label>Historical Tags</Label>
+                <Controller
+                  name="historicalTag"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      {...field}
+                      isMulti
+                      options={historicalTags.map((tag) => ({
+                        value: tag._id,
+                        label: `${tag.type} - ${tag.period}`,
+                      }))}
+                      className="react-select-container"
+                      classNamePrefix="react-select"
+                    />
+                  )}
+                />
+                {errors.historicalTag && (
+                  <p className="text-red-500 text-xs">{errors.historicalTag.message}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="weekdays">Opening Hours (Weekdays)</Label>
+                <Input id="weekdays" {...register("openingHours.weekdays")} placeholder="e.g., 9 AM - 5 PM" />
+                {errors.openingHours?.weekdays && (
+                  <p className="text-red-500 text-xs">{errors.openingHours.weekdays.message}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="weekends">Opening Hours (Weekends)</Label>
+                <Input id="weekends" {...register("openingHours.weekends")} placeholder="e.g., 10 AM - 4 PM" />
+                {errors.openingHours?.weekends && (
+                  <p className="text-red-500 text-xs">{errors.openingHours.weekends.message}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="foreigner">Ticket Prices (in USD) (Foreigner)</Label>
+                <Input id="foreigner" type="number" min="0" {...register("ticketPrices.foreigner")} placeholder="Enter foreigner ticket price (USD)" />
+                {errors.ticketPrices?.foreigner && (
+                  <p className="text-red-500 text-xs">{errors.ticketPrices.foreigner.message}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="native">Ticket Prices (in USD) (Native)</Label>
+                <Input id="native" type="number" min="0" {...register("ticketPrices.native")} placeholder="Enter native ticket price (USD)" />
+                {errors.ticketPrices?.native && (
+                  <p className="text-red-500 text-xs">{errors.ticketPrices.native.message}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="student">Ticket Prices (in USD) (Student)</Label>
+                <Input id="student" type="number" min="0" {...register("ticketPrices.student")} placeholder="Enter student ticket price (USD)" />
+                {errors.ticketPrices?.student && (
+                  <p className="text-red-500 text-xs">{errors.ticketPrices.student.message}</p>
+                )}
+              </div>
+
+            
+
+              <div className="col-span-4">
+                <Label htmlFor="pictures">Pictures</Label>
+                <Input
+                  id="pictures"
+                  type="file"
+                  multiple
+                  onChange={handlePicturesUpload}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="col-span-4 bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Create Historical Place"}
+              </Button>
+
+              {error && <p className="col-span-4 text-red-500 text-xs">{error}</p>}
+            </form>
+          </div>
         </div>
+      </div>
 
-        <div>
-          <label htmlFor="description" className="block text-gray-700 mb-2">
-            Description *
-          </label>
-          <textarea
-            {...register("description")}
-            className="border border-gray-300 rounded-xl p-2 w-full h-24 mb-4"
-            id="description"
-          />
-          {errors.description && (
-            <span className="text-red-500">{errors.description.message}</span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="country" className="block text-gray-700 mb-2">
-            Country *
-          </label>
-          <select
-            {...register("location.country")}
-            onChange={handleCountryChange}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="country"
-          >
-            <option value="">Select a country</option>
-            {countries.map((country) => (
-              <option key={country.name} value={country.name}>
-                {country.name}
-              </option>
-            ))}
-          </select>
-          {errors.location?.country && (
-            <span className="text-red-500">
-              {errors.location.country.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="city" className="block text-gray-700 mb-2">
-            City {isCityDisabled ? "" : "*"}
-          </label>
-          <select
-            {...register("location.city")}
-            disabled={isCityDisabled}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="city"
-          >
-            <option value="">Select a city</option>
-            {cities.map((city) => (
-              <option key={city} value={city}>
-                {city}
-              </option>
-            ))}
-          </select>
-          {errors.location?.city && (
-            <span className="text-red-500">{errors.location.city.message}</span>
-          )}
-          {isCityDisabled && (
-            <span className="text-blue-500">
-              No cities available for this country. You can proceed without
-              selecting a city.
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="address" className="block text-gray-700 mb-2">
-            Address *
-          </label>
-          <input
-            {...register("location.address")}
-            placeholder="Address"
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="address"
-          />
-          {errors.location?.address && (
-            <span className="text-red-500">
-              {errors.location.address.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-gray-700 mb-2">Historical Tags *</label>
-          <Controller
-            name="historicalTag"
-            control={control}
-            render={({ field }) => (
-              <Select
-                {...field}
-                isMulti
-                options={historicalTags.map((tag) => ({
-                  value: tag._id,
-                  label: `${tag.type} - ${tag.period}`,
-                }))}
-                className="rounded-xl"
-                classNamePrefix="select"
-              />
-            )}
-          />
-          {errors.historicalTag && (
-            <span className="text-red-500">{errors.historicalTag.message}</span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="weekdays" className="block text-gray-700 mb-2">
-            Opening Hours (Weekdays) *
-          </label>
-          <input
-            {...register("openingHours.weekdays")}
-            placeholder="e.g., 9 AM - 5 PM"
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="weekdays"
-          />
-          {errors.openingHours?.weekdays && (
-            <span className="text-red-500">
-              {errors.openingHours.weekdays.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="weekends" className="block text-gray-700 mb-2">
-            Opening Hours (Weekends) *
-          </label>
-          <input
-            {...register("openingHours.weekends")}
-            placeholder="e.g., 10 AM - 4 PM"
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="weekends"
-          />
-          {errors.openingHours?.weekends && (
-            <span className="text-red-500">
-              {errors.openingHours.weekends.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="foreigner" className="block text-gray-700 mb-2">
-            Ticket Prices (Foreigner) *
-          </label>
-          <input
-            {...register("ticketPrices.foreigner")}
-            placeholder="Enter foreigner ticket price"
-            type="number"
-            min="0"
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="foreigner"
-          />
-          {errors.ticketPrices?.foreigner && (
-            <span className="text-red-500">
-              {errors.ticketPrices.foreigner.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="native" className="block text-gray-700 mb-2">
-            Ticket Prices (Native) *
-          </label>
-          <input
-            {...register("ticketPrices.native")}
-            placeholder="Enter native ticket price"
-            type="number"
-            min="0"
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="native"
-          />
-          {errors.ticketPrices?.native && (
-            <span className="text-red-500">
-              {errors.ticketPrices.native.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="student" className="block text-gray-700 mb-2">
-            Ticket Prices (Student) *
-          </label>
-          <input
-            {...register("ticketPrices.student")}
-            placeholder="Enter student ticket price"
-            type="number"
-            min="0"
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="student"
-          />
-          {errors.ticketPrices?.student && (
-            <span className="text-red-500">
-              {errors.ticketPrices.student.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="currency">Currency *</Label>
-          <select
-            {...register("currency")}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="currency"
-          >
-            <option value="">Select currency</option>
-            {currencies.map((currency) => (
-              <option key={currency._id} value={currency._id}>
-                {currency.code} - {currency.name} ({currency.symbol})
-              </option>
-            ))}
-          </select>
-          {errors.currency && (
-            <span className="text-red-500">{errors.currency.message}</span>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="pictures">Pictures</Label>
-          <Input
-            id="pictures"
-            type="file"
-            multiple
-            onChange={handlePicturesUpload}
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-orange-500 text-white rounded-xl p-2 h-12 mt-4"
-          disabled={loading}
-        >
-          {loading ? "Creating..." : "Create Historical Place"}
-        </button>
-
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-      </form>
-
-      {/* Success Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">
-              Success!
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
+            <DialogTitle>Success!</DialogTitle>
+            <DialogDescription>
               The historical place was created successfully.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4 flex justify-end space-x-4">
-            <Button onClick={handleGoBack}>Go to All Historical Places</Button>
+          <DialogFooter>
+            <Button onClick={handleGoBack} className="bg-[#5D9297] text-white hover:bg-[#1A3B47]">
+              Go to All Historical Places
+            </Button>
             <Button variant="outline" onClick={handleCreateNew}>
               Create Another
             </Button>

@@ -9,7 +9,6 @@ const createHistoricalPlace = async (req, res) => {
     historicalTag,
     openingHours,
     ticketPrices,
-    currency,
   } = req.body;
 
   try {
@@ -36,7 +35,7 @@ const createHistoricalPlace = async (req, res) => {
       historicalTag,
       openingHours,
       ticketPrices,
-      currency,
+      currency: "67140446ee157ee4f239d523",
       pictures: imagesBuffer,
       governor: res.locals.user_id,
     });
@@ -100,7 +99,6 @@ const updateHistoricalPlace = async (req, res) => {
     historicalTag,
     openingHours,
     ticketPrices,
-    currency,
   } = req.body; // Get details from request body
   const museum = await Museum.findById(id);
   if (museum.governor.toString() != res.locals.user_id) {
@@ -146,7 +144,6 @@ const updateHistoricalPlace = async (req, res) => {
         historicalTag,
         openingHours,
         ticketPrices,
-        currency,
         pictures,
       },
       { new: true, runValidators: true } // Options: return the updated document and run validation

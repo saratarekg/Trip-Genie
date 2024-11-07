@@ -25,6 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
+
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
     <svg
@@ -66,7 +68,6 @@ export default function UpdateHistoricalPlace() {
       student: 0,
       foreigner: 0,
     },
-    currency: "",
     historicalTag: [],
     pictures: [],
   });
@@ -96,7 +97,6 @@ export default function UpdateHistoricalPlace() {
   const nativePriceRef = useRef(null);
   const studentPriceRef = useRef(null);
   const foreignerPriceRef = useRef(null);
-  const pictureUrlRef = useRef(null);
 
   useEffect(() => {
     const fetchCurrencies = async () => {
@@ -199,7 +199,6 @@ export default function UpdateHistoricalPlace() {
       if (err.status === 404) {
         setCities([]);
       }
-      //setError('Error fetching cities. Please try again later. ')
       console.error("Error fetching cities: ", err);
       setCities([]);
     } finally {
@@ -255,12 +254,12 @@ export default function UpdateHistoricalPlace() {
 
     setFormErrors((prev) => ({ ...prev, [name]: "" }));
   };
+
   const handlePicturesUpload = (e) => {
     const files = e.target.files;
     if (files) {
       const newFilePictures = Array.from(files);
 
-      // Create a Set to avoid duplicates based on file names
       const existingFileNames = new Set(newPictures.map((file) => file.name));
 
       const newFilesToUpload = newFilePictures.filter(
@@ -344,7 +343,6 @@ export default function UpdateHistoricalPlace() {
       errors.foreignerPrice = "Foreigner ticket price cannot be negative";
     }
 
-    // Validate opening hours
     if (!historicalPlace.openingHours.weekdays.trim()) {
       errors.weekdays = "Weekdays opening hours are required";
     }
@@ -388,7 +386,6 @@ export default function UpdateHistoricalPlace() {
       const token = Cookies.get("jwt");
       const formData = new FormData();
 
-      // Append all the historical place data to formData
       formData.append("title", historicalPlace.title);
       formData.append("description", historicalPlace.description);
       formData.append("location[address]", historicalPlace.location.address);
@@ -414,16 +411,13 @@ export default function UpdateHistoricalPlace() {
         "ticketPrices[foreigner]",
         historicalPlace.ticketPrices.foreigner.toString()
       );
-      formData.append("currency", historicalPlace.currency);
 
       historicalPlace.historicalTag.forEach((tag, index) => {
         formData.append(`historicalTag[${index}]`, tag._id);
       });
 
-      // Append old pictures as JSON array
       formData.append("oldPictures", JSON.stringify(pictures));
 
-      // Append new pictures as binary files
       newPictures.forEach((picture) => {
         formData.append("newPictures", picture);
       });
@@ -497,13 +491,28 @@ export default function UpdateHistoricalPlace() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-8">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8">Update Historical Place</h1>
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-6">
-            <div className="space-y-6">
-              <div>
+    <div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div
+        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+        style={{
+          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+        }}
+      >
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-7xl flex flex-col md:flex-row">
+          <div className="w-full md:w-1/4 bg-[#B5D3D1] p-6">
+            <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
+              Update Historical Place
+            </h2>
+            <p className="text-sm mb-6 text-[#1A3B47]">
+              Update the details of your historical place. Make sure all information is accurate and up-to-date.
+            </p>
+          </div>
+          <div className="w-full md:w-3/4 p-6">
+            <form className="grid grid-cols-4 gap-4">
+              <div className="col-span-2">
                 <Label htmlFor="title">Title</Label>
                 <Input
                   id="title"
@@ -511,14 +520,13 @@ export default function UpdateHistoricalPlace() {
                   value={historicalPlace.title}
                   onChange={handleChange}
                   ref={titleRef}
-                  className={formErrors.title ? "border-red-500" : ""}
                 />
                 {formErrors.title && (
-                  <p className="text-red-500">{formErrors.title}</p>
+                  <p className="text-red-500 text-xs">{formErrors.title}</p>
                 )}
               </div>
 
-              <div>
+              <div className="col-span-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
@@ -527,216 +535,177 @@ export default function UpdateHistoricalPlace() {
                   onChange={handleChange}
                   rows={5}
                   ref={descriptionRef}
-                  className={formErrors.description ? "border-red-500" : ""}
                 />
                 {formErrors.description && (
-                  <p className="text-red-500">{formErrors.description}</p>
+                  <p className="text-red-500 text-xs">{formErrors.description}</p>
                 )}
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold">Location</h2>
-                <div>
-                  <Label htmlFor="location.address">Address</Label>
-                  <Input
-                    id="location.address"
-                    name="location.address"
-                    value={historicalPlace.location.address}
-                    onChange={handleChange}
-                    ref={addressRef}
-                    className={formErrors.address ? "border-red-500" : ""}
-                  />
-                  {formErrors.address && (
-                    <p className="text-red-500">{formErrors.address}</p>
+              <div className="col-span-2">
+                <Label htmlFor="location.country">Country</Label>
+                <Select
+                  name="location.country"
+                  onValueChange={(value) =>
+                    handleSelectChange("location.country", value)
+                  }
+                  value={historicalPlace.location.country}
+                  ref={countryRef}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country} value={country}>
+                        {country}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formErrors.country && (
+                  <p className="text-red-500 text-xs">{formErrors.country}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="location.city">City</Label>
+                {historicalPlace.location.country &&
+                  cities.length === 0 &&
+                  !citiesLoading && (
+                    <p className="text-blue-500 text-xs">
+                      No cities available for the selected country.
+                    </p>
                   )}
-                </div>
-                <div>
-                  <Label htmlFor="location.country">Country</Label>
+                {citiesLoading ? (
+                  <p>Loading cities...</p>
+                ) : (
                   <Select
-                    name="location.country"
+                    name="location.city"
                     onValueChange={(value) =>
-                      handleSelectChange("location.country", value)
+                      handleSelectChange("location.city", value)
                     }
-                    value={historicalPlace.location.country}
-                    ref={countryRef}
-                    className={formErrors.country ? "border-red-500" : ""}
+                    value={historicalPlace.location.city}
+                    ref={cityRef}
+                    disabled={
+                      !historicalPlace.location.country ||
+                      cities.length === 0 ||
+                      citiesLoading
+                    }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a country" />
+                      <SelectValue
+                        placeholder={
+                          citiesLoading
+                            ? "Loading cities..."
+                            : "Select a city"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>
-                          {country}
+                      {cities.map((city) => (
+                        <SelectItem key={city} value={city}>
+                          {city}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {formErrors.country && (
-                    <p className="text-red-500">{formErrors.country}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="location.city">City</Label>
-                  {historicalPlace.location.country &&
-                    cities.length === 0 &&
-                    !citiesLoading && (
-                      <p className="text-red-500">
-                        No cities available for the selected country.
-                      </p>
-                    )}
-                  {citiesLoading ? (
-                    <p>Loading cities...</p>
-                  ) : (
-                    <Select
-                      name="location.city"
-                      onValueChange={(value) =>
-                        handleSelectChange("location.city", value)
-                      }
-                      value={historicalPlace.location.city}
-                      ref={cityRef}
-                      className={formErrors.city ? "border-red-500" : ""}
-                      disabled={
-                        !historicalPlace.location.country ||
-                        cities.length === 0 ||
-                        citiesLoading
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            citiesLoading
-                              ? "Loading cities..."
-                              : "Select a city"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cities.map((city) => (
-                          <SelectItem key={city} value={city}>
-                            {city}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                  {formErrors.city && (
-                    <p className="text-red-500">{formErrors.city}</p>
-                  )}
-                </div>
+                )}
+                {formErrors.city && (
+                  <p className="text-red-500 text-xs">{formErrors.city}</p>
+                )}
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold">Opening Hours</h2>
-                <div>
-                  <Label htmlFor="openingHours.weekdays">Weekdays</Label>
-                  <Input
-                    id="openingHours.weekdays"
-                    name="openingHours.weekdays"
-                    value={historicalPlace.openingHours.weekdays}
-                    onChange={handleChange}
-                    className={formErrors.weekdays ? "border-red-500" : ""}
-                  />
-                  {formErrors.weekdays && (
-                    <p className="text-red-500">{formErrors.weekdays}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="openingHours.weekends">Weekends</Label>
-                  <Input
-                    id="openingHours.weekends"
-                    name="openingHours.weekends"
-                    value={historicalPlace.openingHours.weekends}
-                    onChange={handleChange}
-                    className={formErrors.weekends ? "border-red-500" : ""}
-                  />
-                  {formErrors.weekends && (
-                    <p className="text-red-500">{formErrors.weekends}</p>
-                  )}
-                </div>
+              <div className="col-span-4">
+                <Label htmlFor="location.address">Address</Label>
+                <Input
+                  id="location.address"
+                  name="location.address"
+                  value={historicalPlace.location.address}
+                  onChange={handleChange}
+                  ref={addressRef}
+                />
+                {formErrors.address && (
+                  <p className="text-red-500 text-xs">{formErrors.address}</p>
+                )}
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold">Ticket Prices</h2>
-                <div>
-                  <Label htmlFor="ticketPrices.native">Native</Label>
-                  <Input
-                    type="number"
-                    id="ticketPrices.native"
-                    name="ticketPrices.native"
-                    value={historicalPlace.ticketPrices.native}
-                    onChange={handleChange}
-                    min="0"
-                    ref={nativePriceRef}
-                    className={formErrors.nativePrice ? "border-red-500" : ""}
-                  />
-                  {formErrors.nativePrice && (
-                    <p className="text-red-500">{formErrors.nativePrice}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="ticketPrices.student">Student</Label>
-                  <Input
-                    type="number"
-                    id="ticketPrices.student"
-                    name="ticketPrices.student"
-                    value={historicalPlace.ticketPrices.student}
-                    onChange={handleChange}
-                    min="0"
-                    ref={studentPriceRef}
-                    className={formErrors.studentPrice ? "border-red-500" : ""}
-                  />
-                  {formErrors.studentPrice && (
-                    <p className="text-red-500">{formErrors.studentPrice}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="ticketPrices.foreigner">Foreigner</Label>
-                  <Input
-                    type="number"
-                    id="ticketPrices.foreigner"
-                    name="ticketPrices.foreigner"
-                    value={historicalPlace.ticketPrices.foreigner}
-                    onChange={handleChange}
-                    min="0"
-                    ref={foreignerPriceRef}
-                    className={
-                      formErrors.foreignerPrice ? "border-red-500" : ""
-                    }
-                  />
-                  {formErrors.foreignerPrice && (
-                    <p className="text-red-500">{formErrors.foreignerPrice}</p>
-                  )}
-                </div>
-                <div>
-                  <Label htmlFor="currency">Currency</Label>
-                  <Select
-                    name="currency"
-                    onValueChange={(value) =>
-                      handleSelectChange("currency", value)
-                    }
-                    value={historicalPlace.currency}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.map((currency) => (
-                        <SelectItem key={currency._id} value={currency._id}>
-                          {currency.code} - {currency.name} ({currency.symbol})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {formErrors.currency && (
-                    <p className="text-red-500">{formErrors.currency}</p>
-                  )}
-                </div>
+              <div className="col-span-2">
+                <Label htmlFor="openingHours.weekdays">Opening Hours (Weekdays)</Label>
+                <Input
+                  id="openingHours.weekdays"
+                  name="openingHours.weekdays"
+                  value={historicalPlace.openingHours.weekdays}
+                  onChange={handleChange}
+                />
+                {formErrors.weekdays && (
+                  <p className="text-red-500 text-xs">{formErrors.weekdays}</p>
+                )}
               </div>
 
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold">Tags</h2>
-                <div className="flex flex-wrap gap-2">
+              <div className="col-span-2">
+                <Label htmlFor="openingHours.weekends">Opening Hours (Weekends)</Label>
+                <Input
+                  id="openingHours.weekends"
+                  name="openingHours.weekends"
+                  value={historicalPlace.openingHours.weekends}
+                  onChange={handleChange}
+                />
+                {formErrors.weekends && (
+                  <p className="text-red-500 text-xs">{formErrors.weekends}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="ticketPrices.native">Ticket Price (Native)</Label>
+                <Input
+                  type="number"
+                  id="ticketPrices.native"
+                  name="ticketPrices.native"
+                  value={historicalPlace.ticketPrices.native}
+                  onChange={handleChange}
+                  min="0"
+                  ref={nativePriceRef}
+                />
+                {formErrors.nativePrice && (
+                  <p className="text-red-500 text-xs">{formErrors.nativePrice}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="ticketPrices.student">Ticket Price (Student)</Label>
+                <Input
+                  type="number"
+                  id="ticketPrices.student"
+                  name="ticketPrices.student"
+                  value={historicalPlace.ticketPrices.student}
+                  onChange={handleChange}
+                  min="0"
+                  ref={studentPriceRef}
+                />
+                {formErrors.studentPrice && (
+                  <p className="text-red-500 text-xs">{formErrors.studentPrice}</p>
+                )}
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor="ticketPrices.foreigner">Ticket Price (Foreigner)</Label>
+                <Input
+                  type="number"
+                  id="ticketPrices.foreigner"
+                  name="ticketPrices.foreigner"
+                  value={historicalPlace.ticketPrices.foreigner}
+                  onChange={handleChange}
+                  min="0"
+                  ref={foreignerPriceRef}
+                />
+                {formErrors.foreignerPrice && (
+                  <p className="text-red-500 text-xs">{formErrors.foreignerPrice}</p>
+                )}
+              </div>
+
+              <div className="col-span-4">
+                <Label>Historical Tags</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
                   {historicalPlace.historicalTag.map((tag) => (
                     <div
                       key={tag._id}
@@ -775,8 +744,8 @@ export default function UpdateHistoricalPlace() {
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="pictures">Add New Pictures</Label>
+              <div className="col-span-4">
+                <Label htmlFor="pictures">Pictures</Label>
                 <Input
                   id="pictures"
                   type="file"
@@ -805,15 +774,15 @@ export default function UpdateHistoricalPlace() {
                   ))}
 
                   {base64Pictures.map((picture, index) => (
-                    <div key={`existing-${index}`} className="relative">
+                    <div key={`new-${index}`} className="relative">
                       <img
-                        src={picture} // This will be the base64 string
-                        alt={`Product Existing ${index + 1}`}
+                        src={picture}
+                        alt={`Product New ${index + 1}`}
                         className="w-full h-32 object-cover rounded cursor-pointer"
                         onClick={() => setSelectedImage(picture)}
                       />
                       <button
-                        onClick={() => removePicture(index, false)} // 'false' indicates it's an existing picture
+                        onClick={() => removePicture(index, false)}
                         className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
                         type="button"
                       >
@@ -823,19 +792,22 @@ export default function UpdateHistoricalPlace() {
                   ))}
                 </div>
               </div>
-            </div>
 
-            <div className="mt-8 flex justify-end">
-              <Button variant="default" onClick={handleUpdate}>
-                Update Historical Place
+              <Button
+                type="button"
+                onClick={handleUpdate}
+                className="col-span-4 bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                disabled={loading}
+              >
+                {loading ? "Updating..." : "Update Historical Place"}
               </Button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
 
       <Dialog open={showSuccessPopup} onOpenChange={setShowSuccessPopup}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
@@ -846,7 +818,7 @@ export default function UpdateHistoricalPlace() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate("/all-historical-places")}>
+            <Button onClick={() => navigate("/all-historical-places")} className="bg-[#5D9297] text-white hover:bg-[#1A3B47]">
               Back to All Historical Places
             </Button>
           </DialogFooter>

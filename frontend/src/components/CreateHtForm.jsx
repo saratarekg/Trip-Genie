@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+"use client";
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Cookies from 'js-cookie';
@@ -14,6 +15,9 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 // Form validation schema using zod
 const formSchema = z.object({
@@ -57,22 +61,15 @@ export default function CreateHtForm() {
 
       if (response.ok) {
         setShowDialog(true);
-        
-      }else{
-
+      } else {
         const body = await response.json();
-        if(body.message === "Historical tag already exists"){
-             setError('Historical Tag already exists');
-         }else{
-
-             setError('Failed to create historical tag. Please try again.');
- 
-         }
-      
+        if (body.message === "Historical tag already exists") {
+          setError('Historical Tag already exists');
+        } else {
+          setError('Failed to create historical tag. Please try again.');
+        }
       }
-     
     } catch (err) {
-        
       console.error(err.message);
     } finally {
       setLoading(false);
@@ -90,57 +87,71 @@ export default function CreateHtForm() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        className="bg-white p-6 rounded-xl shadow-md w-full max-w-md mt-20 mb-20 space-y-4"
-        onSubmit={handleSubmit(onSubmit)}
+    <div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div
+        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+        style={{
+          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+        }}
       >
-        <h2 className="text-xl font-semibold mb-4 text-center">Create Historical Tag</h2>
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-1/2 max-w-7xl flex flex-col md:flex-row">
+          <div className="w-full md:w-1/4 bg-[#B5D3D1] p-6">
+            <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
+              Create Historical Tag
+            </h2>
+            <p className="text-sm mb-6 text-[#1A3B47]">
+              Add a new historical tag to categorize historical places and events.
+            </p>
+          </div>
+          <div className="w-full md:w-3/4 p-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Type *</Label>
+                <Input
+                  {...register('type')}
+                  id="type"
+                  placeholder="Enter historical tag type"
+                />
+                {errors.type && <p className="text-red-500 text-xs">{errors.type.message}</p>}
+              </div>
 
-        <div>
-          <label htmlFor="type" className="block text-gray-700 mb-2">Type *</label>
-          <input
-            {...register('type')}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="type"
-            placeholder="Enter historical tag type"
-          />
-          {errors.type && <span className="text-red-500">{errors.type.message}</span>}
+              <div className="space-y-2">
+                <Label htmlFor="period">Period *</Label>
+                <Input
+                  {...register('period')}
+                  id="period"
+                  placeholder="Example: 2000-2008"
+                />
+                {errors.period && <p className="text-red-500 text-xs">{errors.period.message}</p>}
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                disabled={loading}
+              >
+                {loading ? 'Creating...' : 'Create Historical Tag'}
+              </Button>
+
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+            </form>
+          </div>
         </div>
+      </div>
 
-        <div>
-          <label htmlFor="period" className="block text-gray-700 mb-2">Period *</label>
-          <input
-            {...register('period')}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="period"
-            placeholder="Example:2000-2008"
-          />
-          {errors.period && <span className="text-red-500">{errors.period.message}</span>}
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-orange-500 text-white rounded-xl p-2 h-12 mt-4"
-          disabled={loading}
-        >
-          {loading ? 'Creating...' : 'Create Historical Tag'}
-        </button>
-
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-      </form>
-
-      {/* Success Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Success!</DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
+            <DialogTitle>Success!</DialogTitle>
+            <DialogDescription>
               The historical tag was created successfully.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="mt-4 flex justify-end space-x-4">
-            <Button colorScheme="blue" onClick={handleGoBack}>
+          <DialogFooter>
+            <Button onClick={handleGoBack} className="bg-[#5D9297] text-white hover:bg-[#1A3B47]">
               Go to Home Page
             </Button>
             <Button variant="outline" onClick={handleCreateNew}>
