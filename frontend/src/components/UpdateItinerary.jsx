@@ -10,7 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import ReactSelect from "react-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,7 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, Trash, Plus, CheckCircle, XCircle, Trash2 , Edit} from "lucide-react";
+import { PlusCircle, Trash2, Edit, CheckCircle, XCircle } from "lucide-react";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 const worldLanguages = [
@@ -43,19 +45,13 @@ const worldLanguages = [
   "Zhuang", "Zulu"
 ];
 
-const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
-  const [activity, setActivity] = useState({
-    name: '',
-    description: '',
-    location: { address: '', coordinates: { longitude: '', latitude: '' } },
-    duration: '',
-    timing: '',
-    tags: [],
-    categories: [],
-    ...initialData, // This allows initialData to overwrite the defaults, but will fall back to the defaults if missing
-  });
+const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   const [tags, setTags] = useState([]);
   const [categories, setCategories] = useState([]);
+
+  const { register, handleSubmit, control, setValue } = useForm({
+    defaultValues: initialData || {}
+  });
 
   useEffect(() => {
     fetchTags();
@@ -63,125 +59,125 @@ const ActivityForm = ({ onSave, onClose, initialData = {} }) => {
   }, []);
 
   useEffect(() => {
-    setActivity((prevActivity) => ({
-      ...prevActivity,
-      ...initialData, // Ensure that initialData properly updates activity if changed
-    }));
-  }, [initialData]);
+    if (initialData) {
+      // Set the initial values for tags and categories
+      setValue('tags', initialData?.tags?.map(tag => tag._id));
+      setValue('categories', initialData?.categories?.map(category => category._id));
+    }
+  }, [initialData, setValue]);
 
   const fetchTags = async () => {
-    const response = await axios.get("http://localhost:4000/api/getAllTags");
-    setTags(response.data.map((tag) => ({ value: tag._id, label: tag.type })));
+    try {
+      const response = await axios.get("http://localhost:4000/api/getAllTags");
+      setTags(response.data.map((tag) => ({ value: tag._id, label: tag.type })));
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    }
   };
 
   const fetchCategories = async () => {
-    const response = await axios.get("http://localhost:4000/api/getAllCategories");
-    setCategories(response.data.map((cat) => ({ value: cat._id, label: cat.name })));
+    try {
+      const response = await axios.get("http://localhost:4000/api/getAllCategories");
+      setCategories(response.data.map((cat) => ({ value: cat._id, label: cat.name })));
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-    // Helper function to handle deeply nested updates
-    const updateNestedValue = (obj, path, value) => {
-      const keys = path.split('.');
-      const lastKey = keys.pop();
-      const lastObj = keys.reduce((acc, key) => acc[key] = acc[key] || {}, obj);
-      lastObj[lastKey] = value;
-      return { ...obj };
+  const onSubmit = (data) => {
+    // Ensure tags and categories are arrays of IDs
+    const formattedData = {
+      ...data,
+      tags: data.tags || [],
+      categories: data.categories || []
     };
-
-    setActivity((prev) => {
-      // Check if the name includes dots, indicating nested structure
-      if (name.includes('.')) {
-        return updateNestedValue(prev, name, value);
-      }
-      return { ...prev, [name]: value };
-    });
-  };
-
-  const handleCheckboxChange = (field, value) => {
-    setActivity(prev => {
-      const currentValues = prev[field] || [];
-      const updatedValues = currentValues.includes(value)
-        ? currentValues.filter(v => v !== value)
-        : [...currentValues, value];
-      return { ...prev, [field]: updatedValues };
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave(activity);
+    onSave(formattedData);
     onClose();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" value={activity?.name || ''} onChange={handleChange} />
+        <Input id="name" {...register("name", { required: true })} />
       </div>
+
       <div>
         <Label htmlFor="description">Description</Label>
-        <Textarea id="description" name="description" value={activity?.description || ''} onChange={handleChange} />
+        <Textarea id="description" {...register("description")} />
       </div>
+
       <div>
         <Label htmlFor="address">Address</Label>
-        <Input id="address" name="location.address" value={activity?.location?.address || ''} onChange={handleChange} />
+        <Input id="address" {...register("location.address")} />
       </div>
+
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label htmlFor="longitude">Longitude</Label>
-          <Input id="longitude" name="location.coordinates.longitude" type="number" step="any" value={activity?.location?.coordinates?.longitude || ''} onChange={handleChange} />
+          <Input id="longitude" type="number" step="any" {...register("location.coordinates.longitude")} />
         </div>
         <div>
           <Label htmlFor="latitude">Latitude</Label>
-          <Input id="latitude" name="location.coordinates.latitude" type="number" step="any" value={activity?.location?.coordinates?.latitude || ''} onChange={handleChange} />
+          <Input id="latitude" type="number" step="any" {...register("location.coordinates.latitude")} />
         </div>
       </div>
+
       <div>
         <Label htmlFor="duration">Duration (minutes)</Label>
-        <Input id="duration" name="duration" type="number" value={activity?.duration || ''} onChange={handleChange} />
+        <Input id="duration" type="number" {...register("duration")} />
       </div>
+
       <div>
         <Label htmlFor="timing">Timing</Label>
-        <Input id="timing" name="timing" type="datetime-local" value={activity?.timing || ''} onChange={handleChange} />
+        <Input id="timing" type="datetime-local" {...register("timing")} />
       </div>
+
       <div>
         <Label>Tags</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {tags.map((tag) => (
-            <label key={tag.value} className="flex items-center space-x-2">
-              <Checkbox
-                checked={activity?.tags?.includes(tag.value)}
-                onCheckedChange={(checked) => handleCheckboxChange('tags', tag.value)}
-              />
-              <span>{tag.label}</span>
-            </label>
-          ))}
-        </div>
+        <Controller
+          name="tags"
+          control={control}
+          render={({ field }) => (
+            <ReactSelect
+              {...field}
+              options={tags}
+              isMulti
+              defaultValue={[]}
+              className="react-select-container"
+              classNamePrefix="react-select"
+              value={tags.filter(option => field?.value?.includes(option.value))}
+              onChange={(selectedOptions) => field?.onChange(selectedOptions.map(option => option.value))}
+            />
+          )}
+        />
       </div>
+
       <div>
         <Label>Categories</Label>
-        <div className="grid grid-cols-2 gap-2">
-          {categories.map((category) => (
-            <label key={category.value} className="flex items-center space-x-2">
-              <Checkbox
-                checked={activity?.categories?.includes(category.value)}
-                onCheckedChange={(checked) => handleCheckboxChange('categories', category.value)}
-              />
-              <span>{category.label}</span>
-            </label>
-          ))}
-        </div>
+        <Controller
+          name="categories"
+          control={control}
+          render={({ field }) => (
+            <ReactSelect
+              {...field}
+              options={categories}
+              isMulti
+              defaultValue={[]}
+              className="react-select-container"
+              classNamePrefix="react-select"
+              value={categories.filter(option => field?.value?.includes(option.value))}
+              onChange={(selectedOptions) => field?.onChange(selectedOptions.map(option => option.value))}
+            />
+          )}
+        />
       </div>
-    
+
+
       <Button type="submit">Save Activity</Button>
     </form>
   );
 };
-
 
 export default function UpdateItinerary() {
   const { id } = useParams();
@@ -202,28 +198,29 @@ export default function UpdateItinerary() {
   const [showErrorPopup, setShowErrorPopup] = useState(null);
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchItineraryDetails = async () => {
-      setLoading(true);
-      try {
-        const token = Cookies.get('jwt');
-        const response = await axios.get(`http://localhost:4000/tour-guide/itineraries/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setItinerary(response.data);
-        setError(null);
-      } catch (err) {
-        setError('Error fetching data. Please try again later.');
-        console.error('Error fetching data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchItineraryDetails();
   }, [id]);
+
+  const fetchItineraryDetails = async () => {
+    setLoading(true);
+    try {
+      const token = Cookies.get('jwt');
+      const response = await axios.get(`http://localhost:4000/tour-guide/itineraries/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setItinerary(response.data);
+      setError(null);
+    } catch (err) {
+      setError('Error fetching data. Please try again later.');
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -286,17 +283,29 @@ export default function UpdateItinerary() {
   };
 
   const handleAddActivity = (activity) => {
+    const newActivity = { 
+      ...activity, 
+      tags: activity.tags.map(tagId => ({ _id: tagId })),
+      categories: activity.categories.map(categoryId => ({ _id: categoryId }))
+    };
     setItinerary((prev) => ({
       ...prev,
-      activities: [...prev.activities, activity],
+      activities: [...prev.activities, newActivity],
     }));
     setShowActivityForm(false);
   };
 
-  const handleEditActivity = (activity) => {
+  const handleEditActivity = (updatedActivity) => {
     setItinerary((prev) => ({
       ...prev,
-      activities: prev.activities.map(a => a._id === activity._id ? activity : a),
+      activities: prev.activities.map(a => 
+        a._id === editingActivity._id ? {
+          ...updatedActivity,
+          _id: a._id,
+          tags: updatedActivity.tags.map(tagId => ({ _id: tagId })),
+          category: updatedActivity.categories.map(categoryId => ({ _id: categoryId }))
+        } : a
+      ),
     }));
     setShowActivityForm(false);
     setEditingActivity(null);
@@ -339,7 +348,7 @@ export default function UpdateItinerary() {
     setLoading(true);
     try {
       const token = Cookies.get('jwt');
-      const response = await axios.put(`http://localhost:4000/tour-guide/itineraries/${id}`, itinerary, {
+      await axios.put(`http://localhost:4000/tour-guide/itineraries/${id}`, itinerary, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -449,9 +458,7 @@ export default function UpdateItinerary() {
                 <Label htmlFor="accessibility">Accessible for Disabled</Label>
               </div>
 
-              
-
-              <div className="col-span-3 space-y-4">
+              <div className="col-span-2 space-y-4">
                 <Label className="text-sm font-medium">Available Dates</Label>
                 {itinerary.availableDates.map((dateObj, dateIndex) => (
                   <div key={dateIndex} className="mb-4 p-4 border rounded">
@@ -462,8 +469,7 @@ export default function UpdateItinerary() {
                         onChange={(e) => handleDateChange(e.target.value, dateIndex)}
                         className={`w-40 ${!dateObj.date ? 'border-red-500' : ''}`}
                       />
-                      <Button type="button" variant="destructive" size="icon" onClick={() => removeDate(dateIndex)}   className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                      >
+                      <Button type="button" variant="destructive" size="icon" onClick={() => removeDate(dateIndex)} className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out">
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </div>
@@ -481,30 +487,30 @@ export default function UpdateItinerary() {
                           onChange={(e) => handleTimeChange(e.target.value, dateIndex, timeIndex, 'endTime')}
                           className={`w-32 ${!timeObj.endTime ? 'border-red-500' : ''}`}
                         />
-                        <Button type="button" variant="destructive" size="icon" onClick={() => removeTime(dateIndex, timeIndex)}   className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                        >
+                        <Button type="button" variant="destructive" size="icon" onClick={() => removeTime(dateIndex, timeIndex)} className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out">
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </div>
                     ))}
                     <Button type="button" variant="outline" onClick={(e) => addTime(e, dateIndex)}>
-                      <Plus className="mr-2 h-4 w-4" /> Add Time
+                      <PlusCircle className="mr-2 h-4 w-4" /> Add Time
                     </Button>
                   </div>
                 ))}
                 <Button type="button" variant="outline" onClick={addDate}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Date
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add Date
                 </Button>
                 {itinerary.availableDates.length === 0 && <span className="text-red-500 block mt-2">At least one date is required.</span>}
               </div>
-              <div className="col-span-1">
+
+              <div className="col-span-2">
                 <Label className="text-sm font-medium">Activities</Label>
                 <ul className="list-disc pl-5 space-y-1">
-                  {itinerary.activities.map((activity, index) => (
-                    <li key={index} className="flex justify-between items-center">
+                  {itinerary.activities.map((activity) => (
+                    <li key={activity._id} className="flex justify-between items-center">
                       <span>{activity.name}</span>
                       <div>
-                      <button
+                        <button
                           type="button"
                           onClick={() => {
                             setEditingActivity(activity);
@@ -514,7 +520,6 @@ export default function UpdateItinerary() {
                         >
                           <Edit className="h-4 w-4 text-blue-500" />
                         </button>
-
                         <button
                           type="button"
                           onClick={() => removeActivity(activity._id)}
@@ -571,7 +576,7 @@ export default function UpdateItinerary() {
           </DialogHeader>
           <ScrollArea className="max-h-[80vh]">
             <ActivityForm 
-              onSave={editingActivity ? handleEditActivity : handleAddActivity} 
+              onSave={editingActivity ? handleEditActivity : handleAddActivity}
               onClose={() => {
                 setShowActivityForm(false);
                 setEditingActivity(null);

@@ -415,7 +415,7 @@ const updateItinerary = async (req, res) => {
       dropOffLocation,
       appropriate,
     } = req.body;
-
+console.log(activities);
     await Itinerary.findByIdAndUpdate(req.params.id, {
       title,
       availableDates,
