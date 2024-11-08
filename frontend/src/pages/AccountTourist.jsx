@@ -144,8 +144,85 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [redeemError, setRedeemError] = useState(null);
   const [redeemSuccess, setRedeemSuccess] = useState(null);
-  const [exchangeRate, setExchangeRate] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [rates, setRates] = useState({})
+  const [currencies, setCurrencies] = useState([])
+  const [preferredCurrency, setPreferredCurrency] = useState('USD')
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = Cookies.get('jwt')
+        const [ratesResponse, currenciesResponse] = await Promise.all([
+          axios.get('http://localhost:4000/rates', { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get('http://localhost:4000/tourist/currencies', { headers: { Authorization: `Bearer ${token}` } }), 
+          fetchUserInfo()
+        ])
+        setRates(ratesResponse.data.rates)
+        setCurrencies(currenciesResponse.data)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const convertCurrency = (amount, fromCurrency, toCurrency) => {
+    // if type of from currency is string and to currency is string  return (amount / rates[fromCurrency]) * rates[toCurrency]
+
+    if (typeof fromCurrency === 'string' && typeof toCurrency === 'string') {
+      return (amount / rates[fromCurrency]) * rates[toCurrency]
+    }
+    if (!rates[fromCurrency] || !rates[toCurrency.code]) return amount
+    return (amount / rates[fromCurrency]) * rates[toCurrency.code]
+  }
+
+  const formatCurrency = (amount, currency) => {
+    const currencyInfo = currencies.find(c => c.code === currency.code)
+    return `${currencyInfo ? currencyInfo.symbol : ''}${amount.toFixed(4)}`
+  }
+
+  const convertedWalletAmount = convertCurrency(user.wallet, 'USD', preferredCurrency)
+  const pointsValueInEGP = user.loyaltyPoints / 100
+  const pointsValueInUSD = convertCurrency(pointsValueInEGP, 'EGP', 'USD')
+  const pointsValueInPreferredCurrency = convertCurrency(pointsValueInUSD, 'USD', preferredCurrency)
+
+  console.log('Converted wallet amount:', convertedWalletAmount)
+  console.log('Points value in EGP:', pointsValueInEGP)
+  console.log('Points value in USD:', pointsValueInUSD)
+  console.log('Points value in preferred currency:', pointsValueInPreferredCurrency)
+
+
+  const fetchUserInfo = useCallback(async () => {
+    const role = Cookies.get("role") || "guest";
+    if (role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        if (!token) {
+          console.error("No JWT token found");
+          return;
+        }
+
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const currencyId = response.data.preferredCurrency;
+
+        if (currencyId) {
+          const response2 = await axios.get(
+            `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setPreferredCurrency(response2.data);
+        } else {
+          console.error("No preferred currency found for user");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  }, []);
 
   const handleRedeemClick = async () => {
     setIsRedeeming(true);
@@ -164,59 +241,8 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
     }
   };
 
-  const fetchExchangeRate = useCallback(async () => {
-    if (user && user.role === "tourist") {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await fetch(`http://localhost:4000/tourist/populate`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            base: "withEGP",
-            target: user.preferredCurrency,
-          }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setExchangeRate(data.conversion_rate);
-        } else {
-          console.error("Error in fetching exchange rate:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching exchange rate:", error);
-      }
-    }
-  }, [user]);
 
-  const getCurrencySymbol = useCallback(async () => {
-    if (user && user.role === "tourist") {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${user.preferredCurrency}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setCurrencySymbol(response.data.symbol);
-      } catch (error) {
-        console.error("Error fetching currency symbol:", error);
-      }
-    }
-  }, [user]);
 
-  const formatWallet = (price) => {
-    fetchExchangeRate();
-    getCurrencySymbol();
-    if (user && user.role === "tourist" && exchangeRate && currencySymbol) {
-      const exchangedPrice = price * exchangeRate;
-      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
-    }
-    return price;
-  };
 
   if (user.role !== "tourist") {
     return <div>Points redemption not available for {user.role}</div>;
