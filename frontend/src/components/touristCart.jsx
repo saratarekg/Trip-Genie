@@ -104,14 +104,6 @@ const ShoppingCart = () => {
     }
   }, [location]);
 
-  useEffect(() => {
-    if (allPurchasesSuccessful) {
-      emptyCart();
-    } else {
-      console.error("Failed to complete purchase for some items.");
-    }
-  }, [allPurchasesSuccessful]);
-
   const calculateDeliveryCost = (type) => {
     switch (type) {
       case "Standard":
@@ -228,12 +220,9 @@ const ShoppingCart = () => {
     setTotalAmountLoading(false);
   }, [cartItems, userRole, userPreferredCurrency, exchangeRates]);
 
-  const emptyCart = async () => {
+  const emptyCart = useCallback(async () => {
     try {
       setCartItems([]);
-      setShowPurchaseConfirm(false);
-      setPaymentMethod("");
-
       const token = Cookies.get("jwt");
       const emptyCartResponse = await fetch(
         "http://localhost:4000/tourist/empty/cart",
@@ -249,11 +238,13 @@ const ShoppingCart = () => {
         console.log("Cart emptied successfully.");
       } else {
         console.error("Failed to empty the cart.");
+        throw new Error("Failed to empty the cart");
       }
     } catch (error) {
       console.error("Error emptying cart items:", error);
+      setActionError("Failed to empty the cart. Please try again.");
     }
-  };
+  }, []);
 
   const handleRemoveItem = async (productId) => {
     try {
@@ -348,28 +339,29 @@ const ShoppingCart = () => {
         body: JSON.stringify({
           products,
           totalAmount,
-          paymentMethod: paymentMethod,
+          paymentMethod,
           shippingAddress: location,
-          locationType: locationType,
-          deliveryType: deliveryType,
-          deliveryTime: deliveryTime,
-          deliveryDate: deliveryDate,
+          locationType,
+          deliveryType,
+          deliveryTime,
+          deliveryDate,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Purchase failed:", errorData.message);
-        setActionError(errorData.message);
-        setAllPurchasesSuccessful(false);
-        setAllPurchasesSuccessfulPopup(false);
-      } else {
-        setAllPurchasesSuccessful(true);
-        setAllPurchasesSuccessfulPopup(true);
-        console.log("Purchase successful for all items!");
+        throw new Error(errorData.message || "Purchase failed");
       }
+
+      await emptyCart();
+
+      setAllPurchasesSuccessful(true);
+      setAllPurchasesSuccessfulPopup(true);
+      console.log("Purchase successful for all items!");
     } catch (error) {
       setActionError(error.message);
+      setAllPurchasesSuccessful(false);
+      setAllPurchasesSuccessfulPopup(false);
       console.error("Error making purchase:", error);
     }
   };
@@ -958,10 +950,8 @@ const ShoppingCart = () => {
               <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
               Success
             </DialogTitle>
-            <DialogDescription>
-              Purchase completed successfully!
-            </DialogDescription>
           </DialogHeader>
+          <p>Purchase completed successfully!</p>
           <DialogFooter>
             <Button
               variant="default"
@@ -983,8 +973,8 @@ const ShoppingCart = () => {
               <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
               Error
             </DialogTitle>
-            <DialogDescription>{actionError}</DialogDescription>
           </DialogHeader>
+          <p>{actionError}</p>
           <DialogFooter>
             <Button variant="default" onClick={() => setActionError(null)}>
               Close
