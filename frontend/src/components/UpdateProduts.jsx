@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
-import { Modal } from "@/components/Modal";
-
 
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
@@ -60,8 +58,6 @@ const UpdateProduct = () => {
   const [base64Pictures, setBase64Pictures] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(false);
-  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -202,18 +198,6 @@ const UpdateProduct = () => {
     }
   };
 
-
-  const openModal = () => {
-    setModalOpen(true);
-    setDropdownOpen(false); // Close the dropdown when opening the modal
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setModalOpen(false);
-    setImageModalOpen(false);
-  };
-
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -332,11 +316,7 @@ const UpdateProduct = () => {
                       src={picture.url}
                       alt={`Product Existing ${index + 1}`}
                       className="w-full h-32 object-cover rounded cursor-pointer"
-                      onClick={() => {
-                        setSelectedImage(picture)
-                        setIsImageViewerOpen(true);
-
-                      }}
+                      onClick={() => setSelectedImage(picture.url)}
                     />
                     <button
                       type="button"
@@ -353,11 +333,8 @@ const UpdateProduct = () => {
                       src={picture}
                       alt={`Product New ${index + 1}`}
                       className="w-full h-32 object-cover rounded cursor-pointer"
-                      onClick={() => {
-                        setSelectedImage(picture)
-                        setIsImageViewerOpen(true);
-
-                      }}                    />
+                      onClick={() => setSelectedImage(picture)}
+                    />
                     <button
                       type="button"
                       onClick={() => removePicture(index, false)}
@@ -403,13 +380,8 @@ const UpdateProduct = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Modal
-        show={isImageViewerOpen}
-        onClose={() => setIsImageViewerOpen(false)}
-        isImageViewer={true}
-        imageUrl={selectedImage?.url || selectedImage}
-      />
-      {/* {selectedImage && (
+
+      {selectedImage && (
         <Dialog
           open={!!selectedImage}
           onOpenChange={() => setSelectedImage(null)}
@@ -422,7 +394,7 @@ const UpdateProduct = () => {
             />
           </DialogContent>
         </Dialog>
-      )} */}
+      )}
     </div>
   );
 };
