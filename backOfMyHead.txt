@@ -62,9 +62,9 @@ New page:
 Admin:
 
 - Create new pages instead of popups (done)
-- Edit and delete colors
-- Fonts
-- Move buttons to the right 
+- Edit and delete colors(done)
+- Fonts(done)
+- Move buttons to the right (done)
 - Change hide to back and improve its appearance (done)
-- Add filter and sort (khaleeha search bas when he is deleting sort w filter malhomsh lazma ll admin )
+- Add search to users (done) habiba
 - Add color behind navbar at the beginning so that logo appears.(done)
