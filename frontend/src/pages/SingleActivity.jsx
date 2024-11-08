@@ -333,6 +333,13 @@ const ActivityDetail = () => {
     setOpen(false);
   };
 
+
+  const handleDeleteSuccess = () => {
+    setShowDeleteSuccess(false);
+    navigate("/activity");
+  };
+
+
   const handleEmailShare = () => {
     const subject = encodeURIComponent(
       `Check out this activity: ${activity.name}`
@@ -1744,7 +1751,12 @@ const ActivityDetail = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
+       <Dialog 
+        open={showDeleteSuccess} 
+        onOpenChange={(open) => {
+          if (!open) handleDeleteSuccess();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Success</DialogTitle>
@@ -1753,7 +1765,7 @@ const ActivityDetail = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate("/activity")} variant="default">
+            <Button onClick={handleDeleteSuccess} variant="default">
               OK
             </Button>
           </DialogFooter>
