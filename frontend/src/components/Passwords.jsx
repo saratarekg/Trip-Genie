@@ -100,7 +100,7 @@ export default function PasswordChanger() {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">Change my password</h2>
+      <h2 className="text-2xl font-bold mb-4">Change my password</h2>
       {changeStatus.type && (
         <Alert
           className={`mb-4 ${
