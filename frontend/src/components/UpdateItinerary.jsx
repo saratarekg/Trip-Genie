@@ -60,17 +60,14 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
 
   useEffect(() => {
     if (initialData) {
-      setValue('tags', initialData.tags.map(tag => tag._id));
-      setValue('category', initialData.category.map(category => category._id));
+      setValue('tags', initialData.tags.map(tag => tag._id))
+      setValue('category', initialData.category.map(category => category._id))
       
-      // Split the timing into date and time
       if (initialData.timing) {
-        const dateTime = new Date(initialData.timing);
-        setValue('activityDate', dateTime.toISOString().split('T')[0]);
-        setValue('activityTime', dateTime.toTimeString().split(' ')[0].slice(0, 5));
+        setValue('activityTime', initialData.timing.split('T')[1].slice(0, 5))
       }
     }
-  }, [initialData, setValue]);
+  }, [initialData, setValue])
 
   const fetchTags = async () => {
     try {
@@ -95,11 +92,11 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
       ...data,
       tags: data.tags || [],
       category: data.category || [],
-      timing: new Date(`${data.activityDate}T${data.activityTime}`).toISOString()
-    };
-    onSave(formattedData);
-    onClose();
-  };
+      timing: `${new Date().toISOString().split('T')[0]}T${data.activityTime}`
+    }
+    onSave(formattedData)
+    onClose()
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -164,24 +161,15 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <div>
-          <Label htmlFor="activityDate">Date</Label>
-          <Input 
-            id="activityDate" 
-            type="date" 
-            {...register("activityDate", { required: "Date is required" })} 
-          />
-          {errors.activityDate && <p className="text-red-500 text-xs mt-1">{errors.activityDate.message}</p>}
-        </div>
-        <div>
-          <Label htmlFor="activityTime">Time</Label>
-          <Input 
-            id="activityTime" 
-            type="time" 
-            {...register("activityTime", { required: "Time is required" })} 
-          />
-          {errors.activityTime && <p className="text-red-500 text-xs mt-1">{errors.activityTime.message}</p>}
-        </div>
+      <div>
+        <Label htmlFor="activityTime">Time</Label>
+        <Input 
+          id="activityTime" 
+          type="time" 
+          {...register("activityTime", { required: "Time is required" })} 
+        />
+        {errors.activityTime && <p className="text-red-500 text-xs mt-1">{errors.activityTime.message}</p>}
+      </div>
       </div>
 
       <div>
@@ -235,15 +223,15 @@ export default function UpdateItinerary() {
   const { id } = useParams();
   const [itinerary, setItinerary] = useState({
     title: '',
-    timeline: '',
     language: '',
     price: '',
     pickUpLocation: '',
     dropOffLocation: '',
     accessibility: false,
+    isRepeated: false,
     availableDates: [],
     activities: []
-  });
+  })
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -288,51 +276,28 @@ export default function UpdateItinerary() {
   };
 
   const handleDateChange = (value, index) => {
-    const newDates = [...itinerary.availableDates];
-    newDates[index].date = value;
-    setItinerary((prev) => ({ ...prev, availableDates: newDates }));
-  };
-
-  const handleTimeChange = (value, dateIndex, timeIndex, field) => {
-    const newDates = [...itinerary.availableDates];
-    newDates[dateIndex].times[timeIndex][field] = value;
-    setItinerary((prev) => ({ ...prev, availableDates: newDates }));
-  };
+    const newDates = [...itinerary.availableDates]
+    newDates[index].date = value
+    setItinerary((prev) => ({ ...prev, availableDates: newDates }))
+  }
 
   const addDate = (e) => {
-    e.preventDefault();
-    const newDate = {
-      date: "",
-      times: [{ startTime: "", endTime: "" }]
-    };
+    e.preventDefault()
+    const newDate = { date: "" }
     setItinerary((prev) => ({
       ...prev,
       availableDates: [...prev.availableDates, newDate],
-    }));
-  };
+    }))
+  }
 
   const removeDate = (index) => {
     setItinerary((prev) => ({
       ...prev,
       availableDates: prev.availableDates.filter((_, i) => i !== index),
-    }));
-  };
+    }))
+  }
 
-  const addTime = (e, dateIndex) => {
-    e.preventDefault();
-    const newDates = [...itinerary.availableDates];
-    newDates[dateIndex].times.push({ startTime: '', endTime: '' });
-    setItinerary((prev) => ({ ...prev, availableDates: newDates }));
-  };
-
-  const removeTime = (dateIndex, timeIndex) => {
-    const newDates = [...itinerary.availableDates];
-    newDates[dateIndex].times.splice(timeIndex, 1);
-    if (newDates[dateIndex].times.length === 0) {
-      newDates.splice(dateIndex, 1);
-    }
-    setItinerary((prev) => ({ ...prev, availableDates: newDates }));
-  };
+  
 
   const handleAddActivity = (activity) => {
     const newActivity = { 
@@ -373,7 +338,6 @@ export default function UpdateItinerary() {
   const isFormValid = useMemo(() => {
     return (
       itinerary.title.trim() !== '' &&
-      itinerary.timeline.trim() !== '' &&
       itinerary.language !== '' &&
       itinerary.price !== '' &&
       !isNaN(itinerary.price) &&
@@ -381,19 +345,23 @@ export default function UpdateItinerary() {
       itinerary.pickUpLocation.trim() !== '' &&
       itinerary.dropOffLocation.trim() !== '' &&
       itinerary.availableDates.length > 0 &&
-      itinerary.availableDates.every(date => 
-        date.date && 
-        date.times.length > 0 && 
-        date.times.every(time => time.startTime && time.endTime)
-      ) &&
+      itinerary.availableDates.every(date => date.date) &&
       itinerary.activities.length > 0
-    );
-  }, [itinerary]);
+    )
+  }, [itinerary])
+
+  const today = new Date().toISOString().split('T')[0]
+
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!isFormValid) {
       setShowErrorPopup("Please fill in all required fields before updating.");
+      return;
+    }
+
+    if(itinerary.availableDates.length>1 && (!itinerary.isRepeated)){
+      setShowErrorPopup("If the itinerary is not repeated you can only choose one date.");
       return;
     }
     
@@ -449,17 +417,13 @@ export default function UpdateItinerary() {
           </div>
           <div className="w-full md:w-3/4 p-6">
             <form onSubmit={handleUpdate} className="grid grid-cols-4 gap-4">
-              <div className="col-span-2">
+              <div className="col-span-4">
                 <Label htmlFor="title">Itinerary Title</Label>
                 <Input id="title" name="title" value={itinerary.title} onChange={handleChange} />
                 {!itinerary.title.trim() && <span className="text-red-500 text-xs">Title is required.</span>}
               </div>
 
-              <div className="col-span-2">
-                <Label htmlFor="timeline">Timeline</Label>
-                <Input id="timeline" name="timeline" value={itinerary.timeline} onChange={handleChange} />
-                {!itinerary.timeline.trim() && <span className="text-red-500 text-xs">Timeline is required.</span>}
-              </div>
+             
 
               <div>
                 <Label htmlFor="language">Language</Label>
@@ -501,7 +465,7 @@ export default function UpdateItinerary() {
                 {!itinerary.dropOffLocation.trim() && <span className="text-red-500 text-xs">Drop-off location is required.</span>}
               </div>
 
-              <div className="col-span-4 flex items-center space-x-2">
+              <div className="col-span-2 flex items-center space-x-2">
                 <Checkbox
                   id="accessibility"
                   checked={itinerary.accessibility}
@@ -510,50 +474,55 @@ export default function UpdateItinerary() {
                 <Label htmlFor="accessibility">Accessible for Disabled</Label>
               </div>
 
-              <div className="col-span-2 space-y-4">
-                <Label className="text-sm font-medium">Available Dates</Label>
-                {itinerary.availableDates.map((dateObj, dateIndex) => (
-                  <div key={dateIndex} className="mb-4 p-4 border rounded">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Input
-                        type="date"
-                        value={dateObj.date.split('T')[0]}
-                        onChange={(e) => handleDateChange(e.target.value, dateIndex)}
-                        className={`w-40 ${!dateObj.date ? 'border-red-500' : ''}`}
-                      />
-                      <Button type="button" variant="destructive" size="icon" onClick={() => removeDate(dateIndex)} className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out">
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                    {dateObj.times.map((timeObj, timeIndex) => (
-                      <div key={timeIndex} className="flex items-center space-x-2 mb-2">
-                        <Input
-                          type="time"
-                          value={timeObj.startTime}
-                          onChange={(e) => handleTimeChange(e.target.value, dateIndex, timeIndex, 'startTime')}
-                          className={`w-32 ${!timeObj.startTime ? 'border-red-500' : ''}`}
-                        />
-                        <Input
-                          type="time"
-                          value={timeObj.endTime}
-                          onChange={(e) => handleTimeChange(e.target.value, dateIndex, timeIndex, 'endTime')}
-                          className={`w-32 ${!timeObj.endTime ? 'border-red-500' : ''}`}
-                        />
-                        <Button type="button" variant="destructive" size="icon" onClick={() => removeTime(dateIndex, timeIndex)} className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out">
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))}
-                    <Button type="button" variant="outline" onClick={(e) => addTime(e, dateIndex)}>
-                      <PlusCircle className="mr-2 h-4 w-4" /> Add Time
-                    </Button>
-                  </div>
-                ))}
-                <Button type="button" variant="outline" onClick={addDate}>
-                  <PlusCircle className="mr-2 h-4 w-4" /> Add Date
-                </Button>
-                {itinerary.availableDates.length === 0 && <span className="text-red-500 block mt-2">At least one date is required.</span>}
+              <div className="col-span-2 flex items-center space-x-2">
+                <Checkbox
+                  id="isRepeated"
+                  checked={itinerary.isRepeated}
+                  onCheckedChange={() => handleSwitchChange('isRepeated')}
+                />
+                <Label htmlFor="isRepeated">Is Repeated</Label>
               </div>
+
+              <div className="col-span-2 p-4 border rounded space-y-4">
+  <Label className="text-sm font-medium">Available Dates</Label>
+  
+  {itinerary.availableDates.map((dateObj, dateIndex) => (
+    <div key={dateIndex} className="flex items-center space-x-2 mb-2">
+      <Input
+        type="date"
+        value={dateObj.date.split('T')[0]}
+        min={today}  // Ensures that dates can't be set before today
+        onChange={(e) => handleDateChange(e.target.value, dateIndex)}
+        className={`w-40 ${!dateObj.date ? 'border-red-500' : ''}`}
+      />
+      {(itinerary.isRepeated || itinerary.availableDates.length > 1) && (
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          onClick={() => removeDate(dateIndex)}
+          className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+        >
+          <Trash2 className="h-4 w-4 text-red-500" />
+        </Button>
+      )}
+    </div>
+  ))}
+
+  {(itinerary.isRepeated || itinerary.availableDates.length === 0) && (
+    <Button type="button" variant="outline" onClick={addDate} className="mt-2">
+      <PlusCircle className="mr-2 h-4 w-4" /> Add Date
+    </Button>
+  )}
+
+  {/* Error message if no dates are available */}
+  {itinerary.availableDates.length === 0 && (
+    <span className="text-red-500 text-xs mt-2">
+      At least one date is required.
+    </span>
+  )}
+</div>
+
 
               <div className="col-span-2">
                 <Label className="text-sm font-medium">Activities</Label>
