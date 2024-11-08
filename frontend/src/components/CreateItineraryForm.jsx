@@ -511,7 +511,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
 
       <div className="space-y-2">
         <Label htmlFor="pictures" className="text-sm font-medium">
-          Add Product Pictures
+          Add Activity Pictures
         </Label>
         <Input
           id="pictures"
@@ -525,7 +525,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
           <div key={`new-${index}`} className="relative">
             <img
               src={picture}
-              alt={`Product New ${index + 1}`}
+              alt={`Activity ${index + 1}`}
               className="w-full h-32 object-cover rounded cursor-pointer"
               onClick={() => {
                 setSelectedImage(picture);
