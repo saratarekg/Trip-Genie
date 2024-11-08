@@ -709,8 +709,8 @@ export default function UpdateItinerary() {
     );
   }, [itinerary]);
 
-  const today = new Date().toISOString().split("T")[0];
-
+  const today = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]
+  
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!isFormValid) {
