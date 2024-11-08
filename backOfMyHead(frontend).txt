@@ -12,6 +12,11 @@ ActivitySlider component : In the homepage some activity cards are bigger than o
 
 are you sure you want to logout popup able el logout!!
 
+
+my itineraries fe tour guide el navbar mesh lel a5r
+
+eshm3na transportation fel nav bar w flights w hotels laa hasa yb2a one tab "booking" fi el 3 options
+
 Orange: #F88C33
 Beige/Tan: #E6DCCF
 Light Aqua/Seafoam Green: #B5D3D1

@@ -47,6 +47,8 @@ import Loader from "./Loader";
 import defaultImage from "../assets/images/default-image.jpg";
 import DualHandleSliderComponent from "./dual-handle-slider";
 import LazyLoad from "react-lazyload";
+import productImage from '../assets/images/products.png';
+import productImage2 from '../assets/images/products2.png';
 
 const renderStars = (rating) => {
   return (
@@ -643,13 +645,35 @@ export function AllProducts() {
   };
 
   return (
-    <div className="bg-[#E6DCCF]">
+    <div className="bg-gray-100">
       {/* Navbar */}
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      {/* <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div> */}
+      <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
+        <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
+          <div className="flex-1">
+            <h1 className="text-5xl font-bold text-white mb-4">All Products</h1>
+            <p className="text-gray-200">
+            <Link to="/" className="font-bold text-gray-200 hover:text-gray-300 hover:underline">
+              Home
+            </Link> 
+            / Products
+          </p>
+          </div>
+          <div className="hidden lg:block w-1/3">
+          <img
+            src={productImage}
+            alt="Decorative"
+            height="160"
+            width="160"
+            className="ml-auto"
+          />
+        </div>
+        </div>
       </div>
-      <div className="container mx-auto px-24 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-[#1A3B47] mb-8">All Products</h1>
+      <div className="container mx-auto px-24 py-8 sm:px-12 lg:px-24">
+        {/* <h1 className="text-5xl font-bold text-[#1A3B47] mb-8">All Products</h1> */}
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
@@ -697,7 +721,7 @@ export function AllProducts() {
               </div>
             </div>
             {/* Sort by Rating */}
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">
                 Sort by Rating
               </h3>
@@ -714,9 +738,9 @@ export function AllProducts() {
                   {sortBy === "rating" ? (sortOrder === 1 ? "↓" : "↑") : ""}
                 </div>
               </Button>
-            </div>
+            </div> */}
             {/* Sort by Price */}
-            <div className="mb-6">
+            {/* <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Sort by Price</h3>
               <Button
                 variant="outline"
@@ -732,16 +756,39 @@ export function AllProducts() {
                 </div>
               </Button>
             </div>
+          </div> */}
+           {/* Featured Products Section */}
+            <div className="mb-6">
+              <h3 className="font-medium text-[#1A3B47] mb-4">Featured Products</h3>
+              <div className="space-y-4">
+                {products.slice(0, 3).map((product) => (
+                  <Link 
+                    key={product._id} 
+                    to={`/product/${product._id}`} 
+                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                  >
+                    <img
+                      src={product.pictures[0]?.url || defaultImage}
+                      alt={product.name}
+                      className="w-16 h-16 object-cover rounded-md"
+                    />
+                    <div>
+                      <h4 className="font-medium text-sm">{product.name}</h4>
+                      <div className="mt-1">{renderStars(product.rating)}</div>
+                      {/* <p className="text-sm text-muted-foreground">{formatPrice(product.price)}</p> */}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* View Toggle */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center justify-center space-x-4">
-                <div className="relative" style={{ width: "790px" }}>
-                  {" "}
-                  {/* Smaller search bar */}
+            {/* Search and Sort Controls */}
+            <div className="mb-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="relative flex-grow">
                   <input
                     type="text"
                     placeholder="Search products..."
@@ -751,15 +798,33 @@ export function AllProducts() {
                   />
                   <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
                 </div>
-                <span className="text-gray-500 text-sm">
+                <span className="text-gray-500 text-sm whitespace-nowrap">
                   ({products.length} items)
                 </span>
-              </div>
-              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="whitespace-nowrap rounded-full"
+                  onClick={() => handleSort("rating")}
+                >
+                  <ArrowUpDown className="w-4 h-4 mr-2" />
+                  Sort by Rating
+                  {sortBy === "rating" && <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="whitespace-nowrap rounded-full"
+                  onClick={() => handleSort("price")}
+                >
+                  <ArrowUpDown className="w-4 h-4 mr-2" />
+                  Sort by Price
+                  {sortBy === "price" && <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>}
+                </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-full md:hidden"
+                  className="md:hidden"
                   onClick={toggleFilters}
                 >
                   <Filter className="w-4 h-4" />
@@ -785,6 +850,7 @@ export function AllProducts() {
                 <AlertDescription>{alertMessage.message}</AlertDescription>
               </Alert>
             )}
+
             {isLoading ? (
               <Loader />
             ) : (
@@ -820,7 +886,7 @@ export function AllProducts() {
                     }}
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                      currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
                     }`}
                   >
                     <ChevronLeft />
@@ -847,7 +913,7 @@ export function AllProducts() {
                     className={`px-4 py-2 rounded-full bg-white shadow ${
                       currentPage === Math.ceil(products.length / tripsPerPage)
                         ? "text-gray-300"
-                        : "text-blue-600"
+                        : "text-[#388A94]"
                     }`}
                   >
                     <ChevronRight />
