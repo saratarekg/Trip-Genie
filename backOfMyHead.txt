@@ -16,7 +16,7 @@
 - booking a transportation using wallet actually uses the tourist's wallet 
 - enter removes available dates in create itinerary
 - categories and tags are optional in create activity inside create itinerary 
--pagination not working in activities
+- pagination not working in activities
 
 
 Hadwa's requests:

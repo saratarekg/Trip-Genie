@@ -27,7 +27,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PlusCircle, Trash, Plus, Trash2, CheckCircle, Edit } from "lucide-react";
-import signUpPicture from "../assets/images/signUpPicture.jpeg";
+import backgroundPicture from "../assets/images/backgroundPattern.png";
 
 const worldLanguages = [
   "Abkhaz", "Afar", "Afrikaans", "Akan", "Albanian", "Amharic", "Arabic", "Aragonese", "Armenian", "Assamese",
@@ -395,12 +395,12 @@ const ItineraryForm = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div
-        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+        className="flex min-h-screen  items-center justify-center bg-cover bg-center bg-no-repeat p-2"
         style={{
-          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+          backgroundImage: `url(${backgroundPicture})`,
         }}
       >
-        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-7xl flex flex-col md:flex-row">
+        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-5xl flex flex-col md:flex-row">
           <div className="w-full md:w-1/4 bg-[#B5D3D1] p-6">
             <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
               Create New Itinerary
