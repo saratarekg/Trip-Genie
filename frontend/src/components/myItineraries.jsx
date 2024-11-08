@@ -33,14 +33,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, itineraryTitle }) => {
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  itineraryTitle,
+}) => {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
         <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
-        <p className="mb-6">Are you sure you want to delete the itinerary "{itineraryTitle}"?</p>
+        <p className="mb-6">
+          Are you sure you want to delete the itinerary "{itineraryTitle}"?
+        </p>
         <div className="flex justify-end space-x-4">
           <button
             className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
@@ -67,12 +74,11 @@ const ItineraryCard = ({
   setShowDeleteConfirm,
   setSelectedItinerary,
   userInfo,
-  onDeleteConfirm
+  onDeleteConfirm,
 }) => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [userId, setUserId] = useState(null);
-
 
   const fetchExchangeRate = useCallback(async () => {
     if (!userInfo || !userInfo.preferredCurrency) return;
@@ -82,10 +88,10 @@ const ItineraryCard = ({
       const response = await fetch(
         `http://localhost:4000/${userInfo.role}/populate`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             base: itinerary.currency,
@@ -97,7 +103,7 @@ const ItineraryCard = ({
       if (response.ok) {
         setExchangeRate(data.conversion_rate);
       } else {
-        console.error('Error in fetching exchange rate:', data.message);
+        console.error("Error in fetching exchange rate:", data.message);
       }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
@@ -107,9 +113,12 @@ const ItineraryCard = ({
   const getCurrencySymbol = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/${userInfo.role}/getCurrency/${itinerary.currency}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `http://localhost:4000/${userInfo.role}/getCurrency/${itinerary.currency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setCurrencySymbol(response.data.symbol);
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
@@ -117,7 +126,11 @@ const ItineraryCard = ({
   }, [userInfo.role, itinerary.currency]);
 
   useEffect(() => {
-    if (userInfo.role === 'tourist' && userInfo.preferredCurrency && userInfo.preferredCurrency !== itinerary.currency) {
+    if (
+      userInfo.role === "tourist" &&
+      userInfo.preferredCurrency &&
+      userInfo.preferredCurrency !== itinerary.currency
+    ) {
       fetchExchangeRate();
     } else {
       getCurrencySymbol();
@@ -125,12 +138,14 @@ const ItineraryCard = ({
   }, [userInfo, itinerary, fetchExchangeRate, getCurrencySymbol]);
 
   const formatPrice = (price) => {
-    if (userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+    if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
       if (userInfo.preferredCurrency === itinerary.currency) {
         return `${userInfo.preferredCurrency.symbol}${price}`;
       } else if (exchangeRate) {
         const exchangedPrice = price * exchangeRate;
-        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
+          2
+        )}`;
       }
     } else if (currencySymbol) {
       return `${currencySymbol}${price}`;
@@ -142,14 +157,14 @@ const ItineraryCard = ({
     if (token) {
       const decodedToken = jwtDecode.jwtDecode(token);
       setUserId(decodedToken.id);
-
     }
-  }, []); 
-
-
+  }, []);
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative" onClick={() => onSelect(itinerary._id)}>
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative"
+      onClick={() => onSelect(itinerary._id)}
+    >
       <div className="relative aspect-video overflow-hidden">
         <img
           src={itinerary.activities?.[0]?.pictures?.[0] || defaultImage}
@@ -166,33 +181,35 @@ const ItineraryCard = ({
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-600 mb-2">{itinerary.timeline}</p>
         <div className="flex justify-between items-center mb-2">
           <span className="text-lg font-bold text-blue-600">
             {formatPrice(itinerary.price)}/Day
           </span>
-          <span className="text-sm text-gray-600">
-            {itinerary.language}
-          </span>
+          <span className="text-sm text-gray-600">{itinerary.language}</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {itinerary.activities?.flatMap((activity, index) => [
             ...(activity.category?.map((cat) => (
-              <span key={`cat-${index}-${cat.id || cat.name}`} className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">
+              <span
+                key={`cat-${index}-${cat.id || cat.name}`}
+                className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full"
+              >
                 {cat.name}
               </span>
             )) || []),
             ...(activity.tags?.map((tag) => (
-              <span key={`tag-${index}-${tag.id || tag.type}`} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+              <span
+                key={`tag-${index}-${tag.id || tag.type}`}
+                className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
+              >
                 {tag.type}
               </span>
-            )) || [])
+            )) || []),
           ])}
         </div>
       </div>
 
       {role === "tour-guide" && userId === itinerary.tourGuide._id && (
-
         <div className="absolute top-2 right-2 flex space-x-2">
           <button
             className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
@@ -218,8 +235,7 @@ const ItineraryCard = ({
       )}
     </div>
   );
-
-}
+};
 
 export function MyItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
@@ -258,20 +274,23 @@ export function MyItinerariesComponent() {
     const role = Cookies.get("role") || "guest";
     const token = Cookies.get("jwt");
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
         });
         const currencyId = response.data.preferredCurrency;
 
-        const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const currencyResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         setUserInfo({
           role,
-          preferredCurrency: currencyResponse.data
+          preferredCurrency: currencyResponse.data,
         });
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -289,7 +308,7 @@ export function MyItinerariesComponent() {
   };
 
   const getSymbol = () => {
-    if (userInfo && userInfo.role === 'tourist' && userInfo.preferredCurrency) {
+    if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
       return `${userInfo.preferredCurrency.symbol}`;
     } else {
       return "$";
@@ -378,7 +397,9 @@ export function MyItinerariesComponent() {
         setItineraries([...preferredItineraries, ...otherItineraries]);
         setIsSortedByPreference(true);
       } else {
-        const url = new URL(`http://localhost:4000/${role}/itineraries?myItineraries=true`);
+        const url = new URL(
+          `http://localhost:4000/${role}/itineraries?myItineraries=true`
+        );
         const response = await fetch(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -419,7 +440,9 @@ export function MyItinerariesComponent() {
     try {
       setIsLoading(true);
       const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/itineraries?myItineraries=true`);
+      const url = new URL(
+        `http://localhost:4000/${role}/itineraries?myItineraries=true`
+      );
 
       if (priceRange[0] !== 0 || priceRange[1] !== maxPrice) {
         url.searchParams.append("minPrice", priceRange[0].toString());
@@ -477,8 +500,6 @@ export function MyItinerariesComponent() {
       setIsLoading(false);
     }
   }, [myItineraries, searchTerm, selectedTypes, isBooked, sortBy, sortOrder]);
-
-
 
   useEffect(() => {
     fetchItineraries();
@@ -587,7 +608,6 @@ export function MyItinerariesComponent() {
   //   }
   // };
 
-
   const handleDeleteConfirm = (id, title) => {
     setItineraryToDelete({ id, title });
     setShowDeleteModal(true);
@@ -601,7 +621,9 @@ export function MyItinerariesComponent() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${getUserRole()}/itineraries/${itineraryToDelete.id}`,
+        `http://localhost:4000/${getUserRole()}/itineraries/${
+          itineraryToDelete.id
+        }`,
 
         {
           method: "DELETE",
@@ -632,7 +654,6 @@ export function MyItinerariesComponent() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gray-100">
       {isLoading ? (
@@ -640,8 +661,7 @@ export function MyItinerariesComponent() {
       ) : (
         <div className=" px-4 sm:px-6 lg:px-8 mb-4">
           <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
           </div>
           <div className="max-w-7xl mx-auto">
             <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
@@ -719,7 +739,6 @@ export function MyItinerariesComponent() {
                     setShowDeleteConfirm={setShowDeleteConfirm}
                     setSelectedItinerary={setSelectedItinerary}
                     onDeleteConfirm={handleDeleteConfirm}
-
                   />
                 ))}
             </div>
@@ -728,8 +747,9 @@ export function MyItinerariesComponent() {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-blue-600"
-                  }`}
+                className={`px-4 py-2 rounded-full bg-white shadow ${
+                  currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                }`}
               >
                 <ChevronLeft />
               </button>
@@ -737,8 +757,8 @@ export function MyItinerariesComponent() {
               <span className="text-lg font-medium">
                 {itineraries.length > 0
                   ? `Page ${currentPage} of ${Math.ceil(
-                    itineraries.length / tripsPerPage
-                  )}`
+                      itineraries.length / tripsPerPage
+                    )}`
                   : "No pages available"}
               </span>
 
@@ -746,13 +766,14 @@ export function MyItinerariesComponent() {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={
                   currentPage ===
-                  Math.ceil(itineraries.length / tripsPerPage) ||
+                    Math.ceil(itineraries.length / tripsPerPage) ||
                   itineraries.length === 0
                 }
-                className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(itineraries.length / tripsPerPage)
-                  ? "text-gray-300"
-                  : "text-blue-600"
-                  }`}
+                className={`px-4 py-2 rounded-full bg-white shadow ${
+                  currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                    ? "text-gray-300"
+                    : "text-blue-600"
+                }`}
               >
                 <ChevronRight />
               </button>
