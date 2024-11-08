@@ -10,6 +10,8 @@ transition hotel and flights in home page
 
 ActivitySlider component : In the homepage some activity cards are bigger than others + arrows are different color. 
 
+are you sure you want to logout popup able el logout!!
+
 Orange: #F88C33
 Beige/Tan: #E6DCCF
 Light Aqua/Seafoam Green: #B5D3D1
