@@ -168,10 +168,20 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
 
   const convertCurrency = (amount, fromCurrency, toCurrency) => {
     // if type of from currency is string and to currency is string  return (amount / rates[fromCurrency]) * rates[toCurrency]
-
     if (typeof fromCurrency === 'string' && typeof toCurrency === 'string') {
       return (amount / rates[fromCurrency]) * rates[toCurrency]
     }
+    if (typeof fromCurrency !== 'string' && typeof toCurrency === 'string') {
+      return (amount / rates[fromCurrency.code]) * rates[toCurrency]
+    }
+    if (typeof fromCurrency !== 'string' && typeof toCurrency !== 'string') {
+      return (amount / rates[fromCurrency.code]) * rates[toCurrency.code]
+    }
+
+    if (typeof fromCurrency === 'string' && typeof toCurrency !== 'string') {
+      return (amount / rates[fromCurrency]) * rates[toCurrency.code]
+    }
+
     if (!rates[fromCurrency] || !rates[toCurrency.code]) return amount
     return (amount / rates[fromCurrency]) * rates[toCurrency.code]
   }
@@ -249,41 +259,44 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <h2 className="text-2xl font-semibold mb-4">Redeem Loyalty Points</h2>
-      <p className="text-sm text-gray-600 mb-4">
-        Convert your loyalty points to wallet balance
-      </p>
-      <div className="space-y-2 mb-4">
-        <p className="text-sm font-medium">
-          Available Wallet Balance:{" "}
-          <span className="text-green-600">{formatCurrency(convertedWalletAmount, preferredCurrency)}</span>
-        </p>
-        <p className="text-sm font-medium">
-          Loyalty Points:{" "}
-          <span className="text-blue-600">{user.loyaltyPoints} points</span>
-        </p>
-      </div>
-      <Button
-        onClick={handleRedeemClick}
-        disabled={isRedeeming || user.loyaltyPoints === 0}
-        className="w-full"
-      >
-        {isRedeeming
-          ? "Redeeming..."
-          : `Redeem Points for ${formatCurrency(pointsValueInPreferredCurrency, preferredCurrency)}`}
-      </Button>
-      {redeemError && (
-        <p className="text-red-500 text-sm text-center mt-2">{redeemError}</p>
-      )}
-      {redeemSuccess && (
-        <p className="text-green-500 text-sm text-center mt-2">
-          {redeemSuccess}
-        </p>
-      )}
-    </div>
-  );
-};
+    <div className="w-full max-w-md mx-auto bg-gray-50 shadow-xl rounded-lg p-6">
+  <h2 className="text-2xl font-bold mb-4">Redeem Loyalty Points</h2>
+  <p className="text-lg text-gray-700 mb-6">
+    Convert your loyalty points into wallet balance.
+  </p>
+
+  <div className="space-y-4 mb-6">
+    <p className="text-lg font-medium text-gray-600">
+      Available Wallet Balance:{" "}
+      <span className="text-teal-600">{formatWallet(user.wallet)}</span>
+    </p>
+    <p className="text-lg font-medium text-gray-600">
+      Loyalty Points:{" "}
+      <span className="text-blue-600">{user.loyaltyPoints} points</span>
+    </p>
+  </div>
+
+  <Button
+    onClick={handleRedeemClick}
+    disabled={isRedeeming || user.loyaltyPoints === 0}
+    className="w-full py-3 bg-[#F88C33] text-white rounded-lg hover:bg-orange-500 transition duration-300 ease-in-out"
+  >
+    {isRedeeming
+      ? "Redeeming..."
+      : `Redeem Points for ${user.loyaltyPoints / 100} EGP`}
+  </Button>
+
+  {/* Error Message */}
+  {redeemError && (
+    <p className="text-red-500 text-sm text-center mt-4">{redeemError}</p>
+  )}
+
+  {/* Success Message */}
+  {redeemSuccess && (
+    <p className="text-green-500 text-sm text-center mt-4">{redeemSuccess}</p>
+  )}
+</div>
+  );}
 
 const CurrencyApp = ({ user }) => {
   const [currencies, setCurrencies] = useState([]);
@@ -383,90 +396,56 @@ const CurrencyApp = ({ user }) => {
   }
 
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      <div className="container p-5">
-        <Popup
-          isOpen={popupOpen}
-          onClose={closePopup}
-          type={popupType}
-          message={popupMessage}
-        />
-      </div>
-      <h1 style={{ fontSize: "2em", fontWeight: "bold", marginBottom: "20px" }}>
-        Preferred Currency
-      </h1>
-      <h2
-        style={{
-          fontSize: "3em",
-          fontWeight: "bold",
-          color: "#3B82F6",
-          marginBottom: "20px",
-        }}
-      >
-        {preferredCurrency
-          ? `${preferredCurrency.name} (${preferredCurrency.code})`
-          : "Loading..."}
-      </h2>
+    <div className="container p-8 max-w-lg mx-auto bg-white shadow-lg rounded-lg">
+  <Popup
+    isOpen={popupOpen}
+    onClose={closePopup}
+    type={popupType}
+    message={popupMessage}
+  />
+  <h1 className="text-2xl font-bold mb-4">Preferred Currency</h1>
+  <h2 className="text-xl font-bold mb-4">
+    {preferredCurrency
+      ? `${preferredCurrency.name} (${preferredCurrency.code})`
+      : "Loading..."}
+  </h2>
 
-      <label
-        style={{ display: "block", marginBottom: "20px", fontSize: "1.2em" }}
+  <label className="block text-lg font-medium text-gray-700 mb-5">
+    <span>Select New Preferred Currency:</span>
+    <div className="relative mt-2">
+      <select
+        value={selectedCurrency}
+        onChange={(e) => setSelectedCurrency(e.target.value)}
+        className="w-full p-4 rounded-lg border-2 border-teal-600 text-teal-600 bg-teal-50 font-medium focus:ring-teal-500 focus:border-teal-500 transition duration-300 ease-in-out"
       >
-        Select New Preferred Currency:
-        <div
-          style={{
-            display: "inline-block",
-            marginLeft: "10px",
-            position: "relative",
-          }}
-        >
-          <select
-            value={selectedCurrency}
-            onChange={(e) => setSelectedCurrency(e.target.value)}
-            style={{
-              padding: "10px 20px",
-              borderRadius: "8px",
-              border: "2px solid #3B82F6",
-              fontSize: "1em",
-              appearance: "none",
-              width: "250px",
-              cursor: "pointer",
-              color: "#3B82F6",
-              backgroundColor: "#f0f4ff",
-              fontWeight: "500",
-            }}
-          >
-            <option value="" disabled>
-              Choose Currency
-            </option>
-            {currencies.map((currency) => (
-              <option key={currency._id} value={currency._id}>
-                {currency.name} ({currency.code})
-              </option>
-            ))}
-          </select>
-        </div>
-        <button
-          type="button"
-          onClick={handleSetPreferredCurrency}
-          disabled={!selectedCurrency}
-          style={{
-            marginLeft: "15px",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            backgroundColor: selectedCurrency ? "#3B82F6" : "#a3a3a3",
-            color: "white",
-            fontWeight: "bold",
-            border: "none",
-            cursor: selectedCurrency ? "pointer" : "not-allowed",
-            fontSize: "1em",
-          }}
-        >
-          Set
-        </button>
-      </label>
+        <option value="" disabled>
+          Choose Currency
+        </option>
+        {currencies.map((currency) => (
+          <option key={currency._id} value={currency._id}>
+            {currency.name} ({currency.code})
+          </option>
+        ))}
+      </select>
     </div>
-  );
-};
+  </label>
+
+  <div className="flex justify-end">
+    <button
+      type="button"
+      onClick={handleSetPreferredCurrency}
+      disabled={!selectedCurrency}
+      className={`w-36 py-3 rounded-lg text-white font-semibold focus:outline-none transition duration-300 ease-in-out ${
+        selectedCurrency
+          ? "bg-[#F88C33] hover:bg-orange-600 cursor-pointer"     //className="flex items-center justify-center w-full py-2 bg-[#F88C33] text-white rounded-md hover:bg-orange-500 transition duration-300 ease-in-out mb-4"
+          : "bg-gray-400 cursor-not-allowed"
+      }`}
+    >
+      Set
+    </button>
+  </div>
+</div>
+  );}
 
 const DeleteAccount = ({ onClose }) => {
   const [isDeleting, setIsDeleting] = useState(false);

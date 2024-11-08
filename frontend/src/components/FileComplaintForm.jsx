@@ -86,63 +86,66 @@ export default function FileComplaintForm() {
   };
 
   return (
-    <div className="flex justify-center items-start h-screen">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <h2 className="text-xl font-semibold mb-4 text-center">File Complaint</h2>
+    <div className="flex justify-center items-start h-screen bg-gray-50 p-6">
+  <form
+    onSubmit={handleSubmit(onSubmit)}
+    className="bg-white shadow-xl rounded-xl p-8 w-full max-w-xl space-y-6"
+  >
+    <h2 className="text-3xl font-bold text-black-800 mb-6 text-center">File a Complaint</h2>
 
-        <div>
-          <label htmlFor="title" className="block text-gray-700 mb-2">Title *</label>
-          <input
-            {...register('title')}
-            className="border border-gray-300 rounded-xl p-2 w-full h-12 mb-4"
-            id="title"
-          />
-          {errors.title && <span className="text-red-500">{errors.title.message}</span>}
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block text-gray-700 mb-2">Description *</label>
-          <textarea
-            {...register('body')}
-            className="border border-gray-300 rounded-xl p-2 w-full h-24 mb-4"
-            id="description"
-          />
-          {errors.body && <span className="text-red-500">{errors.body.message}</span>}
-        </div>
-
-
-        <button
-          type="submit"
-          className="w-full bg-orange-500 text-white rounded-xl p-2 h-12 mt-4"
-          disabled={loading}
-        >
-          {loading ? 'Submiting...' : 'File Complaint'}
-        </button>
-
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-      </form>
-
-      {/* Success Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Success!</DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
-              Your complaint was filed successfully.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4 flex justify-end space-x-4">
-            <Button onClick={handleGoBack}>
-              Go to Home
-            </Button>
-            <Button variant="outline" onClick={handleCreateNew}>
-              File Another
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+    {/* Title Field */}
+    <div>
+      <label htmlFor="title" className="block text-lg font-medium text-gray-700 mb-2">Title *</label>
+      <input
+        {...register('title')}
+        className="border border-teal-300 rounded-xl p-3 w-full h-12 mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        id="title"
+      />
+      {errors.title && <span className="text-red-500 text-sm">{errors.title.message}</span>}
     </div>
-  );
-}
+
+    {/* Description Field */}
+    <div>
+      <label htmlFor="description" className="block text-lg font-medium text-gray-700 mb-2">Description *</label>
+      <textarea
+        {...register('body')}
+        className="border border-teal-300 rounded-xl p-3 w-full h-32 mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        id="description"
+      />
+      {errors.body && <span className="text-red-500 text-sm">{errors.body.message}</span>}
+    </div>
+
+    {/* Submit Button */}
+    <button
+      type="submit"
+      className="w-full bg-orange-500 text-white rounded-xl p-3 h-12 mt-4 font-semibold hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+      disabled={loading}
+    >
+      {loading ? 'Submitting...' : 'File Complaint'}
+    </button>
+
+    {/* Error Message */}
+    {error && <div className="text-red-500 text-sm text-center mt-4">{error}</div>}
+  </form>
+
+  {/* Success Dialog */}
+  <Dialog open={showDialog} onOpenChange={setShowDialog}>
+    <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+      <DialogHeader>
+        <DialogTitle className="text-2xl font-semibold text-teal-600">Success!</DialogTitle>
+        <DialogDescription className="text-gray-600 mt-2">
+          Your complaint was filed successfully.
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter className="mt-4 flex justify-end space-x-4">
+        <Button onClick={handleGoBack} className="bg-teal-600 text-white hover:bg-teal-700">
+          Go to Home
+        </Button>
+        <Button variant="outline" onClick={handleCreateNew} className="border-teal-600 text-teal-600 hover:bg-teal-50">
+          File Another
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+</div>
+  );}
