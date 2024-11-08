@@ -29,8 +29,16 @@ router.put("/", upload.single("profilePicture"), updateTourGuideProfile);
 router.get("/tour-guide/:id", getTourGuideByID);
 router.delete("/delete-account", deleteTourGuideAccount);
 router.get("/itineraries", itineraryController.getAllItineraries);
-router.post("/itineraries", itineraryController.createItinerary);
-router.put("/itineraries/:id", itineraryController.updateItinerary);
+router.post(
+  "/itineraries",
+  upload.array("pictures", 10),
+  itineraryController.createItinerary
+);
+router.put(
+  "/itineraries/:id",
+  upload.array("newPictures", 10),
+  itineraryController.updateItinerary
+);
 router.delete("/itineraries/:id", itineraryController.deleteItinerary);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 
@@ -45,11 +53,20 @@ router.put(
 
 router.post("/password", changePassword);
 
-// transportation crud 
+// transportation crud
 router.get("/transportations", transportationController.getAllTransportations);
-router.get("/transportations/:id", transportationController.getTransportationById);
+router.get(
+  "/transportations/:id",
+  transportationController.getTransportationById
+);
 router.post("/transportations", transportationController.createTransportation);
-router.put("/transportations/:id", transportationController.updateTransportation);
-router.delete("/transportations/:id", transportationController.deleteTransportation);
+router.put(
+  "/transportations/:id",
+  transportationController.updateTransportation
+);
+router.delete(
+  "/transportations/:id",
+  transportationController.deleteTransportation
+);
 
 module.exports = router;
