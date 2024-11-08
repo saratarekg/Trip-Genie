@@ -14,7 +14,7 @@ const renderStars = (rating) => {
         <Star
           key={star}
           className={`w-5 h-5 ${
-            star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
           }`}
         />
       ))}
@@ -41,7 +41,7 @@ const ProductCard = ({ product, onSelect }) => (
         <span className="text-lg font-bold text-blue-600">
           ${product.price}
         </span>
-        <div className="text-yellow-400 text-s">
+        <div className="text-[#F88C33] text-s">
           {renderStars(product.rating)}
         </div>
       </div>

@@ -196,7 +196,6 @@ const getActivityById = async (req, res) => {
       .populate("advertiser")
       .populate("category")
       .populate("tags")
-      .populate("transportations")
       .exec();
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
@@ -224,7 +223,6 @@ const createActivity = async (req, res) => {
     specialDiscount,
     rating,
     isBookingOpen,
-    transportations,
   } = req.body;
 
   let imagesBuffer = [];
@@ -260,7 +258,6 @@ const createActivity = async (req, res) => {
       isBookingOpen,
       advertiser: res.locals.user_id,
       pictures: imagesBuffer,
-      transportations,
     });
     await activity.save();
     res.status(201).json(activity);
@@ -328,7 +325,6 @@ const updateActivity = async (req, res) => {
       tags,
       specialDiscount,
       isBookingOpen,
-      transportations,
     } = req.body;
     let ImagesBuffer = [];
 
@@ -376,7 +372,6 @@ const updateActivity = async (req, res) => {
         specialDiscount,
         isBookingOpen,
         pictures,
-        transportations,
       },
       {
         new: true,

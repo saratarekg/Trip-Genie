@@ -147,7 +147,7 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
         <Star
           key={star}
           className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
-            star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
           }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
@@ -1187,14 +1187,14 @@ const ActivityDetail = () => {
             </div>
           </div>
 
-          {(userRole === "advertiser" || userRole === "tourist") && (
+          {/* {(userRole === "advertiser" || userRole === "tourist") && (
             <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4">
                 Transportation Options
               </h2>
               {renderTransportationOptions()}
             </div>
-          )}
+          )} */}
 
           {/* Comment Carousel */}
           <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">

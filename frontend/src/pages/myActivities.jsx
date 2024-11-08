@@ -128,7 +128,7 @@ const ActivityCard = ({ activity, onSelect, userInfo }) => {
               key={i}
               className={`h-4 w-4 ${
                 i < activity.rating
-                  ? "text-yellow-400 fill-yellow-400"
+                  ? "text-[#F88C33] fill-[#F88C33]"
                   : "text-gray-300"
               }`}
             />

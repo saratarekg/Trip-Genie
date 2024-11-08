@@ -331,7 +331,7 @@ const FilterComponent = ({
                     key={star}
                     onClick={() => handleStarClick(star)}
                     className={`p-2 rounded-full border ${
-                      minStars >= star ? "bg-yellow-500" : "bg-gray-200"
+                      minStars >= star ? "bg-[#F88C33]" : "bg-gray-200"
                     }`}
                   >
                     <Star size={18} className="text-white" />

@@ -769,13 +769,13 @@ export default function UpdateActivity() {
                     </div>
                   </div>
                 ))}
-                <Button
+                {/* <Button
                   type="button"
                   onClick={() => setShowTransportationForm(true)}
                   className="bg-[#5D9297] hover:bg-[#1A3B47] text-white w-full"
                 >
                   Add Transportation
-                </Button>
+                </Button> */}
               </div>
 
               <Button

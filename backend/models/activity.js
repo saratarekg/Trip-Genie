@@ -134,12 +134,6 @@ const activitySchema = new Schema(
       required: true,
       default: false,
     },
-    transportations: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Transportation",
-      },
-    ],
   },
   {
     timestamps: true,
