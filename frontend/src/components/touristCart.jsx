@@ -46,8 +46,7 @@ const ShoppingCart = () => {
   const [locationType, setLocationType] = useState("");
   const [quantityError, setQuantityError] = useState(false);
   const [allPurchasesSuccessful, setAllPurchasesSuccessful] = useState(false);
-  const [allPurchasesSuccessfulPopup, setAllPurchasesSuccessfulPopup] =
-    useState(false);
+  const [allPurchasesSuccessfulPopup, setAllPurchasesSuccessfulPopup] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [popupType, setPopupType] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
@@ -56,6 +55,7 @@ const ShoppingCart = () => {
   const [userRole, setUserRole] = useState("guest");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
+  const [currencies, setCurrencies] = useState([]);
 
   const openSuccessPopup = (message) => {
     setPopupType("success");
@@ -127,83 +127,61 @@ const ShoppingCart = () => {
     }
   };
 
-  useEffect(() => {
-    fetchUserInfo();
-    fetchCartItems();
+
+
+  const fetchExchangeRates = useCallback(async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/rates');
+      setExchangeRates(response.data.rates);
+    } catch (error) {
+      console.error('Error fetching exchange rates:', error);
+    }
   }, []);
 
-  useEffect(() => {
-    calculateTotalAmount();
-  }, [cartItems, exchangeRates, userPreferredCurrency]);
+  const fetchCurrencies = useCallback(async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/tourist/currencies', {
+        headers: { Authorization: `Bearer ${Cookies.get('jwt')}` }
+      });
+      setCurrencies(response.data);
+    } catch (error) {
+      console.error('Error fetching currencies:', error);
+    }
+  }, []);
 
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === "tourist") {
+    if (role === 'tourist') {
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get("http://localhost:4000/tourist/", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${token}` }
         });
         const currencyId = response.data.preferredCurrency;
 
-        const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         setUserPreferredCurrency(response2.data);
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
     }
-  };
+  }, []);
 
-  const fetchExchangeRates = useCallback(
-    async (baseCurrencies, targetCurrency) => {
-      const token = Cookies.get("jwt");
-      const newRates = { ...exchangeRates };
-      let hasNewRates = false;
+  useEffect(() => {
+    fetchUserInfo();
+    fetchExchangeRates();
+    fetchCurrencies();
+    fetchCartItems();
+  }, [fetchUserInfo, fetchExchangeRates, fetchCurrencies]);
 
-      for (const baseCurrency of baseCurrencies) {
-        if (!exchangeRates[`${baseCurrency}-${targetCurrency}`]) {
-          try {
-            const response = await fetch(
-              `http://localhost:4000/${userRole}/populate`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  base: baseCurrency,
-                  target: targetCurrency,
-                }),
-              }
-            );
-            const data = await response.json();
-            if (response.ok) {
-              newRates[`${baseCurrency}-${targetCurrency}`] =
-                data.conversion_rate;
-              hasNewRates = true;
-            } else {
-              console.error("Error in fetching exchange rate:", data.message);
-            }
-          } catch (error) {
-            console.error("Error fetching exchange rate:", error);
-          }
-        }
-      }
+  useEffect(() => {
+    calculateTotalAmount();
+  }, [cartItems, exchangeRates, userPreferredCurrency]);
 
-      if (hasNewRates) {
-        setExchangeRates(newRates);
-      }
-    },
-    [exchangeRates, userRole]
-  );
 
   const fetchCartItems = useCallback(async () => {
     try {
@@ -215,71 +193,33 @@ const ShoppingCart = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        const itemsWithLoading = data.map((item) => ({
-          ...item,
-          priceLoading: true,
-        }));
-        setCartItems(itemsWithLoading);
-
-        if (userRole === "tourist" && userPreferredCurrency) {
-          const baseCurrencies = [
-            ...new Set(data.map((item) => item.product.currency)),
-          ];
-          await fetchExchangeRates(baseCurrencies, userPreferredCurrency._id);
-        }
-
-        // Update items to remove loading state
-        setCartItems((prevItems) =>
-          prevItems.map((item) => ({
-            ...item,
-            priceLoading: false,
-          }))
-        );
+        setCartItems(data);
       }
     } catch (error) {
       console.error("Error fetching cart items:", error);
     }
-  }, [userRole, userPreferredCurrency, fetchExchangeRates]);
+  }, []);
 
-  const formatPrice = useCallback(
-    (price, productCurrency) => {
-      if (userRole === "tourist" && userPreferredCurrency) {
-        if (userPreferredCurrency.code === productCurrency) {
-          return `${userPreferredCurrency.symbol}${price.toFixed(2)}`;
-        } else {
-          const rate =
-            exchangeRates[`${productCurrency}-${userPreferredCurrency._id}`];
-          if (rate) {
-            const exchangedPrice = price * rate;
-            return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(
-              2
-            )}`;
-          }
-        }
-      }
-      return "NOTHING";
-    },
-    [userRole, userPreferredCurrency, exchangeRates]
-  );
+  
+  const formatPrice = useCallback((price, productCurrency) => {
+    if (userRole === 'tourist' && userPreferredCurrency) {
+      const baseRate = exchangeRates[productCurrency] || 1;
+      const targetRate = exchangeRates[userPreferredCurrency.code] || 1;
+      const exchangedPrice = (price / baseRate) * targetRate;
+      return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+    }
+    const currency = currencies.find(c => c._id === productCurrency);
+    return `${currency ? currency.symbol : '$'}${price.toFixed(2)}`;
+  }, [userRole, userPreferredCurrency, exchangeRates, currencies]);
 
   const calculateTotalAmount = useCallback(() => {
     setTotalAmountLoading(true);
     let total = 0;
     for (const item of cartItems) {
-      if (
-        userRole === "tourist" &&
-        userPreferredCurrency &&
-        userPreferredCurrency.code !== item.product?.currency
-      ) {
-        const rate =
-          exchangeRates[
-            `${item.product?.currency}-${userPreferredCurrency._id}`
-          ];
-        if (rate) {
-          total += item.product?.price * rate * item.quantity;
-        } else {
-          total += item.product?.price * item.quantity;
-        }
+      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency.code !== item.product?.currency) {
+        const baseRate = exchangeRates[item.product?.currency] || 1;
+        const targetRate = exchangeRates[userPreferredCurrency.code] || 1;
+        total += (item.product?.price / baseRate) * targetRate * item.quantity;
       } else {
         total += item?.product?.price * item.quantity;
       }
