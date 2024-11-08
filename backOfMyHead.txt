@@ -10,10 +10,9 @@
 - Sort products by price( habiba) done
 - Remove white highlight from admin and add a highlight in its place(Habiba)
 - Add payment details in booking flight and choose payment method in booking hotels and book transportation from available credit cards
-- Book transport cost is added to activity cost 
 - In admin, make "my account" logout only as there is no other active button except logout(habiba) done
 - show booked transportation in history
-- booking a transportation using wallet actually uses the tourist's wallet 
+- booking a transportation and flight using wallet actually uses the tourist's wallet 
 - enter removes available dates in create itinerary
 - categories and tags are optional in create activity inside create itinerary 
 - pagination not working in activities

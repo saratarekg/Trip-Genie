@@ -16,88 +16,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { set } from "date-fns";
 
-const ActivityCard = ({ activity, onSelect, userInfo }) => {
-  const [exchangeRate, setExchangeRate] = useState(null);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-
-  useEffect(() => {
-    if (
-      userInfo &&
-      userInfo.role == "tourist" &&
-      userInfo.preferredCurrency !== activity.currency
-    ) {
-      // console.log("exchange rate tyb?");
-      fetchExchangeRate();
-    } else {
-      // console.log("ba get currency");
-      getCurrencySymbol();
-    }
-  }, [userInfo, activity]);
-
-  const fetchExchangeRate = useCallback(async () => {
-    if (userInfo && userInfo.role == "tourist") {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userInfo.role}/populate`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              base: activity.currency,
-              target: userInfo.preferredCurrency._id,
-            }),
-          }
-        );
-        const data = await response.json();
-        if (response.ok) {
-          setExchangeRate(data.conversion_rate);
-        } else {
-          console.error("Error in fetching exchange rate:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching exchange rate:", error);
-      }
-    }
-  }, [userInfo, activity]);
-
-  const getCurrencySymbol = useCallback(async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/${userInfo.role}/getCurrency/${activity.currency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCurrencySymbol(response.data.symbol);
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-    }
-  }, [userInfo, activity]);
-
+const ActivityCard = ({ activity, onSelect, userInfo, exchangeRates, currencies }) => {
   const formatPrice = (price) => {
-    // if (!userInfo || !price) return '';
+    if (!userInfo || !price) return '';
 
     if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
-      if (userInfo.preferredCurrency === activity.currency) {
-        return `${userInfo.preferredCurrency.symbol}${price}`;
-      } else if (exchangeRate) {
-        const exchangedPrice = price * exchangeRate;
-        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
-          2
-        )}`;
-      }
-    } else if (currencySymbol) {
-      // console.log("currencySymbol:", currencySymbol, "price:", price);
-      return `${currencySymbol}${price}`;
+      const baseRate = exchangeRates[activity.currency] || 1;
+      const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
+      const exchangedPrice = (price / baseRate) * targetRate;
+      return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+    } else {
+      const currency = currencies.find(c => c._id === activity.currency);
+      return `${currency ? currency.symbol : '$'}${price}`;
     }
   };
+
 
   return (
     <Card
@@ -189,10 +123,36 @@ export function AllActivitiesComponent() {
   const [minStars, setMinStars] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false); // To track if it's the initial load
   const [userInfo, setUserInfo] = useState(null);
+  const [currencies, setCurrencies] = useState([]);
+  const [exchangeRates, setExchangeRates] = useState({});
 
   const navigate = useNavigate();
 
-  const fetchUserInfo = useCallback(async () => {
+  
+  const fetchExchangeRates = useCallback(async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/rates');
+      setExchangeRates(response.data.rates);
+    } catch (error) {
+      console.error('Error fetching exchange rates:', error);
+    }
+  }, []);
+
+  const fetchCurrencies = useCallback(async () => {
+    const role = Cookies.get('role');
+    if (role !== 'tourist') return;
+    try {
+      const response = await axios.get('http://localhost:4000/tourist/currencies', {
+        headers: { Authorization: `Bearer ${Cookies.get('jwt')}` },
+      });
+      setCurrencies(response.data);
+    } catch (error) {
+      console.error('Error fetching currencies:', error);
+    }
+  }, []);
+
+
+    const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
     const token = Cookies.get("jwt");
 
@@ -239,7 +199,9 @@ export function AllActivitiesComponent() {
 
   useEffect(() => {
     fetchUserInfo();
-  }, [fetchUserInfo]);
+    fetchExchangeRates();
+    fetchCurrencies();
+  }, [fetchUserInfo, fetchExchangeRates, fetchCurrencies]);
 
   useEffect(() => {
     if (userInfo) {
@@ -624,6 +586,8 @@ export function AllActivitiesComponent() {
                             key={activity._id}
                             userInfo={userInfo}
                             activity={activity}
+                            exchangeRates={exchangeRates}
+                            currencies={currencies}
                             onSelect={handleActivitySelect}
                           />
                         ))}

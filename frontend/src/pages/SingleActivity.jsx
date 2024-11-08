@@ -1187,14 +1187,14 @@ const ActivityDetail = () => {
             </div>
           </div>
 
-          {(userRole === "advertiser" || userRole === "tourist") && (
+          {/* {(userRole === "advertiser" || userRole === "tourist") && (
             <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4">
                 Transportation Options
               </h2>
               {renderTransportationOptions()}
             </div>
-          )}
+          )} */}
 
           {/* Comment Carousel */}
           <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
