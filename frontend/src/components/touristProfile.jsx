@@ -548,7 +548,7 @@ export function TouristProfileComponent() {
           </Button>
         </>
       ) : (
-        <Button onClick={() => setIsEditing(true)} className="w-32 bg-teal-500 text-white">
+        <Button onClick={() => setIsEditing(true)}  className="flex items-center justify-center  py-2 bg-[#F88C33] text-white rounded-md hover:bg-orange-500 transition duration-300 ease-in-out mb-4">
           Edit Profile
         </Button>
       )}

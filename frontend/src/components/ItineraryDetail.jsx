@@ -1105,12 +1105,6 @@ const handleRateItinerary = async () => {
                         Drop-off: {itinerary.dropOffLocation}
                       </span>
                     </div>
-                    <div className="flex items-center">
-                      <Clock className="w-6 h-6 mr-2 text-[#F88C33]" />
-                      <span className="text-gray-700">
-                        Timeline: {itinerary.timeline}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
@@ -1125,13 +1119,7 @@ const handleRateItinerary = async () => {
                             {new Date(dateInfo.date).toLocaleDateString()}
                           </span>
                         </div>
-                        <ul className="space-y-1">
-                          {dateInfo.times.map((time, timeIndex) => (
-                            <li key={timeIndex} className="text-sm text-gray-600">
-                              {time.startTime} - {time.endTime}
-                            </li>
-                          ))}
-                        </ul>
+                      
                       </div>
                     ))}
                   </div>
@@ -1166,9 +1154,10 @@ const handleRateItinerary = async () => {
                               <div className="flex items-center">
                                 <Calendar className="w-4 h-4 mr-2 text-gray-500" />
                                 <span className="text-sm">
-                                  {new Date(activity.timing).toLocaleString()}
+                                  {new Date(activity.timing).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                               </div>
+
                               {/* <div className="flex items-center">
                                 <Banknote className="w-4 h-4 mr-2 text-gray-500" />
                                 <span className="text-sm">

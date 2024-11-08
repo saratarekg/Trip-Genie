@@ -394,7 +394,7 @@ export default function ShippingAddress() {
       {/* Add New Address Button */}
       <button
         onClick={() => { setShowAddForm(true); resetAddressDetails(); }}
-        className="mt-4 text-white bg-[#388A94] hover:bg-[#1A3B47] px-4 py-2 rounded-md transition duration-300 ease-in-out"
+        className="flex items-center justify-center w-full py-2 bg-[#F88C33] text-white rounded-md hover:bg-orange-500 transition duration-300 ease-in-out mb-4"
       >
         Add New Address
       </button>

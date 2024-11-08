@@ -453,7 +453,22 @@ const updateItinerary = async (req, res) => {
       pickUpLocation,
       dropOffLocation,
       appropriate,
+      isRepeated,
     } = req.body;
+    if (!isRepeated) {
+      if (availableDates.length > 1) {
+        return res.status(400).json({
+          message: "Itinerary must have only one date if it is not repeated",
+        });
+      }
+      activities.forEach((activity) => {
+        if (activity.timing < availableDates[0].date) {
+          return res.status(400).json({
+            message: "Activities date must be after the itinerary date",
+          });
+        }
+      });
+    }
     console.log(activities);
     await Itinerary.findByIdAndUpdate(req.params.id, {
       title,
@@ -466,6 +481,7 @@ const updateItinerary = async (req, res) => {
       pickUpLocation,
       dropOffLocation,
       appropriate,
+      isRepeated,
     });
 
     res.status(200).json({ message: "Itinerary updated successfully" });

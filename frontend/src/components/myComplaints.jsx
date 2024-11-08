@@ -56,49 +56,53 @@ export function MyComplaintsComponent() {
   }
 
   return (
-    (<div className="w-full">
-      {complaints.length === 0 ? (
-        <p className="text-center text-gray-500">No complaints found.</p>
-      ) : (
-        <Accordion type="single" collapsible className="w-full">
-          {complaints.map((complaint) => (
-            <AccordionItem key={complaint._id} value={complaint._id}>
-              <AccordionTrigger className="grid grid-cols-[1fr_auto] items-center w-full py-4 gap-4">
-                <div className="text-left font-medium truncate">{complaint.title}</div>
-                <div className="w-24 text-right" onClick={(e) => e.stopPropagation()}>
-                  <Badge variant="custom" className={`${getStatusColor(complaint.status)} hover:${getStatusColor(complaint.status)}`}>
-                    {complaint.status}
-                  </Badge>
+<div className="w-full max-w-4xl mx-auto">
+  {complaints.length === 0 ? (
+    <p className="text-center text-gray-600">No complaints found.</p>
+  ) : (
+    <Accordion type="single" collapsible className="space-y-4">
+      {complaints.map((complaint) => (
+        <AccordionItem key={complaint._id} value={complaint._id}>
+          <AccordionTrigger className="flex justify-between items-center py-3 px-6 bg-white border-b border-gray-300 hover:bg-teal-50 transition duration-200 ease-in-out">
+            <div className="font-semibold text-teal-800 truncate">{complaint.title}</div>
+            <div className="text-sm">
+              <Badge
+                variant="outline"
+                className={`px-3 py-1 rounded-md text-xs ${getStatusColor(complaint.status)}`}
+              >
+                {complaint.status}
+              </Badge>
+            </div>
+          </AccordionTrigger>
+
+          <AccordionContent className="p-6 bg-white rounded-b-md border border-gray-200">
+            <div className="space-y-4">
+              <p className="text-gray-700">{complaint.body}</p>
+
+              {/* Replies Section */}
+              <div className="mt-4">
+                <h4 className="font-semibold text-teal-800 mb-3">Replies</h4>
+                <div className="space-y-2">
+                  {complaint.replies && complaint.replies.length > 0 ? (
+                    complaint.replies.map((reply, index) => (
+                      <div key={index} className="bg-teal-50 p-4 rounded-md shadow-sm">
+                        <p className="text-sm text-gray-700">{reply.content}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          By Admin on {new Date(reply.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic">No replies yet</p>
+                  )}
                 </div>
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4">
-                  <p className="text-gray-700">{complaint.body}</p>
-                  <div className="mt-4">
-                    <h4 className="font-semibold mb-2">Replies:</h4>
-                    <div className="space-y-2">
-                      {complaint.replies && complaint.replies.length > 0 ? (
-                        complaint.replies.map((reply, index) => (
-                          <Card key={index} className="bg-gray-50">
-                            <CardContent className="p-4">
-                              <p className="text-sm">{reply.content}</p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                By Admin on {new Date(reply.createdAt).toLocaleDateString()}
-                              </p>
-                            </CardContent>
-                          </Card>
-                        ))
-                      ) : (
-                        <p className="text-gray-500 italic">No replies yet</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      )}
-    </div>)
-  );
-}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      ))}
+    </Accordion>
+  )}
+</div>
+
+  );}

@@ -230,20 +230,7 @@ const worldLanguages = [
   "Zulu",
 ];
 
-const vehicleTypes = ["Bus", "Car", "Microbus"];
 
-const getMaxSeats = (vehicleType) => {
-  switch (vehicleType) {
-    case "Bus":
-      return 50;
-    case "Car":
-      return 5;
-    case "Microbus":
-      return 15;
-    default:
-      return 50;
-  }
-};
 
 const activitySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -256,7 +243,6 @@ const activitySchema = z.object({
     }),
   }),
   duration: z.number().min(1, "Duration is required"),
-  activityDate: z.string().min(1, "Date is required"),
   activityTime: z.string().min(1, "Time is required"),
   tags: z.array(z.string()).min(1, "Choose at least one Tag"),
   category: z.array(z.string()).min(1, "Choose at least one Category"),
@@ -264,7 +250,6 @@ const activitySchema = z.object({
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  timeline: z.string().min(1, "Timeline is required"),
   language: z.string().min(1, "Language is required"),
   price: z.number().min(1, "Price is required"),
   pickUpLocation: z.string().min(1, "Pick-up location is required"),
@@ -273,19 +258,12 @@ const formSchema = z.object({
     .array(
       z.object({
         date: z.string().min(1, "Date is required"),
-        times: z
-          .array(
-            z.object({
-              startTime: z.string().min(1, "Start time is required"),
-              endTime: z.string().min(1, "End time is required"),
-            })
-          )
-          .min(1, "At least one time slot is required"),
       })
     )
     .min(1, "At least one date is required"),
   accessibility: z.boolean(),
-});
+  isRepeated: z.boolean(),
+})
 
 const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   const [tags, setTags] = useState([]);
@@ -313,19 +291,18 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   useEffect(() => {
     if (initialData) {
       if (initialData.timing) {
-        const dateTime = new Date(initialData.timing);
-        setValue("activityDate", format(dateTime, "yyyy-MM-dd"));
-        setValue("activityTime", format(dateTime, "HH:mm"));
+        const dateTime = new Date(initialData.timing)
+        setValue("activityTime", format(dateTime, "HH:mm"))
       }
-      setValue("tags", initialData.tags);
-      setValue("category", initialData.category);
-      setPictures(initialData.pictures);
-      const base64Files = initialData.pictures.map((file) =>
+      setValue("tags", initialData.tags)
+      setValue("category", initialData.category)
+      setPictures(initialData.pictures || [])
+      const base64Files = (initialData.pictures || []).map((file) =>
         URL.createObjectURL(file)
-      );
-      setBase64Pictures(base64Files);
+      )
+      setBase64Pictures(base64Files)
     }
-  }, [initialData, setValue]);
+  }, [initialData, setValue])
 
   const fetchTags = async () => {
     const response = await fetch("http://localhost:4000/api/getAllTags");
@@ -360,7 +337,6 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   const handleAddActivity = (data) => {
     const formattedData = {
       ...data,
-      timing: `${data.activityDate}T${data.activityTime}`,
       pictures,
     };
     console.log("Activity data:", formattedData);
@@ -421,7 +397,8 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
         </div>
       </div>
 
-      <div>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
         <Label htmlFor="duration">Duration (minutes)</Label>
         <Input
           id="duration"
@@ -431,20 +408,9 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
         {errors.duration && (
           <p className="text-red-500 text-xs">{errors.duration.message}</p>
         )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <Label htmlFor="activityDate">Date</Label>
-          <Input id="activityDate" type="date" {...register("activityDate")} />
-          {errors.activityDate && (
-            <p className="text-red-500 text-xs">
-              {errors.activityDate.message}
-            </p>
-          )}
         </div>
         <div>
-          <Label htmlFor="activityTime">Time</Label>
+          <Label htmlFor="activityTime">Start Time</Label>
           <Input id="activityTime" type="time" {...register("activityTime")} />
           {errors.activityTime && (
             <p className="text-red-500 text-xs">
@@ -452,6 +418,10 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
             </p>
           )}
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+       
       </div>
 
       <div className="col-span-2">
@@ -526,7 +496,6 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
               className="w-full h-32 object-cover rounded cursor-pointer"
               onClick={() => {
                 setSelectedImage(picture);
-                setIsImageViewerOpen(true);
               }}
             />
             <button
@@ -584,10 +553,14 @@ const ItineraryForm = () => {
       dropOffLocation: "",
       availableDates: [{ date: "", times: [{ startTime: "", endTime: "" }] }],
       accessibility: false,
+      isRepeated: false,
     },
   });
 
   const availableDates = watch("availableDates");
+  const isRepeated = watch("isRepeated") // Watch the isRepeated field
+  const today = new Date().toISOString().split('T')[0]
+
 
   const handleCreateItinerary = async (data) => {
     setLoading(true);
@@ -603,12 +576,16 @@ const ItineraryForm = () => {
 
       const hasEmptyDateOrTime = data.availableDates.some(
         (date) =>
-          !date.date ||
-          date.times.some((time) => !time.startTime || !time.endTime)
-      );
+          !date.date );
 
       if (hasEmptyDateOrTime) {
         setError("Please fill in all dates and times.");
+        setLoading(false);
+        return;
+      }
+
+      if(data.availableDates.length>1 && (!data.isRepeated)){
+        setError("If the itinerary is not repeated you can only choose one date.");
         setLoading(false);
         return;
       }
@@ -627,6 +604,7 @@ const ItineraryForm = () => {
       formData.append("accessibility", data.accessibility);
       formData.append("availableDates", JSON.stringify(data.availableDates));
       formData.append("activities", JSON.stringify(activities));
+      formData.append("isRepeated", data.isRepeated)
       activities.forEach((activity, index) => {
         activity.pictures.forEach((file, fileIndex) => {
           formData.append(`activities[${index}][pictures][${fileIndex}]`, file);
@@ -665,8 +643,8 @@ const ItineraryForm = () => {
     console.log("Activity:", activity);
     const newActivity = {
       ...activity,
-      timing: `${activity.activityDate}T${activity.activityTime}`,
-    };
+ timing: new Date().toISOString().split('T')[0] + 'T' + activity.activityTime,
+};
     if (editingActivityIndex !== null) {
       const updatedActivities = [...activities];
       updatedActivities[editingActivityIndex] = newActivity;
@@ -692,34 +670,36 @@ const ItineraryForm = () => {
   };
 
   const addDate = () => {
-    setValue("availableDates", [
-      ...availableDates,
-      { date: "", times: [{ startTime: "", endTime: "" }] },
-    ]);
-  };
-
-  const addTime = (dateIndex) => {
-    const newDates = [...availableDates];
-    newDates[dateIndex].times.push({ startTime: "", endTime: "" });
-    setValue("availableDates", newDates);
-  };
-
-  const removeTime = (dateIndex, timeIndex) => {
-    const newDates = [...availableDates];
-    newDates[dateIndex].times.splice(timeIndex, 1);
-
-    if (newDates[dateIndex].times.length === 0) {
-      newDates.splice(dateIndex, 1);
+    // Allow adding dates only if isRepeated is true or if no dates have been added yet
+    if (isRepeated || availableDates.length === 0) {
+      setValue("availableDates", [...availableDates, { date: "" }])
     }
-
-    setValue("availableDates", newDates);
-  };
+  }
 
   const removeDate = (dateIndex) => {
-    const newDates = [...availableDates];
-    newDates.splice(dateIndex, 1);
-    setValue("availableDates", newDates);
-  };
+    const newDates = [...availableDates]
+    newDates.splice(dateIndex, 1)
+    setValue("availableDates", newDates)
+  }
+
+
+  // const addTime = (dateIndex) => {
+  //   const newDates = [...availableDates];
+  //   newDates[dateIndex].times.push({ startTime: "", endTime: "" });
+  //   setValue("availableDates", newDates);
+  // };
+
+  // const removeTime = (dateIndex, timeIndex) => {
+  //   const newDates = [...availableDates];
+  //   newDates[dateIndex].times.splice(timeIndex, 1);
+
+  //   if (newDates[dateIndex].times.length === 0) {
+  //     newDates.splice(dateIndex, 1);
+  //   }
+
+  //   setValue("availableDates", newDates);
+  // };
+
 
   return (
     <div>
@@ -747,7 +727,7 @@ const ItineraryForm = () => {
               onSubmit={handleSubmit(handleCreateItinerary)}
               className="grid grid-cols-4 gap-4"
             >
-              <div className="col-span-2">
+              <div className="col-span-4">
                 <Label htmlFor="title" className="text-sm font-medium">
                   Itinerary Title
                 </Label>
@@ -760,23 +740,6 @@ const ItineraryForm = () => {
                   <p className="text-red-500 text-xs">{errors.title.message}</p>
                 )}
               </div>
-
-              <div className="col-span-2">
-                <Label htmlFor="timeline" className="text-sm font-medium">
-                  Timeline
-                </Label>
-                <Input
-                  id="timeline"
-                  {...register("timeline")}
-                  onKeyDown={handleKeyDown}
-                />
-                {errors.timeline && (
-                  <p className="text-red-500 text-xs">
-                    {errors.timeline.message}
-                  </p>
-                )}
-              </div>
-
               <div className="col-span-1">
                 <Label htmlFor="language" className="text-sm font-medium">
                   Language
@@ -858,132 +821,101 @@ const ItineraryForm = () => {
                   </p>
                 )}
               </div>
+              <div className="col-span-2 flex items-center space-x-2">
+          <Controller
+            name="isRepeated"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                id="isRepeated"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            )}
+          />
+          <Label htmlFor="isRepeated" className="text-sm font-medium">
+            Is Repeated
+          </Label>
+        </div>
 
-              <div className="col-span-3 space-y-1">
-                <Label className="text-sm font-medium">Available Dates</Label>
-                {availableDates.map((dateObj, dateIndex) => (
-                  <div key={dateIndex} className="mb-4 p-4 border rounded">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Controller
-                        name={`availableDates.${dateIndex}.date`}
-                        control={control}
-                        render={({ field }) => (
-                          <Input
-                            type="date"
-                            {...field}
-                            className={`w-40 ${
-                              errors.availableDates?.[dateIndex]?.date
-                                ? "border-red-500"
-                                : ""
-                            }`}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault(); // Prevent the "Enter" key's default behavior
-                                e.stopPropagation(); // Stop the event from bubbling up
-                              }
-                            }}
-                          />
-                        )}
-                      />
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => removeDate(dateIndex)}
-                        className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                    {dateObj.times.map((timeObj, timeIndex) => (
-                      <div
-                        key={timeIndex}
-                        className="flex items-center space-x-2 mb-2"
-                      >
-                        <Controller
-                          name={`availableDates.${dateIndex}.times.${timeIndex}.startTime`}
-                          control={control}
-                          render={({ field }) => (
-                            <Input
-                              type="time"
-                              {...field}
-                              className={`w-32 ${
-                                errors.availableDates?.[dateIndex]?.times?.[
-                                  timeIndex
-                                ]?.startTime
-                                  ? "border-red-500"
-                                  : ""
-                              }`}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault(); // Prevent the "Enter" key's default behavior
-                                  e.stopPropagation(); // Stop the event from bubbling up
-                                }
-                              }}
-                            />
-                          )}
-                        />
-                        <Controller
-                          name={`availableDates.${dateIndex}.times.${timeIndex}.endTime`}
-                          control={control}
-                          render={({ field }) => (
-                            <Input
-                              type="time"
-                              {...field}
-                              className={`w-32 ${
-                                errors.availableDates?.[dateIndex]?.times?.[
-                                  timeIndex
-                                ]?.endTime
-                                  ? "border-red-500"
-                                  : ""
-                              }`}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault(); // Prevent the "Enter" key's default behavior
-                                  e.stopPropagation(); // Stop the event from bubbling up
-                                }
-                              }}
-                            />
-                          )}
-                        />
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => removeTime(dateIndex, timeIndex)}
-                          className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))}
-                    <Button
-                      variant="outline"
-                      onClick={() => addTime(dateIndex)}
-                    >
-                      <Plus className="mr-2 h-4 w-4" /> Add Time
-                    </Button>
-                    {dateObj.times.length === 0 && (
-                      <p className="text-red-500 text-xs mt-2">
-                        Please add at least one time
-                      </p>
-                    )}
-                  </div>
-                ))}
-                <Button variant="outline" onClick={addDate}>
-                  <Plus className="mr-2 h-4 w-4" /> Add Date
-                </Button>
-                {availableDates.length === 0 && (
-                  <p className="text-red-500 text-xs mt-2">
-                    Please add at least one date
-                  </p>
-                )}
-                {errors.availableDates && (
-                  <span className="text-red-500 block mt-2">
-                    {errors.availableDates.message}
-                  </span>
-                )}
+        <div className="col-span-2 flex items-center space-x-2">
+                <Controller
+                  name="accessibility"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="accessibility"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <Label htmlFor="accessibility" className="text-sm font-medium">
+                  Accessible for Disabled
+                </Label>
               </div>
 
-              <div className="col-span-1">
+              <div className="col-span-2 space-y-4 p-4 border rounded">
+  <Label className="text-sm font-medium">Available Dates</Label>
+  
+  {availableDates.map((dateObj, dateIndex) => (
+    <div key={dateIndex} className="flex items-center space-x-2 mb-2">
+      <Controller
+        name={`availableDates.${dateIndex}.date`}
+        control={control}
+        render={({ field }) => (
+          <Input
+          type="date"
+          {...field}
+          value={dateObj.date.split('T')[0]}
+          min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]} // Sets min date to tomorrow
+          className={`w-40 ${
+            errors.availableDates?.[dateIndex]?.date ? "border-red-500" : ""
+          }`}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
+        />
+        )}
+      />
+      {/* Show remove button only if isRepeated is true or there's more than one date */}
+      {(isRepeated || availableDates.length > 1) && (
+        <Button
+          variant="destructive"
+          size="icon"
+          onClick={() => removeDate(dateIndex)}
+          className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+        >
+          <Trash2 className="h-4 w-4 text-red-500" />
+        </Button>
+      )}
+    </div>
+  ))}
+
+  {/* Show add date button only if isRepeated is true or no dates have been added */}
+  {(isRepeated || availableDates.length === 0) && (
+    <Button variant="outline" onClick={addDate} className="mt-2">
+      <Plus className="mr-2 h-4 w-4" /> Add Date
+    </Button>
+  )}
+  
+  {/* Error message when no dates are added */}
+  {availableDates.length === 0 && (
+    <p className="text-red-500 text-xs mt-2">Please add at least one date</p>
+  )}
+  {errors.availableDates && (
+    <span className="text-red-500 block mt-2">
+      {errors.availableDates.message}
+    </span>
+  )}
+</div>
+
+
+
+              <div className="col-span-2">
                 <Label className="text-sm font-medium">Activities</Label>
                 {activities.map((activity, index) => (
                   <div
@@ -1027,22 +959,7 @@ const ItineraryForm = () => {
                 )}
               </div>
 
-              <div className="col-span-4 flex items-center space-x-2">
-                <Controller
-                  name="accessibility"
-                  control={control}
-                  render={({ field }) => (
-                    <Checkbox
-                      id="accessibility"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  )}
-                />
-                <Label htmlFor="accessibility" className="text-sm font-medium">
-                  Accessible for Disabled
-                </Label>
-              </div>
+              
 
               {error && (
                 <Alert variant="destructive" className="col-span-4">
