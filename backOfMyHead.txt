@@ -16,7 +16,9 @@
 - enter removes available dates in create itinerary
 - categories and tags are optional in create activity inside create itinerary 
 - pagination not working in activities
-
+- max price in price sliders (in activity, itineraries, preferences, products) by fetching the max price from the backend
+- sort by preferences is activated on its own after being toggled off
+- photos don't appear in wishlist 
 
 Hadwa's requests:
 - Add global search bar 
