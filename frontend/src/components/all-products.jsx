@@ -65,6 +65,8 @@ const renderStars = (rating) => {
   );
 };
 
+let exchangeRateForFilter;
+
 const ProductCard = ({
   product,
   onSelect,
@@ -75,10 +77,11 @@ const ProductCard = ({
   onAddToCart,
   onAddToWishlist,
   onRemoveFromWishlist,
+
 }) => {
-  const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState(null);
 
   const isInCart = cartItems.some((item) => item.product?._id === product._id);
   const isInWishlist = wishlistItems.some(
@@ -118,6 +121,7 @@ const ProductCard = ({
         const data = await response.json();
         if (response.ok) {
           setExchangeRate(data.conversion_rate);
+          exchangeRateForFilter = data.conversion_rate;
         } else {
           console.error("Error in fetching exchange rate:", data.message);
         }
@@ -128,6 +132,7 @@ const ProductCard = ({
   }, [userInfo, product]);
 
   const getCurrencySymbol = useCallback(async () => {
+    if(userInfo){
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
@@ -140,6 +145,7 @@ const ProductCard = ({
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
     }
+  }
   }, [userInfo, product]);
 
   const formatPrice = (price) => {
@@ -254,8 +260,9 @@ export function AllProducts() {
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [myProducts, setMyProducts] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [maxPrice, setMaxPrice] = useState(1000);
+  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -370,7 +377,8 @@ export function AllProducts() {
         }
 
         const data = await response.json();
-        setProducts(data);
+        setProducts(data.products);
+        setMaxPriceOfProducts(data.maxPrice);
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -433,7 +441,7 @@ export function AllProducts() {
         searchBy: searchTerm,
         myproducts: myProducts,
         minPrice: priceRange[0],
-        maxPrice: priceRange[1],
+        maxPrice: maxPriceOfProducts,
         rating: selectedRating,
         sort: sortBy,
         asc: sortOrder,
@@ -476,7 +484,7 @@ export function AllProducts() {
     setSortBy("");
     setSortOrder(1);
     setMyProducts(false);
-    setPriceRange([0, maxPrice]);
+    setPriceRange([0, maxPriceOfProducts]);
     setSelectedRating(null);
     setSelectedCategories([]);
     fetchProducts();
@@ -694,10 +702,11 @@ export function AllProducts() {
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
               <DualHandleSliderComponent
                 min={0}
-                max={maxPrice}
+                max={maxPriceOfProducts}
                 symbol={getSymbol()}
-                step={Math.max(1, Math.ceil(maxPrice / 100))}
+                step={Math.max(1, Math.ceil(maxPrice*exchangeRateForFilter / 100))}
                 values={priceRange}
+                exchangeRate={exchangeRateForFilter}
                 middleColor="#5D9297"
                 colorRing="#388A94"
                 onChange={(values) => setPriceRange(values)}

@@ -21,6 +21,7 @@ router.get("/products/:id", productController.getProductById);
 
 router.get("/activities", activityController.getAllActivities);
 router.get("/activities/:id", activityController.getActivityById);
+router.get("/maxPriceActivities", activityController.getMaxPrice);
 
 router.get(
   "/historical-places",

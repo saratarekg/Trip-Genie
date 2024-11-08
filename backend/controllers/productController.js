@@ -5,15 +5,10 @@ const Purchase = require("../models/purchase");
 const cloudinary = require("../utils/cloudinary");
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, maxPrice, searchBy, asc, sort, myproducts, rating } =
-    req.query;
-  console.log(myproducts);
+  const { minPrice, maxPrice, searchBy, asc, sort, myproducts, rating } = req.query;
   const role = res.locals.user_role;
-  console.log(role);
-
+  
   try {
-    // Debugging: Log incoming query parameters
-
     // Build the query object dynamically
     const query = {};
     // Apply search filter (by name) if provided
@@ -29,7 +24,7 @@ const getAllProducts = async (req, res) => {
       query.price = {};
     }
     if (minPrice) query.price.$gte = parseFloat(minPrice); // Apply minPrice if given
-    if (maxPrice) query.price.$lte = parseFloat(maxPrice); // Apply maxPrice if given}
+    if (maxPrice) query.price.$lte = parseFloat(maxPrice); // Apply maxPrice if given
 
     // Filter by the user's products (myProducts)
     if (myproducts) {
@@ -37,6 +32,7 @@ const getAllProducts = async (req, res) => {
       else query.seller = res.locals.user_id;
     }
 
+    // Apply rating filter if provided
     if (rating) {
       query.rating = { $gte: parseInt(rating, 10) }; // Ensure rating is treated as a number
     }
@@ -45,6 +41,7 @@ const getAllProducts = async (req, res) => {
     query.isArchived = false;
     query.isDeleted = false;
     let productsQuery = Product.find(query);
+
     // Apply sorting if 'asc' is defined (for sorting by rating)
     if (sort) {
       const sortBy = {};
@@ -53,18 +50,26 @@ const getAllProducts = async (req, res) => {
     } else {
       productsQuery = productsQuery.sort({ createdAt: -1 });
     }
+
     // Execute the query and get the products
     const products = await productsQuery;
-    // Check if no products match the filters
+
+    // If no products match the filters, return an empty array
     if (!products.length) {
-      return res.status(200).json([]);
+      return res.status(200).json({ products: [], maxPrice: 0 });
     }
-    // Return filtered products
-    res.status(200).json(products);
+
+    // Calculate the max price of the products
+    const maxPriceOfProducts = Math.max(...products.map(product => product.price));
+    console.log("maximum:",maxPriceOfProducts);
+
+    // Return the products along with the max price of the products
+    res.status(200).json({ products, maxPrice: maxPriceOfProducts });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const getAllProductsArchive = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts, rating, sort } =

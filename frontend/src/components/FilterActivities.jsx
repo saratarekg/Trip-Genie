@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Range, getTrackBackground } from "react-range";
 
-function DualHandleSliderComponent({ min, max, step, values, onChange, symbol }) {
+function DualHandleSliderComponent({ min, max, step, values, onChange, symbol, exchangeRate }) {
   return (
     <div className="w-full px-4 py-8">
       <Range
@@ -67,10 +67,10 @@ function DualHandleSliderComponent({ min, max, step, values, onChange, symbol })
       />
       <div className="flex justify-between mt-2">
         <span className="text-sm font-medium text-gray-700">
-          Min: {symbol}{values[0]}
+          Min: {symbol}{Math.ceil(values[0] * exchangeRate)}
         </span>
         <span className="text-sm font-medium text-gray-700">
-          Max: {symbol}{values[1]}
+          Max: {symbol}{Math.ceil(values[1] * exchangeRate)}
         </span>
       </div>
     </div>
@@ -88,6 +88,7 @@ const FilterComponent = ({
   priceRange,
   setPriceRange,
   maxPrice,
+  exchangeRate,
   initialPriceRange,
   dateRange,
   setDateRange,
@@ -107,7 +108,9 @@ const FilterComponent = ({
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [localPriceRange, setLocalPriceRange] = useState(initialPriceRange);
   const [isInitialized, setIsInitialized] = useState(false); // To track if it's the initial load
-
+  console.log(priceRange);
+  console.log(initialPriceRange);
+  console.log(maxPrice);
 
   useEffect(() => {
   if (isInitialized) {
@@ -261,7 +264,8 @@ const FilterComponent = ({
                 min={0}
                 max={maxPrice}
                 symbol={symbol}
-                step={Math.max(1, Math.ceil(maxPrice / 100))}
+                step={Math.max(1, Math.ceil(maxPrice*exchangeRate / 100))}
+                exchangeRate={exchangeRate}
                 values={localPriceRange}
                 onChange={handlePriceRangeChange}
               />

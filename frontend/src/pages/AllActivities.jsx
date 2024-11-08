@@ -17,6 +17,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+let exchangeRateForFilter = 1;
+
 const ActivityCard = ({ activity, onSelect, userInfo, exchangeRates, currencies }) => {
   const formatPrice = (price) => {
     if (!userInfo || !price) return '';
@@ -25,6 +27,7 @@ const ActivityCard = ({ activity, onSelect, userInfo, exchangeRates, currencies 
       const baseRate = exchangeRates[activity.currency] || 1;
       const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
       const exchangedPrice = (price / baseRate) * targetRate;
+      exchangeRateForFilter = targetRate / baseRate;
       return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
     } else {
       const currency = currencies.find(c => c._id === activity.currency);
@@ -110,9 +113,10 @@ export function AllActivitiesComponent() {
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [maxPrice, setMaxPrice] = useState(1000);
-  const [initialPriceRange, setInitialPriceRange] = useState([0, 1000]);
+  const [maxPriceOfActivities,setMaxPriceOfActivities] = useState(0);
+  const [priceRange, setPriceRange] = useState([0,maxPriceOfActivities]);
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfActivities);
+  const [initialPriceRange, setInitialPriceRange] = useState([0, maxPriceOfActivities]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
@@ -125,9 +129,9 @@ export function AllActivitiesComponent() {
   const [userInfo, setUserInfo] = useState(null);
   const [currencies, setCurrencies] = useState([]);
   const [exchangeRates, setExchangeRates] = useState({});
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
 
   const navigate = useNavigate();
-
   
   const fetchExchangeRates = useCallback(async () => {
     try {
@@ -337,18 +341,7 @@ export function AllActivitiesComponent() {
         const data = await response.json();
         setActivities(data);
       }
-
-      // Calculate max price
-      const maxActivityPrice = Math.max(
-        ...activities.map((activity) => activity.price)
-      );
-      const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
-
-      if (roundedMaxPrice > -Infinity) {
-        setMaxPrice(roundedMaxPrice);
-        setInitialPriceRange([0, roundedMaxPrice]);
-        setPriceRange([0, roundedMaxPrice]);
-      }
+      fetchMaxPrice();
 
       setError(null);
       setCurrentPage(1);
@@ -360,6 +353,27 @@ export function AllActivitiesComponent() {
       setIsLoading(false);
     }
   }, [userInfo, isSortedByPreference]);
+
+  const fetchMaxPrice = async () => {
+  const role = getUserRole();
+  // console.log("Role:", role);
+  const token = Cookies.get("jwt");
+  const url = new URL(`http://localhost:4000/${role}/maxPriceActivities`);
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! status: ${response.status}`);
+        // }
+        const data = await response.json();
+        setMaxPriceOfActivities(data);
+        setInitialPriceRange([0, data]);
+        setIsPriceInitialized(true);
+        setPriceRange([0, data]);
+        // console.log("el max price",data);
+  }
 
   const searchActivities = async () => {
     setIsSortedByPreference(false);
@@ -466,16 +480,16 @@ export function AllActivitiesComponent() {
       }
 
       // Calculate max price
-      const maxActivityPrice = Math.max(
-        ...activities.map((activity) => activity.price)
-      );
-      const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
+      // const maxActivityPrice = Math.max(
+      //   ...activities.map((activity) => activity.price)
+      // );
+      // const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
 
-      if (roundedMaxPrice > -Infinity) {
-        setMaxPrice(roundedMaxPrice);
-        setInitialPriceRange([0, roundedMaxPrice]);
-        setPriceRange([0, roundedMaxPrice]);
-      }
+      // if (roundedMaxPrice > -Infinity) {
+      //   setMaxPrice(roundedMaxPrice);
+      //   setInitialPriceRange([0, roundedMaxPrice]);
+      //   setPriceRange([0, roundedMaxPrice]);
+      // }
 
       setError(null);
       setCurrentPage(1);
@@ -548,7 +562,7 @@ export function AllActivitiesComponent() {
                     <Search className="absolute left-3 top-2.5 text-gray-400" />
                   </div>
 
-                  <FilterComponent
+                  {isPriceInitialized && (<FilterComponent
                     filtersVisible={filtersVisible}
                     toggleFilters={toggleFilters}
                     sortOrder={sortOrder}
@@ -560,6 +574,7 @@ export function AllActivitiesComponent() {
                     dateRange={dateRange}
                     setDateRange={setDateRange}
                     minStars={minStars}
+                    exchangeRate={exchangeRateForFilter}
                     setMinStars={setMinStars}
                     categoriesOptions={categoryOptions}
                     searchActivites={searchActivities}
@@ -568,11 +583,11 @@ export function AllActivitiesComponent() {
                     myActivities={myActivities}
                     symbol={getSymbol()}
                     handlemyActivities={handlemyActivities}
-                    maxPrice={maxPrice} // Pass maxPrice as a prop
+                    maxPrice={maxPriceOfActivities} // Pass maxPrice as a prop
                     initialPriceRange={initialPriceRange}
                     isSortedByPreference={isSortedByPreference}
                     handleSortByPreference={handleSortByPreference}
-                  />
+                  />)}
 
                   {activities.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -33,6 +33,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+let exchangeRateForFilter;
+
 const DeleteConfirmationModal = ({
   isOpen,
   onClose,
@@ -102,6 +104,7 @@ const ItineraryCard = ({
       const data = await response.json();
       if (response.ok) {
         setExchangeRate(data.conversion_rate);
+        exchangeRateForFilter = data.conversion_rate;
       } else {
         console.error("Error in fetching exchange rate:", data.message);
       }
@@ -260,8 +263,9 @@ export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [maxPrice, setMaxPrice] = useState(1000);
+  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
@@ -427,6 +431,7 @@ export function AllItinerariesComponent() {
         }
         const data = await response.json();
         setItineraries(data);
+        // setMaxPriceOfProducts(data.maxPrice);
         setIsSortedByPreference(false);
       }
 
@@ -580,7 +585,7 @@ export function AllItinerariesComponent() {
     setSortOrder("");
     setMyItineraries(false);
     setIsBooked(false);
-    setPriceRange([0, maxPrice]);
+    setPriceRange([0, maxPriceOfProducts]);
     fetchItineraries();
   };
 
@@ -713,7 +718,7 @@ export function AllItinerariesComponent() {
                   clearFilters={clearFilters}
                   priceRange={priceRange}
                   setPriceRange={setPriceRange}
-                  maxPrice={maxPrice}
+                  maxPrice={maxPriceOfProducts}
                   price={price}
                   setPrice={setPrice}
                   dateRange={dateRange}
