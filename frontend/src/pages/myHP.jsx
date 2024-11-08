@@ -86,6 +86,7 @@ const HistoricalPlaceCard = ({
   };
 
   const formatPrice = (price, type) => {
+
     if (userRole === "tourist") {
       if (userPreferredCurrency._id === historicalPlace.currency._id) {
         return `${userPreferredCurrency.symbol}${price}/Day`;
@@ -167,7 +168,7 @@ const HistoricalPlaceCard = ({
 };
 
 // Main Component
-export function AllHistoricalPlacesComponent() {
+export function MyHistoricalPlacesComponent() {
   const [historicalPlaces, setHistoricalPlaces] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
@@ -275,7 +276,7 @@ export function AllHistoricalPlacesComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const response = await fetch(
-        `http://localhost:4000/${role}/historical-places`,
+        `http://localhost:4000/${role}/historical-places?myPlaces=true`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -330,11 +331,8 @@ export function AllHistoricalPlacesComponent() {
   const searchHistoricalPlaces = async () => {
     try {
       const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/historical-places`);
+      const url = new URL(`http://localhost:4000/${role}/historical-places?myPlaces=true`);
 
-      if (myHistoricalPlaces) {
-        url.searchParams.append("myPlaces", myHistoricalPlaces);
-      }
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
       }
@@ -379,16 +377,14 @@ export function AllHistoricalPlacesComponent() {
           <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
           </div>
-          <div className="min-h-screen bg-gray-100 py-2 px-4 sm:px-6 lg:px-8">
+          <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
               <>
-               
-                <div className="flex flex-col">
                 <h1 className="text-2xl font-bold mb-4 mt-4">
-                  All Historical Places
+                  My Historical Places
                 </h1>
+                <div className="flex flex-col">
                   <div className="relative">
-                    
                     <input
                       type="text"
                       placeholder="Search products..."
@@ -483,4 +479,4 @@ export function AllHistoricalPlacesComponent() {
   );
 }
 
-export default AllHistoricalPlacesComponent;
+export default MyHistoricalPlacesComponent;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -12,11 +12,13 @@ import {
   GraduationCap,
   Award,
   Star,
+  BriefcaseBusiness,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
 import { ImageCropper } from "@/components/ImageCropper";
-import { X } from "lucide-react"
+import { X, ZoomIn, ZoomOut } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -30,53 +32,15 @@ import { Badge } from "@/components/ui/badge";
 import "react-phone-input-2/lib/style.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import zIndex from "@mui/material/styles/zIndex";
+import { Modal } from "@/components/Modal";
 
 // Custom validator for mobile number
 const phoneValidator = (value) => {
-  console.log(value);
+  console.log("value", value);
   const phoneNumber = parsePhoneNumberFromString("+" + value);
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
-
-const Modal = ({ show, onClose, children, isImageViewer = false, imageUrl = "" }) => {
-  if (!show) return null;
-
-  if (isImageViewer) {
-    return (
-      <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-        <div className="absolute top-4 left-4 z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-            onClick={onClose}
-          >
-            <X className="h-6 w-6" />
-          </Button>
-        </div>
-        <div className="w-full h-full flex items-center justify-center">
-          <img
-            src={imageUrl}
-            alt="Full screen view"
-            className="max-w-[90vw] max-h-[90vh] object-contain"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-        <button className="absolute top-2 right-2 text-gray-500" onClick={onClose}>
-          X
-        </button>
-        {children}
-      </div>
-    </div>
-  );
-};
 export function TouristProfileComponent() {
   const [tourist, setTourist] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,8 +59,6 @@ export function TouristProfileComponent() {
   const [newImage, setNewImage] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
-
-
   const getUserRole = () => Cookies.get("role") || "guest";
 
   useEffect(() => {
@@ -108,6 +70,8 @@ export function TouristProfileComponent() {
         const response = await axios.get(api, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        response.data.mobile = response.data.mobile.slice(1);
+        console.log("response.data", response.data);
         setTourist(response.data);
         setEditedTourist(response.data);
         setSelectedImage(response.data.profilePicture);
@@ -138,25 +102,22 @@ export function TouristProfileComponent() {
     if (tourist) {
       try {
         const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/tourist/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              base: "withEGP",
-              target: tourist.preferredCurrency,
-            }),
-          }
-        );
+        const response = await fetch(`http://localhost:4000/tourist/populate`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            base: "withEGP",
+            target: tourist.preferredCurrency,
+          }),
+        });
         const data = await response.json();
         if (response.ok) {
           setExchangeRate(data.conversion_rate);
         } else {
-          console.error('Error in fetching exchange rate:', data.message);
+          console.error("Error in fetching exchange rate:", data.message);
         }
       } catch (error) {
         console.error("Error fetching exchange rate:", error);
@@ -167,9 +128,12 @@ export function TouristProfileComponent() {
   const getCurrencySymbol = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(`http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setCurrencySymbol(response.data.symbol);
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
@@ -202,7 +166,6 @@ export function TouristProfileComponent() {
   const handleFirstSave = () => {
     setSelectedImage(newImage);
     setShowModal(false);
-
   };
 
   useEffect(() => {
@@ -263,13 +226,14 @@ export function TouristProfileComponent() {
     if (!validateFields()) return;
 
     try {
-      editedTourist.mobile = "+" + editedTourist.mobile;
+      const finalTourist = { ...editedTourist };
+      finalTourist.mobile = "+" + editedTourist.mobile;
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const api = `http://localhost:4000/${role}`;
-      editedTourist.profilePicture = selectedImage;
+      finalTourist.profilePicture = selectedImage;
 
-      const response = await axios.put(api, editedTourist, {
+      const response = await axios.put(api, finalTourist, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -327,26 +291,49 @@ export function TouristProfileComponent() {
   };
 
   return (
-    <div >
-
-
+    <div>
       <div className="p-8">
         <div className="flex items-center gap-4 mb-6 relative">
           <div className="flex-shrink-0 relative">
             <button
               className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white"
               onClick={toggleDropdown}
-              disabled={!isEditing}
+              disabled={!selectedImage && !isEditing}
             >
-              {selectedImage ? (selectedImage.public_id ? (<img src={selectedImage.url} alt="User" className="w-20 h-20 rounded-full" />) : (<img src={selectedImage} alt="User" className="w-20 h-20 rounded-full" />))
-                : (
-                  <User className="w-12 h-12 text-white" />
-                )}            </button>
+              {selectedImage ? (
+                selectedImage.public_id ? (
+                  <img
+                    src={selectedImage.url}
+                    alt="User"
+                    className="w-20 h-20 rounded-full"
+                  />
+                ) : (
+                  <img
+                    src={selectedImage}
+                    alt="User"
+                    className="w-20 h-20 rounded-full"
+                  />
+                )
+              ) : (
+                <User className="w-12 h-12 text-white" />
+              )}{" "}
+            </button>
 
             <div className="absolute top-full mt-2 left-0 bg-white  rounded-lg shadow-lg z-10 w-32">
               <Modal show={showModal} onClose={closeModal}>
-                <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
-                <ImageCropper onImageCropped={handleImageCropped} currentImage={selectedImage ? (selectedImage.public_id ? selectedImage.url : (selectedImage)) : null} />
+                <h2 className="text-lg font-bold mb-4">
+                  Update Profile Picture
+                </h2>
+                <ImageCropper
+                  onImageCropped={handleImageCropped}
+                  currentImage={
+                    selectedImage
+                      ? selectedImage.public_id
+                        ? selectedImage.url
+                        : selectedImage
+                      : null
+                  }
+                />
                 <div className="mt-4 flex justify-end">
                   <Button
                     onClick={handleFirstSave}
@@ -361,10 +348,19 @@ export function TouristProfileComponent() {
                   >
                     Close
                   </Button>
-
                 </div>
               </Modal>
             </div>
+
+            {isEditing && (
+              <div className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow-md">
+                <Camera className="w-5 h-5 text-gray-600" 
+                 style={{ cursor: "pointer" }}
+                 onClick={toggleDropdown}/>
+              </div>
+            )}
+          
+            
             {isDropdownOpen && (
               <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
                 <ul className="py-2">
@@ -381,20 +377,21 @@ export function TouristProfileComponent() {
                     </li>
                   )}
 
-                  <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={handleUpdateClick}
-                  >
-                    Update
-                  </li>
+                  {isEditing && (
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={handleUpdateClick}
+                    >
+                      Update
+                    </li>
+                  )}
 
-                  {selectedImage && (
+                  {isEditing && selectedImage && (
                     <li
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
                       onClick={() => {
                         setSelectedImage(null);
                         setDropdownOpen(false);
-
                       }}
                     >
                       Delete
@@ -484,10 +481,11 @@ export function TouristProfileComponent() {
                       name: "mobile",
                       required: true,
                       placeholder: tourist.mobile,
-                      className: `w-full p-2 ${validationMessages.mobile
-                        ? "border-red-500"
-                        : "border-gray-300"
-                        }`,
+                      className: `w-full p-2 ${
+                        validationMessages.mobile
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`,
                     }}
                     containerClass="w-full"
                     inputStyle={{ width: "60%", marginLeft: "45px" }}
@@ -546,7 +544,7 @@ export function TouristProfileComponent() {
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-gray-500" />
+              <BriefcaseBusiness className="w-4 h-4 text-gray-500" />
               {isEditing ? (
                 <Input
                   type="jobOrStudent"

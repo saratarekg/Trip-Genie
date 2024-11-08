@@ -35,6 +35,11 @@ const transportationSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
+    isStandAlone: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   { timestamps: true }
 );

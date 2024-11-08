@@ -114,8 +114,9 @@ export default function CreateHpForm() {
     const fetchCurrencies = async () => {
       try {
         const token = Cookies.get("jwt");
+        const role = Cookies.get("role") || "guest";
         const response = await axios.get(
-          `http://localhost:4000/tourism-governor/currencies`,
+          `http://localhost:4000/${role}/currencies`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -135,8 +136,10 @@ export default function CreateHpForm() {
   const fetchHistoricalTags = async () => {
     try {
       const token = Cookies.get("jwt");
+      const role = Cookies.get("role") || "guest";
+
       const response = await axios.get(
-        `http://localhost:4000/tourism-governor/historical-tag`,
+        `http://localhost:4000/${role}/historical-tag`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

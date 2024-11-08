@@ -25,7 +25,7 @@ import { NavbarComponent } from "./components/navbar.jsx";
 import { FooterComponent } from "./components/footer.jsx";
 import { AllHistoricalPlacesComponent } from "./pages/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
-//import { MyItinerariesComponent } from "./components/myItineraries.jsx";
+import { MyItinerariesComponent } from "./components/myItineraries.jsx";
 import { MyProducts } from "./components/myProducts.jsx";
 import HistoricalPlaceDetail from "./components/HistoricalPlaceDetail.jsx";
 import ViewComplaints from "./components/ViewComplaints.jsx";
@@ -38,6 +38,7 @@ import CreateHpPage from "./pages/CreateHpPage.jsx";
 import Checkout from "./pages/checkout.jsx";
 import CheckoutPage from "./pages/checkout2.jsx";
 import { AllActivitiesComponent } from "./pages/AllActivities.jsx";
+import { MyActivitiesComponent } from "./pages/myActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
 // import {Cart} from "./pages/AccountTourist.jsx";
@@ -66,6 +67,8 @@ import { DeleteAccount } from "@/components/DeleteAccPopout.jsx";
 import AdminGovernorPage from "./pages/AdminGovernorPage";
 import TagsPage from "./pages/TagsPage";
 import CategoriesPage from "./pages/CategoriesPage";
+import TransportationPage from "./pages/TransportationPage.jsx";
+import MyHistoricalPlacesComponent from "./pages/myHP.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -166,7 +169,9 @@ function AppContent() {
           <Route
             path="/account/*"
             element={
-              <ProtectedRoute allowedRoles={["tourist" , "advertiser" , "seller" , "tour-guide"]}>
+              <ProtectedRoute
+                allowedRoles={["tourist", "advertiser", "seller", "tour-guide"]}
+              >
                 <AccountTourist />
               </ProtectedRoute>
             }
@@ -211,7 +216,7 @@ function AppContent() {
             path="/historical-place/:id"
             element={
               <ProtectedRoute
-                allowedRoles={["tourism-governor", "guest", "tourist"]}
+                allowedRoles={["tourism-governor", "guest", "tourist","admin"]}
               >
                 <HistoricalPlaceDetail />
               </ProtectedRoute>
@@ -251,7 +256,7 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          {/* <Route
+           <Route
             path="/my-itineraries"
             element={
               <ProtectedRoute
@@ -261,7 +266,28 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
- */}
+           <Route
+            path="/my-activities"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser"]}
+              >
+                <MyActivitiesComponent />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/my-historical-places"
+            element={
+              <ProtectedRoute
+                allowedRoles={["tourism-governor"]}
+              >
+                <MyHistoricalPlacesComponent />
+              </ProtectedRoute>
+            }
+          />
+ 
+ 
 
           <Route
             path="/my-products"
@@ -276,7 +302,7 @@ function AppContent() {
             path="/all-historical-places"
             element={
               <ProtectedRoute
-                allowedRoles={["tourism-governor", "guest", "tourist"]}
+                allowedRoles={["tourism-governor", "guest", "tourist", "admin"]}
               >
                 <AllHistoricalPlacesComponent />
               </ProtectedRoute>
@@ -516,6 +542,15 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/transportation"
+            element={
+              <ProtectedRoute allowedRoles={["tourist", "advertiser"]}>
+                <TransportationPage />
               </ProtectedRoute>
             }
           />

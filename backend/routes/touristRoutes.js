@@ -174,6 +174,9 @@ router.post("/redeem-points", touristController.redeemPoints);
 router.get("/complaints", complaintsController.getTouristComplaints);
 router.delete("/delete-account", touristController.deleteAccount);
 
-router.post("/book-transportation", touristController.bookTransportation);
+router.post("/book-transportation", touristController.bookTransportation); 
+router.get("/transportations", transportationController.getAllTransportations);
+
+
 
 module.exports = router;

@@ -1,5 +1,5 @@
 teal navbar not taking up full page width
-create forms and edit forms still have a white background and the navbar is not visible before scrolling 
+create forms and edit forms still have a white background and the navbar is not visible before scrolling (Amy --DONE!!)
 same thing with profile pages
 whitespace in transportation options for tourists and advertisers
 

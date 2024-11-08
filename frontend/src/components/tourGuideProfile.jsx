@@ -36,7 +36,7 @@ import {
   Smile,
   Frown,
 } from "lucide-react";
-import { X } from "lucide-react"
+import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import PhoneInput from "react-phone-input-2";
@@ -60,14 +60,12 @@ import {
 import "react-phone-input-2/lib/style.css";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { ImageCropper } from "@/components/ImageCropper";
-// import { profile } from "console";
+import { Modal } from "@/components/Modal";
 
 const phoneValidator = (value) => {
   // Check if the input starts with a "+"
-  const phoneNumberStr = value.startsWith("+") ? value : "+" + value;
-  console.log(phoneNumberStr);
 
-  const phoneNumber = parsePhoneNumberFromString(phoneNumberStr);
+  const phoneNumber = parsePhoneNumberFromString("+" + value);
 
   if (!phoneNumber || !phoneNumber.isValid()) {
     return false;
@@ -81,51 +79,13 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
-            }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
+            star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
+          }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
       ))}
-    </div>
-  );
-};
-
-const Modal = ({ show, onClose, children, isImageViewer = false, imageUrl = "" }) => {
-  if (!show) return null;
-
-  if (isImageViewer) {
-    return (
-      <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-        <div className="absolute top-4 left-4 z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-            onClick={onClose}
-          >
-            <X className="h-6 w-6" />
-          </Button>
-        </div>
-        <div className="w-full h-full flex items-center justify-center">
-          <img
-            src={imageUrl}
-            alt="Full screen view"
-            className="max-w-[90vw] max-h-[90vh] object-contain"
-          />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-        <button className="absolute top-2 right-2 text-gray-500" onClick={onClose}>
-          X
-        </button>
-        {children}
-      </div>
     </div>
   );
 };
@@ -152,7 +112,6 @@ export function TourGuideProfileComponent() {
   const [newImage, setNewImage] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
-
 
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
   const [showFullComment, setShowFullComment] = useState(false);
@@ -199,6 +158,7 @@ export function TourGuideProfileComponent() {
             Authorization: `Bearer ${token}`,
           },
         });
+        response.data.mobile = response.data.mobile.slice(1); // Remove the "+" sign from the mobile number
         setTourGuide(response.data);
         setEditedTourGuide(response.data);
         setProfilePicture(response.data.profilePicture);
@@ -311,14 +271,13 @@ export function TourGuideProfileComponent() {
       } = editedTourGuide;
 
       // Modify the mobile field in the editedTourGuide object directly
-      editedTourGuide.mobile = mobile.startsWith("+") ? mobile : "+" + mobile;
 
       const formData = new FormData();
       formData.append("name", name);
       profilePicture && formData.append("profilePicture", profilePicture);
       formData.append("username", username);
       formData.append("email", email);
-      formData.append("mobile", mobile);
+      formData.append("mobile", "+" + mobile);
       formData.append("yearsOfExperience", yearsOfExperience);
       formData.append("nationality", nationality._id);
       formData.append("previousWorks", JSON.stringify(previousWorks));
@@ -406,8 +365,6 @@ export function TourGuideProfileComponent() {
     );
   }
 
-
-
   const openModal = () => {
     setModalOpen(true);
     setDropdownOpen(false); // Close the dropdown when opening the modal
@@ -429,7 +386,6 @@ export function TourGuideProfileComponent() {
   const handleFirstSave = () => {
     setProfilePicture(newImage);
     setShowModal(false);
-
   };
 
   const toggleDropdown = () => {
@@ -439,8 +395,7 @@ export function TourGuideProfileComponent() {
     <div>
       {" "}
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className="w-full max-w-6xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Changed max-w-3xl to max-w-4xl */}
@@ -451,18 +406,42 @@ export function TourGuideProfileComponent() {
               <button
                 className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white"
                 onClick={toggleDropdown}
-                disabled={!isEditing}
+                disabled={!profilePicture && !isEditing}
               >
-                {profilePicture ? (profilePicture.public_id ? (<img src={profilePicture.url} alt="User" className="w-20 h-20 rounded-full" />) : (<img src={profilePicture} alt="User" className="w-20 h-20 rounded-full" />))
-                  : (
-                    <User className="w-12 h-12 text-white" />
-                  )}
+                {profilePicture ? (
+                  profilePicture.public_id ? (
+                    <img
+                      src={profilePicture.url}
+                      alt="User"
+                      className="w-20 h-20 rounded-full"
+                    />
+                  ) : (
+                    <img
+                      src={profilePicture}
+                      alt="User"
+                      className="w-20 h-20 rounded-full"
+                    />
+                  )
+                ) : (
+                  <User className="w-12 h-12 text-white" />
+                )}
               </button>
 
               <div className="absolute top-full mt-2 left-0 bg-white  rounded-lg shadow-lg z-10 w-32">
                 <Modal show={showModal} onClose={closeModal}>
-                  <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
-                  <ImageCropper onImageCropped={handleImageCropped} currentImage={profilePicture ? (profilePicture.public_id ? profilePicture.url : (profilePicture)) : null} />
+                  <h2 className="text-lg font-bold mb-4">
+                    Update Profile Picture
+                  </h2>
+                  <ImageCropper
+                    onImageCropped={handleImageCropped}
+                    currentImage={
+                      profilePicture
+                        ? profilePicture.public_id
+                          ? profilePicture.url
+                          : profilePicture
+                        : null
+                    }
+                  />
                   <div className="mt-4 flex justify-end">
                     <Button
                       onClick={handleFirstSave}
@@ -477,7 +456,6 @@ export function TourGuideProfileComponent() {
                     >
                       Close
                     </Button>
-
                   </div>
                 </Modal>
               </div>
@@ -486,33 +464,31 @@ export function TourGuideProfileComponent() {
                   <ul className="py-2">
                     {profilePicture && (
                       <li
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        setIsImageViewerOpen(true);
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => {
+                          setIsImageViewerOpen(true);
 
-                        setDropdownOpen(false);
-                      }}
-                    >
-                      View
-                    </li>
+                          setDropdownOpen(false);
+                        }}
+                      >
+                        View
+                      </li>
                     )}
 
-                    <div>
+                    {isEditing && (
                       <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                         onClick={handleUpdateClick}
-                        
                       >
                         Update
                       </li>
-                    </div>
-                    {profilePicture && (
-
+                    )}
+                    {isEditing && profilePicture && (
                       <li
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                        
                         onClick={() => {
-                       setProfilePicture(null)                        }}
+                          setProfilePicture(null);
+                        }}
                       >
                         Delete
                       </li>
@@ -529,8 +505,9 @@ export function TourGuideProfileComponent() {
                     name="name"
                     value={editedTourGuide.name}
                     onChange={handleInputChange}
-                    className={`text-3xl font-bold mb-1 border rounded px-2 py-1 ${validationMessages.name ? "border-red-500" : ""
-                      }`}
+                    className={`text-3xl font-bold mb-1 border rounded px-2 py-1 ${
+                      validationMessages.name ? "border-red-500" : ""
+                    }`}
                     placeholder="Full Name"
                   />
                   {validationMessages.name && (
@@ -611,10 +588,11 @@ export function TourGuideProfileComponent() {
                         name: "mobile",
                         required: true,
                         placeholder: tourGuide.mobile,
-                        className: `w-full p-2 ${validationMessages.mobile
-                          ? "border-red-500"
-                          : "border-gray-300"
-                          }`,
+                        className: `w-full p-2 ${
+                          validationMessages.mobile
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`,
                       }}
                       containerClass="w-full"
                       inputStyle={{ width: "60%", marginLeft: "45px" }}
@@ -642,7 +620,9 @@ export function TourGuideProfileComponent() {
                     value={editedTourGuide.yearsOfExperience}
                     onChange={handleInputChange}
                     className={
-                      validationMessages.yearsOfExperience ? "border-red-500" : ""
+                      validationMessages.yearsOfExperience
+                        ? "border-red-500"
+                        : ""
                     }
                     placeholder="Years of Experience"
                   />
@@ -700,10 +680,11 @@ export function TourGuideProfileComponent() {
             {/* Account Status Section */}
             <div>
               <span
-                className={`px-2 py-1 rounded-full text-xs font-semibold ${tourGuide.isAccepted
-                  ? "bg-green-100 text-green-800 text-lg"
-                  : "bg-yellow-100 text-yellow-800"
-                  }`}
+                className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                  tourGuide.isAccepted
+                    ? "bg-green-100 text-green-800 text-lg"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
               >
                 <CheckCircle className="inline w-4 h-4 mr-1" />
                 {tourGuide.isAccepted ? "Account Accepted" : "Account Pending"}
@@ -745,7 +726,11 @@ export function TourGuideProfileComponent() {
                 </div>
               ))}
             {isEditing && (
-              <Button onClick={handleAddWork} variant="outline" className="mt-2">
+              <Button
+                onClick={handleAddWork}
+                variant="outline"
+                className="mt-2"
+              >
                 <Plus className="w-4 h-4 mr-2" /> Add Work Experience
               </Button>
             )}
@@ -825,7 +810,10 @@ export function TourGuideProfileComponent() {
                           </div>
                           {/* Star Rating below username and date */}
                           <div className="mt-2">
-                            <StarRating rating={comment.rating} readOnly={true} />
+                            <StarRating
+                              rating={comment.rating}
+                              readOnly={true}
+                            />
                           </div>
                         </CardHeader>
 
@@ -854,7 +842,9 @@ export function TourGuideProfileComponent() {
                 <Button
                   onClick={handleNextComment}
                   variant="ghost"
-                  disabled={currentCommentIndex >= tourGuide.comments.length - 3}
+                  disabled={
+                    currentCommentIndex >= tourGuide.comments.length - 3
+                  }
                 >
                   <ChevronRight />
                 </Button>
@@ -879,7 +869,8 @@ export function TourGuideProfileComponent() {
                       readOnly={true}
                     />
                     <p className="text-sm text-gray-500 mt-1">
-                      {showFullComment && formatCommentDate(showFullComment.date)}
+                      {showFullComment &&
+                        formatCommentDate(showFullComment.date)}
                     </p>
                   </div>
                   <div>
@@ -897,7 +888,8 @@ export function TourGuideProfileComponent() {
                       Disliked:
                     </h4>
                     <p>
-                      {showFullComment?.content?.disliked || "Nothing mentioned"}
+                      {showFullComment?.content?.disliked ||
+                        "Nothing mentioned"}
                     </p>
                   </div>
                 </div>

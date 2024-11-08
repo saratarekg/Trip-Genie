@@ -12,11 +12,15 @@ const historicalTagController = require("../controllers/historicalTagController"
 const complaintsController = require("../controllers/complaintsController.js");
 const itineraryController = require("../controllers/itineraryController.js");
 const currencyController = require("../controllers/currencyController");
+const historicalPlacesController = require("../controllers/historicalPlacesController");
 const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const router = express.Router();
+
+router.get("/historical-places",historicalPlacesController.getAllHistoricalPlaces);
+router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);
 
 router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);

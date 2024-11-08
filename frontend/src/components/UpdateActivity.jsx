@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, Check, X } from "lucide-react";
+import { ChevronLeft, Check, X, Trash2,Edit, CheckCircleIcon } from "lucide-react";
+import { FaMapMarkerAlt, FaDollarSign, FaClock, FaHourglassHalf, FaChair } from 'react-icons/fa';
 import * as z from "zod";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -754,17 +755,17 @@ export default function UpdateActivity() {
                       <Button
                         type="button"
                         onClick={() => handleEditTransportation(index)}
-                        className="bg-[#5D9297] hover:bg-[#1A3B47] text-white"
-                      >
-                        Edit
+                        className="p-2 rounded-full  w-10 h-10 bg-blue-100 hover:bg-blue-200 transition duration-300 ease-in-out mr-2"
+                        >
+                                                  <Edit className="h-4 w-4 text-blue-500" />
                       </Button>
                       <Button
                         type="button"
                         onClick={() => handleDeleteTransportation(index)}
-                        className="bg-red-500 hover:bg-red-600 text-white"
-                      >
-                        Delete
-                      </Button>
+                        className="p-2 w-10 h-10 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
                     </div>
                   </div>
                 ))}
@@ -790,23 +791,27 @@ export default function UpdateActivity() {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Activity Updated</DialogTitle>
-            <DialogDescription>
-              The activity has been successfully updated.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              onClick={handleGoBack}
-              className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
-            >
-              Back to Activities
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+  <DialogContent className="text-left"> {/* Ensures all text inside DialogContent is left-aligned */}
+    <DialogHeader>
+      <DialogTitle className="flex items-center space-x-2">
+        <CheckCircleIcon className="text-green-500" />
+        <span>Activity Updated</span>
+      </DialogTitle>
+      <DialogDescription className="text-left">
+        The activity has been successfully updated.
+      </DialogDescription>
+    </DialogHeader>
+    <DialogFooter className="flex justify-center"> {/* Centers the button */}
+      <Button
+        onClick={handleGoBack}
+        className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+      >
+        Back to Activities
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
       {selectedImage && (
         <Dialog
           open={!!selectedImage}
