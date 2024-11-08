@@ -149,11 +149,11 @@ const WishlistPage = () => {
       });
 
       setWishlistItems(formattedData.filter(Boolean));
-      setTimeout(() => setLoading(false), 500)
+      setTimeout(() => setLoading(false), 500);
     } catch (err) {
       setError("Error fetching wishlist items. Please try again later.");
       console.error("Error fetching wishlist items:", err);
-      setLoading(false)
+      setLoading(false);
     }
   }, [userRole, formatPrice]);
 
@@ -266,7 +266,7 @@ const WishlistPage = () => {
               <CardContent>
                 <img
                   src={
-                    item.product.pictures[0] ||
+                    item.product.pictures[0]?.url ||
                     "/placeholder.svg?height=192&width=256"
                   }
                   alt={item.product.name}
