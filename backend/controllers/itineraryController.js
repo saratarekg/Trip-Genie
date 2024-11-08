@@ -357,14 +357,6 @@ const createItinerary = async (req, res) => {
         });
       }
     });
-  } else {
-    //All activities must be on the same day
-    const activityDates = activities.map((activity) => activity.timing);
-    if (activityDates.some((date) => date !== activityDates[0])) {
-      return res.status(400).json({
-        message: "All activities must be on the same day",
-      });
-    }
   }
 
   await (async () => {
