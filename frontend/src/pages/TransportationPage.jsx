@@ -45,6 +45,7 @@ import {
   FormLabel,
   FormControl,
 } from "@/components/ui/form";
+import TransportationCard from "@/components/transportationCard";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -102,6 +103,19 @@ export default function TransportationPage() {
   const [bookingError, setBookingError] = useState("");
   const transportationsPerPage = 6;
 
+  const getMaxSeats = (vehicleType) => {
+    switch (vehicleType) {
+      case "Bus":
+        return 50;
+      case "Car":
+        return 5;
+      case "Microbus":
+        return 15;
+      default:
+        return 0;
+    }
+  };
+
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
@@ -149,6 +163,8 @@ export default function TransportationPage() {
       remainingSeats: 0,
     },
   });
+
+  
 
   useEffect(() => {
     const role = Cookies.get("role");
@@ -261,7 +277,18 @@ export default function TransportationPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchTransportations();
+      form.reset({
+        from: "",
+        to: "",
+        vehicleType: "Bus",  // or other default values
+        ticketCost: 0,
+        timeDeparture: new Date(),
+        estimatedDuration: 0,
+        remainingSeats: 0,
+      });
+      
       setIsAddDialogOpen(false);
+      
     } catch (error) {
       console.error("Error adding transportation:", error);
     }
@@ -397,14 +424,13 @@ export default function TransportationPage() {
 
   return (
     <div>
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      </div>
     </div>
-  </div>
 
-  <div className="container mx-auto p-4 ">
-
-      <h1 className="text-3xl font-bold mb-6">Transportation Management</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-6 text-[#1A3B47]">Transportation Management</h1>
 
       <div className="mb-6 flex flex-wrap gap-4">
         <Input
@@ -465,11 +491,11 @@ export default function TransportationPage() {
             />
           </PopoverContent>
         </Popover>
-        <Button onClick={handleSearch}>Search</Button>
+        <Button onClick={handleSearch} className="bg-[#5D9297]">Search</Button>
         {userRole === "advertiser" && (
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="bg-[#1A3B47]">
                 <Plus className="mr-2 h-4 w-4" /> Add Transportation
               </Button>
             </DialogTrigger>
@@ -506,30 +532,33 @@ export default function TransportationPage() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="vehicleType"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Vehicle Type</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select vehicle type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Bus">Bus</SelectItem>
-                            <SelectItem value="Car">Car</SelectItem>
-                            <SelectItem value="Microbus">Microbus</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
+                   <FormField
+                control={form.control}
+                name="vehicleType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Vehicle Type</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        form.setValue("remainingSeats", getMaxSeats(value));
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select vehicle type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Bus">Bus</SelectItem>
+                        <SelectItem value="Car">Car</SelectItem>
+                        <SelectItem value="Microbus">Microbus</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
                   <FormField
                     control={form.control}
                     name="ticketCost"
@@ -577,23 +606,28 @@ export default function TransportationPage() {
                     )}
                   />
                   <FormField
-                    control={form.control}
-                    name="remainingSeats"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Remaining Seats</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Remaining seats"
-                            {...field}
-                            onChange={(e) => field.onChange(+e.target.value)}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
+                control={form.control}
+                name="remainingSeats"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Remaining Seats</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Remaining seats"
+                        {...field}
+                        onChange={(e) => {
+                          const value = +e.target.value;
+                          const maxSeats = getMaxSeats(form.getValues("vehicleType"));
+                          field.onChange(Math.min(value, maxSeats));
+                        }}
+                        max={getMaxSeats(form.getValues("vehicleType"))}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
                   />
-                  <Button type="submit">Add Transportation</Button>
+                  <Button type="submit" className="bg-[#1A3B47]">Add Transportation</Button>
                 </form>
               </Form>
             </DialogContent>
@@ -601,7 +635,7 @@ export default function TransportationPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentTransportations.map((transportation) => (
           <Card key={transportation._id}>
             <CardHeader>
@@ -632,164 +666,8 @@ export default function TransportationPage() {
             </CardContent>
             <CardFooter className="flex justify-between">
               {userRole === "advertiser" && (
-                <>
-                  <Dialog
-                    open={editingTransportation === transportation}
-                    onOpenChange={(open) => {
-                      if (!open) handleEditClose();
-                    }}
-                  >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleEditClick(transportation)}
-                      >
-                        <Edit className="mr-2 h-4 w-4" /> Edit
-                      </Button>
-                    </DialogTrigger>
-                    {editingTransportation === transportation && (
-                      <DialogContent className="max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Edit Transportation</DialogTitle>
-                        </DialogHeader>
-                        <Form {...form}>
-                          <form
-                            onSubmit={form.handleSubmit(handleEdit)}
-                            className="space-y-8"
-                          >
-                            <FormField
-                              control={form.control}
-                              name="from"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>From</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="From location"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="to"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>To</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      placeholder="To location"
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="vehicleType"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Vehicle Type</FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select vehicle type" />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                      <SelectItem value="Bus">Bus</SelectItem>
-                                      <SelectItem value="Car">Car</SelectItem>
-                                      <SelectItem value="Microbus">
-                                        Microbus
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="ticketCost"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Ticket Cost</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="Ticket cost"
-                                      {...field}
-                                      onChange={(e) =>
-                                        field.onChange(+e.target.value)
-                                      }
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="timeDeparture"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Departure Time</FormLabel>
-                                  <FormControl>
-                                    <DateTimePicker field={field} />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="estimatedDuration"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>
-                                    Estimated Duration (hours)
-                                  </FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="Estimated duration"
-                                      {...field}
-                                      onChange={(e) =>
-                                        field.onChange(+e.target.value)
-                                      }
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="remainingSeats"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Remaining Seats</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      placeholder="Remaining seats"
-                                      {...field}
-                                      onChange={(e) =>
-                                        field.onChange(+e.target.value)
-                                      }
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <Button type="submit">Update Transportation</Button>
-                          </form>
-                        </Form>
-                      </DialogContent>
-                    )}
-                  </Dialog>
+                <>*/}
+                  {/*
                   <Button
                     variant="destructive"
                     onClick={() => handleDelete(transportation._id)}
@@ -812,31 +690,182 @@ export default function TransportationPage() {
             </CardFooter>
           </Card>
         ))}
-      </div>
+      </div> */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {currentTransportations.map((transportation) => (
+    <div key={transportation._id}>
+      <TransportationCard
+        transportation={transportation}
+        userRole={userRole}
+        onEdit={handleEditClick}
+        onDelete={handleDelete}
+        onBook={() => {
+          setSelectedTransportation(transportation);
+          setShowTransportationBookingDialog(true);
+        }}
+        displayPrice={displayPrice}
+      />
 
-      <div className="mt-6 flex justify-center items-center space-x-4">
-        <Button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          variant="outline"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <span>
-          Page {currentPage} of{" "}
-          {Math.ceil(sortedTransportations.length / transportationsPerPage)}
-        </span>
-        <Button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={
-            currentPage ===
-            Math.ceil(sortedTransportations.length / transportationsPerPage)
-          }
-          variant="outline"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
+      {/* Dialog for editing transportation */}
+      <Dialog
+        open={editingTransportation === transportation}
+        onOpenChange={(open) => {
+          if (!open) handleEditClose();
+        }}
+      >
+       
+        {editingTransportation === transportation && (
+          <DialogContent className="max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Transportation</DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleEdit)} className="space-y-8">
+                <FormField control={form.control} name="from" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>From</FormLabel>
+                    <FormControl>
+                      <Input placeholder="From location" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="to" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>To</FormLabel>
+                    <FormControl>
+                      <Input placeholder="To location" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField
+                        control={form.control}
+                        name="vehicleType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Vehicle Type</FormLabel>
+                            <Select
+                              onValueChange={(value) => {
+                                field.onChange(value);
+                                form.setValue("remainingSeats", getMaxSeats(value));
+                              }}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select vehicle type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="Bus">Bus</SelectItem>
+                                <SelectItem value="Car">Car</SelectItem>
+                                <SelectItem value="Microbus">Microbus</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormItem>
+                        )}
+                      />
+                <FormField control={form.control} name="ticketCost" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ticket Cost</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Ticket cost" {...field} onChange={(e) => field.onChange(+e.target.value)} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="timeDeparture" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Departure Time</FormLabel>
+                    <FormControl>
+                      <DateTimePicker field={field} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="estimatedDuration" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estimated Duration (hours)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="Estimated duration" {...field} onChange={(e) => field.onChange(+e.target.value)} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField
+                  control={form.control}
+                  name="remainingSeats"
+                  render={({ field }) => {
+                    const maxSeats = getMaxSeats(form.getValues("vehicleType"));
+                    const value = +field.value;
+
+                    // Check if the value exceeds maxSeats
+                    const isExceedingMax = value > maxSeats;
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Remaining Seats</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Remaining seats"
+                            {...field}
+                            onChange={(e) => {
+                              const inputValue = +e.target.value;
+                              // Update the value only if it's less than or equal to maxSeats
+                              if (inputValue <= maxSeats) {
+                                field.onChange(inputValue);
+                              } else {
+                                // Update to maxSeats value if the user tries to exceed it
+                                field.onChange(maxSeats);
+                              }
+                            }}
+                            max={maxSeats}
+                          />
+                        </FormControl>
+                        {isExceedingMax && (
+                          <p className="text-red-500 text-sm mt-1">
+                            Max {maxSeats} seats allowed.
+                          </p>
+                        )}
+                      </FormItem>
+                    );
+                  }}
+                />
+
+
+                <Button type="submit" className="bg-[#1A3B47]">Update Transportation</Button>
+              </form>
+            </Form>
+          </DialogContent>
+        )}
+      </Dialog>
+    </div>
+  ))}
+</div>
+
+
+        <div className="mt-6 flex justify-center items-center space-x-4">
+          <Button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            variant="outline"
+            className="border-[#388A94] text-[#388A94] hover:bg-[#388A94] hover:text-white"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-[#1A3B47]">
+            Page {currentPage} of{" "}
+            {Math.ceil(sortedTransportations.length / transportationsPerPage)}
+          </span>
+          <Button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={
+              currentPage ===
+              Math.ceil(sortedTransportations.length / transportationsPerPage)
+            }
+            variant="outline"
+            className="border-[#388A94] text-[#388A94] hover:bg-[#388A94] hover:text-white"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
 
       <Dialog
         open={showTransportationBookingDialog}

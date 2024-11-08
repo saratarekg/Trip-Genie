@@ -7,3 +7,10 @@ extra almost done wana ba sign up zay ma hazem 2al
 search hotels/flights when i pass the parameters from home page to automatically search
 search flights w hotels el buttons helwa keda wala lazem hover? fel home page
 transition hotel and flights in home page
+
+Orange: #F88C33
+Beige/Tan: #E6DCCF
+Light Aqua/Seafoam Green: #B5D3D1
+Teal: #5D9297
+Turquoise: #388A94
+Dark Teal/Blue: #1A3B47
