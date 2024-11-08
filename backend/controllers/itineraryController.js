@@ -329,36 +329,58 @@ const getItineraryById = async (req, res) => {
 const createItinerary = async (req, res) => {
   const {
     title,
-    timeline,
-    activities,
     language,
     price,
-    availableDates,
+    isRepeated,
     accessibility,
     pickUpLocation,
     dropOffLocation,
-    rating,
   } = req.body;
-  let imagesBuffer = [];
-  const pictures = req.files.map(
-    (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
-  );
-  //upload multiple images using cloudinary
-  for (let i = 0; i < pictures.length; i++) {
-    const result = await cloudinary.uploader.upload(pictures[i], {
-      folder: "Itineraries",
-    });
+  const activities = JSON.parse(req.body.activities);
+  const availableDates = JSON.parse(req.body.availableDates);
 
-    imagesBuffer.push({
-      public_id: result.public_id,
-      url: result.secure_url,
+  if (availableDates.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Itinerary must have at least one date" });
+  }
+  if (!isRepeated) {
+    if (availableDates.length > 1) {
+      return res.status(400).json({
+        message: "Itinerary must have only one date if it is not repeated",
+      });
+    }
+    activities.forEach((activity) => {
+      if (activity.timing < availableDates[0].date) {
+        return res.status(400).json({
+          message: "Activities date must be after the itinerary date",
+        });
+      }
     });
   }
 
-  console.log(activities);
+  await (async () => {
+    for (const file of req.files) {
+      const [activityIndex, imageIndex] = file.fieldname
+        .match(/\d+/g)
+        .map(Number);
+
+      //convert the file to base64
+      const base64 = `data:image/jpeg;base64,${file.buffer.toString("base64")}`;
+      const result = await cloudinary.uploader.upload(base64, {
+        folder: "Itineraries",
+      });
+      console.log(activities[activityIndex].pictures);
+
+      activities[activityIndex].pictures[imageIndex] = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
+    }
+  })();
+
   const itinerary = new Itinerary({
     title,
-    timeline,
     activities,
     language,
     price,
@@ -368,7 +390,7 @@ const createItinerary = async (req, res) => {
     pickUpLocation,
     dropOffLocation,
     tourGuide: res.locals.user_id,
-    rating,
+    isRepeated,
   });
 
   try {
