@@ -180,7 +180,7 @@ export function SellerProfileComponent() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="w-full max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="p-8">
         <div className="flex items-center gap-4 mb-6 relative">
           <div className="flex-shrink-0 relative">
