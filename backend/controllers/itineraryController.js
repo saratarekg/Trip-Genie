@@ -1,6 +1,7 @@
 const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
 const ItineraryBooking = require("../models/itineraryBooking");
+const cloudinary = require("../utils/cloudinary");
 
 // import { ItineraryBooking } from './models/itineraryBooking';
 
@@ -338,6 +339,22 @@ const createItinerary = async (req, res) => {
     dropOffLocation,
     rating,
   } = req.body;
+  let imagesBuffer = [];
+  const pictures = req.files.map(
+    (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
+  );
+  //upload multiple images using cloudinary
+  for (let i = 0; i < pictures.length; i++) {
+    const result = await cloudinary.uploader.upload(pictures[i], {
+      folder: "Itineraries",
+    });
+
+    imagesBuffer.push({
+      public_id: result.public_id,
+      url: result.secure_url,
+    });
+  }
+
   console.log(activities);
   const itinerary = new Itinerary({
     title,
@@ -345,7 +362,7 @@ const createItinerary = async (req, res) => {
     activities,
     language,
     price,
-    currency:"67140446ee157ee4f239d523",
+    currency: "67140446ee157ee4f239d523",
     availableDates,
     accessibility,
     pickUpLocation,
@@ -415,7 +432,7 @@ const updateItinerary = async (req, res) => {
       dropOffLocation,
       appropriate,
     } = req.body;
-console.log(activities);
+    console.log(activities);
     await Itinerary.findByIdAndUpdate(req.params.id, {
       title,
       availableDates,
@@ -593,7 +610,9 @@ const updateCommentOnItinerary = async (req, res) => {
   try {
     const { rating, content, username } = req.body;
     const touristId = res.locals.user_id; // Get the authenticated user's ID
-    console.log("11111111111111111111111111111111111111111111111111111111111111111");
+    console.log(
+      "11111111111111111111111111111111111111111111111111111111111111111"
+    );
     console.log(username);
     // Validate the rating if it's provided
     if (rating !== undefined && (rating < 0 || rating > 5)) {
@@ -621,7 +640,9 @@ const updateCommentOnItinerary = async (req, res) => {
       (comment) => comment.tourist.toString() === touristId
     );
     if (!comment) {
-      return res.status(400).json({ message: "Comment not found for this user" });
+      return res
+        .status(400)
+        .json({ message: "Comment not found for this user" });
     }
 
     // Update fields if provided
@@ -629,7 +650,7 @@ const updateCommentOnItinerary = async (req, res) => {
 
     if (username && username === "Anonymous") {
       finalUsername = "Anonymous"; // Use 'anonymous' as the username
-    } else  {
+    } else {
       finalUsername = tourist.username;
     }
     comment.username = finalUsername;
@@ -640,7 +661,10 @@ const updateCommentOnItinerary = async (req, res) => {
     let newAverageRating;
     if (rating !== undefined) {
       const totalRatings = itinerary.comments.length;
-      const sumOfRatings = itinerary.comments.reduce((sum, comment) => sum + comment.rating, 0);
+      const sumOfRatings = itinerary.comments.reduce(
+        (sum, comment) => sum + comment.rating,
+        0
+      );
       newAverageRating = sumOfRatings / totalRatings;
       itinerary.rating = newAverageRating; // Update the itinerary's average rating
     }
@@ -733,7 +757,8 @@ const addActivityToItinerary = async (req, res) => {
     const activityData = req.body; // Activity data sent in the request body
 
     const itinerary = await Itinerary.findById(itineraryId);
-    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+    if (!itinerary)
+      return res.status(404).json({ error: "Itinerary not found" });
 
     itinerary.activities.push(activityData); // Add new activity
     await itinerary.save();
@@ -751,7 +776,8 @@ const editActivityInItinerary = async (req, res) => {
     const updatedData = req.body; // Updated data for the activity
 
     const itinerary = await Itinerary.findById(itineraryId);
-    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+    if (!itinerary)
+      return res.status(404).json({ error: "Itinerary not found" });
 
     const activity = itinerary.activities.id(activityId);
     if (!activity) return res.status(404).json({ error: "Activity not found" });
@@ -770,7 +796,8 @@ const removeActivityFromItinerary = async (req, res) => {
     const { itineraryId, activityId } = req.params;
 
     const itinerary = await Itinerary.findById(itineraryId);
-    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+    if (!itinerary)
+      return res.status(404).json({ error: "Itinerary not found" });
 
     const activity = itinerary.activities.id(activityId);
     if (!activity) return res.status(404).json({ error: "Activity not found" });
@@ -783,7 +810,6 @@ const removeActivityFromItinerary = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 module.exports = {
   getAllItineraries,
@@ -802,5 +828,5 @@ module.exports = {
   updateCommentOnItinerary,
   removeActivityFromItinerary,
   editActivityInItinerary,
-  addActivityToItinerary
+  addActivityToItinerary,
 };

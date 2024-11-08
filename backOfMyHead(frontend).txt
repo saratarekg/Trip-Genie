@@ -7,3 +7,5 @@ extra almost done wana ba sign up zay ma hazem 2al
 search hotels/flights when i pass the parameters from home page to automatically search
 search flights w hotels el buttons helwa keda wala lazem hover? fel home page
 transition hotel and flights in home page
+
+ActivitySlider component : In the homepage some activity cards are bigger than others + arrows are different color. 
