@@ -109,7 +109,7 @@ export default function TransportationCard({
 
 {/* Price with VAT displayed directly below the main price */}
 <div className="text-xs text-[#F88C33] mt-2 flex items-center">
-  <span>Price with VAT: {displayPrice(priceWithVAT)}</span>
+  <span>Price with VAT: {displayPrice(priceWithVAT.toFixed(2))}</span>
   <div className="ml-1 cursor-pointer text-[#5D9297]">
     <Info className="h-4 w-4" />
   </div>
