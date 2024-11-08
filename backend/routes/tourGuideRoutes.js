@@ -29,11 +29,7 @@ router.put("/", upload.single("profilePicture"), updateTourGuideProfile);
 router.get("/tour-guide/:id", getTourGuideByID);
 router.delete("/delete-account", deleteTourGuideAccount);
 router.get("/itineraries", itineraryController.getAllItineraries);
-router.post(
-  "/itineraries",
-  upload.array("pictures", 10),
-  itineraryController.createItinerary
-);
+router.post("/itineraries", upload.any(), itineraryController.createItinerary);
 router.put(
   "/itineraries/:id",
   upload.array("newPictures", 10),

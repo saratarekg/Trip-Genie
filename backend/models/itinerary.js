@@ -60,18 +60,8 @@ const itinerarySchema = new Schema(
             url: { type: String, required: true },
           },
         ],
-        transportations: [
-          {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Transportation",
-          },
-        ],
       },
     ],
-    timeline: {
-      type: String,
-      required: true,
-    },
     language: {
       type: String,
       required: true,
@@ -85,24 +75,16 @@ const itinerarySchema = new Schema(
       ref: "Currency",
       required: true,
     },
+    isRepeated: {
+      type: Boolean,
+      required: true,
+    },
     availableDates: [
       {
         date: {
           type: Date,
           required: true,
         },
-        times: [
-          {
-            startTime: {
-              type: String,
-              required: true,
-            },
-            endTime: {
-              type: String,
-              required: true,
-            },
-          },
-        ],
       },
     ],
     accessibility: {
@@ -132,7 +114,6 @@ const itinerarySchema = new Schema(
       required: true,
       default: true,
     },
-
     tourGuide: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "TourGuide",
@@ -321,7 +302,10 @@ itinerarySchema.statics.filter = async function (
 itinerarySchema.methods.addRating = async function (newRating) {
   // Calculate the new average rating by iterating over all comments
   const totalRatings = this.comments.length;
-  const sumOfRatings = this.comments.reduce((sum, comment) => sum + comment.rating, 0);
+  const sumOfRatings = this.comments.reduce(
+    (sum, comment) => sum + comment.rating,
+    0
+  );
   const averageRating = sumOfRatings / totalRatings;
 
   // Update the activity's rating with the new average

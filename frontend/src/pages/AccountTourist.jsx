@@ -686,10 +686,10 @@ export default function AccountManagement() {
       { name: "My Complaints", icon: FileText, tab: "my-complaints", roles: ["tourist"] },
       { name: "FAQs", icon: HelpCircle, tab: "faqs", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     ],
-    "Display and Accessibility": [
-      { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
-      { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
-    ],
+    // "Display and Accessibility": [
+    //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
+    //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
+    // ],
     "Give Feedback": [
       { name: "History", icon: HistoryIcon, tab: "history", roles: ["tourist"] },
       { name: "Feedback", icon: MessageSquare, tab: "feedback", roles: ["tourist"] },
