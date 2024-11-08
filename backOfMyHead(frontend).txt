@@ -10,6 +10,8 @@ transition hotel and flights in home page
 
 ActivitySlider component : In the homepage some activity cards are bigger than others + arrows are different color. 
 
+are you sure you want to logout popup able el logout!!
+
 
 my itineraries fe tour guide el navbar mesh lel a5r
 
