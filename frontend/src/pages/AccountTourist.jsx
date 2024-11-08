@@ -168,10 +168,20 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
 
   const convertCurrency = (amount, fromCurrency, toCurrency) => {
     // if type of from currency is string and to currency is string  return (amount / rates[fromCurrency]) * rates[toCurrency]
-
     if (typeof fromCurrency === 'string' && typeof toCurrency === 'string') {
       return (amount / rates[fromCurrency]) * rates[toCurrency]
     }
+    if (typeof fromCurrency !== 'string' && typeof toCurrency === 'string') {
+      return (amount / rates[fromCurrency.code]) * rates[toCurrency]
+    }
+    if (typeof fromCurrency !== 'string' && typeof toCurrency !== 'string') {
+      return (amount / rates[fromCurrency.code]) * rates[toCurrency.code]
+    }
+
+    if (typeof fromCurrency === 'string' && typeof toCurrency !== 'string') {
+      return (amount / rates[fromCurrency]) * rates[toCurrency.code]
+    }
+
     if (!rates[fromCurrency] || !rates[toCurrency.code]) return amount
     return (amount / rates[fromCurrency]) * rates[toCurrency.code]
   }
