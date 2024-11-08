@@ -269,9 +269,6 @@ const formSchema = z.object({
   price: z.number().min(1, "Price is required"),
   pickUpLocation: z.string().min(1, "Pick-up location is required"),
   dropOffLocation: z.string().min(1, "Drop-off location is required"),
-  activities: z
-    .array(activitySchema)
-    .min(1, "At least one activity is required"),
   availableDates: z
     .array(
       z.object({
@@ -587,7 +584,6 @@ const ItineraryForm = () => {
       dropOffLocation: "",
       availableDates: [{ date: "", times: [{ startTime: "", endTime: "" }] }],
       accessibility: false,
-      activities: [],
     },
   });
 

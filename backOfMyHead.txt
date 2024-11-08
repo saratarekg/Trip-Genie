@@ -14,7 +14,7 @@
 - pagination not working in activities
 - max price in price sliders (in activity, itineraries, preferences, products) by fetching the max price from the backend
 - sort by preferences is activated on its own after being toggled off
-- photos don't appear in wishlist 
+- photos don't appear in wishlist  (DONE -HAZEM)
 
 Hadwa's requests:
 - Add global search bar 
