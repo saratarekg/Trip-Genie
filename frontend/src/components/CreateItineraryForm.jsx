@@ -559,6 +559,8 @@ const ItineraryForm = () => {
 
   const availableDates = watch("availableDates");
   const isRepeated = watch("isRepeated") // Watch the isRepeated field
+  const today = new Date().toISOString().split('T')[0]
+
 
   const handleCreateItinerary = async (data) => {
     setLoading(true);
@@ -853,63 +855,65 @@ const ItineraryForm = () => {
                 </Label>
               </div>
 
-        <div className="col-span-2 space-y-1">
-          <Label className="text-sm font-medium">Available Dates</Label>
-          {availableDates.map((dateObj, dateIndex) => (
-            <div key={dateIndex} className="mb-4 p-4 border rounded">
-              <div className="flex items-center space-x-2 mb-2">
-                <Controller
-                  name={`availableDates.${dateIndex}.date`}
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      type="date"
-                      {...field}
-                      className={`w-40 ${
-                        errors.availableDates?.[dateIndex]?.date
-                          ? "border-red-500"
-                          : ""
-                      }`}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          e.stopPropagation()
-                        }
-                      }}
-                    />
-                  )}
-                />
-                {/* Show remove button only if isRepeated is true or there's more than one date */}
-                {(isRepeated || availableDates.length > 1) && (
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => removeDate(dateIndex)}
-                    className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-          {/* Show add date button only if isRepeated is true or no dates have been added */}
-          {(isRepeated || availableDates.length === 0) && (
-            <Button variant="outline" onClick={addDate}>
-              <Plus className="mr-2 h-4 w-4" /> Add Date
-            </Button>
-          )}
-          {availableDates.length === 0 && (
-            <p className="text-red-500 text-xs mt-2">
-              Please add at least one date
-            </p>
-          )}
-          {errors.availableDates && (
-            <span className="text-red-500 block mt-2">
-              {errors.availableDates.message}
-            </span>
-          )}
-        </div>
+              <div className="col-span-2 space-y-4 p-4 border rounded">
+  <Label className="text-sm font-medium">Available Dates</Label>
+  
+  {availableDates.map((dateObj, dateIndex) => (
+    <div key={dateIndex} className="flex items-center space-x-2 mb-2">
+      <Controller
+        name={`availableDates.${dateIndex}.date`}
+        control={control}
+        render={({ field }) => (
+          <Input
+            type="date"
+            {...field}
+            value={dateObj.date.split('T')[0]}
+            min={new Date().toISOString().split("T")[0]} // Minimum date set to today
+            className={`w-40 ${
+              errors.availableDates?.[dateIndex]?.date ? "border-red-500" : ""
+            }`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
+          />
+        )}
+      />
+      {/* Show remove button only if isRepeated is true or there's more than one date */}
+      {(isRepeated || availableDates.length > 1) && (
+        <Button
+          variant="destructive"
+          size="icon"
+          onClick={() => removeDate(dateIndex)}
+          className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+        >
+          <Trash2 className="h-4 w-4 text-red-500" />
+        </Button>
+      )}
+    </div>
+  ))}
+
+  {/* Show add date button only if isRepeated is true or no dates have been added */}
+  {(isRepeated || availableDates.length === 0) && (
+    <Button variant="outline" onClick={addDate} className="mt-2">
+      <Plus className="mr-2 h-4 w-4" /> Add Date
+    </Button>
+  )}
+  
+  {/* Error message when no dates are added */}
+  {availableDates.length === 0 && (
+    <p className="text-red-500 text-xs mt-2">Please add at least one date</p>
+  )}
+  {errors.availableDates && (
+    <span className="text-red-500 block mt-2">
+      {errors.availableDates.message}
+    </span>
+  )}
+</div>
+
+
 
               <div className="col-span-2">
                 <Label className="text-sm font-medium">Activities</Label>
