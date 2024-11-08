@@ -133,7 +133,7 @@ export default function TravelPreferences() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-xl font-semibold mb-4 text-left">Travel Preferences</h1>
+      <h1 className="text-2xl font-bold mb-4 text-left">Travel Preferences</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
           <div>
