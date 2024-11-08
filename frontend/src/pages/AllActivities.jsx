@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Cookies from "js-cookie";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import FilterComponent from "../components/FilterActivities.jsx";
@@ -17,89 +17,101 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const ActivityCard = ({ activity, onSelect, userInfo, exchangeRates, currencies }) => {
-  const formatPrice = (price) => {
-    if (!userInfo || !price) return '';
+let exchangeRateForFilter = 1;
 
-    if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
-      const baseRate = exchangeRates[activity.currency] || 1;
-      const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
-      const exchangedPrice = (price / baseRate) * targetRate;
-      return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-    } else {
-      const currency = currencies.find(c => c._id === activity.currency);
-      return `${currency ? currency.symbol : '$'}${price}`;
-    }
-  };
+const ActivityCard = React.memo(
+  ({ activity, onSelect, userInfo, exchangeRates, currencies }) => {
+    const formatPrice = useCallback(
+      (price) => {
+        if (!userInfo || !price) return "";
 
+        if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
+          const baseRate = exchangeRates[activity.currency] || 1;
+          const targetRate =
+            exchangeRates[userInfo.preferredCurrency.code] || 1;
+          const exchangedPrice = (price / baseRate) * targetRate;
+          exchangeRateForFilter = targetRate / baseRate;
+          return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
+            2
+          )}`;
+        } else {
+          const currency = currencies.find((c) => c._id === activity.currency);
+          return `${currency ? currency.symbol : "$"}${price}`;
+        }
+      },
+      [userInfo, exchangeRates, currencies, activity.currency]
+    );
 
-  return (
-    <Card
-      className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
-      onClick={() => onSelect(activity._id)}
-    >
-      <div className="relative aspect-video overflow-hidden">
-        <img
-          src={
-            activity.pictures && activity.pictures.length > 0
-              ? activity.pictures[0]?.url
-              : defaultImage
-          }
-          alt={activity.name}
-          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-        />
-      </div>
-      <CardHeader className="p-4">
-        <CardTitle className="text-xl font-semibold">{activity.name}</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          {activity.location.address}
-        </p>
-      </CardHeader>
-      <CardContent className="p-4 pt-0 space-y-2">
-        <div className="flex items-center space-x-1">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`h-4 w-4 ${
-                i < activity.rating
-                  ? "text-[#F88C33] fill-[#F88C33]"
-                  : "text-gray-300"
-              }`}
-            />
-          ))}
-          <span className="text-sm text-muted-foreground ml-1">
-            {activity.rating.toFixed(1)}
-          </span>
+    return (
+      <Card
+        className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
+        onClick={() => onSelect(activity._id)}
+      >
+        <div className="relative aspect-video overflow-hidden">
+          <img
+            src={
+              activity.pictures && activity.pictures.length > 0
+                ? activity.pictures[0]?.url
+                : defaultImage
+            }
+            alt={activity.name}
+            className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+          />
         </div>
-        <div className="flex justify-between items-center">
-          <span className="text-lg font-bold text-primary">
-            {formatPrice(activity.price)}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {activity.duration} hours
-          </span>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {new Date(activity.timing).toLocaleDateString()}
-        </p>
-      </CardContent>
-      <CardFooter className="p-4 pt-0">
-        <div className="flex flex-wrap gap-2">
-          {activity.tags.map((tag, index) => (
-            <Badge key={index} variant="outline">
-              {tag.type}
-            </Badge>
-          ))}
-          {activity.category.map((cat, index) => (
-            <Badge key={index} variant="secondary">
-              {cat.name}
-            </Badge>
-          ))}
-        </div>
-      </CardFooter>
-    </Card>
-  );
-};
+        <CardHeader className="p-4">
+          <CardTitle className="text-xl font-semibold">
+            {activity.name}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {activity.location.address}
+          </p>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 space-y-2">
+          <div className="flex items-center space-x-1">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-4 w-4 ${
+                  i < activity.rating
+                    ? "text-[#F88C33] fill-[#F88C33]"
+                    : "text-gray-300"
+                }`}
+              />
+            ))}
+            <span className="text-sm text-muted-foreground ml-1">
+              {activity.rating.toFixed(1)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-bold text-primary">
+              {formatPrice(activity.price)}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {activity.duration} hours
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {new Date(activity.timing).toLocaleDateString()}
+          </p>
+        </CardContent>
+        <CardFooter className="p-4 pt-0">
+          <div className="flex flex-wrap gap-2">
+            {activity.tags.map((tag, index) => (
+              <Badge key={index} variant="outline">
+                {tag.type}
+              </Badge>
+            ))}
+            {activity.category.map((cat, index) => (
+              <Badge key={index} variant="secondary">
+                {cat.name}
+              </Badge>
+            ))}
+          </div>
+        </CardFooter>
+      </Card>
+    );
+  }
+);
 
 export function AllActivitiesComponent() {
   const [activities, setActivities] = useState([]);
@@ -110,9 +122,10 @@ export function AllActivitiesComponent() {
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [maxPrice, setMaxPrice] = useState(1000);
-  const [initialPriceRange, setInitialPriceRange] = useState([0, 1000]);
+  const [maxPriceOfActivities,setMaxPriceOfActivities] = useState(0);
+  const [priceRange, setPriceRange] = useState([0,maxPriceOfActivities]);
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfActivities);
+  const [initialPriceRange, setInitialPriceRange] = useState([0, maxPriceOfActivities]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
@@ -125,34 +138,36 @@ export function AllActivitiesComponent() {
   const [userInfo, setUserInfo] = useState(null);
   const [currencies, setCurrencies] = useState([]);
   const [exchangeRates, setExchangeRates] = useState({});
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
 
   const navigate = useNavigate();
-
   
   const fetchExchangeRates = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:4000/rates');
+      const response = await axios.get("http://localhost:4000/rates");
       setExchangeRates(response.data.rates);
     } catch (error) {
-      console.error('Error fetching exchange rates:', error);
+      console.error("Error fetching exchange rates:", error);
     }
   }, []);
 
   const fetchCurrencies = useCallback(async () => {
-    const role = Cookies.get('role');
-    if (role !== 'tourist') return;
+    const role = Cookies.get("role");
+    if (role !== "tourist") return;
     try {
-      const response = await axios.get('http://localhost:4000/tourist/currencies', {
-        headers: { Authorization: `Bearer ${Cookies.get('jwt')}` },
-      });
+      const response = await axios.get(
+        "http://localhost:4000/tourist/currencies",
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
       setCurrencies(response.data);
     } catch (error) {
-      console.error('Error fetching currencies:', error);
+      console.error("Error fetching currencies:", error);
     }
   }, []);
 
-
-    const fetchUserInfo = useCallback(async () => {
+  const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
     const token = Cookies.get("jwt");
 
@@ -183,19 +198,19 @@ export function AllActivitiesComponent() {
     }
   }, []);
 
-  const getUserRole = () => {
+  const getUserRole = useCallback(() => {
     let role = Cookies.get("role");
     if (!role) role = "guest";
     return role;
-  };
+  }, []);
 
-  const getSymbol = () => {
+  const getSymbol = useCallback(() => {
     if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
       return `${userInfo.preferredCurrency.symbol}`;
     } else {
       return "$";
     }
-  };
+  }, [userInfo]);
 
   useEffect(() => {
     fetchUserInfo();
@@ -218,11 +233,14 @@ export function AllActivitiesComponent() {
       await fetchActivities();
     }
   };
-  const handleActivitySelect = (id) => {
-    setIsLoading(true);
-    navigate(`/activity/${id}`);
-    setIsLoading(false);
-  };
+  const handleActivitySelect = useCallback(
+    (id) => {
+      setIsLoading(true);
+      navigate(`/activity/${id}`);
+      setIsLoading(false);
+    },
+    [navigate]
+  );
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -248,15 +266,15 @@ export function AllActivitiesComponent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handlePageChange = (pageNumber) => {
+  const handlePageChange = useCallback((pageNumber) => {
     setCurrentPage(pageNumber);
-  };
+  }, []);
 
-  const handlemyActivities = (attribute) => {
+  const handlemyActivities = useCallback((attribute) => {
     setIsLoading(true);
     setMyActivities(attribute);
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     fetchActivities();
@@ -288,13 +306,16 @@ export function AllActivitiesComponent() {
     }
   }, [sortBy, sortOrder]);
 
-  const handleSort = (attribute) => {
-    setIsLoading(true);
-    const newSortOrder = sortOrder === 1 ? -1 : 1;
-    setSortOrder(newSortOrder);
-    setSortBy(attribute);
-    setIsLoading(false);
-  };
+  const handleSort = useCallback(
+    (attribute) => {
+      setIsLoading(true);
+      const newSortOrder = sortOrder === 1 ? -1 : 1;
+      setSortOrder(newSortOrder);
+      setSortBy(attribute);
+      setIsLoading(false);
+    },
+    [sortOrder]
+  );
 
   const fetchActivities = useCallback(async () => {
     try {
@@ -337,21 +358,9 @@ export function AllActivitiesComponent() {
         const data = await response.json();
         setActivities(data);
       }
-
-      // Calculate max price
-      const maxActivityPrice = Math.max(
-        ...activities.map((activity) => activity.price)
-      );
-      const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
-
-      if (roundedMaxPrice > -Infinity) {
-        setMaxPrice(roundedMaxPrice);
-        setInitialPriceRange([0, roundedMaxPrice]);
-        setPriceRange([0, roundedMaxPrice]);
-      }
+      fetchMaxPrice();
 
       setError(null);
-      setCurrentPage(1);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching activities:", error);
@@ -360,6 +369,27 @@ export function AllActivitiesComponent() {
       setIsLoading(false);
     }
   }, [userInfo, isSortedByPreference]);
+
+  const fetchMaxPrice = async () => {
+  const role = getUserRole();
+  // console.log("Role:", role);
+  const token = Cookies.get("jwt");
+  const url = new URL(`http://localhost:4000/${role}/maxPriceActivities`);
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! status: ${response.status}`);
+        // }
+        const data = await response.json();
+        setMaxPriceOfActivities(data);
+        setInitialPriceRange([0, data]);
+        setIsPriceInitialized(true);
+        setPriceRange([0, data]);
+        // console.log("el max price",data);
+  }
 
   const searchActivities = async () => {
     setIsSortedByPreference(false);
@@ -466,16 +496,16 @@ export function AllActivitiesComponent() {
       }
 
       // Calculate max price
-      const maxActivityPrice = Math.max(
-        ...activities.map((activity) => activity.price)
-      );
-      const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
+      // const maxActivityPrice = Math.max(
+      //   ...activities.map((activity) => activity.price)
+      // );
+      // const roundedMaxPrice = Math.ceil(maxActivityPrice / 100) * 100;
 
-      if (roundedMaxPrice > -Infinity) {
-        setMaxPrice(roundedMaxPrice);
-        setInitialPriceRange([0, roundedMaxPrice]);
-        setPriceRange([0, roundedMaxPrice]);
-      }
+      // if (roundedMaxPrice > -Infinity) {
+      //   setMaxPrice(roundedMaxPrice);
+      //   setInitialPriceRange([0, roundedMaxPrice]);
+      //   setPriceRange([0, roundedMaxPrice]);
+      // }
 
       setError(null);
       setCurrentPage(1);
@@ -492,7 +522,7 @@ export function AllActivitiesComponent() {
     fetchActivitiesByPreference();
   }, [fetchActivitiesByPreference]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearchTerm("");
     setPriceRange([0, 1000]);
     setDateRange({ start: "", end: "" });
@@ -506,13 +536,39 @@ export function AllActivitiesComponent() {
     } else {
       fetchActivities();
     }
-  };
+  }, [getUserRole, fetchActivitiesByPreference, fetchActivities]);
 
-  const toggleFilters = () => {
+  const toggleFilters = useCallback(() => {
     setIsLoading(false);
     setFiltersVisible(!filtersVisible);
     setIsLoading(false);
-  };
+  }, [filtersVisible]);
+
+  const memoizedActivityCards = useMemo(() => {
+    return activities
+      .slice(
+        (currentPage - 1) * activitiesPerPage,
+        currentPage * activitiesPerPage
+      )
+      .map((activity) => (
+        <ActivityCard
+          key={activity._id}
+          userInfo={userInfo}
+          activity={activity}
+          exchangeRates={exchangeRates}
+          currencies={currencies}
+          onSelect={handleActivitySelect}
+        />
+      ));
+  }, [
+    activities,
+    currentPage,
+    activitiesPerPage,
+    userInfo,
+    exchangeRates,
+    currencies,
+    handleActivitySelect,
+  ]);
 
   return (
     <div>
@@ -548,7 +604,7 @@ export function AllActivitiesComponent() {
                     <Search className="absolute left-3 top-2.5 text-gray-400" />
                   </div>
 
-                  <FilterComponent
+                  {isPriceInitialized && (<FilterComponent
                     filtersVisible={filtersVisible}
                     toggleFilters={toggleFilters}
                     sortOrder={sortOrder}
@@ -560,6 +616,7 @@ export function AllActivitiesComponent() {
                     dateRange={dateRange}
                     setDateRange={setDateRange}
                     minStars={minStars}
+                    exchangeRate={exchangeRateForFilter}
                     setMinStars={setMinStars}
                     categoriesOptions={categoryOptions}
                     searchActivites={searchActivities}
@@ -568,29 +625,15 @@ export function AllActivitiesComponent() {
                     myActivities={myActivities}
                     symbol={getSymbol()}
                     handlemyActivities={handlemyActivities}
-                    maxPrice={maxPrice} // Pass maxPrice as a prop
+                    maxPrice={maxPriceOfActivities} // Pass maxPrice as a prop
                     initialPriceRange={initialPriceRange}
                     isSortedByPreference={isSortedByPreference}
                     handleSortByPreference={handleSortByPreference}
-                  />
+                  />)}
 
                   {activities.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {activities
-                        .slice(
-                          (currentPage - 1) * activitiesPerPage,
-                          currentPage * activitiesPerPage
-                        )
-                        .map((activity) => (
-                          <ActivityCard
-                            key={activity._id}
-                            userInfo={userInfo}
-                            activity={activity}
-                            exchangeRates={exchangeRates}
-                            currencies={currencies}
-                            onSelect={handleActivitySelect}
-                          />
-                        ))}
+                      {memoizedActivityCards}
                     </div>
                   ) : (
                     <p className="text-center text-gray-500">

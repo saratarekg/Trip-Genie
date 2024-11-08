@@ -5,6 +5,20 @@ const Tourist = require("../models/tourist");
 const ActivityBooking = require("../models/activityBooking");
 const cloudinary = require("../utils/cloudinary");
 
+// Function to get the maximum price from activities
+const getMaxPrice = async (req, res) => {
+    const maxPriceActivity = await Activity.findOne().sort({ price: -1 });
+    let maxPrice;
+    if(maxPriceActivity){
+    maxPrice = await maxPriceActivity.price;
+    } else {
+      maxPrice = 0;
+    }
+    // console.log("henaaaaaaaaaaaa", maxPrice);
+    res.status(200).json(maxPrice);
+};
+
+
 const getAllActivities = async (req, res) => {
   try {
     const {
@@ -572,4 +586,5 @@ module.exports = {
   getActivitiesByPreferences,
   theHolyAntiFilter,
   updateCommentOnActivity,
+  getMaxPrice,
 };

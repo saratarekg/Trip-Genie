@@ -22,6 +22,7 @@ const transportationController = require("../controllers/transportationControlle
 router.get("/", getTourGuideProfile);
 
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
+router.get("/maxPriceActivities", activityController.getMaxPrice);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
 // Route for updating a tour guide by ID

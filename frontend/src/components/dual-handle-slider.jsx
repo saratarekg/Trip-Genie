@@ -7,6 +7,7 @@ function DualHandleSliderComponent({
   symbol,
   step,
   values,
+  exchangeRate,
   onChange,
   middleColor = "#f97516",
   colorRing = "orange",
@@ -59,11 +60,11 @@ function DualHandleSliderComponent({
       <div className="flex justify-between mt-2">
         <span className="text-sm font-medium text-gray-700">
           Min: {symbol}
-          {values[0]}
+          {Math.ceil(values[0] * exchangeRate)}
         </span>
         <span className="text-sm font-medium text-gray-700">
           Max: {symbol}
-          {values[1]}
+          {Math.ceil(values[1] * exchangeRate)}
         </span>
       </div>
     </div>
