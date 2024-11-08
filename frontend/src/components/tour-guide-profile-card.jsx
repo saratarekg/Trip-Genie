@@ -32,7 +32,7 @@ export default function TourguideProfileCard({ profile }) {
             <span>{profile.yearsOfExperience} years of experience</span>
           </div>
           <div className="flex items-center">
-            <Star className="w-5 h-5 mr-2 text-yellow-500" aria-hidden="true" />
+            <Star className="w-5 h-5 mr-2 text-[#F88C33]" aria-hidden="true" />
             <span>{profile.rating} / 5.0</span>
           </div>
         </div>

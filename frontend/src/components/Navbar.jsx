@@ -121,7 +121,7 @@ export function NavbarComponent() {
           ? "bg-black/50"
           : ""
       }`}
-      style={{ backdropFilter: "saturate(180%) blur(8px)" }}
+      style={isScrolled ? { backdropFilter: "saturate(180%) blur(8px)" } : {}}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -228,7 +228,6 @@ export function NavbarComponent() {
                       </div>
                     )}
                   </div>
-                  <NavLink to="/seller-profile">Profile</NavLink>
                 </>
               )}
               {role === "tourist" && (
@@ -285,7 +284,7 @@ export function NavbarComponent() {
                   </div>
                   <NavLink to="/transportation">Transportation</NavLink>
 
-                  <NavLink to="/advertiser-profile">Profile</NavLink>
+                
                 </>
               )}
               {role === "admin" && (
@@ -436,7 +435,7 @@ export function NavbarComponent() {
                   Sign up
                 </Link>
               </>
-            ) : role !== "admin" ? (
+            ) : role !== "admin" || role==="admin" ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => toggleDropdown("userMenu")}
@@ -482,16 +481,7 @@ export function NavbarComponent() {
                         </Link>
                       </>
                     )}
-                    {role === "tour-guide" && (
-                      <Link
-                        to="/tour-guide-profile"
-                        className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
-                        onClick={closeDropdown}
-                      >
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Link>
-                    )}
+                    
                     <button
                       onClick={logOut}
                       className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
@@ -605,7 +595,7 @@ export function NavbarComponent() {
                     </div>
                   )}
                 </div>
-                <NavLink to="/tour-guide-profile">Profile</NavLink>
+                
               </>
             )}
             {role === "seller" && (
@@ -679,9 +669,6 @@ export function NavbarComponent() {
               <>
                 <NavLink to="/activity" onClick={closeDropdown}>
                   Activities
-                </NavLink>
-                <NavLink to="/advertiser-profile" onClick={closeDropdown}>
-                  Profile
                 </NavLink>
               </>
             )}

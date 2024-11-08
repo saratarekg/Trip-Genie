@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
 import ReactSelect from "react-select";
-import signUpPicture from "../assets/images/signUpPicture.jpeg";
+import backgroundPicture from "../assets/images/backgroundPattern.png";
 
 const vehicleTypes = ["Bus", "Car", "Microbus"];
 
@@ -388,7 +388,7 @@ export default function CreateActivity() {
       <div
         className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
         style={{
-          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+          backgroundImage: `url(${backgroundPicture})`,
         }}
       >
         <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-7xl flex flex-col md:flex-row">
@@ -635,7 +635,7 @@ export default function CreateActivity() {
                 </div>
               </div>
 
-              <div className="col-span-4">
+              {/* <div className="col-span-4">
                 <Label>Transportation Options</Label>
                 {transportations.map((transport, index) => (
                   <div key={index} className="p-2 border rounded flex justify-between items-center mb-2">
@@ -672,7 +672,7 @@ export default function CreateActivity() {
                 >
                   Add Transportation
                 </Button>
-              </div>
+              </div> */}
 
               <Button
                 type="submit"

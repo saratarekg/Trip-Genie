@@ -83,7 +83,7 @@ const StarRating = ({ rating, onRatingChange = null }) => {
         <Star
           key={star}
           className={`w-5 h-5 ${
-            star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
           } ${onRatingChange ? "cursor-pointer" : ""}`}
           onClick={() => onRatingChange && onRatingChange(star)}
         />
@@ -961,7 +961,7 @@ const ProductDetail = () => {
                                 ? quickRating >= star
                                 : quickRating >= star
                             )
-                              ? "text-yellow-500 fill-current"
+                              ? "text-[#F88C33] fill-current"
                               : "text-gray-300"
                           }`}
                           onMouseEnter={() => {

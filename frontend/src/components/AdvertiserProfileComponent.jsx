@@ -182,7 +182,7 @@ export function AdvertiserProfileComponent() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="w-full max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
       <div className="p-8">
         <div className="flex items-center gap-4 mb-6 relative">
           <div className="flex-shrink-0 relative">
@@ -191,15 +191,23 @@ export function AdvertiserProfileComponent() {
               onClick={() => setDropdownOpen(!isDropdownOpen)}
               disabled={!isEditing && !logo}
             >
-              {logo ? (
-                <img
-                  src={logo}
-                  alt="Logo"
-                  className="w-20 h-20 rounded-full object-cover"
-                />
+                {logo ? (
+                logo.public_id ? (
+                  <img
+                    src={logo.url}
+                    alt="User"
+                    className="w-20 h-20 rounded-full"
+                  />
+                ) : (
+                  <img
+                    src={logo}
+                    alt="User"
+                    className="w-20 h-20 rounded-full"
+                  />
+                )
               ) : (
                 <User className="w-12 h-12 text-white" />
-              )}
+              )}{" "}
             </button>
 
             {isDropdownOpen && (
@@ -420,8 +428,12 @@ export function AdvertiserProfileComponent() {
 
       <Modal show={showModal} onClose={closeModal}>
         <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
-        <ImageCropper onImageCropped={handleImageCropped} currentImage={logo} />
-        <div className="mt-4 flex justify-end">
+        <ImageCropper onImageCropped={handleImageCropped} currentImage={logo
+                      ? logo.public_id
+                        ? logo.url
+                        : logo
+                      : null} />
+                              <div className="mt-4 flex justify-end">
           <Button onClick={handleFirstSave} className="mr-2">
             Save
           </Button>
@@ -435,7 +447,7 @@ export function AdvertiserProfileComponent() {
         show={isImageViewerOpen}
         onClose={() => setIsImageViewerOpen(false)}
         isImageViewer={true}
-        imageUrl={logo}
+        imageUrl={logo?.url || logo}
       />
     </div>
   );

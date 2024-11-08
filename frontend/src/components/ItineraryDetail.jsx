@@ -48,7 +48,7 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? '' : 'cursor-pointer'} ${star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
+          className={`w-6 h-6 ${readOnly ? '' : 'cursor-pointer'} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
             }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? 's' : ''}`}
@@ -1381,7 +1381,7 @@ const handleRateItinerary = async () => {
                     key={star}
                     className={`w-8 h-8 cursor-pointer ${
                       (isRatingHovered ? quickRating >= star : quickRating >= star)
-                        ? "text-yellow-500 fill-current"
+                        ? "text-[#F88C33] fill-current"
                         : "text-gray-300"
                     }`}
                     onMouseEnter={() => {

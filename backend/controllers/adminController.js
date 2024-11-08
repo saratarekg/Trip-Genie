@@ -221,6 +221,17 @@ const deleteFile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getAdminProfile = async (req, res) => {
+  try {
+    const admin = await Admin.findById(res.locals.user_id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    res.status(200).json(admin);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 const usernameExists = async (username) => {
   if (
@@ -248,4 +259,5 @@ module.exports = {
   getAllFiles,
   getFile,
   deleteFile,
+  getAdminProfile,
 };
