@@ -29,6 +29,18 @@ const addTourismGovernor = async (req, res) => {
   }
 };
 
+const getTourismGovernorProfile = async (req, res) => {
+  try {
+    const admin = await TourismGovernor.findById(res.locals.user_id);
+    if (!admin) {
+      return res.status(404).json({ message: "Toursim Governor not found" });
+    }
+    res.status(200).json(admin);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const deleteTourismGovAccount = async (req, res) => {
   try {
     const tourismGov = await TourismGovernor.findByIdAndDelete(req.params.id);
@@ -130,4 +142,5 @@ module.exports = {
   getAllTourismGov,
   deleteTourismGovAccount,
   changePassword,
+  getTourismGovernorProfile,
 };

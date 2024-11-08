@@ -35,6 +35,8 @@ router.post("/currencies/set", touristController.setCurrencyCode);
 router.post("/admins", adminController.addAdmin);
 router.post("/governors", tourismGovernorController.addTourismGovernor);
 
+router.get("/",adminController.getAdminProfile);
+
 // Route to delete an Advertiser
 router.delete("/reject/advertisers/:id", advertiserController.rejectAdvertiser);
 

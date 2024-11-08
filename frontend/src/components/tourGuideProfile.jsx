@@ -393,11 +393,8 @@ export function TourGuideProfileComponent() {
   };
   return (
     <div>
-      {" "}
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-      </div>
-      <div className="w-full max-w-6xl mx-auto my-32 bg-white shadow-lg rounded-lg overflow-hidden">
+      
+      <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Changed max-w-3xl to max-w-4xl */}
         <div className="p-8">
           {/* Profile Section */}
