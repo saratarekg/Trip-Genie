@@ -348,6 +348,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
       timing: `${data.activityDate}T${data.activityTime}`,
       pictures,
     };
+    console.log("Activity data:", formattedData);
     onSave(formattedData);
     onClose();
   };
@@ -577,10 +578,27 @@ const ItineraryForm = () => {
 
       const token = Cookies.get("jwt");
       const role = Cookies.get("role") || "guest";
+      console.log("activities: ", activities);
+
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("timeline", data.timeline);
+      formData.append("language", data.language);
+      formData.append("price", data.price);
+      formData.append("pickUpLocation", data.pickUpLocation);
+      formData.append("dropOffLocation", data.dropOffLocation);
+      formData.append("accessibility", data.accessibility);
+      formData.append("availableDates", JSON.stringify(data.availableDates));
+      formData.append("activities", JSON.stringify(activities));
+      activities.forEach((activity, index) => {
+        activity.pictures.forEach((file, fileIndex) => {
+          formData.append(`activities[${index}][pictures][${fileIndex}]`, file);
+        });
+      });
 
       const response = await axios.post(
         `http://localhost:4000/${role}/itineraries`,
-        { ...data, activities },
+        formData,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -607,6 +625,7 @@ const ItineraryForm = () => {
   };
 
   const handleAddActivity = (activity) => {
+    console.log("Activity:", activity);
     const newActivity = {
       ...activity,
       timing: `${activity.activityDate}T${activity.activityTime}`,
