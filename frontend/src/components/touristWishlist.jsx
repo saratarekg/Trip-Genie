@@ -1,12 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { CheckCircle, XCircle } from "lucide-react";
-import Loader from './Loader';
+import Loader from "./Loader";
 
 const WishlistPage = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -16,119 +23,62 @@ const WishlistPage = () => {
   const [actionError, setActionError] = useState(null);
   const navigate = useNavigate();
 
-  const [userRole, setUserRole] = useState('guest');
+  const [userRole, setUserRole] = useState("guest");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
-  const [currencySymbols, setCurrencySymbols] = useState({});
   const [exchangeRates, setExchangeRates] = useState({});
+  const [currencies, setCurrencies] = useState([]);
 
-  const fetchExchangeRate = useCallback(async (baseCurrency, targetCurrency) => {
-    if (!baseCurrency || !targetCurrency || !userRole) {
- 
-
-      console.error("Missing required parameters for fetchExchangeRate");
-      return null;
+  const fetchExchangeRates = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/rates");
+      setExchangeRates(response.data.rates);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
     }
-    const cacheKey = `${baseCurrency}_${targetCurrency}`;
-    if (exchangeRates[cacheKey]) {
-      return exchangeRates[cacheKey];
-    }
+  }, []);
 
+  const fetchCurrencies = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
-      if (!token) {
-        console.error("No JWT token found");
-        return null;
-      }
-
-      const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
+      const response = await axios.get(
+        "http://localhost:4000/tourist/currencies",
         {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            base: baseCurrency,
-            target: targetCurrency,
-          }),
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const data = await response.json();
-
-      if (response.ok) {
-        setExchangeRates(prev => ({
-          ...prev,
-          [cacheKey]: data.conversion_rate
-        }));
-        return data.conversion_rate;
-      } else {
-        console.error('Error in fetching exchange rate:', data.message);
-        return null;
-      }
+      setCurrencies(response.data);
     } catch (error) {
-      console.error("Error fetching exchange rate:", error);
-      return null;
+      console.error("Error fetching currencies:", error);
     }
-  }, [userRole, exchangeRates]);
+  }, []);
 
-  const getCurrencySymbol = useCallback(async (currencyCode) => {
-    if (!currencyCode || !userRole) {
-      console.error("Missing required parameters for getCurrencySymbol");
-      return '';
-    }
-
-    if (currencySymbols[currencyCode]) {
-      return currencySymbols[currencyCode];
-    }
-
-    try {
-      const token = Cookies.get("jwt");
-      if (!token) {
-        console.error("No JWT token found");
-        return '';
+  const formatPrice = useCallback(
+    (price, productCurrency) => {
+      if (!price || !productCurrency || !userRole) {
+        console.error("Missing required parameters for formatPrice");
+        return "";
       }
 
-      const response = await axios.get(`http://localhost:4000/${userRole}/getCurrency/${currencyCode}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setCurrencySymbols(prev => ({ ...prev, [currencyCode]: response.data.symbol }));
-      return response.data.symbol;
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-      return '';
-    }
-  }, [userRole, currencySymbols]);
-
-  const formatPrice = useCallback(async (price, productCurrency) => {
-    if (!price || !productCurrency || !userRole) {
-      console.error("Missing required parameters for formatPrice");
-      return '';
-    }
-
-    const roundedPrice = Math.round(price);
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      if (userPreferredCurrency.code === productCurrency.code) {
-        return `${userPreferredCurrency.symbol}${roundedPrice}`;
-      } else {
-
-        const rate = await fetchExchangeRate(productCurrency, userPreferredCurrency._id);
-        if (rate) {
-          const exchangedPrice = Math.round(roundedPrice * rate);
-          return `${userPreferredCurrency.symbol}${exchangedPrice}`;
-        }
+      const roundedPrice = Math.round(price);
+      if (userRole === "tourist" && userPreferredCurrency) {
+        const baseRate = exchangeRates[productCurrency] || 1;
+        const targetRate = exchangeRates[userPreferredCurrency.code] || 1;
+        const exchangedPrice = Math.round(
+          (roundedPrice / baseRate) * targetRate
+        );
+        return `${userPreferredCurrency.symbol}${exchangedPrice}`;
       }
-    }
-    const symbol = await getCurrencySymbol(productCurrency);
-    return `${symbol}${roundedPrice}`;
-  }, [userRole, userPreferredCurrency, fetchExchangeRate, getCurrencySymbol]);
+      const currency = currencies.find((c) => c._id === productCurrency);
+      return `${currency ? currency.symbol : "$"}${roundedPrice}`;
+    },
+    [userRole, userPreferredCurrency, exchangeRates, currencies]
+  );
 
   const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
         const token = Cookies.get("jwt");
         if (!token) {
@@ -136,15 +86,18 @@ const WishlistPage = () => {
           return;
         }
 
-        const response = await axios.get('http://localhost:4000/tourist/', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
         });
         const currencyId = response.data.preferredCurrency;
 
         if (currencyId) {
-          const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const response2 = await axios.get(
+            `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
           setUserPreferredCurrency(response2.data);
         } else {
           console.error("No preferred currency found for user");
@@ -171,7 +124,7 @@ const WishlistPage = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:4000/tourist/wishlist', {
+      const response = await fetch("http://localhost:4000/tourist/wishlist", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -180,33 +133,38 @@ const WishlistPage = () => {
         throw new Error("Failed to fetch wishlist items");
       }
       const data = await response.json();
-      
-      const formattedData = await Promise.all(data.map(async (item) => {
+
+      const formattedData = data.map((item) => {
         if (!item.product || !item.product.price || !item.product.currency) {
           console.error("Invalid product data:", item);
           return null;
         }
         return {
           ...item,
-          formattedPrice: await formatPrice(item.product.price, item.product.currency)
+          formattedPrice: formatPrice(
+            item.product.price,
+            item.product.currency
+          ),
         };
-      }));
+      });
 
       setWishlistItems(formattedData.filter(Boolean));
-      setLoading(false);
+      setTimeout(() => setLoading(false), 500)
     } catch (err) {
       setError("Error fetching wishlist items. Please try again later.");
       console.error("Error fetching wishlist items:", err);
-    } finally {
+      setLoading(false)
     }
   }, [userRole, formatPrice]);
 
   useEffect(() => {
     fetchUserInfo();
-  }, [fetchUserInfo]);
+    fetchExchangeRates();
+    fetchCurrencies();
+  }, [fetchUserInfo, fetchExchangeRates, fetchCurrencies]);
 
   useEffect(() => {
-    if (userRole && (userRole === 'guest' || userPreferredCurrency)) {
+    if (userRole && (userRole === "guest" || userPreferredCurrency)) {
       fetchWishlistItems();
     }
   }, [userRole, userPreferredCurrency, fetchWishlistItems]);
@@ -224,16 +182,21 @@ const WishlistPage = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:4000/tourist/remove/wishlist/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:4000/tourist/remove/wishlist/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to remove item from wishlist");
       }
-      setWishlistItems(wishlistItems.filter(item => item.product._id !== productId));
+      setWishlistItems(
+        wishlistItems.filter((item) => item.product._id !== productId)
+      );
       setActionSuccess("Item removed from wishlist successfully!");
     } catch (error) {
       setActionError("Error removing item from wishlist. Please try again.");
@@ -254,13 +217,16 @@ const WishlistPage = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:4000/tourist/move/wishlist/${productId}`, {
-        method: "PUT",
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `http://localhost:4000/tourist/move/wishlist/${productId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error("Failed to add item to cart");
       }
@@ -275,39 +241,49 @@ const WishlistPage = () => {
   if (loading) return <Loader />;
 
   if (error) {
-    return (
-      <div className="text-center mt-8 text-red-500">
-        {error}
-      </div>
-    );
+    return <div className="text-center mt-8 text-red-500">{error}</div>;
   }
 
   return (
-
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">My Wishlist</h1>
       {wishlistItems.length === 0 ? (
-        <p className="text-center text-gray-500 text-lg">Your wishlist is empty.</p>
+        <p className="text-center text-gray-500 text-lg">
+          Your wishlist is empty.
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {wishlistItems.map(item => (
+          {wishlistItems.map((item) => (
             <Card key={item._id} className="overflow-hidden">
               <CardHeader>
-                <CardTitle className="cursor-pointer hover:underline" onClick={() => navigate(`/product/${item.product._id}`)}>
+                <CardTitle
+                  className="cursor-pointer hover:underline"
+                  onClick={() => navigate(`/product/${item.product._id}`)}
+                >
                   {item.product.name}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <img 
-                  src={item.product.pictures[0] || '/placeholder.svg?height=192&width=256'} 
-                  alt={item.product.name} 
+                <img
+                  src={
+                    item.product.pictures[0] ||
+                    "/placeholder.svg?height=192&width=256"
+                  }
+                  alt={item.product.name}
                   className="w-full h-48 object-cover mb-4 cursor-pointer rounded-md"
                   onClick={() => navigate(`/product/${item.product._id}`)}
                 />
-                <p className="text-xl font-semibold mb-2">{item.formattedPrice}</p>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-3">{item.product.description}</p>
+                <p className="text-xl font-semibold mb-2">
+                  {item.formattedPrice}
+                </p>
+                <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+                  {item.product.description}
+                </p>
                 <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => handleRemoveFromWishlist(item.product._id)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleRemoveFromWishlist(item.product._id)}
+                  >
                     Remove
                   </Button>
                   <Button onClick={() => handleAddToCart(item.product._id)}>
@@ -320,7 +296,10 @@ const WishlistPage = () => {
         </div>
       )}
 
-      <Dialog open={actionSuccess !== null} onOpenChange={() => setActionSuccess(null)}>
+      <Dialog
+        open={actionSuccess !== null}
+        onOpenChange={() => setActionSuccess(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -337,7 +316,10 @@ const WishlistPage = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={actionError !== null} onOpenChange={() => setActionError(null)}>
+      <Dialog
+        open={actionError !== null}
+        onOpenChange={() => setActionError(null)}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
