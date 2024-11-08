@@ -329,17 +329,43 @@ const getItineraryById = async (req, res) => {
 const createItinerary = async (req, res) => {
   const {
     title,
-    timeline,
     language,
     price,
-
+    isRepeated,
     accessibility,
     pickUpLocation,
     dropOffLocation,
-    rating,
   } = req.body;
   const activities = JSON.parse(req.body.activities);
   const availableDates = JSON.parse(req.body.availableDates);
+
+  if (availableDates.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Itinerary must have at least one date" });
+  }
+  if (!isRepeated) {
+    if (availableDates.length > 1) {
+      return res.status(400).json({
+        message: "Itinerary must have only one date if it is not repeated",
+      });
+    }
+    activities.forEach((activity) => {
+      if (activity.timing < availableDates[0].date) {
+        return res.status(400).json({
+          message: "Activities date must be after the itinerary date",
+        });
+      }
+    });
+  } else {
+    //All activities must be on the same day
+    const activityDates = activities.map((activity) => activity.timing);
+    if (activityDates.some((date) => date !== activityDates[0])) {
+      return res.status(400).json({
+        message: "All activities must be on the same day",
+      });
+    }
+  }
 
   await (async () => {
     for (const file of req.files) {
@@ -360,11 +386,9 @@ const createItinerary = async (req, res) => {
       };
     }
   })();
-  console.log("I am out of loop");
-  console.log(activities);
+
   const itinerary = new Itinerary({
     title,
-    timeline,
     activities,
     language,
     price,
@@ -374,7 +398,7 @@ const createItinerary = async (req, res) => {
     pickUpLocation,
     dropOffLocation,
     tourGuide: res.locals.user_id,
-    rating,
+    isRepeated,
   });
 
   try {
