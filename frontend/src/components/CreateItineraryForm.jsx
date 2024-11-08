@@ -865,20 +865,20 @@ const ItineraryForm = () => {
         control={control}
         render={({ field }) => (
           <Input
-            type="date"
-            {...field}
-            value={dateObj.date.split('T')[0]}
-            min={new Date().toISOString().split("T")[0]} // Minimum date set to today
-            className={`w-40 ${
-              errors.availableDates?.[dateIndex]?.date ? "border-red-500" : ""
-            }`}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                e.stopPropagation();
-              }
-            }}
-          />
+          type="date"
+          {...field}
+          value={dateObj.date.split('T')[0]}
+          min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]} // Sets min date to tomorrow
+          className={`w-40 ${
+            errors.availableDates?.[dateIndex]?.date ? "border-red-500" : ""
+          }`}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
+        />
         )}
       />
       {/* Show remove button only if isRepeated is true or there's more than one date */}
