@@ -147,7 +147,7 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
         <Star
           key={star}
           className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
-            star <= rating ? "text-yellow-500 fill-current" : "text-gray-300"
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
           }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
