@@ -9,6 +9,7 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import ReactSelect from "react-select";
 import { format, parseISO } from "date-fns";
+import { X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -293,6 +294,8 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   const [tags, setTags] = useState([]);
   const [category, setCategory] = useState([]);
   const [pictures, setPictures] = useState([]);
+  const [base64Pictures, setBase64Pictures] = useState([]);
+  const [selectedImage, setSelectedImage] = useState("");
 
   const {
     register,
@@ -319,6 +322,11 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
       }
       setValue("tags", initialData.tags);
       setValue("category", initialData.category);
+      setPictures(initialData.pictures);
+      const base64Files = initialData.pictures.map((file) =>
+        URL.createObjectURL(file)
+      );
+      setBase64Pictures(base64Files);
     }
   }, [initialData, setValue]);
 
@@ -338,8 +346,18 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
     const files = e.target.files;
     if (files) {
       setPictures([...pictures, ...Array.from(files)]);
-      console.log("Pictures:", pictures);
     }
+    const base64Files = Array.from(files).map((file) =>
+      URL.createObjectURL(file)
+    );
+    setBase64Pictures([...base64Pictures, ...base64Files]);
+  };
+
+  const removePicture = (index) => {
+    const updatedPictures = pictures.filter((_, i) => i !== index);
+    const updatedBase64Pictures = base64Pictures.filter((_, i) => i !== index);
+    setPictures(updatedPictures);
+    setBase64Pictures(updatedBase64Pictures);
   };
 
   const handleAddActivity = (data) => {
@@ -491,8 +509,10 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
         )}
       </div>
 
-      <div className="col-span-4">
-        <Label htmlFor="pictures">Pictures</Label>
+      <div className="space-y-2">
+        <Label htmlFor="pictures" className="text-sm font-medium">
+          Add Product Pictures
+        </Label>
         <Input
           id="pictures"
           type="file"
@@ -500,7 +520,28 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
           onChange={handlePicturesUpload}
         />
       </div>
-
+      <div className="grid grid-cols-3 gap-4 mt-4">
+        {base64Pictures.map((picture, index) => (
+          <div key={`new-${index}`} className="relative">
+            <img
+              src={picture}
+              alt={`Product New ${index + 1}`}
+              className="w-full h-32 object-cover rounded cursor-pointer"
+              onClick={() => {
+                setSelectedImage(picture);
+                setIsImageViewerOpen(true);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => removePicture(index)}
+              className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ))}
+      </div>
       <Button
         type="submit"
         className="bg-[#1A3B47] hover:bg-[#388A94] rounded-full"
