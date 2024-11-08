@@ -5,13 +5,14 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 
 export default function CategoriesPage() {
@@ -102,8 +103,8 @@ export default function CategoriesPage() {
         );
         setUpdatedCategory("");
         setSuccessMessage("Category updated successfully!");
+        setSelectedCategoryId(null);
         fetchCategories();
-        setShowEditModal(false);
         setTimeout(() => setSuccessMessage(""), 3000);
       } catch (error) {
         setEditErrorMessage("Category name already exists");
@@ -218,28 +219,59 @@ export default function CategoriesPage() {
                       key={category._id}
                       className="flex justify-between items-center p-4"
                     >
-                      <span className="text-blue-900 font-medium">
-                        {category.name}
-                      </span>
+                      {selectedCategoryId === category._id ? (
+                        <div className="flex-1 mr-2">
+                          <Input
+                            type="text"
+                            value={updatedCategory}
+                            onChange={(e) => setUpdatedCategory(e.target.value)}
+                            className="border-[#808080]"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-[#003f66] font-medium">{category.name}</span>
+                      )}
                       <div className="flex space-x-2">
-                        <Button
-                          onClick={() =>
-                            handleEditClick(category._id, category.name)
-                          }
-                          className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
-                      hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
-                      active:transform active:scale-95 transition-all duration-200"
-                          variant="outline"
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteClick(category)}
-                          className="bg-red-500 hover:bg-red-600 active:bg-red-700 
-                          active:transform active:scale-95 text-white transition-all duration-200"
-                        >
-                          Delete
-                        </Button>
+                        {selectedCategoryId === category._id ? (
+                          <>
+                            <Button
+                              onClick={handleUpdateCategory}
+                              className="bg-green-500 hover:bg-green-600 text-white"
+                            >
+                              Save
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setSelectedCategoryId(null);
+                                setUpdatedCategory('');
+                              }}
+                              className="bg-gray-500 hover:bg-gray-600 text-white"
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              onClick={() => {
+                                setSelectedCategoryId(category._id);
+                                setUpdatedCategory(category.name);
+                              }}
+                              className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
+                              hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
+                              active:transform active:scale-95 transition-all duration-200"
+                              variant="outline"
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteClick(category)}
+                              className="p-2 bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </li>
                   ))}
@@ -262,39 +294,6 @@ export default function CategoriesPage() {
           </div>
         </div>
       </div>
-
-      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
-          </DialogHeader>
-          <Input
-            type="text"
-            value={updatedCategory}
-            onChange={(e) => setUpdatedCategory(e.target.value)}
-            placeholder="New category name"
-          />
-          {editErrorMessage && (
-            <div className="text-red-600 text-sm">{editErrorMessage}</div>
-          )}
-          <DialogFooter>
-            <Button
-              onClick={handleUpdateCategory}
-              className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] 
-              active:transform active:scale-95 text-white transition-all duration-200"
-            >
-              Save Changes
-            </Button>
-            <Button
-              onClick={() => setShowEditModal(false)}
-              className="bg-gray-500 hover:bg-gray-600 active:bg-gray-700 
-              active:transform active:scale-95 text-white transition-all duration-200"
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <DialogContent>

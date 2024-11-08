@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Trash2 } from 'lucide-react';
 
 const TagsPage = () => {
   const [tags, setTags] = useState([]);
@@ -237,9 +238,9 @@ const TagsPage = () => {
                           </Button>
                           <Button
                             onClick={() => handleDeleteClick(tag)}
-                            className="bg-red-500 hover:bg-red-600 text-white"
+                            className="p-2 bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
                           >
-                            Delete
+                            <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>
                         </>
                       )}
