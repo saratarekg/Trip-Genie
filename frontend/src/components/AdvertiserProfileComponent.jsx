@@ -120,6 +120,8 @@ export function AdvertiserProfileComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
 
+      setDropdownOpen(false);
+
       const { email, username, name, hotline, website, description } =
         editedAdvertiser;
       const formData = new FormData();
@@ -191,7 +193,7 @@ export function AdvertiserProfileComponent() {
               onClick={() => setDropdownOpen(!isDropdownOpen)}
               disabled={!isEditing && !logo}
             >
-                {logo ? (
+              {logo ? (
                 logo.public_id ? (
                   <img
                     src={logo.url}
@@ -428,12 +430,11 @@ export function AdvertiserProfileComponent() {
 
       <Modal show={showModal} onClose={closeModal}>
         <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
-        <ImageCropper onImageCropped={handleImageCropped} currentImage={logo
-                      ? logo.public_id
-                        ? logo.url
-                        : logo
-                      : null} />
-                              <div className="mt-4 flex justify-end">
+        <ImageCropper
+          onImageCropped={handleImageCropped}
+          currentImage={logo ? (logo.public_id ? logo.url : logo) : null}
+        />
+        <div className="mt-4 flex justify-end">
           <Button onClick={handleFirstSave} className="mr-2">
             Save
           </Button>

@@ -260,10 +260,10 @@ console.log(picture);
 };
 
 const bookTransportation = async (req, res) => {
-  const { transportationID, seatsToBook } = req.body;
-
+  const { transportationID, seatsToBook, paymentMethod } = req.body;
+  console.log(paymentMethod);
   const touristID = res.locals.user_id;
-  
+
   try {
     // Step 1: Find the transportation and check available seats
     const transportation = await Transportation.findById(transportationID);
@@ -276,16 +276,39 @@ const bookTransportation = async (req, res) => {
       return res.status(400).json({ message: "Not enough seats available" });
     }
 
-    // Step 2: Decrease the remaining seats
-    transportation.remainingSeats -= seatsToBook;
+    // Step 2: If payment method is wallet, check wallet balance and update it
+    if (paymentMethod === "wallet") {
+      const tourist = await Tourist.findById(touristID);
 
-    // Step 3: Save the updated transportation data
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+
+      const totalCost = transportation.ticketCost * seatsToBook;
+
+      console.log(tourist.wallet);
+
+      if (tourist.wallet < totalCost) {
+        return res.status(400).json({ message: "Not enough funds in wallet" });
+      }
+
+      // Use findByIdAndUpdate to update the tourist's wallet
+      await Tourist.findByIdAndUpdate(
+        touristID,
+        { $inc: { wallet: -totalCost } }, // Decrease the wallet amount
+        { new: true }
+      );
+    }
+
+    // Step 3: Decrease the remaining seats
+    transportation.remainingSeats -= seatsToBook;
     await transportation.save();
 
     // Step 4: Create a new booking record in TouristTransportation
     const booking = new TouristTransportation({
       touristID,
       transportationID,
+      seatsToBook,
     });
 
     const savedBooking = await booking.save();
@@ -296,9 +319,12 @@ const bookTransportation = async (req, res) => {
       remainingSeats: transportation.remainingSeats,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {

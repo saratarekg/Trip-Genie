@@ -333,12 +333,10 @@ const ActivityDetail = () => {
     setOpen(false);
   };
 
-
   const handleDeleteSuccess = () => {
     setShowDeleteSuccess(false);
     navigate("/activity");
   };
-
 
   const handleEmailShare = () => {
     const subject = encodeURIComponent(
@@ -532,7 +530,9 @@ const ActivityDetail = () => {
         const bookings = response.data;
         console.log(bookings);
         //search through all bookin.activity._id and check if it matches the current activity id
-        const isBooked = bookings.some((booking) => booking.activity._id === id);
+        const isBooked = bookings.some(
+          (booking) => booking.activity._id === id
+        );
         console.log(isBooked);
         setIsActivityBooked(isBooked);
       } catch (error) {
@@ -702,8 +702,6 @@ const ActivityDetail = () => {
 
   const handleDelete = async () => {
     setShowDeleteConfirm(false);
-    setLoading(true);
-    setDeleteError(null);
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
@@ -718,8 +716,11 @@ const ActivityDetail = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        if (response.status === 400) {
-          setDeleteError(errorData.message);
+        if (
+          response.status === 400 &&
+          errorData.message === "Cannot delete activity with existing bookings"
+        ) {
+          setDeleteError(true);
           return;
         }
         throw new Error("Failed to delete activity");
@@ -1751,8 +1752,21 @@ const ActivityDetail = () => {
         </DialogContent>
       </Dialog>
 
-       <Dialog 
-        open={showDeleteSuccess} 
+      <Dialog open={deleteError} onOpenChange={setDeleteError}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cannot Delete Activity</DialogTitle>
+            <DialogDescription>
+              This activity cannot be deleted because it has active bookings.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setDeleteError(false)}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={showDeleteSuccess}
         onOpenChange={(open) => {
           if (!open) handleDeleteSuccess();
         }}

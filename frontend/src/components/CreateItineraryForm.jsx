@@ -230,8 +230,6 @@ const worldLanguages = [
   "Zulu",
 ];
 
-
-
 const activitySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
@@ -263,7 +261,7 @@ const formSchema = z.object({
     .min(1, "At least one date is required"),
   accessibility: z.boolean(),
   isRepeated: z.boolean(),
-})
+});
 
 const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   const [tags, setTags] = useState([]);
@@ -291,18 +289,18 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
   useEffect(() => {
     if (initialData) {
       if (initialData.timing) {
-        const dateTime = new Date(initialData.timing)
-        setValue("activityTime", format(dateTime, "HH:mm"))
+        const dateTime = new Date(initialData.timing);
+        setValue("activityTime", format(dateTime, "HH:mm"));
       }
-      setValue("tags", initialData.tags)
-      setValue("category", initialData.category)
-      setPictures(initialData.pictures || [])
+      setValue("tags", initialData.tags);
+      setValue("category", initialData.category);
+      setPictures(initialData.pictures || []);
       const base64Files = (initialData.pictures || []).map((file) =>
         URL.createObjectURL(file)
-      )
-      setBase64Pictures(base64Files)
+      );
+      setBase64Pictures(base64Files);
     }
-  }, [initialData, setValue])
+  }, [initialData, setValue]);
 
   const fetchTags = async () => {
     const response = await fetch("http://localhost:4000/api/getAllTags");
@@ -399,15 +397,15 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-        <Label htmlFor="duration">Duration (minutes)</Label>
-        <Input
-          id="duration"
-          type="number"
-          {...register("duration", { valueAsNumber: true })}
-        />
-        {errors.duration && (
-          <p className="text-red-500 text-xs">{errors.duration.message}</p>
-        )}
+          <Label htmlFor="duration">Duration (minutes)</Label>
+          <Input
+            id="duration"
+            type="number"
+            {...register("duration", { valueAsNumber: true })}
+          />
+          {errors.duration && (
+            <p className="text-red-500 text-xs">{errors.duration.message}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="activityTime">Start Time</Label>
@@ -420,9 +418,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-       
-      </div>
+      <div className="grid grid-cols-2 gap-2"></div>
 
       <div className="col-span-2">
         <Label>Categories</Label>
@@ -546,21 +542,19 @@ const ItineraryForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      timeline: "",
       language: "",
       price: "",
       pickUpLocation: "",
       dropOffLocation: "",
-      availableDates: [{ date: "", times: [{ startTime: "", endTime: "" }] }],
+      availableDates: [{ date: "" }],
       accessibility: false,
       isRepeated: false,
     },
   });
 
   const availableDates = watch("availableDates");
-  const isRepeated = watch("isRepeated") // Watch the isRepeated field
-  const today = new Date().toISOString().split('T')[0]
-
+  const isRepeated = watch("isRepeated"); // Watch the isRepeated field
+  const today = new Date().toISOString().split("T")[0];
 
   const handleCreateItinerary = async (data) => {
     setLoading(true);
@@ -574,9 +568,7 @@ const ItineraryForm = () => {
         return;
       }
 
-      const hasEmptyDateOrTime = data.availableDates.some(
-        (date) =>
-          !date.date );
+      const hasEmptyDateOrTime = data.availableDates.some((date) => !date.date);
 
       if (hasEmptyDateOrTime) {
         setError("Please fill in all dates and times.");
@@ -584,8 +576,10 @@ const ItineraryForm = () => {
         return;
       }
 
-      if(data.availableDates.length>1 && (!data.isRepeated)){
-        setError("If the itinerary is not repeated you can only choose one date.");
+      if (data.availableDates.length > 1 && !data.isRepeated) {
+        setError(
+          "If the itinerary is not repeated you can only choose one date."
+        );
         setLoading(false);
         return;
       }
@@ -596,7 +590,6 @@ const ItineraryForm = () => {
 
       const formData = new FormData();
       formData.append("title", data.title);
-      formData.append("timeline", data.timeline);
       formData.append("language", data.language);
       formData.append("price", data.price);
       formData.append("pickUpLocation", data.pickUpLocation);
@@ -604,7 +597,7 @@ const ItineraryForm = () => {
       formData.append("accessibility", data.accessibility);
       formData.append("availableDates", JSON.stringify(data.availableDates));
       formData.append("activities", JSON.stringify(activities));
-      formData.append("isRepeated", data.isRepeated)
+      formData.append("isRepeated", data.isRepeated);
       activities.forEach((activity, index) => {
         activity.pictures.forEach((file, fileIndex) => {
           formData.append(`activities[${index}][pictures][${fileIndex}]`, file);
@@ -643,8 +636,9 @@ const ItineraryForm = () => {
     console.log("Activity:", activity);
     const newActivity = {
       ...activity,
- timing: new Date().toISOString().split('T')[0] + 'T' + activity.activityTime,
-};
+      timing:
+        new Date().toISOString().split("T")[0] + "T" + activity.activityTime,
+    };
     if (editingActivityIndex !== null) {
       const updatedActivities = [...activities];
       updatedActivities[editingActivityIndex] = newActivity;
@@ -672,16 +666,15 @@ const ItineraryForm = () => {
   const addDate = () => {
     // Allow adding dates only if isRepeated is true or if no dates have been added yet
     if (isRepeated || availableDates.length === 0) {
-      setValue("availableDates", [...availableDates, { date: "" }])
+      setValue("availableDates", [...availableDates, { date: "" }]);
     }
-  }
+  };
 
   const removeDate = (dateIndex) => {
-    const newDates = [...availableDates]
-    newDates.splice(dateIndex, 1)
-    setValue("availableDates", newDates)
-  }
-
+    const newDates = [...availableDates];
+    newDates.splice(dateIndex, 1);
+    setValue("availableDates", newDates);
+  };
 
   // const addTime = (dateIndex) => {
   //   const newDates = [...availableDates];
@@ -699,7 +692,6 @@ const ItineraryForm = () => {
 
   //   setValue("availableDates", newDates);
   // };
-
 
   return (
     <div>
@@ -822,23 +814,23 @@ const ItineraryForm = () => {
                 )}
               </div>
               <div className="col-span-2 flex items-center space-x-2">
-          <Controller
-            name="isRepeated"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                id="isRepeated"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            )}
-          />
-          <Label htmlFor="isRepeated" className="text-sm font-medium">
-            Is Repeated
-          </Label>
-        </div>
+                <Controller
+                  name="isRepeated"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isRepeated"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <Label htmlFor="isRepeated" className="text-sm font-medium">
+                  Is Repeated
+                </Label>
+              </div>
 
-        <div className="col-span-2 flex items-center space-x-2">
+              <div className="col-span-2 flex items-center space-x-2">
                 <Controller
                   name="accessibility"
                   control={control}
@@ -856,64 +848,75 @@ const ItineraryForm = () => {
               </div>
 
               <div className="col-span-2 space-y-4 p-4 border rounded">
-  <Label className="text-sm font-medium">Available Dates</Label>
-  
-  {availableDates.map((dateObj, dateIndex) => (
-    <div key={dateIndex} className="flex items-center space-x-2 mb-2">
-      <Controller
-        name={`availableDates.${dateIndex}.date`}
-        control={control}
-        render={({ field }) => (
-          <Input
-          type="date"
-          {...field}
-          value={dateObj.date.split('T')[0]}
-          min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]} // Sets min date to tomorrow
-          className={`w-40 ${
-            errors.availableDates?.[dateIndex]?.date ? "border-red-500" : ""
-          }`}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              e.stopPropagation();
-            }
-          }}
-        />
-        )}
-      />
-      {/* Show remove button only if isRepeated is true or there's more than one date */}
-      {(isRepeated || availableDates.length > 1) && (
-        <Button
-          variant="destructive"
-          size="icon"
-          onClick={() => removeDate(dateIndex)}
-          className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-        >
-          <Trash2 className="h-4 w-4 text-red-500" />
-        </Button>
-      )}
-    </div>
-  ))}
+                <Label className="text-sm font-medium">Available Dates</Label>
 
-  {/* Show add date button only if isRepeated is true or no dates have been added */}
-  {(isRepeated || availableDates.length === 0) && (
-    <Button variant="outline" onClick={addDate} className="mt-2">
-      <Plus className="mr-2 h-4 w-4" /> Add Date
-    </Button>
-  )}
-  
-  {/* Error message when no dates are added */}
-  {availableDates.length === 0 && (
-    <p className="text-red-500 text-xs mt-2">Please add at least one date</p>
-  )}
-  {errors.availableDates && (
-    <span className="text-red-500 block mt-2">
-      {errors.availableDates.message}
-    </span>
-  )}
-</div>
+                {availableDates.map((dateObj, dateIndex) => (
+                  <div
+                    key={dateIndex}
+                    className="flex items-center space-x-2 mb-2"
+                  >
+                    <Controller
+                      name={`availableDates.${dateIndex}.date`}
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          type="date"
+                          {...field}
+                          value={dateObj.date.split("T")[0]}
+                          min={
+                            new Date(
+                              new Date().setDate(new Date().getDate() + 1)
+                            )
+                              .toISOString()
+                              .split("T")[0]
+                          } // Sets min date to tomorrow
+                          className={`w-40 ${
+                            errors.availableDates?.[dateIndex]?.date
+                              ? "border-red-500"
+                              : ""
+                          }`}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }
+                          }}
+                        />
+                      )}
+                    />
+                    {/* Show remove button only if isRepeated is true or there's more than one date */}
+                    {(isRepeated || availableDates.length > 1) && (
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => removeDate(dateIndex)}
+                        className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
 
+                {/* Show add date button only if isRepeated is true or no dates have been added */}
+                {(isRepeated || availableDates.length === 0) && (
+                  <Button variant="outline" onClick={addDate} className="mt-2">
+                    <Plus className="mr-2 h-4 w-4" /> Add Date
+                  </Button>
+                )}
 
+                {/* Error message when no dates are added */}
+                {availableDates.length === 0 && (
+                  <p className="text-red-500 text-xs mt-2">
+                    Please add at least one date
+                  </p>
+                )}
+                {errors.availableDates && (
+                  <span className="text-red-500 block mt-2">
+                    {errors.availableDates.message}
+                  </span>
+                )}
+              </div>
 
               <div className="col-span-2">
                 <Label className="text-sm font-medium">Activities</Label>
@@ -958,8 +961,6 @@ const ItineraryForm = () => {
                   </p>
                 )}
               </div>
-
-              
 
               {error && (
                 <Alert variant="destructive" className="col-span-4">

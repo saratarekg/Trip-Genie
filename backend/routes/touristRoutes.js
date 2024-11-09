@@ -176,7 +176,7 @@ router.get("/complaints", complaintsController.getTouristComplaints);
 router.delete("/delete-account", touristController.deleteAccount);
 
 router.post("/book-transportation", touristController.bookTransportation); 
-router.get("/transportations", transportationController.getAllTransportations);
+router.get("/transportations", transportationController.getAllTransportationsNew);
 
 
 

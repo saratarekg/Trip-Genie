@@ -420,7 +420,8 @@ const createItinerary = async (req, res) => {
 const updateItinerary = async (req, res) => {
   try {
     const tourGuideId = res.locals.user_id; // Get the current tour guide's ID
-
+    console.log(req.files);
+    console.log(req.body);
     // Find the itinerary by ID
     const itinerary = await Itinerary.findById(req.params.id);
 
@@ -444,17 +445,23 @@ const updateItinerary = async (req, res) => {
     // If all checks pass, delete the itinerary
     const {
       title,
-      availableDates,
       price,
       language,
-      timeline,
-      activities,
       accessibility,
       pickUpLocation,
       dropOffLocation,
       appropriate,
       isRepeated,
     } = req.body;
+
+    const activities = JSON.parse(req.body.activities);
+    const availableDates = JSON.parse(req.body.availableDates);
+
+    if (availableDates.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Itinerary must have at least one date" });
+    }
     if (!isRepeated) {
       if (availableDates.length > 1) {
         return res.status(400).json({
@@ -469,13 +476,46 @@ const updateItinerary = async (req, res) => {
         }
       });
     }
-    console.log(activities);
+
+    await (async () => {
+      for (const file of req.files) {
+        const [activityIndex, imageIndex] = file.fieldname
+          .match(/\d+/g)
+          .map(Number);
+
+        //convert the file to base64
+        const base64 = `data:image/jpeg;base64,${file.buffer.toString(
+          "base64"
+        )}`;
+        const result = await cloudinary.uploader.upload(base64, {
+          folder: "Itineraries",
+        });
+
+        activities[activityIndex].pictures[imageIndex] = {
+          url: result.secure_url,
+          public_id: result.public_id,
+        };
+      }
+    })();
+
+    const oldActivitiesPictures = itinerary.activities
+      .map((activity) => activity.pictures.map((picture) => picture.public_id))
+      .flat();
+    const newActivitiesPictures = activities
+      .map((activity) => activity.pictures.map((picture) => picture.public_id))
+      .flat();
+
+    oldActivitiesPictures.forEach(async (public_id) => {
+      if (!newActivitiesPictures.includes(public_id)) {
+        await cloudinary.uploader.destroy(public_id);
+      }
+    });
+
     await Itinerary.findByIdAndUpdate(req.params.id, {
       title,
       availableDates,
       price,
       language,
-      timeline,
       activities,
       accessibility,
       pickUpLocation,

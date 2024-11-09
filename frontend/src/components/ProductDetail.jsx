@@ -68,7 +68,7 @@ const RatingDistributionBar = ({ percentage, count }) => (
     <span className="w-8 text-right">{count} ★</span>
     <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
       <div
-        className="h-full bg-primary rounded-full"
+        className="h-full bg-[#1A3B47] rounded-full"
         style={{ width: `${percentage}%` }}
       />
     </div>
@@ -861,7 +861,7 @@ const ProductDetail = () => {
           <div className="md:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-3xl font-bold">
+                <CardTitle className="text-4xl font-bold">
                   {product.name}
                 </CardTitle>
                 <CardDescription className="flex items-center justify-end"></CardDescription>
@@ -1028,7 +1028,7 @@ const ProductDetail = () => {
               <Card>
                 {/* Product Info Section */}
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold">
+                  <CardTitle className="text-3xl font-bold">
                     {product.name}
                   </CardTitle>
                   <CardDescription className="flex items-center">
@@ -1044,7 +1044,7 @@ const ProductDetail = () => {
                             return (
                               <Star
                                 key={index}
-                                fill="#ffef00"
+                                fill="#F88C33"
                                 strokeWidth={0}
                                 className="w-7 h-7"
                               />
@@ -1054,7 +1054,7 @@ const ProductDetail = () => {
                             return (
                               <StarHalf
                                 key={index}
-                                fill="#ffef00"
+                                fill="#F88C33"
                                 strokeWidth={0}
                                 className="w-7 h-7"
                               />
@@ -1078,7 +1078,7 @@ const ProductDetail = () => {
                       </span>
                     </div>
 
-                    <span className=" text-blue-500 text-medium font-semibold ml-4">
+                    <span className="  text-[#5D9297] text-medium font-semibold ml-4">
                       {product.reviews ? product.reviews.length : 0} Item
                       Ratings
                     </span>
@@ -1161,7 +1161,7 @@ const ProductDetail = () => {
                     )}
                     <div className="flex items-center">
                       {/* <DollarSign className="w-6 h-6 mr-2 text-green-500" /> */}
-                      <span className="text-4xl font-bold">
+                      <span className="text-4xl font-bold text-[#1A3B47]">
                         {formatPrice(product.price)}
                       </span>
                     </div>
@@ -1180,7 +1180,7 @@ const ProductDetail = () => {
                       {/* "View More / View Less" link placed inline */}
                       {product.description.length > characterLimit && (
                         <button
-                          className="text-blue-500 font-semibold inline ml-1 hover:underline "
+                          className="text-[#5D9297] font-semibold inline ml-1 hover:underline "
                           onClick={toggleExpansion}
                         >
                           {isExpanded ? "View Less" : "View More"}
@@ -1194,7 +1194,7 @@ const ProductDetail = () => {
                         {/* Buy Now Button - Only if product quantity is greater than 0 */}
                         {product.quantity > 0 && (
                           <Button
-                            className="w-full text-xl bg-green-500 hover:bg-green-600 text-white font-bold py-2 flex items-center justify-center"
+                            className="w-full text-xl bg-[#388A94] hover:bg-[#2B6870] text-white font-bold py-2 flex items-center justify-center"
                             onClick={() => setShowPurchaseConfirm(true)}
                           >
                             {/* <Wallet className="w-5 h-5 mr-2" /> */}
@@ -1206,7 +1206,7 @@ const ProductDetail = () => {
                         {product.quantity > 0 && (
                           <Button
                             variant="outline"
-                            className="w-full text-xl border-green-500 text-green-500 hover:bg-green-50 font-bold py-2 flex items-center justify-center"
+                            className="w-full text-xl border-[#388A94] text-[#388A94] hover:bg-green-50 font-bold py-2 flex items-center justify-center"
                             onClick={handleAddToCart}
                           >
                             <ShoppingCart className="w-5 h-5 mr-2" />
@@ -1217,7 +1217,7 @@ const ProductDetail = () => {
                         {/* Add to Wishlist Button - Always visible */}
                         <Button
                           variant="secondary"
-                          className="w-full text-xl bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 flex items-center justify-center"
+                          className="w-full text-xl bg-[#1A3B47] hover:bg-[#152D38] text-white font-bold py-2 flex items-center justify-center"
                           onClick={handleAddToWishlist}
                         >
                           <Heart className="w-5 h-5 mr-2" />
