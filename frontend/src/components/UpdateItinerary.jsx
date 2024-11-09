@@ -789,7 +789,7 @@ export default function UpdateItinerary() {
     }
 
 
-    if (!isRepeated) {
+    if (!itinerary.isRepeated) {
       // Check for activities with no timing set
       const activitiesWithoutDate = itinerary.activities.filter(
         (activity) => !activity.timing // Check if timing is missing for non-repeated itinerary
@@ -804,7 +804,8 @@ export default function UpdateItinerary() {
         setLoading(false);
         return;
       }
-    
+
+     if(!itinerary.isRepeated){
       // Check if all activity timings are on or after the first available itinerary date
       const earliestDate = new Date(itinerary.availableDates[0].date);
       
@@ -825,6 +826,7 @@ export default function UpdateItinerary() {
         return;
       }
     }
+  }
     
 
     setLoading(true);
