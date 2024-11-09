@@ -75,6 +75,16 @@ const phoneValidator = (value) => {
   return true;
 };
 
+const convertUrlToBase64 = async (url) => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+};
+
 const StarRating = ({ rating, setRating, readOnly = false }) => {
   return (
     <div className="flex items-center">
@@ -117,6 +127,8 @@ export function TourGuideProfileComponent() {
 
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
   const [showFullComment, setShowFullComment] = useState(false);
+  const [base64Image, setBase64Image] = useState(null);
+
   const handlePrevComment = () =>
     setCurrentCommentIndex((prev) => Math.max(0, prev - 3));
   const handleNextComment = () =>
@@ -164,6 +176,9 @@ export function TourGuideProfileComponent() {
         setTourGuide(response.data);
         setEditedTourGuide(response.data);
         setProfilePicture(response.data.profilePicture);
+        convertUrlToBase64(response.data.profilePicture.url).then((base64) => {
+          setBase64Image(base64);
+        });
       } catch (err) {
         setError(err.message);
       } finally {
@@ -438,7 +453,7 @@ export function TourGuideProfileComponent() {
                     currentImage={
                       profilePicture
                         ? profilePicture.public_id
-                          ?profilePicture.url
+                          ? base64Image
                           : profilePicture
                         : null
                     }

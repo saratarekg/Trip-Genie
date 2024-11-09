@@ -5,7 +5,8 @@ const Seller = require("../models/seller");
 const Admin = require("../models/admin");
 const TourismGovernor = require("../models/tourismGovernor");
 const Product = require("../models/product");
-const activity = require("../models/activity");
+const Activity = require("../models/activity");
+const Itinerary = require("../models/itinerary");
 const ActivityBooking = require("../models/activityBooking");
 const Purchase = require("../models/purchase");
 const ItineraryBooking = require("../models/itineraryBooking");
@@ -192,7 +193,7 @@ const updateTouristProfile = async (req, res) => {
     const tourist1 = await Tourist.findById(res.locals.user_id).lean();
     console.log(tourist1);
     let picture = tourist1.profilePicture;
-console.log(picture);
+    console.log(picture);
     const {
       email,
       username,
@@ -212,26 +213,19 @@ console.log(picture);
     if (profilePicture === null) {
       picture = null;
       if (tourist1.profilePicture !== null) {
-
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
-
       }
     } else if (profilePicture.public_id === undefined) {
-
       const result = await cloudinary.uploader.upload(profilePicture, {
         folder: "tourist-profile-pictures",
       });
-      if (tourist1.profilePicture !== null ) {
-        
-
+      if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
       }
       picture = {
         public_id: result.public_id,
         url: result.secure_url,
       };
-
-
     }
     // Find the Tourist by their ID and update with new data
     const tourist = await Tourist.findByIdAndUpdate(
@@ -323,8 +317,6 @@ const bookTransportation = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
@@ -840,6 +832,22 @@ const deleteAccount = async (req, res) => {
       await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
     }
     await Tourist.findByIdAndDelete(res.locals.user_id);
+    await TourGuide.updateMany(
+      { "comments.tourist": res.locals.user_id }, // Match documents where a comment has the matching tourist
+      { $pull: { comments: { tourist: res.locals.user_id } } } // Pull the comment where the tourist matches
+    );
+    await Activity.updateMany(
+      { "comments.tourist": res.locals.user_id }, // Match documents where a comment has the matching tourist
+      { $pull: { comments: { tourist: res.locals.user_id } } } // Pull the comment where the tourist matches
+    );
+    await Itinerary.updateMany(
+      { "comments.tourist": res.locals.user_id }, // Match documents where a comment has the matching tourist
+      { $pull: { comments: { tourist: res.locals.user_id } } } // Pull the comment where the tourist matches
+    );
+    await Product.updateMany(
+      { "reviews.tourist": res.locals.user_id }, // Match documents where a review has the matching tourist
+      { $pull: { reviews: { tourist: res.locals.user_id } } } // Pull the review where the tourist matches
+    );
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -894,6 +902,22 @@ const deleteTouristAccount = async (req, res) => {
       await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
     }
     await Tourist.findByIdAndDelete(req.params.id);
+    await TourGuide.updateMany(
+      { "comments.tourist": req.params.id }, // Match documents where a comment has the matching tourist
+      { $pull: { comments: { tourist: req.params.id } } } // Pull the comment where the tourist matches
+    );
+    await Activity.updateMany(
+      { "comments.tourist": req.params.id }, // Match documents where a comment has the matching tourist
+      { $pull: { comments: { tourist: req.params.id } } } // Pull the comment where the tourist matches
+    );
+    await Itinerary.updateMany(
+      { "comments.tourist": req.params.id }, // Match documents where a comment has the matching tourist
+      { $pull: { comments: { tourist: req.params.id } } } // Pull the comment where the tourist matches
+    );
+    await Product.updateMany(
+      { "reviews.tourist": req.params.id }, // Match documents where a review has the matching tourist
+      { $pull: { reviews: { tourist: req.params.id } } } // Pull the review where the tourist
+    );
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
