@@ -6,11 +6,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Star } from 'lucide-react';
+import { Star, Wifi, Coffee, Tv, AirVent } from 'lucide-react';
 
 const API_KEY = import.meta.env.VITE_HOTELS_API_KEY;
-
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default function HotelDetails() {
   const { hotelId } = useParams();
@@ -38,7 +36,7 @@ export default function HotelDetails() {
         };
 
         const fetchWithDelay = async (url) => {
-          await delay(1000); // 1 second delay between requests
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
           const response = await fetch(url, { headers });
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -50,13 +48,13 @@ export default function HotelDetails() {
           fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/data?hotel_id=${parsedHotelId}&locale=en-gb`),
           fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/photos?hotel_id=${parsedHotelId}&locale=en-gb`),
           fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/facilities?hotel_id=${parsedHotelId}&locale=en-gb`),
-          fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/room-list?checkin_date=2025-01-18&checkout_date=2025-01-19&hotel_id=${parsedHotelId}&adults_number_by_rooms=2&children_number_by_rooms=0&locale=en-gb&currency=USD&units=metric`)
+          fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/room-list?checkin_date=2025-01-18&checkout_date=2025-01-19&hotel_id=${parsedHotelId}&adults_number_by_rooms=2&children_number_by_rooms=0&currency=USD&units=metric&locale=en-gb`)
         ]);
 
         setHotelData(data);
         setHotelPhotos(photos);
         setHotelFacilities(facilities);
-        setRoomList(roomListData.result || []);
+        setRoomList(Object.values(roomListData.rooms || {}));
       } catch (err) {
         setError('An error occurred while fetching hotel details. Please try again.');
         console.error('Error fetching hotel details:', err);
@@ -117,7 +115,7 @@ export default function HotelDetails() {
             <div className="flex flex-wrap gap-2">
               {hotelFacilities.map((facility, index) => (
                 <Badge key={index} variant="secondary">
-                  {facility.name}
+                  {facility.facility_name}
                 </Badge>
               ))}
             </div>
@@ -145,12 +143,28 @@ export default function HotelDetails() {
                       <CardDescription>Max occupancy: {room.max_occupancy}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="font-bold mb-2">Price: {room.price_breakdown?.gross_price} {room.price_breakdown?.currency}</p>
-                      <ul className="list-disc list-inside">
+                      <div className="flex flex-wrap gap-2 mb-2">
                         {room.highlights.map((highlight, i) => (
-                          <li key={i}>{highlight}</li>
+                          <Badge key={i} variant="outline">{highlight}</Badge>
+                        ))}
+                      </div>
+                      <p className="font-bold mb-2">Bed Configuration:</p>
+                      <ul className="list-disc list-inside mb-4">
+                        {room.bed_configurations[0]?.bed_types.map((bed, i) => (
+                          <li key={i}>{bed.name_with_count}</li>
                         ))}
                       </ul>
+                      <div className="flex flex-wrap gap-2">
+                        {room.facilities.slice(0, 5).map((facility, i) => (
+                          <Badge key={i} variant="secondary">
+                            {facility.name === 'Free WiFi' && <Wifi className="w-4 h-4 mr-1" />}
+                            {facility.name === 'Tea/Coffee maker' && <Coffee className="w-4 h-4 mr-1" />}
+                            {facility.name === 'TV' && <Tv className="w-4 h-4 mr-1" />}
+                            {facility.name === 'Air conditioning' && <AirVent className="w-4 h-4 mr-1" />}
+                            {facility.name}
+                          </Badge>
+                        ))}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -164,15 +178,27 @@ export default function HotelDetails() {
                     <CardDescription>Max occupancy: {room.max_occupancy}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="font-bold mb-2">Price: {room.price_breakdown?.gross_price} {room.price_breakdown?.currency}</p>
-                    <ul className="list-disc list-inside mb-4">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {room.highlights.map((highlight, i) => (
-                        <li key={i}>{highlight}</li>
+                        <Badge key={i} variant="outline">{highlight}</Badge>
+                      ))}
+                    </div>
+                    <p className="font-bold mb-2">Bed Configuration:</p>
+                    <ul className="list-disc list-inside mb-4">
+                      {room.bed_configurations[0]?.bed_types.map((bed, i) => (
+                        <li key={i}>{bed.name_with_count}</li>
                       ))}
                     </ul>
+                    <p className="font-bold mb-2">Facilities:</p>
                     <div className="grid grid-cols-2 gap-2">
                       {room.facilities.map((facility, i) => (
-                        <Badge key={i} variant="outline">{facility}</Badge>
+                        <Badge key={i} variant="secondary">
+                          {facility.name === 'Free WiFi' && <Wifi className="w-4 h-4 mr-1" />}
+                          {facility.name === 'Tea/Coffee maker' && <Coffee className="w-4 h-4 mr-1" />}
+                          {facility.name === 'TV' && <Tv className="w-4 h-4 mr-1" />}
+                          {facility.name === 'Air conditioning' && <AirVent className="w-4 h-4 mr-1" />}
+                          {facility.name}
+                        </Badge>
                       ))}
                     </div>
                   </CardContent>
