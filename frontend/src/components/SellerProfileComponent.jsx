@@ -88,6 +88,7 @@ export function SellerProfileComponent() {
   const handleDiscard = () => {
     setEditedSeller(seller);
     setLogo(seller.logo);
+    setDropdownOpen(false);
     setIsEditing(false);
   };
 
@@ -119,6 +120,7 @@ export function SellerProfileComponent() {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
+      setDropdownOpen(false);
 
       const { name, username, email, mobile, description } = editedSeller;
       const formData = new FormData();
@@ -189,8 +191,6 @@ export function SellerProfileComponent() {
               onClick={() => setDropdownOpen(!isDropdownOpen)}
               disabled={!logo && !isEditing}
             >
-             
-
               {logo ? (
                 logo.public_id ? (
                   <img
@@ -208,8 +208,6 @@ export function SellerProfileComponent() {
               ) : (
                 <User className="w-12 h-12 text-white" />
               )}{" "}
-
-
             </button>
 
             {isDropdownOpen && (
@@ -336,10 +334,11 @@ export function SellerProfileComponent() {
                     inputProps={{
                       name: "mobile",
                       required: true,
-                      className: `w-full p-2 ${validationMessages.mobile
+                      className: `w-full p-2 ${
+                        validationMessages.mobile
                           ? "border-red-500"
                           : "border-gray-300"
-                        }`,
+                      }`,
                     }}
                     containerClass="w-full"
                     inputStyle={{ width: "60%", marginLeft: "45px" }}
@@ -360,10 +359,11 @@ export function SellerProfileComponent() {
 
           <div>
             <span
-              className={`px-2 py-1 rounded-full text-xs font-semibold ${seller.isAccepted
+              className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                seller.isAccepted
                   ? "bg-green-100 text-green-800 text-lg"
                   : "bg-yellow-100 text-yellow-800"
-                }`}
+              }`}
             >
               <CheckCircle className="inline w-4 h-4 mr-1" />
               {seller.isAccepted ? "Account Accepted" : "Account Pending"}
@@ -407,11 +407,10 @@ export function SellerProfileComponent() {
 
       <Modal show={showModal} onClose={closeModal}>
         <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
-        <ImageCropper onImageCropped={handleImageCropped} currentImage={logo
-                      ? logo.public_id
-                        ? logo.url
-                        : logo
-                      : null} />
+        <ImageCropper
+          onImageCropped={handleImageCropped}
+          currentImage={logo ? (logo.public_id ? logo.url : logo) : null}
+        />
         <div className="mt-4 flex justify-end">
           <Button onClick={handleFirstSave} className="mr-2">
             Save
