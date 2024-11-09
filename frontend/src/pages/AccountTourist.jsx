@@ -701,26 +701,36 @@ export default function AccountManagement() {
     ],
   };
 
-  const logOut = async () => {
-    console.log("Logging out...");
-    try {
-      const response = await fetch("http://localhost:4000/auth/logout");
+  const LogoutPopup = ({ onConfirm, onCancel }) => { return ( <div className="popup"> <div className="popup-content"> <h3>Are you sure you want to log out?</h3> <button onClick={onConfirm}>Yes</button> <button onClick={onCancel}>No</button> </div> </div> ); };
 
-      if (response.ok) {
-        Cookies.set("jwt", "");
-        Cookies.set("role", "");
-        Cookies.remove("jwt");
-        Cookies.remove("role");
-        console.log("Logged out successfully");
-        navigate("/login");
-        window.location.reload();
-      } else {
-        console.error("Logout failed.");
-      }
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
+  const [showPopup, setShowPopup] = useState(false); 
+ 
+  const logOut = async () => {
+     console.log("Logging out...");
+      try { const response = await fetch("http://localhost:4000/auth/logout");
+         if (response.ok) { 
+          Cookies.set("jwt", ""); 
+          Cookies.set("role", ""); 
+          Cookies.remove("jwt"); 
+          Cookies.remove("role"); 
+          console.log("Logged out successfully"); 
+          navigate("/login"); window.location.reload(); 
+        } 
+        else { 
+          console.error("Logout failed."); 
+        } } catch (error) { 
+          console.error("Error during logout:", error); 
+        } }; 
+
+    const handleLogoutClick = () => { 
+      setShowPopup(true); };
+
+     const handleConfirmLogout = () => { 
+      setShowPopup(false); logOut(); }; 
+
+      const handleCancelLogout = () =>
+         { setShowPopup(false); }; 
+
 
   const role = getUserRole();
 
@@ -782,12 +792,14 @@ export default function AccountManagement() {
                 })}
                 <li>
                   <button
-                    onClick={logOut}
+                    onClick={handleLogoutClick}
                     className="flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left"
                   >
                     <LogOut className="h-5 w-5 mr-3" />
                     Logout
                   </button>
+                  {showPopup && ( <LogoutPopup onConfirm={handleConfirmLogout} onCancel={handleCancelLogout} /> )}
+
                 </li>
               </ul>
             </nav>

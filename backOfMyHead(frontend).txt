@@ -10,8 +10,7 @@ transition hotel and flights in home page
 
 ActivitySlider component : In the homepage some activity cards are bigger than others + arrows are different color. 
 
-are you sure you want to logout popup able el logout!!
-
+are you sure you want to logout popup able el logout!! yes im sureee
 
 my itineraries fe tour guide el navbar mesh lel a5r
 
@@ -22,10 +21,10 @@ all products spaces on the side fi haga ghalat ya radwa screen sizes.
 
 copy link and share sinlge products
 
-time in transportation cards
 
+time in transportation cards
 transportation edit doesnt close for some reason
-transition chooses and updates to a future date
+transportation creates and updates to a future date
 
 Orange: #F88C33
 Beige/Tan: #E6DCCF
