@@ -852,8 +852,9 @@ export function AllItinerariesComponent() {
                 setShowDeleteSuccess(false);
                 navigate("/all-itineraries");
               }}
+              className = "bg-gray-400 hover:bg-gray-500"
             >
-              Back to All Itineraries
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
