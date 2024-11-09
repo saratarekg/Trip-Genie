@@ -889,7 +889,7 @@ const ItineraryForm = () => {
       )}
     />
     <Label htmlFor="isRepeated" className="text-sm font-medium">
-      Repeated Itinerary
+      Repeatable Itinerary
     </Label>
   </div>
   
