@@ -51,7 +51,8 @@ const updateTourGuide = async (req, res) => {
     } = req.body; // Data to update
     const { id } = req.params;
 
-    let { profilePicture } = req.body;
+
+    let  profilePicture  =req.body.profilePicture? JSON.parse(req.body.profilePicture):undefined;
 
     if (profilePicture === undefined) {
       profilePicture = null;
@@ -112,7 +113,7 @@ const updateTourGuideProfile = async (req, res) => {
       previousWorks,
     } = req.body;
 
-    let { profilePicture } = req.body;
+    let  profilePicture  =req.body.profilePicture? JSON.parse(req.body.profilePicture):undefined;
 
     const nat = await Nationality.findOne({ _id: nationality });
 

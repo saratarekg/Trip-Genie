@@ -86,9 +86,12 @@ export function TouristProfileComponent() {
         setTourist(response.data);
         setEditedTourist(response.data);
         setSelectedImage(response.data.profilePicture);
-        convertUrlToBase64(response.data.profilePicture.url).then((res) => {
-          setBase64Image(res);
-        });
+    
+        if (response.data.profilePicture && response.data.profilePicture.url) {
+          convertUrlToBase64(response.data.profilePicture.url).then((res) => {
+            setBase64Image(res)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {

@@ -49,9 +49,12 @@ export function AdvertiserProfileComponent() {
         setAdvertiser(response.data);
         setEditedAdvertiser(response.data);
         setLogo(response.data.logo);
-        convertUrlToBase64(response.data.logo.url).then((base64) =>
-          setBase64Image(base64)
-        );
+       
+        if (response.data.logo && response.data.logo.url) {
+          convertUrlToBase64(response.data.logo.url).then((base64) => {
+            setBase64Image(base64)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -140,7 +143,7 @@ export function AdvertiserProfileComponent() {
         editedAdvertiser;
       const formData = new FormData();
       formData.append("name", name);
-      logo && formData.append("logo", logo);
+      logo && formData.append("logo",JSON.stringify(logo));
       formData.append("username", username);
       formData.append("email", email);
       formData.append("hotline", hotline);

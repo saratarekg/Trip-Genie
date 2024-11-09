@@ -61,9 +61,12 @@ export function SellerProfileComponent() {
         setSeller(response.data);
         setEditedSeller(response.data);
         setLogo(response.data.logo);
-        convertUrlToBase64(response.data.logo.url).then((data) =>
-          setBase64Image(data)
-        );
+      
+        if (response.data.logo && response.data.logo.url) {
+          convertUrlToBase64(response.data.logo.url).then((data) => {
+            setBase64Image(data)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -139,7 +142,7 @@ export function SellerProfileComponent() {
       const { name, username, email, mobile, description } = editedSeller;
       const formData = new FormData();
       formData.append("name", name);
-      logo && formData.append("logo", logo);
+      logo && formData.append("logo", JSON.stringify(logo));
       formData.append("username", username);
       formData.append("email", email);
       formData.append("mobile", "+" + mobile);
