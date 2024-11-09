@@ -62,7 +62,7 @@ const renderStars = (rating) => {
 };
 
 const ProductCard = ({ product, onSelect, userInfo }) => {
-  const [currencySymbol, setCurrencySymbol] = useState('');
+  const [currencySymbol, setCurrencySymbol] = useState("");
 
   const getCurrencySymbol = useCallback(async () => {
     try {
@@ -82,7 +82,6 @@ const ProductCard = ({ product, onSelect, userInfo }) => {
   useEffect(() => {
     getCurrencySymbol();
   }, [getCurrencySymbol]);
-
 
   const formatPrice = (price) => {
     return `${currencySymbol}${price.toFixed(2)}`;
@@ -167,12 +166,19 @@ export function MyProducts() {
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
-        const url = new URL(`http://localhost:4000/${role}/products?myproducts=true`);
+        const url = new URL(
+          `http://localhost:4000/${role}/products?myproducts=true`
+        );
+        if (params.sort) url.searchParams.append("sort", params.sort);
+        if (params.asc !== undefined)
+          url.searchParams.append("asc", params.asc);
+        if (params.searchBy)
+          url.searchParams.append("searchBy", params.searchBy);
 
-        if (params.searchBy) url.searchParams.append("searchBy", params.searchBy);
-        if (params.asc) url.searchParams.append("asc", params.asc);
-        if (params.minPrice) url.searchParams.append("minPrice", params.minPrice);
-        if (params.maxPrice) url.searchParams.append("maxPrice", params.maxPrice);
+        if (params.minPrice)
+          url.searchParams.append("minPrice", params.minPrice);
+        if (params.maxPrice)
+          url.searchParams.append("maxPrice", params.maxPrice);
         if (params.rating) url.searchParams.append("rating", params.rating);
         if (params.categories && params.categories.length > 0) {
           url.searchParams.append("categories", params.categories.join(","));
@@ -218,6 +224,7 @@ export function MyProducts() {
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         rating: selectedRating,
+        sort: sortBy,
         asc: sortOrder,
         categories: selectedCategories,
       });
@@ -343,15 +350,22 @@ export function MyProducts() {
                 </div>
               </Button>
             </div>
-
+            {/* Sort by Price */}
             <div className="mb-6">
-              <Link
-                to="/create-product"
-                className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-orange-400 text-white"
+              <h3 className="font-medium text-[#1A3B47] mb-2">Sort by Price</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                style={{ borderRadius: "20px" }}
+                onClick={() => handleSort("price")}
               >
-                <Plus className="mr-2 w-4 h-4" />
-                Create Product
-              </Link>
+                <ArrowUpDown className="w-4 h-4" />
+                <span>Price</span>
+                <div className="ml-auto">
+                  {sortBy === "price" ? (sortOrder === 1 ? "↓" : "↑") : ""}
+                </div>
+              </Button>
             </div>
           </div>
 
@@ -454,11 +468,13 @@ export function MyProducts() {
                       handlePageChange(currentPage + 1);
                     }}
                     disabled={
-                      currentPage === Math.ceil(products.length / productsPerPage) ||
+                      currentPage ===
+                        Math.ceil(products.length / productsPerPage) ||
                       products.length === 0
                     }
                     className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === Math.ceil(products.length / productsPerPage)
+                      currentPage ===
+                      Math.ceil(products.length / productsPerPage)
                         ? "text-gray-300"
                         : "text-blue-600"
                     }`}
