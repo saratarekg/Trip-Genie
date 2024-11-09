@@ -3,12 +3,31 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronLeft, Check, X, Trash2,Edit, CheckCircleIcon } from "lucide-react";
-import { FaMapMarkerAlt, FaDollarSign, FaClock, FaHourglassHalf, FaChair } from 'react-icons/fa';
+import {
+  ChevronLeft,
+  Check,
+  X,
+  Trash2,
+  Edit,
+  CheckCircleIcon,
+} from "lucide-react";
+import {
+  FaMapMarkerAlt,
+  FaDollarSign,
+  FaClock,
+  FaHourglassHalf,
+  FaChair,
+} from "react-icons/fa";
 import * as z from "zod";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,28 +70,28 @@ const getMaxSeats = (vehicleType) => {
   }
 };
 
-const transportationSchema = z.object({
-  from: z.string().min(1, "From is required"),
-  to: z.string().min(1, "To is required"),
-  vehicleType: z.enum(vehicleTypes),
-  ticketCost: z.number().positive("Ticket cost must be positive"),
-  timeDeparture: z.string().min(1, "Departure time is required"),
-  estimatedDuration: z.number().positive("Duration must be positive"),
-  remainingSeats: z
-    .number()
-    .int()
-    .positive("Remaining seats must be positive")
-    .refine(
-      (val, ctx) => {
-        const maxSeats = 100;
-        return val <= maxSeats;
-      },
-      {
-        message:
-          "Remaining seats must not exceed the maximum for the selected vehicle type",
-      }
-    ),
-});
+// const transportationSchema = z.object({
+//   from: z.string().min(1, "From is required"),
+//   to: z.string().min(1, "To is required"),
+//   vehicleType: z.enum(vehicleTypes),
+//   ticketCost: z.number().positive("Ticket cost must be positive"),
+//   timeDeparture: z.string().min(1, "Departure time is required"),
+//   estimatedDuration: z.number().positive("Duration must be positive"),
+//   remainingSeats: z
+//     .number()
+//     .int()
+//     .positive("Remaining seats must be positive")
+//     .refine(
+//       (val, ctx) => {
+//         const maxSeats = 100;
+//         return val <= maxSeats;
+//       },
+//       {
+//         message:
+//           "Remaining seats must not exceed the maximum for the selected vehicle type",
+//       }
+//     ),
+// });
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -145,24 +164,24 @@ export default function UpdateActivity() {
   const [selectedImage, setSelectedImage] = useState(null);
   const navigate = useNavigate();
 
-  const [transportations, setTransportations] = useState([]);
-  const [showTransportationForm, setShowTransportationForm] = useState(false);
-  const [editingTransportationIndex, setEditingTransportationIndex] =
-    useState(null);
+  // const [transportations, setTransportations] = useState([]);
+  // const [showTransportationForm, setShowTransportationForm] = useState(false);
+  // const [editingTransportationIndex, setEditingTransportationIndex] =
+  //   useState(null);
 
-  const {
-    register: registerTransportation,
-    handleSubmit: handleSubmitTransportation,
-    reset: resetTransportation,
-    control: controlTransportation,
-    setValue: setTransportationValue,
-    watch: watchTransportation,
-    formState: { errors: transportationErrors },
-  } = useForm({
-    resolver: zodResolver(transportationSchema),
-  });
+  // const {
+  //   register: registerTransportation,
+  //   handleSubmit: handleSubmitTransportation,
+  //   reset: resetTransportation,
+  //   control: controlTransportation,
+  //   setValue: setTransportationValue,
+  //   watch: watchTransportation,
+  //   formState: { errors: transportationErrors },
+  // } = useForm({
+  //   resolver: zodResolver(transportationSchema),
+  // });
 
-  const selectedVehicleType = watchTransportation("vehicleType");
+  // const selectedVehicleType = watchTransportation("vehicleType");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -204,7 +223,7 @@ export default function UpdateActivity() {
         setValue("pictures", activityData.pictures);
 
         setPictures(activityData.pictures);
-        setTransportations(activityData.transportations || []);
+        // setTransportations(activityData.transportations || []);
 
         // Set location for the map
         const activityLocation = activityData.location.coordinates;
@@ -277,9 +296,9 @@ export default function UpdateActivity() {
       formData.append("newPictures", picture);
     });
 
-    transportations.forEach((transport) => {
-      formData.append("transportations[]", transport._id);
-    });
+    // transportations.forEach((transport) => {
+    //   formData.append("transportations[]", transport._id);
+    // });
 
     try {
       console.log("Location coordinates:", data.location.coordinates);
@@ -383,76 +402,79 @@ export default function UpdateActivity() {
     navigate("/activity");
   };
 
-  const onSubmitTransportation = async (data) => {
-    try {
-      const token = Cookies.get("jwt");
-      let response;
-      if (editingTransportationIndex !== null) {
-        // Update existing transportation
-        response = await axios.put(
-          `http://localhost:4000/advertiser/transportations/${transportations[editingTransportationIndex]._id}`,
-          data,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const updatedTransportations = [...transportations];
-        updatedTransportations[editingTransportationIndex] = response.data;
-        setTransportations(updatedTransportations);
-      } else {
-        // Create new transportation
-        response = await axios.post(
-          "http://localhost:4000/advertiser/transportations",
-          data,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setTransportations((prevTransportations) => [
-          ...prevTransportations,
-          response.data,
-        ]);
-      }
-      setShowTransportationForm(false);
-      resetTransportation();
-      setEditingTransportationIndex(null);
-    } catch (error) {
-      console.error("Failed to create/update transportation:", error);
-    }
-  };
+  // const onSubmitTransportation = async (data) => {
+  //   try {
+  //     const token = Cookies.get("jwt");
+  //     let response;
+  //     if (editingTransportationIndex !== null) {
+  //       // Update existing transportation
+  //       response = await axios.put(
+  //         `http://localhost:4000/advertiser/transportations/${transportations[editingTransportationIndex]._id}`,
+  //         data,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       const updatedTransportations = [...transportations];
+  //       updatedTransportations[editingTransportationIndex] = response.data;
+  //       setTransportations(updatedTransportations);
+  //     } else {
+  //       // Create new transportation
+  //       response = await axios.post(
+  //         "http://localhost:4000/advertiser/transportations",
+  //         data,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       setTransportations((prevTransportations) => [
+  //         ...prevTransportations,
+  //         response.data,
+  //       ]);
+  //     }
+  //     setShowTransportationForm(false);
+  //     resetTransportation();
+  //     setEditingTransportationIndex(null);
+  //   } catch (error) {
+  //     console.error("Failed to create/update transportation:", error);
+  //   }
+  // };
 
-  const handleEditTransportation = (index) => {
-    const transportation = transportations[index];
-    resetTransportation({
-      ...transportation,
-      timeDeparture: format(parseISO(transportation.timeDeparture), "yyyy-MM-dd'T'HH:mm"),
-    });
-    setEditingTransportationIndex(index);
-    setShowTransportationForm(true);
-  };
+  // const handleEditTransportation = (index) => {
+  //   const transportation = transportations[index];
+  //   resetTransportation({
+  //     ...transportation,
+  //     timeDeparture: format(
+  //       parseISO(transportation.timeDeparture),
+  //       "yyyy-MM-dd'T'HH:mm"
+  //     ),
+  //   });
+  //   setEditingTransportationIndex(index);
+  //   setShowTransportationForm(true);
+  // };
 
   const formatDate = (dateString) => {
+    console.log("Date string:", dateString);
     return format(parseISO(dateString), "dd/MM/yyyy HH:mm");
   };
 
-
-  const handleDeleteTransportation = async (index) => {
-    try {
-      const token = Cookies.get("jwt");
-      await axios.delete(
-        `http://localhost:4000/advertiser/transportations/${transportations[index]._id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const updatedTransportations = transportations.filter(
-        (_, i) => i !== index
-      );
-      setTransportations(updatedTransportations);
-    } catch (error) {
-      console.error("Failed to delete transportation:", error);
-    }
-  };
+  // const handleDeleteTransportation = async (index) => {
+  //   try {
+  //     const token = Cookies.get("jwt");
+  //     await axios.delete(
+  //       `http://localhost:4000/advertiser/transportations/${transportations[index]._id}`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+  //     const updatedTransportations = transportations.filter(
+  //       (_, i) => i !== index
+  //     );
+  //     setTransportations(updatedTransportations);
+  //   } catch (error) {
+  //     console.error("Failed to delete transportation:", error);
+  //   }
+  // };
 
   return (
     <div>
@@ -471,11 +493,15 @@ export default function UpdateActivity() {
               Update Activity
             </h2>
             <p className="text-sm mb-6 text-[#1A3B47]">
-              Update the details of your activity. Make sure all information is accurate and up-to-date.
+              Update the details of your activity. Make sure all information is
+              accurate and up-to-date.
             </p>
           </div>
           <div className="w-full md:w-3/4 p-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-4 gap-4">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="grid grid-cols-4 gap-4"
+            >
               <div className="col-span-2">
                 <Label htmlFor="name">Name</Label>
                 <Controller
@@ -583,9 +609,7 @@ export default function UpdateActivity() {
                   )}
                 />
                 {errors.price && (
-                  <p className="text-red-500 text-xs">
-                    {errors.price.message}
-                  </p>
+                  <p className="text-red-500 text-xs">{errors.price.message}</p>
                 )}
               </div>
 
@@ -609,8 +633,6 @@ export default function UpdateActivity() {
                   </p>
                 )}
               </div>
-
-             
 
               <div className="col-span-2">
                 <Label>Categories</Label>
@@ -735,7 +757,7 @@ export default function UpdateActivity() {
                 </div>
               </div>
 
-              <div className="col-span-4 space-y-4">
+              {/* <div className="col-span-4 space-y-4">
                 <Label>Transportation Options</Label>
                 {transportations.map((transport, index) => (
                   <div
@@ -743,29 +765,47 @@ export default function UpdateActivity() {
                     className="p-4 border rounded-md flex justify-between items-center"
                   >
                     <div>
-                      <p><strong>From:</strong> {transport.from}</p>
-                      <p><strong>To:</strong> {transport.to}</p>
-                      <p><strong>Vehicle:</strong> {transport.vehicleType}</p>
-                      <p><strong>Ticket Cost:</strong> {transport.ticketCost}</p>
-                      <p><strong>Departure:</strong> {formatDate(transport.timeDeparture)}</p>
-                      <p><strong>Duration:</strong> {transport.estimatedDuration} hours</p>
-                      <p><strong>Remaining Seats:</strong> {transport.remainingSeats}</p>
+                      <p>
+                        <strong>From:</strong> {transport.from}
+                      </p>
+                      <p>
+                        <strong>To:</strong> {transport.to}
+                      </p>
+                      <p>
+                        <strong>Vehicle:</strong> {transport.vehicleType}
+                      </p>
+                      <p>
+                        <strong>Ticket Cost:</strong> {transport.ticketCost}
+                      </p>
+                      {console.log(transport)}
+                      <p>
+                        <strong>Departure:</strong>{" "}
+                        {formatDate(transport.timeDeparture)}
+                      </p>
+                      <p>
+                        <strong>Duration:</strong> {transport.estimatedDuration}{" "}
+                        hours
+                      </p>
+                      <p>
+                        <strong>Remaining Seats:</strong>{" "}
+                        {transport.remainingSeats}
+                      </p>
                     </div>
                     <div className="space-x-2">
                       <Button
                         type="button"
                         onClick={() => handleEditTransportation(index)}
                         className="p-2 rounded-full  w-10 h-10 bg-blue-100 hover:bg-blue-200 transition duration-300 ease-in-out mr-2"
-                        >
-                                                  <Edit className="h-4 w-4 text-blue-500" />
+                      >
+                        <Edit className="h-4 w-4 text-blue-500" />
                       </Button>
                       <Button
                         type="button"
                         onClick={() => handleDeleteTransportation(index)}
                         className="p-2 w-10 h-10 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -775,8 +815,8 @@ export default function UpdateActivity() {
                   className="bg-[#5D9297] hover:bg-[#1A3B47] text-white w-full"
                 >
                   Add Transportation
-                </Button> */}
-              </div>
+                </Button> 
+              </div> */}
 
               <Button
                 type="submit"
@@ -791,26 +831,30 @@ export default function UpdateActivity() {
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-  <DialogContent className="text-left"> {/* Ensures all text inside DialogContent is left-aligned */}
-    <DialogHeader>
-      <DialogTitle className="flex items-center space-x-2">
-        <CheckCircleIcon className="text-green-500" />
-        <span>Activity Updated</span>
-      </DialogTitle>
-      <DialogDescription className="text-left">
-        The activity has been successfully updated.
-      </DialogDescription>
-    </DialogHeader>
-    <DialogFooter className="flex justify-center"> {/* Centers the button */}
-      <Button
-        onClick={handleGoBack}
-        className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
-      >
-        Back to Activities
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+        <DialogContent className="text-left">
+          {" "}
+          {/* Ensures all text inside DialogContent is left-aligned */}
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <CheckCircleIcon className="text-green-500" />
+              <span>Activity Updated</span>
+            </DialogTitle>
+            <DialogDescription className="text-left">
+              The activity has been successfully updated.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex justify-center">
+            {" "}
+            {/* Centers the button */}
+            <Button
+              onClick={handleGoBack}
+              className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+            >
+              Back to Activities
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {selectedImage && (
         <Dialog
@@ -826,7 +870,7 @@ export default function UpdateActivity() {
           </DialogContent>
         </Dialog>
       )}
-      <Dialog
+      {/* <Dialog
         open={showTransportationForm}
         onOpenChange={setShowTransportationForm}
       >
@@ -861,31 +905,31 @@ export default function UpdateActivity() {
               )}
             </div>
             <div>
-            <Label htmlFor="vehicleType">Vehicle Type</Label>
-            <Controller
-              name="vehicleType"
-              control={controlTransportation}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select vehicle type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {vehicleTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <Label htmlFor="vehicleType">Vehicle Type</Label>
+              <Controller
+                name="vehicleType"
+                control={controlTransportation}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select vehicle type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicleTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {transportationErrors.vehicleType && (
+                <p className="text-red-500 text-sm">
+                  {transportationErrors.vehicleType.message}
+                </p>
               )}
-            />
-            {transportationErrors.vehicleType && (
-              <p className="text-red-500 text-sm">
-                {transportationErrors.vehicleType.message}
-              </p>
-            )}
-          </div>
+            </div>
             <div>
               <Label htmlFor="ticketCost">Ticket Cost</Label>
               <Input
@@ -913,13 +957,20 @@ export default function UpdateActivity() {
                     value={field.value}
                     onChange={(e) => {
                       const localDate = new Date(e.target.value);
-                      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+                      const utcDate = new Date(
+                        localDate.getTime() -
+                          localDate.getTimezoneOffset() * 60000
+                      );
                       field.onChange(utcDate.toISOString().slice(0, 16));
                     }}
                   />
                 )}
               />
-              {transportationErrors.timeDeparture && <p className="text-red-500">{transportationErrors.timeDeparture.message}</p>}
+              {transportationErrors.timeDeparture && (
+                <p className="text-red-500">
+                  {transportationErrors.timeDeparture.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="estimatedDuration">
@@ -962,7 +1013,7 @@ export default function UpdateActivity() {
             </Button>
           </form>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }

@@ -161,12 +161,10 @@ const ItineraryCard = ({
       const decodedToken = jwtDecode.jwtDecode(token);
       setUserId(decodedToken.id);
     }
-  }, []); 
+  }, []);
 
   const uniqueCategories = new Set();
   const uniqueTags = new Set();
-
-
 
   return (
     <div
@@ -189,7 +187,6 @@ const ItineraryCard = ({
             </span>
           )}
         </div>
-        <p className="text-sm text-gray-600 mb-2">{itinerary.timeline}</p>
         <div className="flex justify-between items-center mb-2">
           <span className="text-lg font-bold text-blue-600">
             {formatPrice(itinerary.price)}/Day
@@ -197,38 +194,42 @@ const ItineraryCard = ({
           <span className="text-sm text-gray-600">{itinerary.language}</span>
         </div>
         <div className="flex flex-wrap gap-2">
-      {itinerary.activities?.flatMap((activity, index) => [
-        ...(activity.category?.filter((cat) => {
-          if (uniqueCategories.has(cat.name)) {
-            return false;
-          }
-          uniqueCategories.add(cat.name);
-          return true;
-        }).map((cat) => (
-          <span
-            key={`cat-${index}-${cat.id || cat.name}`}
-            className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full"
-          >
-            {cat.name}
-          </span>
-        )) || []),
+          {itinerary.activities?.flatMap((activity, index) => [
+            ...(activity.category
+              ?.filter((cat) => {
+                if (uniqueCategories.has(cat.name)) {
+                  return false;
+                }
+                uniqueCategories.add(cat.name);
+                return true;
+              })
+              .map((cat) => (
+                <span
+                  key={`cat-${index}-${cat.id || cat.name}`}
+                  className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full"
+                >
+                  {cat.name}
+                </span>
+              )) || []),
 
-        ...(activity.tags?.filter((tag) => {
-          if (uniqueTags.has(tag.type)) {
-            return false;
-          }
-          uniqueTags.add(tag.type);
-          return true;
-        }).map((tag) => (
-          <span
-            key={`tag-${index}-${tag.id || tag.type}`}
-            className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
-          >
-            {tag.type}
-          </span>
-        )) || [])
-      ])}
-    </div>
+            ...(activity.tags
+              ?.filter((tag) => {
+                if (uniqueTags.has(tag.type)) {
+                  return false;
+                }
+                uniqueTags.add(tag.type);
+                return true;
+              })
+              .map((tag) => (
+                <span
+                  key={`tag-${index}-${tag.id || tag.type}`}
+                  className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
+                >
+                  {tag.type}
+                </span>
+              )) || []),
+          ])}
+        </div>
       </div>
 
       {role === "tour-guide" && userId === itinerary.tourGuide._id && (
@@ -263,7 +264,7 @@ export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
-  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
   const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
   const [currentPage, setCurrentPage] = useState(1);

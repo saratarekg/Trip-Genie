@@ -217,6 +217,7 @@ export function TourGuideProfileComponent() {
   const handleDiscard = () => {
     setEditedTourGuide(tourGuide);
     setProfilePicture(tourGuide.profilePicture);
+    setDropdownOpen(false);
     setIsEditing(false);
   };
 
@@ -269,6 +270,8 @@ export function TourGuideProfileComponent() {
         name,
         previousWorks,
       } = editedTourGuide;
+
+      setDropdownOpen(false);
 
       // Modify the mobile field in the editedTourGuide object directly
 
@@ -393,7 +396,6 @@ export function TourGuideProfileComponent() {
   };
   return (
     <div>
-      
       <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Changed max-w-3xl to max-w-4xl */}
         <div className="p-8">

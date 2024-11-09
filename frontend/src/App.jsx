@@ -12,8 +12,6 @@ import UpdateItinerary from "./components/UpdateItinerary.jsx";
 import UpdateProduct from "./components/UpdateProduts.jsx";
 import UpdatehistoricalPlace from "./components/UpdateHP.jsx";
 import ProductDetail from "./components/ProductDetail.jsx";
-import { TourGuideProfileComponent } from "./components/tourGuideProfile.jsx";
-import { TouristProfileComponent } from "./components/touristProfile.jsx";
 
 import ShoppingCart from "./components/touristCart.jsx";
 import WishlistPage from "./components/touristWishlist.jsx";
@@ -48,8 +46,6 @@ import AccountTourist from "./pages/AccountTourist.jsx";
 
 import UpdateActivity from "./components/UpdateActivity.jsx";
 import CreateActivity from "./pages/CreateActivity.jsx";
-import SellerProfile from "./pages/SellerProfile.jsx";
-import AdvertiserProfile from "./pages/AdvertiserProfile.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
 import CreateHtpage from "./pages/CreateHtpage.jsx";
 import NotFound from "./components/NotFound.jsx";
@@ -170,7 +166,14 @@ function AppContent() {
             path="/account/*"
             element={
               <ProtectedRoute
-                allowedRoles={["tourist", "advertiser", "seller", "tour-guide", "admin" , "tourism-governor"]}
+                allowedRoles={[
+                  "tourist",
+                  "advertiser",
+                  "seller",
+                  "tour-guide",
+                  "admin",
+                  "tourism-governor",
+                ]}
               >
                 <AccountTourist />
               </ProtectedRoute>
@@ -182,22 +185,6 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["advertiser"]}>
                 <CreateActivity />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/seller-profile"
-            element={
-              <ProtectedRoute allowedRoles={["seller"]}>
-                <SellerProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/advertiser-profile"
-            element={
-              <ProtectedRoute allowedRoles={["advertiser"]}>
-                <AdvertiserProfile />
               </ProtectedRoute>
             }
           />
@@ -216,7 +203,7 @@ function AppContent() {
             path="/historical-place/:id"
             element={
               <ProtectedRoute
-                allowedRoles={["tourism-governor", "guest", "tourist","admin"]}
+                allowedRoles={["tourism-governor", "guest", "tourist", "admin"]}
               >
                 <HistoricalPlaceDetail />
               </ProtectedRoute>
@@ -231,22 +218,6 @@ function AppContent() {
             }
           />
           <Route
-            path="/tour-guide-profile"
-            element={
-              <ProtectedRoute allowedRoles={["tour-guide"]}>
-                <TourGuideProfileComponent />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tourist-profile"
-            element={
-              <ProtectedRoute allowedRoles={["tourist"]}>
-                <TouristProfileComponent />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/all-itineraries"
             element={
               <ProtectedRoute
@@ -256,38 +227,30 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/my-itineraries"
             element={
-              <ProtectedRoute
-                allowedRoles={["tour-guide"]}
-              >
+              <ProtectedRoute allowedRoles={["tour-guide"]}>
                 <MyItinerariesComponent />
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/my-activities"
             element={
-              <ProtectedRoute
-                allowedRoles={["advertiser"]}
-              >
+              <ProtectedRoute allowedRoles={["advertiser"]}>
                 <MyActivitiesComponent />
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/my-historical-places"
             element={
-              <ProtectedRoute
-                allowedRoles={["tourism-governor"]}
-              >
+              <ProtectedRoute allowedRoles={["tourism-governor"]}>
                 <MyHistoricalPlacesComponent />
               </ProtectedRoute>
             }
           />
- 
- 
 
           <Route
             path="/my-products"

@@ -193,7 +193,6 @@ itinerarySchema.statics.findByFields = async function (searchCriteria) {
   const activityIds = activities.map((tag) => tag._id);
 
   query.push({ ["title"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
-  query.push({ ["timeline"]: { $regex: new RegExp(searchCriteria, "i") } }); // Case-insensitive
 
   const cursor = this.find().cursor();
 
