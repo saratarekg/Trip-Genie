@@ -49,9 +49,12 @@ export function AdvertiserProfileComponent() {
         setAdvertiser(response.data);
         setEditedAdvertiser(response.data);
         setLogo(response.data.logo);
-        convertUrlToBase64(response.data.logo.url).then((base64) =>
-          setBase64Image(base64)
-        );
+       
+        if (response.data.logo && response.data.logo.url) {
+          convertUrlToBase64(response.data.logo.url).then((base64) => {
+            setBase64Image(base64)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {

@@ -61,9 +61,12 @@ export function SellerProfileComponent() {
         setSeller(response.data);
         setEditedSeller(response.data);
         setLogo(response.data.logo);
-        convertUrlToBase64(response.data.logo.url).then((data) =>
-          setBase64Image(data)
-        );
+      
+        if (response.data.logo && response.data.logo.url) {
+          convertUrlToBase64(response.data.logo.url).then((data) => {
+            setBase64Image(data)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {

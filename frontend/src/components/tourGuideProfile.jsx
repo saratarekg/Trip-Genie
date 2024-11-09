@@ -176,9 +176,13 @@ export function TourGuideProfileComponent() {
         setTourGuide(response.data);
         setEditedTourGuide(response.data);
         setProfilePicture(response.data.profilePicture);
-        convertUrlToBase64(response.data.profilePicture.url).then((base64) => {
-          setBase64Image(base64);
-        });
+       
+
+        if (response.data.profilePicture && response.data.profilePicture.url) {
+          convertUrlToBase64(response.data.profilePicture.url).then((base64) => {
+            setBase64Image(base64)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {
