@@ -11,6 +11,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImageCropper } from "@/components/ImageCropper";
 import { Modal } from "@/components/Modal";
 
+const convertUrlToBase64 = async (url) => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+};
+
 export function AdvertiserProfileComponent() {
   const [advertiser, setAdvertiser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,6 +33,7 @@ export function AdvertiserProfileComponent() {
   const [showModal, setShowModal] = useState(false);
   const [newImage, setNewImage] = useState(null);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+  const [base64Image, setBase64Image] = useState(null);
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
@@ -38,6 +49,9 @@ export function AdvertiserProfileComponent() {
         setAdvertiser(response.data);
         setEditedAdvertiser(response.data);
         setLogo(response.data.logo);
+        convertUrlToBase64(response.data.logo.url).then((base64) =>
+          setBase64Image(base64)
+        );
       } catch (err) {
         setError(err.message);
       } finally {
@@ -432,7 +446,7 @@ export function AdvertiserProfileComponent() {
         <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
         <ImageCropper
           onImageCropped={handleImageCropped}
-          currentImage={logo ? (logo.public_id ? logo.url : logo) : null}
+          currentImage={logo ? (logo.public_id ? base64Image : logo) : null}
         />
         <div className="mt-4 flex justify-end">
           <Button onClick={handleFirstSave} className="mr-2">
