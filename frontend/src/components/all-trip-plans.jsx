@@ -173,7 +173,7 @@ const ItineraryCard = ({
     >
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={itinerary.activities?.[0]?.pictures?.[0] || defaultImage}
+          src={itinerary.activities?.[0]?.pictures?.[0]?.url || defaultImage}
           alt={itinerary.title}
           className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
         />
