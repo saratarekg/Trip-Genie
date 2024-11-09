@@ -188,7 +188,7 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
 
   const formatCurrency = (amount, currency) => {
     const currencyInfo = currencies.find(c => c.code === currency.code)
-    return `${currencyInfo ? currencyInfo.symbol : ''}${amount.toFixed(4)}`
+    return `${currencyInfo ? currencyInfo.symbol : ''}${amount.toFixed(2)}`
   }
 
   const convertedWalletAmount = convertCurrency(user.wallet, 'USD', preferredCurrency)
@@ -268,7 +268,7 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
   <div className="space-y-4 mb-6">
     <p className="text-lg font-medium text-gray-600">
       Available Wallet Balance:{" "}
-      <span className="text-teal-600">{formatWallet(user.wallet)}</span>
+      <span className="text-teal-600">{formatCurrency(convertedWalletAmount, preferredCurrency)}</span>
     </p>
     <p className="text-lg font-medium text-gray-600">
       Loyalty Points:{" "}
@@ -281,10 +281,10 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
     disabled={isRedeeming || user.loyaltyPoints === 0}
     className="w-full py-3 bg-[#F88C33] text-white rounded-lg hover:bg-orange-500 transition duration-300 ease-in-out"
   >
-    {isRedeeming
-      ? "Redeeming..."
-      : `Redeem Points for ${user.loyaltyPoints / 100} EGP`}
-  </Button>
+     {isRedeeming
+          ? "Redeeming..."
+          : `Redeem Points for ${formatCurrency(pointsValueInPreferredCurrency, preferredCurrency)}`}
+      </Button>
 
   {/* Error Message */}
   {redeemError && (
@@ -591,7 +591,7 @@ export default function AccountManagement() {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-      const api = `http://localhost:4000/tourists/redeem-points`;
+      const api = `http://localhost:4000/${role}/redeem-points`;
       const response = await axios.post(
         api,
         {},

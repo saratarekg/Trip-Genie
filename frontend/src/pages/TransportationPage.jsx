@@ -9,6 +9,7 @@ import {
   CalendarIcon,
   Clock,
   CheckCircle,
+  XCircle,
 } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -240,6 +241,7 @@ setSelectedDate(null);
         {
           transportationID: selectedTransportation._id,
           seatsToBook: seatsToBook,
+          paymentMethod: paymentMethod,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -936,6 +938,31 @@ setSelectedDate(null);
             </div>
             <DialogFooter>
               <Button onClick={() => setShowTransportationSuccessDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={!(bookingError==="")}
+          onOpenChange={setBookingError}
+        >
+          <DialogContent>
+            <DialogHeader>
+            <div className="py-4">
+            {bookingError}
+            </div>
+              <DialogTitle>
+                <div className="flex items-center">
+                  <XCircle className="w-6 h-6 text-red-500 mr-2" />
+                  Failed to book transportation
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+           
+            <DialogFooter>
+              <Button onClick={() => setBookingError("")}>
                 Close
               </Button>
             </DialogFooter>

@@ -1650,27 +1650,6 @@ const handleRateItinerary = async () => {
           </SelectContent>
         </Select>
       </div>
-      {selectedDate && (
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="time" className="text-right">
-            Time
-          </Label>
-          <Select onValueChange={setSelectedTime} value={selectedTime || undefined}>
-            <SelectTrigger className="col-span-3">
-              <SelectValue placeholder="Select a time" />
-            </SelectTrigger>
-            <SelectContent>
-              {itinerary.availableDates
-                .find(dateInfo => dateInfo.date === selectedDate)
-                ?.times.map((time, index) => (
-                  <SelectItem key={index} value={`${time.startTime}-${time.endTime}`}>
-                    {time.startTime} - {time.endTime}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="tickets" className="text-right">
           Tickets
@@ -1716,7 +1695,7 @@ const handleRateItinerary = async () => {
       <Button onClick={() => setShowBookingDialog(false)} variant="outline">
         Cancel
       </Button>
-      <Button onClick={handleBooking} disabled={isBooking || !selectedDate || !selectedTime}>
+      <Button onClick={handleBooking} disabled={isBooking || !selectedDate}>
         {isBooking ? "Booking..." : "Confirm Booking"}
       </Button>
     </DialogFooter>

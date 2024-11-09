@@ -10,6 +10,21 @@ const getAllTransportations = async (req, res) => {
   }
 };
 
+const getAllTransportationsNew = async (req, res) => {
+  try {
+    const today = new Date();
+    const transportations = await Transportation.find({
+      isStandAlone: true,
+      remainingSeats: { $gt: 0 },
+      timeDeparture: { $gte: today }
+    });
+    res.status(200).json(transportations);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 // Get transportation by ID
 const getTransportationById = async (req, res) => {
   try {
@@ -96,4 +111,5 @@ module.exports = {
   createTransportation,
   updateTransportation,
   deleteTransportation,
+  getAllTransportationsNew
 };
