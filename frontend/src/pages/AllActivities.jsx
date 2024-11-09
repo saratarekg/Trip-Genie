@@ -4,6 +4,7 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import FilterComponent from "../components/FilterActivities.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader.jsx";
 import ActivityDetail from "./SingleActivity.jsx";
@@ -111,7 +112,7 @@ const ActivityCard = React.memo(
             className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
           />
 
-          {role === "advertiser" && userInfo._id === activity.advertiser._id && (
+          {role === "advertiser" && userInfo.userId === activity.advertiser && (
         <div className="absolute top-2 right-2 flex space-x-2">
           <button
             className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
@@ -267,16 +268,30 @@ export function AllActivitiesComponent() {
           }
         );
 
-        setUserInfo({
-          role,
-          preferredCurrency: currencyResponse.data,
-        });
+        
+          setUserInfo({
+            role,
+            preferredCurrency: currencyResponse.data
+          }); 
+        
+
+       
       } catch (error) {
         console.error("Error fetching user profile:", error);
         setUserInfo({ role });
       }
     } else {
-      setUserInfo({ role });
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        console.log("hereeeeeeeeeeeeeeeeeeeeeeeeee");
+        console.log(decodedToken.id);
+        setUserInfo({
+          role,
+          userId: decodedToken.id
+        });        
+      }else{    
+          setUserInfo({ role  });
+    }
     }
   }, []);
 
@@ -423,6 +438,7 @@ export function AllActivitiesComponent() {
             },
           }
         ).then((res) => res.json());
+       
 
         setActivities([...preferredActivities, ...otherActivities]);
         setIsSortedByPreference(true);
@@ -441,6 +457,25 @@ export function AllActivitiesComponent() {
         setActivities(data);
       }
       fetchMaxPrice();
+
+      console.log("hereeeeeeeeeeeee88888888888888888888888888888eeeeeeeeeeeee");
+
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        console.log("hereeeeeeeeeeeeeeeeeeeeeeeeee");
+        console.log(decodedToken.id);
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data,
+          userId: decodedToken.id
+        });        
+      }
+      else{
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data
+        }); 
+      }
 
       setError(null);
       setIsLoading(false);
