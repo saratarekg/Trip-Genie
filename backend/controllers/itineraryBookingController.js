@@ -12,7 +12,6 @@ exports.createBooking = async (req, res) => {
       paymentAmount,
       numberOfTickets,
       date,
-      time,
     } = req.body;
 
     // Check if the itinerary exists
@@ -51,7 +50,6 @@ exports.createBooking = async (req, res) => {
       user: userId,
       numberOfTickets,
       date,
-      time,
     });
 
     // Calculate loyalty points based on the user's badge level

@@ -188,7 +188,7 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
 
   const formatCurrency = (amount, currency) => {
     const currencyInfo = currencies.find(c => c.code === currency.code)
-    return `${currencyInfo ? currencyInfo.symbol : ''}${amount.toFixed(4)}`
+    return `${currencyInfo ? currencyInfo.symbol : ''}${amount.toFixed(2)}`
   }
 
   const convertedWalletAmount = convertCurrency(user.wallet, 'USD', preferredCurrency)
@@ -268,7 +268,7 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
   <div className="space-y-4 mb-6">
     <p className="text-lg font-medium text-gray-600">
       Available Wallet Balance:{" "}
-      <span className="text-teal-600">{formatWallet(user.wallet)}</span>
+      <span className="text-teal-600">{formatCurrency(convertedWalletAmount, preferredCurrency)}</span>
     </p>
     <p className="text-lg font-medium text-gray-600">
       Loyalty Points:{" "}
@@ -281,10 +281,10 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
     disabled={isRedeeming || user.loyaltyPoints === 0}
     className="w-full py-3 bg-[#F88C33] text-white rounded-lg hover:bg-orange-500 transition duration-300 ease-in-out"
   >
-    {isRedeeming
-      ? "Redeeming..."
-      : `Redeem Points for ${user.loyaltyPoints / 100} EGP`}
-  </Button>
+     {isRedeeming
+          ? "Redeeming..."
+          : `Redeem Points for ${formatCurrency(pointsValueInPreferredCurrency, preferredCurrency)}`}
+      </Button>
 
   {/* Error Message */}
   {redeemError && (
@@ -591,7 +591,7 @@ export default function AccountManagement() {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-      const api = `http://localhost:4000/tourists/redeem-points`;
+      const api = `http://localhost:4000/${role}/redeem-points`;
       const response = await axios.post(
         api,
         {},
@@ -701,26 +701,36 @@ export default function AccountManagement() {
     ],
   };
 
-  const logOut = async () => {
-    console.log("Logging out...");
-    try {
-      const response = await fetch("http://localhost:4000/auth/logout");
+  const LogoutPopup = ({ onConfirm, onCancel }) => { return ( <div className="popup"> <div className="popup-content"> <h3>Are you sure you want to log out?</h3> <button onClick={onConfirm}>Yes</button> <button onClick={onCancel}>No</button> </div> </div> ); };
 
-      if (response.ok) {
-        Cookies.set("jwt", "");
-        Cookies.set("role", "");
-        Cookies.remove("jwt");
-        Cookies.remove("role");
-        console.log("Logged out successfully");
-        navigate("/login");
-        window.location.reload();
-      } else {
-        console.error("Logout failed.");
-      }
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
+  const [showPopup, setShowPopup] = useState(false); 
+ 
+  const logOut = async () => {
+     console.log("Logging out...");
+      try { const response = await fetch("http://localhost:4000/auth/logout");
+         if (response.ok) { 
+          Cookies.set("jwt", ""); 
+          Cookies.set("role", ""); 
+          Cookies.remove("jwt"); 
+          Cookies.remove("role"); 
+          console.log("Logged out successfully"); 
+          navigate("/login"); window.location.reload(); 
+        } 
+        else { 
+          console.error("Logout failed."); 
+        } } catch (error) { 
+          console.error("Error during logout:", error); 
+        } }; 
+
+    const handleLogoutClick = () => { 
+      setShowPopup(true); };
+
+     const handleConfirmLogout = () => { 
+      setShowPopup(false); logOut(); }; 
+
+      const handleCancelLogout = () =>
+         { setShowPopup(false); }; 
+
 
   const role = getUserRole();
 
@@ -782,12 +792,14 @@ export default function AccountManagement() {
                 })}
                 <li>
                   <button
-                    onClick={logOut}
+                    onClick={handleLogoutClick}
                     className="flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left"
                   >
                     <LogOut className="h-5 w-5 mr-3" />
                     Logout
                   </button>
+                  {showPopup && ( <LogoutPopup onConfirm={handleConfirmLogout} onCancel={handleCancelLogout} /> )}
+
                 </li>
               </ul>
             </nav>

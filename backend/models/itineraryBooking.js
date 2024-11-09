@@ -29,11 +29,6 @@ const itineraryBookingSchema = new Schema({
         type: Date,
         required: true,
       },
-      time: 
-        {
-            type: String,
-            required: true,
-        },
 }, { timestamps: true });
 
 itineraryBookingSchema.statics.getBookingsForTourist = async function(touristId) {

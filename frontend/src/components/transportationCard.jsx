@@ -32,6 +32,14 @@ export default function TransportationCard({
     }).toUpperCase();
   };
 
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   const tripCode = Array.from({ length: 12 }, () => 
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 36)]
   ).join('');
@@ -67,21 +75,31 @@ export default function TransportationCard({
     <div className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-start">
-          <span className="text-xs text-[#5D9297]">Departure</span>
+          <span className="text-sm text-[#5D9297]">Departure</span>
           <span className="text-lg font-semibold text-[#F88C33]">{transportation.from.toUpperCase()}</span>
-          <span className="text-sm font-semibold">{formatTime(departureTime)}</span>
+          {/* Departure Time */}
+          <div className="flex items-center">
+            <span className="text-sm font-semibold">{formatTime(departureTime)}</span>
+          </div>
         </div>
         
         <div className="flex flex-col items-center mx-4 relative w-[70%]">
           <div className="border-t-2 border-[#5D9297] w-full absolute top-1/2 -translate-y-1/2" />
           
-          <div className="absolute flex items-center justify-center bg-white px-2 text-xs text-[#5D9297] -top-6">
+          {/* Trip Code */}
+          <div className="absolute flex items-center justify-center bg-white px-2 text-sm text-[#5D9297] top-1">
             {`${Math.floor(transportation.estimatedDuration / 60)} hours and ${transportation.estimatedDuration % 60} minutes`}
           </div>
 
-          <div className="absolute flex items-center justify-center bg-white px-2 text-xs text-[#5D9297]">
-            {tripCode}
+          {/* Date Below the Code */}
+          <div className="absolute flex items-center justify-center bg-white px-2 text-xl font-semibold text-[#F88C33] -top-6">
+            {formatDate(departureTime)}
           </div>
+          
+
+          {/* <div className="absolute flex items-center justify-center bg-white px-2 text-sm text-[#5D9297] -top-6">
+            {transportation._id}
+          </div> */}
 
           <div className="flex justify-between w-full mt-2 relative">
             <div className="w-4 h-4 rounded-full border-2 border-[#388A94] bg-white translate-y-[-15%]" />
@@ -90,7 +108,7 @@ export default function TransportationCard({
         </div>
 
         <div className="flex flex-col items-end">
-          <span className="text-xs text-[#5D9297]">Arrival</span>
+          <span className="text-sm text-[#5D9297]">Arrival</span>
           <span className="text-lg font-semibold text-[#F88C33]">{transportation.to.toUpperCase()}</span>
           <span className="text-sm font-semibold">{formatTime(arrivalTime)}</span>
         </div>
@@ -98,29 +116,25 @@ export default function TransportationCard({
       
       <div className="mt-4 flex justify-between items-center">
         <div className="flex flex-col items-start">
-          <span className="text-xs text-[#5D9297]">Remaining Seats</span>
+          <span className="text-sm text-[#5D9297]">Remaining Seats</span>
           <span className="text-lg font-semibold text-[#F88C33]">{transportation.remainingSeats}</span>
         </div>
-        <div className="text-sm text-center text-[#5D9297] font-semibold">
+        <div className="text-lg text-center text-[#5D9297] font-semibold">
           {getFormattedVehicleType(transportation.vehicleType)}
         </div>
         <div className="flex items-center space-x-4">
-        <div className="text-3xl font-bold text-[#1A3B47]">{displayPrice(transportation.ticketCost)}</div>
+          <div className="text-3xl font-bold text-[#1A3B47]">{displayPrice(transportation.ticketCost)}</div>
 
-{/* Price with VAT displayed directly below the main price */}
-<div className="text-xs text-[#F88C33] mt-2 flex items-center">
-  <span>Price with VAT: {displayPrice(priceWithVAT.toFixed(2))}</span>
-  <div className="ml-1 cursor-pointer text-[#5D9297]">
-    <Info className="h-4 w-4" />
-  </div>
-</div>
-
-
+          {/* Price label with VAT text */}
+          {/* <div className="text-xs text-[#5D9297] mt-2 flex items-center">
+            <Info className="h-4 w-4 mr-1" />
+            <span>Price includes VAT*</span>
+          </div> */}
 
           {userRole === "tourist" && transportation.remainingSeats > 0 ? (
             <Button 
               onClick={() => onBook(transportation)} 
-              className="bg-[#F88C33] text-white px-4 py-2 rounded hover:bg-[#2b6e73] transition-colors"
+              className="bg-[#F88C33] text-white px-4 py-2 rounded hover:bg-orange-500 transition-colors"
             >
               Book Now
             </Button>
