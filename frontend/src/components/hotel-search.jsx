@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,36 +148,38 @@ export default function HotelSearch() {
 
       <div className="space-y-6">
         {hotels.map((hotel) => (
-          <Card key={hotel.hotel_id}>
-            <CardContent className="p-6">
-              <div className="flex space-x-4">
-                <div className="relative w-[200px] h-[150px]">
-                  <img
-                    src={hotel.max_photo_url || '/placeholder.svg'}
-                    alt={hotel.hotel_name}
-                    className="object-cover rounded-md w-full h-full"
-                  />
-                </div>
-                <div>
-                  <CardHeader className="p-0">
-                    <CardTitle className="text-xl">{hotel.hotel_name}</CardTitle>
-                  </CardHeader>
-                  <div className="mt-2 flex items-center">
-                    {[...Array(Math.floor(hotel.review_score / 2) || 0)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                    <span className="ml-2 text-sm text-gray-600">
-                      {hotel.review_score ? `${hotel.review_score.toFixed(1)} (${hotel.review_count} reviews)` : 'No reviews yet'}
-                    </span>
+          <Link to={`/hotels2/${hotel.hotel_id}`} key={hotel.hotel_id} className="block">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex space-x-4">
+                  <div className="relative w-[200px] h-[150px]">
+                    <img
+                      src={hotel.max_photo_url || '/placeholder.svg'}
+                      alt={hotel.hotel_name}
+                      className="object-cover rounded-md w-full h-full"
+                    />
                   </div>
-                  <p className="mt-2">{hotel.address}</p>
-                  <p className="mt-2 font-bold">
-                    ${hotel.min_total_price ? hotel.min_total_price.toFixed(2) : 'N/A'} per night
-                  </p>
+                  <div>
+                    <CardHeader className="p-0">
+                      <CardTitle className="text-xl">{hotel.hotel_name}</CardTitle>
+                    </CardHeader>
+                    <div className="mt-2 flex items-center">
+                      {[...Array(Math.floor(hotel.review_score / 2) || 0)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      ))}
+                      <span className="ml-2 text-sm text-gray-600">
+                        {hotel.review_score ? `${hotel.review_score.toFixed(1)} (${hotel.review_count} reviews)` : 'No reviews yet'}
+                      </span>
+                    </div>
+                    <p className="mt-2">{hotel.address}</p>
+                    <p className="mt-2 font-bold">
+                      ${hotel.min_total_price ? hotel.min_total_price.toFixed(2) : 'N/A'} per night
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>
