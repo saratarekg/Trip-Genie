@@ -26,6 +26,14 @@ time in transportation cards
 transportation edit doesnt close for some reason
 transportation creates and updates to a future date
 
+
+sprint 3:
+make all popups the same, we can take inspo from the stuff i sent to radwa. 
+hasa toasts ahla men popups bas hanshoof
+pagination mehtaga tendaf
+buttons bardo can be better. maybe remove the drop shadow and make it an outline bas
+
+
 Orange: #F88C33
 Beige/Tan: #E6DCCF
 Light Aqua/Seafoam Green: #B5D3D1
