@@ -709,8 +709,10 @@ export default function UpdateItinerary() {
     );
   }, [itinerary]);
 
-  const today = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]
-  
+  const today = new Date(new Date().setDate(new Date().getDate() + 1))
+    .toISOString()
+    .split("T")[0];
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!isFormValid) {
@@ -729,10 +731,38 @@ export default function UpdateItinerary() {
     try {
       const token = Cookies.get("jwt");
       console.log(itinerary);
+      const formData = new FormData();
+      formData.append("title", itinerary.title);
+      formData.append("language", itinerary.language);
+      formData.append("price", itinerary.price);
+      formData.append("pickUpLocation", itinerary.pickUpLocation);
+      formData.append("dropOffLocation", itinerary.dropOffLocation);
+      formData.append("accessibility", itinerary.accessibility);
+      formData.append("isRepeated", itinerary.isRepeated);
+      formData.append(
+        "availableDates",
+        JSON.stringify(itinerary.availableDates)
+      );
+      formData.append("activities", JSON.stringify(itinerary.activities));
+      itinerary.activities.forEach((activity, index) => {
+        activity.pictures.forEach((file, fileIndex) => {
+          if (file instanceof File) {
+            formData.append(
+              `activities[${index}][pictures][${fileIndex}]`,
+              file
+            );
+          }
+        });
+      });
+
+      console.log("hi");
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
 
       await axios.put(
         `http://localhost:4000/tour-guide/itineraries/${id}`,
-        itinerary,
+        formData,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

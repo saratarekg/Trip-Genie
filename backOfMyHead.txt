@@ -15,6 +15,9 @@
 - photos don't appear in wishlist  (DONE -HAZEM)
 - pop up when deleting an activity or itinerary fails because there are existing bookings(done for activity)
 - hours and minutes input in add transportation and edit transportation
+-filter price products msh shghal
+-page my products darba
+-archive products filter msh shghal
 
 Hadwa's requests:
 - Add global search bar 
