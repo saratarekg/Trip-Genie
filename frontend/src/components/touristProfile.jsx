@@ -299,7 +299,7 @@ export function TouristProfileComponent() {
         {/* Profile Image Section */}
         <div className="flex justify-center mb-8 relative">
           <button
-            className="w-32 h-32 bg-gray-300 rounded-full overflow-hidden shadow-xl"
+            className="w-32 h-32 bg-gray-300 rounded-full overflow-hidden shadow-xl flex justify-center items-center"
             onClick={toggleDropdown}
             disabled={!selectedImage && !isEditing}
           >
@@ -308,13 +308,13 @@ export function TouristProfileComponent() {
                 <img
                   src={selectedImage.url}
                   alt="User"
-                  className="w-20 h-20 rounded-full"
+                  className="w-32 h-32 rounded-full"
                 />
               ) : (
                 <img
                   src={selectedImage}
                   alt="User"
-                  className="w-20 h-20 rounded-full"
+                  className="w-32 h-32 rounded-full"
                 />
               )
             ) : (
