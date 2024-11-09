@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Star, Wifi, Coffee, Tv, AirVent } from 'lucide-react';
+import Loader from '@/components/Loader';
 
 const API_KEY = import.meta.env.VITE_HOTELS_API_KEY;
 
@@ -18,6 +19,12 @@ export default function HotelDetails() {
   const [roomList, setRoomList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // useRef flags to track if each request has already been fetched
+  const hotelDataFetched = useRef(false);
+  const hotelPhotosFetched = useRef(false);
+  const hotelFacilitiesFetched = useRef(false);
+  const roomListFetched = useRef(false);
 
   useEffect(() => {
     const fetchHotelDetails = async () => {
@@ -35,26 +42,44 @@ export default function HotelDetails() {
           'x-rapidapi-key': API_KEY,
         };
 
-        const fetchWithDelay = async (url) => {
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        const fetchWithCache = async (url, cachedData, setData, fetchFlag) => {
+          if (fetchFlag.current) return; // Skip if fetch has been done
+          fetchFlag.current = true; // Mark as fetched
           const response = await fetch(url, { headers });
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          return response.json();
+          const data = await response.json();
+          setData(data);
         };
 
-        const [data, photos, facilities, roomListData] = await Promise.all([
-          fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/data?hotel_id=${parsedHotelId}&locale=en-gb`),
-          fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/photos?hotel_id=${parsedHotelId}&locale=en-gb`),
-          fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/facilities?hotel_id=${parsedHotelId}&locale=en-gb`),
-          fetchWithDelay(`https://booking-com.p.rapidapi.com/v1/hotels/room-list?checkin_date=2025-01-18&checkout_date=2025-01-19&hotel_id=${parsedHotelId}&adults_number_by_rooms=2&children_number_by_rooms=0&currency=USD&units=metric&locale=en-gb`)
+        // Fetch all necessary data once
+        await Promise.all([
+          fetchWithCache(
+            `https://booking-com.p.rapidapi.com/v1/hotels/data?hotel_id=${parsedHotelId}&locale=en-gb`,
+            hotelData,
+            setHotelData,
+            hotelDataFetched
+          ),
+          fetchWithCache(
+            `https://booking-com.p.rapidapi.com/v1/hotels/photos?hotel_id=${parsedHotelId}&locale=en-gb`,
+            hotelPhotos,
+            setHotelPhotos,
+            hotelPhotosFetched
+          ),
+          fetchWithCache(
+            `https://booking-com.p.rapidapi.com/v1/hotels/facilities?hotel_id=${parsedHotelId}&locale=en-gb`,
+            hotelFacilities,
+            setHotelFacilities,
+            hotelFacilitiesFetched
+          ),
+          fetchWithCache(
+            `https://booking-com.p.rapidapi.com/v1/hotels/room-list?checkin_date=2025-01-18&checkout_date=2025-01-19&hotel_id=${parsedHotelId}&adults_number_by_rooms=2&children_number_by_rooms=0&currency=USD&units=metric&locale=en-gb`,
+            roomList,
+            (data) => setRoomList(Object.values(data.rooms || {})),
+            roomListFetched
+          ),
         ]);
-
-        setHotelData(data);
-        setHotelPhotos(photos);
-        setHotelFacilities(facilities);
-        setRoomList(Object.values(roomListData.rooms || {}));
       } catch (err) {
         setError('An error occurred while fetching hotel details. Please try again.');
         console.error('Error fetching hotel details:', err);
@@ -67,15 +92,16 @@ export default function HotelDetails() {
   }, [hotelId]);
 
   if (isLoading) {
-    return <div className="container mx-auto p-4">Loading...</div>;
+    return <Loader />;
   }
 
   if (error || !hotelData) {
     return <div className="container mx-auto p-4 text-red-500">{error || 'Failed to load hotel details'}</div>;
   }
 
+
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 mt-5">
       <h1 className="text-3xl font-bold mb-6">{hotelData.name}</h1>
       <div className="mb-6">
         <Carousel className="w-full max-w-xl">
@@ -114,7 +140,7 @@ export default function HotelDetails() {
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {hotelFacilities.map((facility, index) => (
-                <Badge key={index} variant="secondary">
+                <Badge key={index} variant="outline">
                   {facility.facility_name}
                 </Badge>
               ))}
