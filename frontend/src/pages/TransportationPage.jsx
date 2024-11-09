@@ -104,6 +104,7 @@ export default function TransportationPage() {
   const [bookingError, setBookingError] = useState("");
   const [filteredTransportations, setFilteredTransportations] = useState([]);
   const transportationsPerPage = 6;
+  
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -593,17 +594,21 @@ setSelectedDate(null);
                       )}
                     />
                     <FormField
-                      control={form.control}
-                      name="timeDeparture"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Departure Time</FormLabel>
-                          <FormControl>
-                            <DateTimePicker field={field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+  control={form.control}
+  name="timeDeparture"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Departure Time</FormLabel>
+      <FormControl>
+        <DateTimePicker
+          field={field}
+          disablePastminDate={new Date().setDate(new Date().getDate() + 1)} // Setting minimum date to tomorrow
+        />
+      </FormControl>
+    </FormItem>
+  )}
+/>
+
                     <FormField
                       control={form.control}
                       name="estimatedDuration"
@@ -732,14 +737,19 @@ setSelectedDate(null);
                     </FormControl>
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="timeDeparture" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Departure Time</FormLabel>
-                    <FormControl>
-                      <DateTimePicker field={field} />
-                    </FormControl>
-                  </FormItem>
-                )} />
+              <FormField control={form.control} name="timeDeparture" render={({ field }) => (
+  <FormItem>
+    <FormLabel>Departure Time</FormLabel>
+    <FormControl>
+      <DateTimePicker
+        field={field}
+        disablePast
+        minDate={new Date().setDate(new Date().getDate() + 1)} // Setting minimum date to tomorrow
+      />
+    </FormControl>
+  </FormItem>
+)} />
+
                 <FormField control={form.control} name="estimatedDuration" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Estimated Duration (minutes)</FormLabel>

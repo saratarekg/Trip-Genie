@@ -25,6 +25,7 @@ copy link and share sinlge products
 time in transportation cards
 
 transportation edit doesnt close for some reason
+transition chooses and updates to a future date
 
 Orange: #F88C33
 Beige/Tan: #E6DCCF
