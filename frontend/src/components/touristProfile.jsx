@@ -294,173 +294,187 @@ export function TouristProfileComponent() {
   };
 
   return (
-    <div className="bg-beige-100 min-h-screen py-10 flex justify-center">
-      <div className="w-full max-w-3xl bg-white shadow-xl rounded-lg p-8">
-        {/* Profile Image Section */}
-        <div className="flex justify-center mb-8 relative">
-          <button
-            className="w-32 h-32 bg-gray-300 rounded-full overflow-hidden shadow-xl"
-            onClick={toggleDropdown}
-            disabled={!selectedImage && !isEditing}
-          >
-            {selectedImage ? (
-              selectedImage.public_id ? (
-                <img
-                  src={selectedImage.url}
-                  alt="User"
-                  className="w-20 h-20 rounded-full"
-                />
-              ) : (
-                <img
-                  src={selectedImage}
-                  alt="User"
-                  className="w-20 h-20 rounded-full"
-                />
-              )
-            ) : (
-              <User className="w-12 h-12 text-white" />
-            )}
-          </button>
-          <div className="absolute top-full mt-2 left-0 bg-white  rounded-lg shadow-lg z-10 w-32">
-            <Modal show={showModal} onClose={closeModal}>
-              <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
-              <ImageCropper
-                onImageCropped={handleImageCropped}
-                currentImage={
-                  selectedImage
-                    ? selectedImage.public_id
-                      ? selectedImage.url
-                      : selectedImage
-                    : null
-                }
-              />
-              <div className="mt-4 flex justify-end">
-                <Button
-                  onClick={handleFirstSave}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
-                >
-                  Save
-                </Button>
-
-                <Button
-                  onClick={closeModal}
-                  className="px-4 py-2 ml-4 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200"
-                >
-                  Close
-                </Button>
-              </div>
-            </Modal>
-          </div>
-
-          {/* Camera Icon */}
-          {isEditing && (
-            <div className="absolute top-20 left-0.4  bg-white p-1 rounded-full shadow-md cursor-pointer">
-              <Camera
-                className="w-5 h-5 text-gray-600"
-                style={{ cursor: "pointer" }}
-                onClick={toggleDropdown}
-              />
-            </div>
-          )}
-
-          {/* Dropdown Menu (View, Update, Delete) */}
-          {isDropdownOpen && (
-            <div className="absolute top-full mt-2 top-15 left-0.4 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
-              <ul className="py-2">
-                {selectedImage && (
-                  <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      setIsImageViewerOpen(true);
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    View
-                  </li>
-                )}
-                {isEditing && (
-                  <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={handleUpdateClick}
-                  >
-                    Update
-                  </li>
-                )}
-                {isEditing && selectedImage && (
-                  <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                    onClick={() => {
-                      setSelectedImage(null);
-                      setDropdownOpen(false);
-                    }}
-                  >
-                    Delete
-                  </li>
-                )}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        {/* Profile Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-black-600">
-            {tourist.username}
-          </h2>
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <AtSign className="w-4 h-4 text-gray-500" />
-            <p className="text-lg font-semibold text-black-600">
-              {tourist.username}
-            </p>
-          </div>
-        </div>
-
-        {/* Badge Section */}
-        <div className="text-center mb-6">
-          <Badge
-            className={`${getBadgeColor()} px-3 py-1 text-lg font-semibold rounded-full inline-flex items-center gap-2 cursor-default`}
-          >
-            <Award className="w-5 h-5" />
-            {tourist.loyaltyBadge}
-          </Badge>
-        </div>
-
-        {/* Dividing sections */}
-        <div className="space-y-8">
-          {/* Contact Info Section */}
-          <div className="border-t border-gray-300 pt-4">
-            <h3 className="text-xl font-semibold mb-4 text-black-600">
-              Contact Info
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <label htmlFor="email" className="font-semibold text-teal-600">
-                  Email
-                </label>
-                {isEditing ? (
-                  <Input
-                    type="email"
-                    name="email"
-                    value={editedTourist.email}
-                    onChange={handleInputChange}
-                    className={validationMessages.email ? "border-red-500" : ""}
-                    placeholder="Email"
+    <div>
+      <div className="p-8">
+        <div className="flex items-center gap-4 mb-6 relative">
+          <div className="flex-shrink-0 relative">
+            <button
+              className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-2xl font-bold text-white"
+              onClick={toggleDropdown}
+              disabled={!selectedImage && !isEditing}
+            >
+              {selectedImage ? (
+                selectedImage.public_id ? (
+                  <img
+                    src={selectedImage.url}
+                    alt="User"
+                    className="w-20 h-20 rounded-full"
                   />
                 ) : (
-                  <span>{tourist.email}</span>
-                )}
-                {validationMessages.email && (
-                  <span className="text-red-500 text-sm">
-                    {validationMessages.email}
-                  </span>
-                )}
-              </div>
+                  <img
+                    src={selectedImage}
+                    alt="User"
+                    className="w-20 h-20 rounded-full"
+                  />
+                )
+              ) : (
+                <User className="w-12 h-12 text-white" />
+              )}{" "}
+            </button>
 
-              <div className="flex flex-col">
-                <label htmlFor="mobile" className="font-semibold text-teal-600">
-                  Phone Number
-                </label>
-                {isEditing ? (
+            <div className="absolute top-full mt-2 left-0 bg-white  rounded-lg shadow-lg z-10 w-32">
+              <Modal show={showModal} onClose={closeModal}>
+                <h2 className="text-lg font-bold mb-4">
+                  Update Profile Picture
+                </h2>
+                <ImageCropper
+                  onImageCropped={handleImageCropped}
+                  currentImage={
+                    selectedImage
+                      ? selectedImage.public_id
+                        ? selectedImage.url
+                        : selectedImage
+                      : null
+                  }
+                />
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    onClick={handleFirstSave}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+                  >
+                    Save
+                  </Button>
+
+                  <Button
+                    onClick={closeModal}
+                    className="px-4 py-2 ml-4 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </Modal>
+            </div>
+
+            {isEditing && (
+              <div className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow-md">
+                <Camera
+                  className="w-5 h-5 text-gray-600"
+                  style={{ cursor: "pointer" }}
+                  onClick={toggleDropdown}
+                />
+              </div>
+            )}
+
+            {isDropdownOpen && (
+              <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
+                <ul className="py-2">
+                  {selectedImage && (
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        setIsImageViewerOpen(true);
+
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      View
+                    </li>
+                  )}
+
+                  {isEditing && (
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={handleUpdateClick}
+                    >
+                      Update
+                    </li>
+                  )}
+
+                  {isEditing && selectedImage && (
+                    <li
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setDropdownOpen(false);
+                      }}
+                    >
+                      Delete
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col flex-grow">
+            <h2 className="text-3xl font-bold mb-1">{tourist.username}</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <AtSign className="w-4 h-4 text-gray-500" />
+              <p className="text-2xl font-semibold">{tourist.username}</p>
+            </div>
+          </div>
+
+          <div className="flex-shrink-0">
+            <Badge
+              className={`${getBadgeColor()} hover:${getBadgeColor()} px-3 py-2 text-xl font-semibold rounded-full flex items-center gap-2`}
+            >
+              <Award className="w-6 h-6" />
+              {tourist.loyaltyBadge}
+            </Badge>
+          </div>
+
+          {/* {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
+            <div className="bg-white p-6 rounded-lg shadow-lg relative">
+              <button
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                onClick={closeModal}
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <div className="w-48 h-48 bg-gray-300 rounded-full flex items-center justify-center text-4xl font-bold text-white">
+                <User className="w-24 h-24 text-white" />
+              </div>
+              <button
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                onClick={closeModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )} */}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <Mail className="w-4 h-4 text-gray-500" />
+              {isEditing ? (
+                <Input
+                  type="email"
+                  name="email"
+                  value={editedTourist.email}
+                  onChange={handleInputChange}
+                  className={validationMessages.email ? "border-red-500" : ""}
+                  placeholder="Email"
+                />
+              ) : (
+                <span>{tourist.email}</span>
+              )}
+            </div>
+            {validationMessages.email && (
+              <span className="text-red-500 text-sm">
+                {validationMessages.email}
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-gray-500" />
+              {isEditing ? (
+                <div className="w-full" style={{ zIndex: 0 }}>
                   <PhoneInput
                     style={{ zIndex: 0 }}
                     country={"eg"}
@@ -477,138 +491,113 @@ export function TouristProfileComponent() {
                           : "border-gray-300"
                       }`,
                     }}
-                    className="w-full"
+                    containerClass="w-full"
+                    inputStyle={{ width: "60%", marginLeft: "45px" }}
                   />
-                ) : (
-                  <span>{tourist.mobile}</span>
-                )}
-                {validationMessages.mobile && (
-                  <span className="text-red-500 text-sm">
-                    {validationMessages.mobile}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Personal Information Section */}
-          <div className="border-t border-gray-300 pt-4">
-            <h3 className="text-xl font-semibold mb-4 text-black-600">
-              Personal Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col">
-                  <label htmlFor="dob" className="font-semibold text-teal-600">
-                    Date of Birth
-                  </label>
-                  <span>
-                    {new Date(tourist.dateOfBirth).toLocaleDateString()}
-                  </span>
                 </div>
-              </div>
+              ) : (
+                <span>{tourist.mobile}</span>
+              )}
+            </div>
+            {validationMessages.mobile && (
+              <span className="text-red-500 text-sm">
+                {validationMessages.mobile}
+              </span>
+            )}
+          </div>
 
-              <div className="flex flex-col">
-                <label
-                  htmlFor="nationality"
-                  className="font-semibold text-teal-600"
-                >
-                  Nationality
-                </label>
-                {isEditing ? (
-                  <div className="flex flex-col w-full">
-                    <Select onValueChange={handleNationalityChange}>
-                      <SelectTrigger
-                        className={
-                          validationMessages.nationality ? "border-red-500" : ""
-                        }
-                      >
-                        <SelectValue placeholder={tourist.nationality.name} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {nationalities.map((nat) => (
-                          <SelectItem key={nat._id} value={nat._id}>
-                            {nat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {validationMessages.nationality && (
-                      <span className="text-red-500 text-sm">
-                        {validationMessages.nationality}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <span>
-                    {tourist.nationality
-                      ? tourist.nationality.name
-                      : "Nationality not set"}
+          <div className="flex items-center gap-2">
+            <Flag className="w-4 h-4 text-gray-500" />
+            {isEditing ? (
+              <div className="flex flex-col w-full">
+                <Select onValueChange={handleNationalityChange}>
+                  <SelectTrigger
+                    className={
+                      validationMessages.nationality ? "border-red-500" : ""
+                    }
+                  >
+                    <SelectValue placeholder={tourist.nationality.name} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {nationalities.map((nat) => (
+                      <SelectItem key={nat._id} value={nat._id}>
+                        {nat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {validationMessages.nationality && (
+                  <span className="text-red-500 text-sm">
+                    {validationMessages.nationality}
                   </span>
                 )}
               </div>
+            ) : (
+              <span>
+                {tourist.nationality
+                  ? tourist.nationality.name
+                  : "Nationality not set"}
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-gray-500" />
+            <span>{new Date(tourist.dateOfBirth).toLocaleDateString()}</span>
+          </div>
+
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <BriefcaseBusiness className="w-4 h-4 text-gray-500" />
+              {isEditing ? (
+                <Input
+                  type="jobOrStudent"
+                  name="jobOrStudent"
+                  value={editedTourist.jobOrStudent}
+                  onChange={handleInputChange}
+                  // className={validationMessages.email ? "border-red-500" : ""}
+                  placeholder="Occupation/Student"
+                />
+              ) : (
+                <span>{tourist.jobOrStudent}</span>
+              )}
             </div>
           </div>
 
-          {/* Account Status Section */}
-          <div className="border-t border-gray-300 pt-4">
-            <h3 className="text-xl font-semibold mb-4 text-black-600">
-              Account Status
-            </h3>
-            <div className="flex items-center gap-2">
-              <label htmlFor="wallet" className="font-semibold text-teal-600">
-                Wallet Balance
-              </label>
-              <span>{formatWallet(tourist.wallet)}</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <Wallet className="w-4 h-4 text-gray-500" />
+            <span>{formatWallet(tourist.wallet)}</span>
+          </div>
 
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="loyaltyPoints"
-                className="font-semibold text-teal-600"
-              >
-                Loyalty Points
-              </label>
-              <span>{tourist.loyaltyPoints.toLocaleString()} points</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 text-gray-500" />
+            <span>{tourist.loyaltyPoints.toLocaleString()} points</span>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="mt-6 flex justify-center gap-4">
+        <div className="mt-6">
           {isEditing ? (
-            <>
-              <Button
-                onClick={handleUpdate}
-                className="w-32 bg-orange-500 text-white"
-              >
+            <div className="flex gap-2">
+              <Button onClick={handleUpdate} variant="default">
                 Save Changes
               </Button>
-              <Button
-                onClick={handleDiscard}
-                className="w-32 bg-gray-500 text-white"
-              >
-                Discard
+              <Button onClick={handleDiscard} variant="destructive">
+                Discard Changes
               </Button>
-            </>
+            </div>
           ) : (
-            <Button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center justify-center  py-2 bg-[#F88C33] text-white rounded-md hover:bg-orange-500 transition duration-300 ease-in-out mb-4"
-            >
+            <Button onClick={() => setIsEditing(true)} variant="default">
               Edit Profile
             </Button>
           )}
         </div>
-
-        {/* Image Viewer Modal */}
-        <Modal
-          show={isImageViewerOpen}
-          onClose={() => setIsImageViewerOpen(false)}
-          isImageViewer={true}
-          imageUrl={selectedImage?.url || selectedImage}
-        />
       </div>
+      <Modal
+        show={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+        isImageViewer={true}
+        imageUrl={selectedImage?.url || selectedImage}
+      />
     </div>
   );
 }
