@@ -38,6 +38,7 @@ export function AdvertiserProfileComponent() {
         setAdvertiser(response.data);
         setEditedAdvertiser(response.data);
         setLogo(response.data.logo);
+        console.log(response.data.logo);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -126,7 +127,7 @@ export function AdvertiserProfileComponent() {
         editedAdvertiser;
       const formData = new FormData();
       formData.append("name", name);
-      logo && formData.append("logo", logo);
+      logo && formData.append("logo",JSON.stringify(logo));
       formData.append("username", username);
       formData.append("email", email);
       formData.append("hotline", hotline);

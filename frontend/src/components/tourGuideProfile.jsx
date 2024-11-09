@@ -62,6 +62,8 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { ImageCropper } from "@/components/ImageCropper";
 import { Modal } from "@/components/Modal";
 
+
+
 const phoneValidator = (value) => {
   // Check if the input starts with a "+"
 
@@ -277,7 +279,7 @@ export function TourGuideProfileComponent() {
 
       const formData = new FormData();
       formData.append("name", name);
-      profilePicture && formData.append("profilePicture", profilePicture);
+      profilePicture && formData.append("profilePicture", JSON.stringify(profilePicture));
       formData.append("username", username);
       formData.append("email", email);
       formData.append("mobile", "+" + mobile);
@@ -436,7 +438,7 @@ export function TourGuideProfileComponent() {
                     currentImage={
                       profilePicture
                         ? profilePicture.public_id
-                          ? profilePicture.url
+                          ?profilePicture.url
                           : profilePicture
                         : null
                     }

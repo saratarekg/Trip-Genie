@@ -188,9 +188,12 @@ const updateAdvertiser = async (req, res) => {
     }
 
     const { email, username, name, description, hotline, website } = req.body;
-    let { logo } = req.body;
+    
+    let  logo  =req.body.logo? JSON.parse(req.body.logo):undefined;
+
     if (username !== advertiser1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
+
     }
     if (email !== advertiser1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
@@ -199,6 +202,7 @@ const updateAdvertiser = async (req, res) => {
     if (logo === undefined) {
       logo = null;
       if (advertiser1.logo !== null) {
+
         await cloudinary.uploader.destroy(advertiser1.logo.public_id);
 
       }
