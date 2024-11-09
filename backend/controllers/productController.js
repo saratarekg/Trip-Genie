@@ -7,6 +7,7 @@ const cloudinary = require("../utils/cloudinary");
 const getAllProducts = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, sort, myproducts, rating } = req.query;
   const role = res.locals.user_role;
+  console.log(myproducts);
   
   try {
     // Build the query object dynamically

@@ -845,7 +845,7 @@ export function AllProducts() {
               <div className="text-red-500 text-center mb-4">{error}</div>
             )}
 
-            {alertMessage && (
+            {/* {alertMessage && (
               <Alert
                 className={`mb-4 ${
                   alertMessage.type === "success"
@@ -858,7 +858,7 @@ export function AllProducts() {
                 </AlertTitle>
                 <AlertDescription>{alertMessage.message}</AlertDescription>
               </Alert>
-            )}
+            )} */}
 
             {isLoading ? (
               <Loader />

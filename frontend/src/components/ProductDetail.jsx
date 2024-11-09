@@ -213,6 +213,11 @@ const ProductDetail = () => {
   const [userReview, setUserReview] = useState(null);
   const [quickRating, setQuickRating] = useState(0);
   const [isRatingHovered, setIsRatingHovered] = useState(false);
+  const [isExpandedComment, setIsExpandedComment] = useState(false);
+
+  const handleToggleComment = () => {
+    setIsExpandedComment(!isExpandedComment);
+  };
 
   const [filteredReviews, setFilteredReviews] = useState(null);
   // Handle filtering reviews based on selected star rating
@@ -1034,8 +1039,10 @@ const ProductDetail = () => {
                   <CardDescription className="flex items-center">
                     <div className="flex items-center">
                       {Array.from({ length: 5 }, (_, index) => {
+                        let ratingValue = 0;
                         if (product.rating) {
-                          const ratingValue = Math.floor(product.rating); // Get the integer part
+                           ratingValue = Math.floor(product.rating);
+                         } 
                           const isHalfStar =
                             product.rating - ratingValue >= 0.5; // Check for half-star
 
@@ -1070,11 +1077,10 @@ const ProductDetail = () => {
                               />
                             );
                           }
-                        }
-                        return null;
+                       
                       })}
                       <span className="text-xl font-semibold text-black ml-2">
-                        {product.rating ? product.rating.toFixed(1) : "N/A"}
+                        {product.rating ? product.rating.toFixed(1) : 0}
                       </span>
                     </div>
 
@@ -1099,9 +1105,7 @@ const ProductDetail = () => {
                         ) : product.quantity > 0 ? (
                           <>
                             {/* <Package className="w-6 h-6 mr-2 text-blue-500" /> */}
-                            <span className="text-green-600 text-medium">
-                              Still in stock!
-                            </span>
+                           
                           </>
                         ) : (
                           <div className="w-full">
@@ -1123,9 +1127,9 @@ const ProductDetail = () => {
                         ) : (
                           <>
                             {/* Tourist sees this if there are no sales */}
-                            <span className="text-lg font-semibold text-blue-500">
+                            {/* <span className="text-lg font-semibold text-blue-500">
                               Be the first to try it!
-                            </span>
+                            </span> */}
                           </>
                         )
                       ) : userRole === "admin" || userRole === "seller" ? (
@@ -1151,25 +1155,29 @@ const ProductDetail = () => {
                       ) : null}
                     </div>
 
-                    {/* {product.sales > 50 && (
-                    <p className="text-green-600">Popular product</p>
-                  )} */}
-                    {product.quantity <= 5 && product.quantity > 0 && (
-                      <p className="text-red-600 font-semibold">
-                        Only {product.quantity} left in stock! Buy now!
-                      </p>
-                    )}
+                    
+                    
                     <div className="flex items-center">
                       {/* <DollarSign className="w-6 h-6 mr-2 text-green-500" /> */}
-                      <span className="text-4xl font-bold text-[#1A3B47]">
+                      <span className="text-5xl font-bold text-[#1A3B47]">
                         {formatPrice(product.price)}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 mb-4 mt-2">
+                  <div className="flex items-center text-sm text-gray-500 mb-2 mt-2">
                     <Info className="w-5 h-5 mr-2" />
                     <p>Price includes VAT</p>
                   </div>
+                  {product.quantity <= 5 && product.quantity > 0 ? (
+  <p className="text-red-600 font-semibold text-xl mb-4">
+    Only {product.quantity} left in stock! Buy now!
+  </p>
+) : (
+  <span className="text-green-600 text-medium">
+    Still in stock!
+  </span>
+)}
+
                   <div>
                     <p className="text-gray-700 inline break-words ">
                       {isExpanded ||
@@ -1242,7 +1250,7 @@ const ProductDetail = () => {
                     {/* Standard Shipping */}
                     <div>
                       <div className="flex justify-between text-xl">
-                        <span className="font-semibold text-green-700">
+                        <span className="font-semibold text-[#388A94]">
                           Standard Shipping
                         </span>
                         <span>{formatPrice(2.99)}</span>
@@ -1255,7 +1263,7 @@ const ProductDetail = () => {
                     {/* Express Shipping */}
                     <div>
                       <div className="flex justify-between text-xl">
-                        <span className="font-semibold text-green-700">
+                        <span className="font-semibold text-[#388A94]">
                           Express Shipping
                         </span>
                         <span>{formatPrice(4.99)}</span>
@@ -1268,7 +1276,7 @@ const ProductDetail = () => {
                     {/* Next-Day/Same-Day Shipping */}
                     <div>
                       <div className="flex justify-between text-xl">
-                        <span className="font-semibold text-green-700">
+                        <span className="font-semibold text-[#388A94]">
                           Next-Day/Same-Day Shipping
                         </span>
                         <span>{formatPrice(6.99)}</span>
@@ -1281,7 +1289,7 @@ const ProductDetail = () => {
                     {/* International Shipping */}
                     <div>
                       <div className="flex justify-between text-xl">
-                        <span className="font-semibold text-green-700">
+                        <span className="font-semibold text-[#388A94]">
                           International Shipping
                         </span>
                         <span>{formatPrice(14.99)}</span>
@@ -1305,19 +1313,19 @@ const ProductDetail = () => {
                 <CardContent>
                   <ul className="space-y-2">
                     <li className="flex items-center text-lg">
-                      <Coins className="w-5 h-5 mr-2 text-blue-500" />
+                      <Coins className="w-5 h-5 mr-2 text-[#5D9297]" />
                       Buyer Protection
                     </li>
                     <li className="flex items-center text-lg">
-                      <RotateCcw className="w-5 h-5 mr-2 text-blue-500" />
+                      <RotateCcw className="w-5 h-5 mr-2 text-[#5D9297]" />
                       30 day returns
                     </li>
                     <li className="flex items-center text-lg">
-                      <Phone className="w-5 h-5 mr-2 text-blue-500" />
+                      <Phone className="w-5 h-5 mr-2 text-[#5D9297]" />
                       Easy access to support
                     </li>
                     <li className="flex items-center text-lg">
-                      <CreditCard className="w-5 h-5 mr-2 text-blue-500" />
+                      <CreditCard className="w-5 h-5 mr-2 text-[#5D9297]" />
                       Secure, flexible payment options
                     </li>
                   </ul>
@@ -1375,7 +1383,7 @@ const ProductDetail = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div className="ml-4">
-                          <h3 className="text-2xl font-bold">
+                          <h3 className="text-2xl font-bold text-[#1A3B47]">
                             {product.seller.name}
                           </h3>
                           <div className="flex items-center text-sm text-gray-500 mt-1">
@@ -2105,7 +2113,7 @@ const ProductDetail = () => {
                 <span className="text-gray-500 uppercase text-sm">Overall</span>
                 <div className="flex justify-center items-center">
                   <span className="text-4xl font-bold">
-                    {product.rating ? product.rating.toFixed(1) : "N/A"}
+                    {product.rating ? product.rating.toFixed(1) : 0}
                   </span>
                   <div className="ml-2 flex items-center">
                     {[...Array(5)].map((_, i) => {
@@ -2174,12 +2182,26 @@ const ProductDetail = () => {
                     <AvatarFallback>{review.user[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-lg font-semibold">{review.user}</h4>
-                      <StarRating rating={review.rating} />
-                    </div>
-                    <p className="text-gray-600 mt-1">{review.comment}</p>
-                  </div>
+      <div className="flex items-center justify-between">
+        <h4 className="text-lg font-semibold">{review.user}</h4>
+        <StarRating rating={review.rating} />
+      </div>
+      
+      {/* Show the first 50 characters of the comment and a "Show more" link */}
+      <p className="text-gray-600 mt-1">
+        {isExpandedComment ? review.comment : `${review.comment.slice(0, 100)}...`}
+      </p>
+
+      {/* Only show "Show more" if the comment length exceeds 50 characters */}
+      {review.comment.length > 100 && (
+        <button 
+          onClick={handleToggleComment} 
+          className="text-blue-500 mt-2 hover:underline"
+        >
+          {isExpandedComment ? 'Show less' : 'Show more'}
+        </button>
+      )}
+    </div>
                 </div>
               ))
             ) : (

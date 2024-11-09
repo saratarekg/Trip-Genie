@@ -190,7 +190,7 @@ export function MyProducts() {
         }
 
         const data = await response.json();
-        setProducts(data);
+        setProducts(data.products);
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
