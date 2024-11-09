@@ -33,7 +33,7 @@ router.get("/itineraries", itineraryController.getAllItineraries);
 router.post("/itineraries", upload.any(), itineraryController.createItinerary);
 router.put(
   "/itineraries/:id",
-  upload.array("newPictures", 10),
+  upload.any(),
   itineraryController.updateItinerary
 );
 router.delete("/itineraries/:id", itineraryController.deleteItinerary);
