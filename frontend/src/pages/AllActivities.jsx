@@ -283,8 +283,6 @@ export function AllActivitiesComponent() {
     } else {
       if (token) {
         const decodedToken = jwtDecode(token);
-        console.log("hereeeeeeeeeeeeeeeeeeeeeeeeee");
-        console.log(decodedToken.id);
         setUserInfo({
           role,
           userId: decodedToken.id
@@ -458,12 +456,9 @@ export function AllActivitiesComponent() {
       }
       fetchMaxPrice();
 
-      console.log("hereeeeeeeeeeeee88888888888888888888888888888eeeeeeeeeeeee");
 
       if (token) {
         const decodedToken = jwtDecode(token);
-        console.log("hereeeeeeeeeeeeeeeeeeeeeeeeee");
-        console.log(decodedToken.id);
         setUserInfo({
           role,
           preferredCurrency: currencyResponse.data,
