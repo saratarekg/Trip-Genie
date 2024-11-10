@@ -30,7 +30,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Loader from "@/components/loader";
 import defaultImage from "../assets/images/default-image.jpg";
-import historicalPlaceImage from "../assets/images/historical-places.png";
+import historicalPlaceImage from "../assets/images/hp.png";
 
 const HistoricalPlaceCard = ({
   historicalPlace,
@@ -204,7 +204,7 @@ const HistoricalPlaceCard = ({
               }}
               aria-label="Delete Historical Place"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 " />
             </Button>
           </div>
         )}
