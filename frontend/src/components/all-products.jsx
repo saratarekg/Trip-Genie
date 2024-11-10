@@ -900,25 +900,26 @@ export function AllProducts() {
                 <div>
                   {products.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {products
-                        .slice(
-                          (currentPage - 1) * tripsPerPage,
-                          currentPage * tripsPerPage
-                        )
-                        .map((product) => (
-                          <ProductCard
-                            key={product._id}
-                            product={product}
-                            userInfo={userInfo}
-                            onSelect={handleProductSelect}
-                            onBuyNow={handleBuyNow}
-                            cartItems={cartItems}
-                            wishlistItems={wishlistItems}
-                            onAddToCart={handleAddToCart}
-                            onAddToWishlist={handleAddToWishlist}
-                            onRemoveFromWishlist={handleRemoveFromWishlist}
-                          />
-                        ))}
+                      {products.length > 0 &&
+                        products
+                          .slice(
+                            (currentPage - 1) * tripsPerPage,
+                            currentPage * tripsPerPage
+                          )
+                          .map((product) => (
+                            <ProductCard
+                              key={product._id}
+                              product={product}
+                              userInfo={userInfo}
+                              onSelect={handleProductSelect}
+                              onBuyNow={handleBuyNow}
+                              cartItems={cartItems}
+                              wishlistItems={wishlistItems}
+                              onAddToCart={handleAddToCart}
+                              onAddToWishlist={handleAddToWishlist}
+                              onRemoveFromWishlist={handleRemoveFromWishlist}
+                            />
+                          ))}
                     </div>
                   ) : (
                     <p className="text-sm text-gray-500">
@@ -929,26 +930,29 @@ export function AllProducts() {
 
                 <div className="mt-8 flex justify-center items-center space-x-4">
                   <button
-                    onClick={() => {
-                      handlePageChange(currentPage - 1);
-                    }}
+                    onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-full bg-white shadow ${
                       currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
                     }`}
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft />
                   </button>
-                  <span className="text-gray-600">
-                    Page {currentPage} of{" "}
-                    {Math.ceil(products.length / tripsPerPage)}
+
+                  <span className="text-lg font-medium">
+                    {products.length > 0
+                      ? `Page ${currentPage} of ${Math.ceil(
+                          products.length / tripsPerPage
+                        )}`
+                      : "No pages available"}
                   </span>
+
                   <button
-                    onClick={() => {
-                      handlePageChange(currentPage + 1);
-                    }}
+                    onClick={() => handlePageChange(currentPage + 1)}
                     disabled={
-                      currentPage === Math.ceil(products.length / tripsPerPage)
+                      currentPage ===
+                        Math.ceil(products.length / tripsPerPage) ||
+                      products.length === 0
                     }
                     className={`px-4 py-2 rounded-full bg-white shadow ${
                       currentPage === Math.ceil(products.length / tripsPerPage)
@@ -956,7 +960,7 @@ export function AllProducts() {
                         : "text-[#388A94]"
                     }`}
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight />
                   </button>
                 </div>
               </>
