@@ -9,7 +9,7 @@
 - show booked transportation in history
 - booking a transportation and flight using wallet actually uses the tourist's wallet 
 - enter removes available dates in create itinerary(done) Amy
-- categories and tags are optional in create activity inside create itinerary 
+- categories and tags are optional in create activity inside create itinerary (done amy)
 - max price in price sliders (in activity, itineraries, preferences, products) by fetching the max price from the backend(done)radwa w sam
 - sort by preferences is activated on its own after being toggled off(done)sam
 - photos don't appear in wishlist  (DONE -HAZEM)
@@ -23,7 +23,7 @@ Hadwa's requests:
 - Add global search bar 
 
 Tourguide activities:
-- Allow tour guide to create own activities or choose from available ones (sprint 3),
+- Allow tour guide to create own activities (done) or choose from available ones (sprint 3),
 
 Activity card:
 - Sort by importance

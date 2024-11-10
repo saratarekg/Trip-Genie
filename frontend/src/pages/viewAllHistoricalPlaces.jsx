@@ -191,6 +191,7 @@ const HistoricalPlaceCard = ({
                 e.stopPropagation();
                 window.location.href = `/update-historical-place/${historicalPlace._id}`;
               }}
+              className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
               aria-label="Edit Historical Place"
             >
               <Edit className="h-4 w-4" />
@@ -202,6 +203,7 @@ const HistoricalPlaceCard = ({
                 e.stopPropagation();
                 onDeleteConfirm(historicalPlace._id, historicalPlace.title);
               }}
+              className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
               aria-label="Delete Historical Place"
             >
               <Trash2 className="h-4 w-4 " />

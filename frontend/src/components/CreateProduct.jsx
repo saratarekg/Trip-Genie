@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
+import backgroundPicture from "../assets/images/backgroundPattern.png";
 
 const formSchema = z.object({
   name: z.string().min(1, "Please enter a product name"),
@@ -138,15 +139,15 @@ const CreateProductForm = () => {
 
   return (
     <div>
-   <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+    <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-    <div
-      className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
-      style={{
-        backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
-      }}
-    >
+      <div
+        className="flex min-h-screen  items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+        style={{
+          backgroundImage: `url(${backgroundPicture})`,
+        }}
+      >
       
       <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
         <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
@@ -237,7 +238,8 @@ const CreateProductForm = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={handleGoBack}>Go to all products</Button>
+            <Button className="bg-[#5D9297]"
+            onClick={handleGoBack}>Go to all products</Button>
             <Button variant="outline" onClick={handleCreateNew}>
               Create Another
             </Button>

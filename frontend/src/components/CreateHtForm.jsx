@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
+import backgroundPicture from "../assets/images/backgroundPattern.png";
+
 
 // Form validation schema using zod
 const formSchema = z.object({
@@ -88,17 +90,17 @@ export default function CreateHtForm() {
 
   return (
     <div>
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+     <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div
-        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2"
+        className="flex min-h-screen  items-center justify-center bg-cover bg-center bg-no-repeat p-2"
         style={{
-          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+          backgroundImage: `url(${backgroundPicture})`,
         }}
       >
         <div className="bg-white rounded-xl shadow-xl overflow-hidden w-1/2 max-w-7xl flex flex-col md:flex-row">
-          <div className="w-full md:w-1/4 bg-[#B5D3D1] p-6">
+          <div className="w-full md:w-1/3 bg-[#B5D3D1] p-6">
             <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
               Create Historical Tag
             </h2>
@@ -106,7 +108,7 @@ export default function CreateHtForm() {
               Add a new historical tag to categorize historical places and events.
             </p>
           </div>
-          <div className="w-full md:w-3/4 p-6">
+          <div className="w-full md:w-2/3 p-6">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="type">Type *</Label>
