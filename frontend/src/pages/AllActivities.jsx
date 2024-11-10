@@ -768,7 +768,7 @@ export function AllActivitiesComponent() {
                     <Search className="absolute left-3 top-2.5 text-gray-400" />
                   </div>
 
-                  {isPriceInitialized && (<FilterComponent
+                  {(isPriceInitialized) && (<FilterComponent
                     filtersVisible={filtersVisible}
                     toggleFilters={toggleFilters}
                     sortOrder={sortOrder}

@@ -68,7 +68,7 @@ const getAllProducts = async (req, res) => {
 
 // Function to get the maximum price from products
 const getMaxPrice = async (req, res) => {
-  const maxPriceProduct = await Product.findOne().sort({ price: -1 });
+  const maxPriceProduct = await Product.findOne({ isArchived: false, isDeleted: false }).sort({ price: -1 });
   let maxPrice;
   if(maxPriceProduct){
   maxPrice = await maxPriceProduct.price;
