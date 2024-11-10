@@ -61,10 +61,10 @@ export function SellerProfileComponent() {
         setSeller(response.data);
         setEditedSeller(response.data);
         setLogo(response.data.logo);
-      
+
         if (response.data.logo && response.data.logo.url) {
           convertUrlToBase64(response.data.logo.url).then((data) => {
-            setBase64Image(data)
+            setBase64Image(data);
           });
         }
       } catch (err) {
@@ -155,6 +155,7 @@ export function SellerProfileComponent() {
           "Content-Type": "multipart/form-data",
         },
       });
+      response.data.seller.mobile = response.data.seller.mobile.slice(1);
 
       if (response.statusText === "OK") {
         setSeller(response.data.seller);
