@@ -103,12 +103,14 @@ const getActivitiesByPreferences = async (req, res) => {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    const { budget, categories, price, tourLanguages, tourType } =
+    const { budget, categories, price} =
       tourist.preference;
 
     // Apply filters based on preferences and query params
     const { startDate, endDate, minRating, searchBy, sort, asc, myActivities } =
       req.query;
+
+      console.log("req query: ", req.query);
 
     const filterResult = await Activity.filter(
       budget,
@@ -119,7 +121,18 @@ const getActivitiesByPreferences = async (req, res) => {
       minRating
     );
 
+    console.log("budget: ", budget);
+    console.log("price: ", price);
+    console.log("startDate: ", startDate);
+    console.log("endDate: ", endDate);
+    console.log("categories: ", categories);
+    console.log("minRating: ", minRating);
+
+    console.log("filterResult: ", filterResult);
+
     const searchResult = await Activity.findByFields(searchBy);
+
+    console.log("searchResult: ", searchResult);
 
     const searchResultIds = searchResult.map((activity) => activity._id);
     const filterResultIds = filterResult.map((activity) => activity._id);
@@ -129,13 +142,6 @@ const getActivitiesByPreferences = async (req, res) => {
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
 
-    // Filter based on tour languages and tour type preferences
-    if (tourLanguages.length > 0) {
-      query.push({ languages: { $in: tourLanguages } });
-    }
-    if (tourType.length > 0) {
-      query.push({ type: { $in: tourType } });
-    }
 
     // Only show future activities if 'myActivities' is not specified
     if (!myActivities) {
