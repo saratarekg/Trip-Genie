@@ -71,7 +71,7 @@ Activity card:
 - Make Vtp the admin(done)
 
 Pop-ups:
-- Ensure close button doesn't redirect after deletion is complete (Ehab)
+- Ensure close button doesn't redirect after deletion is complete (Ehab---(lesa delete itineraries not done))
 
 Consistency:
 - Ensure filter stars are consistent across all sections

@@ -1780,7 +1780,8 @@ const ActivityDetail = () => {
           </DialogHeader>
           <DialogFooter>
             <Button onClick={handleDeleteSuccess} variant="default">
-              OK
+              
+            Back to All Activities
             </Button>
           </DialogFooter>
         </DialogContent>
