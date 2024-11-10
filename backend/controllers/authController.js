@@ -16,22 +16,19 @@ const createToken = (id, role) => {
 
 const touristSignup = async (req, res) => {
   try {
-    if (await emailExists(req.body.email)) {
+    const { password, nationality, mobile, dateOfBirth, jobOrStudent } =
+      req.body;
+
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
+
+    if (await emailExists(email)) {
       throw new Error("Email already exists");
     }
-    if (await usernameExists(req.body.username)) {
+    if (await usernameExists(username)) {
       throw new Error("Username already exists");
     }
-    const {
-      email,
-      username,
-      password,
-      nationality,
-      mobile,
-      dateOfBirth,
-      jobOrStudent,
-    } = req.body;
-
     let { profilePicture } = req.body;
     if (profilePicture === "null") {
       profilePicture = null;
@@ -71,7 +68,8 @@ const touristSignup = async (req, res) => {
 };
 
 const login = async (req, res) => {
-  const { username, password } = req.body;
+  let { username, password } = req.body;
+  username = username.toLowerCase();
 
   try {
     let role = "";
@@ -138,15 +136,17 @@ const login = async (req, res) => {
 
 const advertiserSignup = async (req, res) => {
   try {
-    if (await emailExists(req.body.email)) {
+    const { password, name, description, website, hotline } = req.body;
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
+
+    if (await emailExists(email)) {
       throw new Error("Email already exists");
     }
-    if (await usernameExists(req.body.username)) {
+    if (await usernameExists(username)) {
       throw new Error("Username already exists");
     }
-
-    const { email, username, password, name, description, website, hotline } =
-      req.body;
     const IDFilename = req.files.ID[0].filename;
     const taxationRegistryCardFilename =
       req.files["Taxation Registry Card"][0].filename;
@@ -189,16 +189,7 @@ const advertiserSignup = async (req, res) => {
 
 const tourGuideSignup = async (req, res) => {
   try {
-    if (await emailExists(req.body.email)) {
-      throw new Error("Email already exists");
-    }
-    if (await usernameExists(req.body.username)) {
-      throw new Error("Username already exists");
-    }
-
     const {
-      email,
-      username,
       password,
       name,
       nationality,
@@ -206,6 +197,17 @@ const tourGuideSignup = async (req, res) => {
       yearsOfExperience,
       previousWorks,
     } = req.body;
+
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
+
+    if (await emailExists(email)) {
+      throw new Error("Email already exists");
+    }
+    if (await usernameExists(username)) {
+      throw new Error("Username already exists");
+    }
 
     let { profilePicture } = req.body;
     if (profilePicture === "null") {
@@ -253,14 +255,17 @@ const tourGuideSignup = async (req, res) => {
 
 const sellerSignup = async (req, res) => {
   try {
-    if (await emailExists(req.body.email)) {
+    const { password, name, description, mobile } = req.body;
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
+
+    if (await emailExists(email)) {
       throw new Error("Email already exists");
     }
-    if (await usernameExists(req.body.username)) {
+    if (await usernameExists(username)) {
       throw new Error("Username already exists");
     }
-
-    const { email, username, password, name, description, mobile } = req.body;
     let { logo } = req.body;
     if (logo === "null") {
       logo = null;
@@ -340,7 +345,9 @@ const usernameExists = async (username) => {
 };
 
 const checkUnique = async (req, res) => {
-  const { email, username } = req.query;
+  let { email, username } = req.query;
+  email = email.toLowerCase();
+  username = username.toLowerCase();
   const existingEmail = await emailExists(email);
   const existingUsername = await usernameExists(username);
   try {
