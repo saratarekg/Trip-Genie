@@ -25,6 +25,7 @@ router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlac
 router.get("/max-price-products", productController.getMaxPrice);
 router.get("/max-price-products-my", productController.getMaxPriceMy);
 router.get("/max-price-products-archived", productController.getMaxPriceArchived);
+router.get("/max-price-itinerary", itineraryController.getMaxPrice);
 
 router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);

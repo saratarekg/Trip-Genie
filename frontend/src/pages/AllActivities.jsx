@@ -686,7 +686,7 @@ export function AllActivitiesComponent() {
 
   const clearFilters = useCallback(() => {
     setSearchTerm("");
-    setPriceRange([0, 1000]);
+    setPriceRange([0, maxPriceOfActivities]);
     setDateRange({ start: "", end: "" });
     setSelectedCategories([]);
     setSortBy("");
