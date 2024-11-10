@@ -362,19 +362,7 @@ const HistoricalPlaceDetail = () => {
                             </Badge>
                           )
                         )}
-                        {historicalPlace.historicalTag.map(
-                          (historicalTag, index) => (
-                            <Badge
-                              key={index}
-                              variant="secondary"
-                              className="text-lg px-4 py-2 rounded-full flex items-center" // Same styles for the period badge
-                            >
-                              <Tag className="mr-2" />{" "}
-                              {/* Tag icon for the period as well */}
-                              {historicalTag.period}
-                            </Badge>
-                          )
-                        )}
+                  
                       </div>
                     ) : (
                       <p>No tags available</p>
