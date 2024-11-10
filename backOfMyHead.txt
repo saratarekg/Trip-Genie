@@ -77,7 +77,7 @@ Consistency:
 - Ensure filter stars are consistent across all sections
 
 Sign up:
-- Change all previous works (Zeina)
+- Change all previous works (Zeina--done)
 
 404 page:
 - Change "Return to home" to "Make a wish" (Amy --DONE!!)
