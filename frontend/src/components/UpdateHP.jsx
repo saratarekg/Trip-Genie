@@ -714,7 +714,7 @@ export default function UpdateHistoricalPlace() {
                       className="flex items-center bg-gray-200 rounded-full px-3 py-1"
                     >
                       <span>
-                        {tag.type} - {tag.period}
+                        {tag.type} 
                       </span>
                       <Button
                         variant="ghost"
@@ -735,7 +735,7 @@ export default function UpdateHistoricalPlace() {
                     <SelectContent>
                       {availableTags.map((tag) => (
                         <SelectItem key={tag._id} value={tag._id}>
-                          {tag.type} - {tag.period}
+                          {tag.type} 
                         </SelectItem>
                       ))}
                     </SelectContent>
