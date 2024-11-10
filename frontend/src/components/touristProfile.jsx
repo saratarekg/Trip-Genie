@@ -34,6 +34,16 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import zIndex from "@mui/material/styles/zIndex";
 import { Modal } from "@/components/Modal";
 
+const convertUrlToBase64 = async (url) => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+};
+
 // Custom validator for mobile number
 const phoneValidator = (value) => {
   console.log("value", value);
@@ -58,6 +68,7 @@ export function TouristProfileComponent() {
   const [showModal, setShowModal] = useState(false);
   const [newImage, setNewImage] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+  const [base64Image, setBase64Image] = useState(null);
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
@@ -75,6 +86,12 @@ export function TouristProfileComponent() {
         setTourist(response.data);
         setEditedTourist(response.data);
         setSelectedImage(response.data.profilePicture);
+    
+        if (response.data.profilePicture && response.data.profilePicture.url) {
+          convertUrlToBase64(response.data.profilePicture.url).then((res) => {
+            setBase64Image(res)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -329,7 +346,7 @@ export function TouristProfileComponent() {
                 currentImage={
                   selectedImage
                     ? selectedImage.public_id
-                      ? selectedImage.url
+                      ? base64Image
                       : selectedImage
                     : null
                 }
@@ -478,6 +495,7 @@ export function TouristProfileComponent() {
                       }`,
                     }}
                     className="w-full"
+                    inputStyle={{ width: "60%", marginLeft: "45px" }}
                   />
                 ) : (
                   <span>{tourist.mobile}</span>

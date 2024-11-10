@@ -78,6 +78,7 @@ router.get("/products/:id", productController.getProductById);
 
 router.get("/seller/:id", sellerController.getSellerByID);
 
+router.get("/max-price-products", productController.getMaxPrice);
 router.get("/maxPriceActivities", activityController.getMaxPrice);
 router.get("/activities", activityController.getAllActivities);
 router.get(

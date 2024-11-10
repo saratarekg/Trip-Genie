@@ -22,6 +22,16 @@ const phoneValidator = (value) => {
   return true;
 };
 
+const convertUrlToBase64 = async (url) => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+};
+
 export function SellerProfileComponent() {
   const [seller, setSeller] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +44,7 @@ export function SellerProfileComponent() {
   const [showModal, setShowModal] = useState(false);
   const [newImage, setNewImage] = useState(null);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+  const [base64Image, setBase64Image] = useState(null);
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
@@ -50,6 +61,12 @@ export function SellerProfileComponent() {
         setSeller(response.data);
         setEditedSeller(response.data);
         setLogo(response.data.logo);
+      
+        if (response.data.logo && response.data.logo.url) {
+          convertUrlToBase64(response.data.logo.url).then((data) => {
+            setBase64Image(data)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -125,7 +142,7 @@ export function SellerProfileComponent() {
       const { name, username, email, mobile, description } = editedSeller;
       const formData = new FormData();
       formData.append("name", name);
-      logo && formData.append("logo", logo);
+      logo && formData.append("logo", JSON.stringify(logo));
       formData.append("username", username);
       formData.append("email", email);
       formData.append("mobile", "+" + mobile);
@@ -409,7 +426,7 @@ export function SellerProfileComponent() {
         <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
         <ImageCropper
           onImageCropped={handleImageCropped}
-          currentImage={logo ? (logo.public_id ? logo.url : logo) : null}
+          currentImage={logo ? (logo.public_id ? base64Image : logo) : null}
         />
         <div className="mt-4 flex justify-end">
           <Button onClick={handleFirstSave} className="mr-2">

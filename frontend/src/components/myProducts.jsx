@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Cookies from "js-cookie";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import {
   Search,
@@ -11,7 +10,6 @@ import {
   ChevronRight,
   Star,
   Filter,
-  Plus,
   ArrowUpDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,29 +20,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Loader from "./Loader";
 import defaultImage from "../assets/images/default-image.jpg";
+import productImage from "../assets/images/products.png";
 import DualHandleSliderComponent from "./dual-handle-slider";
-import LazyLoad from "react-lazyload";
 
 const renderStars = (rating) => {
   return (
@@ -62,7 +42,7 @@ const renderStars = (rating) => {
 };
 
 const ProductCard = ({ product, onSelect, userInfo }) => {
-  const [currencySymbol, setCurrencySymbol] = useState('');
+  const [currencySymbol, setCurrencySymbol] = useState("");
 
   const getCurrencySymbol = useCallback(async () => {
     try {
@@ -83,7 +63,6 @@ const ProductCard = ({ product, onSelect, userInfo }) => {
     getCurrencySymbol();
   }, [getCurrencySymbol]);
 
-
   const formatPrice = (price) => {
     return `${currencySymbol}${price.toFixed(2)}`;
   };
@@ -94,14 +73,15 @@ const ProductCard = ({ product, onSelect, userInfo }) => {
         <img
           src={product.pictures[0]?.url || defaultImage}
           alt={product.name}
-          className="w-full h-48 object-cover"
+          className="w-full h-40 object-cover"
         />
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(product._id)}>
         <CardTitle className="text-lg text-[#1A3B47]">{product.name}</CardTitle>
-        <p className="text-sm text-gray-600 mt-2">
-          {product.description.length > 100
-            ? `${product.description.slice(0, 100)}...`
+        <div className="mt-1">{renderStars(product.rating)}</div>
+        <p className="text-sm text-gray-600 mt-2 break-words">
+          {product.description.length > 70
+            ? `${product.description.slice(0, 70)}...`
             : product.description}
         </p>
       </CardContent>
@@ -109,7 +89,6 @@ const ProductCard = ({ product, onSelect, userInfo }) => {
         <span className="text-2xl font-bold text-[#388A94]">
           {formatPrice(product.price)}
         </span>
-        {renderStars(product.rating)}
       </CardFooter>
     </Card>
   );
@@ -122,14 +101,13 @@ export function MyProducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState(1);
   const [sortBy, setSortBy] = useState("");
-  const [filtersVisible, setFiltersVisible] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [maxPrice, setMaxPrice] = useState(1000);
+  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedRating, setSelectedRating] = useState(null);
-  const [alertMessage, setAlertMessage] = useState(null);
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const productsPerPage = 6;
 
   const navigate = useNavigate();
@@ -158,21 +136,47 @@ export function MyProducts() {
     }
   }, []);
 
-  const getSymbol = () => {
-    return ""; // No need for a default symbol as we're using the product's currency
-  };
+  useEffect(() => {
+    if(!isPriceInitialized){
+      fetchMaxPrice();
+      }
+  }, [userInfo]);
+
+  const fetchMaxPrice = async () => {
+    const role = getUserRole();
+    const token = Cookies.get("jwt");
+    const url = new URL(`http://localhost:4000/${role}/max-price-products-my`);
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          setMaxPriceOfProducts(data);
+          setPriceRange([0, data]);
+          setIsPriceInitialized(true);
+          
+    };
 
   const fetchProducts = useCallback(
     async (params = {}) => {
       try {
+        setIsLoading(true);
         const token = Cookies.get("jwt");
         const role = getUserRole();
-        const url = new URL(`http://localhost:4000/${role}/products?myproducts=true`);
+        const url = new URL(
+          `http://localhost:4000/${role}/products?myproducts=true`
+        );
 
-        if (params.searchBy) url.searchParams.append("searchBy", params.searchBy);
-        if (params.asc) url.searchParams.append("asc", params.asc);
-        if (params.minPrice) url.searchParams.append("minPrice", params.minPrice);
-        if (params.maxPrice) url.searchParams.append("maxPrice", params.maxPrice);
+        if (params.searchBy)
+          url.searchParams.append("searchBy", params.searchBy);
+        if (params.sort) url.searchParams.append("sort", params.sort);
+        if (params.asc !== undefined)
+          url.searchParams.append("asc", params.asc);
+        if (params.minPrice)
+          url.searchParams.append("minPrice", params.minPrice);
+        if (params.maxPrice)
+          url.searchParams.append("maxPrice", params.maxPrice);
         if (params.rating) url.searchParams.append("rating", params.rating);
         if (params.categories && params.categories.length > 0) {
           url.searchParams.append("categories", params.categories.join(","));
@@ -191,15 +195,22 @@ export function MyProducts() {
 
         const data = await response.json();
         setProducts(data);
+       
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
         setError("Error fetching products");
         setProducts([]);
+      } finally {
+        setIsLoading(false);
       }
     },
-    [getUserRole]
+    [getUserRole, maxPriceOfProducts]
   );
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, [fetchUserInfo]);
 
   useEffect(() => {
     if (userInfo) {
@@ -208,21 +219,17 @@ export function MyProducts() {
   }, [userInfo, fetchProducts]);
 
   useEffect(() => {
-    fetchUserInfo();
-  }, [fetchUserInfo]);
-
-  useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchProducts({
         searchBy: searchTerm,
+        sort: sortBy,
+        asc: sortOrder,
         minPrice: priceRange[0],
         maxPrice: priceRange[1],
         rating: selectedRating,
-        asc: sortOrder,
         categories: selectedCategories,
       });
     }, 300);
-
     return () => clearTimeout(delayDebounceFn);
   }, [
     searchTerm,
@@ -251,35 +258,43 @@ export function MyProducts() {
     setSearchTerm("");
     setSortBy("");
     setSortOrder(1);
-    setPriceRange([0, maxPrice]);
+    setPriceRange([0, maxPriceOfProducts]);
     setSelectedRating(null);
     setSelectedCategories([]);
     fetchProducts();
   };
 
-  const toggleFilters = () => {
-    setFiltersVisible(!filtersVisible);
-  };
-
-  const handleCategoryChange = (category) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
   return (
-    <div className="bg-[#E6DCCF]">
-      {/* Navbar */}
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+    <div className="bg-gray-100">
+      <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
+        <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
+          <div className="flex-1">
+            <h1 className="text-5xl font-bold text-white mb-4">My Products</h1>
+            <p className="text-gray-200">
+              <Link
+                to="/"
+                className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
+              >
+                Home
+              </Link>{" "}
+              / My Products
+            </p>
+          </div>
+          <div className="hidden lg:block w-1/3">
+            <img
+              src={productImage}
+              alt="Decorative"
+              height="160"
+              width="160"
+              className="ml-auto"
+            />
+          </div>
+        </div>
       </div>
-      <div className="container mx-auto px-24 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold text-[#1A3B47] mb-8">My Products</h1>
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex gap-8">
           {/* Sidebar Filters */}
-          <div className="hidden md:block w-64 bg-white rounded-lg shadow-lg p-6">
+          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button
@@ -290,22 +305,21 @@ export function MyProducts() {
                 Clear All
               </Button>
             </div>
-
             {/* Price Range */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-              <DualHandleSliderComponent
+              {isPriceInitialized && (<DualHandleSliderComponent
                 min={0}
-                max={maxPrice}
-                symbol={getSymbol()}
-                step={Math.max(1, Math.ceil(maxPrice / 100))}
+                max={maxPriceOfProducts}
+                symbol="$"
+                step={Math.max(1, Math.ceil(maxPriceOfProducts / 100))}
                 values={priceRange}
+                exchangeRate='1'
                 middleColor="#5D9297"
                 colorRing="#388A94"
                 onChange={(values) => setPriceRange(values)}
-              />
+              />)}
             </div>
-
             {/* Rating Filter */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Rating</h3>
@@ -323,63 +337,89 @@ export function MyProducts() {
                 ))}
               </div>
             </div>
-
-            {/* Sort by Rating */}
+            {/* Featured Products Section */}
             <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-2">
-                Sort by Rating
+              <h3 className="font-medium text-[#1A3B47] mb-4">
+                Featured Products
               </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                style={{ borderRadius: "20px" }}
-                onClick={() => handleSort("rating")}
-              >
-                <ArrowUpDown className="w-4 h-4" />
-                <span>Rating</span>
-                <div className="ml-auto">
-                  {sortBy === "rating" ? (sortOrder === 1 ? "↓" : "↑") : ""}
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-4">
+                  {products.slice(0, 3).map((product) => (
+                    <Link
+                      key={product._id}
+                      to={`/product/${product._id}`}
+                      className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                    >
+                      <img
+                        src={product.pictures[0]?.url || defaultImage}
+                        alt={product.name}
+                        className="w-16 h-16 object-cover rounded-md"
+                      />
+                      <div>
+                        <h4 className="font-medium text-sm">{product.name}</h4>
+                        <div className="mt-1">
+                          {renderStars(product.rating)}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Button>
-            </div>
-
-            <div className="mb-6">
-              <Link
-                to="/create-product"
-                className="flex items-center justify-between w-full px-4 py-2 rounded-md bg-orange-400 text-white"
-              >
-                <Plus className="mr-2 w-4 h-4" />
-                Create Product
-              </Link>
+              </ScrollArea>
             </div>
           </div>
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Search Bar */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center justify-center space-x-4">
-                <div className="relative" style={{ width: "900px" }}>
+            <div className="mb-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="relative flex-grow">
                   <input
                     type="text"
-                    placeholder="Search products..."
+                    placeholder="Search my products..."
                     className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
                 </div>
-                <span className="text-gray-500 text-sm">
+                <span className="text-gray-500 text-sm whitespace-nowrap">
                   ({products.length} items)
                 </span>
-              </div>
-              <div className="flex gap-2">
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="whitespace-nowrap rounded-full"
+                    onClick={() => handleSort("rating")}
+                  >
+                    <ArrowUpDown className="w-4 h-4 mr-2" />
+                    Sort by Rating
+                    {sortBy === "rating" && (
+                      <span className="ml-2">
+                        {sortOrder === 1 ? "↓" : "↑"}
+                      </span>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="whitespace-nowrap rounded-full"
+                    onClick={() => handleSort("price")}
+                  >
+                    <ArrowUpDown className="w-4 h-4 mr-2" />
+                    Sort by Price
+                    {sortBy === "price" && (
+                      <span className="ml-2">
+                        {sortOrder === 1 ? "↓" : "↑"}
+                      </span>
+                    )}
+                  </Button>
+                </div>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-full md:hidden"
-                  onClick={toggleFilters}
+                  className="md:hidden"
+                  onClick={() => {}} // TODO: Implement mobile filters
                 >
                   <Filter className="w-4 h-4" />
                 </Button>
@@ -390,26 +430,10 @@ export function MyProducts() {
               <div className="text-red-500 text-center mb-4">{error}</div>
             )}
 
-            {alertMessage && (
-              <Alert
-                className={`mb-4 ${
-                  alertMessage.type === "success"
-                    ? "bg-green-100"
-                    : "bg-red-100"
-                }`}
-              >
-                <AlertTitle>
-                  {alertMessage.type === "success" ? "Success" : "Error"}
-                </AlertTitle>
-                <AlertDescription>{alertMessage.message}</AlertDescription>
-              </Alert>
-            )}
-
             {isLoading ? (
               <Loader />
             ) : (
               <>
-                {/* Product Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {products
                     .slice(
@@ -426,21 +450,17 @@ export function MyProducts() {
                     ))}
                 </div>
 
-                {/* Pagination */}
                 <div className="mt-8 flex justify-center items-center space-x-4">
                   <button
-                    onClick={() => {
-                      handlePageChange(currentPage - 1);
-                    }}
+                    onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === 1 ? "text-gray-300" : "text-blue-600"
+                      currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
                     }`}
                   >
                     <ChevronLeft />
                   </button>
 
-                  {/* Page X of Y */}
                   <span className="text-lg font-medium">
                     {products.length > 0
                       ? `Page ${currentPage} of ${Math.ceil(
@@ -450,17 +470,17 @@ export function MyProducts() {
                   </span>
 
                   <button
-                    onClick={() => {
-                      handlePageChange(currentPage + 1);
-                    }}
+                    onClick={() => handlePageChange(currentPage + 1)}
                     disabled={
-                      currentPage === Math.ceil(products.length / productsPerPage) ||
+                      currentPage ===
+                        Math.ceil(products.length / productsPerPage) ||
                       products.length === 0
                     }
                     className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === Math.ceil(products.length / productsPerPage)
+                      currentPage ===
+                      Math.ceil(products.length / productsPerPage)
                         ? "text-gray-300"
-                        : "text-blue-600"
+                        : "text-[#388A94]"
                     }`}
                   >
                     <ChevronRight />

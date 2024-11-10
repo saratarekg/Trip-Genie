@@ -51,7 +51,7 @@ import CreateHtpage from "./pages/CreateHtpage.jsx";
 import NotFound from "./components/NotFound.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import TouristActivities from "./pages/TouristActivities.jsx";
-import { ProductArchive } from "./components/product-archive.jsx";
+import ProductArchive from "./components/product-archive.jsx";
 import BookingPage from "./pages/FlightBooking.jsx";
 import FileViewer from "./components/FileViewer.jsx";
 import HotelBookingPage from "./pages/HotelBooking.jsx";
@@ -65,6 +65,8 @@ import TagsPage from "./pages/TagsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import TransportationPage from "./pages/TransportationPage.jsx";
 import MyHistoricalPlacesComponent from "./pages/myHP.jsx";
+import HotelSearch from "./components/hotel-search.jsx";
+import HotelDetails from "./pages/HotelDetails.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -199,6 +201,25 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/hotels2"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <HotelSearch />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/hotels2/:hotelId"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <HotelDetails />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/historical-place/:id"
             element={

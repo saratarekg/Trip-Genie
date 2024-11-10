@@ -19,7 +19,7 @@ const updateSeller = async (req, res) => {
         .json({ error: "Seller is not accepted yet, Can not update profile" });
     }
     const { email, username, name, description, mobile } = req.body;
-    let { logo } = req.body;
+    let  logo  =req.body.logo? JSON.parse(req.body.logo):undefined;
 
     if (username !== seller1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });

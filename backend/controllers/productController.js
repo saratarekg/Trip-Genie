@@ -7,6 +7,7 @@ const cloudinary = require("../utils/cloudinary");
 const getAllProducts = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, sort, myproducts, rating } = req.query;
   const role = res.locals.user_role;
+  console.log(myproducts);
   
   try {
     // Build the query object dynamically
@@ -59,16 +60,71 @@ const getAllProducts = async (req, res) => {
       return res.status(200).json({ products: [], maxPrice: 0 });
     }
 
-    // Calculate the max price of the products
-    const maxPriceOfProducts = Math.max(...products.map(product => product.price));
-    console.log("maximum:",maxPriceOfProducts);
-
-    // Return the products along with the max price of the products
-    res.status(200).json({ products, maxPrice: maxPriceOfProducts });
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Function to get the maximum price from products
+const getMaxPrice = async (req, res) => {
+  const maxPriceProduct = await Product.findOne().sort({ price: -1 });
+  let maxPrice;
+  if(maxPriceProduct){
+  maxPrice = await maxPriceProduct.price;
+  } else {
+    maxPrice = 0;
+  }
+  res.status(200).json(maxPrice);
+};
+
+const getMaxPriceMy = async (req, res) => {
+  const role = res.locals.user_role;
+  const userId = res.locals.user_id;
+
+  try {
+    let maxPriceProduct;
+
+    if (role === "admin") {
+      // Admin: Access max price across all non-archived products
+      maxPriceProduct = await Product.findOne({ seller: null, isArchived: false, isDeleted: false }).sort({ price: -1 });
+    } else {
+      // Seller: Retrieve max price for non-archived products belonging to this user
+      maxPriceProduct = await Product.findOne({ seller: userId, isArchived: false, isDeleted: false }).sort({ price: -1 });
+    }
+
+    const maxPrice = maxPriceProduct ? maxPriceProduct.price : 0;
+    res.status(200).json(maxPrice);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getMaxPriceArchived = async (req, res) => {
+  const role = res.locals.user_role;
+  const userId = res.locals.user_id;
+
+  try {
+    let maxPriceProduct;
+
+    if (role === "admin") {
+      // Admin: Access max price across all non-archived products
+      maxPriceProduct = await Product.findOne({ seller: null, isArchived: true, isDeleted: false }).sort({ price: -1 });
+    } else {
+      // Seller: Retrieve max price for non-archived products belonging to this user
+      maxPriceProduct = await Product.findOne({ seller: userId, isArchived: true, isDeleted: false }).sort({ price: -1 });
+    }
+
+    const maxPrice = maxPriceProduct ? maxPriceProduct.price : 0;
+    res.status(200).json(maxPrice);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 
 
 const getAllProductsArchive = async (req, res) => {
@@ -870,4 +926,7 @@ module.exports = {
   archiveProduct,
   getAllProductsArchive,
   updateCommentOnProduct,
+  getMaxPrice,
+  getMaxPriceMy,
+  getMaxPriceArchived,
 };

@@ -1091,6 +1091,13 @@ const handleRateItinerary = async () => {
                         Accessibility: {itinerary.accessibility ? "Yes" : "No"}
                       </span>
                     </div>
+
+                    <div className="flex items-center">
+                      <Accessibility className="w-6 h-6 mr-2 text-[#F88C33]" />
+                      <span className="text-gray-700">
+                        Repeatable: {itinerary.isRepeated ? "Yes" : "No"}
+                      </span>
+                    </div>
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-center">
@@ -1152,11 +1159,23 @@ const handleRateItinerary = async () => {
                                 </span>
                               </div>
                               <div className="flex items-center">
-                                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                                <span className="text-sm">
-                                  {new Date(activity.timing).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </span>
-                              </div>
+  <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+  <span className="text-sm">
+    {itinerary.isRepeated
+      ? new Date(activity.timing).toLocaleTimeString([], { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        })
+      : new Date(activity.timing).toLocaleString([], { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        })}
+  </span>
+</div>
+
 
                               {/* <div className="flex items-center">
                                 <Banknote className="w-4 h-4 mr-2 text-gray-500" />

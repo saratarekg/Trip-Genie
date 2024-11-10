@@ -49,6 +49,7 @@ import DualHandleSliderComponent from "./dual-handle-slider";
 import LazyLoad from "react-lazyload";
 import productImage from '../assets/images/products.png';
 import productImage2 from '../assets/images/products2.png';
+import { role } from "@/pages/login";
 
 const renderStars = (rating) => {
   return (
@@ -65,7 +66,7 @@ const renderStars = (rating) => {
   );
 };
 
-let exchangeRateForFilter;
+let exchangeRateForFilter = 1;
 
 const ProductCard = ({
   product,
@@ -133,18 +134,19 @@ const ProductCard = ({
 
   const getCurrencySymbol = useCallback(async () => {
     if(userInfo){
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/${userInfo.role}/getCurrency/${product.currency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCurrencySymbol(response.data.symbol);
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-    }
+      setCurrencySymbol("$");
+    // try {
+    //   const token = Cookies.get("jwt");
+    //   const response = await axios.get(
+    //     `http://localhost:4000/${userInfo.role}/getCurrency/${product.currency}`,
+    //     {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     }
+    //   );
+    //   setCurrencySymbol(response.data.symbol);
+    // } catch (error) {
+    //   console.error("Error fetching currency symbol:", error);
+    // }
   }
   }, [userInfo, product]);
 
@@ -279,6 +281,7 @@ export function AllProducts() {
   const [cartItems, setCartItems] = useState([]);
   const [wishlistItems, setWishlistItems] = useState([]);
   const [alertMessage, setAlertMessage] = useState(null);
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const tripsPerPage = 6;
 
   const navigate = useNavigate();
@@ -377,8 +380,8 @@ export function AllProducts() {
         }
 
         const data = await response.json();
-        setProducts(data.products);
-        setMaxPriceOfProducts(data.maxPrice);
+        setProducts(data);
+        
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -389,7 +392,32 @@ export function AllProducts() {
     [getUserRole]
   );
 
+  useEffect(() => {
+    if(!isPriceInitialized){
+      fetchMaxPrice();
+      }
+  }, [role]);
+
+  const fetchMaxPrice = async () => {
+    const role = getUserRole();
+    const token = Cookies.get("jwt");
+    const url = new URL(`http://localhost:4000/${role}/max-price-products`);
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          setMaxPriceOfProducts(data);
+          setPriceRange([0, data]);
+          setMaxPrice(data);
+          setIsPriceInitialized(true);
+          
+    };
+
+
   const fetchCartItems = useCallback(async () => {
+    if(role == 'tourist'){
     try {
       const token = Cookies.get("jwt");
       const response = await fetch("http://localhost:4000/tourist/cart", {
@@ -404,9 +432,11 @@ export function AllProducts() {
     } catch (error) {
       console.error("Error fetching cart items:", error);
     }
+  }
   }, []);
 
   const fetchWishlistItems = useCallback(async () => {
+    if(role == 'tourist'){
     try {
       const token = Cookies.get("jwt");
       const response = await fetch("http://localhost:4000/tourist/wishlist", {
@@ -421,6 +451,7 @@ export function AllProducts() {
     } catch (error) {
       console.error("Error fetching wishlist items:", error);
     }
+  }
   }, []);
 
   useEffect(() => {
@@ -436,12 +467,13 @@ export function AllProducts() {
   }, [fetchUserInfo]);
 
   useEffect(() => {
+    // if(isPriceInitialized){
     const delayDebounceFn = setTimeout(() => {
       fetchProducts({
         searchBy: searchTerm,
         myproducts: myProducts,
         minPrice: priceRange[0],
-        maxPrice: maxPriceOfProducts,
+        maxPrice: priceRange[1],
         rating: selectedRating,
         sort: sortBy,
         asc: sortOrder,
@@ -700,17 +732,17 @@ export function AllProducts() {
             {/* Price Range */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-              <DualHandleSliderComponent
+              {isPriceInitialized && (<DualHandleSliderComponent
                 min={0}
                 max={maxPriceOfProducts}
                 symbol={getSymbol()}
-                step={Math.max(1, Math.ceil(maxPrice*exchangeRateForFilter / 100))}
+                step={Math.max(1, Math.ceil(maxPriceOfProducts*exchangeRateForFilter / 100))}
                 values={priceRange}
                 exchangeRate={exchangeRateForFilter}
                 middleColor="#5D9297"
                 colorRing="#388A94"
                 onChange={(values) => setPriceRange(values)}
-              />
+              />)}
             </div>
             {/* Rating Filter */}
             <div className="mb-6">
@@ -845,7 +877,7 @@ export function AllProducts() {
               <div className="text-red-500 text-center mb-4">{error}</div>
             )}
 
-            {alertMessage && (
+            {/* {alertMessage && (
               <Alert
                 className={`mb-4 ${
                   alertMessage.type === "success"
@@ -858,7 +890,7 @@ export function AllProducts() {
                 </AlertTitle>
                 <AlertDescription>{alertMessage.message}</AlertDescription>
               </Alert>
-            )}
+            )} */}
 
             {isLoading ? (
               <Loader />

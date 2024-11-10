@@ -62,6 +62,8 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { ImageCropper } from "@/components/ImageCropper";
 import { Modal } from "@/components/Modal";
 
+
+
 const phoneValidator = (value) => {
   // Check if the input starts with a "+"
 
@@ -71,6 +73,16 @@ const phoneValidator = (value) => {
     return false;
   }
   return true;
+};
+
+const convertUrlToBase64 = async (url) => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
 };
 
 const StarRating = ({ rating, setRating, readOnly = false }) => {
@@ -115,6 +127,8 @@ export function TourGuideProfileComponent() {
 
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
   const [showFullComment, setShowFullComment] = useState(false);
+  const [base64Image, setBase64Image] = useState(null);
+
   const handlePrevComment = () =>
     setCurrentCommentIndex((prev) => Math.max(0, prev - 3));
   const handleNextComment = () =>
@@ -162,6 +176,13 @@ export function TourGuideProfileComponent() {
         setTourGuide(response.data);
         setEditedTourGuide(response.data);
         setProfilePicture(response.data.profilePicture);
+       
+
+        if (response.data.profilePicture && response.data.profilePicture.url) {
+          convertUrlToBase64(response.data.profilePicture.url).then((base64) => {
+            setBase64Image(base64)
+          });
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -277,7 +298,7 @@ export function TourGuideProfileComponent() {
 
       const formData = new FormData();
       formData.append("name", name);
-      profilePicture && formData.append("profilePicture", profilePicture);
+      profilePicture && formData.append("profilePicture", JSON.stringify(profilePicture));
       formData.append("username", username);
       formData.append("email", email);
       formData.append("mobile", "+" + mobile);
@@ -436,7 +457,7 @@ export function TourGuideProfileComponent() {
                     currentImage={
                       profilePicture
                         ? profilePicture.public_id
-                          ? profilePicture.url
+                          ? base64Image
                           : profilePicture
                         : null
                     }

@@ -4,6 +4,7 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import FilterComponent from "../components/FilterActivities.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader.jsx";
 import ActivityDetail from "./SingleActivity.jsx";
@@ -16,11 +17,61 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Edit,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  activityName,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
+        <p className="mb-6">
+          Are you sure you want to delete the activity "{activityName}"?
+        </p>
+        <div className="flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            onClick={onConfirm}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 let exchangeRateForFilter = 1;
+const role = Cookies.get("role")
 
 const ActivityCard = React.memo(
-  ({ activity, onSelect, userInfo, exchangeRates, currencies }) => {
+  ({ activity, onSelect, userInfo, exchangeRates, currencies , onDeleteConfirm, setShowDeleteConfirm,}) => {
     const formatPrice = useCallback(
       (price) => {
         if (!userInfo || !price) return "";
@@ -42,6 +93,9 @@ const ActivityCard = React.memo(
       [userInfo, exchangeRates, currencies, activity.currency]
     );
 
+
+    
+
     return (
       <Card
         className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
@@ -57,6 +111,31 @@ const ActivityCard = React.memo(
             alt={activity.name}
             className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
           />
+
+          {role === "advertiser" && userInfo.userId === activity.advertiser && (
+        <div className="absolute top-2 right-2 flex space-x-2">
+          <button
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `/update-activity/${activity._id}`;
+            }}
+            aria-label="Edit activity"
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+          <button
+            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteConfirm(activity._id, activity.name);
+            }}
+            aria-label="Delete activity"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
         </div>
         <CardHeader className="p-4">
           <CardTitle className="text-xl font-semibold">
@@ -139,8 +218,12 @@ export function AllActivitiesComponent() {
   const [currencies, setCurrencies] = useState([]);
   const [exchangeRates, setExchangeRates] = useState({});
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [activityToDelete, setActivityToDelete] = useState(null);
   const navigate = useNavigate();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
   
   const fetchExchangeRates = useCallback(async () => {
     try {
@@ -185,16 +268,28 @@ export function AllActivitiesComponent() {
           }
         );
 
-        setUserInfo({
-          role,
-          preferredCurrency: currencyResponse.data,
-        });
+        
+          setUserInfo({
+            role,
+            preferredCurrency: currencyResponse.data
+          }); 
+        
+
+       
       } catch (error) {
         console.error("Error fetching user profile:", error);
         setUserInfo({ role });
       }
     } else {
-      setUserInfo({ role });
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        setUserInfo({
+          role,
+          userId: decodedToken.id
+        });        
+      }else{    
+          setUserInfo({ role  });
+    }
     }
   }, []);
 
@@ -341,6 +436,7 @@ export function AllActivitiesComponent() {
             },
           }
         ).then((res) => res.json());
+       
 
         setActivities([...preferredActivities, ...otherActivities]);
         setIsSortedByPreference(true);
@@ -359,6 +455,22 @@ export function AllActivitiesComponent() {
         setActivities(data);
       }
       fetchMaxPrice();
+
+
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data,
+          userId: decodedToken.id
+        });        
+      }
+      else{
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data
+        }); 
+      }
 
       setError(null);
       setIsLoading(false);
@@ -453,6 +565,56 @@ export function AllActivitiesComponent() {
       setActivities([]);
     }
   };
+
+
+  const handleDeleteConfirm = (id, name) => {
+    setActivityToDelete({ id, name });
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (!activityToDelete) return;
+
+    setIsLoading(true);
+    setDeleteError(null);
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${role}/activities/${activityToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (
+          response.status === 400 &&
+          errorData.message === "Cannot delete activity with existing bookings"
+         
+        ) {
+          setError("Cannot Delete Activity With Existing Bookings.");
+          setDeleteError("Cannot Delete Activity With Existing Bookings.");
+          return;
+        }
+        throw new Error("Failed to delete activity");
+      }
+
+      setShowDeleteSuccess(true);
+      fetchActivities();
+    } catch (err) {
+      setError("Error deleting activity. Please try again later.");
+      console.error("Error deleting activity:", err);
+    } finally {
+      setIsLoading(false);
+      setShowDeleteModal(false);
+      setActivityToDelete(null);
+    }
+  };
+
 
   const fetchActivitiesByPreference = useCallback(async () => {
     try {
@@ -558,6 +720,8 @@ export function AllActivitiesComponent() {
           exchangeRates={exchangeRates}
           currencies={currencies}
           onSelect={handleActivitySelect}
+          onDeleteConfirm={handleDeleteConfirm}
+          setShowDeleteConfirm={setShowDeleteConfirm}
         />
       ));
   }, [
@@ -689,6 +853,82 @@ export function AllActivitiesComponent() {
           </div>
         </div>
       )}
+           <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        activityName={activityToDelete?.name}
+      />
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete activity</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this activity?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Activity Deleted
+            </DialogTitle>
+            <DialogDescription>
+              The activity has been successfully deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="default"
+              onClick={() => {
+                setShowDeleteSuccess(false);
+                navigate("/activity");
+              }}
+              className = "bg-gray-400 hover:bg-gray-500"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteError !== null}
+        onOpenChange={() => setDeleteError(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Failed to Delete activity
+            </DialogTitle>
+            <DialogDescription>
+              {deleteError || "activity is already booked!"}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="default" onClick={() => setDeleteError(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
