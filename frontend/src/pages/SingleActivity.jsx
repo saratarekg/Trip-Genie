@@ -1023,7 +1023,8 @@ const ActivityDetail = () => {
           <Badge
             key={index}
             variant="secondary"
-            className="flex items-center text-sm bg-green-300 text-white px-2 py-1 rounded"
+            className="flex items-center text-base bg-[#388A94]  text-white font-semibold px-2 py-1 rounded
+            hover:bg-[#388A94] hover:text-white"
           >
             {cat.name}
           </Badge>
@@ -1034,7 +1035,7 @@ const ActivityDetail = () => {
           <Badge
             key={index}
             variant="secondary"
-            className="flex items-center text-sm bg-blue-300 text-white px-2 py-1 rounded"
+            className="flex items-center text-base font-semibold bg-[#1A3B47] text-white px-2 py-1 rounded hover:bg-[#1A3B47] hover:text-white"
           >
             {tag.type}
           </Badge>
