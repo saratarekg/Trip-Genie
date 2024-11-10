@@ -174,11 +174,7 @@ const HistoricalPlaceCard = ({
               {tag.type}
             </Badge>
           ))}
-          {historicalPlace.historicalTag.map((tag, index) => (
-            <Badge key={`period-${index}`} variant="secondary">
-              {tag.period}
-            </Badge>
-          ))}
+         
         </div>
       </div>
       {userRole === "tourism-governor" &&
