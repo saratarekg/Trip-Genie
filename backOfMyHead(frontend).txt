@@ -27,6 +27,13 @@ transportation edit doesnt close for some reason
 transportation creates and updates to a future date
 
 
+hotels in home page
+n move reviews ta7t fel home page
+sowar hp sliders
+silider cards mesh kolo same size
+
+
+
 sprint 3:
 make all popups the same, we can take inspo from the stuff i sent to radwa. 
 hasa toasts ahla men popups bas hanshoof
