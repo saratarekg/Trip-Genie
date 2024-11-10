@@ -361,7 +361,7 @@ export default function CreateHpForm() {
                       isMulti
                       options={historicalTags.map((tag) => ({
                         value: tag._id,
-                        label: `${tag.type} - ${tag.period}`,
+                        label: `${tag.type} `,
                       }))}
                       className="react-select-container"
                       classNamePrefix="react-select"

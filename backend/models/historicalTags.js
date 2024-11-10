@@ -7,10 +7,10 @@ const historicalTagSchema = new Schema(
       type: String,
       required: true,
     },
-    period: {
-      type: String,
-      required: true,
-    },
+    // period: {
+    //   type: String,
+    //   required: true,
+    // },
   },
   { timestamps: true }
 );
@@ -21,16 +21,18 @@ historicalTagSchema.statics.findByType = function (type) {
   return this.find({ type }).exec();
 };
 
-historicalTagSchema.statics.findByPeriod = function (period) {
-  return this.find({ period }).exec();
-};
+// historicalTagSchema.statics.findByPeriod = function (period) {
+//   return this.find({ period }).exec();
+// };
 
 historicalTagSchema.statics.filterByFields = async function (searchFields) {
-  const { type, period } = searchFields;
+  // const { type, period } = searchFields;
+  const { type } = searchFields;
+
   const query = {};
 
   // Convert the fields to case-insensitive regex search
-  for (let key in { type, period }) {
+  for (let key in { type }) {
     query[key] = { $regex: new RegExp(searchFields[key], "i") }; // Case-insensitive
   }
 
@@ -48,7 +50,7 @@ historicalTagSchema.statics.searchByFields = async function (searchCriteria) {
   const query = [];
 
   query.push({ ["type"]: { $regex: new RegExp(searchCriteria, "i") } });
-  query.push({ ["period"]: { $regex: new RegExp(searchCriteria, "i") } });
+  // query.push({ ["period"]: { $regex: new RegExp(searchCriteria, "i") } });
   return this.find({ $or: query }); // Perform a search with the regex query
 };
 

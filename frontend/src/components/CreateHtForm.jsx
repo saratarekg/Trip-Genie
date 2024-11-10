@@ -24,7 +24,7 @@ import backgroundPicture from "../assets/images/backgroundPattern.png";
 // Form validation schema using zod
 const formSchema = z.object({
   type: z.string().min(1, 'Please enter a type'),
-  period: z.string().min(1, 'Please enter a period'),
+  // period: z.string().min(1, 'Please enter a period'),
 });
 
 export default function CreateHtForm() {
@@ -41,7 +41,7 @@ export default function CreateHtForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       type: '',
-      period: '',
+      // period: '',
     },
   });
 
@@ -120,7 +120,7 @@ export default function CreateHtForm() {
                 {errors.type && <p className="text-red-500 text-xs">{errors.type.message}</p>}
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="period">Period *</Label>
                 <Input
                   {...register('period')}
@@ -128,7 +128,7 @@ export default function CreateHtForm() {
                   placeholder="Example: 2000-2008"
                 />
                 {errors.period && <p className="text-red-500 text-xs">{errors.period.message}</p>}
-              </div>
+              </div> */}
 
               <Button
                 type="submit"

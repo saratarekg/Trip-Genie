@@ -2,17 +2,17 @@ const HistoricalTag = require("../models/historicalTags");
 const HistoricalPlace = require("../models/historicalPlaces");
 
 const addHistoricalTag  = async(req, res) => {
-  const { type, period } = req.body;
-  if (!type || !period) {
+  const { type } = req.body;
+  if (!type ) {
     return res
       .status(400)
-      .json({ message: "Please provide a type and period" });
+      .json({ message: "Please provide a type " });
   }
   
-  if (await HistoricalTag.findOne({ type, period })) {
+  if (await HistoricalTag.findOne({ type })) {
     return res.status(400).json({ message: "Historical tag already exists" });
   }
-  const historicalTag = new HistoricalTag({ type, period });
+  const historicalTag = new HistoricalTag({ type });
 
   historicalTag
     .save()
@@ -27,19 +27,19 @@ const addHistoricalTag  = async(req, res) => {
 
 const updateHistoricalTag = async (req, res) => {
   try {
-    const { type, period } = req.body;
-    if (!type || !period) {
+    const { type } = req.body;
+    if (!type ) {
       return res
         .status(400)
-        .json({ message: "Please provide a type and period" });
+        .json({ message: "Please provide a type " });
     }
-    if (await HistoricalTag.findOne({ type, period })) {
+    if (await HistoricalTag.findOne({ type })) {
       return res.status(400).json({ message: "Historical tag already exists" });
     }
 
     const historicalTag = await HistoricalTag.findByIdAndUpdate(
       req.params.id,
-      { type, period },
+      { type },
       {
         new: true,
         runValidators: true,
