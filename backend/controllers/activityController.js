@@ -22,9 +22,9 @@ const getMaxPriceMy = async (req, res) => {
   const userId = res.locals.user_id;
 
   try {
-    const maxPriceProduct = await Product.findOne({ advertiser: userId, isDeleted: false }).sort({ price: -1 });
+    const maxPriceActivity = await Activity.findOne({ advertiser: userId, isDeleted: false }).sort({ price: -1 });
 
-    const maxPrice = maxPriceProduct ? maxPriceProduct.price : 0;
+    const maxPrice = maxPriceActivity ? maxPriceActivity.price : 0;
     res.status(200).json(maxPrice);
 
   } catch (error) {
