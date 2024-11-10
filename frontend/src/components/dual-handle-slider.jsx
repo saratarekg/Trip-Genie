@@ -11,7 +11,12 @@ function DualHandleSliderComponent({
   onChange,
   middleColor = "#f97516",
   colorRing = "orange",
-}) {
+}) 
+{
+console.log(min);
+console.log(values[1]);
+console.log(step);
+
   return (
     <div className="w-full px-4 py-8">
       <Range

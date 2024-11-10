@@ -900,8 +900,9 @@ export function AllActivitiesComponent() {
                 setShowDeleteSuccess(false);
                 navigate("/activity");
               }}
+              className = "bg-gray-400 hover:bg-gray-500"
             >
-              Back to All Activity
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

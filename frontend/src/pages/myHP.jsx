@@ -14,16 +14,66 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react"; // Import icons
+import { Button } from "@/components/ui/button";
+import {
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Edit,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"; 
+
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  historicalPlaceName,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
+        <p className="mb-6">
+          Are you sure you want to delete the Historical Place "{historicalPlaceName}"?
+        </p>
+        <div className="flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            onClick={onConfirm}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // HistoricalPlaceCard Component
 const HistoricalPlaceCard = ({
   historicalPlace,
   onSelect,
   userRole,
-  userPreferredCurrency,
+  userPreferredCurrency, onDeleteConfirm, setShowDeleteConfirm,
 }) => {
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
+  const[userId,setUserId] = useState(null);
   // console.log(historicalPlace);
   // console.log(userPreferredCurrency);
 
@@ -100,6 +150,16 @@ const HistoricalPlaceCard = ({
       return `${currencySymbol.symbol}${price}/Day`;
     }
   };
+  useEffect(() => {
+    const token = Cookies.get("jwt");
+    if (token) {
+      const decodedToken = jwtDecode.jwtDecode(token);
+      setUserId(decodedToken.id);
+    }
+  }, []);
+
+  const uniqueCategories = new Set();
+  const uniqueTags = new Set();
 
   return (
     <Card
@@ -120,6 +180,31 @@ const HistoricalPlaceCard = ({
         </h3>
       </CardHeader>
       <CardContent>
+
+      {userRole === "tourism-governor" && userId === historicalPlace?.governor && (
+        <div className="absolute top-2 right-2 flex space-x-2">
+          <button
+            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `/update-historical-place/${historicalPlace._id}`;
+            }}
+            aria-label="Edit Historical Place"
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+          <button
+            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteConfirm(historicalPlace._id, historicalPlace.title);
+            }}
+            aria-label="Delete Historical Place"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
         <div className="flex justify-between items-center mt-4">
           <div className="flex flex-col">
             {historicalPlace.ticketPrices?.native && (
@@ -186,6 +271,11 @@ export function MyHistoricalPlacesComponent() {
   const [periodOptions, setPeriodOptions] = useState([]);
   // const [pageNumber, setPageNumber] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [historicalPlacesToDelete, setHistoricalPlacesToDelete] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -327,6 +417,52 @@ export function MyHistoricalPlacesComponent() {
     setmyHistoricalPlaces(false);
     fetchHistoricalPlace();
   };
+
+  const handleDeleteConfirm = (id, name) => {
+    setHistoricalPlacesToDelete({ id,name });
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (!historicalPlacesToDelete) return;
+    const role = getUserRole();
+    setIsLoading(true);
+    setDeleteError(null);
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${role}/historical-places/${historicalPlacesToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400 || response.status === 403) {
+          setDeleteError(errorData.message);
+          return;
+        }
+        throw new Error("Failed to delete Historical Place");
+      }
+      fetchHistoricalPlace();
+
+      setShowDeleteSuccess(true);
+
+    } catch (err) {
+      setError("Error deleting Historical Place. Please try again later.");
+      console.error("Error deleting Historical Place:", err);
+    } finally {
+      setIsLoading(false);
+      setShowDeleteModal(false);
+      setHistoricalPlacesToDelete(null);
+    }
+  };
+
+
 
   const searchHistoricalPlaces = async () => {
     try {
@@ -475,6 +611,83 @@ export function MyHistoricalPlacesComponent() {
           </div>
         </div>
       )}
+        <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        historicalPlaceName={historicalPlacesToDelete?.name}
+      />
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Historical Places</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this Historical Place?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setShowDeleteConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+              Historical Place Deleted
+            </DialogTitle>
+            <DialogDescription>
+              The Historical Place has been successfully deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="default"
+              onClick={() => {
+                setShowDeleteSuccess(false);
+                navigate("/all-historical-places");
+              }}
+              className = "bg-gray-400 hover:bg-gray-500"
+            >
+              Close
+            </Button>
+            
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteError !== null}
+        onOpenChange={() => setDeleteError(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+              Failed to Delete Historical Place
+            </DialogTitle>
+            <DialogDescription>
+              {deleteError}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="default" onClick={() => setDeleteError(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -21,6 +21,9 @@ const router = express.Router();
 
 router.get("/historical-places",historicalPlacesController.getAllHistoricalPlaces);
 router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);
+router.get("/max-price-products", productController.getMaxPrice);
+router.get("/max-price-products-my", productController.getMaxPriceMy);
+router.get("/max-price-products-archived", productController.getMaxPriceArchived);
 
 router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);

@@ -876,10 +876,11 @@ export function MyActivitiesComponent() {
               variant="default"
               onClick={() => {
                 setShowDeleteSuccess(false);
-                navigate("/activity");
+                navigate("/my-activities");
               }}
+              className = "bg-gray-400 hover:bg-gray-500"
             >
-              Back to All Activity
+             Close
             </Button>
           </DialogFooter>
         </DialogContent>

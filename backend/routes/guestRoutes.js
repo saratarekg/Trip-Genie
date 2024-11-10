@@ -18,6 +18,7 @@ router.get("/tour-guide/:id", tourguideController.getTourGuideByID);
 
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);
+router.get("/max-price-products", productController.getMaxPrice);
 
 router.get("/activities", activityController.getAllActivities);
 router.get("/activities/:id", activityController.getActivityById);
