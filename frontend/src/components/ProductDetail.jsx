@@ -14,6 +14,8 @@ import {
 import Loader from "../components/Loader";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Card,
   CardContent,
@@ -28,6 +30,8 @@ import {
   Flame,
   Edit,
   Trash2,
+  Link,
+  Share2,
   TrendingUp,
   Mail,
   Phone,
@@ -214,6 +218,8 @@ const ProductDetail = () => {
   const [quickRating, setQuickRating] = useState(0);
   const [isRatingHovered, setIsRatingHovered] = useState(false);
   const [isExpandedComment, setIsExpandedComment] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
 
   const handleToggleComment = () => {
     setIsExpandedComment(!isExpandedComment);
@@ -231,6 +237,20 @@ const ProductDetail = () => {
         product.reviews.filter((review) => review.rating === rating)
       );
     }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsToastOpen(true);
+    setOpen(false);
+  };
+
+
+  const handleEmailShare = () => {
+    const subject = encodeURIComponent(`Check out this product: ${product.name}`);
+    const body = encodeURIComponent(`I thought you might be interested in this product:\n\n${product.name}\n\n${window.location.href}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    setOpen(false); // Close the popover
   };
 
   const fetchExchangeRate = async () => {
@@ -865,12 +885,58 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-4xl font-bold">
-                  {product.name}
-                </CardTitle>
-                <CardDescription className="flex items-center justify-end"></CardDescription>
-              </CardHeader>
+            <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-5xl font-bold">
+                {product.name}
+              </CardTitle>
+              <div>
+                <ToastProvider>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="ml-auto">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <div className="flex flex-col">
+                        <Button
+                          variant="ghost"
+                          onClick={handleCopyLink}
+                          className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
+                        >
+                          <Link className="mr-2 h-4 w-4" />
+                          Copy Link
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={handleEmailShare}
+                          className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
+                        >
+                          <Mail className="mr-2 h-4 w-4" />
+                          Share by Email
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  <ToastViewport />
+
+                  {isToastOpen && (
+                    <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
+                      <ToastTitle>Link Copied</ToastTitle>
+                      <ToastDescription>
+                        The link has been copied to your clipboard.
+                      </ToastDescription>
+                      <ToastClose />
+                    </Toast>
+                  )}
+                </ToastProvider>
+              </div>
+            </div>
+            <CardDescription className="flex items-center justify-end"></CardDescription>
+          </CardHeader>
+
               <CardContent>
                 <div className="flex flex-col lg:flex-row gap-8">
                   <div className="w-full h-[400px]">
@@ -1033,7 +1099,7 @@ const ProductDetail = () => {
               <Card>
                 {/* Product Info Section */}
                 <CardHeader>
-                  <CardTitle className="text-3xl font-bold">
+                  <CardTitle className="text-4xl font-bold">
                     {product.name}
                   </CardTitle>
                   <CardDescription className="flex items-center">
