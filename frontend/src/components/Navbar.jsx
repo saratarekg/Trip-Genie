@@ -452,7 +452,7 @@ export function NavbarComponent() {
                       onClick={closeDropdown}
                     >
                       <User className="mr-2 h-4 w-4" />
-                      My account
+                      My Account
                     </Link>
                     {role === "tourist" && (
                       <>
@@ -705,7 +705,7 @@ export function NavbarComponent() {
                   onClick={closeDropdown}
                 >
                   <User className="mr-2 h-4 w-4" />
-                  My account
+                  My Account
                 </Link>
                 {role === "tourist" && (
                   <>
