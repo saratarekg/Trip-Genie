@@ -43,7 +43,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Loader from "@/components/loader";
 import defaultImage from "../assets/images/default-image.jpg";
-import historicalPlaceImage from "../assets/images/historical-place.png";
+import historicalPlaceImage from "../assets/images/historical-places.png";
 
 const HistoricalPlaceCard = ({
   historicalPlace,
@@ -453,12 +453,13 @@ export default function AllHistoricalPlacesComponent() {
               / Historical Places
             </p>
           </div>
+
           <div className="hidden lg:block w-1/3">
             <img
               src={historicalPlaceImage}
               alt="Decorative"
-              height="160"
-              width="160"
+              height="200"
+              width="200"
               className="ml-auto"
             />
           </div>
