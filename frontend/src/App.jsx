@@ -21,7 +21,7 @@ import CreateItineraryPage from "./pages/CreateItineraryPage.jsx";
 import CreateProduct from "./components/CreateProduct.jsx";
 import { NavbarComponent } from "./components/navbar.jsx";
 import { FooterComponent } from "./components/footer.jsx";
-import { AllHistoricalPlacesComponent } from "./pages/viewAllHistoricalPlaces.jsx";
+import AllHistoricalPlacesComponent from "./pages/viewAllHistoricalPlaces.jsx";
 import { AllItinerariesComponent } from "./components/all-trip-plans.jsx";
 import { MyItinerariesComponent } from "./components/myItineraries.jsx";
 import { MyProducts } from "./components/myProducts.jsx";

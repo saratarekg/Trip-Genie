@@ -57,9 +57,8 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
         />
       ))}
     </div>
@@ -133,21 +132,21 @@ const ProductCard = ({
   }, [userInfo, product]);
 
   const getCurrencySymbol = useCallback(async () => {
-    if(userInfo){
+    if (userInfo) {
       setCurrencySymbol("$");
-    // try {
-    //   const token = Cookies.get("jwt");
-    //   const response = await axios.get(
-    //     `http://localhost:4000/${userInfo.role}/getCurrency/${product.currency}`,
-    //     {
-    //       headers: { Authorization: `Bearer ${token}` },
-    //     }
-    //   );
-    //   setCurrencySymbol(response.data.symbol);
-    // } catch (error) {
-    //   console.error("Error fetching currency symbol:", error);
-    // }
-  }
+      // try {
+      //   const token = Cookies.get("jwt");
+      //   const response = await axios.get(
+      //     `http://localhost:4000/${userInfo.role}/getCurrency/${product.currency}`,
+      //     {
+      //       headers: { Authorization: `Bearer ${token}` },
+      //     }
+      //   );
+      //   setCurrencySymbol(response.data.symbol);
+      // } catch (error) {
+      //   console.error("Error fetching currency symbol:", error);
+      // }
+    }
   }, [userInfo, product]);
 
   const formatPrice = (price) => {
@@ -191,8 +190,8 @@ const ProductCard = ({
           {formatPrice(product.price)}
         </span>
 
-        {/* Show "Buy Now" button only if user role is "tourist" */}
-        {userInfo?.role === "tourist" && (
+        {/* Show "Buy Now" button only if user role is "tourist" and product is in stock */}
+        {userInfo?.role === "tourist" && product.quantity > 0 ? (
           <Button
             className="bg-orange-400 hover:bg-[#F88C33] text-white"
             style={{
@@ -207,8 +206,15 @@ const ProductCard = ({
           >
             Buy Now
           </Button>
+        ) : (
+          userInfo?.role === "tourist" && (
+            <span className="text-red-500 text-2xl font-bold">
+              Out of stock
+            </span>
+          )
         )}
       </CardFooter>
+
 
       {/* Show "Add to Cart" and "Add to Wishlist" buttons only if user role is "tourist" */}
       {userInfo?.role === "tourist" && (
@@ -226,11 +232,10 @@ const ProductCard = ({
             </Button>
           )}
           <Button
-            className={`rounded-full w-10 h-10 p-0 ${
-              isInWishlist
-                ? "bg-red-400 hover:bg-red-500"
-                : "bg-gray-200 hover:bg-gray-300"
-            } text-white`}
+            className={`rounded-full w-10 h-10 p-0 ${isInWishlist
+              ? "bg-red-400 hover:bg-red-500"
+              : "bg-gray-200 hover:bg-gray-300"
+              } text-white`}
             onClick={(e) => {
               e.stopPropagation();
               if (isInWishlist) {
@@ -262,7 +267,7 @@ export function AllProducts() {
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [myProducts, setMyProducts] = useState(false);
-  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
   const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
   const [isLoading, setIsLoading] = useState(false);
@@ -381,7 +386,7 @@ export function AllProducts() {
 
         const data = await response.json();
         setProducts(data);
-        
+
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -393,65 +398,65 @@ export function AllProducts() {
   );
 
   useEffect(() => {
-    if(!isPriceInitialized){
+    if (!isPriceInitialized) {
       fetchMaxPrice();
-      }
+    }
   }, [role]);
 
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(`http://localhost:4000/${role}/max-price-products`);
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          setMaxPriceOfProducts(data);
-          setPriceRange([0, data]);
-          setMaxPrice(data);
-          setIsPriceInitialized(true);
-          
-    };
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    setMaxPriceOfProducts(data);
+    setPriceRange([0, data]);
+    setMaxPrice(data);
+    setIsPriceInitialized(true);
+
+  };
 
 
   const fetchCartItems = useCallback(async () => {
-    if(role == 'tourist'){
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch("http://localhost:4000/tourist/cart", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCartItems(data);
+    if (role == 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch("http://localhost:4000/tourist/cart", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setCartItems(data);
+        }
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
       }
-    } catch (error) {
-      console.error("Error fetching cart items:", error);
     }
-  }
   }, []);
 
   const fetchWishlistItems = useCallback(async () => {
-    if(role == 'tourist'){
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch("http://localhost:4000/tourist/wishlist", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setWishlistItems(data);
+    if (role == 'tourist') {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch("http://localhost:4000/tourist/wishlist", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setWishlistItems(data);
+        }
+      } catch (error) {
+        console.error("Error fetching wishlist items:", error);
       }
-    } catch (error) {
-      console.error("Error fetching wishlist items:", error);
     }
-  }
   }, []);
 
   useEffect(() => {
@@ -695,21 +700,21 @@ export function AllProducts() {
           <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">All Products</h1>
             <p className="text-gray-200">
-            <Link to="/" className="font-bold text-gray-200 hover:text-gray-300 hover:underline">
-              Home
-            </Link> 
-            / Products
-          </p>
+              <Link to="/" className="font-bold text-gray-200 hover:text-gray-300 hover:underline">
+                Home
+              </Link>
+              / Products
+            </p>
           </div>
           <div className="hidden lg:block w-1/3">
-          <img
-            src={productImage}
-            alt="Decorative"
-            height="160"
-            width="160"
-            className="ml-auto"
-          />
-        </div>
+            <img
+              src={productImage}
+              alt="Decorative"
+              height="160"
+              width="160"
+              className="ml-auto"
+            />
+          </div>
         </div>
       </div>
       <div className="container mx-auto px-24 py-8 sm:px-12 lg:px-24">
@@ -736,7 +741,7 @@ export function AllProducts() {
                 min={0}
                 max={maxPriceOfProducts}
                 symbol={getSymbol()}
-                step={Math.max(1, Math.ceil(maxPriceOfProducts*exchangeRateForFilter / 100))}
+                step={Math.max(1, Math.ceil(maxPriceOfProducts * exchangeRateForFilter / 100))}
                 values={priceRange}
                 exchangeRate={exchangeRateForFilter}
                 middleColor="#5D9297"
@@ -752,9 +757,8 @@ export function AllProducts() {
                   <button
                     key={rating}
                     onClick={() => setSelectedRating(rating)}
-                    className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
-                      selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                    }`}
+                    className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                      }`}
                   >
                     {renderStars(rating)}
                   </button>
@@ -798,15 +802,15 @@ export function AllProducts() {
               </Button>
             </div>
           </div> */}
-           {/* Featured Products Section */}
+            {/* Featured Products Section */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-4">Featured Products</h3>
               <div className="space-y-4">
                 {products && products.length > 0 ? (
                   products.slice(0, 3).map((product) => (
-                    <Link 
-                      key={product._id} 
-                      to={`/product/${product._id}`} 
+                    <Link
+                      key={product._id}
+                      to={`/product/${product._id}`}
                       className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
                     >
                       <img
@@ -933,9 +937,8 @@ export function AllProducts() {
                       handlePageChange(currentPage - 1);
                     }}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
-                    }`}
+                    className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
+                      }`}
                   >
                     <ChevronLeft />
                   </button>
@@ -944,8 +947,8 @@ export function AllProducts() {
                   <span className="text-lg font-medium">
                     {products.length > 0
                       ? `Page ${currentPage} of ${Math.ceil(
-                          products.length / tripsPerPage
-                        )}`
+                        products.length / tripsPerPage
+                      )}`
                       : "No pages available"}
                   </span>
 
@@ -955,14 +958,13 @@ export function AllProducts() {
                     }}
                     disabled={
                       currentPage ===
-                        Math.ceil(products.length / tripsPerPage) ||
+                      Math.ceil(products.length / tripsPerPage) ||
                       products.length === 0
                     }
-                    className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === Math.ceil(products.length / tripsPerPage)
-                        ? "text-gray-300"
-                        : "text-[#388A94]"
-                    }`}
+                    className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(products.length / tripsPerPage)
+                      ? "text-gray-300"
+                      : "text-[#388A94]"
+                      }`}
                   >
                     <ChevronRight />
                   </button>
