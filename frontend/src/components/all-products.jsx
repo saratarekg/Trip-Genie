@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import Cookies from "js-cookie";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect, useCallback } from "react"
+import { useNavigate } from "react-router-dom"
+import Cookies from "js-cookie"
+import { Link } from "react-router-dom"
+import axios from "axios"
 import {
   Search,
   ChevronLeft,
@@ -15,18 +15,18 @@ import {
   Heart,
   ShoppingCart,
   ArrowUpDown,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from "@/components/ui/card"
+import { Slider } from "@/components/ui/slider"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Dialog,
   DialogContent,
@@ -34,23 +34,23 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Loader from "./Loader";
-import defaultImage from "../assets/images/default-image.jpg";
-import DualHandleSliderComponent from "./dual-handle-slider";
-import LazyLoad from "react-lazyload";
-import productImage from "../assets/images/prod.png";
-import productImage2 from "../assets/images/products2.png";
-import { role } from "@/pages/login";
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import Loader from "./Loader"
+import defaultImage from "../assets/images/default-image.jpg"
+import DualHandleSliderComponent from "./dual-handle-slider"
+import LazyLoad from "react-lazyload"
+import productImage from '../assets/images/products.png'
+import productImage2 from '../assets/images/products2.png'
+import { role } from "@/pages/login"
 
 const renderStars = (rating) => {
   return (
@@ -58,16 +58,15 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
         />
       ))}
     </div>
-  );
-};
+  )
+}
 
-let exchangeRateForFilter = 1;
+let exchangeRateForFilter = 1
 
 const ProductCard = ({
   product,
@@ -86,10 +85,10 @@ const ProductCard = ({
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isInWishlistLocal, setIsInWishlistLocal] = useState(false)
 
-  const isInCart = cartItems.some((item) => item.product?._id === product._id);
+  const isInCart = cartItems.some((item) => item.product?._id === product._id)
   const isInWishlist = wishlistItems.some(
     (item) => item?.product?._id === product._id
-  );
+  )
 
   useEffect(() => {
     if (
@@ -97,16 +96,16 @@ const ProductCard = ({
       userInfo.role === "tourist" &&
       userInfo.preferredCurrency !== product.currency
     ) {
-      fetchExchangeRate();
+      fetchExchangeRate()
     } else {
-      getCurrencySymbol();
+      getCurrencySymbol()
     }
-  }, [userInfo, product]);
+  }, [userInfo, product])
 
   const fetchExchangeRate = useCallback(async () => {
     if (userInfo && userInfo.role === "tourist") {
       try {
-        const token = Cookies.get("jwt");
+        const token = Cookies.get("jwt")
         const response = await fetch(
           `http://localhost:4000/${userInfo.role}/populate`,
           {
@@ -120,45 +119,45 @@ const ProductCard = ({
               target: userInfo.preferredCurrency._id,
             }),
           }
-        );
-        const data = await response.json();
+        )
+        const data = await response.json()
         if (response.ok) {
-          setExchangeRate(data.conversion_rate);
-          exchangeRateForFilter = data.conversion_rate;
+          setExchangeRate(data.conversion_rate)
+          exchangeRateForFilter = data.conversion_rate
         } else {
-          console.error("Error in fetching exchange rate:", data.message);
+          console.error("Error in fetching exchange rate:", data.message)
         }
       } catch (error) {
-        console.error("Error fetching exchange rate:", error);
+        console.error("Error fetching exchange rate:", error)
       }
     }
-  }, [userInfo, product]);
+  }, [userInfo, product])
 
   const getCurrencySymbol = useCallback(async () => {
     if (userInfo) {
-      setCurrencySymbol("$");
+      setCurrencySymbol("$")
     }
-  }, [userInfo, product]);
+  }, [userInfo, product])
 
   const formatPrice = (price) => {
     if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
       if (userInfo.preferredCurrency === product.currency) {
-        return `${userInfo.preferredCurrency.symbol}${price}`;
+        return `${userInfo.preferredCurrency.symbol}${price}`
       } else if (exchangeRate) {
-        const exchangedPrice = price * exchangeRate;
+        const exchangedPrice = price * exchangeRate
         return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
           2
-        )}`;
+        )}`
       }
     } else if (currencySymbol) {
-      return `${currencySymbol}${price}`;
+      return `${currencySymbol}${price}`
     }
-  };
+  }
 
   const handleCheckoutNow = () => {
-    onBuyNow(product);
-    onAddToCart(product);
-    setIsPopupOpen(false);
+    onBuyNow(product)
+    onAddToCart(product)
+    setIsPopupOpen(false)
     // Redirect to checkout page
     window.location.href = 'account/cart' // Replace with your actual checkout URL
   }
@@ -218,13 +217,11 @@ const ProductCard = ({
                 <DialogTitle>Choose an option</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart(product);
-                    setIsPopupOpen(false);
-                  }}
-                >
+                <Button onClick={(e) => {
+                  e.stopPropagation()
+                  onAddToCart(product)
+                  setIsPopupOpen(false)
+                }}>
                   Add to Cart and Continue Shopping
                 </Button>
                 <Button onClick={handleCheckoutNow}>
@@ -248,8 +245,8 @@ const ProductCard = ({
             <Button
               className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
               onClick={(e) => {
-                e.stopPropagation();
-                onAddToCart(product);
+                e.stopPropagation()
+                onAddToCart(product)
               }}
             >
               <Plus className="w-5 h-5" />
@@ -268,7 +265,7 @@ const ProductCard = ({
               if (isInWishlistLocal) {
                 onRemoveFromWishlist(product)
               } else {
-                onAddToWishlist(product);
+                onAddToWishlist(product)
               }
             }}
           >
@@ -280,120 +277,120 @@ const ProductCard = ({
         </div>
       )}
     </Card>
-  );
-};
+  )
+}
 
 export function AllProducts() {
-  const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortOrder, setSortOrder] = useState(1);
-  const [sortBy, setSortBy] = useState("");
-  const [filtersVisible, setFiltersVisible] = useState(false);
-  const [myProducts, setMyProducts] = useState(false);
-  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
-  const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
-  const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
-  const [isLoading, setIsLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedRating, setSelectedRating] = useState(null);
-  const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [deliveryDate, setDeliveryDate] = useState("");
-  const [deliveryTime, setDeliveryTime] = useState("");
-  const [deliveryType, setDeliveryType] = useState("");
-  const [locationType, setLocationType] = useState("");
-  const [location, setLocation] = useState("");
-  const [cartItems, setCartItems] = useState([]);
-  const [wishlistItems, setWishlistItems] = useState([]);
-  const [alertMessage, setAlertMessage] = useState(null);
-  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
-  const tripsPerPage = 6;
+  const [products, setProducts] = useState([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [error, setError] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [sortOrder, setSortOrder] = useState(1)
+  const [sortBy, setSortBy] = useState("")
+  const [filtersVisible, setFiltersVisible] = useState(false)
+  const [myProducts, setMyProducts] = useState(false)
+  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000)
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts])
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts)
+  const [isLoading, setIsLoading] = useState(false)
+  const [userInfo, setUserInfo] = useState(null)
+  const [selectedCategories, setSelectedCategories] = useState([])
+  const [selectedRating, setSelectedRating] = useState(null)
+  const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [quantity, setQuantity] = useState(1)
+  const [paymentMethod, setPaymentMethod] = useState("")
+  const [deliveryDate, setDeliveryDate] = useState("")
+  const [deliveryTime, setDeliveryTime] = useState("")
+  const [deliveryType, setDeliveryType] = useState("")
+  const [locationType, setLocationType] = useState("")
+  const [location, setLocation] = useState("")
+  const [cartItems, setCartItems] = useState([])
+  const [wishlistItems, setWishlistItems] = useState([])
+  const [alertMessage, setAlertMessage] = useState(null)
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false)
+  const tripsPerPage = 6
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (alertMessage) {
       const timer = setTimeout(() => {
-        setAlertMessage(null);
-      }, 2000);
+        setAlertMessage(null)
+      }, 2000)
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer)
     }
-  }, [alertMessage]);
+  }, [alertMessage])
 
   const getUserRole = useCallback(() => {
-    let role = Cookies.get("role");
-    return role || "guest";
-  }, []);
+    let role = Cookies.get("role")
+    return role || "guest"
+  }, [])
 
   const fetchUserInfo = useCallback(async () => {
-    const role = Cookies.get("role") || "guest";
-    const token = Cookies.get("jwt");
+    const role = Cookies.get("role") || "guest"
+    const token = Cookies.get("jwt")
 
     if (role === "tourist") {
       try {
         const response = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        const currencyId = response.data.preferredCurrency;
+        })
+        const currencyId = response.data.preferredCurrency
 
         const currencyResponse = await axios.get(
           `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
-        );
+        )
 
         setUserInfo({
           role,
           preferredCurrency: currencyResponse.data,
-        });
+        })
       } catch (error) {
-        console.error("Error fetching user profile:", error);
-        setUserInfo({ role });
+        console.error("Error fetching user profile:", error)
+        setUserInfo({ role })
       }
     } else {
-      setUserInfo({ role });
+      setUserInfo({ role })
     }
-  }, []);
+  }, [])
 
   const getSymbol = () => {
     if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
-      return `${userInfo.preferredCurrency.symbol}`;
+      return `${userInfo.preferredCurrency.symbol}`
     } else {
-      return "$";
+      return "$"
     }
-  };
+  }
 
   const fetchProducts = useCallback(
     async (params = {}) => {
       try {
-        const token = Cookies.get("jwt");
-        const role = getUserRole();
-        const url = new URL(`http://localhost:4000/${role}/products`);
+        const token = Cookies.get("jwt")
+        const role = getUserRole()
+        const url = new URL(`http://localhost:4000/${role}/products`)
 
         if (params.searchBy)
-          url.searchParams.append("searchBy", params.searchBy);
+          url.searchParams.append("searchBy", params.searchBy)
         if (products.length > 0) {
-          handlePageChange(1);
+          handlePageChange(1)
         }
-        if (params.sort) url.searchParams.append("sort", params.sort);
+        if (params.sort) url.searchParams.append("sort", params.sort)
         if (params.asc !== undefined)
-          url.searchParams.append("asc", params.asc);
+          url.searchParams.append("asc", params.asc)
         if (params.myproducts)
-          url.searchParams.append("myproducts", params.myproducts);
+          url.searchParams.append("myproducts", params.myproducts)
         if (params.minPrice)
-          url.searchParams.append("minPrice", params.minPrice);
+          url.searchParams.append("minPrice", params.minPrice)
         if (params.maxPrice)
-          url.searchParams.append("maxPrice", params.maxPrice);
-        if (params.rating) url.searchParams.append("rating", params.rating);
+          url.searchParams.append("maxPrice", params.maxPrice)
+        if (params.rating) url.searchParams.append("rating", params.rating)
         if (params.categories && params.categories.length > 0) {
-          url.searchParams.append("categories", params.categories.join(","));
+          url.searchParams.append("categories", params.categories.join(","))
         }
 
         const response = await fetch(url, {
@@ -401,97 +398,97 @@ export function AllProducts() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        });
+        })
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
 
-        const data = await response.json();
-        setProducts(data);
+        const data = await response.json()
+        setProducts(data)
 
-        setError(null);
+        setError(null)
       } catch (error) {
-        console.error("Error fetching products:", error);
-        setError("Error fetching products");
-        setProducts([]);
+        console.error("Error fetching products:", error)
+        setError("Error fetching products")
+        setProducts([])
       }
     },
     [getUserRole]
-  );
+  )
 
   useEffect(() => {
     if (!isPriceInitialized) {
-      fetchMaxPrice();
+      fetchMaxPrice()
     }
-  }, [role]);
+  }, [role])
 
   const fetchMaxPrice = async () => {
-    const role = getUserRole();
-    const token = Cookies.get("jwt");
-    const url = new URL(`http://localhost:4000/${role}/max-price-products`);
+    const role = getUserRole()
+    const token = Cookies.get("jwt")
+    const url = new URL(`http://localhost:4000/${role}/max-price-products`)
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    });
-    const data = await response.json();
-    setMaxPriceOfProducts(data);
-    setPriceRange([0, data]);
-    setMaxPrice(data);
-    setIsPriceInitialized(true);
-  };
+    })
+    const data = await response.json()
+    setMaxPriceOfProducts(data)
+    setPriceRange([0, data])
+    setMaxPrice(data)
+    setIsPriceInitialized(true)
+  }
 
   const fetchCartItems = useCallback(async () => {
-    if (role == "tourist") {
+    if (role == 'tourist') {
       try {
-        const token = Cookies.get("jwt");
+        const token = Cookies.get("jwt")
         const response = await fetch("http://localhost:4000/tourist/cart", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
+        })
         if (response.ok) {
-          const data = await response.json();
-          setCartItems(data);
+          const data = await response.json()
+          setCartItems(data)
         }
       } catch (error) {
-        console.error("Error fetching cart items:", error);
+        console.error("Error fetching cart items:", error)
       }
     }
-  }, []);
+  }, [])
 
   const fetchWishlistItems = useCallback(async () => {
-    if (role == "tourist") {
+    if (userInfo?.role === 'tourist') {
       try {
-        const token = Cookies.get("jwt");
+        const token = Cookies.get("jwt")
         const response = await fetch("http://localhost:4000/tourist/wishlist", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
+        })
         if (response.ok) {
           const data = await response.json()
           console.log('Fetched wishlist items:', data)
           setWishlistItems(data) // This should be an array of products from the tourist's wishlist
         }
       } catch (error) {
-        console.error("Error fetching wishlist items:", error);
+        console.error("Error fetching wishlist items:", error)
       }
     }
   }, [userInfo])
 
   useEffect(() => {
     if (userInfo) {
-      fetchProducts();
-      fetchCartItems();
-      fetchWishlistItems();
+      fetchProducts()
+      fetchCartItems()
+      fetchWishlistItems()
     }
-  }, [userInfo, fetchProducts, fetchCartItems, fetchWishlistItems]);
+  }, [userInfo, fetchProducts, fetchCartItems, fetchWishlistItems])
 
   useEffect(() => {
-    fetchUserInfo();
-  }, [fetchUserInfo]);
+    fetchUserInfo()
+  }, [fetchUserInfo])
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -504,11 +501,11 @@ export function AllProducts() {
         sort: sortBy,
         asc: sortOrder,
         categories: selectedCategories,
-      });
-    }, 0.01);
-    setCurrentPage(1);
+      })
+    }, 0.01)
+    setCurrentPage(1)
 
-    return () => clearTimeout(delayDebounceFn);
+    return () => clearTimeout(delayDebounceFn)
   }, [
     searchTerm,
     sortBy,
@@ -518,56 +515,56 @@ export function AllProducts() {
     selectedRating,
     selectedCategories,
     fetchProducts,
-  ]);
+  ])
 
   const handleProductSelect = (id) => {
-    navigate(`/product/${id}`);
-  };
+    navigate(`/product/${id}`)
+  }
 
   const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+    setCurrentPage(pageNumber)
+  }
 
   const handleSort = (attribute) => {
-    setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1));
-    setSortBy(attribute);
-  };
+    setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1))
+    setSortBy(attribute)
+  }
 
   const handleMyProducts = (attribute) => {
-    setMyProducts(attribute);
-  };
+    setMyProducts(attribute)
+  }
 
   const clearFilters = () => {
-    setSearchTerm("");
-    setSortBy("");
-    setSortOrder(1);
-    setMyProducts(false);
-    setPriceRange([0, maxPriceOfProducts]);
-    setSelectedRating(null);
-    setSelectedCategories([]);
-    fetchProducts();
-  };
+    setSearchTerm("")
+    setSortBy("")
+    setSortOrder(1)
+    setMyProducts(false)
+    setPriceRange([0, maxPriceOfProducts])
+    setSelectedRating(null)
+    setSelectedCategories([])
+    fetchProducts()
+  }
 
   const toggleFilters = () => {
-    setFiltersVisible(!filtersVisible);
-  };
+    setFiltersVisible(!filtersVisible)
+  }
 
   const handleCategoryChange = (category) => {
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
         : [...prev, category]
-    );
-  };
+    )
+  }
 
   const handleBuyNow = (product) => {
     // Redirect to checkout page
-    window.location.href = "/checkout"; // Replace with your actual checkout URL
-  };
+    window.location.href = '/checkout' // Replace with your actual checkout URL
+  }
 
   const handleAddToCart = async (product) => {
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const response = await fetch(
         "http://localhost:4000/tourist/product/addToCart",
         {
@@ -582,28 +579,28 @@ export function AllProducts() {
             totalAmount: product.price,
           }),
         }
-      );
+      )
 
       if (!response.ok) {
-        throw new Error("Failed to add to cart");
+        throw new Error("Failed to add to cart")
       }
 
       setAlertMessage({
         type: "success",
         message: "Product added to cart successfully!",
-      });
-      fetchCartItems();
+      })
+      fetchCartItems()
     } catch (error) {
       setAlertMessage({
         type: "error",
         message: "Error adding product to cart. Please try again.",
-      });
+      })
     }
-  };
+  }
 
   const handleAddToWishlist = async (product) => {
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const response = await fetch(
         `http://localhost:4000/tourist/product/addToWishlist/${product._id}`,
         {
@@ -613,28 +610,28 @@ export function AllProducts() {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
+      )
 
       if (!response.ok) {
-        throw new Error("Failed to add to wishlist");
+        throw new Error("Failed to add to wishlist")
       }
 
       setAlertMessage({
         type: "success",
         message: "Product added to wishlist successfully!",
-      });
-      fetchWishlistItems();
+      })
+      fetchWishlistItems()
     } catch (error) {
       setAlertMessage({
         type: "error",
         message: "Error adding product to wishlist. Please try again.",
-      });
+      })
     }
-  };
+  }
 
   const handleRemoveFromWishlist = async (product) => {
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const response = await fetch(
         `http://localhost:4000/tourist/remove/wishlist/${product._id}`,
         {
@@ -644,30 +641,30 @@ export function AllProducts() {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
+      )
 
       if (!response.ok) {
-        throw new Error("Failed to remove from wishlist");
+        throw new Error("Failed to remove from wishlist")
       }
 
       setAlertMessage({
         type: "success",
         message: "Product removed from wishlist successfully!",
-      });
-      fetchWishlistItems();
+      })
+      fetchWishlistItems()
     } catch (error) {
       setAlertMessage({
         type: "error",
         message: "Error removing product from wishlist. Please try again.",
-      });
+      })
     }
-  };
+  }
 
   const handlePurchase = async () => {
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
 
-      const totalAmount = selectedProduct.price * quantity;
+      const totalAmount = selectedProduct.price * quantity
 
       const response = await fetch("http://localhost:4000/tourist/purchase", {
         method: "POST",
@@ -690,25 +687,25 @@ export function AllProducts() {
           deliveryTime: deliveryTime,
           deliveryDate: deliveryDate,
         }),
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to complete purchase");
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to complete purchase")
       }
 
       setAlertMessage({
         type: "success",
         message: "Purchase completed successfully!",
-      });
-      setShowPurchaseConfirm(false);
+      })
+      setShowPurchaseConfirm(false)
     } catch (error) {
       setAlertMessage({
         type: "error",
         message: "Error completing purchase. Please try again.",
-      });
+      })
     }
-  };
+  }
 
   return (
     <div className="bg-gray-100">
@@ -717,10 +714,7 @@ export function AllProducts() {
           <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">All Products</h1>
             <p className="text-gray-200">
-              <Link
-                to="/"
-                className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
-              >
+              <Link to="/" className="font-bold text-gray-200 hover:text-gray-300 hover:underline">
                 Home
               </Link>
               / Products
@@ -730,8 +724,8 @@ export function AllProducts() {
             <img
               src={productImage}
               alt="Decorative"
-              height="200"
-              width="230"
+              height="160"
+              width="160"
               className="ml-auto"
             />
           </div>
@@ -752,24 +746,17 @@ export function AllProducts() {
             </div>
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-              {isPriceInitialized && (
-                <DualHandleSliderComponent
-                  min={0}
-                  max={maxPriceOfProducts}
-                  symbol={getSymbol()}
-                  step={Math.max(
-                    1,
-                    Math.ceil(
-                      (maxPriceOfProducts * exchangeRateForFilter) / 100
-                    )
-                  )}
-                  values={priceRange}
-                  exchangeRate={exchangeRateForFilter}
-                  middleColor="#5D9297"
-                  colorRing="#388A94"
-                  onChange={(values) => setPriceRange(values)}
-                />
-              )}
+              {isPriceInitialized && (<DualHandleSliderComponent
+                min={0}
+                max={maxPriceOfProducts}
+                symbol={getSymbol()}
+                step={Math.max(1, Math.ceil(maxPriceOfProducts * exchangeRateForFilter / 100))}
+                values={priceRange}
+                exchangeRate={exchangeRateForFilter}
+                middleColor="#5D9297"
+                colorRing="#388A94"
+                onChange={(values) => setPriceRange(values)}
+              />)}
             </div>
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Rating</h3>
@@ -778,9 +765,8 @@ export function AllProducts() {
                   <button
                     key={rating}
                     onClick={() => setSelectedRating(rating)}
-                    className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
-                      selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                    }`}
+                    className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                      }`}
                   >
                     {renderStars(rating)}
                   </button>
@@ -788,9 +774,7 @@ export function AllProducts() {
               </div>
             </div>
             <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-4">
-                Featured Products
-              </h3>
+              <h3 className="font-medium text-[#1A3B47] mb-4">Featured Products</h3>
               <div className="space-y-4">
                 {products && products.length > 0 ? (
                   products.slice(0, 3).map((product) => (
@@ -806,16 +790,12 @@ export function AllProducts() {
                       />
                       <div>
                         <h4 className="font-medium text-sm">{product.name}</h4>
-                        <div className="mt-1">
-                          {renderStars(product.rating)}
-                        </div>
+                        <div className="mt-1">{renderStars(product.rating)}</div>
                       </div>
                     </Link>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">
-                    No products available.
-                  </p>
+                  <p className="text-sm text-gray-500">No products available.</p>
                 )}
               </div>
             </div>
@@ -845,9 +825,7 @@ export function AllProducts() {
                 >
                   <ArrowUpDown className="w-4 h-4 mr-2" />
                   Sort by Rating
-                  {sortBy === "rating" && (
-                    <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>
-                  )}
+                  {sortBy === "rating" && <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>}
                 </Button>
                 <Button
                   variant="outline"
@@ -857,9 +835,7 @@ export function AllProducts() {
                 >
                   <ArrowUpDown className="w-4 h-4 mr-2" />
                   Sort by Price
-                  {sortBy === "price" && (
-                    <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>
-                  )}
+                  {sortBy === "price" && <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>}
                 </Button>
                 <Button
                   variant="outline"
@@ -884,10 +860,7 @@ export function AllProducts() {
                   {products.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {products
-                        .slice(
-                          (currentPage - 1) * tripsPerPage,
-                          currentPage * tripsPerPage
-                        )
+                        .slice((currentPage - 1) * tripsPerPage, currentPage * tripsPerPage)
                         .map((product) => (
                           <ProductCard
                             key={product._id}
@@ -904,21 +877,18 @@ export function AllProducts() {
                         ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500">
-                      No products available.
-                    </p>
+                    <p className="text-sm text-gray-500">No products available.</p>
                   )}
                 </div>
 
                 <div className="mt-8 flex justify-center items-center space-x-4">
                   <button
                     onClick={() => {
-                      handlePageChange(currentPage - 1);
+                      handlePageChange(currentPage - 1)
                     }}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
-                    }`}
+                    className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
+                      }`}
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
@@ -928,16 +898,15 @@ export function AllProducts() {
                   </span>
                   <button
                     onClick={() => {
-                      handlePageChange(currentPage + 1);
+                      handlePageChange(currentPage + 1)
                     }}
                     disabled={
                       currentPage === Math.ceil(products.length / tripsPerPage)
                     }
-                    className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === Math.ceil(products.length / tripsPerPage)
-                        ? "text-gray-300"
-                        : "text-[#388A94]"
-                    }`}
+                    className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(products.length / tripsPerPage)
+                      ? "text-gray-300"
+                      : "text-[#388A94]"
+                      }`}
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -950,9 +919,8 @@ export function AllProducts() {
 
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -961,5 +929,5 @@ export function AllProducts() {
         </Alert>
       )}
     </div>
-  );
+  )
 }
