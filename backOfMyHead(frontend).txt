@@ -1,6 +1,6 @@
 teal navbar not taking up full page width
 create forms and edit forms still have a white background and the navbar is not visible before scrolling (Amy --DONE!!)
-same thing with profile pages
+same thing with profile pages(not needed any more)
 whitespace in transportation options for tourists and advertisers
 
 extra almost done wana ba sign up zay ma hazem 2al
@@ -25,6 +25,13 @@ copy link and share sinlge products
 time in transportation cards
 transportation edit doesnt close for some reason
 transportation creates and updates to a future date
+
+
+hotels in home page
+n move reviews ta7t fel home page
+sowar hp sliders
+silider cards mesh kolo same size
+
 
 
 sprint 3:
