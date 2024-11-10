@@ -42,6 +42,8 @@ export default function HotelDetails() {
           'x-rapidapi-key': API_KEY,
         };
 
+        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
         const fetchWithCache = async (url, cachedData, setData, fetchFlag) => {
           if (fetchFlag.current) return; // Skip if fetch has been done
           fetchFlag.current = true; // Mark as fetched
@@ -51,35 +53,50 @@ export default function HotelDetails() {
           }
           const data = await response.json();
           setData(data);
+          await delay(1000); // 1 second delay between requests
         };
 
-        // Fetch all necessary data once
-        await Promise.all([
-          fetchWithCache(
-            `https://booking-com.p.rapidapi.com/v1/hotels/data?hotel_id=${parsedHotelId}&locale=en-gb`,
-            hotelData,
-            setHotelData,
-            hotelDataFetched
-          ),
-          fetchWithCache(
-            `https://booking-com.p.rapidapi.com/v1/hotels/photos?hotel_id=${parsedHotelId}&locale=en-gb`,
-            hotelPhotos,
-            setHotelPhotos,
-            hotelPhotosFetched
-          ),
-          fetchWithCache(
-            `https://booking-com.p.rapidapi.com/v1/hotels/facilities?hotel_id=${parsedHotelId}&locale=en-gb`,
-            hotelFacilities,
-            setHotelFacilities,
-            hotelFacilitiesFetched
-          ),
-          fetchWithCache(
+        // Fetch all necessary data sequentially with delays
+        await fetchWithCache(
+          `https://booking-com.p.rapidapi.com/v1/hotels/data?hotel_id=${parsedHotelId}&locale=en-gb`,
+          hotelData,
+          setHotelData,
+          hotelDataFetched
+        );
+
+        await fetchWithCache(
+          `https://booking-com.p.rapidapi.com/v1/hotels/photos?hotel_id=${parsedHotelId}&locale=en-gb`,
+          hotelPhotos,
+          setHotelPhotos,
+          hotelPhotosFetched
+        );
+
+        await fetchWithCache(
+          `https://booking-com.p.rapidapi.com/v1/hotels/facilities?hotel_id=${parsedHotelId}&locale=en-gb`,
+          hotelFacilities,
+          setHotelFacilities,
+          hotelFacilitiesFetched
+        );
+
+        await fetchWithCache(
             `https://booking-com.p.rapidapi.com/v1/hotels/room-list?checkin_date=2025-01-18&checkout_date=2025-01-19&hotel_id=${parsedHotelId}&adults_number_by_rooms=2&children_number_by_rooms=0&currency=USD&units=metric&locale=en-gb`,
             roomList,
-            (data) => setRoomList(Object.values(data.rooms || {})),
+            (data) => {
+              if (data && data[0] && data[0].rooms) {
+                const roomsArray = Object.entries(data[0].rooms).map(([id, room]) => ({
+                  id,
+                  ...room
+                }));
+                console.log('Rooms data:', roomsArray);
+                setRoomList(roomsArray);
+              } else {
+                setRoomList([]);
+                console.log('No rooms data available:', data);
+              }
+            },
             roomListFetched
-          ),
-        ]);
+          );
+
       } catch (err) {
         setError('An error occurred while fetching hotel details. Please try again.');
         console.error('Error fetching hotel details:', err);
@@ -98,7 +115,6 @@ export default function HotelDetails() {
   if (error || !hotelData) {
     return <div className="container mx-auto p-4 text-red-500">{error || 'Failed to load hotel details'}</div>;
   }
-
 
   return (
     <div className="container mx-auto p-4 mt-5">
@@ -160,42 +176,50 @@ export default function HotelDetails() {
                 <TabsTrigger key={index} value={`room-${index}`}>{room.name}</TabsTrigger>
               ))}
             </TabsList>
-            <TabsContent value="all">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {roomList.map((room, index) => (
-                  <Card key={index}>
-                    <CardHeader>
-                      <CardTitle>{room.name}</CardTitle>
-                      <CardDescription>Max occupancy: {room.max_occupancy}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {room.highlights.map((highlight, i) => (
-                          <Badge key={i} variant="outline">{highlight}</Badge>
-                        ))}
-                      </div>
-                      <p className="font-bold mb-2">Bed Configuration:</p>
-                      <ul className="list-disc list-inside mb-4">
-                        {room.bed_configurations[0]?.bed_types.map((bed, i) => (
-                          <li key={i}>{bed.name_with_count}</li>
-                        ))}
-                      </ul>
-                      <div className="flex flex-wrap gap-2">
-                        {room.facilities.slice(0, 5).map((facility, i) => (
-                          <Badge key={i} variant="secondary">
-                            {facility.name === 'Free WiFi' && <Wifi className="w-4 h-4 mr-1" />}
-                            {facility.name === 'Tea/Coffee maker' && <Coffee className="w-4 h-4 mr-1" />}
-                            {facility.name === 'TV' && <Tv className="w-4 h-4 mr-1" />}
-                            {facility.name === 'Air conditioning' && <AirVent className="w-4 h-4 mr-1" />}
-                            {facility.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
+            {roomList && roomList.length > 0 ? (
+              <TabsContent value="all">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {roomList.map((room, index) => (
+                    <Card key={index}>
+                      <CardHeader>
+                        <CardTitle>{room.name}</CardTitle>
+                        <CardDescription>Max occupancy: {room.max_occupancy}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {room.highlights && room.highlights.map((highlight, i) => (
+                            <Badge key={i} variant="outline">{highlight.translated_name}</Badge>
+                          ))}
+                        </div>
+                        <p className="font-bold mb-2">Bed Configuration:</p>
+                        <ul className="list-disc list-inside mb-4">
+                          {room.bed_configurations && room.bed_configurations[0]?.bed_types.map((bed, i) => (
+                            <li key={i}>{bed.name_with_count}</li>
+                          ))}
+                        </ul>
+                        <div className="flex flex-wrap gap-2">
+                          {room.facilities && room.facilities.slice(0, 5).map((facility, i) => (
+                            <Badge key={i} variant="secondary">
+                              {facility.name === 'Free WiFi' && <Wifi className="w-4 h-4 mr-1" />}
+                              {facility.name === 'Tea/Coffee maker' && <Coffee className="w-4 h-4 mr-1" />}
+                              {facility.name === 'TV' && <Tv className="w-4 h-4 mr-1" />}
+                              {facility.name === 'Air conditioning' && <AirVent className="w-4 h-4 mr-1" />}
+                              {facility.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            ) : (
+              <TabsContent value="all">
+                <div className="text-muted-foreground text-center py-4">
+                  No rooms available for the selected dates
+                </div>
+              </TabsContent>
+            )}
             {roomList.map((room, index) => (
               <TabsContent key={index} value={`room-${index}`}>
                 <Card>
@@ -205,19 +229,19 @@ export default function HotelDetails() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {room.highlights.map((highlight, i) => (
-                        <Badge key={i} variant="outline">{highlight}</Badge>
+                      {room.highlights && room.highlights.map((highlight, i) => (
+                        <Badge key={i} variant="outline">{highlight.translated_name}</Badge>
                       ))}
                     </div>
                     <p className="font-bold mb-2">Bed Configuration:</p>
                     <ul className="list-disc list-inside mb-4">
-                      {room.bed_configurations[0]?.bed_types.map((bed, i) => (
+                      {room.bed_configurations && room.bed_configurations[0]?.bed_types.map((bed, i) => (
                         <li key={i}>{bed.name_with_count}</li>
                       ))}
                     </ul>
                     <p className="font-bold mb-2">Facilities:</p>
                     <div className="grid grid-cols-2 gap-2">
-                      {room.facilities.map((facility, i) => (
+                      {room.facilities && room.facilities.map((facility, i) => (
                         <Badge key={i} variant="secondary">
                           {facility.name === 'Free WiFi' && <Wifi className="w-4 h-4 mr-1" />}
                           {facility.name === 'Tea/Coffee maker' && <Coffee className="w-4 h-4 mr-1" />}
