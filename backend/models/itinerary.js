@@ -10,6 +10,11 @@ const itinerarySchema = new Schema(
     },
     activities: [
       {
+        day: {
+          type: Number,
+          required: true,
+          min: 1, // Ensures the day is at least 1
+        },
         name: {
           type: String,
           required: true,
@@ -23,25 +28,25 @@ const itinerarySchema = new Schema(
             type: String,
             required: true,
           },
-          coordinates: {
-            longitude: {
-              type: Number,
-              required: true,
-            },
-            latitude: {
-              type: Number,
-              required: true,
-            },
-          },
+          // coordinates: {
+          //   longitude: {
+          //     type: Number,
+          //     required: true,
+          //   },
+          //   latitude: {
+          //     type: Number,
+          //     required: true,
+          //   },
+          // },
         },
         duration: {
           type: Number,
           required: true,
         },
-        timing: {
-          type: Date,
-          required: true,
-        },
+        // timing: {
+        //   type: Date,
+        //   required: true,
+        // },
         category: [
           {
             type: mongoose.Schema.Types.ObjectId,
@@ -75,10 +80,10 @@ const itinerarySchema = new Schema(
       ref: "Currency",
       required: true,
     },
-    isRepeated: {
-      type: Boolean,
-      required: true,
-    },
+    // isRepeated: {
+    //   type: Boolean,
+    //   required: true,
+    // },
     availableDates: [
       {
         date: {

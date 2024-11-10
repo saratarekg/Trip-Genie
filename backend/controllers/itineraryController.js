@@ -369,7 +369,7 @@ const createItinerary = async (req, res) => {
     title,
     language,
     price,
-    isRepeated,
+    // isRepeated,
     accessibility,
     pickUpLocation,
     dropOffLocation,
@@ -382,20 +382,20 @@ const createItinerary = async (req, res) => {
       .status(400)
       .json({ message: "Itinerary must have at least one date" });
   }
-  if (!isRepeated) {
-    if (availableDates.length > 1) {
-      return res.status(400).json({
-        message: "Itinerary must have only one date if it is not repeated",
-      });
-    }
-    activities.forEach((activity) => {
-      if (activity.timing < availableDates[0].date) {
-        return res.status(400).json({
-          message: "Activities date must be after the itinerary date",
-        });
-      }
-    });
-  }
+  // if (!isRepeated) {
+    // if (availableDates.length > 1) {
+    //   return res.status(400).json({
+    //     message: "Itinerary must have only one date if it is not repeated",
+    //   });
+    // }
+    // activities.forEach((activity) => {
+    //   if (activity.timing < availableDates[0].date) {
+    //     return res.status(400).json({
+    //       message: "Activities date must be after the itinerary date",
+    //     });
+    //   }
+    // });
+
 
   await (async () => {
     for (const file of req.files) {
@@ -428,7 +428,7 @@ const createItinerary = async (req, res) => {
     pickUpLocation,
     dropOffLocation,
     tourGuide: res.locals.user_id,
-    isRepeated,
+    // isRepeated,
   });
 
   try {
@@ -458,8 +458,8 @@ const createItinerary = async (req, res) => {
 const updateItinerary = async (req, res) => {
   try {
     const tourGuideId = res.locals.user_id; // Get the current tour guide's ID
-    console.log(req.files);
-    console.log(req.body);
+    // console.log(req.files);
+    // console.log(req.body);
     // Find the itinerary by ID
     const itinerary = await Itinerary.findById(req.params.id);
 
@@ -489,7 +489,7 @@ const updateItinerary = async (req, res) => {
       pickUpLocation,
       dropOffLocation,
       appropriate,
-      isRepeated,
+      // isRepeated,
     } = req.body;
 
     const activities = JSON.parse(req.body.activities);
@@ -500,7 +500,7 @@ const updateItinerary = async (req, res) => {
         .status(400)
         .json({ message: "Itinerary must have at least one date" });
     }
-    if (!isRepeated) {
+    // if (!isRepeated) {
       if (availableDates.length > 1) {
         return res.status(400).json({
           message: "Itinerary must have only one date if it is not repeated",
@@ -513,7 +513,7 @@ const updateItinerary = async (req, res) => {
           });
         }
       });
-    }
+  
 
     await (async () => {
       for (const file of req.files) {
@@ -559,7 +559,7 @@ const updateItinerary = async (req, res) => {
       pickUpLocation,
       dropOffLocation,
       appropriate,
-      isRepeated,
+      // isRepeated,
     });
 
     res.status(200).json({ message: "Itinerary updated successfully" });

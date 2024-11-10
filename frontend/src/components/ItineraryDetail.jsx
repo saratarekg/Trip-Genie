@@ -28,6 +28,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimelinePreviewComponent } from "@/components/timeline-preview";
+import { ActivityTimeline } from "@/components/ItineraryTimeline";
 
 const RatingDistributionBar = ({ percentage, count }) => (
   <div className="flex items-center gap-2 text-sm">
@@ -1133,7 +1134,8 @@ const ItineraryDetail = () => {
 
                 <div className="mt-8">
                   <h2 className="text-2xl font-semibold mb-4">Activities</h2>
-                  {activities.length === 0 ? (
+                  <ActivityTimeline activities={itinerary.activities} />
+                  {/* {activities.length === 0 ? (
                     <p>No activities found.</p>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1175,28 +1177,6 @@ const ItineraryDetail = () => {
                                 </span>
                               </div>
 
-
-                              {/* <div className="flex items-center">
-                                <Banknote className="w-4 h-4 mr-2 text-gray-500" />
-                                <span className="text-sm">
-                                  Price: {formatPrice(activity.price)}
-                                </span>
-                              </div>
-                              {activity.specialDiscount > 0 && (
-                                <div className="flex items-center">
-                                  <Info className="w-4 h-4 mr-2 text-green-500" />
-                                  <span className="text-sm text-green-500">
-                                    Special Discount: {activity.specialDiscount}%
-                                    off
-                                  </span>
-                                </div>
-                              )}
-                              <div className="flex items-center">
-                                <Star className="w-4 h-4 mr-2 text-yellow-500" />
-                                <span className="text-sm">
-                                  Rating: {activity.rating || "N/A"}
-                                </span>
-                              </div> */}
                               <div className="flex flex-wrap gap-2 mt-2">
                                 {activity.category &&
                                   activity.category.map((cat, catIndex) => (
@@ -1218,7 +1198,7 @@ const ItineraryDetail = () => {
                         </Card>
                       ))}
                     </div>
-                  )}
+                  )} */}
                 </div>
 
                 {itinerary.location && (
