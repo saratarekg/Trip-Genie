@@ -137,7 +137,6 @@ export function NavbarComponent() {
             <div className="inline-flex items-center border-2 border-white/30 rounded-full px-2 py-1">
               {role === "tour-guide" && (
                 <>
-                  <NavLink to="/activity">Activities</NavLink>
 
                   <div className="relative" ref={itinerariesRef}>
                     <button
@@ -555,7 +554,6 @@ export function NavbarComponent() {
           <div className="px-2 pt-2 pb-3 space-y-1">
             {role === "tour-guide" && (
               <>
-                <NavLink to="/activity">Activities</NavLink>
                 {/* Itineraries Dropdown */}
                 <div className="relative">
                   <button
