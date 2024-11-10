@@ -6,15 +6,7 @@ import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import * as jwtDecode from "jwt-decode";
-import {
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  Edit,
-  Trash2,
-  ChevronDown,
-} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,11 +26,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Loader from "@/components/loader";
@@ -230,10 +217,8 @@ export default function AllHistoricalPlacesComponent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filtersVisible, setFiltersVisible] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [selectedPeriods, setSelectedPeriods] = useState([]);
-  const [myHistoricalPlaces, setMyHistoricalPlaces] = useState(false);
   const [userRole, setUserRole] = useState("guest");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [typesOptions, setTypesOptions] = useState([]);
@@ -243,8 +228,6 @@ export default function AllHistoricalPlacesComponent() {
   const [historicalPlaceToDelete, setHistoricalPlaceToDelete] = useState(null);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
-  const [isTypeOpen, setIsTypeOpen] = useState(false);
-  const [isPeriodOpen, setIsPeriodOpen] = useState(false);
   const navigate = useNavigate();
   const tripsPerPage = 6;
 
@@ -272,7 +255,7 @@ export default function AllHistoricalPlacesComponent() {
 
   useEffect(() => {
     searchHistoricalPlaces();
-  }, [myHistoricalPlaces, searchTerm]);
+  }, [searchTerm, selectedTypes, selectedPeriods]);
 
   const fetchUserInfo = async () => {
     const role = getUserRole();
@@ -344,15 +327,10 @@ export default function AllHistoricalPlacesComponent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const toggleFilters = () => {
-    setFiltersVisible(!filtersVisible);
-  };
-
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedTypes([]);
     setSelectedPeriods([]);
-    setMyHistoricalPlaces(false);
     fetchHistoricalPlaces();
   };
 
@@ -400,8 +378,6 @@ export default function AllHistoricalPlacesComponent() {
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/historical-places`);
-      if (myHistoricalPlaces)
-        url.searchParams.append("myPlaces", myHistoricalPlaces);
       if (searchTerm) url.searchParams.append("searchBy", searchTerm);
       if (selectedTypes.length > 0)
         url.searchParams.append("types", selectedTypes.join(","));
@@ -427,12 +403,6 @@ export default function AllHistoricalPlacesComponent() {
       setError("Error fetching filtered results");
       setHistoricalPlaces([]);
     }
-  };
-
-  const applyFilters = () => {
-    searchHistoricalPlaces();
-    setIsTypeOpen(false);
-    setIsPeriodOpen(false);
   };
 
   return (
@@ -481,86 +451,66 @@ export default function AllHistoricalPlacesComponent() {
             </div>
             {/* Type Filter */}
             <div className="mb-6">
-              <Popover open={isTypeOpen} onOpenChange={setIsTypeOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    Type
-                    <ChevronDown className="h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <ScrollArea className="h-[300px] p-4">
-                    {typesOptions.map((type) => (
-                      <div
-                        key={type._id}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={`type-${type._id}`}
-                          checked={selectedTypes.includes(type._id)}
-                          onCheckedChange={(checked) => {
-                            setSelectedTypes((prev) =>
-                              checked
-                                ? [...prev, type._id]
-                                : prev.filter((t) => t !== type._id)
-                            );
-                          }}
-                        />
-                        <label
-                          htmlFor={`type-${type._id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {type.type}
-                        </label>
-                      </div>
-                    ))}
-                  </ScrollArea>
-                </PopoverContent>
-              </Popover>
+              <h3 className="font-medium text-[#1A3B47] mb-2">
+                Filter By Type
+              </h3>
+              <ScrollArea className="h-[150px]">
+                {console.log(typesOptions)}
+                {typesOptions.map((type) => (
+                  <div key={type} className="flex items-center space-x-2 mb-2">
+                    <Checkbox
+                      id={`type-${type}`}
+                      checked={selectedTypes.includes(type)}
+                      onCheckedChange={(checked) => {
+                        setSelectedTypes((prev) =>
+                          checked
+                            ? [...prev, type]
+                            : prev.filter((t) => t !== type)
+                        );
+                      }}
+                    />
+                    <label
+                      htmlFor={`type-${type}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {type}
+                    </label>
+                  </div>
+                ))}
+              </ScrollArea>
             </div>
             {/* Period Filter */}
             <div className="mb-6">
-              <Popover open={isPeriodOpen} onOpenChange={setIsPeriodOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    Period
-                    <ChevronDown className="h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <ScrollArea className="h-[300px] p-4">
-                    {periodOptions.map((period) => (
-                      <div
-                        key={period._id}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={`period-${period._id}`}
-                          checked={selectedPeriods.includes(period._id)}
-                          onCheckedChange={(checked) => {
-                            setSelectedPeriods((prev) =>
-                              checked
-                                ? [...prev, period._id]
-                                : prev.filter((p) => p !== period._id)
-                            );
-                          }}
-                        />
-                        <label
-                          htmlFor={`period-${period._id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {period.period}
-                        </label>
-                      </div>
-                    ))}
-                  </ScrollArea>
-                </PopoverContent>
-              </Popover>
+              <h3 className="font-medium text-[#1A3B47] mb-2">
+                Filter by Period
+              </h3>
+              <ScrollArea className="h-[150px]">
+                {periodOptions.map((period) => (
+                  <div
+                    key={period}
+                    className="flex items-center space-x-2 mb-2"
+                  >
+                    <Checkbox
+                      id={`period-${period}`}
+                      checked={selectedPeriods.includes(period)}
+                      onCheckedChange={(checked) => {
+                        setSelectedPeriods((prev) =>
+                          checked
+                            ? [...prev, period]
+                            : prev.filter((p) => p !== period)
+                        );
+                      }}
+                    />
+                    <label
+                      htmlFor={`period-${period}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      {period}
+                    </label>
+                  </div>
+                ))}
+              </ScrollArea>
             </div>
-            {/* Apply Filters Button */}
-            <Button onClick={applyFilters} className="w-full bg-[#5D9297]">
-              Apply Filters
-            </Button>
             {/* Featured Historical Places Section */}
             <div className="mt-6">
               <h3 className="font-medium text-[#1A3B47] mb-4">
@@ -614,14 +564,6 @@ export default function AllHistoricalPlacesComponent() {
                 <span className="text-gray-500 text-sm whitespace-nowrap">
                   ({historicalPlaces.length} places)
                 </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="md:hidden"
-                  onClick={toggleFilters}
-                >
-                  <Filter className="w-4 h-4" />
-                </Button>
               </div>
             </div>
 
@@ -637,50 +579,60 @@ export default function AllHistoricalPlacesComponent() {
             ) : (
               <>
                 {/* Historical Places Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {historicalPlaces
-                    .slice(
-                      (currentPage - 1) * tripsPerPage,
-                      currentPage * tripsPerPage
-                    )
-                    .map((place) => (
-                      <HistoricalPlaceCard
-                        key={place._id}
-                        historicalPlace={place}
-                        onSelect={handleHistoricalPlaceSelect}
-                        userRole={userRole}
-                        userPreferredCurrency={userPreferredCurrency}
-                        onDeleteConfirm={handleDeleteConfirm}
-                      />
-                    ))}
-                </div>
+                {historicalPlaces.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {historicalPlaces
+                      .slice(
+                        (currentPage - 1) * tripsPerPage,
+                        currentPage * tripsPerPage
+                      )
+                      .map((place) => (
+                        <HistoricalPlaceCard
+                          key={place._id}
+                          historicalPlace={place}
+                          onSelect={handleHistoricalPlaceSelect}
+                          userRole={userRole}
+                          userPreferredCurrency={userPreferredCurrency}
+                          onDeleteConfirm={handleDeleteConfirm}
+                        />
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-lg text-gray-600">
+                      No historical places found.
+                    </p>
+                  </div>
+                )}
 
                 {/* Pagination */}
-                <div className="mt-8 flex justify-center items-center space-x-4">
-                  <Button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    variant="outline"
-                    size="icon"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm font-medium">
-                    Page {currentPage} of{" "}
-                    {Math.ceil(historicalPlaces.length / tripsPerPage)}
-                  </span>
-                  <Button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={
-                      currentPage ===
-                      Math.ceil(historicalPlaces.length / tripsPerPage)
-                    }
-                    variant="outline"
-                    size="icon"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
+                {historicalPlaces.length > 0 && (
+                  <div className="mt-8 flex justify-center items-center space-x-4">
+                    <Button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      variant="outline"
+                      size="icon"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm font-medium">
+                      Page {currentPage} of{" "}
+                      {Math.ceil(historicalPlaces.length / tripsPerPage)}
+                    </span>
+                    <Button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={
+                        currentPage ===
+                        Math.ceil(historicalPlaces.length / tripsPerPage)
+                      }
+                      variant="outline"
+                      size="icon"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           </div>
