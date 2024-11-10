@@ -7,26 +7,30 @@ const cloudinary = require("../utils/cloudinary");
 
 // Function to get the maximum price from activities
 const getMaxPrice = async (req, res) => {
-    const maxPriceActivity = await Activity.findOne().sort({ price: -1 });
-    let maxPrice;
-    if(maxPriceActivity){
+  const maxPriceActivity = await Activity.findOne({ isDeleted: false }).sort({
+    price: -1,
+  });
+  let maxPrice;
+  if (maxPriceActivity) {
     maxPrice = await maxPriceActivity.price;
-    } else {
-      maxPrice = 0;
-    }
-    // console.log("henaaaaaaaaaaaa", maxPrice);
-    res.status(200).json(maxPrice);
+  } else {
+    maxPrice = 0;
+  }
+  // console.log("henaaaaaaaaaaaa", maxPrice);
+  res.status(200).json(maxPrice);
 };
 
 const getMaxPriceMy = async (req, res) => {
   const userId = res.locals.user_id;
 
   try {
-    const maxPriceActivity = await Activity.findOne({ advertiser: userId, isDeleted: false }).sort({ price: -1 });
+    const maxPriceActivity = await Activity.findOne({
+      advertiser: userId,
+      isDeleted: false,
+    }).sort({ price: -1 });
 
     const maxPrice = maxPriceActivity ? maxPriceActivity.price : 0;
     res.status(200).json(maxPrice);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -103,14 +107,13 @@ const getActivitiesByPreferences = async (req, res) => {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    const { budget, categories, price} =
-      tourist.preference;
+    const { budget, categories, price } = tourist.preference;
 
     // Apply filters based on preferences and query params
     const { startDate, endDate, minRating, searchBy, sort, asc, myActivities } =
       req.query;
 
-      console.log("req query: ", req.query);
+    console.log("req query: ", req.query);
 
     const filterResult = await Activity.filter(
       budget,
@@ -141,7 +144,6 @@ const getActivitiesByPreferences = async (req, res) => {
     query.push({ isDeleted: false });
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
-
 
     // Only show future activities if 'myActivities' is not specified
     if (!myActivities) {
