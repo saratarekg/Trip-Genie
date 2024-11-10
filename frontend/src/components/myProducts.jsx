@@ -101,12 +101,13 @@ export function MyProducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState(1);
   const [sortBy, setSortBy] = useState("");
-  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
+  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedRating, setSelectedRating] = useState(null);
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const productsPerPage = 6;
 
   const navigate = useNavigate();
@@ -134,6 +135,28 @@ export function MyProducts() {
       setUserInfo({ role });
     }
   }, []);
+
+  useEffect(() => {
+    if(!isPriceInitialized){
+      fetchMaxPrice();
+      }
+  }, [userInfo]);
+
+  const fetchMaxPrice = async () => {
+    const role = getUserRole();
+    const token = Cookies.get("jwt");
+    const url = new URL(`http://localhost:4000/${role}/max-price-products-my`);
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          setMaxPriceOfProducts(data);
+          setPriceRange([0, data]);
+          setIsPriceInitialized(true);
+          
+    };
 
   const fetchProducts = useCallback(
     async (params = {}) => {
@@ -171,8 +194,8 @@ export function MyProducts() {
         }
 
         const data = await response.json();
-        setProducts(data.products || data);
-        setMaxPriceOfProducts(data.maxPrice || maxPriceOfProducts);
+        setProducts(data);
+       
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -285,16 +308,17 @@ export function MyProducts() {
             {/* Price Range */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-              <DualHandleSliderComponent
+              {isPriceInitialized && (<DualHandleSliderComponent
                 min={0}
                 max={maxPriceOfProducts}
                 symbol="$"
                 step={Math.max(1, Math.ceil(maxPriceOfProducts / 100))}
                 values={priceRange}
+                exchangeRate='1'
                 middleColor="#5D9297"
                 colorRing="#388A94"
                 onChange={(values) => setPriceRange(values)}
-              />
+              />)}
             </div>
             {/* Rating Filter */}
             <div className="mb-6">

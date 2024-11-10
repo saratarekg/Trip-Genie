@@ -76,9 +76,10 @@ export default function ProductArchive() {
   const [sortOrder, setSortOrder] = useState(1);
   const [sortBy, setSortBy] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
+  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
   const [selectedRating, setSelectedRating] = useState(null);
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const tripsPerPage = 6;
 
   const navigate = useNavigate();
@@ -136,6 +137,30 @@ export default function ProductArchive() {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+
+  useEffect(() => {
+    if(!isPriceInitialized){
+      fetchMaxPrice();
+      }
+  }, [getUserRole]);
+
+  const fetchMaxPrice = async () => {
+    const role = getUserRole();
+    const token = Cookies.get("jwt");
+    const url = new URL(`http://localhost:4000/${role}/max-price-products-archived`);
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          setMaxPriceOfProducts(data);
+          setPriceRange([0, data]);
+          setIsPriceInitialized(true);
+          
+    };
+
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -232,6 +257,7 @@ export default function ProductArchive() {
                 symbol="$"
                 step={Math.max(1, Math.ceil(maxPriceOfProducts / 100))}
                 values={priceRange}
+                exchangeRate='1'
                 middleColor="#5D9297"
                 colorRing="#388A94"
                 onChange={(values) => setPriceRange(values)}

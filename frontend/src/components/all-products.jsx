@@ -395,8 +395,6 @@ export function AllProducts() {
   useEffect(() => {
     if(!isPriceInitialized){
       fetchMaxPrice();
-      console.log("bageeb max tany?");
-      console.log(isPriceInitialized);
       }
   }, [role]);
 

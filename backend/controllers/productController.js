@@ -78,6 +78,54 @@ const getMaxPrice = async (req, res) => {
   res.status(200).json(maxPrice);
 };
 
+const getMaxPriceMy = async (req, res) => {
+  const role = res.locals.user_role;
+  const userId = res.locals.user_id;
+
+  try {
+    let maxPriceProduct;
+
+    if (role === "admin") {
+      // Admin: Access max price across all non-archived products
+      maxPriceProduct = await Product.findOne({ seller: null, isArchived: false, isDeleted: false }).sort({ price: -1 });
+    } else {
+      // Seller: Retrieve max price for non-archived products belonging to this user
+      maxPriceProduct = await Product.findOne({ seller: userId, isArchived: false, isDeleted: false }).sort({ price: -1 });
+    }
+
+    const maxPrice = maxPriceProduct ? maxPriceProduct.price : 0;
+    res.status(200).json(maxPrice);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getMaxPriceArchived = async (req, res) => {
+  const role = res.locals.user_role;
+  const userId = res.locals.user_id;
+
+  try {
+    let maxPriceProduct;
+
+    if (role === "admin") {
+      // Admin: Access max price across all non-archived products
+      maxPriceProduct = await Product.findOne({ seller: null, isArchived: true, isDeleted: false }).sort({ price: -1 });
+    } else {
+      // Seller: Retrieve max price for non-archived products belonging to this user
+      maxPriceProduct = await Product.findOne({ seller: userId, isArchived: true, isDeleted: false }).sort({ price: -1 });
+    }
+
+    const maxPrice = maxPriceProduct ? maxPriceProduct.price : 0;
+    res.status(200).json(maxPrice);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 
 const getAllProductsArchive = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts, rating, sort } =
@@ -879,4 +927,6 @@ module.exports = {
   getAllProductsArchive,
   updateCommentOnProduct,
   getMaxPrice,
+  getMaxPriceMy,
+  getMaxPriceArchived,
 };
