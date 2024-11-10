@@ -263,9 +263,10 @@ export function MyActivitiesComponent() {
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [maxPrice, setMaxPrice] = useState(1000);
-  const [initialPriceRange, setInitialPriceRange] = useState([0, 1000]);
+  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
+  const [initialPriceRange, setInitialPriceRange] = useState([0, maxPriceOfProducts]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
@@ -278,6 +279,7 @@ export function MyActivitiesComponent() {
   const [userInfo, setUserInfo] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [activityToDelete, setActivityToDelete] = useState(null);
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
@@ -324,6 +326,28 @@ export function MyActivitiesComponent() {
     }
     } 
   }, []);
+
+  useEffect(() => {
+    if(!isPriceInitialized){
+      fetchMaxPrice();
+      }
+  }, [userInfo]);
+
+  const fetchMaxPrice = async () => {
+    const role = getUserRole();
+    const token = Cookies.get("jwt");
+    const url = new URL(`http://localhost:4000/${role}/max-price-activities-my`);
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          setMaxPriceOfProducts(data);
+          setPriceRange([0, data]);
+          setIsPriceInitialized(true);
+          
+    };
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -743,6 +767,7 @@ export function MyActivitiesComponent() {
                     dateRange={dateRange}
                     setDateRange={setDateRange}
                     minStars={minStars}
+                    exchangeRate={1}
                     setMinStars={setMinStars}
                     categoriesOptions={categoryOptions}
                     searchActivites={searchActivities}

@@ -18,6 +18,19 @@ const getMaxPrice = async (req, res) => {
     res.status(200).json(maxPrice);
 };
 
+const getMaxPriceMy = async (req, res) => {
+  const userId = res.locals.user_id;
+
+  try {
+    const maxPriceProduct = await Product.findOne({ advertiser: userId, isDeleted: false }).sort({ price: -1 });
+
+    const maxPrice = maxPriceProduct ? maxPriceProduct.price : 0;
+    res.status(200).json(maxPrice);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 const getAllActivities = async (req, res) => {
   try {
@@ -587,4 +600,5 @@ module.exports = {
   theHolyAntiFilter,
   updateCommentOnActivity,
   getMaxPrice,
+  getMaxPriceMy,
 };

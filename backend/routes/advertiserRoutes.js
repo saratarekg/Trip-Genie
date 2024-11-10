@@ -27,6 +27,7 @@ router.put(
 );
 router.delete("/activities/:id", activityController.deleteActivity);
 router.get("/maxPriceActivities", activityController.getMaxPrice);
+router.get("/max-price-activities-my", activityController.getMaxPriceMy);
 
 router.get("/", advertiserController.getAdvertiser);
 router.put("/", upload.single("logo"), advertiserController.updateAdvertiser);
