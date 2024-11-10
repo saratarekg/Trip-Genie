@@ -347,7 +347,7 @@ const HistoricalPlaceDetail = () => {
                   </h1>
                   <div className="flex flex-wrap gap-2">
                     {historicalPlace.historicalTag &&
-                      historicalPlace.historicalTag.length > 0 ? (
+                    historicalPlace.historicalTag.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {historicalPlace.historicalTag.map(
                           (historicalTag, index) => (
@@ -362,7 +362,6 @@ const HistoricalPlaceDetail = () => {
                             </Badge>
                           )
                         )}
-                  
                       </div>
                     ) : (
                       <p>No tags available</p>
@@ -524,27 +523,26 @@ const HistoricalPlaceDetail = () => {
                 </div>
               </div>
 
-              {(
-                (canModify && userRole === "tourism-governor")) && (
-                  <div className="mt-8 flex justify-end space-x-4">
-                    <Button
-                      onClick={handleUpdate}
-                      variant="default"
-                      className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Update
-                    </Button>
-                    <Button
-                      onClick={() => setShowDeleteConfirm(true)}
-                      variant="destructive"
-                      className="flex items-center"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </Button>
-                  </div>
-                )}
+              {canModify && userRole === "tourism-governor" && (
+                <div className="mt-8 flex justify-end space-x-4">
+                  <Button
+                    onClick={handleUpdate}
+                    variant="default"
+                    className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Update
+                  </Button>
+                  <Button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    variant="destructive"
+                    className="flex items-center"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -571,15 +569,7 @@ const HistoricalPlaceDetail = () => {
           </DialogContent>
         </Dialog>
 
-        <Dialog
-          open={showDeleteSuccess}
-          onOpenChange={(open) => {
-            if (!open) {
-              setShowDeleteSuccess(false);
-              navigate("/all-historical-places");
-            }
-          }}
-        >
+        <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
@@ -593,10 +583,7 @@ const HistoricalPlaceDetail = () => {
             <DialogFooter>
               <Button
                 variant="default"
-                onClick={() => {
-                  setShowDeleteSuccess(false);
-                  navigate("/all-historical-places");
-                }}
+                onClick={() => navigate("/all-historical-places")}
               >
                 Back to All Historical Places
               </Button>

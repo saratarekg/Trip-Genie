@@ -174,11 +174,6 @@ const HistoricalPlaceCard = ({
               {tag.type}
             </Badge>
           ))}
-          {historicalPlace.historicalTag.map((tag, index) => (
-            <Badge key={`period-${index}`} variant="secondary">
-              {tag.period}
-            </Badge>
-          ))}
         </div>
       </div>
       {userRole === "tourism-governor" &&
@@ -220,11 +215,9 @@ export default function MyHistoricalPlacesComponent() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTypes, setSelectedTypes] = useState([]);
-  const [selectedPeriods, setSelectedPeriods] = useState([]);
   const [userRole, setUserRole] = useState("guest");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [typesOptions, setTypesOptions] = useState([]);
-  const [periodOptions, setPeriodOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [historicalPlaceToDelete, setHistoricalPlaceToDelete] = useState(null);
@@ -257,7 +250,7 @@ export default function MyHistoricalPlacesComponent() {
 
   useEffect(() => {
     searchHistoricalPlaces();
-  }, [searchTerm, selectedTypes, selectedPeriods]);
+  }, [searchTerm, selectedTypes]);
 
   const fetchUserInfo = async () => {
     const role = getUserRole();
@@ -309,14 +302,12 @@ export default function MyHistoricalPlacesComponent() {
 
   const fetchTypesAndPeriods = async () => {
     try {
-      const [typesResponse, periodsResponse] = await Promise.all([
+      const [typesResponse] = await Promise.all([
         axios.get("http://localhost:4000/api/getAllHistoricalTypes"),
-        axios.get("http://localhost:4000/api/getAllHistoricalPeriods"),
       ]);
       setTypesOptions(typesResponse.data);
-      setPeriodOptions(periodsResponse.data);
     } catch (error) {
-      console.error("Error fetching types and periods:", error);
+      console.error("Error fetching types ", error);
     }
   };
 
@@ -332,7 +323,6 @@ export default function MyHistoricalPlacesComponent() {
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedTypes([]);
-    setSelectedPeriods([]);
     fetchHistoricalPlaces();
   };
 
@@ -385,8 +375,6 @@ export default function MyHistoricalPlacesComponent() {
       if (searchTerm) url.searchParams.append("searchBy", searchTerm);
       if (selectedTypes.length > 0)
         url.searchParams.append("types", selectedTypes.join(","));
-      if (selectedPeriods.length > 0)
-        url.searchParams.append("periods", selectedPeriods.join(","));
 
       const token = Cookies.get("jwt");
       const response = await fetch(url, {
@@ -455,7 +443,7 @@ export default function MyHistoricalPlacesComponent() {
             </div>
             {/* Type Filter */}
             <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-2">Filter Type</h3>
+              <h3 className="font-medium text-[#1A3B47] mb-2"> Type</h3>
               <ScrollArea className="h-[150px]">
                 {typesOptions.map((type) => (
                   <div
@@ -483,38 +471,7 @@ export default function MyHistoricalPlacesComponent() {
                 ))}
               </ScrollArea>
             </div>
-            {/* Period Filter */}
-            <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-2">
-                Filter by Period
-              </h3>
-              <ScrollArea className="h-[150px]">
-                {periodOptions.map((period) => (
-                  <div
-                    key={period}
-                    className="flex items-center space-x-2 mb-2"
-                  >
-                    <Checkbox
-                      id={`period-${period}`}
-                      checked={selectedPeriods.includes(period)}
-                      onCheckedChange={(checked) => {
-                        setSelectedPeriods((prev) =>
-                          checked
-                            ? [...prev, period]
-                            : prev.filter((p) => p !== period)
-                        );
-                      }}
-                    />
-                    <label
-                      htmlFor={`period-${period}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {period}
-                    </label>
-                  </div>
-                ))}
-              </ScrollArea>
-            </div>
+
             {/* Featured Historical Places Section */}
             <div className="mt-6">
               <h3 className="font-medium text-[#1A3B47] mb-4">
