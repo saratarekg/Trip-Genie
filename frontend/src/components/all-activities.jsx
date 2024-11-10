@@ -48,8 +48,8 @@ const DualHandleSliderComponent = ({
   colorRing = "orange",
 }) => {
   // Ensure values are within bounds and align with step
-  const adjustedValues = values.map(value => 
-    Math.round(Math.max(min, Math.min(max, value)) / step) * step
+  const adjustedValues = values.map(
+    (value) => Math.max(min, Math.min(max, value) / step) * step
   );
 
   return (
@@ -61,8 +61,9 @@ const DualHandleSliderComponent = ({
         max={max}
         onChange={(newValues) => {
           // Ensure new values are within bounds and align with step
-          const adjustedNewValues = newValues.map(value => 
-            Math.round(Math.max(min, Math.min(max, value)) / step) * step
+          const adjustedNewValues = newValues.map(
+            (value) =>
+              Math.round(Math.max(min, Math.min(max, value)) / step) * step
           );
           onChange(adjustedNewValues);
         }}
