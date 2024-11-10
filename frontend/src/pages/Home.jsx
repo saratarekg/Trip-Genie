@@ -176,7 +176,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#E6DCCF]">
-      <TravelHero />
+      <TravelHero
+       userRole={role} />
       
       <div className="mx-auto px-4 py-16">
         {renderContent()}
