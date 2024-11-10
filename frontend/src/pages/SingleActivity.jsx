@@ -9,6 +9,7 @@ import Loader from "../components/Loader";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import signUpPicture from "../assets/images/signUpPicture.jpeg";
 import {
   ToastProvider,
   ToastViewport,
@@ -80,9 +81,10 @@ const ImageGallery = ({ pictures }) => {
   };
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-4 h-full">
+      {/* Thumbnail Column */}
       <div className="w-1/5 relative">
-        <div className="h-full overflow-hidden">
+        <div className="h-full overflow-hidden relative">
           {pictures.length > 5 && (
             <button
               onClick={handlePrev}
@@ -93,13 +95,13 @@ const ImageGallery = ({ pictures }) => {
               <ChevronUp size={20} />
             </button>
           )}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 h-full">
             {pictures.slice(startIndex, startIndex + 5).map((pic, index) => (
               <img
                 key={index}
                 src={pic.url}
-                alt={`Activity image ${startIndex + index + 1}`}
-                className="w-full h-[calc(20%-8px)] object-cover rounded-lg cursor-pointer"
+                alt={`Product image ${startIndex + index + 1}`}
+                className="w-full h-[20%] object-cover rounded-lg cursor-pointer"
                 onClick={() => setMainImage(pic.url)}
               />
             ))}
@@ -116,12 +118,16 @@ const ImageGallery = ({ pictures }) => {
           )}
         </div>
       </div>
-      <div className="w-4/5">
-        <img
-          src={mainImage}
-          alt="Main activity image"
-          className="w-full h-auto object-cover rounded-lg"
-        />
+
+      {/* Main Image Column */}
+      <div className="w-4/5 h-full">
+        <div className="h-full flex items-center justify-center">
+          <img
+            src={mainImage}
+            alt="Main product image"
+            className="w-full h-full object-contain rounded-lg"
+          />
+        </div>
       </div>
     </div>
   );
@@ -920,16 +926,25 @@ const ActivityDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="bg-[#1a202c] text-white py-20 px-4">
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            {activity.name}
-          </h1>
-        </div>
-      </div>
+  <div
+    style={{
+      backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.7), rgba(93, 146, 151, 0.5)), url(${activity.pictures[0].url})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+    }}
+    className="bg-[#1a202c] text-white py-20 px-4"
+  >
+    <div className="container mx-auto text-center">
+      <h1 className="text-4xl md:text-6xl font-bold mb-4">
+        {activity.name}
+      </h1>
+    </div>
+  </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="p-6">
+  <div className="bg-gray-100">
+      <div className="container " >
+        <div className="pt-4">
           <div className="flex flex-col md:flex-row gap-8">
             <div className="flex-[2] bg-white shadow-md rounded-lg p-8 flex flex-col justify-center h-full">
               <div className="mb-6 flex items-center justify-between">
@@ -952,10 +967,9 @@ const ActivityDetail = () => {
                 </div>
               </div>
 
-              <div className="flex gap-8">
-                <div className="flex-1 space-y-4"></div>
+              <div className="flex flex-col lg:flex-row gap-8">
+              <div className="w-full h-[400px]">
 
-                <div className="lg:w-2/3">
                   <ImageGallery pictures={activity.pictures} />
                   <div className="h-6"></div>
                   <p className="text-lg text-gray-600 mt-32 mb-6">
@@ -963,7 +977,13 @@ const ActivityDetail = () => {
                   </p>
                 </div>
 
-                <div className="lg:w-1/3 space-y-6">
+               
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-col gap-8">
+              <div className="flex-1 bg-white shadow-md rounded-lg p-4">
+              <div>
                   <div className="space-y-4">
                     <div className="flex items-start">
                       <div>
@@ -1056,7 +1076,7 @@ const ActivityDetail = () => {
                           <Toast
                             onOpenChange={setIsToastOpen}
                             open={isToastOpen}
-                            duration={3000}
+                            duration={2000}
                           >
                             {" "}
                             {/* Auto close after 3 seconds */}
@@ -1082,11 +1102,6 @@ const ActivityDetail = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-col gap-8">
-              <div className="flex-1 bg-white shadow-md rounded-lg p-4">
                 <div className="flex items-center mb-6">
                   <Avatar className="w-12 h-12 mr-2">
                     <AvatarImage
@@ -1569,6 +1584,7 @@ const ActivityDetail = () => {
           </DialogContent>
         </Dialog>
       </div>
+    
 
       {/* Full Comment Dialog */}
       <Dialog
@@ -1887,6 +1903,7 @@ const ActivityDetail = () => {
         </DialogContent>
       </Dialog>
     </div>
+      </div>
   );
 };
 

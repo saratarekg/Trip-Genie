@@ -263,10 +263,10 @@ export function MyActivitiesComponent() {
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
-  const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
-  const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
-  const [initialPriceRange, setInitialPriceRange] = useState([0, maxPriceOfProducts]);
+  const [maxPriceOfActivities,setMaxPriceOfActivities] = useState(1000);
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfActivities]);
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfActivities);
+  const [initialPriceRange, setInitialPriceRange] = useState([0, maxPriceOfActivities]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
@@ -343,8 +343,10 @@ export function MyActivitiesComponent() {
             },
           });
           const data = await response.json();
-          setMaxPriceOfProducts(data);
+          console.log("data: ",data);
+          setMaxPriceOfActivities(data);
           setPriceRange([0, data]);
+          setInitialPriceRange([0, data]);
           setIsPriceInitialized(true);
           
     };

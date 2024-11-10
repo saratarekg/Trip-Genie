@@ -97,6 +97,12 @@ export function SignupForm() {
           message: "Username must be at least 3 characters.",
         })
         .trim(),
+        fname: z
+        .string()
+        .optional(),
+        lname: z
+        .string()
+       .optional(),
       email: z
         .string()
         .email({
@@ -276,6 +282,8 @@ export function SignupForm() {
 
   const formRefs = {
     username: useRef(null),
+    fname: useRef(null),
+    lname: useRef(null),
     email: useRef(null),
     password: useRef(null),
     userType: useRef(null),
@@ -294,6 +302,8 @@ export function SignupForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
+      fname:"",
+      lname:"",
       email: "",
       password: "",
       userType: undefined,
@@ -680,6 +690,44 @@ export function SignupForm() {
               )}
               useRef={formRefs.username}
             />
+
+{userType === "tourist" && (
+  <>
+    <div className="flex space-x-4">
+      <FormField
+        control={control}
+        name="fname"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>First Name (Optional)</FormLabel>
+            <FormControl>
+              <Input placeholder="First Name" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+        useRef={formRefs.fname}
+      />
+
+      <FormField
+        control={control}
+        name="lname"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Last Name (Optional)</FormLabel>
+            <FormControl>
+              <Input placeholder="Last Name" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+        useRef={formRefs.lname}
+      />
+    </div>
+  </>
+)}
+
+
             <FormField
               control={control}
               name="email"

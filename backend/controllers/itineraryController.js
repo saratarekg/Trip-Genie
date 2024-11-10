@@ -102,6 +102,31 @@ const getAllItineraries = async (req, res) => {
   }
 };
 
+const getMaxPrice = async (req, res) => {
+  const maxPriceItinerary = await Itinerary.findOne().sort({ price: -1 });
+  let maxPrice;
+  if(maxPriceItinerary){
+  maxPrice = await maxPriceItinerary.price;
+  } else {
+    maxPrice = 0;
+  }
+  res.status(200).json(maxPrice);
+};
+
+const getMaxPriceMy = async (req, res) => {
+const userId = res.locals.user_id;
+
+try {
+  const maxPriceItinerary = await Itinerary.findOne({ tourGuide: userId, isDeleted: false }).sort({ price: -1 });
+
+  const maxPrice = maxPriceItinerary ? maxPriceItinerary.price : 0;
+  res.status(200).json(maxPrice);
+
+} catch (error) {
+  res.status(500).json({ message: error.message });
+}
+};
+
 const getItinerariesByPreference = async (req, res) => {
   try {
     // Fetch tourist preferences
@@ -907,4 +932,6 @@ module.exports = {
   removeActivityFromItinerary,
   editActivityInItinerary,
   addActivityToItinerary,
+  getMaxPrice,
+  getMaxPriceMy,
 };

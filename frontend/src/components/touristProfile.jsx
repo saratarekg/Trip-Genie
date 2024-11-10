@@ -86,10 +86,10 @@ export function TouristProfileComponent() {
         setTourist(response.data);
         setEditedTourist(response.data);
         setSelectedImage(response.data.profilePicture);
-    
+
         if (response.data.profilePicture && response.data.profilePicture.url) {
           convertUrlToBase64(response.data.profilePicture.url).then((res) => {
-            setBase64Image(res)
+            setBase64Image(res);
           });
         }
       } catch (err) {
@@ -246,6 +246,7 @@ export function TouristProfileComponent() {
     if (!validateFields()) return;
 
     try {
+      console.log("editedTourist", editedTourist);
       const finalTourist = { ...editedTourist };
       finalTourist.mobile = "+" + editedTourist.mobile;
       const token = Cookies.get("jwt");
@@ -257,6 +258,7 @@ export function TouristProfileComponent() {
       const response = await axios.put(api, finalTourist, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      response.data.tourist.mobile = response.data.tourist.mobile.slice(1);
 
       if (response.status === 200) {
         setTourist(response.data.tourist);
