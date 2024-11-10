@@ -214,6 +214,7 @@ export function TouristProfileComponent() {
 
   const handleDiscard = () => {
     setEditedTourist(tourist);
+    setSelectedImage(tourist.profilePicture)
     setDropdownOpen(false);
     setIsEditing(false);
   };

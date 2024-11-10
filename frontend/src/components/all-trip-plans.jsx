@@ -167,6 +167,10 @@ const ItineraryCard = ({
   const uniqueCategories = new Set();
   const uniqueTags = new Set();
 
+  const firstAvailablePicture = itinerary.activities
+    ?.flatMap((activity) => activity.pictures ?? [])
+    .find((picture) => picture?.url)?.url;
+
   return (
     <div
       className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative"
@@ -174,7 +178,7 @@ const ItineraryCard = ({
     >
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={itinerary.activities?.[0]?.pictures?.[0] || defaultImage}
+          src={firstAvailablePicture || defaultImage}
           alt={itinerary.title}
           className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
         />
@@ -888,7 +892,7 @@ export function AllItinerariesComponent() {
                 setShowDeleteSuccess(false);
                 navigate("/all-itineraries");
               }}
-              className = "bg-gray-400 hover:bg-gray-500"
+              className="bg-gray-400 hover:bg-gray-500"
             >
               Close
             </Button>

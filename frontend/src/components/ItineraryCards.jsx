@@ -133,11 +133,13 @@ export const ItineraryCards = () => {
     });
   }, [userRole, userPreferredCurrency, itineraries]);
 
+
+
   return (
     <div className="container mx-auto px-24 py-12 flex flex-col md:flex-row">
       {/* Left Side: Itineraries Title, Line, Description, Button */}
       <div className="w-full md:w-2/6 pr-8 mb-8 md:mb-0">
-      <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Itineraries</h1>
+        <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Itineraries</h1>
         <p className="text-[#1A3B47] mb-4">
           Discover our curated itineraries designed for every traveler, blending cultural experiences with thrilling adventures. From serene escapes to adrenaline-filled expeditions, our diverse journeys cater to all preferences. Let us turn your travel dreams into reality!
         </p>
@@ -154,43 +156,67 @@ export const ItineraryCards = () => {
       {/* Right Side: Itineraries Cards */}
       <div className="w-full md:w-4/6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {itineraries.map((itinerary) => {
-          const activityImage =
-            itinerary.activities &&
-            itinerary.activities.length > 0 &&
-            itinerary.activities[0].pictures &&
-            itinerary.activities[0].pictures.length > 0
-              ? itinerary.activities[0].pictures[0]
-              : defaultImage;
+          // const activityImage =
+          //   itinerary.activities &&
+          //     itinerary.activities.length > 0 &&
+          //     itinerary.activities[0].pictures &&
+          //     itinerary.activities[0].pictures.length > 0
+          //     ? itinerary.activities[0].pictures[0].url
+          //     : defaultImage;
+
+          const firstAvailablePicture = itinerary.activities
+          ?.flatMap((activity) => activity.pictures ?? [])
+          .find((picture) => picture?.url)?.url || defaultImage;
 
               return (
                 <Link to={`/itinerary/${itinerary._id}`} key={itinerary._id}>
                   <div
-                    className="group relative bg-cover bg-center rounded-[26px] p-5 overflow-hidden"
+                    className="group relative bg-cover bg-center rounded-[26px] overflow-hidden"
                     style={{
                       width: "100%",
                       height: "300px",
-                      backgroundImage: `url(${activityImage})`,
+                      backgroundImage: `url(${firstAvailablePicture})`,
                     }}
                   >
                     {/* Gradient Overlay - hidden initially */}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#002845] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
               
                     {/* Itinerary content - hidden and slides up on hover */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 text-white transform translate-y-full transition-transform duration-500 group-hover:translate-y-0">
-                      <div className="flex justify-between font-semibold text-lg">
-                        <span className="shadow-lg shadow-md tracking-wide">{itinerary.title}</span>
-                        <span className="shadow-lg shadow-md tracking-wide">{formatPrice(itinerary.price, itinerary.currency)}/Day</span>
-                      </div>
+                    <div className="absolute inset-x-0 bottom-0 p-5 text-white transform translate-y-full transition-transform duration-500 group-hover:translate-y-0">
+                      <div className="flex flex-col items-start w-full">
+                        <h3
+                          className="w-[90%] font-semibold text-lg leading-tight mb-2"
+                          style={{
+                            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                          }}
+                        >
+                          {itinerary.title}
+                        </h3>
+                        <span
+                          className="text-base font-medium"
+                          style={{
+                            textShadow: "2px 2px 5px rgba(0, 0, 0, 1)", // Increased shadow strength
+                          }}
+                        >
+                          {formatPrice(itinerary.price, itinerary.currency)}/Day
+                        </span>
               
-                      <div className="mt-2 text-m">
-                        {itinerary.availableDates.length > 0
-                          ? new Date(itinerary.availableDates[0].date).toLocaleDateString()
-                          : "No dates available"}
+                        <div
+                          className="mt-1 text-sm text-white/90"
+                          style={{
+                            textShadow: "1px 1px 3px rgba(0, 0, 0, 0.5)",
+                          }}
+                        >
+                          {itinerary.availableDates.length > 0
+                            ? new Date(itinerary.availableDates[0].date).toLocaleDateString()
+                            : "No dates available"}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </Link>
-              ); 
+              );
+              
         })}
       </div>
     </div>

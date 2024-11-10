@@ -58,7 +58,9 @@ const images = [
   },
 ];
 
-export default function TravelHero() {
+export default function TravelHero({  
+  userRole,  
+}) {
   const [currentImage, setCurrentImage] = useState(0);
 
   useEffect(() => {
@@ -123,15 +125,21 @@ export default function TravelHero() {
               <h1 className="mb-6 text-6xl font-bold text-white">
                 {images[currentImage].title}
               </h1>
-              <div className="h-16"> {/* Fixed height container for button */}
-                <a
-                  href={images[currentImage].link}
-                  className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#1A3B47] transition-all duration-1000 hover:bg-white/90"
-                >
-                  View More Details
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
-              </div>
+              {(userRole === "tourist" || userRole === "tour-guide" || userRole === "guest") && (
+  <>
+    <div className="h-16"> {/* Fixed height container for button */}
+      <a
+        href={images[currentImage].link}
+        className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#1A3B47] transition-all duration-1000 hover:bg-white/90"
+      >
+        View More Details
+        <ArrowRight className="ml-2 h-4 w-4" />
+      </a>
+    </div>
+  </>
+)}
+
+
             </div>
 
             {/* Bottom Content */}
