@@ -262,7 +262,7 @@ const formSchema = z.object({
 })
 
 const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) => {
-  // console.log(itineraryDate);
+  console.log(itineraryDate);
   const [tags, setTags] = useState([]);
   const [category, setCategory] = useState([]);
   const [pictures, setPictures] = useState([]);
@@ -346,10 +346,10 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
     // console.log("Activity data:", data)
     const newActivity = {
       ...data,
-      // timing: isRepeated
-      //   ? itineraryDate + "T" + data.activityTime
-      //   : data.activityDate + "T" + data.activityTime,
+      timing: itineraryDate +"T" + data.activityTime,
+      pictures: pictures,
     }
+    // console.log("henaaaaaaaaaaa", newActivity.timing);
     onSave(newActivity)
     onClose()
   }
@@ -751,7 +751,7 @@ const ItineraryForm = () => {
 
   const handleEditActivity = (index) => {
     const activityToEdit = activities[index];
-    // const dateTime = new Date(activityToEdit.timing);
+    const dateTime = new Date(activityToEdit.timing);
     setEditingActivityIndex(index);
     setShowActivityForm(true);
   };

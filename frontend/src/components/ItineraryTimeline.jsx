@@ -1,82 +1,97 @@
-import React, { useState } from "react"
-import { format } from "date-fns"
+import React, { useState, useMemo } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Clock, MapPin } from "lucide-react"
 
 export function ActivityTimeline({ activities = [] }) {
   const [selectedActivity, setSelectedActivity] = useState(null)
 
-  // Sort activities by date and group them by day number
-  const groupedActivities = activities.reduce((acc, activity) => {
-    const activityDate = new Date(activity.timing)
-    const firstDate = new Date(Math.min(...activities.map(a => new Date(a.timing).getTime())))
-    
-    // Calculate days difference
-    const dayNumber = Math.floor((activityDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
-    
-    if (!acc[dayNumber]) {
-      acc[dayNumber] = []
-    }
-    acc[dayNumber].push(activity)
-    return acc
-  }, {})
+  const groupedAndSortedActivities = useMemo(() => {
+    const grouped = activities.reduce((acc, activity) => {
+      const day = activity.day
+      if (!acc[day]) {
+        acc[day] = []
+      }
+      acc[day].push(activity)
+      return acc
+    }, {})
+
+    Object.keys(grouped).forEach(day => {
+      grouped[Number(day)].sort((a, b) => new Date(a.timing).getTime() - new Date(b.timing).getTime())
+    })
+
+    return grouped
+  }, [activities])
+
+  const sortedDays = Object.keys(groupedAndSortedActivities).sort((a, b) => Number(a) - Number(b))
+
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    console.log("date",date);
+    return date instanceof Date && !isNaN(date.getTime())
+      ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : 'Invalid Date'
+  }
 
   return (
-    <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold mb-6">Daily Schedule</h2>
-      <div className="overflow-y-auto h-[600px] pr-4">
-        <div className="space-y-8">
-          {Object.entries(groupedActivities).map(([day, dayActivities]) => (
-            <div key={day} className="grid grid-cols-[auto,1fr] gap-4">
-              {dayActivities[0].pictures[0] && (
-                <div className="relative w-24 h-24 rounded-full overflow-hidden">
-                  <img
-                    src={dayActivities[0].pictures[0].url}
-                    alt={dayActivities[0].name}
-                    className="object-cover w-full h-full"
-                  />
+    <div className="max-w-3xl mx-auto p-4 bg-white">
+      <div className="relative">
+        {/* Timeline line */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-px bg-[#5D9297]" />
+
+        {/* Days and activities */}
+        <div className="space-y-24">
+          {sortedDays.map((day) => (
+            <div key={day} className="relative">
+              {/* Day header with image */}
+              <div className="flex items-center gap-4">
+                <div className="w-1/2 flex justify-end">
+                  {groupedAndSortedActivities[Number(day)][0]?.pictures?.[0] && (
+                    <div className="w-24 h-24 rounded-full overflow-hidden mr-8">
+                      <img
+                        src={groupedAndSortedActivities[Number(day)][0].pictures[0].url}
+                        alt={`Day ${day}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
-              <div className="space-y-3">
-                <div className="flex items-baseline gap-4">
-                  <h3 className="text-lg font-semibold">Day {day}:</h3>
-                  <p className="text-lg text-gray-600">
-                    {format(new Date(dayActivities[0].timing), 'MMMM d, yyyy')}
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  {dayActivities.map((activity, index) => (
-                    <div key={index} className="grid grid-cols-[1fr,auto] gap-4 items-center">
-                      <div>
-                        <p className="text-sm text-gray-600">
-                          {format(new Date(activity.timing), 'HH:mm')} -{' '}
-                          {format(
-                            new Date(new Date(activity.timing).getTime() + activity.duration * 60000),
-                            'HH:mm'
-                          )}
-                        </p>
-                        <p>{activity.name}</p>
-                      </div>
-                      <button
-                        className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                <div className="w-1/2 pl-8">
+                {/* Day marker */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-[#F88C33]" />
+                  <h3 className="text-2xl text-[#1A3B47]">Day {day}</h3>
+                  <ul className="">
+                    {groupedAndSortedActivities[Number(day)].map((activity, index) => (
+                      <li 
+                        key={index}
+                        className="flex items-center justify-between cursor-pointer hover:bg-[#B5D3D1] hover:bg-opacity-20 p-2 rounded-lg transition-colors"
                         onClick={() => setSelectedActivity(activity)}
                       >
-                        View Details
-                      </button>
-                    </div>
-                  ))}
+                        <span className="text-sm text-[#5D9297]">{formatTime(activity.timing)}</span>
+                        <span className="text-sm text-[#1A3B47] font-medium">{activity.name}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
+
+              
             </div>
           ))}
         </div>
       </div>
 
-      {selectedActivity && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-semibold mb-4">{selectedActivity.name}</h3>
+      {/* Activity details modal */}
+      <Dialog open={!!selectedActivity} onOpenChange={() => setSelectedActivity(null)}>
+        {selectedActivity && (
+          <DialogContent className="max-w-2xl bg-white">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-light text-[#1A3B47]">
+                {selectedActivity.name}
+              </DialogTitle>
+            </DialogHeader>
             <div className="grid gap-4">
-              {selectedActivity.pictures[0] && (
-                <div className="relative w-full h-48">
+              {selectedActivity.pictures && selectedActivity.pictures[0] && (
+                <div className="relative h-64 w-full">
                   <img
                     src={selectedActivity.pictures[0].url}
                     alt={selectedActivity.name}
@@ -84,40 +99,37 @@ export function ActivityTimeline({ activities = [] }) {
                   />
                 </div>
               )}
-              <div className="grid gap-2">
-                <p className="text-sm text-gray-600">
-                  {format(new Date(selectedActivity.timing), 'MMMM d, yyyy HH:mm')} -{' '}
-                  {format(
-                    new Date(new Date(selectedActivity.timing).getTime() + selectedActivity.duration * 60000),
-                    'HH:mm'
-                  )}
-                </p>
-                <p>{selectedActivity.description}</p>
-                <p className="text-sm">
-                  <span className="font-semibold">Location:</span> {selectedActivity.location.address}
-                </p>
-                {selectedActivity.category.length > 0 && (
-                  <p className="text-sm">
-                    <span className="font-semibold">Categories:</span>{' '}
-                    {selectedActivity.category.join(', ')}
-                  </p>
-                )}
-                {selectedActivity.tags.length > 0 && (
-                  <p className="text-sm">
-                    <span className="font-semibold">Tags:</span> {selectedActivity.tags.join(', ')}
-                  </p>
+              <div className="space-y-3">
+                <p className="text-[#5D9297]">{selectedActivity.description}</p>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-[#388A94]" />
+                  <span className="text-sm text-[#388A94]">
+                    Time: {formatTime(selectedActivity.timing)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-[#388A94]" />
+                  <span className="text-sm text-[#388A94]">
+                    Location: {selectedActivity.location.address}
+                  </span>
+                </div>
+                {selectedActivity.tags && selectedActivity.tags.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {selectedActivity.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-2 py-1 rounded-full text-xs bg-[#B5D3D1] text-[#1A3B47]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
-            <button
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              onClick={() => setSelectedActivity(null)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   )
 }

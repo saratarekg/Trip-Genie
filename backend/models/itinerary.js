@@ -28,25 +28,15 @@ const itinerarySchema = new Schema(
             type: String,
             required: true,
           },
-          // coordinates: {
-          //   longitude: {
-          //     type: Number,
-          //     required: true,
-          //   },
-          //   latitude: {
-          //     type: Number,
-          //     required: true,
-          //   },
-          // },
         },
         duration: {
           type: Number,
           required: true,
         },
-        // timing: {
-        //   type: Date,
-        //   required: true,
-        // },
+        timing: {
+          type: Date,
+          // required: true,
+        },
         category: [
           {
             type: mongoose.Schema.Types.ObjectId,
