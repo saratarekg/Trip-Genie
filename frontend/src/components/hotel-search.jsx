@@ -23,7 +23,7 @@ export default function HotelSearch() {
   const [searchQuery, setSearchQuery] = useState('');
   const [checkInDate, setCheckInDate] = useState();
   const [checkOutDate, setCheckOutDate] = useState();
-  const [adults, setAdults] = useState(2);
+  const [adults, setAdults] = useState(null);
   const [hotels, setHotels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -186,7 +186,7 @@ export default function HotelSearch() {
 
       <div className="space-y-6">
         {hotels.map((hotel) => (
-          <Link to={`/hotels2/${hotel.hotel_id}`} key={hotel.hotel_id} className="block">
+          <Link to={`/hotels/${hotel.hotel_id}`} key={hotel.hotel_id} className="block">
             <Card>
               <CardContent className="p-6">
                 <div className="flex space-x-4">

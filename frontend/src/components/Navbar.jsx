@@ -50,6 +50,7 @@ export function NavbarComponent() {
   const userMenuRef = useRef(null);
   const activitiesRef = useRef(null);
   const historicalRef = useRef(null);
+  const transportationRef = useRef(null);
 
   const handleClickOutside = (event) => {
     if (
@@ -57,7 +58,8 @@ export function NavbarComponent() {
       !productsRef.current?.contains(event.target) &&
       !activitiesRef.current?.contains(event.target) &&
       !historicalRef.current?.contains(event.target) &&
-      !userMenuRef.current?.contains(event.target)
+      !userMenuRef.current?.contains(event.target) &&
+      !transportationRef.current?.contains(event.target)
     ) {
       closeDropdown();
     }
@@ -235,7 +237,43 @@ export function NavbarComponent() {
                     Historical Places
                   </NavLink>
                   <NavLink to="/all-products">Products</NavLink>
-                  <NavLink to="/transportation">Transportation</NavLink>
+
+                  <div>
+                    {/* Transportation Dropdown */}
+                    <div className="relative" ref={transportationRef}>
+                      <button
+                        onClick={() => toggleDropdown("transportation")}
+                        className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                      >
+                        Transportation
+                        {openDropdown === "transportation" ? (
+                          <ChevronUp className="ml-1 h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="ml-1 h-4 w-4" />
+                        )}
+                      </button>
+                      {openDropdown === "transportation" && (
+                        <div className="absolute left-0 mt-2 w-48 bg-black/90 rounded-xl border border-white/20 shadow-lg">
+                          <Link
+                            to="/transportation"
+                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200"
+                            onClick={closeDropdown}
+                          >
+                            Land transportation
+                          </Link>
+                          <Link
+                            to="/flights"
+                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200"
+                            onClick={closeDropdown}
+                          >
+                            Flights
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <NavLink to="/hotels">Hotels</NavLink>
                 </>
               )}
               {role === "advertiser" && (
