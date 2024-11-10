@@ -108,10 +108,10 @@ const FilterComponent = ({
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [localPriceRange, setLocalPriceRange] = useState(initialPriceRange);
   const [isInitialized, setIsInitialized] = useState(false); // To track if it's the initial load
-  console.log(priceRange);
-  console.log(initialPriceRange);
-  console.log(maxPrice);
-  console.log(exchangeRate);
+  // console.log(priceRange);
+  // console.log(initialPriceRange);
+  // console.log(maxPrice);
+  // console.log(exchangeRate);
 
   useEffect(() => {
   if (isInitialized) {

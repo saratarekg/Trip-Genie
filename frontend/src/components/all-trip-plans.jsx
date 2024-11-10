@@ -33,7 +33,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-let exchangeRateForFilter;
+let exchangeRateForFilter = 1;
 
 const DeleteConfirmationModal = ({
   isOpen,
@@ -114,18 +114,19 @@ const ItineraryCard = ({
   }, [userInfo, itinerary.currency]);
 
   const getCurrencySymbol = useCallback(async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/${userInfo.role}/getCurrency/${itinerary.currency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCurrencySymbol(response.data.symbol);
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-    }
+    setCurrencySymbol("$");
+    // try {
+    //   const token = Cookies.get("jwt");
+    //   const response = await axios.get(
+    //     `http://localhost:4000/${userInfo.role}/getCurrency/${itinerary.currency}`,
+    //     {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     }
+    //   );
+    //   setCurrencySymbol(response.data.symbol);
+    // } catch (error) {
+    //   console.error("Error fetching currency symbol:", error);
+    // }
   }, [userInfo.role, itinerary.currency]);
 
   useEffect(() => {
@@ -268,9 +269,9 @@ export function AllItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
-  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
-  const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
-  const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
+  const [maxPriceOfItinerary, setMaxPriceOfItinerary] = useState(1000);
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfItinerary]);
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfItinerary);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
@@ -292,6 +293,7 @@ export function AllItinerariesComponent() {
   const [deleteError, setDeleteError] = useState(null);
   const [isSortedByPreference, setIsSortedByPreference] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState(null);
@@ -342,6 +344,30 @@ export function AllItinerariesComponent() {
       return "$";
     }
   };
+
+  useEffect(() => {
+    if(!isPriceInitialized){
+      fetchMaxPrice();
+      }
+  }, [userInfo]);
+
+  const fetchMaxPrice = async () => {
+    const role = getUserRole();
+    const token = Cookies.get("jwt");
+    const url = new URL(`http://localhost:4000/${role}/max-price-itinerary`);
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          console.log("data: ",data);
+          setMaxPriceOfItinerary(data);
+          setMaxPrice(data);
+          setPriceRange([0, data]);
+          setIsPriceInitialized(true);
+          
+    };
 
   const handleSortByPreference = async () => {
     try {
@@ -436,7 +462,6 @@ export function AllItinerariesComponent() {
         }
         const data = await response.json();
         setItineraries(data);
-        // setMaxPriceOfProducts(data.maxPrice);
         setIsSortedByPreference(false);
       }
 
@@ -450,7 +475,7 @@ export function AllItinerariesComponent() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, sortBy, myItineraries]);
+  }, [sortBy, myItineraries]);
 
   useEffect(() => {
     fetchUserInfo();
@@ -462,7 +487,7 @@ export function AllItinerariesComponent() {
     }
   }, [userInfo, fetchItineraries]);
 
-  const searchItineraries = useCallback(async () => {
+  const searchItineraries = async () => {
     setIsSortedByPreference(false);
     try {
       const role = getUserRole();
@@ -503,6 +528,10 @@ export function AllItinerariesComponent() {
         url.searchParams.append("asc", sortOrder);
       }
 
+      console.log(priceRange[0]);
+      console.log(priceRange[1]);
+      console.log(url);
+
       const token = Cookies.get("jwt");
       const response = await fetch(url, {
         headers: {
@@ -524,7 +553,8 @@ export function AllItinerariesComponent() {
       setError("Error fetching filtered results");
       setItineraries([]);
     }
-  }, [myItineraries, searchTerm, selectedTypes, isBooked, sortBy, sortOrder]);
+  };
+
 
   useEffect(() => {
     fetchItineraries();
@@ -547,21 +577,26 @@ export function AllItinerariesComponent() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (searchTerm || sortBy || sortOrder || myItineraries) {
+      if (searchTerm) {
         searchItineraries();
       } else {
         fetchItineraries();
       }
-    }, 0.01);
+    }, 300);
 
     return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  useEffect(() => {
+      if (sortBy || sortOrder || myItineraries) {
+        searchItineraries();
+      } else {
+        fetchItineraries();
+      }
   }, [
-    searchTerm,
     sortBy,
     sortOrder,
     myItineraries,
-    searchItineraries,
-    fetchItineraries,
   ]);
 
   const handleSort = (attribute) => {
@@ -590,7 +625,7 @@ export function AllItinerariesComponent() {
     setSortOrder("");
     setMyItineraries(false);
     setIsBooked(false);
-    setPriceRange([0, maxPriceOfProducts]);
+    setPriceRange([0, maxPriceOfItinerary]);
     fetchItineraries();
   };
 
@@ -712,7 +747,7 @@ export function AllItinerariesComponent() {
                   <Search className="absolute left-3 top-2.5 text-gray-400" />
                 </div>
 
-                <FilterComponent
+                { isPriceInitialized && (<FilterComponent
                   filtersVisible={filtersVisible}
                   toggleFilters={toggleFilters}
                   sortOrder={sortOrder}
@@ -723,8 +758,9 @@ export function AllItinerariesComponent() {
                   clearFilters={clearFilters}
                   priceRange={priceRange}
                   setPriceRange={setPriceRange}
-                  maxPrice={maxPriceOfProducts}
+                  maxPrice={maxPriceOfItinerary}
                   price={price}
+                  exchangeRate={exchangeRateForFilter}
                   setPrice={setPrice}
                   dateRange={dateRange}
                   setDateRange={setDateRange}
@@ -741,7 +777,7 @@ export function AllItinerariesComponent() {
                   setIsBooked={setIsBooked}
                   isSortedByPreference={isSortedByPreference}
                   handleSortByPreference={handleSortByPreference}
-                />
+                />)}
               </div>
 
               {error && (

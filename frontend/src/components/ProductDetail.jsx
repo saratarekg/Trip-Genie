@@ -14,6 +14,8 @@ import {
 import Loader from "../components/Loader";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Card,
   CardContent,
@@ -28,6 +30,8 @@ import {
   Flame,
   Edit,
   Trash2,
+  Link,
+  Share2,
   TrendingUp,
   Mail,
   Phone,
@@ -50,6 +54,8 @@ import {
   Wallet,
   MessageSquare,
   XCircleIcon,
+  Archive,
+  ArchiveX,
 } from "lucide-react";
 import {
   Select,
@@ -214,6 +220,8 @@ const ProductDetail = () => {
   const [quickRating, setQuickRating] = useState(0);
   const [isRatingHovered, setIsRatingHovered] = useState(false);
   const [isExpandedComment, setIsExpandedComment] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
 
   const handleToggleComment = () => {
     setIsExpandedComment(!isExpandedComment);
@@ -231,6 +239,20 @@ const ProductDetail = () => {
         product.reviews.filter((review) => review.rating === rating)
       );
     }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsToastOpen(true);
+    setOpen(false);
+  };
+
+
+  const handleEmailShare = () => {
+    const subject = encodeURIComponent(`Check out this product: ${product.name}`);
+    const body = encodeURIComponent(`I thought you might be interested in this product:\n\n${product.name}\n\n${window.location.href}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    setOpen(false); // Close the popover
   };
 
   const fetchExchangeRate = async () => {
@@ -865,12 +887,58 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-4xl font-bold">
-                  {product.name}
-                </CardTitle>
-                <CardDescription className="flex items-center justify-end"></CardDescription>
-              </CardHeader>
+            <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-5xl font-bold">
+                {product.name}
+              </CardTitle>
+              <div>
+                <ToastProvider>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="ml-auto">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <div className="flex flex-col">
+                        <Button
+                          variant="ghost"
+                          onClick={handleCopyLink}
+                          className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
+                        >
+                          <Link className="mr-2 h-4 w-4" />
+                          Copy Link
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={handleEmailShare}
+                          className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
+                        >
+                          <Mail className="mr-2 h-4 w-4" />
+                          Share by Email
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+
+                  <ToastViewport />
+
+                  {isToastOpen && (
+                    <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
+                      <ToastTitle>Link Copied</ToastTitle>
+                      <ToastDescription>
+                        The link has been copied to your clipboard.
+                      </ToastDescription>
+                      <ToastClose />
+                    </Toast>
+                  )}
+                </ToastProvider>
+              </div>
+            </div>
+            <CardDescription className="flex items-center justify-end"></CardDescription>
+          </CardHeader>
+
               <CardContent>
                 <div className="flex flex-col lg:flex-row gap-8">
                   <div className="w-full h-[400px]">
@@ -882,7 +950,7 @@ const ProductDetail = () => {
                   {/* First Badge: Sales with ShieldCheck Icon */}
                   <Badge
                     variant="secondary"
-                    className="flex items-center text-md bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                    className="flex items-center text-md bg-[#5D9297] text-white hover:bg-[#5D9297] hover:text-white"
                   >
                     <ShieldCheck className="mr-2" />{" "}
                     {/* Add the ShieldCheck icon */}
@@ -893,7 +961,7 @@ const ProductDetail = () => {
                   {product.rating >= 4 && (
                     <Badge
                       variant="secondary"
-                      className="flex items-center text-md bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                      className="flex items-center text-md bg-[#5D9297] text-white hover:bg-[#5D9297] hover:text-white"
                     >
                       <Star className="mr-2" /> {/* Add the Star icon */}
                       Top Rated
@@ -903,7 +971,7 @@ const ProductDetail = () => {
                   {/* Third Badge: Sales with Flame Icon */}
                   <Badge
                     variant="secondary"
-                    className="flex items-center text-md bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                    className="flex items-center text-md bg-[#5D9297] text-white hover:bg-[#5D9297] hover:text-white"
                   >
                     {" "}
                     <TrendingUp className="mr-2" /> {/* Add the Flame icon */}
@@ -995,7 +1063,7 @@ const ProductDetail = () => {
                     <>
                       {product.reviews.length > 5 && (
                         <span
-                          className="text-blue-500 font-semibold justify-end hover:underline flex justify-end cursor-pointer mt-6"
+                          className="text-[#388A94] font-semibold justify-end hover:underline flex justify-end cursor-pointer mt-6"
                           onClick={() => setShowAllReviews(true)}
                         >
                           View More Reviews
@@ -1033,7 +1101,7 @@ const ProductDetail = () => {
               <Card>
                 {/* Product Info Section */}
                 <CardHeader>
-                  <CardTitle className="text-3xl font-bold">
+                  <CardTitle className="text-4xl font-bold">
                     {product.name}
                   </CardTitle>
                   <CardDescription className="flex items-center">
@@ -1234,6 +1302,49 @@ const ProductDetail = () => {
                       </div>
                     )}
                   </div>
+                  <div className="mt-8 space-y-4">
+              {(userRole === "admin" ||
+                (userRole === "seller" && canModify && product.seller)) && (
+                <Button
+                  className="w-full bg-[#1A3B47] text-xl  text-white"
+                  variant="default"
+                  onClick={handleUpdate}
+                >
+                  <Edit className="w-5 h-5 mr-2" /> Update Product
+                </Button>
+              )}
+
+              {((userRole === "admin" && product.seller == null) ||
+                (userRole === "seller" && canModify && product.seller)) && (
+                <Button
+                  
+                  variant={product.isArchived ? "outline" : "default"}
+                  className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78]"
+                  onClick={() => setShowArchiveConfirm(true)}
+                >
+                  {product.isArchived ? (
+                    <>
+                      <ArchiveX className="w-5 h-5 mr-2" /> Unarchive Product
+                    </>
+                  ) : (
+                    <>
+                      <Archive className="w-5 h-5 mr-2" /> Archive Product
+                    </>
+                  )}
+                </Button>
+              )}
+
+              {(userRole === "admin" ||
+                (userRole === "seller" && canModify && product.seller)) && (
+                <Button
+                  className="w-full text-xl bg-red-500 hover:bg-red-600"
+                  variant="destructive"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <Trash2 className="w-5 h-5 mr-2" /> Delete Product
+                </Button>
+              )}
+            </div>
                 </CardContent>
 
                 {/* Divider */}
@@ -1369,7 +1480,7 @@ const ProductDetail = () => {
                         <span className="text-3xl font-bold">Sold By</span>
                         <Badge
                           variant="secondary"
-                          className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+                          className="px-2 py-1 text-xs font-medium rounded-full bg-[#388A94] text-white hover:bg-[#388A94] hover:text-white"
                         >
                           Verified Seller
                         </Badge>
@@ -1434,48 +1545,7 @@ const ProductDetail = () => {
               </Card>
             </div>
 
-            <div className="mt-8 space-y-4">
-              {(userRole === "admin" ||
-                (userRole === "seller" && canModify && product.seller)) && (
-                <Button
-                  className="w-full bg-blue-500 hover:bg-blue-700 text-white"
-                  variant="default"
-                  onClick={handleUpdate}
-                >
-                  <Edit className="w-4 h-4 mr-2" /> Update Product
-                </Button>
-              )}
-
-              {((userRole === "admin" && product.seller == null) ||
-                (userRole === "seller" && canModify && product.seller)) && (
-                <Button
-                  className="w-full"
-                  variant={product.isArchived ? "outline" : "default"}
-                  onClick={() => setShowArchiveConfirm(true)}
-                >
-                  {product.isArchived ? (
-                    <>
-                      <Edit className="w-4 h-4 mr-2" /> Unarchive Product
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="w-4 h-4 mr-2" /> Archive Product
-                    </>
-                  )}
-                </Button>
-              )}
-
-              {(userRole === "admin" ||
-                (userRole === "seller" && canModify && product.seller)) && (
-                <Button
-                  className="w-full"
-                  variant="destructive"
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" /> Delete Product
-                </Button>
-              )}
-            </div>
+            
           </div>
         </div>
       </div>
@@ -1496,10 +1566,11 @@ const ProductDetail = () => {
             <Button
               variant="outline"
               onClick={() => setShowArchiveConfirm(false)}
+              className ="bg-gray-200 hover:bg-gray-300"
             >
               Cancel
             </Button>
-            <Button variant="default" onClick={handleArchive}>
+            <Button variant="default" onClick={handleArchive} className="bg-[#388A94] hover:bg-[#2d6e78]" >
               {product.isArchived ? "Unarchive" : "Archive"}
             </Button>
           </DialogFooter>
@@ -1521,6 +1592,7 @@ const ProductDetail = () => {
           <DialogFooter>
             <Button
               variant="default"
+              className="bg-[#388A94] hover:bg-[#2d6e78]"
               onClick={() => {
                 if (product.isArchived) {
                   navigate("/product-archive");
@@ -2119,14 +2191,14 @@ const ProductDetail = () => {
                     {[...Array(5)].map((_, i) => {
                       if (i < Math.floor(product.rating)) {
                         return (
-                          <Star key={i} className="w-6 h-6 text-blue-500" />
+                          <Star key={i} className="w-6 h-6 text-[#1A3B47]" />
                         );
                       } else if (
                         i === Math.floor(product.rating) &&
                         product.rating % 1 >= 0.5
                       ) {
                         return (
-                          <StarHalf key={i} className="w-6 h-6 text-blue-500" />
+                          <StarHalf key={i} className="w-6 h-6 text-[#1A3B47]" />
                         );
                       } else {
                         return (
@@ -2149,7 +2221,7 @@ const ProductDetail = () => {
                 <button
                   className={`px-3 py-2 rounded-md ${
                     filteredRating === 0
-                      ? "bg-blue-500 text-white"
+                      ? "bg-[#388A94] text-white"
                       : "bg-gray-200"
                   }`}
                   onClick={() => handleFilterRating(0, product)}
@@ -2161,7 +2233,7 @@ const ProductDetail = () => {
                     key={star}
                     className={`px-3 py-2 rounded-md ${
                       filteredRating === star
-                        ? "bg-blue-500 text-white"
+                        ? "bg-[#388A94] text-white"
                         : "bg-gray-200"
                     }`}
                     onClick={() => handleFilterRating(star, product)}
@@ -2212,7 +2284,8 @@ const ProductDetail = () => {
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setShowAllReviews(false)}>Close</Button>
+            <Button className="bg-[#1A3B47]"
+            onClick={() => setShowAllReviews(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

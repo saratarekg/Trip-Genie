@@ -6,6 +6,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import Map from "../components/Map";
 import axios from "axios";
 import Loader from "../components/Loader";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -23,7 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,8 @@ import {
   MapPin,
   Users,
   User,
+  ShieldCheck,
+  TrendingUp,
   DollarSign,
   Globe,
   Accessibility,
@@ -165,8 +168,10 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
 
 const ActivityDetail = () => {
   const { id } = useParams();
+  const [isExpanded, setIsExpanded] = useState(false);
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showMore, setShowMore] = useState(false);
   const [error, setError] = useState(null);
   const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -255,6 +260,8 @@ const ActivityDetail = () => {
       setTransportationBookingDialog(false);
     }
   };
+
+  const toggleExpanded = () => setIsExpanded(!isExpanded);
 
   const renderTransportationOptions = () => {
     if (!activity.transportations || activity.transportations.length === 0) {
@@ -946,251 +953,310 @@ const ActivityDetail = () => {
       <div className="container " >
         <div className="pt-4">
           <div className="flex flex-col md:flex-row gap-8">
-            <div className="flex-[2] bg-white shadow-md rounded-lg p-8 flex flex-col justify-center h-full">
-              <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-4xl font-bold">{activity.name}</h1>
-                <div className="flex items-center">
-                  {/* Rating Badge */}
-                  <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                    <Star className="w-8 h-8 text-yellow-500 mr-2" />
-                    <span className="text-2xl font-semibold">
-                      {activity.rating ? activity.rating.toFixed(1) : "N/A"}
-                    </span>
-                  </div>
+          <div className="md:col-span-2">
+  <Card>
+    <CardHeader>
+    <CardTitle className="text-4xl font-bold flex items-center justify-between">
+  {activity.name}
+  <div className="flex items-center">
+    <ToastProvider>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className="ml-4">
+            <Share2 className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <div className="flex flex-col">
+            <Button
+              variant="ghost"
+              onClick={handleCopyLink}
+              className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+            >
+              <Link className="mr-2 h-4 w-4" />
+              Copy Link
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleEmailShare}
+              className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              Share by Email
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
 
-                  {/* Rating Count outside the badge */}
-                  <span className="text-sm font-normal ml-2">
-                    {activity.comments
-                      ? `(${activity.comments.length})`
-                      : "(0)"}
-                  </span>
-                </div>
-              </div>
+      <ToastViewport />
 
-              <div className="flex flex-col lg:flex-row gap-8">
-              <div className="w-full h-[400px]">
+      {isToastOpen && (
+        <Toast
+          onOpenChange={setIsToastOpen}
+          open={isToastOpen}
+          duration={2000}
+        >
+          <ToastTitle>Link Copied</ToastTitle>
+          <ToastDescription>
+            The link has been copied to your clipboard.
+          </ToastDescription>
+          <ToastClose />
+        </Toast>
+      )}
+    </ToastProvider>
+  </div>
+</CardTitle>
 
-                  <ImageGallery pictures={activity.pictures} />
-                  <div className="h-6"></div>
-                  <p className="text-lg text-gray-600 mt-32 mb-6">
-                    {activity.description}
-                  </p>
-                </div>
 
-               
-              </div>
-            </div>
+      <CardDescription className="flex items-center justify-end"></CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="w-full h-[400px]">
+          <ImageGallery pictures={activity.pictures} />
+        </div>
+      </div>
+      
+      <div className="mt-4 flex flex-wrap gap-2">
+        {/* Categories Badges */}
+        {activity.category.map((cat, index) => (
+          <Badge
+            key={index}
+            variant="secondary"
+            className="flex items-center text-base bg-[#388A94]  text-white font-semibold px-2 py-1 rounded
+            hover:bg-[#388A94] hover:text-white"
+          >
+            {cat.name}
+          </Badge>
+        ))}
 
-            <div className="flex flex-col md:flex-col gap-8">
-              <div className="flex-1 bg-white shadow-md rounded-lg p-4">
-              <div>
-                  <div className="space-y-4">
-                    <div className="flex items-start">
-                      <div>
-                        <div className="bg-red-600 text-white text-sm font-bold px-3 py-2 rounded mb-2 inline-block">
-                          Limited time deal
-                        </div>
-                        <div className="flex flex-col items-start">
-                          <div className="flex items-baseline">
-                            <span className="text-4xl font-bold text-gray-900">
-                              {formatPrice(
-                                calculateDiscountedPrice(
-                                  activity.price,
-                                  activity.specialDiscount
-                                )
-                              )}
-                            </span>
-                            <span className="ml-3  text-xl font-semibold text-red-600">
-                              -{activity.specialDiscount}% Discount
-                            </span>
-                          </div>
-                          <div className="text-xl text-gray-500 line-through mt-2">
-                            {formatPrice(activity.price)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+        {/* Tags Badges */}
+        {activity.tags.map((tag, index) => (
+          <Badge
+            key={index}
+            variant="secondary"
+            className="flex items-center text-base font-semibold bg-[#1A3B47] text-white px-2 py-1 rounded hover:bg-[#1A3B47] hover:text-white"
+          >
+            {tag.type}
+          </Badge>
+        ))}
+      </div>
 
-                    <div className="flex items-center">
-                      <Globe className="w-5 h-5 mr-2 text-orange-500" />
-                      <span className="text-gray-700">
-                        Location: {activity.location.address}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Calendar className="w-5 h-5 mr-2 text-orange-500" />
-                      <span className="text-gray-700">
-                        Date: {new Date(activity.timing).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center">
-                      <Clock className="w-5 h-5 mr-2 text-orange-500" />
-                      <span className="text-gray-700">
-                        Time:{" "}
-                        {new Date(activity.timing).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-
-                    <div>
-                      <ToastProvider>
-                        <Popover open={open} onOpenChange={setOpen}>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="ml-auto"
-                            >
-                              <Share2 className="h-4 w-4" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <div className="flex flex-col">
-                              <Button
-                                variant="ghost"
-                                onClick={handleCopyLink}
-                                className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                              >
-                                <Link className="mr-2 h-4 w-4" />
-                                Copy Link
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                onClick={handleEmailShare}
-                                className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                              >
-                                <Mail className="mr-2 h-4 w-4" />
-                                Share by Email
-                              </Button>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-
-                        <ToastViewport />
-
-                        {isToastOpen && (
-                          <Toast
-                            onOpenChange={setIsToastOpen}
-                            open={isToastOpen}
-                            duration={2000}
-                          >
-                            {" "}
-                            {/* Auto close after 3 seconds */}
-                            <ToastTitle>Link Copied</ToastTitle>
-                            <ToastDescription>
-                              The link has been copied to your clipboard.
-                            </ToastDescription>
-                            <ToastClose />
-                          </Toast>
-                        )}
-                      </ToastProvider>
-                    </div>
-
-                    <div className="flex items-center">
+           <div className="flex items-center p-6">
                       <Map
                         position={[
                           activity.location.coordinates.latitude,
                           activity.location.coordinates.longitude,
                         ]}
-                        height="125px"
+                        height="300px"
                         width="100%"
                       />
                     </div>
-                  </div>
-                </div>
-                <div className="flex items-center mb-6">
-                  <Avatar className="w-12 h-12 mr-2">
-                    <AvatarImage
-                      src={advertiserProfile.logo}
-                      alt={advertiserProfile.username}
-                    />
-                    <AvatarFallback>
-                      <User className="w-8 h-8" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <h1 className="text-xl font-bold">Advertiser Profile</h1>
-                </div>
+    </CardContent>
+    
+    
+  </Card>
 
-                <div className="space-y-4">
-                  <div className="flex items-center mb-4">
-                    <User className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">
-                      Advertiser:{" "}
-                      {advertiserProfile
-                        ? advertiserProfile.username
-                        : "Loading..."}
-                    </span>
-                  </div>
+ 
+</div>
 
-                  <div className="flex items-center">
-                    <Mail className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">
-                      Email:{" "}
-                      {advertiserProfile
-                        ? advertiserProfile.email
-                        : "Loading..."}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center">
-                    <Phone className="w-6 h-6 mr-2 text-orange-500" />
-                    <span className="text-gray-700">
-                      Hotline:{" "}
-                      {advertiserProfile
-                        ? advertiserProfile.hotline
-                        : "Loading..."}
-                    </span>
-                  </div>
-                </div>
-              </div>
+
+
+            <div className="flex flex-col md:flex-col gap-8">
               <div className="flex-1 bg-white shadow-md rounded-lg p-4">
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="text-2xl font-semibold mb-1">Categories</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {activity.category && activity.category.length > 0 ? (
-                        activity.category.map((cat, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-                          >
-                            {cat.name}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-gray-500 italic">
-                          No categories available
-                        </span>
-                      )}
-                    </div>
-                  </div>
+              <div>
+              <div className="space-y-4">
+  <div className="">
+    <h1 className="text-3xl font-bold">{activity.name}</h1>
+  </div>
+  <div className="flex items-center">
+    {/* Rating Badge */}
+    <div className="flex items-center px-3 py-1 rounded-full">
+      <StarRating rating={activity.rating} readOnly={true} />
+    </div>
 
-                  <div>
-                    <h2 className="text-2xl font-semibold mb-1">Tags</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {activity.tags && activity.tags.length > 0 ? (
-                        activity.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium flex items-center"
-                          >
-                            <Tag className="w-4 h-4 mr-1" />
-                            {tag.type}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-gray-500 italic">
-                          No tags available
-                        </span>
-                      )}
-                    </div>
-                  </div>
+    {/* Rating Count outside the badge */}
+    <span className="text-sm font-normal ml-2">
+      {activity.comments ? `(${activity.comments.length})` : "(0)"}
+    </span>
+  </div>
+  <div className="flex items-start">
+    <div>
+      <div className="bg-red-600 text-white text-sm font-bold px-3 py-2 rounded mb-2 inline-block">
+        Limited time deal
+      </div>
+
+      <div className="flex flex-col items-start">
+        <div className="flex items-baseline">
+          <span className="text-4xl font-bold text-gray-900">
+            {formatPrice(
+              calculateDiscountedPrice(activity.price, activity.specialDiscount)
+            )}
+          </span>
+          <span className="ml-3 text-xl font-semibold text-red-600">
+            -{activity.specialDiscount}% Discount
+          </span>
+        </div>
+        <div className="text-2xl text-gray-500 line-through mt-2">
+          {formatPrice(activity.price)}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div className="flex items-center">
+    <MapPin className="w-5 h-5 mr-2 text-orange-500" />
+    <span className="text-gray-700">
+      Location: {activity.location.address}
+    </span>
+  </div>
+
+  <div className="flex items-center">
+    <Calendar className="w-5 h-5 mr-2 text-orange-500" />
+    <span className="text-gray-700">
+      Date: {new Date(activity.timing).toLocaleDateString()}
+    </span>
+  </div>
+
+  <div className="flex items-center">
+    <Clock className="w-5 h-5 mr-2 text-orange-500" />
+    <span className="text-gray-700">
+      Time:{" "}
+      {new Date(activity.timing).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}
+    </span>
+  </div>
+ 
+
+  <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
+    {isExpanded
+      ? activity.description
+      : `${activity.description.substring(0, 130)}...`}
+    <button onClick={toggleExpanded} className="text-blue-500 hover:underline ml-2">
+      {isExpanded ? "View Less" : "View More"}
+    </button>
+  </div>
+
+
+
+  {userRole === "tourist" && !isActivityPassed() && (
+    <>
+      <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+
+  <Button
+    onClick={handleBookNowClick}
+    className="w-full bg-[#388A94] hover:bg-[#2B6870] text-white font-bold py-2 px-4 rounded mt-4"
+  >
+    {"Book Now"}
+  </Button>
+  </>
+)}
+
+{canModify && (
+  <>
+    <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+    <Button 
+      onClick={handleUpdate} 
+      variant="default" 
+      className="w-full bg-[#1A3B47] hover:bg-[#123239] text-white font-bold py-2 px-4 rounded mt-4"
+    >
+      <Edit className="mr-2" /> Update
+    </Button>
+    <Button 
+      onClick={handleDelete} 
+      variant="destructive" 
+      className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-4"
+    >
+      <Trash2 className="mr-2" /> Delete
+    </Button>
+  </>
+)}
+
+   
+        
+
+<div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+
+</div>
+
                 </div>
+                
+  <CardHeader>
+    <div className="flex justify-between items-center">
+      <span className="text-3xl font-bold -ml-2 ">Advertiser Profile</span>
+      <Badge
+        variant="secondary"
+        className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
+      >
+        Verified Advertiser
+      </Badge>
+    </div>
+  </CardHeader>
+  <CardContent>
+    <div className="flex items-center">
+      <Avatar className="h-16 w-16">
+        <AvatarImage
+          src={advertiserProfile.logo}
+          alt={advertiserProfile.username}
+        />
+        <AvatarFallback>
+          <User className="h-8 w-8" />
+        </AvatarFallback>
+      </Avatar>
+      <div className="ml-4">
+        <h3 className="text-2xl font-bold text-[#1A3B47]">
+          {advertiserProfile.username}
+        </h3>
+        <div className="flex items-center text-sm text-gray-500 mt-1">
+          <span className="font-semibold text-xs">
+            95% Positive
+          </span>
+          <span className="mx-2">|</span>
+          <span className="font-semibold text-xs">
+            754 Bookings
+          </span>
+        </div>
+        <div className="flex items-center mt-2">
+          <StarRating rating={5} />
+        </div>
+      </div>
+    </div>
+    
+    {showMore && (
+      <div className="mt-4 space-y-2">
+        <div className="flex items-center text-sm">
+          <Mail className="h-5 w-5 mr-2 text-gray-500" />
+          <span>{advertiserProfile.email}</span>
+        </div>
+        <div className="flex items-center text-sm">
+          <Globe className="h-5 w-5 mr-2 text-gray-500" />
+          <span>{advertiserProfile.website}</span>
+        </div>
+        <div className="flex items-center text-sm">
+          <Phone className="h-5 w-5 mr-2 text-gray-500" />
+          <span>{advertiserProfile.hotline}</span>
+        </div>
+      </div>
+    )}
+    
+    <div className="mt-4">
+      <Button
+        variant="link"
+        className="w-full p-0 h-auto font-normal text-blue-500 hover:text-blue-700"
+        onClick={() => setShowMore(!showMore)}
+      >
+        {showMore ? "Less Info" : "More Info"}
+      </Button>
+    </div>
+  </CardContent>
+
+
+
               </div>
+             
               {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
           <Button
           onClick={handleUpdateNowClick}
@@ -1199,14 +1265,7 @@ const ActivityDetail = () => {
           {"Update Booking"}
           </Button>
           )} */}
-              {userRole === "tourist" && !isActivityPassed() && (
-                <Button
-                  onClick={handleBookNowClick}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-                >
-                  {"Book Now"}
-                </Button>
-              )}
+             
             </div>
           </div>
 
@@ -1220,7 +1279,7 @@ const ActivityDetail = () => {
           )} */}
 
           {/* Comment Carousel */}
-          <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
+          <div className="mt-8 relative bg-white p-6 mb-4 rounded-lg shadow-md">
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
@@ -1400,20 +1459,7 @@ const ActivityDetail = () => {
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-200">
-          <div className="flex justify-end mt-8">
-            {canModify && (
-              <div className="flex space-x-2">
-                <Button onClick={handleUpdate} variant="default">
-                  <Edit className="mr-2" /> Update
-                </Button>
-                <Button onClick={handleDelete} variant="destructive">
-                  <Trash2 className="mr-2" /> Delete
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+      
 
         <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
           <DialogContent className="sm:max-w-[425px]">

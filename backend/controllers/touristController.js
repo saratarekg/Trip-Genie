@@ -54,14 +54,11 @@ const updateTourist = async (req, res) => {
     const tourist1 = await Tourist.findById(res.locals.user_id).lean();
     let picture = tourist1.profilePicture;
 
-    const {
-      username,
-      email,
-      nationality,
-      mobile,
-      jobOrStudent,
-      profilePicture,
-    } = req.body; // Data to update
+    const { nationality, mobile, jobOrStudent, profilePicture } = req.body; // Data to update
+
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
 
     if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
@@ -194,14 +191,10 @@ const updateTouristProfile = async (req, res) => {
     console.log(tourist1);
     let picture = tourist1.profilePicture;
     console.log(picture);
-    const {
-      email,
-      username,
-      nationality,
-      mobile,
-      jobOrStudent,
-      profilePicture,
-    } = req.body;
+    const { nationality, mobile, jobOrStudent, profilePicture } = req.body;
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
 
     if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
@@ -514,6 +507,12 @@ const getWishlist = async (req, res) => {
       return res.status(400).json({ message: "Tourist not found" });
     }
 
+    // if the product "isDeleted" or "isArchived" is true, remove it from the wishlist
+    tourist.wishlist = tourist.wishlist.filter(
+      (item) => !item.product.isDeleted && !item.product.isArchived
+    );
+
+
     // Return the wishlist data
     res.status(200).json(tourist.wishlist);
   } catch (error) {
@@ -536,6 +535,10 @@ const getCart = async (req, res) => {
     if (!tourist) {
       return res.status(400).json({ message: "Tourist not found" });
     }
+    // remove the product from the cart if it "isDeleted" or "isArchived" is true
+    tourist.cart = tourist.cart.filter(
+      (item) => !item.product.isDeleted && !item.product.isArchived
+    );
     // Return the cart data
     res.status(200).json(tourist.cart);
   } catch (error) {
@@ -826,6 +829,18 @@ const deleteAccount = async (req, res) => {
         .json({ message: "Cannot delete account with pending purchases" });
     }
 
+    const transportations = await TouristTransportation.find({
+      touristID: res.locals.user_id,
+    }).populate("transportationID");
+
+    transportations.forEach((transportation) => {
+      if (transportation.transportationID.timeDeparture > Date.now()) {
+        return res.status(400).json({
+          message: "Cannot delete account with active transportation bookings",
+        });
+      }
+    });
+
     await Complaint.deleteMany({ tourist: res.locals.user_id });
 
     if (tourist.profilePicture !== null) {
@@ -895,6 +910,18 @@ const deleteTouristAccount = async (req, res) => {
         .status(400)
         .json({ message: "Cannot delete account with pending purchases" });
     }
+
+    const transportations = await TouristTransportation.find({
+      touristID: req.params.id,
+    }).populate("transportationID");
+
+    transportations.forEach((transportation) => {
+      if (transportation.transportationID.timeDeparture > Date.now()) {
+        return res.status(400).json({
+          message: "Cannot delete account with active transportation bookings",
+        });
+      }
+    });
 
     await Complaint.deleteMany({ tourist: req.params.id });
 

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 import defaultImage from "../assets/images/default-image.jpg";
 import Loader from "./Loader.jsx";
 import { Star } from "lucide-react";
@@ -45,10 +45,10 @@ export function ProductViewer() {
       const response = await fetch(
         `http://localhost:4000/${userRole}/populate`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             base: productCurrency,
@@ -64,7 +64,7 @@ export function ProductViewer() {
           [productCurrency]: data.conversion_rate,
         }));
       } else {
-        console.error('Error in fetching exchange rate:', data.message);
+        console.error("Error in fetching exchange rate:", data.message);
       }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
@@ -85,7 +85,7 @@ export function ProductViewer() {
   };
 
   const formatPrice = (price, currency) => {
-    if (userRole === 'tourist' && userPreferredCurrency) {
+    if (userRole === "tourist" && userPreferredCurrency) {
       // console.log("exchangerates:", exchangeRates);
       // console.log("currency:", currency);
       // console.log("henaaaaaaa", exchangeRates[currency]);
@@ -105,10 +105,10 @@ export function ProductViewer() {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get('http://localhost:4000/tourist/', {
+        const response = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const currencyId = response.data.preferredCurrency;
@@ -125,7 +125,11 @@ export function ProductViewer() {
 
   useEffect(() => {
     products.forEach((product) => {
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency._id !== product.currency) {
+      if (
+        userRole === "tourist" &&
+        userPreferredCurrency &&
+        userPreferredCurrency._id !== product.currency
+      ) {
         // console.log("ba fetch exchange rate", product.currency);
         fetchExchangeRate(product.currency);
         // console.log("exchangerates:", exchangeRates);
@@ -136,16 +140,15 @@ export function ProductViewer() {
     });
   }, [userRole, userPreferredCurrency, products]);
 
-
   const handleViewAllProducts = () => {
     setIsLoading(true);
-    navigate(`/all-products`); 
+    navigate(`/all-products`);
     setIsLoading(false);
   };
 
   const handleProductClick = (id) => {
     setIsLoading(true);
-    navigate(`/product/${id}`); 
+    navigate(`/product/${id}`);
     setIsLoading(false);
   };
 
@@ -168,13 +171,16 @@ export function ProductViewer() {
     <div className="container mx-auto px-24 py-12 flex flex-col md:flex-row">
       {isLoading && <Loader />}
       <div className="w-full md:w-1/3 pr-8 mb-8 md:mb-0">
-      <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Products</h1>
+        <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Products</h1>
         <p className="text-[#1A3B47] mb-4">
-        Discover our unique collection of locally-inspired keepsakes. Each item tells a story and celebrates the culture of our vibrant destination, making it a perfect gift for yourself or a loved one. Bring home a piece of your adventure!
-         </p>
+          Discover our unique collection of locally-inspired keepsakes. Each
+          item tells a story and celebrates the culture of our vibrant
+          destination, making it a perfect gift for yourself or a loved one.
+          Bring home a piece of your adventure!
+        </p>
         <div className="flex justify-center">
           <div className="relative">
-            <button 
+            <button
               onClick={handleViewAllProducts}
               className="bg-[#388A94] hover:bg-[#5D9297] text-white px-8 py-2 rounded-full text-lg font-medium transition-colors duration-300"
             >
@@ -185,27 +191,33 @@ export function ProductViewer() {
       </div>
       <div className="w-full md:w-2/3 grid grid-cols-2 md:grid-cols-4 gap-4">
         {products.map((product) => (
-          <div 
-            key={product._id} 
-            className="relative overflow-hidden rounded-lg cursor-pointer group h-72" 
+          <div
+            key={product._id}
+            className="relative overflow-hidden rounded-lg cursor-pointer group h-72"
             onClick={() => handleProductClick(product._id)}
           >
             <img
-              src={product.picture || defaultImage}
+              src={product.pictures[0]?.url || defaultImage}
               alt={product.name}
               className="w-full h-full object-cover transition duration-300 transform group-hover:-translate-y-8"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-white p-4 transform translate-y-full transition duration-300 group-hover:translate-y-0">
               <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-semibold text-gray-600 uppercase">{'BUY ONLINE'}</span>
-                <span className="text-lg font-bold">{formatPrice(product.price, product.currency)}</span>
+                <span className="text-xs font-semibold text-gray-600 uppercase">
+                  {"BUY ONLINE"}
+                </span>
+                <span className="text-lg font-bold">
+                  {formatPrice(product.price, product.currency)}
+                </span>
               </div>
               <h2 className="text-sm mb-2 truncate">{product.name}</h2>
               <div className="flex justify-between items-center">
                 <div className="text-[#F88C33] text-xs">
                   {renderStars(product.rating)}
                 </div>
-                <span className="text-xs text-gray-600">{product.rating} stars</span>
+                <span className="text-xs text-gray-600">
+                  {product.rating} stars
+                </span>
               </div>
             </div>
           </div>

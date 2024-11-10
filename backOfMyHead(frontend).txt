@@ -1,3 +1,6 @@
+back of create and update forms el sora
+
+
 teal navbar not taking up full page width
 create forms and edit forms still have a white background and the navbar is not visible before scrolling (Amy --DONE!!)
 same thing with profile pages(not needed any more)
@@ -11,7 +14,7 @@ transition hotel and flights in home page
 ActivitySlider component : In the homepage some activity cards are bigger than others + arrows are different color.
 also fi black star otline w fi grey 
 
-are you sure you want to logout popup able el logout!! yes im sureee
+"are you sure you want to logout" popup able el logout
 
 my itineraries fe tour guide el navbar mesh lel a5r
 
@@ -34,7 +37,9 @@ hotels in home page
 n move reviews ta7t fel home page
 sowar hp sliders
 silider cards mesh kolo same size
-
+archive product btb3at too many requests
+my products filterand search s3at bydrab error
+pagination all products lama yb2a mafeesh products ytzabat
 
 
 sprint 3:
@@ -43,6 +48,8 @@ hasa toasts ahla men popups bas hanshoof
 pagination mehtaga tendaf
 buttons bardo can be better. maybe remove the drop shadow and make it an outline bas
 
+
+create itinerary seperate sections for days, and then create activities gowa el dates di, w fi option day off.
 
 Orange: #F88C33
 Beige/Tan: #E6DCCF

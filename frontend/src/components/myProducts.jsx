@@ -23,7 +23,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Loader from "./Loader";
 import defaultImage from "../assets/images/default-image.jpg";
-import productImage from "../assets/images/products.png";
+import productImage from "../assets/images/prod.png";
 import DualHandleSliderComponent from "./dual-handle-slider";
 
 const renderStars = (rating) => {
@@ -101,7 +101,7 @@ export function MyProducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState(1);
   const [sortBy, setSortBy] = useState("");
-  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -137,26 +137,25 @@ export function MyProducts() {
   }, []);
 
   useEffect(() => {
-    if(!isPriceInitialized){
+    if (!isPriceInitialized) {
       fetchMaxPrice();
-      }
+    }
   }, [userInfo]);
 
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(`http://localhost:4000/${role}/max-price-products-my`);
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          setMaxPriceOfProducts(data);
-          setPriceRange([0, data]);
-          setIsPriceInitialized(true);
-          
-    };
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    setMaxPriceOfProducts(data);
+    setPriceRange([0, data]);
+    setIsPriceInitialized(true);
+  };
 
   const fetchProducts = useCallback(
     async (params = {}) => {
@@ -195,7 +194,7 @@ export function MyProducts() {
 
         const data = await response.json();
         setProducts(data);
-       
+
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -284,8 +283,8 @@ export function MyProducts() {
             <img
               src={productImage}
               alt="Decorative"
-              height="160"
-              width="160"
+              height="200"
+              width="230"
               className="ml-auto"
             />
           </div>
@@ -308,17 +307,19 @@ export function MyProducts() {
             {/* Price Range */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-              {isPriceInitialized && (<DualHandleSliderComponent
-                min={0}
-                max={maxPriceOfProducts}
-                symbol="$"
-                step={Math.max(1, Math.ceil(maxPriceOfProducts / 100))}
-                values={priceRange}
-                exchangeRate='1'
-                middleColor="#5D9297"
-                colorRing="#388A94"
-                onChange={(values) => setPriceRange(values)}
-              />)}
+              {isPriceInitialized && (
+                <DualHandleSliderComponent
+                  min={0}
+                  max={maxPriceOfProducts}
+                  symbol="$"
+                  step={Math.max(1, Math.ceil(maxPriceOfProducts / 100))}
+                  values={priceRange}
+                  exchangeRate="1"
+                  middleColor="#5D9297"
+                  colorRing="#388A94"
+                  onChange={(values) => setPriceRange(values)}
+                />
+              )}
             </div>
             {/* Rating Filter */}
             <div className="mb-6">
@@ -344,25 +345,28 @@ export function MyProducts() {
               </h3>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-4">
-                  {products.slice(0, 3).map((product) => (
-                    <Link
-                      key={product._id}
-                      to={`/product/${product._id}`}
-                      className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-                    >
-                      <img
-                        src={product.pictures[0]?.url || defaultImage}
-                        alt={product.name}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                      <div>
-                        <h4 className="font-medium text-sm">{product.name}</h4>
-                        <div className="mt-1">
-                          {renderStars(product.rating)}
+                  {products.length > 0 &&
+                    products.slice(0, 3).map((product) => (
+                      <Link
+                        key={product._id}
+                        to={`/product/${product._id}`}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                      >
+                        <img
+                          src={product.pictures[0]?.url || defaultImage}
+                          alt={product.name}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                        <div>
+                          <h4 className="font-medium text-sm">
+                            {product.name}
+                          </h4>
+                          <div className="mt-1">
+                            {renderStars(product.rating)}
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
                 </div>
               </ScrollArea>
             </div>
@@ -435,19 +439,20 @@ export function MyProducts() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {products
-                    .slice(
-                      (currentPage - 1) * productsPerPage,
-                      currentPage * productsPerPage
-                    )
-                    .map((product) => (
-                      <ProductCard
-                        key={product._id}
-                        product={product}
-                        userInfo={userInfo}
-                        onSelect={handleProductSelect}
-                      />
-                    ))}
+                  {products.length > 0 &&
+                    products
+                      .slice(
+                        (currentPage - 1) * productsPerPage,
+                        currentPage * productsPerPage
+                      )
+                      .map((product) => (
+                        <ProductCard
+                          key={product._id}
+                          product={product}
+                          userInfo={userInfo}
+                          onSelect={handleProductSelect}
+                        />
+                      ))}
                 </div>
 
                 <div className="mt-8 flex justify-center items-center space-x-4">

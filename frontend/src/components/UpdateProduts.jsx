@@ -19,6 +19,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
 import { Modal } from "@/components/Modal";
+import backgroundPicture from "../assets/images/backgroundPattern.png";
 
 
 const LoadingSpinner = () => (
@@ -225,9 +226,9 @@ const UpdateProduct = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div
-        className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat p-2 "
+        className="flex min-h-screen  items-center justify-center bg-cover bg-center bg-no-repeat p-2"
         style={{
-          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.5), rgba(93, 146, 151, 0.5)), url(${signUpPicture})`,
+          backgroundImage: `url(${backgroundPicture})`,
         }}
       >
         <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
