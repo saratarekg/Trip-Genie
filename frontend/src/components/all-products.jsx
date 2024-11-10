@@ -83,6 +83,7 @@ const ProductCard = ({
   const [isLoading, setIsLoading] = useState(false)
   const [exchangeRate, setExchangeRate] = useState(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [isInWishlistLocal, setIsInWishlistLocal] = useState(false)
 
   const isInCart = cartItems.some((item) => item.product?._id === product._id)
   const isInWishlist = wishlistItems.some(
@@ -160,6 +161,19 @@ const ProductCard = ({
     // Redirect to checkout page
     window.location.href = 'account/cart' // Replace with your actual checkout URL
   }
+
+  useEffect(() => {
+    console.log('Wishlist items in ProductCard:', wishlistItems)
+    console.log('Current product:', product)
+    console.log('Is in wishlist:', wishlistItems.some(item => item.product._id === product._id))
+  }, [wishlistItems, product])
+
+  useEffect(() => {
+    const isInWishlist = wishlistItems.some(
+      item => item.product._id === product._id
+    )
+    setIsInWishlistLocal(isInWishlist)
+  }, [wishlistItems, product._id])
 
   return (
     <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
@@ -240,13 +254,15 @@ const ProductCard = ({
             </Button>
           )}
           <Button
-            className={`rounded-full w-10 h-10 p-0 ${isInWishlist
-              ? "bg-red-400 hover:bg-red-500"
-              : "bg-gray-200 hover:bg-gray-300"
-              } text-white`}
+            className={`rounded-full w-10 h-10 p-0 ${
+              isInWishlistLocal
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-gray-200 hover:bg-gray-300"
+            } text-white`}
             onClick={(e) => {
               e.stopPropagation()
-              if (isInWishlist) {
+              setIsInWishlistLocal(!isInWishlistLocal)
+              if (isInWishlistLocal) {
                 onRemoveFromWishlist(product)
               } else {
                 onAddToWishlist(product)
@@ -254,7 +270,7 @@ const ProductCard = ({
             }}
           >
             <Heart
-              className={`w-5 h-5 ${isInWishlist ? "fill-current" : ""}`}
+              className={`w-5 h-5 ${isInWishlistLocal ? "fill-current" : ""}`}
             />
             <span className="sr-only">Add to Wishlist</span>
           </Button>
@@ -443,7 +459,7 @@ export function AllProducts() {
   }, [])
 
   const fetchWishlistItems = useCallback(async () => {
-    if (role == 'tourist') {
+    if (userInfo?.role === 'tourist') {
       try {
         const token = Cookies.get("jwt")
         const response = await fetch("http://localhost:4000/tourist/wishlist", {
@@ -453,13 +469,14 @@ export function AllProducts() {
         })
         if (response.ok) {
           const data = await response.json()
-          setWishlistItems(data)
+          console.log('Fetched wishlist items:', data)
+          setWishlistItems(data) // This should be an array of products from the tourist's wishlist
         }
       } catch (error) {
         console.error("Error fetching wishlist items:", error)
       }
     }
-  }, [])
+  }, [userInfo])
 
   useEffect(() => {
     if (userInfo) {
