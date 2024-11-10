@@ -203,10 +203,6 @@ const touristSchema = new Schema(
         type: [String],
         default: [], // Default to an empty array for historical place types
       },
-      historicalPlacePeriod: {
-        type: [String],
-        default: [], // Default to an empty array for historical place periods
-      },
     },
     shippingAddresses: [
       {

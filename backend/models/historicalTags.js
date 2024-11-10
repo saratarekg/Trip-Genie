@@ -6,6 +6,7 @@ const historicalTagSchema = new Schema(
     type: {
       type: String,
       required: true,
+      unique: true,
     },
     // period: {
     //   type: String,
@@ -14,8 +15,6 @@ const historicalTagSchema = new Schema(
   },
   { timestamps: true }
 );
-
-historicalTagSchema.index({ type: 1, period: 1 }, { unique: true });
 
 historicalTagSchema.statics.findByType = function (type) {
   return this.find({ type }).exec();

@@ -47,14 +47,25 @@ const DualHandleSliderComponent = ({
   middleColor = "#f97516",
   colorRing = "orange",
 }) => {
+  // Ensure values are within bounds and align with step
+  const adjustedValues = values.map(value => 
+    Math.round(Math.max(min, Math.min(max, value)) / step) * step
+  );
+
   return (
     <div className="w-full px-4 py-8">
       <RangeSlider
-        values={values}
+        values={adjustedValues}
         step={step}
         min={min}
         max={max}
-        onChange={onChange}
+        onChange={(newValues) => {
+          // Ensure new values are within bounds and align with step
+          const adjustedNewValues = newValues.map(value => 
+            Math.round(Math.max(min, Math.min(max, value)) / step) * step
+          );
+          onChange(adjustedNewValues);
+        }}
         renderTrack={({ props, children }) => {
           const { key, ...restProps } = props;
           return (
@@ -64,7 +75,7 @@ const DualHandleSliderComponent = ({
               className="w-full h-3 pr-2 my-4 bg-gray-200 rounded-md"
               style={{
                 background: getTrackBackground({
-                  values,
+                  values: adjustedValues,
                   colors: ["#ccc", middleColor, "#ccc"],
                   min,
                   max,
@@ -96,11 +107,11 @@ const DualHandleSliderComponent = ({
       <div className="flex justify-between mt-2">
         <span className="text-sm font-medium text-gray-700">
           Min: {symbol}
-          {Math.ceil(values[0] * exchangeRate)}
+          {Math.ceil(adjustedValues[0] * exchangeRate)}
         </span>
         <span className="text-sm font-medium text-gray-700">
           Max: {symbol}
-          {Math.ceil(values[1] * exchangeRate)}
+          {Math.ceil(adjustedValues[1] * exchangeRate)}
         </span>
       </div>
     </div>
