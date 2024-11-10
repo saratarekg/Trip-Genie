@@ -33,7 +33,7 @@ export function TestimonialBannerJsx() {
         <h2 className="text-3xl md:text-4xl font-bold text-center text-[#1A3B47] mb-12">
           What Our Travelers Say
         </h2>
-        <div className="flex flex-col md:flex-row justify-center items-stretch gap-6 w-full max-w-6xl">
+        <div className="flex flex-col md:flex-row justify-center items-stretch gap-6 w-full mb-16 max-w-6xl">
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
@@ -66,7 +66,7 @@ export function TestimonialBannerJsx() {
                 </div>
               </div>
               <Quote className="h-6 w-6 text-[#F88C33] mb-2 opacity-50" />
-              <blockquote className="text-sm italic">
+              <blockquote className="text-sm italic ">
                 {testimonial.quote}
               </blockquote>
             </div>
@@ -74,7 +74,7 @@ export function TestimonialBannerJsx() {
         </div>
         {/* <div className="mt-12 text-center">
           <button className="px-8 py-3 text-white font-bold rounded-full shadow-lg transition duration-300 ease-in-out transform hover:bg-teal-700 bg-orange-500 hover:scale-105">
-            Start Your
+            Start Your Journey
           </button>
         </div> */}
       </div>

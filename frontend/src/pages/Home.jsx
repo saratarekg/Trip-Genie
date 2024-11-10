@@ -128,7 +128,6 @@ export default function Home() {
         return (
           <>
             <AboutUs />
-            <TestimonialBannerJsx />
             <BookingForm />
             <HistoricalPlaces />
             <div className="text-center max-w-2xl mx-auto mb-4 mt-24">
@@ -158,6 +157,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
@@ -169,14 +169,22 @@ export default function Home() {
                 {tabs[activeTab]}
               </motion.div>
             </AnimatePresence>
+            <div className="mt-20">
+            <TestimonialBannerJsx />
+ 
+            </div>
+           
           </>
+          
         )
+        
     }
   }
 
   return (
     <div className="min-h-screen bg-[#E6DCCF]">
-      <TravelHero />
+      <TravelHero
+       userRole={role} />
       
       <div className="mx-auto px-4 py-16">
         {renderContent()}

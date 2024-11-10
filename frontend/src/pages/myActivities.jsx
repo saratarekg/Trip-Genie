@@ -343,7 +343,7 @@ export function MyActivitiesComponent() {
             },
           });
           const data = await response.json();
-          console.log("data: ",data);
+          // console.log("data: ",data);
           setMaxPriceOfActivities(data);
           setPriceRange([0, data]);
           setInitialPriceRange([0, data]);
