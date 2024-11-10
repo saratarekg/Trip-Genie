@@ -35,6 +35,12 @@ const deleteTag = async (req, res) => {
       { $pull: { tags: req.params.id } } // Remove the tag from the array
     );
 
+    // Remove the deleted tag from the 'tags' array in the 'activities' array in Itinerary model
+    await Itinerary.updateMany(
+      { "activities.tags": req.params.id }, // Find itineraries with activities that have this tag
+      { $pull: { "activities.$[].tags": req.params.id } } // Remove the tag from the array
+    );
+
     res
       .status(200)
       .json({ message: "Tag deleted and removed from activities" });

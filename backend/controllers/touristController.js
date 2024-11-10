@@ -819,6 +819,18 @@ const deleteAccount = async (req, res) => {
         .json({ message: "Cannot delete account with pending purchases" });
     }
 
+    const transportations = await TouristTransportation.find({
+      touristID: res.locals.user_id,
+    }).populate("transportationID");
+
+    transportations.forEach((transportation) => {
+      if (transportation.transportationID.timeDeparture > Date.now()) {
+        return res.status(400).json({
+          message: "Cannot delete account with active transportation bookings",
+        });
+      }
+    });
+
     await Complaint.deleteMany({ tourist: res.locals.user_id });
 
     if (tourist.profilePicture !== null) {
@@ -888,6 +900,18 @@ const deleteTouristAccount = async (req, res) => {
         .status(400)
         .json({ message: "Cannot delete account with pending purchases" });
     }
+
+    const transportations = await TouristTransportation.find({
+      touristID: req.params.id,
+    }).populate("transportationID");
+
+    transportations.forEach((transportation) => {
+      if (transportation.transportationID.timeDeparture > Date.now()) {
+        return res.status(400).json({
+          message: "Cannot delete account with active transportation bookings",
+        });
+      }
+    });
 
     await Complaint.deleteMany({ tourist: req.params.id });
 
