@@ -31,6 +31,7 @@ export default function HotelDetails() {
   const [roomList, setRoomList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
 
   // useRef flags to track if each request has already been fetched
   const hotelDataFetched = useRef(false);
@@ -123,6 +124,10 @@ export default function HotelDetails() {
     fetchHotelDetails();
   }, [hotelId]);
 
+  const handleRoomCardClick = (index) => {
+    setActiveTab(`room-${index}`);
+  };
+
   if (isLoading) {
     return <Loader />;
   }
@@ -201,7 +206,11 @@ export default function HotelDetails() {
           <CardTitle>Room Types</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="all" className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList>
               <TabsTrigger value="all">All Rooms</TabsTrigger>
               {roomList.map((room, index) => (
@@ -214,7 +223,11 @@ export default function HotelDetails() {
               <TabsContent value="all">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {roomList.map((room, index) => (
-                    <Card key={index}>
+                    <Card
+                      key={index}
+                      className="cursor-pointer hover:shadow-lg transition-shadow"
+                      onClick={() => handleRoomCardClick(index)}
+                    >
                       <CardHeader>
                         <CardTitle>
                           {room.name || `Room ${index + 1}`}
@@ -275,11 +288,18 @@ export default function HotelDetails() {
                     <CardTitle>{room.name}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                  <Carousel className="w-full mb-6">
+                    <Carousel className="w-full mb-6">
                       <CarouselContent>
                         {room.photos.map((photo, photoIndex) => (
-                          <CarouselItem key={photoIndex} className="md:basis-1/2 lg:basis-1/3">
-                            <img src={photo.url_original} alt={`Room photo ${photoIndex + 1}`} className={`aspect-${photo.ratio} rounded-lg` }/>
+                          <CarouselItem
+                            key={photoIndex}
+                            className="md:basis-1/2 lg:basis-1/3"
+                          >
+                            <img
+                              src={photo.url_original}
+                              alt={`Room photo ${photoIndex + 1}`}
+                              className={`aspect-${photo.ratio} rounded-lg`}
+                            />
                           </CarouselItem>
                         ))}
                       </CarouselContent>
