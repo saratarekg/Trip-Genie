@@ -62,8 +62,6 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { ImageCropper } from "@/components/ImageCropper";
 import { Modal } from "@/components/Modal";
 
-
-
 const phoneValidator = (value) => {
   // Check if the input starts with a "+"
 
@@ -176,12 +174,13 @@ export function TourGuideProfileComponent() {
         setTourGuide(response.data);
         setEditedTourGuide(response.data);
         setProfilePicture(response.data.profilePicture);
-       
 
         if (response.data.profilePicture && response.data.profilePicture.url) {
-          convertUrlToBase64(response.data.profilePicture.url).then((base64) => {
-            setBase64Image(base64)
-          });
+          convertUrlToBase64(response.data.profilePicture.url).then(
+            (base64) => {
+              setBase64Image(base64);
+            }
+          );
         }
       } catch (err) {
         setError(err.message);
@@ -298,7 +297,8 @@ export function TourGuideProfileComponent() {
 
       const formData = new FormData();
       formData.append("name", name);
-      profilePicture && formData.append("profilePicture", JSON.stringify(profilePicture));
+      profilePicture &&
+        formData.append("profilePicture", JSON.stringify(profilePicture));
       formData.append("username", username);
       formData.append("email", email);
       formData.append("mobile", "+" + mobile);
@@ -313,6 +313,7 @@ export function TourGuideProfileComponent() {
           "Content-Type": "multipart/form-data",
         },
       });
+      response.data.tourGuide.mobile = response.data.tourGuide.mobile.slice(1);
 
       if (response.status === 200) {
         setTourGuide(response.data.tourGuide);

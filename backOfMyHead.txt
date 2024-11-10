@@ -71,13 +71,13 @@ Activity card:
 - Make Vtp the admin(done)
 
 Pop-ups:
-- Ensure close button doesn't redirect after deletion is complete (Ehab---(lesa delete itineraries not done))
+- Ensure close button doesn't redirect after deletion is complete (Ehab--done)
 
 Consistency:
 - Ensure filter stars are consistent across all sections
 
 Sign up:
-- Change all previous works (Zeina)
+- Change all previous works (Zeina--done)
 
 404 page:
 - Change "Return to home" to "Make a wish" (Amy --DONE!!)

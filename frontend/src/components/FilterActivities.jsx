@@ -111,6 +111,7 @@ const FilterComponent = ({
   console.log(priceRange);
   console.log(initialPriceRange);
   console.log(maxPrice);
+  console.log(exchangeRate);
 
   useEffect(() => {
   if (isInitialized) {
