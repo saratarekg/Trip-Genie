@@ -100,35 +100,17 @@ historicalPlacesSchema.statics.findByFields = async function (searchCriteria) {
     .exec(); // Perform a search with the regex query
 };
 
-historicalPlacesSchema.statics.filterByTag = async function (types, periods) {
+historicalPlacesSchema.statics.filterByTag = async function (types) {
   const query = [];
   let historicalTags = null;
-  if (
-    (types === undefined || types === null || types.length === 0) &&
-    (periods === undefined || periods === null || periods.length === 0)
-  ) {
+  if (types === undefined || types === null || types.length === 0) {
     return await this.find()
       .populate("governor")
       .populate("historicalTag")
       .exec();
-  } else if (types === undefined || types === null || types.length === 0) {
-    const array = Array.isArray(periods) ? periods : periods.split(","); // Ensure it's an array
-    historicalTags = await HistoricalTag.find({ period: { $in: array } });
-  } else if (
-    periods === undefined ||
-    periods === null ||
-    periods.length === 0
-  ) {
-    const array = Array.isArray(types) ? types : types.split(","); // Ensure it's an array
-    historicalTags = await HistoricalTag.find({ type: { $in: array } });
   } else {
     const array = Array.isArray(types) ? types : types.split(","); // Ensure it's an array
-
-    const array2 = Array.isArray(periods) ? periods : periods.split(","); // Ensure it's an array
-    historicalTags = await HistoricalTag.find({
-      type: { $in: array },
-      period: { $in: array2 },
-    });
+    historicalTags = await HistoricalTag.find({ type: { $in: array } });
   }
   if (historicalTags.length === 0) {
     return [];
