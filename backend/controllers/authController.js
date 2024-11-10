@@ -30,6 +30,8 @@ const touristSignup = async (req, res) => {
       mobile,
       dateOfBirth,
       jobOrStudent,
+      fname,
+      lname
     } = req.body;
 
     let { profilePicture } = req.body;
@@ -54,6 +56,8 @@ const touristSignup = async (req, res) => {
       dateOfBirth,
       jobOrStudent,
       profilePicture,
+      fname,
+      lname
     });
 
     tourist
