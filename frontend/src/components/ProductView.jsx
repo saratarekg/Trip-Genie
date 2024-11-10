@@ -197,7 +197,7 @@ export function ProductViewer() {
             onClick={() => handleProductClick(product._id)}
           >
             <img
-              src={product.picture.url || defaultImage}
+              src={product.pictures[0]?.url || defaultImage}
               alt={product.name}
               className="w-full h-full object-cover transition duration-300 transform group-hover:-translate-y-8"
             />

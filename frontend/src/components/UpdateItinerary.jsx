@@ -227,6 +227,12 @@ const worldLanguages = [
 
 const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) => {
   console.log(itineraryDate);
+  const isoDate = (new Date(itineraryDate)).toLocaleDateString('yyyymmdd');
+  console.log(isoDate);
+// Assume initialData.timing is a date-time string, e.g., "2024-11-10T17:44:00Z"
+const timing = new Date(initialData?.timing);
+const timeString = timing.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
   //check if the pictures in the activity from the initial data are in binary format, if so convert them to base64
   if (initialData?.pictures) {
     initialData.pictures.forEach((picture, index) => {
@@ -352,7 +358,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
       ...data,
       tags: data.tags || [],
       category: data.category || [],
-      timing:`${itineraryDate.date}T${data.activityTime}`,
+      timing:`2024-10-10T${data.activityTime}`,
       pictures: [...pictures, ...newPictures],
     }
     onSave(formattedData)
@@ -361,7 +367,25 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
+       <div className="grid grid-cols-2 gap-2">
+        <div>
+          <Label htmlFor="day">Day</Label>
+          <Input
+            id="day"
+            type="number"
+            step="any"
+            min="1"
+            {...register("day", {
+              required: "Day is required",
+            })}
+          />
+          {errors.day && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.day.message}
+            </p>
+          )}
+        </div>
+        <div>
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
@@ -371,6 +395,9 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
           <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
         )}
       </div>
+      </div>
+
+     
 
       <div>
         <Label htmlFor="description">Description</Label>
@@ -398,39 +425,20 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+     
+      <div className="grid grid-cols-2">
         <div>
-          <Label htmlFor="day">Day</Label>
-          <Input
-            id="day"
-            type="number"
-            step="any"
-            min="1"
-            {...register("day", {
-              required: "Day is required",
-            })}
-          />
-          {errors.day && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.day.message}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div>
         <Label htmlFor="duration">Duration (minutes)</Label>
         <Input
           id="duration"
           type="number"
+          min="5"
           {...register("duration", { required: "Duration is required" })}
         />
         {errors.duration && (
           <p className="text-red-500 text-xs mt-1">{errors.duration.message}</p>
         )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
+        </div>
         <div>
           <Label htmlFor="activityTime">Start Time</Label>
           <Input
@@ -444,17 +452,20 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
             </p>
           )}
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+       
        
           
        
       </div>
 
       <div>
-        <Label>Tags</Label>
+        <Label>Tags (Optional)</Label>
         <Controller
           name="tags"
           control={control}
-          rules={{ required: "At least one tag is required" }}
           render={({ field }) => (
             <ReactSelect
               {...field}
@@ -477,11 +488,10 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
       </div>
 
       <div>
-        <Label>Categories</Label>
+        <Label>Categories (Optional)</Label>
         <Controller
           name="category"
           control={control}
-          rules={{ required: "At least one category is required" }}
           render={({ field }) => (
             <ReactSelect
               {...field}
@@ -732,14 +742,14 @@ export default function UpdateItinerary() {
       }
       return a.day - b.day;
     });
-    console.log("Activities sorted by day and time:", activities);
+    console.log("Activities sorted by day and time:", itinerary.activities);
     
     const overlappingActivities = [];
     
     // Loop through the activities and check for overlaps within the same day
-    for (let i = 0; i < activities.length - 1; i++) {
-      const currentActivity = activities[i];
-      const nextActivity = activities[i + 1];
+    for (let i = 0; i < itinerary.activities.length - 1; i++) {
+      const currentActivity = itinerary.activities[i];
+      const nextActivity = itinerary.activities[i + 1];
     
       // Only check for overlaps if they are on the same day
       if (currentActivity.day === nextActivity.day) {
@@ -770,7 +780,7 @@ export default function UpdateItinerary() {
         `Activity "${current.name}" overlaps with "${next.name}" on day ${current.day}`
       ).join('\n');
       
-      setError(`Error: Overlapping activities detected:\n${errorMessage}`);
+      setShowErrorPopup(`Error: Overlapping activities detected:\n${errorMessage}`);
       setLoading(false);
       console.log("Error: Overlapping activities detected:\n", errorMessage);
       return;
@@ -975,15 +985,7 @@ export default function UpdateItinerary() {
             </p>
           </div> */}
 
-              <div className="col-span-4 flex items-center space-x-2">
-                <Checkbox
-                  id="accessibility"
-                  checked={itinerary.accessibility}
-                  onCheckedChange={() => handleSwitchChange("accessibility")}
-                />
-                <Label htmlFor="accessibility">Accessible for Disabled</Label>
-              </div>
-
+           
             
 
           <div className="col-span-2 p-4 border rounded space-y-4">
@@ -1020,8 +1022,6 @@ export default function UpdateItinerary() {
               </div>
             ))}
 
-            {(
-              itinerary.availableDates.length === 0) && (
               <Button
                 type="button"
                 variant="outline"
@@ -1030,7 +1030,7 @@ export default function UpdateItinerary() {
               >
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Date
               </Button>
-            )}
+            
 
             {itinerary.availableDates.length === 0 && (
               <span className="text-red-500 text-xs mt-2">
@@ -1039,7 +1039,17 @@ export default function UpdateItinerary() {
             )}
           </div>
 
-          <div className="col-span-2">
+          <div className="col-span-2 flex items-center space-x-2">
+                <Checkbox
+                  id="accessibility"
+                  checked={itinerary.accessibility}
+                  onCheckedChange={() => handleSwitchChange("accessibility")}
+                />
+                <Label htmlFor="accessibility">Accessible for Disabled</Label>
+              </div>
+
+
+          <div className="col-span-4">
             <Label className="text-sm font-medium">Activities</Label>
             <ul className="list-disc pl-5 space-y-1">
               {itinerary.activities.map((activity) => (
@@ -1047,7 +1057,7 @@ export default function UpdateItinerary() {
                   key={activity._id}
                   className="flex justify-between items-center"
                 >
-                  <span>{activity.name}</span>
+                  <span>{activity.name}, Day:{activity.day}</span>
                   <div>
                     <button
                       type="button"
@@ -1135,7 +1145,7 @@ export default function UpdateItinerary() {
               }}
               initialData={editingActivity}
               
-              itineraryDate={itinerary.availableDates[0]}
+              itineraryDate={itinerary.availableDates[0].date}
             />
           </ScrollArea>
         </DialogContent>

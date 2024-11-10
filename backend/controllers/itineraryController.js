@@ -500,19 +500,7 @@ const updateItinerary = async (req, res) => {
         .status(400)
         .json({ message: "Itinerary must have at least one date" });
     }
-    // if (!isRepeated) {
-      if (availableDates.length > 1) {
-        return res.status(400).json({
-          message: "Itinerary must have only one date if it is not repeated",
-        });
-      }
-      activities.forEach((activity) => {
-        if (activity.timing < availableDates[0].date) {
-          return res.status(400).json({
-            message: "Activities date must be after the itinerary date",
-          });
-        }
-      });
+   
   
 
     await (async () => {

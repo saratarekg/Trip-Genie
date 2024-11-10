@@ -238,9 +238,8 @@ const activitySchema = z.object({
   }),
   duration: z.number().min(1, "Duration is required"),
   activityTime: z.string().min(1, "Time is required"),
-  activityDate: z.string().optional(), // New field for non-repeated itineraries
-  tags: z.array(z.string()).min(1, "Choose at least one Tag"),
-  category: z.array(z.string()).min(1, "Choose at least one Category"),
+  tags: z.array(z.string()).optional(),
+  category: z.array(z.string()).optional(),  
   day: z.number().min(1, "Day is required"),
 })
 
@@ -349,8 +348,6 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
       timing: itineraryDate + "T" + data.activityTime,
       pictures: pictures,
     }
-    if(data.day>dayLimit)
-    setDayLimit(data.day)
     onSave(newActivity)
     onClose()
   }
@@ -368,7 +365,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
             id="day"
             type="number"
             min="1"
-           // max={dayLimit+1}
+        
             {...register("day", { valueAsNumber: true })}
           />
           {errors.day && (
@@ -419,7 +416,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
         </div>
         <div>
           <Label htmlFor="activityTime">Start Time</Label>
-          <Input id="activityTime" type="time" {...register("timing")} />
+          <Input id="activityTime" type="time" {...register("activityTime")} />
           {errors.activityTime && (
             <p className="text-red-500 text-xs">
               {errors.activityTime.message}
@@ -448,34 +445,10 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
 
       <div className="grid grid-cols-2 gap-2"></div>
 
-      <div className="col-span-2">
-        <Label>Categories</Label>
-        <Controller
-          name="category"
-          control={control}
-          render={({ field }) => (
-            <ReactSelect
-              {...field}
-              options={category}
-              isMulti
-              className="react-select-container"
-              classNamePrefix="react-select"
-              value={category.filter((option) =>
-                field.value?.includes(option.value)
-              )}
-              onChange={(selectedOptions) =>
-                field.onChange(selectedOptions.map((option) => option.value))
-              }
-            />
-          )}
-        />
-        {errors.category && (
-          <p className="text-red-500 text-xs">{errors.category.message}</p>
-        )}
-      </div>
+   
 
       <div className="col-span-2">
-        <Label>Tags</Label>
+        <Label>Tags (Optional)</Label>
         <Controller
           name="tags"
           control={control}
@@ -495,9 +468,31 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
             />
           )}
         />
-        {errors.tags && (
-          <p className="text-red-500 text-xs">{errors.tags.message}</p>
-        )}
+
+      </div>
+
+      <div className="col-span-2">
+        <Label>Categories (Optional)</Label>
+        <Controller
+          name="category"
+          control={control}
+          render={({ field }) => (
+            <ReactSelect
+              {...field}
+              options={category}
+              isMulti
+              className="react-select-container"
+              classNamePrefix="react-select"
+              value={category.filter((option) =>
+                field.value?.includes(option.value)
+              )}
+              onChange={(selectedOptions) =>
+                field.onChange(selectedOptions.map((option) => option.value))
+              }
+            />
+          )}
+        />
+
       </div>
 
       <div className="space-y-2">
@@ -556,7 +551,6 @@ const ItineraryForm = () => {
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [activities, setActivities] = useState([]);
   const [editingActivityIndex, setEditingActivityIndex] = useState(null);
-  const [dayLimit, setDayLimit] = useState(0);
   const navigate = useNavigate();
 
   const {
@@ -1042,7 +1036,7 @@ const ItineraryForm = () => {
       setShowActivityForm(true);
     }}
     className="w-full mt-2 bg-[#1A3B47]"
-    
+    disabled={!itineraryDate}
   >
     <PlusCircle className="w-4 h-4 mr-2" />
     Add Activity
@@ -1118,8 +1112,7 @@ const ItineraryForm = () => {
                   ? activities[editingActivityIndex]
                   : null
               }
-              dayLimit={dayLimit}
-              setDayLimit={setDayLimit}
+          
               // isRepeated={isRepeated}
               itineraryDate={itineraryDate}
             />
