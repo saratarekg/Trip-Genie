@@ -111,18 +111,19 @@ const ItineraryCard = ({
   }, [userInfo, itinerary.currency]);
 
   const getCurrencySymbol = useCallback(async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/${userInfo.role}/getCurrency/${itinerary.currency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCurrencySymbol(response.data.symbol);
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-    }
+    setCurrencySymbol("$");
+    // try {
+    //   const token = Cookies.get("jwt");
+    //   const response = await axios.get(
+    //     `http://localhost:4000/${userInfo.role}/getCurrency/${itinerary.currency}`,
+    //     {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     }
+    //   );
+    //   setCurrencySymbol(response.data.symbol);
+    // } catch (error) {
+    //   console.error("Error fetching currency symbol:", error);
+    // }
   }, [userInfo.role, itinerary.currency]);
 
   useEffect(() => {
@@ -245,8 +246,9 @@ export function MyItinerariesComponent() {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [maxPrice, setMaxPrice] = useState(1000);
+  const [maxPriceOfItinerary, setMaxPriceOfItinerary] = useState(1000);
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfItinerary]);
+  const [maxPrice, setMaxPrice] = useState(maxPriceOfItinerary);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
@@ -268,6 +270,7 @@ export function MyItinerariesComponent() {
   const [deleteError, setDeleteError] = useState(null);
   const [isSortedByPreference, setIsSortedByPreference] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+  const [isPriceInitialized, setIsPriceInitialized] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState(null);
@@ -310,6 +313,30 @@ export function MyItinerariesComponent() {
     if (!role) role = "guest";
     return role;
   };
+
+  useEffect(() => {
+    if(!isPriceInitialized){
+      fetchMaxPrice();
+      }
+  }, [userInfo]);
+
+  const fetchMaxPrice = async () => {
+    const role = getUserRole();
+    const token = Cookies.get("jwt");
+    const url = new URL(`http://localhost:4000/${role}/max-price-itinerary-my`);
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          // console.log("data: ",data);
+          setMaxPriceOfItinerary(data);
+          setMaxPrice(data);
+          setPriceRange([0, data]);
+          setIsPriceInitialized(true);
+          
+    };
 
   const getSymbol = () => {
     if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
@@ -427,7 +454,7 @@ export function MyItinerariesComponent() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, sortBy, myItineraries]);
+  }, [sortBy, myItineraries]);
 
   useEffect(() => {
     fetchUserInfo();
@@ -439,7 +466,7 @@ export function MyItinerariesComponent() {
     }
   }, [userInfo, fetchItineraries]);
 
-  const searchItineraries = useCallback(async () => {
+  const searchItineraries = async () => {
     setIsSortedByPreference(false);
     try {
       setIsLoading(true);
@@ -503,7 +530,19 @@ export function MyItinerariesComponent() {
     } finally {
       setIsLoading(false);
     }
-  }, [myItineraries, searchTerm, selectedTypes, isBooked, sortBy, sortOrder]);
+  };
+
+  useEffect(() => {
+    if (sortBy || sortOrder || myItineraries) {
+      searchItineraries();
+    } else {
+      fetchItineraries();
+    }
+}, [
+  sortBy,
+  sortOrder,
+  myItineraries,
+]);
 
   useEffect(() => {
     fetchItineraries();
@@ -526,22 +565,15 @@ export function MyItinerariesComponent() {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      if (searchTerm || sortBy || sortOrder || myItineraries) {
+      if (searchTerm) {
         searchItineraries();
       } else {
         fetchItineraries();
       }
-    }, 300);
+    }, 600);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [
-    searchTerm,
-    sortBy,
-    sortOrder,
-    myItineraries,
-    searchItineraries,
-    fetchItineraries,
-  ]);
+  }, [searchTerm]);
 
   const handleSort = (attribute) => {
     setIsLoading(true);
@@ -690,7 +722,7 @@ export function MyItinerariesComponent() {
                 <Search className="absolute left-3 top-2.5 text-gray-400" />
               </div>
 
-              <FilterComponent
+              { isPriceInitialized && (<FilterComponent
                 filtersVisible={filtersVisible}
                 toggleFilters={toggleFilters}
                 sortOrder={sortOrder}
@@ -701,7 +733,8 @@ export function MyItinerariesComponent() {
                 clearFilters={clearFilters}
                 priceRange={priceRange}
                 setPriceRange={setPriceRange}
-                maxPrice={maxPrice}
+                exchangeRate={'1'}
+                maxPrice={maxPriceOfItinerary}
                 price={price}
                 setPrice={setPrice}
                 dateRange={dateRange}
@@ -719,7 +752,7 @@ export function MyItinerariesComponent() {
                 setIsBooked={setIsBooked}
                 isSortedByPreference={isSortedByPreference}
                 handleSortByPreference={handleSortByPreference}
-              />
+              />)}
             </div>
 
             {error && (
