@@ -122,13 +122,10 @@ const DualHandleSliderComponent = ({
 const AllActivities = () => {
   const role = Cookies.get("role") || "guest";
 
-  const [maxPriceOfActivities, setMaxPriceOfActivities] = useState(0);
-  const [priceRange, setPriceRange] = useState([0, maxPriceOfActivities]);
-  const [maxPrice, setMaxPrice] = useState(maxPriceOfActivities);
-  const [initialPriceRange, setInitialPriceRange] = useState([
-    0,
-    maxPriceOfActivities,
-  ]);
+  const [maxPriceOfActivities, setMaxPriceOfActivities] = useState(1000);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [maxPrice, setMaxPrice] = useState(1000);
+  const [initialPriceRange, setInitialPriceRange] = useState([0, 1000]);
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const [activities, setActivities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -305,6 +302,25 @@ const AllActivities = () => {
             <p className="text-sm text-gray-600 mt-2 line-clamp-2">
               {activity.description}
             </p>
+            
+            {/* Add price and duration */}
+            <div className="flex justify-between items-center mt-3">
+              <span className="text-lg font-bold text-primary">
+                {formatPrice(activity.price)}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {activity.duration} hours
+              </span>
+            </div>
+
+            {/* Add date display */}
+            <p className="text-sm text-muted-foreground mt-2">
+              {new Date(activity.timing).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+              }).replace(/\//g, '/')}
+            </p>
           </CardContent>
           <CardFooter className="p-4 flex justify-between items-center border-t">
             <div className="flex flex-col">
@@ -362,18 +378,17 @@ const AllActivities = () => {
 
   const formatPrice = useCallback(
     (price, activity) => {
-      if (!userInfo || !price) return "";
+      // Add safety checks
+      if (!userInfo || !price || !activity) return "";
 
       if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
-        const baseRate = exchangeRates[activity.currency] || 1;
+        const baseRate = exchangeRates[activity?.currency] || 1;
         const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
         const exchangedPrice = (price / baseRate) * targetRate;
         exchangeRateForFilter = targetRate / baseRate;
-        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
-          2
-        )}`;
+        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
       } else {
-        const currency = currencies.find((c) => c._id === activity.currency);
+        const currency = currencies.find((c) => c._id === activity?.currency);
         return `${currency ? currency.symbol : "$"}${price}`;
       }
     },
@@ -382,23 +397,28 @@ const AllActivities = () => {
 
   const filteredActivities = useMemo(() => {
     return activities.filter((activity) => {
-      const matchesSearch =
-        activity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = activity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         activity.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesPrice =
-        activity.price >= priceRange[0] && activity.price <= priceRange[1];
-      const matchesRating = selectedRating
-        ? activity.rating >= selectedRating
-        : true;
-      const matchesCategories =
-        selectedCategories.length === 0 ||
-        activity.category?.some((cat) => selectedCategories.includes(cat.name));
+      const matchesPrice = activity.price >= priceRange[0] && activity.price <= priceRange[1];
+      const matchesRating = selectedRating ? activity.rating >= selectedRating : true;
+      const matchesCategories = selectedCategories.length === 0 || 
+        activity.category?.some(cat => selectedCategories.includes(cat.name));
 
-      return (
-        matchesSearch && matchesPrice && matchesRating && matchesCategories
-      );
+      // Add date filtering
+      const activityDate = new Date(activity.timing);
+      const startDate = dateRange.start ? new Date(dateRange.start) : null;
+      const endDate = dateRange.end ? new Date(dateRange.end) : null;
+
+      startDate?.setHours(0, 0, 0, 0);
+      endDate?.setHours(23, 59, 59, 999);
+      activityDate.setHours(0, 0, 0, 0);
+
+      const matchesDate = (!startDate || activityDate >= startDate) && 
+                         (!endDate || activityDate <= endDate);
+
+      return matchesSearch && matchesPrice && matchesRating && matchesCategories && matchesDate;
     });
-  }, [activities, searchTerm, priceRange, selectedRating, selectedCategories]);
+  }, [activities, searchTerm, priceRange, selectedRating, selectedCategories, dateRange]);
 
   const sortedActivities = useMemo(() => {
     const sorted = [...filteredActivities];
@@ -436,19 +456,32 @@ const AllActivities = () => {
   ]);
 
   const fetchMaxPrice = async () => {
-    const role = getUserRole();
-    const token = Cookies.get("jwt");
-    const url = new URL(`http://localhost:4000/${role}/maxPriceActivities`);
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await response.json();
-    setMaxPriceOfActivities(data);
-    setInitialPriceRange([0, data]);
-    setIsPriceInitialized(true);
-    setPriceRange([0, data]);
+    try {
+      const role = getUserRole();
+      const token = Cookies.get("jwt");
+      const url = new URL(`http://localhost:4000/${role}/maxPriceActivities`);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      const roundedMaxPrice = Math.ceil(data / 100) * 100; // Round up to nearest 100
+      
+      setMaxPriceOfActivities(roundedMaxPrice);
+      setMaxPrice(roundedMaxPrice);
+      setInitialPriceRange([0, roundedMaxPrice]);
+      setPriceRange([0, roundedMaxPrice]);
+      setIsPriceInitialized(true);
+    } catch (error) {
+      console.error("Error fetching max price:", error);
+      // Set fallback values
+      setMaxPriceOfActivities(1000);
+      setMaxPrice(1000);
+      setInitialPriceRange([0, 1000]);
+      setPriceRange([0, 1000]);
+      setIsPriceInitialized(true);
+    }
   };
 
   const fetchExchangeRates = useCallback(async () => {
@@ -549,6 +582,12 @@ const AllActivities = () => {
     }
   }, [userInfo]);
 
+  useEffect(() => {
+    if (dateRange.start || dateRange.end) {
+      searchActivities();
+    }
+  }, [dateRange]);
+
   const PriceRangeSlider = () => (
     <div>
       <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
@@ -570,6 +609,115 @@ const AllActivities = () => {
 
   const getUserRole = () => {
     return Cookies.get("role") || "guest";
+  };
+
+  const searchActivities = async () => {
+    setIsSortedByPreference(false);
+    if (searchActivitiesRef.current) return;
+    searchActivitiesRef.current = true;
+
+    try {
+      const role = getUserRole();
+      const url = new URL(`http://localhost:4000/${role}/activities`);
+      
+      if (searchTerm) {
+        url.searchParams.append("searchBy", searchTerm);
+      }
+
+      if (priceRange[0] !== 0 || priceRange[1] !== maxPriceOfActivities) {
+        url.searchParams.append("minPrice", priceRange[0]);
+        url.searchParams.append("price", priceRange[1]);
+      }
+
+      if (dateRange.start) {
+        url.searchParams.append("startDate", dateRange.start);
+      }
+      if (dateRange.end) {
+        url.searchParams.append("endDate", dateRange.end);
+      }
+
+      if (selectedCategories.length > 0) {
+        url.searchParams.append(
+          "category",
+          selectedCategories.map((c) => c.name).join(",")
+        );
+      }
+
+      if (selectedRating) {
+        url.searchParams.append("minRating", selectedRating);
+      }
+
+      if (sortBy) {
+        url.searchParams.append("sort", sortBy);
+      }
+      if (sortOrder) {
+        url.searchParams.append("asc", sortOrder);
+      }
+
+      const token = Cookies.get("jwt");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setActivities(data);
+      setError(null);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error("Error fetching filtered results:", error);
+      setError("Error fetching filtered results");
+      setActivities([]);
+    } finally {
+      setIsLoading(false);
+      searchActivitiesRef.current = false;
+    }
+  };
+
+  const clearFilters = () => {
+    setPriceRange([0, maxPriceOfActivities]);
+    setSelectedCategories([]);
+    setSelectedRating(null);
+    setSortBy("");
+    setSortOrder(1);
+    setIsSortedByPreference(false);
+    setDateRange({ start: "", end: "" });
+    
+    const searchWithClearedFilters = async () => {
+      const role = getUserRole();
+      const url = new URL(`http://localhost:4000/${role}/activities`);
+      const token = Cookies.get("jwt");
+      
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setActivities(data);
+        setError(null);
+        setCurrentPage(1);
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+        setError("Error fetching activities");
+        setActivities([]);
+      }
+    };
+
+    searchWithClearedFilters();
   };
 
   return (
@@ -647,17 +795,21 @@ const AllActivities = () => {
                   <input
                     type="date"
                     value={dateRange.start}
-                    onChange={(e) =>
-                      setDateRange({ ...dateRange, start: e.target.value })
-                    }
+                    onChange={(e) => {
+                      const newDateRange = { ...dateRange, start: e.target.value };
+                      setDateRange(newDateRange);
+                      searchActivities(); // Trigger search immediately
+                    }}
                     className="w-full p-2 border rounded"
                   />
                   <input
                     type="date"
                     value={dateRange.end}
-                    onChange={(e) =>
-                      setDateRange({ ...dateRange, end: e.target.value })
-                    }
+                    onChange={(e) => {
+                      const newDateRange = { ...dateRange, end: e.target.value };
+                      setDateRange(newDateRange);
+                      searchActivities(); // Trigger search immediately
+                    }}
                     className="w-full p-2 border rounded"
                   />
                 </div>
@@ -858,7 +1010,7 @@ const AllActivities = () => {
       )}
     </div>
   );
-};
+}
 
-export const AllActivitiesComponent = AllActivities;
-export default AllActivities;
+export const AllActivitiesComponent = AllActivities
+export default AllActivities
