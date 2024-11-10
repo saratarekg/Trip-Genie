@@ -16,8 +16,15 @@ const createToken = (id, role) => {
 
 const touristSignup = async (req, res) => {
   try {
-    const { password, nationality, mobile, dateOfBirth, jobOrStudent } =
-      req.body;
+    const {
+      password,
+      nationality,
+      mobile,
+      dateOfBirth,
+      jobOrStudent,
+      fname,
+      lname,
+    } = req.body;
 
     let { email, username } = req.body;
     email = email.toLowerCase();
@@ -51,6 +58,8 @@ const touristSignup = async (req, res) => {
       dateOfBirth,
       jobOrStudent,
       profilePicture,
+      fname,
+      lname,
     });
 
     tourist
