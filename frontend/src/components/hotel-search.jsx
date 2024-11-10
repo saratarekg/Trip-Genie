@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,44 @@ export default function HotelSearch() {
   const [hotels, setHotels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [userCurrency, setUserCurrency] = useState({ code: 'USD', symbol: '$' });
+  const [exchangeRates, setExchangeRates] = useState({});
+
+  const fetchUserCurrency = useCallback(async () => {
+    try {
+      const token = Cookies.get('jwt');
+      const response = await axios.get('http://localhost:4000/tourist/', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const currencyId = response.data.preferredCurrency;
+      const currencyResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUserCurrency(currencyResponse.data);
+    } catch (error) {
+      console.error('Error fetching user currency:', error);
+    }
+  }, []);
+
+  const fetchExchangeRates = useCallback(async () => {
+    try {
+      const response = await axios.get('http://localhost:4000/rates');
+      setExchangeRates(response.data.rates);
+    } catch (error) {
+      console.error('Error fetching exchange rates:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUserCurrency();
+    fetchExchangeRates();
+  }, [fetchUserCurrency, fetchExchangeRates]);
+
+  const convertPrice = useCallback((priceUSD) => {
+    if (!priceUSD) return null;
+    const rate = exchangeRates[userCurrency.code] || 1;
+    return (priceUSD * rate).toFixed(2);
+  }, [exchangeRates, userCurrency.code]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -32,7 +72,6 @@ export default function HotelSearch() {
       setIsLoading(true);
       setError(null);
       try {
-        // First, get the destination ID
         const locationResponse = await fetch(
           `https://booking-com.p.rapidapi.com/v1/hotels/locations?locale=en-gb&name=${encodeURIComponent(searchQuery)}`,
           {
@@ -49,7 +88,6 @@ export default function HotelSearch() {
           throw new Error('Destination not found');
         }
 
-        // Now, search for hotels using v1 endpoint
         const searchResponse = await fetch(
           `https://booking-com.p.rapidapi.com/v1/hotels/search?dest_id=${destId}&order_by=popularity&checkout_date=${format(checkOutDate, 'yyyy-MM-dd')}&checkin_date=${format(checkInDate, 'yyyy-MM-dd')}&adults_number=${adults}&room_number=1&units=metric&filter_by_currency=USD&locale=en-gb&dest_type=city`,
           {
@@ -173,7 +211,7 @@ export default function HotelSearch() {
                     </div>
                     <p className="mt-2">{hotel.address}</p>
                     <p className="mt-2 font-bold">
-                      ${hotel.min_total_price ? hotel.min_total_price.toFixed(2) : 'N/A'} per night
+                      {userCurrency.symbol}{convertPrice(hotel.min_total_price)} - {userCurrency.symbol}{convertPrice(hotel.price_breakdown.all_inclusive_price)} per night
                     </p>
                   </div>
                 </div>

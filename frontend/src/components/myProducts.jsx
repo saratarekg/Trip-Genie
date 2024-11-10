@@ -23,7 +23,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Loader from "./Loader";
 import defaultImage from "../assets/images/default-image.jpg";
-import productImage from "../assets/images/products.png";
+import productImage from "../assets/images/prod.png";
 import DualHandleSliderComponent from "./dual-handle-slider";
 
 const renderStars = (rating) => {
@@ -101,7 +101,7 @@ export function MyProducts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState(1);
   const [sortBy, setSortBy] = useState("");
-  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
@@ -137,26 +137,25 @@ export function MyProducts() {
   }, []);
 
   useEffect(() => {
-    if(!isPriceInitialized){
+    if (!isPriceInitialized) {
       fetchMaxPrice();
-      }
+    }
   }, [userInfo]);
 
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(`http://localhost:4000/${role}/max-price-products-my`);
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          setMaxPriceOfProducts(data);
-          setPriceRange([0, data]);
-          setIsPriceInitialized(true);
-          
-    };
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    setMaxPriceOfProducts(data);
+    setPriceRange([0, data]);
+    setIsPriceInitialized(true);
+  };
 
   const fetchProducts = useCallback(
     async (params = {}) => {
@@ -195,7 +194,7 @@ export function MyProducts() {
 
         const data = await response.json();
         setProducts(data);
-       
+
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -284,8 +283,8 @@ export function MyProducts() {
             <img
               src={productImage}
               alt="Decorative"
-              height="160"
-              width="160"
+              height="200"
+              width="230"
               className="ml-auto"
             />
           </div>
@@ -308,17 +307,19 @@ export function MyProducts() {
             {/* Price Range */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-              {isPriceInitialized && (<DualHandleSliderComponent
-                min={0}
-                max={maxPriceOfProducts}
-                symbol="$"
-                step={Math.max(1, Math.ceil(maxPriceOfProducts / 100))}
-                values={priceRange}
-                exchangeRate='1'
-                middleColor="#5D9297"
-                colorRing="#388A94"
-                onChange={(values) => setPriceRange(values)}
-              />)}
+              {isPriceInitialized && (
+                <DualHandleSliderComponent
+                  min={0}
+                  max={maxPriceOfProducts}
+                  symbol="$"
+                  step={Math.max(1, Math.ceil(maxPriceOfProducts / 100))}
+                  values={priceRange}
+                  exchangeRate="1"
+                  middleColor="#5D9297"
+                  colorRing="#388A94"
+                  onChange={(values) => setPriceRange(values)}
+                />
+              )}
             </div>
             {/* Rating Filter */}
             <div className="mb-6">
