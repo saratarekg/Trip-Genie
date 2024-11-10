@@ -137,7 +137,7 @@ export const ItineraryCards = () => {
     <div className="container mx-auto px-24 py-12 flex flex-col md:flex-row">
       {/* Left Side: Itineraries Title, Line, Description, Button */}
       <div className="w-full md:w-2/6 pr-8 mb-8 md:mb-0">
-      <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Itineraries</h1>
+        <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Itineraries</h1>
         <p className="text-[#1A3B47] mb-4">
           Discover our curated itineraries designed for every traveler, blending cultural experiences with thrilling adventures. From serene escapes to adrenaline-filled expeditions, our diverse journeys cater to all preferences. Let us turn your travel dreams into reality!
         </p>
@@ -156,41 +156,45 @@ export const ItineraryCards = () => {
         {itineraries.map((itinerary) => {
           const activityImage =
             itinerary.activities &&
-            itinerary.activities.length > 0 &&
-            itinerary.activities[0].pictures &&
-            itinerary.activities[0].pictures.length > 0
-              ? itinerary.activities[0].pictures[0]
+              itinerary.activities.length > 0 &&
+              itinerary.activities[0].pictures &&
+              itinerary.activities[0].pictures.length > 0
+              ? itinerary.activities[0].pictures[0].url
               : defaultImage;
 
-              return (
-                <Link to={`/itinerary/${itinerary._id}`} key={itinerary._id}>
-                  <div
-                    className="group relative bg-cover bg-center rounded-[26px] p-5 overflow-hidden"
-                    style={{
-                      width: "100%",
-                      height: "300px",
-                      backgroundImage: `url(${activityImage})`,
-                    }}
-                  >
-                    {/* Gradient Overlay - hidden initially */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#002845] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-              
-                    {/* Itinerary content - hidden and slides up on hover */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5 text-white transform translate-y-full transition-transform duration-500 group-hover:translate-y-0">
-                      <div className="flex justify-between font-semibold text-lg">
-                        <span className="shadow-lg shadow-md tracking-wide">{itinerary.title}</span>
-                        <span className="shadow-lg shadow-md tracking-wide">{formatPrice(itinerary.price, itinerary.currency)}/Day</span>
-                      </div>
-              
-                      <div className="mt-2 text-m">
-                        {itinerary.availableDates.length > 0
-                          ? new Date(itinerary.availableDates[0].date).toLocaleDateString()
-                          : "No dates available"}
-                      </div>
-                    </div>
+          return (
+            <Link to={`/itinerary/${itinerary._id}`} key={itinerary._id}>
+              <div
+                className="group relative bg-cover bg-center rounded-[26px] overflow-hidden"
+                style={{
+                  width: "100%",
+                  height: "300px",
+                  backgroundImage: `url(${activityImage})`,
+                }}
+              >
+                {/* Gradient Overlay - hidden initially */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#002845] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                {/* Itinerary content - hidden and slides up on hover */}
+                <div className="absolute inset-x-0 bottom-0 p-5 text-white transform translate-y-full transition-transform duration-500 group-hover:translate-y-0">
+                  <div className="flex flex-col items-start w-full">
+
+                    <h3 className="w-[90%] font-semibold text-lg leading-tight mb-2 text-shadow">
+                      {itinerary.title}
+                    </h3>
+                    <span className="text-base font-medium text-shadow">
+                      {formatPrice(itinerary.price, itinerary.currency)}/Day
+                    </span>
+
+                    <div className="mt-1 text-sm text-white/90">
+                    {itinerary.availableDates.length > 0
+                      ? new Date(itinerary.availableDates[0].date).toLocaleDateString()
+                      : "No dates available"}
                   </div>
-                </Link>
-              ); 
+                </div>
+              </div>
+            </div>
+            </Link>
+          );
         })}
       </div>
     </div>
