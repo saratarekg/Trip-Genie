@@ -33,8 +33,8 @@ const RatingDistributionBar = ({ percentage, count }) => (
   <div className="flex items-center gap-2 text-sm">
     <span className="w-8 text-right">{count} ★</span>
     <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-      <div 
-        className="h-full bg-[#1A3B47]  rounded-full" 
+      <div
+        className="h-full bg-[#1A3B47]  rounded-full"
         style={{ width: `${percentage}%` }}
       />
     </div>
@@ -109,13 +109,13 @@ const TourguideProfileCard = ({
           </div>
         </div>
 
-<div className="flex items-center mt-2">
-      <span>
-        <StarRating rating={profile.rating} readOnly={true} />
-      </span>
+        <div className="flex items-center mt-2">
+          <span>
+            <StarRating rating={profile.rating} readOnly={true} />
+          </span>
 
-  <span className="ml-2 text-lg font-semibold">{profile.rating.toFixed(1)}</span>
-</div>
+          <span className="ml-2 text-lg font-semibold">{profile.rating.toFixed(1)}</span>
+        </div>
 
 
         {showMore && (
@@ -166,25 +166,24 @@ const TourguideProfileCard = ({
               {[1, 2, 3, 4, 5].map(star => (
                 <Star
                   key={star}
-                  className={`w-8 h-8 cursor-pointer ${
-                    tourGuideRating >= star ? 'text-yellow-500 fill-current' : 'text-gray-300'
-                  }`}
+                  className={`w-8 h-8 cursor-pointer ${tourGuideRating >= star ? 'text-yellow-500 fill-current' : 'text-gray-300'
+                    }`}
                   onClick={() => handleQuickTourGuideRating(star)}
                 />
               ))}
             </div>
-            <Button 
-              onClick={() => setShowTourGuideReviewDialog(true)} 
+            <Button
+              onClick={() => setShowTourGuideReviewDialog(true)}
               className="w-full mt-4 mb-2 bg-[#5D9297]"
             >
               {userTourGuideReview ? 'Edit Review' : 'Write a Review'}
             </Button>
           </div>
         )}
-              <Button onClick={onReviewClick} className="w-full bg-[#1A3B47]">
-        See All Reviews
-      </Button>
-      <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4 pt-8"></div>
+        <Button onClick={onReviewClick} className="w-full bg-[#1A3B47]">
+          See All Reviews
+        </Button>
+        <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4 pt-8"></div>
       </CardContent>
     </Card>
   );
@@ -294,14 +293,14 @@ const ItineraryDetail = () => {
     if (tourGuideProfile) {
       // Calculate rating distribution for tour guide
       const tourGuideDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    
+
       // Iterate over the comments array to calculate rating distribution
       tourGuideProfile.comments.forEach(comment => {
         if (comment.rating >= 1 && comment.rating <= 5) { // Ensure rating is within valid range
           tourGuideDistribution[Math.floor(comment.rating)] = (tourGuideDistribution[Math.floor(comment.rating)] || 0) + 1;
         }
       });
-    
+
       setTourGuideRatingDistribution(tourGuideDistribution);
     }
 
@@ -319,7 +318,7 @@ const ItineraryDetail = () => {
       }
     }
   }, [itinerary, userId, tourGuideProfile]);
-    
+
   const handleQuickTourGuideRating = async (rating) => {
     try {
       const method = userTourGuideReview ? 'PUT' : 'POST';
@@ -422,38 +421,38 @@ const ItineraryDetail = () => {
 
 
   const getReviewsCount = () => {
-    return itinerary?.comments?.filter(comment => 
+    return itinerary?.comments?.filter(comment =>
       comment.content && (comment.content.liked || comment.content.disliked)
     ).length || 0;
   };
 
-  
+
   const fetchExchangeRate = async () => {
     try {
       const token = Cookies.get("jwt");
-        const response = await fetch(
-          `http://localhost:4000/${userRole}/populate`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',  // Ensure content type is set to JSON
-            },
-            body: JSON.stringify({
-              base: itinerary.currency,     // Sending base currency ID
-              target: userPreferredCurrency._id,      // Sending target currency ID
-            }),
-          }
-        );
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',  // Ensure content type is set to JSON
+          },
+          body: JSON.stringify({
+            base: itinerary.currency,     // Sending base currency ID
+            target: userPreferredCurrency._id,      // Sending target currency ID
+          }),
+        }
+      );
       // Parse the response JSON
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-      setExchangeRates(data.conversion_rate);
-    } else {
-      // Handle possible errors
-      console.error('Error in fetching exchange rate:', data.message);
-    }
+      if (response.ok) {
+        setExchangeRates(data.conversion_rate);
+      } else {
+        // Handle possible errors
+        console.error('Error in fetching exchange rate:', data.message);
+      }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
@@ -474,20 +473,20 @@ const ItineraryDetail = () => {
   };
 
   const formatPrice = (price, type) => {
-    if(itinerary){
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      if (userPreferredCurrency === itinerary.currency) {
-        return `${userPreferredCurrency.symbol}${price}`;
+    if (itinerary) {
+      if (userRole === 'tourist' && userPreferredCurrency) {
+        if (userPreferredCurrency === itinerary.currency) {
+          return `${userPreferredCurrency.symbol}${price}`;
+        } else {
+          const exchangedPrice = price * exchangeRates;
+          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+        }
       } else {
-        const exchangedPrice = price * exchangeRates;
-        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-      }
-    } else {
-      if(currencySymbol){
-      return `${currencySymbol.symbol}${price}`;
+        if (currencySymbol) {
+          return `${currencySymbol.symbol}${price}`;
+        }
       }
     }
-  }
   };
 
 
@@ -519,7 +518,7 @@ const ItineraryDetail = () => {
       if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency !== itinerary.currency) {
         fetchExchangeRate();
       }
-      else{
+      else {
         getCurrencySymbol();
       }
     }
@@ -552,23 +551,23 @@ const ItineraryDetail = () => {
     setIsBooking(true);
     setBookingError("");
     try {
-    const token = Cookies.get("jwt");
-    const totalPrice = calculateTotalPrice();
-    const response = await fetch(`http://localhost:4000/${userRole}/itineraryBooking`, {
-    method: "POST",
-    headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-    itinerary: id,
-    paymentType,
-    paymentAmount: totalPrice,
-    numberOfTickets,
-    date: selectedDate,
-    time: selectedTime
-    }),
-    });
+      const token = Cookies.get("jwt");
+      const totalPrice = calculateTotalPrice();
+      const response = await fetch(`http://localhost:4000/${userRole}/itineraryBooking`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          itinerary: id,
+          paymentType,
+          paymentAmount: totalPrice,
+          numberOfTickets,
+          date: selectedDate,
+          time: selectedTime
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -652,11 +651,11 @@ const ItineraryDetail = () => {
         setLoading(false);
         return;
       }
-  
+
       setLoading(true);
       try {
         const token = Cookies.get("jwt");
-        
+
         const itineraryFetch = fetch(`http://localhost:4000/${userRole}/itineraries/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -667,17 +666,17 @@ const ItineraryDetail = () => {
           }
           return response.json();
         });
-  
+
         const userBookingsFetch = userRole === 'tourist' ? axios.get(`http://localhost:4000/${userRole}/touristItineraryAttendedBookings`, {
           headers: { Authorization: `Bearer ${token}` },
         }).then(response => response.data) : Promise.resolve([]);
-  
+
         const [data, userBookings] = await Promise.all([itineraryFetch, userBookingsFetch]);
-  
+
         setItinerary(data);
         setActivities(data.activities);
         setUserBookings(userBookings);
-  
+
         if (data.tourGuide) {
           setTourGuideProfile({
             ...data.tourGuide,
@@ -685,13 +684,13 @@ const ItineraryDetail = () => {
             specialties: ['Historical Tours', 'Food Tours', 'Adventure Tours'],
           });
         }
-  
+
         setIsAppropriate(data.appropriate);
         setIsActivated(data.isActivated);
-  
-        if(token){
-        const decodedToken = jwtDecode.jwtDecode(token);
-        setCanModify(decodedToken.id === data.tourGuide._id);
+
+        if (token) {
+          const decodedToken = jwtDecode.jwtDecode(token);
+          setCanModify(decodedToken.id === data.tourGuide._id);
         }
         setError(null);
       } catch (err) {
@@ -701,7 +700,7 @@ const ItineraryDetail = () => {
         setLoading(false);
       }
     };
-  
+
     fetchItineraryDetails();
     fetchUserInfo();
   }, [id, userRole]);
@@ -710,13 +709,13 @@ const ItineraryDetail = () => {
     if (!itinerary.availableDates || itinerary.availableDates.length === 0) {
       return false; // No dates to check, assume not passed
     }
-  
+
     const hasUpcomingDate = itinerary.availableDates.some(dateInfo => {
       const itineraryDate = new Date(dateInfo.date).setHours(0, 0, 0, 0);
       const currentDate = new Date().setHours(0, 0, 0, 0);
-      
+
       const isFutureDate = itineraryDate >= currentDate;
-      
+
       return isFutureDate;
     });
 
@@ -857,7 +856,7 @@ const ItineraryDetail = () => {
       newReview.rating > 0
     );
   };
-  
+
 
   const handlePrevComment = () => {
     setCurrentCommentIndex(Math.max(0, currentCommentIndex - 3));
@@ -886,7 +885,7 @@ const ItineraryDetail = () => {
     }
   };
 
-const handleRateItinerary = async () => {
+  const handleRateItinerary = async () => {
     try {
       const method = userComment ? 'PUT' : 'POST';
       const url = userComment
@@ -995,47 +994,47 @@ const handleRateItinerary = async () => {
 
                   <div>
                     <ToastProvider>
-                <Popover open={open} onOpenChange={setOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="ml-auto">
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <div className="flex flex-col">
-                      <Button
-                        variant="ghost"
-                        onClick={handleCopyLink}
-                        className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                      >
-                        <Link className="mr-2 h-4 w-4" />
-                        Copy Link
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={handleEmailShare}
-                        className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                      >
-                        <Mail className="mr-2 h-4 w-4" />
-                        Share by Email
-                      </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="sm" className="ml-auto">
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <div className="flex flex-col">
+                            <Button
+                              variant="ghost"
+                              onClick={handleCopyLink}
+                              className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                            >
+                              <Link className="mr-2 h-4 w-4" />
+                              Copy Link
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              onClick={handleEmailShare}
+                              className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                            >
+                              <Mail className="mr-2 h-4 w-4" />
+                              Share by Email
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
 
-                <ToastViewport />
+                      <ToastViewport />
 
-                {isToastOpen && (
-                  <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
-                    <ToastTitle>Link Copied</ToastTitle>
-                    <ToastDescription>
-                      The link has been copied to your clipboard.
-                    </ToastDescription>
-                    <ToastClose />
-                  </Toast>
-                )}
-              </ToastProvider>
-                    </div>
+                      {isToastOpen && (
+                        <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
+                          <ToastTitle>Link Copied</ToastTitle>
+                          <ToastDescription>
+                            The link has been copied to your clipboard.
+                          </ToastDescription>
+                          <ToastClose />
+                        </Toast>
+                      )}
+                    </ToastProvider>
+                  </div>
 
 
                   <div className="flex items-center space-x-4">
@@ -1126,7 +1125,7 @@ const handleRateItinerary = async () => {
                             {new Date(dateInfo.date).toLocaleDateString()}
                           </span>
                         </div>
-                      
+
                       </div>
                     ))}
                   </div>
@@ -1159,22 +1158,22 @@ const handleRateItinerary = async () => {
                                 </span>
                               </div>
                               <div className="flex items-center">
-  <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-  <span className="text-sm">
-    {itinerary.isRepeated
-      ? new Date(activity.timing).toLocaleTimeString([], { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        })
-      : new Date(activity.timing).toLocaleString([], { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric', 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        })}
-  </span>
-</div>
+                                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                                <span className="text-sm">
+                                  {itinerary.isRepeated
+                                    ? new Date(activity.timing).toLocaleTimeString([], {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })
+                                    : new Date(activity.timing).toLocaleString([], {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                </span>
+                              </div>
 
 
                               {/* <div className="flex items-center">
@@ -1262,8 +1261,8 @@ const handleRateItinerary = async () => {
 
           <div className="lg:w-1/3">
             {tourGuideProfile && (
-              <TourguideProfileCard 
-                profile={tourGuideProfile} 
+              <TourguideProfileCard
+                profile={tourGuideProfile}
                 ratingDistribution={tourGuideRatingDistribution}
                 onReviewClick={() => setShowAllTourGuideReviews(true)}
                 userRole={userRole}
@@ -1272,24 +1271,24 @@ const handleRateItinerary = async () => {
                 tourGuideRating={tourGuideRating}
                 userTourGuideReview={userTourGuideReview}
                 handleQuickTourGuideRating={handleQuickTourGuideRating}
-                setShowTourGuideReviewDialog = {setShowTourGuideReviewDialog}
+                setShowTourGuideReviewDialog={setShowTourGuideReviewDialog}
               />
             )}
-            {userRole === 'tourist' && isItineraryAvailable() &&(
-        isActivated ? (
-          <Button
-            onClick={handleBookNowClick}
-            className="w-full bg-[#5D9297] hover:[#388A94] text-white font-bold py-2 px-4 rounded mt-4"
-          >
-            Book Now
-          </Button>
-        ) : (
-          <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
-            Currently Unavailable
-          </div>
-        )
-      )}
-      
+            {userRole === 'tourist' && isItineraryAvailable() && (
+              isActivated ? (
+                <Button
+                  onClick={handleBookNowClick}
+                  className="w-full bg-[#5D9297] hover:[#388A94] text-white font-bold py-2 px-4 rounded mt-4"
+                >
+                  Book Now
+                </Button>
+              ) : (
+                <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
+                  Currently Unavailable
+                </div>
+              )
+            )}
+
 
             {userRole === "admin" && (
               <>
@@ -1339,541 +1338,549 @@ const handleRateItinerary = async () => {
         </div>
 
         <div className="mt-8 relative bg-white p-6 rounded-lg shadow-md">
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
-            <Button variant="link" className="text-primary">
-              See All
-            </Button>
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Ratings & Reviews</h2>
+              <Button variant="link" className="text-primary">
+                See All
+              </Button>
+            </div>
+
+            <div className="flex gap-8 mb-6">
+              <div className="text-center">
+                <div className="text-4xl font-bold mb-1">
+                  {itinerary?.rating?.toFixed(1) || "0.0"}
+                </div>
+                <div className="text-sm text-gray-500">
+                  out of 5
+                </div>
+                <div className="text-sm text-gray-500 mt-1">
+                  {getTotalRatings()} Ratings
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-1">
+                {[5, 4, 3, 2, 1].map(stars => {
+                  const count = ratingDistribution[stars] || 0;
+                  const percentage = getTotalRatings()
+                    ? Math.round((count / getTotalRatings()) * 100)
+                    : 0;
+                  return (
+                    <RatingDistributionBar
+                      key={stars}
+                      percentage={percentage}
+                      count={stars}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+
+            {userRole === "tourist" && (
+              <div className="border-t pt-4">
+                <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
+                <div
+                  className="flex gap-2"
+                  onMouseLeave={() => setIsRatingHovered(false)}
+                >
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-8 h-8 cursor-pointer ${(isRatingHovered ? quickRating >= star : quickRating >= star)
+                          ? "text-[#F88C33] fill-current"
+                          : "text-gray-300"
+                        }`}
+                      onMouseEnter={() => {
+                        setIsRatingHovered(true);
+                        setQuickRating(star);
+                      }}
+                      onClick={() => handleQuickRating(star)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex gap-8 mb-6">
-            <div className="text-center">
-              <div className="text-4xl font-bold mb-1">
-                {itinerary?.rating?.toFixed(1) || "0.0"}
-              </div>
-              <div className="text-sm text-gray-500">
-                out of 5
-              </div>
-              <div className="text-sm text-gray-500 mt-1">
-                {getTotalRatings()} Ratings
-              </div>
-            </div>
-
-            <div className="flex-1 space-y-1">
-              {[5, 4, 3, 2, 1].map(stars => {
-                const count = ratingDistribution[stars] || 0;
-                const percentage = getTotalRatings() 
-                  ? Math.round((count / getTotalRatings()) * 100) 
-                  : 0;
-                return (
-                  <RatingDistributionBar 
-                    key={stars} 
-                    percentage={percentage} 
-                    count={stars}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          {userRole === "tourist" && (
-            <div className="border-t pt-4">
-              <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
-              <div 
-                className="flex gap-2"
-                onMouseLeave={() => setIsRatingHovered(false)}
-              >
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`w-8 h-8 cursor-pointer ${
-                      (isRatingHovered ? quickRating >= star : quickRating >= star)
-                        ? "text-[#F88C33] fill-current"
-                        : "text-gray-300"
-                    }`}
-                    onMouseEnter={() => {
-                      setIsRatingHovered(true);
-                      setQuickRating(star);
-                    }}
-                    onClick={() => handleQuickRating(star)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="border-t pt-6">
-          <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            {getTotalRatings()} overall ratings, {getReviewsCount()} with reviews
-          </p>
-        {itinerary.comments && itinerary.comments.length > 0 ? (
-          <>
-<div className="flex items-center justify-between mb-4">
-  <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
-    <ChevronLeft />
-  </Button>
-  <div className="flex-1 flex justify-between px-4">
-    {itinerary.comments
-      .filter(
-        (comment) => (comment.content.liked || comment.content.disliked) || comment.tourist === userId
-      ) // Filter for comments with content or by the user
-      .slice(currentCommentIndex, currentCommentIndex + 3) // Slice after filtering
-      .map((comment, index) => (
-        <Card
-          key={index}
-          className={`w-[30%] ${comment.tourist === userId ? 'bg-[#B5D3D1]' : 'bg-gray-100'} shadow-none border-none p-4 rounded-lg`}
-        >
-          <CardHeader className="flex items-start">
-            <div className="flex">
-              <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
-                {comment.username.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex flex-col">
-                <CardTitle className="text-xl font-semibold">{comment.username}</CardTitle>
-                <p className="text-sm text-gray-500">{formatCommentDate(comment.date)}</p>
-              </div>
-            </div>
-            <div className="mt-2">
-              <StarRating rating={comment.rating} readOnly={true} />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-700 line-clamp-3">
-              {comment.content.liked || comment.content.disliked || "No comment provided"}
+          <div className="border-t pt-6">
+            <h3 className="text-xl font-semibold mb-4">Customer Reviews</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              {getTotalRatings()} overall ratings, {getReviewsCount()} with reviews
             </p>
-            <div className="flex justify-between items-center mt-2">
-              <a
-                href="#"
-                className="text-[#1A3B47] hover:underline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setShowFullComment(comment);
-                }}
-              >
-                View more
-              </a>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-  </div>
-  <Button
-    onClick={handleNextComment}
-    variant="ghost"
-    disabled={currentCommentIndex >= itinerary.comments.length - 3}
-  >
-    <ChevronRight />
-  </Button>
-</div>
+            {itinerary.comments && itinerary.comments.length > 0 ? (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <Button onClick={handlePrevComment} variant="ghost" disabled={currentCommentIndex === 0}>
+                    <ChevronLeft />
+                  </Button>
+                  <div className="flex-1 flex justify-between px-4">
+                    {itinerary.comments
+                      .filter(
+                        (comment) => (comment.content.liked || comment.content.disliked) || comment.tourist === userId
+                      ) // Filter for comments with content or by the user
+                      .slice(currentCommentIndex, currentCommentIndex + 3) // Slice after filtering
+                      .map((comment, index) => (
+                        <Card
+                          key={index}
+                          className={`w-[30%] ${comment.tourist === userId ? 'bg-[#B5D3D1]' : 'bg-gray-100'} shadow-none border-none p-4 rounded-lg`}
+                        >
+                          <CardHeader className="flex items-start">
+                            <div className="flex">
+                              <div className="flex items-center justify-center w-12 h-12 bg-gray-300 text-gray-700 rounded-full mr-4 text-xl font-bold">
+                                {comment.username.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="flex flex-col">
+                                <CardTitle className="text-xl font-semibold">{comment.username}</CardTitle>
+                                <p className="text-sm text-gray-500">{formatCommentDate(comment.date)}</p>
+                              </div>
+                            </div>
+                            <div className="mt-2">
+                              <StarRating rating={comment.rating} readOnly={true} />
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-gray-700 line-clamp-3">
+                              {comment.content.liked || comment.content.disliked || "No comment provided"}
+                            </p>
+                            <div className="flex justify-between items-center mt-2">
+                              <a
+                                href="#"
+                                className="text-[#1A3B47] hover:underline"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setShowFullComment(comment);
+                                }}
+                              >
+                                View more
+                              </a>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                  <Button
+                    onClick={handleNextComment}
+                    variant="ghost"
+                    disabled={currentCommentIndex >= itinerary.comments.length - 3}
+                  >
+                    <ChevronRight />
+                  </Button>
+                </div>
 
-            </>
-          ) : (
-            <p>No comments yet.</p>
-          )}
+              </>
+            ) : (
+              <p>No comments yet.</p>
+            )}
 
-    
-{userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole !== "admin" && !userComment && (
+
+            {userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole !== "admin" && !userComment && (
               <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
                 Add a Review
               </Button>
-        )}
-           {userComment && (
-            <Button onClick={() => setShowEditReview(true)} className="mt-4 mr-4 bg-[#5D9297] hover:[#B5D3D1] ">
-              Edit Your Review
-            </Button>
-          )}
-      </div>
-      </div>
-
-      <Dialog open={showAllTourGuideReviews} onOpenChange={setShowAllTourGuideReviews}>
-  <DialogContent className="sm:max-w-[600px]">
-    <DialogHeader>
-      <DialogTitle>All Reviews for {tourGuideProfile?.username}</DialogTitle>
-    </DialogHeader>
-    <ScrollArea className="max-h-[60vh] overflow-auto">
-      {tourGuideProfile?.comments.map((review, index) => (
-        <Card 
-          key={index} 
-          className={`mb-4 ${review.tourist === userId ? 'bg-[#B5D3D1]' : ''}`} // Apply blue background if comment is from the logged-in user
-        >
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>{review.username}</CardTitle>
-              <StarRating rating={review.rating} readOnly={true} />
-            </div>
-            <CardDescription>{formatCommentDate(review.date)}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center">
-              <ThumbsUp className="mr-2 text-green-500 w-4 h-4" /> {/* Positive icon next to liked */}
-              <p><strong>Liked:</strong> {review.content.liked || "Not specified"}</p>
-            </div>
-            <div className="flex items-center mt-1">
-              <ThumbsDown className="mr-2 text-red-500 w-4 h-4" /> {/* Negative icon next to disliked */}
-              <p><strong>Disliked:</strong> {review.content.disliked || "Not specified"}</p>
-            </div>
-            {/* Edit Review Button, shown only for user's comments */}
-            {review.tourist === userId && ( // Check if the comment is from the logged-in user
-              <Button 
-                onClick={() => setShowTourGuideReviewDialog(true)} 
-                className="w-full mt-4"
-              >
-                Edit Review
+            )}
+            {userComment && (
+              <Button onClick={() => setShowEditReview(true)} className="mt-4 mr-4 bg-[#5D9297] hover:[#B5D3D1] ">
+                Edit Your Review
               </Button>
             )}
-          </CardContent>
-        </Card>
-      ))}
-    </ScrollArea>
-  </DialogContent>
-</Dialog>
-
-      <Dialog open={showTourGuideReviewDialog} onOpenChange={setShowTourGuideReviewDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{userTourGuideReview ? 'Edit Your Review' : 'Write a Review for Tour Guide'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Your Rating</label>
-              <StarRating rating={tourGuideReview.rating} setRating={(rating) => setTourGuideReview(prev => ({ ...prev, rating }))} />
-            </div>
-            <div>
-              <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
-                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
-                Something you liked
-              </label>
-              <Textarea
-                id="liked"
-                value={tourGuideReview.liked}
-                onChange={(e) => setTourGuideReview(prev => ({ ...prev, liked: e.target.value }))}
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-            <div>
-              <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
-                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
-                Something you didn't like
-              </label>
-              <Textarea
-                id="disliked"
-                value={tourGuideReview.disliked}
-                onChange={(e) => setTourGuideReview(prev => ({ ...prev, disliked: e.target.value }))}
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="anonymous-mode"
-                checked={tourGuideReview.isAnonymous}
-                onCheckedChange={(checked) => setTourGuideReview(prev => ({ ...prev, isAnonymous: checked }))}
-              />
-              <Label htmlFor="anonymous-mode">Post anonymously</Label>
-            </div>
           </div>
-          <DialogFooter>
-            <Button
-              onClick={() => setShowTourGuideReviewDialog(false)}
-              className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
-            >
-              Cancel
-            </Button>
-            <Button
-              className="border-[#5D9297] text-white bg-[#5D9297] hover:[#388A94]"
-              onClick={handleRateTourGuide}
-            >
-              {userTourGuideReview ? 'Update Review' : 'Submit Review'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
 
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Itinerary</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this itinerary?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowDeleteConfirm(false)}
-              className = "bg-gray-300 hover:bg-gray-400"
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} className = "bg-red-500 hover:bg-red-600"
-            >
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-              Itinerary Deleted
-            </DialogTitle>
-            <DialogDescription>
-              The itinerary has been successfully deleted.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="default"
-              onClick={() => {
-                setShowDeleteSuccess(false);
-                navigate("/all-itineraries");
-              }}
-            >
-              Back to All Itineraries
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-
-
-<Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-  <DialogContent className="sm:max-w-[425px]">
-    <DialogHeader>
-      <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
-    </DialogHeader>
-    <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="date" className="text-right">
-          Date
-        </Label>
-        <Select onValueChange={setSelectedDate} value={selectedDate || undefined}>
-          <SelectTrigger className="col-span-3">
-            <SelectValue placeholder="Select a date" />
-          </SelectTrigger>
-          <SelectContent>
-            {itinerary.availableDates
-              .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0)) // Filter upcoming dates
-              .map((dateInfo, index) => (
-                <SelectItem key={index} value={dateInfo.date}>
-                  {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
-                </SelectItem>
+        <Dialog open={showAllTourGuideReviews} onOpenChange={setShowAllTourGuideReviews}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>All Reviews for {tourGuideProfile?.username}</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] overflow-auto">
+              {tourGuideProfile?.comments.map((review, index) => (
+                <Card
+                  key={index}
+                  className={`mb-4 ${review.tourist === userId ? 'bg-[#B5D3D1]' : ''}`} // Apply blue background if comment is from the logged-in user
+                >
+                  <CardHeader>
+                    <div className="flex justify-between items-center">
+                      <CardTitle>{review.username}</CardTitle>
+                      <StarRating rating={review.rating} readOnly={true} />
+                    </div>
+                    <CardDescription>{formatCommentDate(review.date)}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center">
+                      <ThumbsUp className="mr-2 text-green-500 w-4 h-4" /> {/* Positive icon next to liked */}
+                      <p><strong>Liked:</strong> {review.content.liked || "Not specified"}</p>
+                    </div>
+                    <div className="flex items-center mt-1">
+                      <ThumbsDown className="mr-2 text-red-500 w-4 h-4" /> {/* Negative icon next to disliked */}
+                      <p><strong>Disliked:</strong> {review.content.disliked || "Not specified"}</p>
+                    </div>
+                    {/* Edit Review Button, shown only for user's comments */}
+                    {review.tourist === userId && ( // Check if the comment is from the logged-in user
+                      <Button
+                        onClick={() => setShowTourGuideReviewDialog(true)}
+                        className="w-full mt-4"
+                      >
+                        Edit Review
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="tickets" className="text-right">
-          Tickets
-        </Label>
-        <Input
-          id="tickets"
-          type="number"
-          value={numberOfTickets}
-          onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
-          className="col-span-3"
-        />
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label className="text-right">Total Price</Label>
-        <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
-      </div>
-      <div className="grid grid-cols-4 items-center gap-4">
-        <Label className="text-right">Payment Type</Label>
-        <RadioGroup
-          value={paymentType}
-          onValueChange={setPaymentType}
-          className="col-span-3"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="CreditCard" id="CreditCard" />
-            <Label htmlFor="CreditCard">Credit Card</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="DebitCard" id="DebitCard" />
-            <Label htmlFor="DebitCard">Debit Card</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="Wallet" id="Wallet" />
-            <Label htmlFor="Wallet">Wallet</Label>
-          </div>
-        </RadioGroup>
-      </div>
-      {bookingError && (
-        <div className="text-red-500 text-sm">{bookingError}</div>
-      )}
-    </div>
-    <DialogFooter>
-      <Button onClick={() => setShowBookingDialog(false)} variant="outline">
-        Cancel
-      </Button>
-      <Button onClick={handleBooking} disabled={isBooking || !selectedDate}>
-        {isBooking ? "Booking..." : "Confirm Booking"}
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
 
-
-      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            {/* Flexbox container to align icon and title horizontally */}
-            <div className="flex items-center">
-              {/* Check Circle Icon */}
-              <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-              {/* Title */}
-              <DialogTitle>Booking Successful</DialogTitle>
-            </div>
-          </DialogHeader>
-
-          <div className="py-4">
-            <p>You have successfully booked {numberOfTickets} ticket(s) for {itinerary.title}.</p>
-          </div>
-
-          <DialogFooter>
-            <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-
-
-
-
-
-      <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Rate this Itinerary</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-700">Your Rating</label>
-            <StarRating rating={activityRating} setRating={setActivityRating} />
-          </div>
-          <DialogFooter>
-            <Button onClick={handleActivityRating}>Submit My Rating</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-
-    <Dialog open={showRateItineraryDialog || showEditReview} onOpenChange={() => {
-        setShowRateItineraryDialog(false);
-        setShowEditReview(false);
-      }}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{userComment ? 'Edit Your Review' : 'Write a Review for Itinerary'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Your Rating</label>
-              <StarRating rating={itineraryRating} setRating={setItineraryRating} />
-            </div>
-            <div>
-              <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
-                <Smile className="w-5 h-5 inline mr-2 text-green-500" />
-                Something you liked
-              </label>
-              <Textarea
-                id="liked"
-                value={newReview.liked}
-                onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-            <div>
-              <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
-                <Frown className="w-5 h-5 inline mr-2 text-red-500" />
-                Something you didn't like
-              </label>
-              <Textarea
-                id="disliked"
-                value={newReview.disliked}
-                onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
-                rows={3}
-                className="mt-2"
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="anonymous-mode"
-                checked={newReview.isAnonymous}
-                onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
-              />
-              <Label htmlFor="anonymous-mode">Post anonymously</Label>
-            </div>
-          </div>
-          <DialogFooter>
-          <Button
-  onClick={() => {
-    setShowRateItineraryDialog(false);
-    setShowEditReview(false);
-    setNewReview({
-      rating: userComment ? userComment.rating : 0,
-      liked: userComment ? userComment.content.liked : "",
-      disliked: userComment ? userComment.content.disliked : "",
-      isAnonymous: userComment.username === 'Anonymous', 
-    });
-  }}
-  className="bg-gray-300 text-black hover:bg-gray-400 ml-2"
->
-  Cancel
-</Button>
-
-            <Button
-  className="bg-[#5D9297] hover:[#388A94] border-[#5D9297] text-white "
-  onClick={handleRateItinerary}
->
-  {userComment ? 'Update Review' : 'Submit Review'}
-</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-
-
-      <Dialog open={!!showFullComment} onOpenChange={() => setShowFullComment(null)}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{showFullComment?.username}'s Review</DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="max-h-[60vh] overflow-auto">
+        <Dialog open={showTourGuideReviewDialog} onOpenChange={setShowTourGuideReviewDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{userTourGuideReview ? 'Edit Your Review' : 'Write a Review for Tour Guide'}</DialogTitle>
+            </DialogHeader>
             <div className="space-y-4">
               <div>
-                <StarRating rating={showFullComment?.rating} readOnly={true} />
-                <p className="text-sm text-gray-500 mt-1">
-                  {showFullComment && formatCommentDate(showFullComment.date)}
-                </p>
+                <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+                <StarRating rating={tourGuideReview.rating} setRating={(rating) => setTourGuideReview(prev => ({ ...prev, rating }))} />
               </div>
               <div>
-                <h4 className="font-semibold flex items-center">
-                  <Smile className="w-5 h-5 mr-2 text-green-500" />
-                  Liked:
-                </h4>
-                <p>{showFullComment?.content?.liked || "Nothing mentioned"}</p>
+                <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
+                  <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                  Something you liked
+                </label>
+                <Textarea
+                  id="liked"
+                  value={tourGuideReview.liked}
+                  onChange={(e) => setTourGuideReview(prev => ({ ...prev, liked: e.target.value }))}
+                  rows={3}
+                  className="mt-2"
+                />
               </div>
               <div>
-                <h4 className="font-semibold flex items-center">
-                  <Frown className="w-5 h-5 mr-2 text-red-500" />
-                  Disliked:
-                </h4>
-                <p>{showFullComment?.content?.disliked || "Nothing mentioned"}</p>
+                <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
+                  <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                  Something you didn't like
+                </label>
+                <Textarea
+                  id="disliked"
+                  value={tourGuideReview.disliked}
+                  onChange={(e) => setTourGuideReview(prev => ({ ...prev, disliked: e.target.value }))}
+                  rows={3}
+                  className="mt-2"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="anonymous-mode"
+                  checked={tourGuideReview.isAnonymous}
+                  onCheckedChange={(checked) => setTourGuideReview(prev => ({ ...prev, isAnonymous: checked }))}
+                />
+                <Label htmlFor="anonymous-mode">Post anonymously</Label>
               </div>
             </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
-    </div>
+            <DialogFooter>
+              <Button
+                onClick={() => setShowTourGuideReviewDialog(false)}
+                className="bg-gray-300 text-black hover:bg-gray-400 mr-2"
+              >
+                Cancel
+              </Button>
+              <Button
+                className="border-[#5D9297] text-white bg-[#5D9297] hover:[#388A94]"
+                onClick={handleRateTourGuide}
+              >
+                {userTourGuideReview ? 'Update Review' : 'Submit Review'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Itinerary</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this itinerary?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDeleteConfirm(false)}
+                className="bg-gray-300 hover:bg-gray-400"
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDelete} className="bg-red-500 hover:bg-red-600"
+              >
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={showDeleteSuccess}
+          onOpenChange={(open) => {
+            if (!open) {
+              setShowDeleteSuccess(false);
+              navigate("/all-itineraries");
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+                Itinerary Deleted
+              </DialogTitle>
+              <DialogDescription>
+                The itinerary has been successfully deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="default"
+                onClick={() => {
+                  setShowDeleteSuccess(false);
+                  navigate("/all-itineraries");
+                }}
+              >
+                Back to All Itineraries
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+
+
+
+        <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="date" className="text-right">
+                  Date
+                </Label>
+                <Select onValueChange={setSelectedDate} value={selectedDate || undefined}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select a date" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {itinerary.availableDates
+                      .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0)) // Filter upcoming dates
+                      .map((dateInfo, index) => (
+                        <SelectItem key={index} value={dateInfo.date}>
+                          {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="tickets" className="text-right">
+                  Tickets
+                </Label>
+                <Input
+                  id="tickets"
+                  type="number"
+                  value={numberOfTickets}
+                  onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Total Price</Label>
+                <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Payment Type</Label>
+                <RadioGroup
+                  value={paymentType}
+                  onValueChange={setPaymentType}
+                  className="col-span-3"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="CreditCard" id="CreditCard" />
+                    <Label htmlFor="CreditCard">Credit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="DebitCard" id="DebitCard" />
+                    <Label htmlFor="DebitCard">Debit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Wallet" id="Wallet" />
+                    <Label htmlFor="Wallet">Wallet</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              {bookingError && (
+                <div className="text-red-500 text-sm">{bookingError}</div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowBookingDialog(false)} variant="outline">
+                Cancel
+              </Button>
+              <Button onClick={handleBooking} disabled={isBooking || !selectedDate}>
+                {isBooking ? "Booking..." : "Confirm Booking"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+
+        <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              {/* Flexbox container to align icon and title horizontally */}
+              <div className="flex items-center">
+                {/* Check Circle Icon */}
+                <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                {/* Title */}
+                <DialogTitle>Booking Successful</DialogTitle>
+              </div>
+            </DialogHeader>
+
+            <div className="py-4">
+              <p>You have successfully booked {numberOfTickets} ticket(s) for {itinerary.title}.</p>
+            </div>
+
+            <DialogFooter>
+              <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+
+
+
+
+
+        <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Rate this Itinerary</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+              <StarRating rating={activityRating} setRating={setActivityRating} />
+            </div>
+            <DialogFooter>
+              <Button onClick={handleActivityRating}>Submit My Rating</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+
+        <Dialog open={showRateItineraryDialog || showEditReview} onOpenChange={() => {
+          setShowRateItineraryDialog(false);
+          setShowEditReview(false);
+        }}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{userComment ? 'Edit Your Review' : 'Write a Review for Itinerary'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Your Rating</label>
+                <StarRating rating={itineraryRating} setRating={setItineraryRating} />
+              </div>
+              <div>
+                <label htmlFor="liked" className="block text-sm font-medium text-gray-700">
+                  <Smile className="w-5 h-5 inline mr-2 text-green-500" />
+                  Something you liked
+                </label>
+                <Textarea
+                  id="liked"
+                  value={newReview.liked}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, liked: e.target.value }))}
+                  rows={3}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <label htmlFor="disliked" className="block text-sm font-medium text-gray-700">
+                  <Frown className="w-5 h-5 inline mr-2 text-red-500" />
+                  Something you didn't like
+                </label>
+                <Textarea
+                  id="disliked"
+                  value={newReview.disliked}
+                  onChange={(e) => setNewReview(prev => ({ ...prev, disliked: e.target.value }))}
+                  rows={3}
+                  className="mt-2"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="anonymous-mode"
+                  checked={newReview.isAnonymous}
+                  onCheckedChange={(checked) => setNewReview(prev => ({ ...prev, isAnonymous: checked }))}
+                />
+                <Label htmlFor="anonymous-mode">Post anonymously</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  setShowRateItineraryDialog(false);
+                  setShowEditReview(false);
+                  setNewReview({
+                    rating: userComment ? userComment.rating : 0,
+                    liked: userComment ? userComment.content.liked : "",
+                    disliked: userComment ? userComment.content.disliked : "",
+                    isAnonymous: userComment.username === 'Anonymous',
+                  });
+                }}
+                className="bg-gray-300 text-black hover:bg-gray-400 ml-2"
+              >
+                Cancel
+              </Button>
+
+              <Button
+                className="bg-[#5D9297] hover:[#388A94] border-[#5D9297] text-white "
+                onClick={handleRateItinerary}
+              >
+                {userComment ? 'Update Review' : 'Submit Review'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+
+
+        <Dialog open={!!showFullComment} onOpenChange={() => setShowFullComment(null)}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{showFullComment?.username}'s Review</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[60vh] overflow-auto">
+              <div className="space-y-4">
+                <div>
+                  <StarRating rating={showFullComment?.rating} readOnly={true} />
+                  <p className="text-sm text-gray-500 mt-1">
+                    {showFullComment && formatCommentDate(showFullComment.date)}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold flex items-center">
+                    <Smile className="w-5 h-5 mr-2 text-green-500" />
+                    Liked:
+                  </h4>
+                  <p>{showFullComment?.content?.liked || "Nothing mentioned"}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold flex items-center">
+                    <Frown className="w-5 h-5 mr-2 text-red-500" />
+                    Disliked:
+                  </h4>
+                  <p>{showFullComment?.content?.disliked || "Nothing mentioned"}</p>
+                </div>
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 };
