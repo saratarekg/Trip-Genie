@@ -346,13 +346,16 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
     // console.log("Activity data:", data)
     const newActivity = {
       ...data,
-      timing: itineraryDate +"T" + data.activityTime,
+      timing: itineraryDate + "T" + data.activityTime,
       pictures: pictures,
     }
-    // console.log("henaaaaaaaaaaa", newActivity.timing);
+    if(data.day>dayLimit)
+    setDayLimit(data.day)
     onSave(newActivity)
     onClose()
   }
+
+ 
 
   return (
     <form onSubmit={handleSubmit(handleAddActivity)} className="space-y-4">
@@ -365,6 +368,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
             id="day"
             type="number"
             min="1"
+           // max={dayLimit+1}
             {...register("day", { valueAsNumber: true })}
           />
           {errors.day && (
@@ -415,7 +419,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
         </div>
         <div>
           <Label htmlFor="activityTime">Start Time</Label>
-          <Input id="activityTime" type="time" {...register("activityTime")} />
+          <Input id="activityTime" type="time" {...register("timing")} />
           {errors.activityTime && (
             <p className="text-red-500 text-xs">
               {errors.activityTime.message}
@@ -552,6 +556,7 @@ const ItineraryForm = () => {
   const [showActivityForm, setShowActivityForm] = useState(false);
   const [activities, setActivities] = useState([]);
   const [editingActivityIndex, setEditingActivityIndex] = useState(null);
+  const [dayLimit, setDayLimit] = useState(0);
   const navigate = useNavigate();
 
   const {
@@ -582,113 +587,87 @@ const ItineraryForm = () => {
   const itineraryDate = watch("availableDates[0].date")
 
   const handleCreateItinerary = async (data) => {
+    console.log("handleCreateItinerary called with data:", data);
     setLoading(true);
     setError("");
     setSuccess("");
-
+  
     try {
       if (activities.length === 0) {
         setError("Please add at least one activity.");
         setLoading(false);
+        console.log("Error: No activities added.");
         return;
       }
-
-      const hasEmptyDateOrTime = data.availableDates.some((date) => !date.date);
-
-      if (hasEmptyDateOrTime) {
-        setError("Please fill in all dates and times.");
-        setLoading(false);
-        return;
-      }
-
-      // if (data.availableDates.length > 1 && !data.isRepeated) {
-      //   setError(
-      //     "If the itinerary is not repeated you can only choose one date."
-      //   );
+  
+      // const hasEmptyDateOrTime = data.availableDates.some((date) => !date.date);
+  
+      // if (hasEmptyDateOrTime) {
+      //   setError("Please fill in all dates and times.");
       //   setLoading(false);
+      //   console.log("Error: Empty date or time detected.");
       //   return;
       // }
-
-      // if (!isRepeated) {
-        // const activitiesWithoutDate = activities.filter(
-        //   (activity) => !activity.activityDate // Check if activityDate is missing for non-repeated itinerary
-        // );
-      
-        // if (activitiesWithoutDate.length > 0) {
-        //   const activityTitles = activitiesWithoutDate
-        //     .map((activity) => activity.name)
-        //     .join(", ");
-      
-        //   setError(`Error: ${activityTitles} ${activitiesWithoutDate.length > 1 ? 'have' : 'has'} no date set.`);
-        //   setLoading(false);
-        //   return;
-        // }
-
-      // if (!(data.isRepeated)) {
-      //   const itineraryDate = data.availableDates[0]?.date; // Assuming itineraryDate is the first available date
   
-      //   activities.forEach((activity) => {
-      //     const activityDate = activity.timing?.split("T")[0];
-  
-      //     // If date is missing or different from itineraryDate, update it
-      //     if (!activityDate || activityDate !== itineraryDate) {
-      //       activity.timing = `${itineraryDate}T${activity.timing?.split("T")[1] || "00:00"}`;
-      //     }
-      //   });
-      // }
-
-
-        // Sort activities by day and then by start time
-          activities.sort((a, b) => {
-            if (a.day === b.day) {
-              return new Date(a.activityTime) - new Date(b.activityTime);
-            }
-            return a.day - b.day;
-          });
-
-          const overlappingActivities = [];
-
-          // Loop through the activities and check for overlaps within the same day
-          for (let i = 0; i < activities.length - 1; i++) {
-            const currentActivity = activities[i];
-            const nextActivity = activities[i + 1];
-
-            // Only check for overlaps if they are on the same day
-            if (currentActivity.day === nextActivity.day) {
-              const currentEndTime = new Date(currentActivity.activityTime);
-              currentEndTime.setMinutes(currentEndTime.getMinutes() + currentActivity.duration);
-
-              console.log(currentActivity.activityTime);
-              console.log(nextActivity.activityTime);
-              console.log(currentEndTime);
-
-              const nextStartTime = new Date(nextActivity.activityTime);
-
-              // Check if the next activity starts before the current one ends
-              if (nextStartTime < currentEndTime) {
-                overlappingActivities.push({
-                  current: currentActivity,
-                  next: nextActivity,
-                });
-              }
-            }
+      // Sort activities by day and then by start time
+      activities.sort((a, b) => {
+        if (a.day === b.day) {
+          return new Date(`1970-01-01T${a.activityTime}`) - new Date(`1970-01-01T${b.activityTime}`);
+        }
+        return a.day - b.day;
+      });
+      console.log("Activities sorted by day and time:", activities);
+      
+      const overlappingActivities = [];
+      
+      // Loop through the activities and check for overlaps within the same day
+      for (let i = 0; i < activities.length - 1; i++) {
+        const currentActivity = activities[i];
+        const nextActivity = activities[i + 1];
+      
+        // Only check for overlaps if they are on the same day
+        if (currentActivity.day === nextActivity.day) {
+          const currentEndTime = new Date(`1970-01-01T${currentActivity.activityTime}`);
+          currentEndTime.setMinutes(currentEndTime.getMinutes() + currentActivity.duration);
+      
+          const nextStartTime = new Date(`1970-01-01T${nextActivity.activityTime}`);
+      
+          console.log("Checking overlap:");
+          console.log("Current activity time string:", currentActivity.activityTime);
+          console.log("Next activity time string:", nextActivity.activityTime);
+          console.log("Current end time:", currentEndTime);
+          console.log("Next start time:", nextStartTime);
+      
+          // Check if the next activity starts before the current one ends
+          if (nextStartTime < currentEndTime) {
+            overlappingActivities.push({
+              current: currentActivity,
+              next: nextActivity,
+            });
+            console.log("Overlap detected between activities:", currentActivity.name, "and", nextActivity.name);
           }
-
-          if (overlappingActivities.length > 0) {
-            const errorMessage = overlappingActivities.map(({ current, next }) =>
-              `Activity "${current.name}" overlaps with "${next.name}" on day ${current.day}`
-            ).join('\n');
-            
-            setError(`Error: Overlapping activities detected:\n${errorMessage}`);
-          } else {
-            console.log("No overlapping activities found.");
-          }
-
-
+        }
+      }
+      
+      if (overlappingActivities.length > 0) {
+        const errorMessage = overlappingActivities.map(({ current, next }) =>
+          `Activity "${current.name}" overlaps with "${next.name}" on day ${current.day}`
+        ).join('\n');
+        
+        setError(`Error: Overlapping activities detected:\n${errorMessage}`);
+        setLoading(false);
+        console.log("Error: Overlapping activities detected:\n", errorMessage);
+        return;
+      } else {
+        console.log("No overlapping activities found.");
+      }
+      
+      
       const token = Cookies.get("jwt");
       const role = Cookies.get("role") || "guest";
-      console.log("activities: ", activities);
-
+      console.log("Token:", token);
+      console.log("Role:", role);
+  
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("language", data.language);
@@ -698,13 +677,13 @@ const ItineraryForm = () => {
       formData.append("accessibility", data.accessibility);
       formData.append("availableDates", JSON.stringify(data.availableDates));
       formData.append("activities", JSON.stringify(activities));
-      // formData.append("isRepeated", data.isRepeated);
       activities?.forEach((activity, index) => {
         activity?.pictures?.forEach((file, fileIndex) => {
           formData.append(`activities[${index}][pictures][${fileIndex}]`, file);
         });
       });
-
+      console.log("Form data prepared:", formData);
+  
       const response = await axios.post(
         `http://localhost:4000/${role}/itineraries`,
         formData,
@@ -717,12 +696,13 @@ const ItineraryForm = () => {
       setShowDialog(true);
     } catch (err) {
       setError("Failed to create itinerary. Please try again.");
-      console.error(err.message);
+      console.error("Error during itinerary creation:", err.message);
     } finally {
       setLoading(false);
+      console.log("Itinerary creation process completed.");
     }
   };
-
+  
   const handleGoBack = () => {
     setShowDialog(false);
     navigate("/all-itineraries");
@@ -1035,7 +1015,7 @@ const ItineraryForm = () => {
               key={index}
               className="mb-2 p-2 border rounded flex justify-between items-center"
             >
-              <span>{activity.name}</span>
+              <span>{activity.name}, Day:{activity.day}</span>
               <div>
                 <Button
                   type="button"
@@ -1062,18 +1042,14 @@ const ItineraryForm = () => {
       setShowActivityForm(true);
     }}
     className="w-full mt-2 bg-[#1A3B47]"
-    disabled={!itineraryDate}
+    
   >
     <PlusCircle className="w-4 h-4 mr-2" />
     Add Activity
   </Button>
 
   {/* Tooltip message when button is disabled */}
-  {!itineraryDate && (
-    <span className="absolute top-full left-0 mt-1 pb-2 text-xs text-red-500">
-      Please select a date to create an activity
-    </span>
-  )}
+ 
 </div>
 
           
@@ -1142,6 +1118,8 @@ const ItineraryForm = () => {
                   ? activities[editingActivityIndex]
                   : null
               }
+              dayLimit={dayLimit}
+              setDayLimit={setDayLimit}
               // isRepeated={isRepeated}
               itineraryDate={itineraryDate}
             />

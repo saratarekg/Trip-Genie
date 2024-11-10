@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import {
@@ -84,6 +84,10 @@ export default function ProductArchive() {
 
   const navigate = useNavigate();
 
+  // useRef flags
+  const isProductsFetched = useRef(false);
+  const isMaxPriceFetched = useRef(false);
+
   const getUserRole = useCallback(() => {
     let role = Cookies.get("role");
     return role || "guest";
@@ -91,6 +95,7 @@ export default function ProductArchive() {
 
   const fetchProducts = useCallback(
     async (params = {}) => {
+      if (isProductsFetched.current) return;
       try {
         setIsLoading(true);
         const token = Cookies.get("jwt");
@@ -123,6 +128,7 @@ export default function ProductArchive() {
         setProducts(data.products || data);
         setMaxPriceOfProducts(data.maxPrice || maxPriceOfProducts);
         setError(null);
+        isProductsFetched.current = true;
       } catch (error) {
         console.error("Error fetching products:", error);
         setError("Error fetching products");
@@ -139,12 +145,13 @@ export default function ProductArchive() {
   }, [fetchProducts]);
 
   useEffect(() => {
-    if (!isPriceInitialized) {
+    if (!isPriceInitialized && !isMaxPriceFetched.current) {
       fetchMaxPrice();
     }
-  }, [getUserRole]);
+  }, [getUserRole, isPriceInitialized]);
 
   const fetchMaxPrice = async () => {
+    if (isMaxPriceFetched.current) return;
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(
@@ -159,10 +166,12 @@ export default function ProductArchive() {
     setMaxPriceOfProducts(data);
     setPriceRange([0, data]);
     setIsPriceInitialized(true);
+    isMaxPriceFetched.current = true;
   };
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
+      isProductsFetched.current = false; // Reset the flag to allow a new fetch
       fetchProducts({
         searchBy: searchTerm,
         sort: sortBy,
@@ -201,6 +210,7 @@ export default function ProductArchive() {
     setSortOrder(1);
     setPriceRange([0, maxPriceOfProducts]);
     setSelectedRating(null);
+    isProductsFetched.current = false; // Reset the flag to allow a new fetch
     fetchProducts();
   };
 
@@ -286,25 +296,28 @@ export default function ProductArchive() {
               </h3>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-4">
-                  {products.slice(0, 3).map((product) => (
-                    <Link
-                      key={product._id}
-                      to={`/product/${product._id}`}
-                      className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-                    >
-                      <img
-                        src={product.pictures[0]?.url || defaultImage}
-                        alt={product.name}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                      <div>
-                        <h4 className="font-medium text-sm">{product.name}</h4>
-                        <div className="mt-1">
-                          {renderStars(product.rating)}
+                  {products.length > 0 &&
+                    products.slice(0, 3).map((product) => (
+                      <Link
+                        key={product._id}
+                        to={`/product/${product._id}`}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                      >
+                        <img
+                          src={product.pictures[0]?.url || defaultImage}
+                          alt={product.name}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                        <div>
+                          <h4 className="font-medium text-sm">
+                            {product.name}
+                          </h4>
+                          <div className="mt-1">
+                            {renderStars(product.rating)}
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
                 </div>
               </ScrollArea>
             </div>
@@ -377,18 +390,19 @@ export default function ProductArchive() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {products
-                    .slice(
-                      (currentPage - 1) * tripsPerPage,
-                      currentPage * tripsPerPage
-                    )
-                    .map((product) => (
-                      <ProductCard
-                        key={product._id}
-                        product={product}
-                        onSelect={handleProductSelect}
-                      />
-                    ))}
+                  {products.length > 0 &&
+                    products
+                      .slice(
+                        (currentPage - 1) * tripsPerPage,
+                        currentPage * tripsPerPage
+                      )
+                      .map((product) => (
+                        <ProductCard
+                          key={product._id}
+                          product={product}
+                          onSelect={handleProductSelect}
+                        />
+                      ))}
                 </div>
 
                 <div className="mt-8 flex justify-center items-center space-x-4">
