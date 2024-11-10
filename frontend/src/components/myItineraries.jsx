@@ -167,7 +167,7 @@ const ItineraryCard = ({
     >
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={itinerary.activities?.[0]?.pictures?.[0] || defaultImage}
+          src={itinerary.activities?.[0]?.pictures?.[0].url || defaultImage}
           alt={itinerary.title}
           className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
         />
@@ -657,8 +657,8 @@ export function MyItinerariesComponent() {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
       {isLoading ? (
         <Loader />
       ) : (
@@ -829,7 +829,7 @@ export function MyItinerariesComponent() {
                 setShowDeleteSuccess(false);
                 navigate("/my-itineraries");
               }}
-              className = "bg-gray-400 hover:bg-gray-500"
+              className="bg-gray-400 hover:bg-gray-500"
             >
               Close
             </Button>
