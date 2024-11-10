@@ -1,3 +1,6 @@
+back of create and update forms el sora
+
+
 teal navbar not taking up full page width
 create forms and edit forms still have a white background and the navbar is not visible before scrolling (Amy --DONE!!)
 same thing with profile pages(not needed any more)
@@ -34,7 +37,9 @@ hotels in home page
 n move reviews ta7t fel home page
 sowar hp sliders
 silider cards mesh kolo same size
-
+archive product btb3at too many requests
+my products filterand search s3at bydrab error
+pagination all products lama yb2a mafeesh products ytzabat
 
 
 sprint 3:

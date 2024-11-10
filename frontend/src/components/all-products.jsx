@@ -32,6 +32,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
@@ -47,8 +48,8 @@ import Loader from "./Loader";
 import defaultImage from "../assets/images/default-image.jpg";
 import DualHandleSliderComponent from "./dual-handle-slider";
 import LazyLoad from "react-lazyload";
-import productImage from '../assets/images/products.png';
-import productImage2 from '../assets/images/products2.png';
+import productImage from "../assets/images/prod.png";
+import productImage2 from "../assets/images/products2.png";
 import { role } from "@/pages/login";
 
 const renderStars = (rating) => {
@@ -78,11 +79,13 @@ const ProductCard = ({
   onAddToCart,
   onAddToWishlist,
   onRemoveFromWishlist,
-
 }) => {
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isInWishlistLocal, setIsInWishlistLocal] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const isInCart = cartItems.some((item) => item.product?._id === product._id);
   const isInWishlist = wishlistItems.some(
@@ -90,16 +93,23 @@ const ProductCard = ({
   );
 
   useEffect(() => {
-    if (
-      userInfo &&
-      userInfo.role === "tourist" &&
-      userInfo.preferredCurrency !== product.currency
-    ) {
-      fetchExchangeRate();
-    } else {
-      getCurrencySymbol();
-    }
-  }, [userInfo, product]);
+    const initializeCard = async () => {
+      // Wait for currency and wishlist state to be set
+      await Promise.all([
+        userInfo &&
+        userInfo.role === "tourist" &&
+        userInfo.preferredCurrency !== product.currency
+          ? fetchExchangeRate()
+          : getCurrencySymbol(),
+        setIsInWishlistLocal(
+          wishlistItems.some((item) => item.product._id === product._id)
+        ),
+      ]);
+      setIsInitialized(true);
+    };
+
+    initializeCard();
+  }, [userInfo, product, wishlistItems]);
 
   const fetchExchangeRate = useCallback(async () => {
     if (userInfo && userInfo.role === "tourist") {
@@ -133,21 +143,9 @@ const ProductCard = ({
   }, [userInfo, product]);
 
   const getCurrencySymbol = useCallback(async () => {
-    if(userInfo){
+    if (userInfo) {
       setCurrencySymbol("$");
-    // try {
-    //   const token = Cookies.get("jwt");
-    //   const response = await axios.get(
-    //     `http://localhost:4000/${userInfo.role}/getCurrency/${product.currency}`,
-    //     {
-    //       headers: { Authorization: `Bearer ${token}` },
-    //     }
-    //   );
-    //   setCurrencySymbol(response.data.symbol);
-    // } catch (error) {
-    //   console.error("Error fetching currency symbol:", error);
-    // }
-  }
+    }
   }, [userInfo, product]);
 
   const formatPrice = (price) => {
@@ -165,6 +163,36 @@ const ProductCard = ({
     }
   };
 
+  const handleCheckoutNow = () => {
+    onBuyNow(product);
+    onAddToCart(product);
+    setIsPopupOpen(false);
+    // Redirect to checkout page
+    window.location.href = "account/cart"; // Replace with your actual checkout URL
+  };
+
+  useEffect(() => {
+    console.log("Wishlist items in ProductCard:", wishlistItems);
+    console.log("Current product:", product);
+    console.log(
+      "Is in wishlist:",
+      wishlistItems.some((item) => item.product._id === product._id)
+    );
+  }, [wishlistItems, product]);
+
+  useEffect(() => {
+    const isInWishlist = wishlistItems.some(
+      (item) => item.product._id === product._id
+    );
+    setIsInWishlistLocal(isInWishlist);
+  }, [wishlistItems, product._id]);
+
+  if (!isInitialized) {
+    return (
+      <div className="h-[400px] animate-pulse bg-gray-100 rounded-lg"></div>
+    ); // Loading placeholder
+  }
+
   return (
     <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
       <CardHeader className="p-0" onClick={() => onSelect(product._id)}>
@@ -176,10 +204,7 @@ const ProductCard = ({
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(product._id)}>
         <CardTitle className="text-lg text-[#1A3B47]">{product.name}</CardTitle>
-
-        {/* Display rating directly below the product title */}
         <div className="mt-1">{renderStars(product.rating)}</div>
-
         <p className="text-sm text-gray-600 mt-2 break-words">
           {product.description.length > 70
             ? `${product.description.slice(0, 70)}...`
@@ -191,26 +216,49 @@ const ProductCard = ({
           {formatPrice(product.price)}
         </span>
 
-        {/* Show "Buy Now" button only if user role is "tourist" */}
-        {userInfo?.role === "tourist" && (
-          <Button
-            className="bg-orange-400 hover:bg-[#F88C33] text-white"
-            style={{
-              borderRadius: "20px",
-              padding: "4px 12px", // Adjust padding for a thinner button
-              fontSize: "14px",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onBuyNow(product);
-            }}
-          >
-            Buy Now
-          </Button>
+        {userInfo?.role === "tourist" && product.quantity > 0 ? (
+          <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="bg-orange-400 hover:bg-[#F88C99] text-white"
+                style={{
+                  borderRadius: "20px",
+                  padding: "4px 12px",
+                  fontSize: "14px",
+                }}
+              >
+                Buy Now
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Choose an option</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToCart(product);
+                    setIsPopupOpen(false);
+                  }}
+                >
+                  Add to Cart and Continue Shopping
+                </Button>
+                <Button onClick={handleCheckoutNow}>
+                  Add to cart and Checkout Now
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        ) : (
+          userInfo?.role === "tourist" && (
+            <span className="text-red-500 text-2xl font-bold">
+              Out of stock
+            </span>
+          )
         )}
       </CardFooter>
 
-      {/* Show "Add to Cart" and "Add to Wishlist" buttons only if user role is "tourist" */}
       {userInfo?.role === "tourist" && (
         <div className="absolute top-2 right-2 flex space-x-2">
           {!isInCart && (
@@ -227,23 +275,22 @@ const ProductCard = ({
           )}
           <Button
             className={`rounded-full w-10 h-10 p-0 ${
-              isInWishlist
-                ? "bg-red-400 hover:bg-red-500"
+              isInWishlistLocal
+                ? "bg-red-500 hover:bg-red-600"
                 : "bg-gray-200 hover:bg-gray-300"
             } text-white`}
             onClick={(e) => {
               e.stopPropagation();
-              if (isInWishlist) {
-                // Call "remove from wishlist" API if the item is already in the wishlist
+              setIsInWishlistLocal(!isInWishlistLocal);
+              if (isInWishlistLocal) {
                 onRemoveFromWishlist(product);
               } else {
-                // Call "add to wishlist" API if the item is not in the wishlist
                 onAddToWishlist(product);
               }
             }}
           >
             <Heart
-              className={`w-5 h-5 ${isInWishlist ? "fill-current" : ""}`}
+              className={`w-5 h-5 ${isInWishlistLocal ? "fill-current" : ""}`}
             />
             <span className="sr-only">Add to Wishlist</span>
           </Button>
@@ -262,7 +309,7 @@ export function AllProducts() {
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [myProducts, setMyProducts] = useState(false);
-  const [maxPriceOfProducts,setMaxPriceOfProducts] = useState(1000);
+  const [maxPriceOfProducts, setMaxPriceOfProducts] = useState(1000);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfProducts]);
   const [maxPrice, setMaxPrice] = useState(maxPriceOfProducts);
   const [isLoading, setIsLoading] = useState(false);
@@ -288,12 +335,10 @@ export function AllProducts() {
 
   useEffect(() => {
     if (alertMessage) {
-      // Set a timer to clear the alert message after 2 seconds
       const timer = setTimeout(() => {
-        setAlertMessage(null); // Clear alert message
+        setAlertMessage(null);
       }, 2000);
 
-      // Clear the timer if the component unmounts or alertMessage changes
       return () => clearTimeout(timer);
     }
   }, [alertMessage]);
@@ -381,7 +426,7 @@ export function AllProducts() {
 
         const data = await response.json();
         setProducts(data);
-        
+
         setError(null);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -393,66 +438,65 @@ export function AllProducts() {
   );
 
   useEffect(() => {
-    if(!isPriceInitialized){
+    if (!isPriceInitialized) {
       fetchMaxPrice();
-      }
+    }
   }, [role]);
 
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(`http://localhost:4000/${role}/max-price-products`);
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          setMaxPriceOfProducts(data);
-          setPriceRange([0, data]);
-          setMaxPrice(data);
-          setIsPriceInitialized(true);
-          
-    };
-
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    setMaxPriceOfProducts(data);
+    setPriceRange([0, data]);
+    setMaxPrice(data);
+    setIsPriceInitialized(true);
+  };
 
   const fetchCartItems = useCallback(async () => {
-    if(role == 'tourist'){
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch("http://localhost:4000/tourist/cart", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCartItems(data);
+    if (role == "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch("http://localhost:4000/tourist/cart", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setCartItems(data);
+        }
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
       }
-    } catch (error) {
-      console.error("Error fetching cart items:", error);
     }
-  }
   }, []);
 
   const fetchWishlistItems = useCallback(async () => {
-    if(role == 'tourist'){
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch("http://localhost:4000/tourist/wishlist", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setWishlistItems(data);
+    if (userInfo?.role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch("http://localhost:4000/tourist/wishlist", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Fetched wishlist items:", data);
+          setWishlistItems(data); // This should be an array of products from the tourist's wishlist
+        }
+      } catch (error) {
+        console.error("Error fetching wishlist items:", error);
       }
-    } catch (error) {
-      console.error("Error fetching wishlist items:", error);
     }
-  }
-  }, []);
+  }, [userInfo]);
 
   useEffect(() => {
     if (userInfo) {
@@ -467,7 +511,6 @@ export function AllProducts() {
   }, [fetchUserInfo]);
 
   useEffect(() => {
-    // if(isPriceInitialized){
     const delayDebounceFn = setTimeout(() => {
       fetchProducts({
         searchBy: searchTerm,
@@ -535,8 +578,8 @@ export function AllProducts() {
   };
 
   const handleBuyNow = (product) => {
-    setSelectedProduct(product);
-    setShowPurchaseConfirm(true);
+    // Redirect to checkout page
+    window.location.href = "/checkout"; // Replace with your actual checkout URL
   };
 
   const handleAddToCart = async (product) => {
@@ -612,7 +655,7 @@ export function AllProducts() {
       const response = await fetch(
         `http://localhost:4000/tourist/remove/wishlist/${product._id}`,
         {
-          method: "DELETE", // Use DELETE method for removing from wishlist
+          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -628,7 +671,7 @@ export function AllProducts() {
         type: "success",
         message: "Product removed from wishlist successfully!",
       });
-      fetchWishlistItems(); // Update the wishlist after removal
+      fetchWishlistItems();
     } catch (error) {
       setAlertMessage({
         type: "error",
@@ -686,39 +729,34 @@ export function AllProducts() {
 
   return (
     <div className="bg-gray-100">
-      {/* Navbar */}
-      {/* <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-      </div> */}
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
           <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">All Products</h1>
             <p className="text-gray-200">
-            <Link to="/" className="font-bold text-gray-200 hover:text-gray-300 hover:underline">
-              Home
-            </Link> 
-            / Products
-          </p>
+              <Link
+                to="/"
+                className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
+              >
+                Home
+              </Link>
+              / Products
+            </p>
           </div>
           <div className="hidden lg:block w-1/3">
-          <img
-            src={productImage}
-            alt="Decorative"
-            height="160"
-            width="160"
-            className="ml-auto"
-          />
-        </div>
+            <img
+              src={productImage}
+              alt="Decorative"
+              height="200"
+              width="230"
+              className="ml-auto"
+            />
+          </div>
         </div>
       </div>
       <div className="container mx-auto px-24 py-8 sm:px-12 lg:px-24">
-        {/* <h1 className="text-5xl font-bold text-[#1A3B47] mb-8">All Products</h1> */}
         <div className="flex gap-8">
-          {/* Sidebar Filters */}
           <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
-            {" "}
-            {/* Wider filter section */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button
@@ -729,22 +767,27 @@ export function AllProducts() {
                 Clear All
               </Button>
             </div>
-            {/* Price Range */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-              {isPriceInitialized && (<DualHandleSliderComponent
-                min={0}
-                max={maxPriceOfProducts}
-                symbol={getSymbol()}
-                step={Math.max(1, Math.ceil(maxPriceOfProducts*exchangeRateForFilter / 100))}
-                values={priceRange}
-                exchangeRate={exchangeRateForFilter}
-                middleColor="#5D9297"
-                colorRing="#388A94"
-                onChange={(values) => setPriceRange(values)}
-              />)}
+              {isPriceInitialized && (
+                <DualHandleSliderComponent
+                  min={0}
+                  max={maxPriceOfProducts}
+                  symbol={getSymbol()}
+                  step={Math.max(
+                    1,
+                    Math.ceil(
+                      (maxPriceOfProducts * exchangeRateForFilter) / 100
+                    )
+                  )}
+                  values={priceRange}
+                  exchangeRate={exchangeRateForFilter}
+                  middleColor="#5D9297"
+                  colorRing="#388A94"
+                  onChange={(values) => setPriceRange(values)}
+                />
+              )}
             </div>
-            {/* Rating Filter */}
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Rating</h3>
               <div className="space-y-2">
@@ -761,52 +804,16 @@ export function AllProducts() {
                 ))}
               </div>
             </div>
-            {/* Sort by Rating */}
-            {/* <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-2">
-                Sort by Rating
-              </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                style={{ borderRadius: "20px" }}
-                onClick={() => handleSort("rating")}
-              >
-                <ArrowUpDown className="w-4 h-4" />
-                <span>Rating</span>
-                <div className="ml-auto">
-                  {sortBy === "rating" ? (sortOrder === 1 ? "↓" : "↑") : ""}
-                </div>
-              </Button>
-            </div> */}
-            {/* Sort by Price */}
-            {/* <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-2">Sort by Price</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                style={{ borderRadius: "20px" }}
-                onClick={() => handleSort("price")}
-              >
-                <ArrowUpDown className="w-4 h-4" />
-                <span>Price</span>
-                <div className="ml-auto">
-                  {sortBy === "price" ? (sortOrder === 1 ? "↓" : "↑") : ""}
-                </div>
-              </Button>
-            </div>
-          </div> */}
-           {/* Featured Products Section */}
             <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-4">Featured Products</h3>
+              <h3 className="font-medium text-[#1A3B47] mb-4">
+                Featured Products
+              </h3>
               <div className="space-y-4">
                 {products && products.length > 0 ? (
                   products.slice(0, 3).map((product) => (
-                    <Link 
-                      key={product._id} 
-                      to={`/product/${product._id}`} 
+                    <Link
+                      key={product._id}
+                      to={`/product/${product._id}`}
                       className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
                     >
                       <img
@@ -816,20 +823,22 @@ export function AllProducts() {
                       />
                       <div>
                         <h4 className="font-medium text-sm">{product.name}</h4>
-                        <div className="mt-1">{renderStars(product.rating)}</div>
+                        <div className="mt-1">
+                          {renderStars(product.rating)}
+                        </div>
                       </div>
                     </Link>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">No products available.</p>
+                  <p className="text-sm text-gray-500">
+                    No products available.
+                  </p>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="flex-1">
-            {/* Search and Sort Controls */}
             <div className="mb-4">
               <div className="flex flex-wrap items-center gap-4">
                 <div className="relative flex-grow">
@@ -853,7 +862,9 @@ export function AllProducts() {
                 >
                   <ArrowUpDown className="w-4 h-4 mr-2" />
                   Sort by Rating
-                  {sortBy === "rating" && <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>}
+                  {sortBy === "rating" && (
+                    <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>
+                  )}
                 </Button>
                 <Button
                   variant="outline"
@@ -863,7 +874,9 @@ export function AllProducts() {
                 >
                   <ArrowUpDown className="w-4 h-4 mr-2" />
                   Sort by Price
-                  {sortBy === "price" && <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>}
+                  {sortBy === "price" && (
+                    <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>
+                  )}
                 </Button>
                 <Button
                   variant="outline"
@@ -880,31 +893,18 @@ export function AllProducts() {
               <div className="text-red-500 text-center mb-4">{error}</div>
             )}
 
-            {/* {alertMessage && (
-              <Alert
-                className={`mb-4 ${
-                  alertMessage.type === "success"
-                    ? "bg-green-100"
-                    : "bg-red-100"
-                }`}
-              >
-                <AlertTitle>
-                  {alertMessage.type === "success" ? "Success" : "Error"}
-                </AlertTitle>
-                <AlertDescription>{alertMessage.message}</AlertDescription>
-              </Alert>
-            )} */}
-
             {isLoading ? (
               <Loader />
             ) : (
               <>
-                {/* Product Grid */}
                 <div>
                   {products.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {products
-                        .slice((currentPage - 1) * tripsPerPage, currentPage * tripsPerPage)
+                        .slice(
+                          (currentPage - 1) * tripsPerPage,
+                          currentPage * tripsPerPage
+                        )
                         .map((product) => (
                           <ProductCard
                             key={product._id}
@@ -921,12 +921,12 @@ export function AllProducts() {
                         ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500">No products available.</p>
+                    <p className="text-sm text-gray-500">
+                      No products available.
+                    </p>
                   )}
                 </div>
 
-
-                {/* Pagination */}
                 <div className="mt-8 flex justify-center items-center space-x-4">
                   <button
                     onClick={() => {
@@ -937,26 +937,18 @@ export function AllProducts() {
                       currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
                     }`}
                   >
-                    <ChevronLeft />
+                    <ChevronLeft className="w-5 h-5" />
                   </button>
-
-                  {/* Page X of Y */}
-                  <span className="text-lg font-medium">
-                    {products.length > 0
-                      ? `Page ${currentPage} of ${Math.ceil(
-                          products.length / tripsPerPage
-                        )}`
-                      : "No pages available"}
+                  <span className="text-gray-600">
+                    Page {currentPage} of{" "}
+                    {Math.ceil(products.length / tripsPerPage)}
                   </span>
-
                   <button
                     onClick={() => {
                       handlePageChange(currentPage + 1);
                     }}
                     disabled={
-                      currentPage ===
-                        Math.ceil(products.length / tripsPerPage) ||
-                      products.length === 0
+                      currentPage === Math.ceil(products.length / tripsPerPage)
                     }
                     className={`px-4 py-2 rounded-full bg-white shadow ${
                       currentPage === Math.ceil(products.length / tripsPerPage)
@@ -964,7 +956,7 @@ export function AllProducts() {
                         : "text-[#388A94]"
                     }`}
                   >
-                    <ChevronRight />
+                    <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
               </>
@@ -973,163 +965,18 @@ export function AllProducts() {
         </div>
       </div>
 
-      {/* Purchase Confirmation Dialog */}
-      <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold">
-              Confirm Purchase
-            </DialogTitle>
-          </DialogHeader>
-
-          {/* Product Details */}
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Product Details</h2>
-            <div className="my-4">
-              <p className="text-xl font-semibold">{selectedProduct?.name}</p>
-            </div>
-            <div className="my-4">
-              <label htmlFor="quantity" className="block text-lg font-medium">
-                Quantity
-              </label>
-              <Input
-                type="number"
-                id="quantity"
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                min="1"
-                max={selectedProduct?.quantity}
-              />
-            </div>
-          </div>
-
-          {/* Payment & Delivery */}
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Payment & Delivery</h2>
-            <div className="my-4">
-              <label
-                htmlFor="deliveryDate"
-                className="block text-lg font-medium"
-              >
-                Delivery Date
-              </label>
-              <Input
-                type="date"
-                id="deliveryDate"
-                value={deliveryDate}
-                onChange={(e) => setDeliveryDate(e.target.value)}
-              />
-            </div>
-            <div className="my-4">
-              <label
-                htmlFor="deliveryTime"
-                className="block text-lg font-medium"
-              >
-                Delivery Time
-              </label>
-              <Select value={deliveryTime} onValueChange={setDeliveryTime}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select delivery time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="morning">
-                    Morning (8 AM - 12 PM)
-                  </SelectItem>
-                  <SelectItem value="afternoon">
-                    Afternoon (12 PM - 4 PM)
-                  </SelectItem>
-                  <SelectItem value="evening">Evening (4 PM - 8 PM)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="my-4">
-              <label
-                htmlFor="deliveryType"
-                className="block text-lg font-medium"
-              >
-                Delivery Type
-              </label>
-              <Select value={deliveryType} onValueChange={setDeliveryType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select delivery type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Standard">Standard Shipping</SelectItem>
-                  <SelectItem value="Express">Express Shipping</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="my-4">
-              <label
-                htmlFor="paymentMethod"
-                className="block text-lg font-medium"
-              >
-                Payment Method
-              </label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="credit_card">Credit Card</SelectItem>
-                  <SelectItem value="debit_card">Debit Card</SelectItem>
-                  <SelectItem value="paypal">PayPal</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Location Details */}
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Location Details</h2>
-            <div className="my-4">
-              <label
-                htmlFor="locationType"
-                className="block text-lg font-medium"
-              >
-                Location Type
-              </label>
-              <Select value={locationType} onValueChange={setLocationType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select location type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="home">Home</SelectItem>
-                  <SelectItem value="work">Work</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="my-4">
-              <label htmlFor="location" className="block text-lg font-medium">
-                Address
-              </label>
-              <Input
-                type="text"
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Enter full address"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowPurchaseConfirm(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handlePurchase}
-              className="bg-orange-400 hover:bg-orange-500 text-white"
-            >
-              Buy Now
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {alertMessage && (
+        <Alert
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+        >
+          <AlertTitle>
+            {alertMessage.type === "success" ? "Success" : "Error"}
+          </AlertTitle>
+          <AlertDescription>{alertMessage.message}</AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 }

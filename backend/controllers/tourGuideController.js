@@ -40,19 +40,23 @@ const updateTourGuide = async (req, res) => {
       return res.status(404).json({ message: "Tour Guide not found" });
     }
 
-    const {
-      name,
-      email,
-      username,
-      nationality,
-      mobile,
-      yearsOfExperience,
-      previousWorks,
-    } = req.body; // Data to update
+    const { name, nationality, mobile, yearsOfExperience, previousWorks } =
+      req.body; // Data to update
     const { id } = req.params;
+    let { email, username } = req.body;
+    username = username.toLowerCase();
+    email = email.toLowerCase();
 
+    if (username !== tourGuide1.username && (await usernameExists(username))) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+    if (email !== tourGuide1.email && (await emailExists(email))) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
 
-    let  profilePicture  =req.body.profilePicture? JSON.parse(req.body.profilePicture):undefined;
+    let profilePicture = req.body.profilePicture
+      ? JSON.parse(req.body.profilePicture)
+      : undefined;
 
     if (profilePicture === undefined) {
       profilePicture = null;
@@ -103,17 +107,15 @@ const updateTourGuideProfile = async (req, res) => {
       return res.status(404).json({ message: "Tour Guide not found" });
     }
 
-    const {
-      name,
-      email,
-      username,
-      nationality,
-      mobile,
-      yearsOfExperience,
-      previousWorks,
-    } = req.body;
+    const { name, nationality, mobile, yearsOfExperience, previousWorks } =
+      req.body;
+    let { email, username } = req.body;
+    username = username.toLowerCase();
+    email = email.toLowerCase();
 
-    let  profilePicture  =req.body.profilePicture? JSON.parse(req.body.profilePicture):undefined;
+    let profilePicture = req.body.profilePicture
+      ? JSON.parse(req.body.profilePicture)
+      : undefined;
 
     const nat = await Nationality.findOne({ _id: nationality });
 

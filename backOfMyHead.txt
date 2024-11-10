@@ -10,12 +10,12 @@
 - booking a transportation and flight using wallet actually uses the tourist's wallet 
 - enter removes available dates in create itinerary(done) Amy
 - categories and tags are optional in create activity inside create itinerary 
-- max price in price sliders (in activity, itineraries, preferences, products) by fetching the max price from the backend
-- sort by preferences is activated on its own after being toggled off
+- max price in price sliders (in activity, itineraries, preferences, products) by fetching the max price from the backend(done)radwa w sam
+- sort by preferences is activated on its own after being toggled off(done)sam
 - photos don't appear in wishlist  (DONE -HAZEM)
-- pop up when deleting an activity or itinerary fails because there are existing bookings(done for activity)
+- pop up when deleting an activity or itinerary fails because there are existing bookings(done)
 - hours and minutes input in add transportation and edit transportation
--filter price products msh shghal
+-filter price products msh shghal(done)
 -page my products darba(done)Amy
 -archive products filter msh shghal(done)habiba
 

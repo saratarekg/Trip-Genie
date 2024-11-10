@@ -235,16 +235,13 @@ const activitySchema = z.object({
   description: z.string().min(1, "Description is required"),
   location: z.object({
     address: z.string().min(1, "Address is required"),
-    coordinates: z.object({
-      longitude: z.number(),
-      latitude: z.number(),
-    }),
   }),
   duration: z.number().min(1, "Duration is required"),
   activityTime: z.string().min(1, "Time is required"),
   activityDate: z.string().optional(), // New field for non-repeated itineraries
   tags: z.array(z.string()).min(1, "Choose at least one Tag"),
   category: z.array(z.string()).min(1, "Choose at least one Category"),
+  day: z.number().min(1, "Day is required"),
 })
 
 const formSchema = z.object({
@@ -261,11 +258,11 @@ const formSchema = z.object({
     )
     .min(1, "At least one date is required"),
   accessibility: z.boolean(),
-  isRepeated: z.boolean(),
+  // isRepeated: z.boolean(),
 })
 
-const ActivityForm = ({ onSave, onClose, initialData = null, isRepeated, itineraryDate }) => {
-  console.log(itineraryDate);
+const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) => {
+  // console.log(itineraryDate);
   const [tags, setTags] = useState([]);
   const [category, setCategory] = useState([]);
   const [pictures, setPictures] = useState([]);
@@ -346,12 +343,12 @@ const ActivityForm = ({ onSave, onClose, initialData = null, isRepeated, itinera
   };
 
   const handleAddActivity = (data) => {
-    console.log("Activity data:", data)
+    // console.log("Activity data:", data)
     const newActivity = {
       ...data,
-      timing: isRepeated
-        ? itineraryDate + "T" + data.activityTime
-        : data.activityDate + "T" + data.activityTime,
+      // timing: isRepeated
+      //   ? itineraryDate + "T" + data.activityTime
+      //   : data.activityDate + "T" + data.activityTime,
     }
     onSave(newActivity)
     onClose()
@@ -359,13 +356,31 @@ const ActivityForm = ({ onSave, onClose, initialData = null, isRepeated, itinera
 
   return (
     <form onSubmit={handleSubmit(handleAddActivity)} className="space-y-4">
-      <div>
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" {...register("name")} />
-        {errors.name && (
-          <p className="text-red-500 text-xs">{errors.name.message}</p>
-        )}
+      <div className="flex space-x-4">
+        <div className="flex-1">
+          <Label htmlFor="day" className="text-sm font-medium">
+            Day
+          </Label>
+          <Input
+            id="day"
+            type="number"
+            min="1"
+            {...register("day", { valueAsNumber: true })}
+          />
+          {errors.day && (
+            <p className="text-red-500 text-xs">{errors.numberOfDays.message}</p>
+          )}
+        </div>
+
+        <div className="flex-1">
+          <Label htmlFor="name">Name</Label>
+          <Input id="name" {...register("name")} />
+          {errors.name && (
+            <p className="text-red-500 text-xs">{errors.name.message}</p>
+          )}
+        </div>
       </div>
+
 
       <div>
         <Label htmlFor="description">Description</Label>
@@ -387,35 +402,11 @@ const ActivityForm = ({ onSave, onClose, initialData = null, isRepeated, itinera
 
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <Label htmlFor="longitude">Longitude</Label>
-          <Input
-            id="longitude"
-            type="number"
-            step="any"
-            {...register("location.coordinates.longitude", {
-              valueAsNumber: true,
-            })}
-          />
-        </div>
-        <div>
-          <Label htmlFor="latitude">Latitude</Label>
-          <Input
-            id="latitude"
-            type="number"
-            step="any"
-            {...register("location.coordinates.latitude", {
-              valueAsNumber: true,
-            })}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div>
           <Label htmlFor="duration">Duration (minutes)</Label>
           <Input
             id="duration"
             type="number"
+            min='0'
             {...register("duration", { valueAsNumber: true })}
           />
           {errors.duration && (
@@ -433,7 +424,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, isRepeated, itinera
         </div>
       </div>
 
-      {!isRepeated && (
+      {/* {(
         <div>
           <Label htmlFor="activityDate">Activity Date</Label>
           <Input
@@ -448,7 +439,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, isRepeated, itinera
             </p>
           )}
         </div>
-      )}
+      )} */}
 
 
       <div className="grid grid-cols-2 gap-2"></div>
@@ -581,12 +572,13 @@ const ItineraryForm = () => {
       dropOffLocation: "",
       availableDates: [{ date: "" }],
       accessibility: false,
-      isRepeated: false,
+      day: 1,
+      // isRepeated: false,
     },
   })
 
   const availableDates = watch("availableDates")
-  const isRepeated = watch("isRepeated")
+  // const isRepeated = watch("isRepeated")
   const itineraryDate = watch("availableDates[0].date")
 
   const handleCreateItinerary = async (data) => {
@@ -609,29 +601,28 @@ const ItineraryForm = () => {
         return;
       }
 
-      if (data.availableDates.length > 1 && !data.isRepeated) {
-        setError(
-          "If the itinerary is not repeated you can only choose one date."
-        );
-        setLoading(false);
-        return;
-      }
+      // if (data.availableDates.length > 1 && !data.isRepeated) {
+      //   setError(
+      //     "If the itinerary is not repeated you can only choose one date."
+      //   );
+      //   setLoading(false);
+      //   return;
+      // }
 
-      if (!isRepeated) {
-        const activitiesWithoutDate = activities.filter(
-          (activity) => !activity.activityDate // Check if activityDate is missing for non-repeated itinerary
-        );
+      // if (!isRepeated) {
+        // const activitiesWithoutDate = activities.filter(
+        //   (activity) => !activity.activityDate // Check if activityDate is missing for non-repeated itinerary
+        // );
       
-        if (activitiesWithoutDate.length > 0) {
-          const activityTitles = activitiesWithoutDate
-            .map((activity) => activity.name)
-            .join(", ");
+        // if (activitiesWithoutDate.length > 0) {
+        //   const activityTitles = activitiesWithoutDate
+        //     .map((activity) => activity.name)
+        //     .join(", ");
       
-          setError(`Error: ${activityTitles} ${activitiesWithoutDate.length > 1 ? 'have' : 'has'} no date set.`);
-          setLoading(false);
-          return;
-        }
-      }
+        //   setError(`Error: ${activityTitles} ${activitiesWithoutDate.length > 1 ? 'have' : 'has'} no date set.`);
+        //   setLoading(false);
+        //   return;
+        // }
 
       // if (!(data.isRepeated)) {
       //   const itineraryDate = data.availableDates[0]?.date; // Assuming itineraryDate is the first available date
@@ -645,9 +636,54 @@ const ItineraryForm = () => {
       //     }
       //   });
       // }
-  
-      
-      
+
+
+        // Sort activities by day and then by start time
+          activities.sort((a, b) => {
+            if (a.day === b.day) {
+              return new Date(a.activityTime) - new Date(b.activityTime);
+            }
+            return a.day - b.day;
+          });
+
+          const overlappingActivities = [];
+
+          // Loop through the activities and check for overlaps within the same day
+          for (let i = 0; i < activities.length - 1; i++) {
+            const currentActivity = activities[i];
+            const nextActivity = activities[i + 1];
+
+            // Only check for overlaps if they are on the same day
+            if (currentActivity.day === nextActivity.day) {
+              const currentEndTime = new Date(currentActivity.activityTime);
+              currentEndTime.setMinutes(currentEndTime.getMinutes() + currentActivity.duration);
+
+              console.log(currentActivity.activityTime);
+              console.log(nextActivity.activityTime);
+              console.log(currentEndTime);
+
+              const nextStartTime = new Date(nextActivity.activityTime);
+
+              // Check if the next activity starts before the current one ends
+              if (nextStartTime < currentEndTime) {
+                overlappingActivities.push({
+                  current: currentActivity,
+                  next: nextActivity,
+                });
+              }
+            }
+          }
+
+          if (overlappingActivities.length > 0) {
+            const errorMessage = overlappingActivities.map(({ current, next }) =>
+              `Activity "${current.name}" overlaps with "${next.name}" on day ${current.day}`
+            ).join('\n');
+            
+            setError(`Error: Overlapping activities detected:\n${errorMessage}`);
+          } else {
+            console.log("No overlapping activities found.");
+          }
+
 
       const token = Cookies.get("jwt");
       const role = Cookies.get("role") || "guest";
@@ -662,7 +698,7 @@ const ItineraryForm = () => {
       formData.append("accessibility", data.accessibility);
       formData.append("availableDates", JSON.stringify(data.availableDates));
       formData.append("activities", JSON.stringify(activities));
-      formData.append("isRepeated", data.isRepeated);
+      // formData.append("isRepeated", data.isRepeated);
       activities?.forEach((activity, index) => {
         activity?.pictures?.forEach((file, fileIndex) => {
           formData.append(`activities[${index}][pictures][${fileIndex}]`, file);
@@ -715,7 +751,7 @@ const ItineraryForm = () => {
 
   const handleEditActivity = (index) => {
     const activityToEdit = activities[index];
-    const dateTime = new Date(activityToEdit.timing);
+    // const dateTime = new Date(activityToEdit.timing);
     setEditingActivityIndex(index);
     setShowActivityForm(true);
   };
@@ -725,12 +761,11 @@ const ItineraryForm = () => {
     setValue("activities", updatedActivities);
   };
 
-  const addDate = () => {
-    // Allow adding dates only if isRepeated is true or if no dates have been added yet
-    if (isRepeated || availableDates.length === 0) {
+  const addDate = (e) => {
+    e.preventDefault(); 
       setValue("availableDates", [...availableDates, { date: "" }]);
-    }
   };
+
 
   const removeDate = (dateIndex) => {
     const newDates = [...availableDates];
@@ -875,35 +910,8 @@ const ItineraryForm = () => {
                   </p>
                 )}
               </div>
-              <div className="col-span-2 flex flex-col space-y-1">
-  <div className="flex items-center space-x-2">
-    <Controller
-      name="isRepeated"
-      control={control}
-      render={({ field }) => (
-        <Checkbox
-          id="isRepeated"
-          checked={field.value}
-          onCheckedChange={field.onChange}
-        />
-      )}
-    />
-    <Label htmlFor="isRepeated" className="text-sm font-medium">
-      Repeatable Itinerary
-    </Label>
-  </div>
-  
-  {/* Explanation text below checkbox */}
-  <p className="text-sm text-gray-600">
-    {isRepeated
-      ? "If the itinerary is repeated, it means it's a one-day itinerary and can be repeated on other days. You only need to pick the activity times."
-      : "If the itinerary is not repeated, then it can span over multiple days but it only occurs once. You'll need to specify dates for each activity."}
-  </p>
-</div>
-
-
               <div className="col-span-2 flex items-center space-x-2">
-                <Controller
+              <Controller
                   name="accessibility"
                   control={control}
                   render={({ field }) => (
@@ -917,6 +925,36 @@ const ItineraryForm = () => {
                 <Label htmlFor="accessibility" className="text-sm font-medium">
                   Accessible for Disabled
                 </Label>
+                </div> 
+
+
+              <div className="col-span-2 flex items-center space-x-2">
+                {/* 
+                <div className="flex items-center space-x-2">
+                  <Controller
+                    name="isRepeated"
+                    control={control}
+                    render={({ field }) => (
+                      <Checkbox
+                        id="isRepeated"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Label htmlFor="isRepeated" className="text-sm font-medium">
+                    Repeatable Itinerary
+                  </Label>
+                </div> */}
+  
+                {/* Explanation text below checkbox */}
+                {/* <p className="text-sm text-gray-600">
+                  {isRepeated
+                    ? "If the itinerary is repeated, it means it's a one-day itinerary and can be repeated on other days. You only need to pick the activity times."
+                    : "If the itinerary is not repeated, then it can span over multiple days but it only occurs once. You'll need to specify dates for each activity."}
+                </p> 
+                */}
+                
               </div>
 
               <div className="col-span-2 space-y-4 p-4 border rounded">
@@ -957,7 +995,7 @@ const ItineraryForm = () => {
                       )}
                     />
                     {/* Show remove button only if isRepeated is true or there's more than one date */}
-                    {(isRepeated || availableDates.length > 1) && (
+                    {(availableDates.length > 1) && (
                       <Button
                         variant="destructive"
                         size="icon"
@@ -971,7 +1009,7 @@ const ItineraryForm = () => {
                 ))}
 
                 {/* Show add date button only if isRepeated is true or no dates have been added */}
-                {(isRepeated || availableDates.length === 0) && (
+                {(
                   <Button variant="outline" onClick={addDate} className="mt-2">
                     <Plus className="mr-2 h-4 w-4" /> Add Date
                   </Button>
@@ -1104,7 +1142,7 @@ const ItineraryForm = () => {
                   ? activities[editingActivityIndex]
                   : null
               }
-              isRepeated={isRepeated}
+              // isRepeated={isRepeated}
               itineraryDate={itineraryDate}
             />
           </ScrollArea>

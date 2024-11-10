@@ -164,6 +164,10 @@ const deleteHistoricalPlace = async (req, res) => {
     const { id } = req.params;
     const museum = await Museum.findById(id);
 
+    if (!museum) {
+      return res.status(404).json({ message: "Historical Place not found" });
+    }
+
     if (museum.governor.toString() != res.locals.user_id) {
       return res.status(403).json({
         message: "You are not authorized to delete this historical place",
@@ -176,9 +180,7 @@ const deleteHistoricalPlace = async (req, res) => {
     }
 
     const museum2 = await Museum.findByIdAndDelete(id);
-    if (!museum2) {
-      return res.status(404).json({ message: "Historical Place not found" });
-    }
+
     res.status(200).json({ message: "Historical Place deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });

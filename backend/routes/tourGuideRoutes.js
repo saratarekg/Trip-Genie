@@ -25,6 +25,9 @@ router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/maxPriceActivities", activityController.getMaxPrice);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
+router.get("/max-price-itinerary", itineraryController.getMaxPrice);
+router.get("/max-price-itinerary-my", itineraryController.getMaxPriceMy);
+
 // Route for updating a tour guide by ID
 router.put("/", upload.single("profilePicture"), updateTourGuideProfile);
 router.get("/tour-guide/:id", getTourGuideByID);

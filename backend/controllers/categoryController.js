@@ -92,6 +92,11 @@ const deleteCategory = async (req, res) => {
       { $pull: { categories: req.params.id } } // Remove the category from the array
     );
 
+    await Itinerary.updateMany(
+      { "activities.category": req.params.id }, // Find itineraries with activities that have this category
+      { $pull: { "activities.$[].category": req.params.id } } // Remove the category from the array
+    );
+
     res
       .status(201)
       .json({ message: "Category deleted and removed from activities" });
