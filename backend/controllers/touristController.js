@@ -54,14 +54,11 @@ const updateTourist = async (req, res) => {
     const tourist1 = await Tourist.findById(res.locals.user_id).lean();
     let picture = tourist1.profilePicture;
 
-    const {
-      username,
-      email,
-      nationality,
-      mobile,
-      jobOrStudent,
-      profilePicture,
-    } = req.body; // Data to update
+    const { nationality, mobile, jobOrStudent, profilePicture } = req.body; // Data to update
+
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
 
     if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
@@ -194,14 +191,10 @@ const updateTouristProfile = async (req, res) => {
     console.log(tourist1);
     let picture = tourist1.profilePicture;
     console.log(picture);
-    const {
-      email,
-      username,
-      nationality,
-      mobile,
-      jobOrStudent,
-      profilePicture,
-    } = req.body;
+    const { nationality, mobile, jobOrStudent, profilePicture } = req.body;
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
 
     if (username !== tourist1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });

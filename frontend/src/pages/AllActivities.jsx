@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Cookies from "js-cookie";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import FilterComponent from "../components/FilterActivities.jsx";
@@ -224,6 +224,9 @@ export function AllActivitiesComponent() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const isInitialMount = useRef(true);
+  const fetchActivitiesRef = useRef(null);
+  const searchActivitiesRef = useRef(null);
   
   const fetchExchangeRates = useCallback(async () => {
     try {
@@ -413,6 +416,8 @@ export function AllActivitiesComponent() {
   );
 
   const fetchActivities = useCallback(async () => {
+    if (fetchActivitiesRef.current) return;
+    fetchActivitiesRef.current = true;
     try {
       setIsLoading(true);
       const token = Cookies.get("jwt");
@@ -457,28 +462,16 @@ export function AllActivitiesComponent() {
       fetchMaxPrice();
 
 
-      if (token) {
-        const decodedToken = jwtDecode(token);
-        setUserInfo({
-          role,
-          preferredCurrency: currencyResponse.data,
-          userId: decodedToken.id
-        });        
-      }
-      else{
-        setUserInfo({
-          role,
-          preferredCurrency: currencyResponse.data
-        }); 
-      }
 
       setError(null);
-      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching activities:", error);
       setError("Error fetching activities");
       setActivities([]);
+    }
+    finally {
       setIsLoading(false);
+      fetchActivitiesRef.current = false;
     }
   }, [userInfo, isSortedByPreference]);
 
@@ -505,6 +498,9 @@ export function AllActivitiesComponent() {
 
   const searchActivities = async () => {
     setIsSortedByPreference(false);
+    if (searchActivitiesRef.current) return;
+    searchActivitiesRef.current = true;
+
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/activities`);
@@ -515,7 +511,7 @@ export function AllActivitiesComponent() {
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
       }
-      if (priceRange[0] !== 0 || priceRange[1] !== 1000) {
+      if (priceRange[0] !== 0 || priceRange[1] !== maxPriceOfActivities) {
         url.searchParams.append("minPrice", priceRange[0]);
         url.searchParams.append("price", priceRange[1]);
       }
@@ -563,6 +559,10 @@ export function AllActivitiesComponent() {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
       setActivities([]);
+    }
+    finally {
+      setIsLoading(false);
+      searchActivitiesRef.current = false;
     }
   };
 
@@ -614,6 +614,13 @@ export function AllActivitiesComponent() {
       setActivityToDelete(null);
     }
   };
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      fetchActivities();
+    }
+  }, [fetchActivities]);
 
 
   const fetchActivitiesByPreference = useCallback(async () => {
@@ -686,7 +693,7 @@ export function AllActivitiesComponent() {
 
   const clearFilters = useCallback(() => {
     setSearchTerm("");
-    setPriceRange([0, 1000]);
+    setPriceRange([0, maxPriceOfActivities]);
     setDateRange({ start: "", end: "" });
     setSelectedCategories([]);
     setSortBy("");

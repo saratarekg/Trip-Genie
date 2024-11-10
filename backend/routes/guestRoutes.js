@@ -15,6 +15,7 @@ router.get('/getCurrency/:id', currencyController.getCurrencyById);
 router.get("/itineraries", itineraryController.getAllItineraries);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 router.get("/tour-guide/:id", tourguideController.getTourGuideByID);
+router.get("/max-price-itinerary", itineraryController.getMaxPrice);
 
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);

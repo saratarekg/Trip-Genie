@@ -13,9 +13,11 @@ function DualHandleSliderComponent({
   colorRing = "orange",
 }) 
 {
-console.log(min);
-console.log(values[1]);
-console.log(step);
+// console.log(min);
+// console.log(max);
+// console.log(values[1]);
+// console.log(step);
+// console.log(exchangeRate);
 
   return (
     <div className="w-full px-4 py-8">

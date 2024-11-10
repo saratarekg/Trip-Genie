@@ -21,6 +21,7 @@ const FilterComponent = ({
   priceRange,
   setPriceRange,
   maxPrice,
+  exchangeRate,
   myItineraries,
   handlemyItineraries,
   setPrice,
@@ -192,8 +193,9 @@ const FilterComponent = ({
                 min={0}
                 max={maxPrice}
                 symbol={symbol}
-                step={Math.max(1, Math.ceil(maxPrice / 100))}
+                step={Math.max(1, Math.ceil((maxPrice* exchangeRate) / 100))}
                 values={priceRange}
+                exchangeRate={exchangeRate}
                 middleColor="#2563EB"
                 colorRing="blue"
                 onChange={(values) => setPriceRange(values)}
