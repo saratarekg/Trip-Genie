@@ -1,14 +1,12 @@
 const HistoricalTag = require("../models/historicalTags");
 const HistoricalPlace = require("../models/historicalPlaces");
 
-const addHistoricalTag  = async(req, res) => {
+const addHistoricalTag = async (req, res) => {
   const { type } = req.body;
-  if (!type ) {
-    return res
-      .status(400)
-      .json({ message: "Please provide a type " });
+  if (!type) {
+    return res.status(400).json({ message: "Please provide a type " });
   }
-  
+
   if (await HistoricalTag.findOne({ type })) {
     return res.status(400).json({ message: "Historical tag already exists" });
   }
@@ -28,10 +26,8 @@ const addHistoricalTag  = async(req, res) => {
 const updateHistoricalTag = async (req, res) => {
   try {
     const { type } = req.body;
-    if (!type ) {
-      return res
-        .status(400)
-        .json({ message: "Please provide a type " });
+    if (!type) {
+      return res.status(400).json({ message: "Please provide a type " });
     }
     if (await HistoricalTag.findOne({ type })) {
       return res.status(400).json({ message: "Historical tag already exists" });
@@ -95,21 +91,11 @@ const getAllHistoricalTypes = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-const getAllHistoricalPeriods = async (req, res) => {
-  try {
-    const tag = await HistoricalTag.find();
-    const types = tag.map((HistoricalTag) => HistoricalTag.period);
-    res.status(200).json(types);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
 
 module.exports = {
   addHistoricalTag,
   deleteTag,
   getAlltags,
   getAllHistoricalTypes,
-  getAllHistoricalPeriods,
   updateHistoricalTag,
 };

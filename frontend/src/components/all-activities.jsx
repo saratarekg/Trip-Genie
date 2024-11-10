@@ -1,15 +1,38 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react"
-import { Search, ChevronLeft, ChevronRight, Star, Filter, ArrowUpDown, Heart, Edit, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Range as RangeSlider, getTrackBackground } from "react-range"
-import axios from "axios"
-import Cookies from "js-cookie"
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  Filter,
+  ArrowUpDown,
+  Heart,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Range as RangeSlider, getTrackBackground } from "react-range";
+import axios from "axios";
+import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import activityImage from "../assets/images/activity.png";
 
 let exchangeRateForFilter = 1;
 
@@ -46,7 +69,8 @@ const DualHandleSliderComponent = ({
                   min,
                   max,
                 }),
-              }}>
+              }}
+            >
               {children}
             </div>
           );
@@ -62,7 +86,8 @@ const DualHandleSliderComponent = ({
                 ...props.style,
                 height: 20,
                 width: 20,
-              }}>
+              }}
+            >
               <div className={`w-2 h-2 bg-${colorRing}-500 rounded-full`} />
             </div>
           );
@@ -88,7 +113,10 @@ const AllActivities = () => {
   const [maxPriceOfActivities, setMaxPriceOfActivities] = useState(0);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfActivities]);
   const [maxPrice, setMaxPrice] = useState(maxPriceOfActivities);
-  const [initialPriceRange, setInitialPriceRange] = useState([0, maxPriceOfActivities]);
+  const [initialPriceRange, setInitialPriceRange] = useState([
+    0,
+    maxPriceOfActivities,
+  ]);
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const [activities, setActivities] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -152,13 +180,13 @@ const AllActivities = () => {
       setIsLoading(true);
       const token = Cookies.get("jwt");
       const api = `http://localhost:4000/${role}/activities`;
-      
+
       const response = await axios.get(api, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       setActivities(response.data);
       setError(null);
     } catch (err) {
@@ -220,9 +248,17 @@ const AllActivities = () => {
   );
 
   const ActivityCard = React.memo(
-    ({ activity, onSelect, userInfo, exchangeRates, currencies, onDeleteConfirm, setShowDeleteConfirm }) => {
+    ({
+      activity,
+      onSelect,
+      userInfo,
+      exchangeRates,
+      currencies,
+      onDeleteConfirm,
+      setShowDeleteConfirm,
+    }) => {
       const role = Cookies.get("role") || "guest";
-      
+
       return (
         <Card
           className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
@@ -280,28 +316,29 @@ const AllActivities = () => {
               ))}
             </div>
           </CardFooter>
-          {role === "advertiser" && userInfo?.userId === activity.advertiser && (
-            <div className="absolute top-2 right-2 flex space-x-2">
-              <button
-                className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.location.href = `/update-activity/${activity._id}`;
-                }}
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-              <button
-                className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteConfirm(activity);
-                }}
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          )}
+          {role === "advertiser" &&
+            userInfo?.userId === activity.advertiser && (
+              <div className="absolute top-2 right-2 flex space-x-2">
+                <button
+                  className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = `/update-activity/${activity._id}`;
+                  }}
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteConfirm(activity);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            )}
         </Card>
       );
     }
@@ -311,43 +348,55 @@ const AllActivities = () => {
     setPriceRange(values);
   };
 
-  const formatPrice = useCallback((price, activity) => {
-    if (!userInfo || !price) return "";
+  const formatPrice = useCallback(
+    (price, activity) => {
+      if (!userInfo || !price) return "";
 
-    if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
-      const baseRate = exchangeRates[activity.currency] || 1;
-      const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
-      const exchangedPrice = (price / baseRate) * targetRate;
-      exchangeRateForFilter = targetRate / baseRate;
-      return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-    } else {
-      const currency = currencies.find((c) => c._id === activity.currency);
-      return `${currency ? currency.symbol : "$"}${price}`;
-    }
-  }, [userInfo, exchangeRates, currencies]);
+      if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
+        const baseRate = exchangeRates[activity.currency] || 1;
+        const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
+        const exchangedPrice = (price / baseRate) * targetRate;
+        exchangeRateForFilter = targetRate / baseRate;
+        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
+          2
+        )}`;
+      } else {
+        const currency = currencies.find((c) => c._id === activity.currency);
+        return `${currency ? currency.symbol : "$"}${price}`;
+      }
+    },
+    [userInfo, exchangeRates, currencies]
+  );
 
   const filteredActivities = useMemo(() => {
     return activities.filter((activity) => {
-      const matchesSearch = activity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.description.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesPrice = activity.price >= priceRange[0] && activity.price <= priceRange[1]
-      const matchesRating = selectedRating ? activity.rating >= selectedRating : true
-      const matchesCategories = selectedCategories.length === 0 || 
-        activity.category?.some(cat => selectedCategories.includes(cat.name))
+      const matchesSearch =
+        activity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        activity.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesPrice =
+        activity.price >= priceRange[0] && activity.price <= priceRange[1];
+      const matchesRating = selectedRating
+        ? activity.rating >= selectedRating
+        : true;
+      const matchesCategories =
+        selectedCategories.length === 0 ||
+        activity.category?.some((cat) => selectedCategories.includes(cat.name));
 
-      return matchesSearch && matchesPrice && matchesRating && matchesCategories
+      return (
+        matchesSearch && matchesPrice && matchesRating && matchesCategories
+      );
     });
-  }, [activities, searchTerm, priceRange, selectedRating, selectedCategories])
+  }, [activities, searchTerm, priceRange, selectedRating, selectedCategories]);
 
   const sortedActivities = useMemo(() => {
-    const sorted = [...filteredActivities]
-    if (sortBy === 'price') {
-      sorted.sort((a, b) => sortOrder * (a.price - b.price))
-    } else if (sortBy === 'rating') {
-      sorted.sort((a, b) => sortOrder * (b.rating - a.rating))
+    const sorted = [...filteredActivities];
+    if (sortBy === "price") {
+      sorted.sort((a, b) => sortOrder * (a.price - b.price));
+    } else if (sortBy === "rating") {
+      sorted.sort((a, b) => sortOrder * (b.rating - a.rating));
     }
-    return sorted
-  }, [filteredActivities, sortBy, sortOrder])
+    return sorted;
+  }, [filteredActivities, sortBy, sortOrder]);
 
   const memoizedActivityCards = useMemo(() => {
     return sortedActivities
@@ -371,7 +420,7 @@ const AllActivities = () => {
     exchangeRates,
     handleActivitySelect,
     renderStars,
-    formatPrice
+    formatPrice,
   ]);
 
   const fetchMaxPrice = async () => {
@@ -435,7 +484,7 @@ const AllActivities = () => {
 
         setUserInfo({
           role,
-          preferredCurrency: currencyResponse.data
+          preferredCurrency: currencyResponse.data,
         });
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -446,7 +495,7 @@ const AllActivities = () => {
         const decodedToken = jwtDecode(token);
         setUserInfo({
           role,
-          userId: decodedToken.id
+          userId: decodedToken.id,
         });
       } else {
         setUserInfo({ role });
@@ -460,10 +509,10 @@ const AllActivities = () => {
         fetchUserInfo(),
         fetchExchangeRates(),
         fetchCurrencies(),
-        fetchMaxPrice()
+        fetchMaxPrice(),
       ]);
     };
-    
+
     initializeData();
   }, []);
 
@@ -512,19 +561,31 @@ const AllActivities = () => {
   };
 
   return (
-    (<div className="bg-gray-100">
+    <div className="bg-gray-100">
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
           <div className="flex-1">
-            <h1 className="text-5xl font-bold text-white mb-4">All Activities</h1>
+            <h1 className="text-5xl font-bold text-white mb-4">
+              All Activities
+            </h1>
             <p className="text-gray-200">
               <a
                 href="/"
-                className="font-bold text-gray-200 hover:text-gray-300 hover:underline">
+                className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
+              >
                 Home
               </a>{" "}
               / Activities
             </p>
+          </div>
+          <div className="hidden lg:block w-1/3">
+            <img
+              src={activityImage}
+              alt="Decorative"
+              height="300"
+              width="300"
+              className="ml-auto"
+            />
           </div>
         </div>
       </div>
@@ -536,13 +597,14 @@ const AllActivities = () => {
               <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button
                 onClick={() => {
-                  setPriceRange([0, 1000])
-                  setDateRange({ start: "", end: "" })
-                  setSelectedCategories([])
-                  setSelectedRating(null)
+                  setPriceRange([0, 1000]);
+                  setDateRange({ start: "", end: "" });
+                  setSelectedCategories([]);
+                  setSelectedRating(null);
                 }}
                 size="sm"
-                className="text-gray-400 hover:text-gray-200 bg-transparent border-none">
+                className="text-gray-400 hover:text-gray-200 bg-transparent border-none"
+              >
                 Clear All
               </Button>
             </div>
@@ -573,13 +635,19 @@ const AllActivities = () => {
                   <input
                     type="date"
                     value={dateRange.start}
-                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                    className="w-full p-2 border rounded" />
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, start: e.target.value })
+                    }
+                    className="w-full p-2 border rounded"
+                  />
                   <input
                     type="date"
                     value={dateRange.end}
-                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                    className="w-full p-2 border rounded" />
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, end: e.target.value })
+                    }
+                    className="w-full p-2 border rounded"
+                  />
                 </div>
               </div>
 
@@ -590,10 +658,15 @@ const AllActivities = () => {
                   {[5, 4, 3, 2, 1].map((rating) => (
                     <button
                       key={rating}
-                      onClick={() => setSelectedRating(rating === selectedRating ? null : rating)}
+                      onClick={() =>
+                        setSelectedRating(
+                          rating === selectedRating ? null : rating
+                        )
+                      }
                       className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
                         selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                      }`}>
+                      }`}
+                    >
                       {renderStars(rating)}
                     </button>
                   ))}
@@ -620,7 +693,10 @@ const AllActivities = () => {
                           }}
                           className="mr-2"
                         />
-                        <label htmlFor={category._id} className="text-sm text-gray-600">
+                        <label
+                          htmlFor={category._id}
+                          className="text-sm text-gray-600"
+                        >
                           {category.name}
                         </label>
                       </div>
@@ -640,7 +716,8 @@ const AllActivities = () => {
                   placeholder="Search activities..."
                   className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)} />
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
                 <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
               </div>
               <div className="flex justify-between items-center mb-6">
@@ -650,24 +727,34 @@ const AllActivities = () => {
                     size="sm"
                     className="whitespace-nowrap rounded-full"
                     onClick={() => {
-                      setSortBy("rating")
-                      setSortOrder((prev) => (prev === 1 ? -1 : 1))
-                    }}>
+                      setSortBy("rating");
+                      setSortOrder((prev) => (prev === 1 ? -1 : 1));
+                    }}
+                  >
                     <ArrowUpDown className="w-4 h-4 mr-2" />
                     Sort by Rating
-                    {sortBy === "rating" && <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>}
+                    {sortBy === "rating" && (
+                      <span className="ml-2">
+                        {sortOrder === 1 ? "↓" : "↑"}
+                      </span>
+                    )}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     className="whitespace-nowrap rounded-full"
                     onClick={() => {
-                      setSortBy("price")
-                      setSortOrder((prev) => (prev === 1 ? -1 : 1))
-                    }}>
+                      setSortBy("price");
+                      setSortOrder((prev) => (prev === 1 ? -1 : 1));
+                    }}
+                  >
                     <ArrowUpDown className="w-4 h-4 mr-2" />
                     Sort by Price
-                    {sortBy === "price" && <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>}
+                    {sortBy === "price" && (
+                      <span className="ml-2">
+                        {sortOrder === 1 ? "↓" : "↑"}
+                      </span>
+                    )}
                   </Button>
                   <Button
                     variant="outline"
@@ -675,11 +762,12 @@ const AllActivities = () => {
                     className={`whitespace-nowrap rounded-full ${
                       isSortedByPreference ? "bg-red-100" : ""
                     }`}
-                    onClick={handleSortByPreference}>
-                    <Heart 
+                    onClick={handleSortByPreference}
+                  >
+                    <Heart
                       className={`w-4 h-4 mr-2 ${
                         isSortedByPreference ? "fill-current text-red-500" : ""
-                      }`} 
+                      }`}
                     />
                     Sort by Preference
                   </Button>
@@ -693,7 +781,8 @@ const AllActivities = () => {
                     variant="outline"
                     size="icon"
                     className="md:hidden"
-                    onClick={() => setFiltersVisible(!filtersVisible)}>
+                    onClick={() => setFiltersVisible(!filtersVisible)}
+                  >
                     <Filter className="w-4 h-4" />
                   </Button>
                 </div>
@@ -718,7 +807,8 @@ const AllActivities = () => {
                 variant="outline"
                 size="icon"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}>
+                disabled={currentPage === 1}
+              >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-sm">
@@ -727,11 +817,15 @@ const AllActivities = () => {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => 
-                  setCurrentPage((prev) => 
-                    Math.min(prev + 1, Math.ceil(sortedActivities.length / 6)))
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(prev + 1, Math.ceil(sortedActivities.length / 6))
+                  )
                 }
-                disabled={currentPage === Math.ceil(sortedActivities.length / 6)}>
+                disabled={
+                  currentPage === Math.ceil(sortedActivities.length / 6)
+                }
+              >
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -742,14 +836,17 @@ const AllActivities = () => {
         <Alert
           className={`fixed bottom-4 right-4 w-96 ${
             alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}>
-          <AlertTitle>{alertMessage.type === "success" ? "Success" : "Error"}</AlertTitle>
+          } text-white`}
+        >
+          <AlertTitle>
+            {alertMessage.type === "success" ? "Success" : "Error"}
+          </AlertTitle>
           <AlertDescription>{alertMessage.message}</AlertDescription>
         </Alert>
       )}
-    </div>)
+    </div>
   );
-}
+};
 
-export const AllActivitiesComponent = AllActivities
-export default AllActivities
+export const AllActivitiesComponent = AllActivities;
+export default AllActivities;

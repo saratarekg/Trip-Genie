@@ -154,7 +154,6 @@ const updatePreferences = async (req, res) => {
       tourLanguages,
       tourType,
       historicalPlaceType,
-      historicalPlacePeriod,
     } = req.body; // Preferences to update
 
     // Update preferences
@@ -169,8 +168,6 @@ const updatePreferences = async (req, res) => {
         "preference.tourType": tourType ?? tourist1.preference.tourType,
         "preference.historicalPlaceType":
           historicalPlaceType ?? tourist1.preference.historicalPlaceType,
-        "preference.historicalPlacePeriod":
-          historicalPlacePeriod ?? tourist1.preference.historicalPlacePeriod,
       },
       { new: true, runValidators: true }
     );
@@ -511,7 +508,6 @@ const getWishlist = async (req, res) => {
     tourist.wishlist = tourist.wishlist.filter(
       (item) => !item.product.isDeleted && !item.product.isArchived
     );
-
 
     // Return the wishlist data
     res.status(200).json(tourist.wishlist);
