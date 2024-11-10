@@ -13,7 +13,7 @@
 - max price in price sliders (in activity, itineraries, preferences, products) by fetching the max price from the backend
 - sort by preferences is activated on its own after being toggled off
 - photos don't appear in wishlist  (DONE -HAZEM)
-- pop up when deleting an activity or itinerary fails because there are existing bookings(done for activity)
+- pop up when deleting an activity or itinerary fails because there are existing bookings(done)
 - hours and minutes input in add transportation and edit transportation
 -filter price products msh shghal
 -page my products darba(done)Amy
