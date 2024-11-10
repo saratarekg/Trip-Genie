@@ -60,15 +60,22 @@ const getAllProducts = async (req, res) => {
       return res.status(200).json({ products: [], maxPrice: 0 });
     }
 
-    // Calculate the max price of the products
-    const maxPriceOfProducts = Math.max(...products.map(product => product.price));
-    console.log("maximum:",maxPriceOfProducts);
-
-    // Return the products along with the max price of the products
-    res.status(200).json({ products, maxPrice: maxPriceOfProducts });
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+};
+
+// Function to get the maximum price from products
+const getMaxPrice = async (req, res) => {
+  const maxPriceProduct = await Product.findOne().sort({ price: -1 });
+  let maxPrice;
+  if(maxPriceProduct){
+  maxPrice = await maxPriceProduct.price;
+  } else {
+    maxPrice = 0;
+  }
+  res.status(200).json(maxPrice);
 };
 
 
@@ -871,4 +878,5 @@ module.exports = {
   archiveProduct,
   getAllProductsArchive,
   updateCommentOnProduct,
+  getMaxPrice,
 };
