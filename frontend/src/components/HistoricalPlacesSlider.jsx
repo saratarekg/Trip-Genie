@@ -93,7 +93,7 @@ export function HistoricalPlaces() {
                   <div className="absolute inset-0 rounded-2xl overflow-hidden">
                     <img
                       src={Array.isArray(place.pictures) && place.pictures.length > 0
-                        ? place.pictures[0]
+                        ? place.pictures[0].url
                         : defaultImage}
                       alt={place.title}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
