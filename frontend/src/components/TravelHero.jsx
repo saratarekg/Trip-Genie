@@ -4,7 +4,7 @@ import { ChevronUp, ChevronDown, Clock, Mountain, Twitter, Instagram, Facebook, 
 const images = [
   {
     src: "/images/travelHero(1).jpeg",
-    link: "/activity/6728f314ed7744e238999570",
+    link: "/activity/6730aa20d631fe670db3e832",
     title: "Explore The Majestic Mountains",
     icon: Mountain,
     info: "Experience breathtaking views year-round",
@@ -13,7 +13,7 @@ const images = [
   },
   {
     src: "/images/travelHero(2).jpeg",
-    link: "/activity/6728fc90ed7744e23899cd7f",
+    link: "/activity/6730abded631fe670db3f22f",
     title: "Arctic Dog Sledding Adventure",
     icon: Snowflake,
     info: "A dog sledding journey through snowy landscapes.",
@@ -22,7 +22,7 @@ const images = [
   },
   {
     src: "/images/travelHero(2).jpg",
-    link: "activity/6728fe42ed7744e23899da4b",
+    link: "activity/6730b24bd631fe670db46def",
     title: "Chase the Aurora Borealis by 4x4",
     icon:  Leaf,
     info: "Off-road journey under the mesmerizing green skies.",
@@ -31,7 +31,7 @@ const images = [
   },
   {
     src: "/images/travelHero(3).jpg",
-    link: "/activity/67290050ed7744e23899ec2d",
+    link: "/activity/6730b374d631fe670db47fa2",
     title: "Paddle Through Pristine Waters",
     icon: Sun, // Adjust icon to match the activity, if needed
     info: "Serene lake perfect for an unforgettable kayaking journey.",
@@ -40,7 +40,7 @@ const images = [
   },
   {
     src: "/images/travelHero(6).jpg",
-    link: "/activity/67290363ed7744e2389a1239",
+    link: "/activity/6730b4a5d631fe670db4870a",
     title: "Sail Through Majestic Peaks at Sunset",
     icon: Sun,
     info: "A tranquil boat ride framed by mountains and a breathtaking sunset.",
