@@ -286,25 +286,28 @@ export default function ProductArchive() {
               </h3>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-4">
-                  {products.slice(0, 3).map((product) => (
-                    <Link
-                      key={product._id}
-                      to={`/product/${product._id}`}
-                      className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-                    >
-                      <img
-                        src={product.pictures[0]?.url || defaultImage}
-                        alt={product.name}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                      <div>
-                        <h4 className="font-medium text-sm">{product.name}</h4>
-                        <div className="mt-1">
-                          {renderStars(product.rating)}
+                  {products.length > 0 &&
+                    products.slice(0, 3).map((product) => (
+                      <Link
+                        key={product._id}
+                        to={`/product/${product._id}`}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                      >
+                        <img
+                          src={product.pictures[0]?.url || defaultImage}
+                          alt={product.name}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                        <div>
+                          <h4 className="font-medium text-sm">
+                            {product.name}
+                          </h4>
+                          <div className="mt-1">
+                            {renderStars(product.rating)}
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
                 </div>
               </ScrollArea>
             </div>
@@ -377,18 +380,19 @@ export default function ProductArchive() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {products
-                    .slice(
-                      (currentPage - 1) * tripsPerPage,
-                      currentPage * tripsPerPage
-                    )
-                    .map((product) => (
-                      <ProductCard
-                        key={product._id}
-                        product={product}
-                        onSelect={handleProductSelect}
-                      />
-                    ))}
+                  {products.length > 0 &&
+                    products
+                      .slice(
+                        (currentPage - 1) * tripsPerPage,
+                        currentPage * tripsPerPage
+                      )
+                      .map((product) => (
+                        <ProductCard
+                          key={product._id}
+                          product={product}
+                          onSelect={handleProductSelect}
+                        />
+                      ))}
                 </div>
 
                 <div className="mt-8 flex justify-center items-center space-x-4">
