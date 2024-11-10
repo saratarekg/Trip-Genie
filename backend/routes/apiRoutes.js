@@ -14,10 +14,6 @@ router.get(
   "/getAllHistoricalTypes",
   historicaltagController.getAllHistoricalTypes
 );
-router.get(
-  "/getAllHistoricalPeriods",
-  historicaltagController.getAllHistoricalPeriods
-);
 
 router.get("/getAllLanguages", getAllLanguages);
 

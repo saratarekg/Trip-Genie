@@ -60,8 +60,8 @@ const getHistoricalPlace = async (req, res) => {
 
 const getAllHistoricalPlaces = async (req, res) => {
   try {
-    const { types, periods, myPlaces, searchBy } = req.query;
-    const filterResult = await Museum.filterByTag(types, periods);
+    const { types, myPlaces, searchBy } = req.query;
+    const filterResult = await Museum.filterByTag(types);
     const searchResult = await Museum.findByFields(searchBy);
 
     const searchResultIds = searchResult.map((place) => place._id);
@@ -189,8 +189,8 @@ const deleteHistoricalPlace = async (req, res) => {
 
 const filterHistoricalPlaces = async (req, res) => {
   try {
-    const { types, periods } = req.body;
-    const filterResult = await Museum.filterByTag(types, periods);
+    const { types } = req.body;
+    const filterResult = await Museum.filterByTag(types);
     const searchResult = await Museum.findByFields(searchBy);
 
     const searchResultIds = searchResult.map((place) => place._id);
