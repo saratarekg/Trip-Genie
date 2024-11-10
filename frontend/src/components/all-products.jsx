@@ -84,6 +84,7 @@ const ProductCard = ({
   const [exchangeRate, setExchangeRate] = useState(null)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
   const [isInWishlistLocal, setIsInWishlistLocal] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   const isInCart = cartItems.some((item) => item.product?._id === product._id)
   const isInWishlist = wishlistItems.some(
@@ -91,16 +92,19 @@ const ProductCard = ({
   )
 
   useEffect(() => {
-    if (
-      userInfo &&
-      userInfo.role === "tourist" &&
-      userInfo.preferredCurrency !== product.currency
-    ) {
-      fetchExchangeRate()
-    } else {
-      getCurrencySymbol()
-    }
-  }, [userInfo, product])
+    const initializeCard = async () => {
+      // Wait for currency and wishlist state to be set
+      await Promise.all([
+        userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency !== product.currency
+          ? fetchExchangeRate()
+          : getCurrencySymbol(),
+        setIsInWishlistLocal(wishlistItems.some(item => item.product._id === product._id))
+      ]);
+      setIsInitialized(true);
+    };
+
+    initializeCard();
+  }, [userInfo, product, wishlistItems]);
 
   const fetchExchangeRate = useCallback(async () => {
     if (userInfo && userInfo.role === "tourist") {
@@ -174,6 +178,10 @@ const ProductCard = ({
     )
     setIsInWishlistLocal(isInWishlist)
   }, [wishlistItems, product._id])
+
+  if (!isInitialized) {
+    return <div className="h-[400px] animate-pulse bg-gray-100 rounded-lg"></div>; // Loading placeholder
+  }
 
   return (
     <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
