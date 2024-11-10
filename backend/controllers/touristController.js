@@ -507,6 +507,12 @@ const getWishlist = async (req, res) => {
       return res.status(400).json({ message: "Tourist not found" });
     }
 
+    // if the product "isDeleted" or "isArchived" is true, remove it from the wishlist
+    tourist.wishlist = tourist.wishlist.filter(
+      (item) => !item.product.isDeleted && !item.product.isArchived
+    );
+
+
     // Return the wishlist data
     res.status(200).json(tourist.wishlist);
   } catch (error) {
@@ -529,6 +535,10 @@ const getCart = async (req, res) => {
     if (!tourist) {
       return res.status(400).json({ message: "Tourist not found" });
     }
+    // remove the product from the cart if it "isDeleted" or "isArchived" is true
+    tourist.cart = tourist.cart.filter(
+      (item) => !item.product.isDeleted && !item.product.isArchived
+    );
     // Return the cart data
     res.status(200).json(tourist.cart);
   } catch (error) {
