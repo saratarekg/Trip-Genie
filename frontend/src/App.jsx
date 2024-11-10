@@ -203,7 +203,7 @@ function AppContent() {
           />
 
           <Route
-            path="/hotels2"
+            path="/hotels"
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
                 <HotelSearch />
@@ -212,7 +212,7 @@ function AppContent() {
           />
 
           <Route
-            path="/hotels2/:hotelId"
+            path="/hotels/:hotelId"
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
                 <HotelDetails />
@@ -478,14 +478,6 @@ function AppContent() {
             }
           />
 
-          <Route
-            path="/hotels"
-            element={
-              <ProtectedRoute allowedRoles={["tourist"]}>
-                <HotelBookingPage />
-              </ProtectedRoute>
-            }
-          />
           <Route
             path="/product-archive"
             element={

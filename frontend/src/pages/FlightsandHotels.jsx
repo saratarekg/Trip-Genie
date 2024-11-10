@@ -329,11 +329,11 @@ const BookingForm = () => {
     <div className="mx-auto px-24 mb-24">
       <div className="text-center max-w-2xl mx-auto mb-4">
         <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">
-          Book Flights and Hotels
+          Book Flights
         </h1>
         <p className="text-[#1A3B47] mb-8">
-          Discover seamless travel planning with our booking options for flights
-          and hotels. Whether you're traveling for leisure or business, find the
+          Discover seamless travel planning with our booking options for flights.
+           Whether you're traveling for leisure or business, find the
           best deals, plan your perfect stay, and make your journey
           unforgettable. Start booking today!
         </p>
@@ -348,15 +348,6 @@ const BookingForm = () => {
             onClick={() => setActiveTab("flights")}
           >
             <Plane size={16} /> Flight
-          </button>
-          <button
-            style={{
-              ...styles.tab,
-              ...(activeTab === "hotels" ? styles.activeTab : {}),
-            }}
-            onClick={() => setActiveTab("hotels")}
-          >
-            <Building2 size={16} /> Hotel
           </button>
         </div>
 
@@ -529,65 +520,9 @@ const BookingForm = () => {
                 />
                 {/* <Calendar size={16} style={{ position: 'absolute', right: '8px', top: '8px', pointerEvents: 'none' }} /> */}
               </div>
-              <div style={styles.locationDisplay}>
-                {new Date(hotelForm.checkIn).toLocaleDateString("en-US", {
-                  weekday: "short",
-                  day: "2-digit",
-                  month: "short",
-                })}
-              </div>
             </div>
 
-            <div style={styles.fieldGroup}>
-              <label style={styles.label}>CHECK OUT</label>
-              <div style={{ position: "relative" }}>
-                <input
-                  type="date"
-                  style={styles.input}
-                  value={hotelForm.checkOut}
-                  min={hotelForm.checkIn}
-                  onChange={(e) =>
-                    handleFieldClick() &&
-                    setHotelForm({ ...hotelForm, checkOut: e.target.value })
-                  }
-                  required
-                />
-                {/* <Calendar size={16} style={{ position: 'absolute',   right: '8px', top: '8px', pointerEvents: 'none' }} /> */}
-              </div>
-              <div style={styles.locationDisplay}>
-                {new Date(hotelForm.checkOut).toLocaleDateString("en-US", {
-                  weekday: "short",
-                  day: "2-digit",
-                  month: "short",
-                })}
-              </div>
-            </div>
-
-            <div style={styles.fieldGroup}>
-              <label style={styles.label}>ADULTS</label>
-              <select
-                style={styles.select}
-                value={hotelForm.adults}
-                onChange={(e) =>
-                  handleFieldClick() &&
-                  setHotelForm({ ...hotelForm, adults: e.target.value })
-                }
-                required
-              >
-                <option value="1">1 Adult</option>
-                <option value="2">2 Adults</option>
-                <option value="3">3 Adults</option>
-                <option value="4">4 Adults</option>
-                <option value="5">5 Adults</option>
-                <option value="6">6 Adults</option>
-                <option value="7">7 Adults</option>
-                <option value="8">8 Adults</option>
-              </select>
-            </div>
-
-            <button type="submit" style={styles.button}>
-              Search Hotels <ArrowRight size={16} />
-            </button>
+           
           </form>
         </div>
 

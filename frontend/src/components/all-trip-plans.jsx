@@ -409,7 +409,6 @@ export function AllItinerariesComponent() {
       }
 
       setError(null);
-      setCurrentPage(1);
     } catch (error) {
       console.error("Error fetching sorted itineraries:", error);
       setError("Error fetching sorted itineraries. Please try again.");
