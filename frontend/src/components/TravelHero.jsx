@@ -125,7 +125,7 @@ export default function TravelHero({
               <h1 className="mb-6 text-6xl font-bold text-white">
                 {images[currentImage].title}
               </h1>
-              {(userRole === "tourist" || userRole === "tour-guide") && (
+              {(userRole === "tourist" || userRole === "tour-guide" || userRole === "guest") && (
   <>
     <div className="h-16"> {/* Fixed height container for button */}
       <a
@@ -138,6 +138,7 @@ export default function TravelHero({
     </div>
   </>
 )}
+
 
             </div>
 
