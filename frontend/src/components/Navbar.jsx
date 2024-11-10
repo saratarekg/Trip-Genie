@@ -51,7 +51,6 @@ export function NavbarComponent() {
   const activitiesRef = useRef(null);
   const historicalRef = useRef(null);
 
-
   const handleClickOutside = (event) => {
     if (
       !itinerariesRef.current?.contains(event.target) &&
@@ -137,7 +136,6 @@ export function NavbarComponent() {
             <div className="inline-flex items-center border-2 border-white/30 rounded-full px-2 py-1">
               {role === "tour-guide" && (
                 <>
-
                   <div className="relative" ref={itinerariesRef}>
                     <button
                       onClick={() => toggleDropdown("itineraries")}
@@ -238,7 +236,6 @@ export function NavbarComponent() {
                   </NavLink>
                   <NavLink to="/all-products">Products</NavLink>
                   <NavLink to="/transportation">Transportation</NavLink>
-
                 </>
               )}
               {role === "advertiser" && (
@@ -276,14 +273,13 @@ export function NavbarComponent() {
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                           onClick={closeDropdown}
                         >
-                          <PlusCircle className="mr-2 h-4 w-4" /> Create activities
+                          <PlusCircle className="mr-2 h-4 w-4" /> Create
+                          activities
                         </Link>
                       </div>
                     )}
                   </div>
                   <NavLink to="/transportation">Transportation</NavLink>
-
-                
                 </>
               )}
               {role === "admin" && (
@@ -338,8 +334,9 @@ export function NavbarComponent() {
                   </div>
                   {/* <NavLink to="/create-historical-tag">Create Historical Tag</NavLink> */}
 
-                  <NavLink to="/all-historical-places">Historical Places</NavLink>
-                
+                  <NavLink to="/all-historical-places">
+                    Historical Places
+                  </NavLink>
                 </div>
               )}
               {role === "tourism-governor" && (
@@ -363,26 +360,31 @@ export function NavbarComponent() {
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                           onClick={closeDropdown}
                         >
-                          <List className="mr-2 h-4 w-4" /> All Historical Places
+                          <List className="mr-2 h-4 w-4" /> All Historical
+                          Places
                         </Link>
                         <Link
                           to="/my-historical-places"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                           onClick={closeDropdown}
                         >
-                          <Folder className="mr-2 h-4 w-4" /> My Historical Places
+                          <Folder className="mr-2 h-4 w-4" /> My Historical
+                          Places
                         </Link>
                         <Link
                           to="/create-historicalPlace"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                           onClick={closeDropdown}
                         >
-                          <PlusCircle className="mr-2 h-4 w-4" /> Create Historical Place
+                          <PlusCircle className="mr-2 h-4 w-4" /> Create
+                          Historical Place
                         </Link>
                       </div>
                     )}
                   </div>
-                  <NavLink to="/create-historical-tag">Create Historical Tag</NavLink>
+                  <NavLink to="/create-historical-tag">
+                    Create Historical Tag
+                  </NavLink>
                 </>
               )}
               {(role === "guest" || role === undefined) && (
@@ -434,7 +436,7 @@ export function NavbarComponent() {
                   Sign up
                 </Link>
               </>
-            ) : role !== "admin" || role==="admin" ? (
+            ) : role !== "admin" || role === "admin" ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => toggleDropdown("userMenu")}
@@ -450,7 +452,7 @@ export function NavbarComponent() {
                       onClick={closeDropdown}
                     >
                       <User className="mr-2 h-4 w-4" />
-                      Settings & Privacy
+                      My account
                     </Link>
                     {role === "tourist" && (
                       <>
@@ -480,7 +482,7 @@ export function NavbarComponent() {
                         </Link>
                       </>
                     )}
-                    
+
                     <button
                       onClick={logOut}
                       className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
@@ -593,7 +595,6 @@ export function NavbarComponent() {
                     </div>
                   )}
                 </div>
-                
               </>
             )}
             {role === "seller" && (
@@ -704,7 +705,7 @@ export function NavbarComponent() {
                   onClick={closeDropdown}
                 >
                   <User className="mr-2 h-4 w-4" />
-                  Settings & Privacy
+                  My account
                 </Link>
                 {role === "tourist" && (
                   <>
