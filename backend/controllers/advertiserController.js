@@ -9,7 +9,6 @@ const { deleteActivity } = require("./activityController");
 const ActivityBooking = require("../models/activityBooking");
 const cloudinary = require("../utils/cloudinary");
 
-
 const deleteAdvertiserAccount = async (req, res) => {
   try {
     const advertiser = await Advertiser.findById(res.locals.user_id).lean();
@@ -187,13 +186,15 @@ const updateAdvertiser = async (req, res) => {
       });
     }
 
-    const { email, username, name, description, hotline, website } = req.body;
-    
-    let  logo  =req.body.logo? JSON.parse(req.body.logo):undefined;
+    const { name, description, hotline, website } = req.body;
+    let { email, username } = req.body;
+    email = email.toLowerCase();
+    username = username.toLowerCase();
+
+    let logo = req.body.logo ? JSON.parse(req.body.logo) : undefined;
 
     if (username !== advertiser1.username && (await usernameExists(username))) {
       return res.status(400).json({ message: "Username already exists" });
-
     }
     if (email !== advertiser1.email && (await emailExists(email))) {
       return res.status(400).json({ message: "Email already exists" });
@@ -202,27 +203,19 @@ const updateAdvertiser = async (req, res) => {
     if (logo === undefined) {
       logo = null;
       if (advertiser1.logo !== null) {
-
         await cloudinary.uploader.destroy(advertiser1.logo.public_id);
-
       }
     } else if (logo.public_id === undefined) {
-
       const result = await cloudinary.uploader.upload(logo, {
         folder: "logos",
       });
       if (advertiser1.logo !== null) {
-
-
         await cloudinary.uploader.destroy(advertiser1.logo.public_id);
-
       }
       logo = {
         public_id: result.public_id,
         url: result.secure_url,
       };
-
-
     }
     const advertiser = await Advertiser.findByIdAndUpdate(
       res.locals.user_id,
