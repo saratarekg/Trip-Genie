@@ -973,7 +973,6 @@ const AllActivities = () => {
                 </div>
               </div>
             </div>
-
             {isLoading ? (
               <div className="text-center py-8">Loading...</div>
             ) : error ? (
@@ -987,33 +986,37 @@ const AllActivities = () => {
             )}
 
             {/* Pagination */}
-            <div className="mt-8 flex justify-center items-center space-x-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm">
-                Page {currentPage} of {Math.ceil(sortedActivities.length / 6)}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(prev + 1, Math.ceil(sortedActivities.length / 6))
-                  )
-                }
-                disabled={
-                  currentPage === Math.ceil(sortedActivities.length / 6)
-                }
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
+            {sortedActivities.length > 0 && (
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm">
+                  Page {currentPage} of {Math.ceil(sortedActivities.length / 6)}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(prev + 1, Math.ceil(sortedActivities.length / 6))
+                    )
+                  }
+                  disabled={
+                    currentPage === Math.ceil(sortedActivities.length / 6)
+                  }
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
