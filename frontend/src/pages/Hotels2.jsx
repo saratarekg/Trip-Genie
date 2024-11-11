@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarIcon, BedDoubleIcon, UsersIcon, StarIcon } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-const API_KEY = import.meta.env.VITE_HOTELS_API_KEY;
+const API_KEY = import.meta.env.VITE_HOTELS_API_KEY2;
 const API_HOST = 'hotels-com-provider.p.rapidapi.com';
 
 export default function HotelSearch() {

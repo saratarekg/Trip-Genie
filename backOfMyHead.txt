@@ -6,11 +6,17 @@
 itinerary booking and view booking!!
 rate tourguide and itinerary cuz based on booking!!
 upload product picture
+- "already have an account?" fe sign up teb2a fe kol el stages (7otooha 3al shemal)
+- pagination bayez fe all trip plans
+- 2 comments shaklaha mot5alef
+- show complaint date in my complaints
 - SignUp , I accept and agree to the terms and conditions : the button is unclickable even though I have scrolled through all terms and conditions,
 I have to scroll for a second time for it to work. -Hazem
 
-- When I deleted seller account, I instantly got redirected out and received a popup with "account deleted" without waiting for a request 
-i can delete toursit account when he has a booked activity
+- When I deleted tourguide account, I instantly got redirected out and received a popup with "account deleted" without waiting for a request 
+- add comment to itinerary btegy baad rate based
+-attended itineraries btfdl fl upcoming w fl history
+- booking more than one tickets shows 2 entries in upcoming 1 with one booked ticket and one with 2 and they both go to history as welli can delete toursit account when he has a booked activity
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
 - Allow user to enter shipping address and delivery preferences once in settings and auto-fill them later

@@ -92,6 +92,7 @@ const touristSchema = new Schema(
     loyaltyBadge: {
       type: String,
       enum: ["Bronze", "Silver", "Gold"],
+      default: "Bronze",
     },
     cart: [
       {
