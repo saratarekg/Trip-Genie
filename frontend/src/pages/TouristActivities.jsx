@@ -283,6 +283,23 @@ export default function Component() {
     setIsNotificationDialogOpen(true);
   };
 
+  const fetchUpdatedData = async () => {
+    try {
+      const [activitiesData, itinerariesData] = await Promise.all([
+        fetchData(userRole, "touristActivityBookings"),
+        fetchData(userRole, "touristItineraryBookings"),
+      ]);
+      setActivities(activitiesData);
+      setItineraries(itinerariesData);
+    } catch (error) {
+      console.error("Error fetching updated data:", error);
+      showNotification(
+        "Failed to update bookings. Please refresh the page.",
+        "error"
+      );
+    }
+  };
+
   const confirmDelete = async () => {
     if (!selectedBooking) return;
 
@@ -309,11 +326,8 @@ export default function Component() {
         }
       );
 
-      if (bookingType === "activity") {
-        setActivities(activities.filter((a) => a.id !== selectedBooking.id));
-      } else {
-        setItineraries(itineraries.filter((i) => i.id !== selectedBooking.id));
-      }
+      // Fetch updated data after successful deletion
+      await fetchUpdatedData();
 
       showNotification(
         "Your booking has been successfully cancelled.",
@@ -395,9 +409,10 @@ export default function Component() {
                               handleItineraryClick(booking.itinerary?._id)
                             }
                           >
-                            <Calendar className="mr-2 h-4 w-4" />
+                            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
                             {booking.itinerary?.title}
                           </Button>
+
                           <Button
                             variant="ghost"
                             size="icon"

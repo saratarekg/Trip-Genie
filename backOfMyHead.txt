@@ -1,22 +1,21 @@
 -------------------------------------------TESTING---------------------------------------------
--Booked Activity list isnt updated upon deleting one of them(lazem refresh)
--F Booking itineraires, zorar book now, choosing date betdrab error
--Deleting/View booking buttons bto3 itineraires btdrb error(my account-> upcoming bookings -> itineraires -> delete and view buttons)
--Confirmation of booking a hotel & saving booking in database
-itinerary booking and view booking!!
-rate tourguide and itinerary cuz based on booking!!
-upload product picture
-- "already have an account?" fe sign up teb2a fe kol el stages (7otooha 3al shemal)
-- pagination bayez fe all trip plans
+-Booked Activity list isnt updated upon deleting one of them(lazem refresh) (amy) done
+-F Booking itineraires, zorar book now, choosing date betdrab error (amy) done
+-Deleting/View booking buttons bto3 itineraires btdrb error(my account-> upcoming bookings -> itineraires -> delete and view buttons) (amy) done
+-Confirmation of booking a hotel & saving booking in database (sam)
+itinerary booking and view booking!! (amy) done 
+rate tourguide and itinerary cuz based on booking!! (jana) (done)
+upload product picture (hazem) (done)
+- "already have an account?" fe sign up teb2a fe kol el stages (7otooha 3al shemal) (zeina)
+- sort by preference msh 3and guest (habiba) done
 - 2 comments shaklaha mot5alef (mesh mashakelna di khales ya aby)
-- SignUp , I accept and agree to the terms and conditions : the button is unclickable even though I have scrolled through all terms and conditions,
-I have to scroll for a second time for it to work. -Hazem
+- add comment to itinerary btegy baad rate based (jamy) (done)
+-attended itineraries btfdl fl upcoming w fl history (aby)
+- booking more than one tickets shows 2 
+entries in upcoming 1 with one booked ticket and one with 2 
+and they both go to history as welli can delete toursit account when he has a booked activity (amy) done
 
-- add comment to itinerary btegy baad rate based
--attended itineraries btfdl fl upcoming w fl history
-- booking more than one tickets shows 2 entries in upcoming 1 with one booked ticket and one with 2 and they both go to history as welli can delete toursit account when he has a booked activity
-
--Historical type prefrences.
+-Historical type prefrences. (sam)
 -------------------------------------------TO DO---------------------------------------------
 
 - Send confirmation mail after booking a flight/hotel/transportation
