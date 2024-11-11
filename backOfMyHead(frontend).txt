@@ -44,6 +44,16 @@ my products filterand search s3at bydrab error
 pagination all products lama yb2a mafeesh products ytzabat
 
 
+
+-pagination lagging in iteneraries/activities 
+-admin mark as inappropriate button outside card 
+-price filtering in flights all options except one show results.(useless options for filtering)
+-inside admin select book date and time (logically admin should not book), available dates should not be clickable.
+
+
+
+
+
 sprint 3:
 make all popups the same, we can take inspo from the stuff i sent to radwa. 
 hasa toasts ahla men popups bas hanshoof
