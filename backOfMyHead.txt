@@ -5,6 +5,7 @@
 -Confirmation of booking a hotel & saving booking in database
 itinerary booking and view booking!!
 rate tourguide and itinerary cuz based on booking!!
+upload product picture
 
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
