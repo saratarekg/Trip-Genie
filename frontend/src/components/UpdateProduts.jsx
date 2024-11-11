@@ -21,7 +21,6 @@ import signUpPicture from "../assets/images/signUpPicture.jpeg";
 import { Modal } from "@/components/Modal";
 import backgroundPicture from "../assets/images/backgroundPattern.png";
 
-
 const LoadingSpinner = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50">
     <svg
@@ -139,9 +138,9 @@ const UpdateProduct = () => {
       const newBase64Pictures = [...base64Pictures];
       newBase64Pictures.splice(index, 1);
       setBase64Pictures(newBase64Pictures);
-      const newPictures = [...newPictures];
-      newPictures.splice(index, 1);
-      setNewPictures(newPictures);
+      const newPictures2 = [...newPictures];
+      newPictures2.splice(index, 1);
+      setNewPictures(newPictures2);
     }
 
     setSelectedImage(null);
@@ -203,11 +202,10 @@ const UpdateProduct = () => {
     }
   };
 
-
   const openModal = () => {
     setModalOpen(true);
     setDropdownOpen(false); // Close the dropdown when opening the modal
-    setSelectedImage(null)
+    setSelectedImage(null);
   };
 
   const closeModal = () => {
@@ -266,7 +264,7 @@ const UpdateProduct = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price" className="text-sm font-medium">
-                  Price (in USD)
+                    Price (in USD)
                   </Label>
                   <Input
                     id="price"
@@ -335,9 +333,8 @@ const UpdateProduct = () => {
                       alt={`Product Existing ${index + 1}`}
                       className="w-full h-32 object-cover rounded cursor-pointer"
                       onClick={() => {
-                        setSelectedImage(picture.url)
+                        setSelectedImage(picture.url);
                         setIsImageViewerOpen(true);
-
                       }}
                     />
                     <button
@@ -356,10 +353,10 @@ const UpdateProduct = () => {
                       alt={`Product New ${index + 1}`}
                       className="w-full h-32 object-cover rounded cursor-pointer"
                       onClick={() => {
-                        setSelectedImage(picture)
+                        setSelectedImage(picture);
                         setIsImageViewerOpen(true);
-
-                      }}                    />
+                      }}
+                    />
                     <button
                       type="button"
                       onClick={() => removePicture(index, false)}

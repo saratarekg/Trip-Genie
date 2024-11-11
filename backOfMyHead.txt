@@ -1,4 +1,5 @@
 -------------------------------------------TESTING---------------------------------------------
+<<<<<<< Updated upstream
 -Booked Activity list isnt updated upon deleting one of them(lazem refresh)
 -F Booking itineraires, zorar book now, choosing date betdrab error
 -Deleting/View booking buttons bto3 itineraires btdrb error(my account-> upcoming bookings -> itineraires -> delete and view buttons)
@@ -6,6 +7,12 @@
 itinerary booking and view booking!!
 rate tourguide and itinerary cuz based on booking!!
 upload product picture
+=======
+- SignUp I accept and agree to the terms and conditions : the button is unclickable even though I have scrolled through all terms and conditions,
+I have to scroll for a second time for it to work. -Hazem
+
+- When I deleted seller account, I instantly got redirected out and received a popup with "account deleted" without waiting for a request 
+>>>>>>> Stashed changes
 
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
