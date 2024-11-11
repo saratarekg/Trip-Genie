@@ -784,88 +784,6 @@ const updateCommentOnItinerary = async (req, res) => {
   }
 };
 
-
-
-
-const deleteCommentFromItinerary = async (req, res) => {
-  try {
-    const { itineraryId, commentId } = req.params;
-
-    // Find the itinerary by ID
-    const itinerary = await Itinerary.findById(itineraryId);
-
-    if (!itinerary) {
-      return res.status(400).json({ message: "Itinerary not found" });
-    }
-    if (itinerary.isDeleted) {
-      return res.status(400).json({ message: "Itinerary no longer exists" });
-    }
-
-    // Find the comment index in the comments array
-    const commentIndex = itinerary.comments.findIndex(
-      (comment) => comment._id.toString() === commentId
-    );
-
-    if (commentIndex === -1) {
-      return res.status(404).json({ message: "Comment not found" });
-    }
-
-    // Get the rating of the comment before removal to adjust the average rating
-    const commentToDelete = itinerary.comments[commentIndex];
-    const ratingToRemove = commentToDelete.rating;
-
-    // Remove the comment from the comments array
-    itinerary.comments.splice(commentIndex, 1);
-
-    // If the deleted comment included a rating, adjust the average rating
-    let newAverageRating;
-
-    if (ratingToRemove !== undefined) {
-      const totalComments = itinerary.comments.length;
-      const totalRating = itinerary.comments.reduce(
-        (acc, comment) => acc + comment.rating,
-        0
-      );
-
-      // Calculate the new average rating
-      const newTotalRating = totalRating - ratingToRemove;
-      newAverageRating = totalComments > 0 ? newTotalRating / totalComments : 0;
-
-      itinerary.averageRating = newAverageRating; // Update the average rating
-    }
-
-    // Save the updated itinerary
-    await itinerary.save();
-
-    res.status(200).json({
-      message: "Comment deleted successfully",
-      comments: itinerary.comments,
-      newAverageRating, // Return the new average rating if updated
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "An error occurred while deleting the comment",
-      error: error.message,
-    });
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const rateItinerary = async (req, res) => {
   try {
     const { rating } = req.body; // Get rating from the request body
@@ -991,7 +909,6 @@ const removeActivityFromItinerary = async (req, res) => {
 };
 
 module.exports = {
-  deleteCommentFromItinerary,
   getAllItineraries,
   getAllItinerariesAdmin,
   getItineraryById,
