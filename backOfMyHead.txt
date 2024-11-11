@@ -13,7 +13,7 @@ upload product picture
 - SignUp , I accept and agree to the terms and conditions : the button is unclickable even though I have scrolled through all terms and conditions,
 I have to scroll for a second time for it to work. -Hazem
 
-- When I deleted seller account, I instantly got redirected out and received a popup with "account deleted" without waiting for a request 
+- When I deleted tourguide account, I instantly got redirected out and received a popup with "account deleted" without waiting for a request 
 
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
