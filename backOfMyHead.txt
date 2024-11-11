@@ -1,5 +1,5 @@
 -------------------------------------------TESTING---------------------------------------------
-
+itinerary booking and view booking!!
 
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
