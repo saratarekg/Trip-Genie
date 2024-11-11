@@ -342,9 +342,6 @@ const usernameExists = async (username) => {
 
 const redeemPoints = async (req, res) => {
   try {
-    const conversionRate = 10000; // 10,000 points = 100 EGP
-    const cashEquivalent = 100; // 100 EGP for 10,000 points
-
     // Fetch the tourist based on user ID (assuming tourist is the logged-in user)
     const tourist = await Tourist.findById(res.locals.user_id);
 
@@ -363,14 +360,15 @@ const redeemPoints = async (req, res) => {
     const pointsToRedeem = tourist.loyaltyPoints;
 
     // Calculate the redeemable cash based on all loyalty points
-    const redeemableCash = (pointsToRedeem / conversionRate) * cashEquivalent;
+    const redeemableCash = pointsToRedeem / 100 ;  // in EGP
+    const updatedWalletinUSD = redeemableCash / 49.24; // in USD
 
     // Update the wallet and set loyalty points to 0
     const updatedTourist = await Tourist.findByIdAndUpdate(
       res.locals.user_id,
       {
         $set: { loyaltyPoints: 0 },
-        $inc: { wallet: redeemableCash },
+        $inc: { wallet: updatedWalletinUSD },
       },
       { new: true } // Return the updated document
     );
