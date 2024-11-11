@@ -114,7 +114,7 @@ const getMaxPrice = async (req, res) => {
         $elemMatch: {
           date: { $gte: today },
         },
-      }
+      },
     }).sort({ price: -1 });
 
     const maxPrice = maxPriceItinerary ? maxPriceItinerary.price : 0;
@@ -125,19 +125,22 @@ const getMaxPrice = async (req, res) => {
   }
 };
 
-
 const getMaxPriceMy = async (req, res) => {
-const userId = res.locals.user_id;
+  const userId = res.locals.user_id;
 
-try {
-  const maxPriceItinerary = await Itinerary.findOne({ tourGuide: userId, isDeleted: false, isActivated: true, appropriate: true }).sort({ price: -1 });
+  try {
+    const maxPriceItinerary = await Itinerary.findOne({
+      tourGuide: userId,
+      isDeleted: false,
+      isActivated: true,
+      appropriate: true,
+    }).sort({ price: -1 });
 
-  const maxPrice = maxPriceItinerary ? maxPriceItinerary.price : 0;
-  res.status(200).json(maxPrice);
-
-} catch (error) {
-  res.status(500).json({ message: error.message });
-}
+    const maxPrice = maxPriceItinerary ? maxPriceItinerary.price : 0;
+    res.status(200).json(maxPrice);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const getItinerariesByPreference = async (req, res) => {
@@ -149,14 +152,7 @@ const getItinerariesByPreference = async (req, res) => {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    const {
-      budget,
-      price,
-      tourType,
-      tourLanguages,
-      historicalPlacePeriod,
-      historicalPlaceType,
-    } = tourist.preference;
+    const { budget, price, tourType, tourLanguages } = tourist.preference;
 
     // Apply filters based on preferences and query params
     const { upperDate, lowerDate, sort, asc, myItineraries } = req.query;
@@ -383,19 +379,18 @@ const createItinerary = async (req, res) => {
       .json({ message: "Itinerary must have at least one date" });
   }
   // if (!isRepeated) {
-    // if (availableDates.length > 1) {
-    //   return res.status(400).json({
-    //     message: "Itinerary must have only one date if it is not repeated",
-    //   });
-    // }
-    // activities.forEach((activity) => {
-    //   if (activity.timing < availableDates[0].date) {
-    //     return res.status(400).json({
-    //       message: "Activities date must be after the itinerary date",
-    //     });
-    //   }
-    // });
-
+  // if (availableDates.length > 1) {
+  //   return res.status(400).json({
+  //     message: "Itinerary must have only one date if it is not repeated",
+  //   });
+  // }
+  // activities.forEach((activity) => {
+  //   if (activity.timing < availableDates[0].date) {
+  //     return res.status(400).json({
+  //       message: "Activities date must be after the itinerary date",
+  //     });
+  //   }
+  // });
 
   await (async () => {
     for (const file of req.files) {
@@ -500,8 +495,6 @@ const updateItinerary = async (req, res) => {
         .status(400)
         .json({ message: "Itinerary must have at least one date" });
     }
-   
-  
 
     await (async () => {
       for (const file of req.files) {

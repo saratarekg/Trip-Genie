@@ -77,11 +77,15 @@ const AccountInfo = ({ user }) => {
       return (
         <div>
           <h2 className="text-2xl font-bold mb-4">Account Information</h2>
-          <p><strong>Name:</strong> {user.username}</p>
+          <p>
+            <strong>Name:</strong> {user.username}
+          </p>
           {/* make the user role not seperated by hyphen and first letter capital */}
-          <p><strong>Role:</strong> {user.role.charAt(0).toUpperCase() + user.role.slice(1).replace("-"," ")}</p>
-
-
+          <p>
+            <strong>Role:</strong>{" "}
+            {user.role.charAt(0).toUpperCase() +
+              user.role.slice(1).replace("-", " ")}
+          </p>
         </div>
       );
   }
@@ -92,15 +96,35 @@ const Upcoming = ({ user }) => {
     case "tourist":
       return <TouristActivities />;
     case "tourism-governor":
-      return <div className="p-4 text-center">Activity management is handled in the admin dashboard.</div>;
+      return (
+        <div className="p-4 text-center">
+          Activity management is handled in the admin dashboard.
+        </div>
+      );
     case "seller":
-      return <div className="p-4 text-center">Manage your listings in the seller dashboard.</div>;
+      return (
+        <div className="p-4 text-center">
+          Manage your listings in the seller dashboard.
+        </div>
+      );
     case "advertiser":
-      return <div className="p-4 text-center">View your ad campaigns in the advertiser dashboard.</div>;
+      return (
+        <div className="p-4 text-center">
+          View your ad campaigns in the advertiser dashboard.
+        </div>
+      );
     case "tour-guide":
-      return <div className="p-4 text-center">Check your upcoming tours in the tour guide dashboard.</div>;
+      return (
+        <div className="p-4 text-center">
+          Check your upcoming tours in the tour guide dashboard.
+        </div>
+      );
     default:
-      return <div className="p-4 text-center">No upcoming activities available for {user.role}.</div>;
+      return (
+        <div className="p-4 text-center">
+          No upcoming activities available for {user.role}.
+        </div>
+      );
   }
 };
 
@@ -144,63 +168,77 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
   const [isRedeeming, setIsRedeeming] = useState(false);
   const [redeemError, setRedeemError] = useState(null);
   const [redeemSuccess, setRedeemSuccess] = useState(null);
-  const [rates, setRates] = useState({})
-  const [currencies, setCurrencies] = useState([])
-  const [preferredCurrency, setPreferredCurrency] = useState('USD')
+  const [rates, setRates] = useState({});
+  const [currencies, setCurrencies] = useState([]);
+  const [preferredCurrency, setPreferredCurrency] = useState("USD");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = Cookies.get('jwt')
+        const token = Cookies.get("jwt");
         const [ratesResponse, currenciesResponse] = await Promise.all([
-          axios.get('http://localhost:4000/rates', { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('http://localhost:4000/tourist/currencies', { headers: { Authorization: `Bearer ${token}` } }), 
-          fetchUserInfo()
-        ])
-        setRates(ratesResponse.data.rates)
-        setCurrencies(currenciesResponse.data)
+          axios.get("http://localhost:4000/rates", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:4000/tourist/currencies", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetchUserInfo(),
+        ]);
+        setRates(ratesResponse.data.rates);
+        setCurrencies(currenciesResponse.data);
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error("Error fetching data:", error);
       }
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, []);
 
   const convertCurrency = (amount, fromCurrency, toCurrency) => {
     // if type of from currency is string and to currency is string  return (amount / rates[fromCurrency]) * rates[toCurrency]
-    if (typeof fromCurrency === 'string' && typeof toCurrency === 'string') {
-      return (amount / rates[fromCurrency]) * rates[toCurrency]
+    if (typeof fromCurrency === "string" && typeof toCurrency === "string") {
+      return (amount / rates[fromCurrency]) * rates[toCurrency];
     }
-    if (typeof fromCurrency !== 'string' && typeof toCurrency === 'string') {
-      return (amount / rates[fromCurrency.code]) * rates[toCurrency]
+    if (typeof fromCurrency !== "string" && typeof toCurrency === "string") {
+      return (amount / rates[fromCurrency.code]) * rates[toCurrency];
     }
-    if (typeof fromCurrency !== 'string' && typeof toCurrency !== 'string') {
-      return (amount / rates[fromCurrency.code]) * rates[toCurrency.code]
-    }
-
-    if (typeof fromCurrency === 'string' && typeof toCurrency !== 'string') {
-      return (amount / rates[fromCurrency]) * rates[toCurrency.code]
+    if (typeof fromCurrency !== "string" && typeof toCurrency !== "string") {
+      return (amount / rates[fromCurrency.code]) * rates[toCurrency.code];
     }
 
-    if (!rates[fromCurrency] || !rates[toCurrency.code]) return amount
-    return (amount / rates[fromCurrency]) * rates[toCurrency.code]
-  }
+    if (typeof fromCurrency === "string" && typeof toCurrency !== "string") {
+      return (amount / rates[fromCurrency]) * rates[toCurrency.code];
+    }
+
+    if (!rates[fromCurrency] || !rates[toCurrency.code]) return amount;
+    return (amount / rates[fromCurrency]) * rates[toCurrency.code];
+  };
 
   const formatCurrency = (amount, currency) => {
-    const currencyInfo = currencies.find(c => c.code === currency.code)
-    return `${currencyInfo ? currencyInfo.symbol : ''}${amount.toFixed(2)}`
-  }
+    const currencyInfo = currencies.find((c) => c.code === currency.code);
+    return `${currencyInfo ? currencyInfo.symbol : ""}${amount.toFixed(2)}`;
+  };
 
-  const convertedWalletAmount = convertCurrency(user.wallet, 'USD', preferredCurrency)
-  const pointsValueInEGP = user.loyaltyPoints / 100
-  const pointsValueInUSD = convertCurrency(pointsValueInEGP, 'EGP', 'USD')
-  const pointsValueInPreferredCurrency = convertCurrency(pointsValueInUSD, 'USD', preferredCurrency)
+  const convertedWalletAmount = convertCurrency(
+    user.wallet,
+    "USD",
+    preferredCurrency
+  );
+  const pointsValueInEGP = user.loyaltyPoints / 100;
+  const pointsValueInUSD = convertCurrency(pointsValueInEGP, "EGP", "USD");
+  const pointsValueInPreferredCurrency = convertCurrency(
+    pointsValueInUSD,
+    "USD",
+    preferredCurrency
+  );
 
-  console.log('Converted wallet amount:', convertedWalletAmount)
-  console.log('Points value in EGP:', pointsValueInEGP)
-  console.log('Points value in USD:', pointsValueInUSD)
-  console.log('Points value in preferred currency:', pointsValueInPreferredCurrency)
-
+  console.log("Converted wallet amount:", convertedWalletAmount);
+  console.log("Points value in EGP:", pointsValueInEGP);
+  console.log("Points value in USD:", pointsValueInUSD);
+  console.log(
+    "Points value in preferred currency:",
+    pointsValueInPreferredCurrency
+  );
 
   const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
@@ -251,52 +289,57 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
     }
   };
 
-
-
-
   if (user.role !== "tourist") {
     return <div>Points redemption not available for {user.role}</div>;
   }
 
   return (
     <div className="w-full max-w-md mx-auto bg-gray-50 shadow-xl rounded-lg p-6">
-  <h2 className="text-2xl font-bold mb-4">Redeem Loyalty Points</h2>
-  <p className="text-lg text-gray-700 mb-6">
-    Convert your loyalty points into wallet balance.
-  </p>
+      <h2 className="text-2xl font-bold mb-4">Redeem Loyalty Points</h2>
+      <p className="text-lg text-gray-700 mb-6">
+        Convert your loyalty points into wallet balance.
+      </p>
 
-  <div className="space-y-4 mb-6">
-    <p className="text-lg font-medium text-gray-600">
-      Available Wallet Balance:{" "}
-      <span className="text-teal-600">{formatCurrency(convertedWalletAmount, preferredCurrency)}</span>
-    </p>
-    <p className="text-lg font-medium text-gray-600">
-      Loyalty Points:{" "}
-      <span className="text-blue-600">{user.loyaltyPoints} points</span>
-    </p>
-  </div>
+      <div className="space-y-4 mb-6">
+        <p className="text-lg font-medium text-gray-600">
+          Available Wallet Balance:{" "}
+          <span className="text-teal-600">
+            {formatCurrency(convertedWalletAmount, preferredCurrency)}
+          </span>
+        </p>
+        <p className="text-lg font-medium text-gray-600">
+          Loyalty Points:{" "}
+          <span className="text-blue-600">{user.loyaltyPoints} points</span>
+        </p>
+      </div>
 
-  <Button
-    onClick={handleRedeemClick}
-    disabled={isRedeeming || user.loyaltyPoints === 0}
-    className="w-full py-3 bg-[#F88C33] text-white rounded-lg hover:bg-orange-500 transition duration-300 ease-in-out"
-  >
-     {isRedeeming
+      <Button
+        onClick={handleRedeemClick}
+        disabled={isRedeeming || user.loyaltyPoints === 0}
+        className="w-full py-3 bg-[#F88C33] text-white rounded-lg hover:bg-orange-500 transition duration-300 ease-in-out"
+      >
+        {isRedeeming
           ? "Redeeming..."
-          : `Redeem Points for ${formatCurrency(pointsValueInPreferredCurrency, preferredCurrency)}`}
+          : `Redeem Points for ${formatCurrency(
+              pointsValueInPreferredCurrency,
+              preferredCurrency
+            )}`}
       </Button>
 
-  {/* Error Message */}
-  {redeemError && (
-    <p className="text-red-500 text-sm text-center mt-4">{redeemError}</p>
-  )}
+      {/* Error Message */}
+      {redeemError && (
+        <p className="text-red-500 text-sm text-center mt-4">{redeemError}</p>
+      )}
 
-  {/* Success Message */}
-  {redeemSuccess && (
-    <p className="text-green-500 text-sm text-center mt-4">{redeemSuccess}</p>
-  )}
-</div>
-  );}
+      {/* Success Message */}
+      {redeemSuccess && (
+        <p className="text-green-500 text-sm text-center mt-4">
+          {redeemSuccess}
+        </p>
+      )}
+    </div>
+  );
+};
 
 const CurrencyApp = ({ user }) => {
   const [currencies, setCurrencies] = useState([]);
@@ -397,55 +440,56 @@ const CurrencyApp = ({ user }) => {
 
   return (
     <div className="container p-8 max-w-lg mx-auto bg-white shadow-lg rounded-lg">
-  <Popup
-    isOpen={popupOpen}
-    onClose={closePopup}
-    type={popupType}
-    message={popupMessage}
-  />
-  <h1 className="text-2xl font-bold mb-4">Preferred Currency</h1>
-  <h2 className="text-xl font-bold mb-4">
-    {preferredCurrency
-      ? `${preferredCurrency.name} (${preferredCurrency.code})`
-      : "Loading..."}
-  </h2>
+      <Popup
+        isOpen={popupOpen}
+        onClose={closePopup}
+        type={popupType}
+        message={popupMessage}
+      />
+      <h1 className="text-2xl font-bold mb-4">Preferred Currency</h1>
+      <h2 className="text-xl font-bold mb-4">
+        {preferredCurrency
+          ? `${preferredCurrency.name} (${preferredCurrency.code})`
+          : "Loading..."}
+      </h2>
 
-  <label className="block text-lg font-medium text-gray-700 mb-5">
-    <span>Select New Preferred Currency:</span>
-    <div className="relative mt-2">
-      <select
-        value={selectedCurrency}
-        onChange={(e) => setSelectedCurrency(e.target.value)}
-        className="w-full p-4 rounded-lg border-2 border-teal-600 text-teal-600 bg-teal-50 font-medium focus:ring-teal-500 focus:border-teal-500 transition duration-300 ease-in-out"
-      >
-        <option value="" disabled>
-          Choose Currency
-        </option>
-        {currencies.map((currency) => (
-          <option key={currency._id} value={currency._id}>
-            {currency.name} ({currency.code})
-          </option>
-        ))}
-      </select>
+      <label className="block text-lg font-medium text-gray-700 mb-5">
+        <span>Select New Preferred Currency:</span>
+        <div className="relative mt-2">
+          <select
+            value={selectedCurrency}
+            onChange={(e) => setSelectedCurrency(e.target.value)}
+            className="w-full p-4 rounded-lg border-2 border-teal-600 text-teal-600 bg-teal-50 font-medium focus:ring-teal-500 focus:border-teal-500 transition duration-300 ease-in-out"
+          >
+            <option value="" disabled>
+              Choose Currency
+            </option>
+            {currencies.map((currency) => (
+              <option key={currency._id} value={currency._id}>
+                {currency.name} ({currency.code})
+              </option>
+            ))}
+          </select>
+        </div>
+      </label>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={handleSetPreferredCurrency}
+          disabled={!selectedCurrency}
+          className={`w-36 py-3 rounded-lg text-white font-semibold focus:outline-none transition duration-300 ease-in-out ${
+            selectedCurrency
+              ? "bg-[#F88C33] hover:bg-orange-600 cursor-pointer" //className="flex items-center justify-center w-full py-2 bg-[#F88C33] text-white rounded-md hover:bg-orange-500 transition duration-300 ease-in-out mb-4"
+              : "bg-gray-400 cursor-not-allowed"
+          }`}
+        >
+          Set
+        </button>
+      </div>
     </div>
-  </label>
-
-  <div className="flex justify-end">
-    <button
-      type="button"
-      onClick={handleSetPreferredCurrency}
-      disabled={!selectedCurrency}
-      className={`w-36 py-3 rounded-lg text-white font-semibold focus:outline-none transition duration-300 ease-in-out ${
-        selectedCurrency
-          ? "bg-[#F88C33] hover:bg-orange-600 cursor-pointer"     //className="flex items-center justify-center w-full py-2 bg-[#F88C33] text-white rounded-md hover:bg-orange-500 transition duration-300 ease-in-out mb-4"
-          : "bg-gray-400 cursor-not-allowed"
-      }`}
-    >
-      Set
-    </button>
-  </div>
-</div>
-  );}
+  );
+};
 
 const DeleteAccount = ({ onClose }) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -639,17 +683,23 @@ export default function AccountManagement() {
       case "upcoming":
         return <Upcoming user={user} />;
       case "redeem-points":
-        return (
-          <RedeemPoints user={user} onRedeemPoints={handleRedeemPoints} />
-        );
+        return <RedeemPoints user={user} onRedeemPoints={handleRedeemPoints} />;
       case "security":
         return <PasswordChanger />;
       case "preferences":
         return <Preferences user={user} />;
       case "add-card":
-        return user.role === "tourist" ? <AddCard /> : <div>Add card not available for {user.role}</div>;
+        return user.role === "tourist" ? (
+          <AddCard />
+        ) : (
+          <div>Add card not available for {user.role}</div>
+        );
       case "add-ship":
-        return user.role === "tourist" ? <ShippingAddress /> : <div>Add shipping address not available for {user.role}</div>;
+        return user.role === "tourist" ? (
+          <ShippingAddress />
+        ) : (
+          <div>Add shipping address not available for {user.role}</div>
+        );
       case "currency":
         return <CurrencyApp user={user} />;
       case "faqs":
@@ -669,76 +719,191 @@ export default function AccountManagement() {
   };
 
   const menuStructure = {
-    "Activities & Itineraries": [
-      { name: "Upcoming Bookings", icon: Calendar, tab: "upcoming", roles: ["tourist"] },
-      { name: "Points and Wallet", icon: Wallet, tab: "redeem-points", roles: ["tourist"] },
+    "Upcoming Bookings": [
+      {
+        name: "Activities & Itineraries",
+        icon: Calendar,
+        tab: "upcoming",
+        roles: ["tourist"],
+      },
     ],
     Products: [
       { name: "Cart", icon: ShoppingCartIcon, tab: "cart", roles: ["tourist"] },
       { name: "Wishlist", icon: Heart, tab: "wishlist", roles: ["tourist"] },
     ],
     "Settings and Privacy": [
-      { name: "Account", icon: User, tab: "info", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin" , "tourism-governor"] },
-      { name: "Security", icon: Lock, tab: "security", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
-      { name: "Preferences", icon: Settings, tab: "preferences", roles: ["tourist"] },
-      { name: "Set Currency", icon: DollarSign, tab: "currency", roles: ["tourist"] },
-      { name: "Add credit/debit cards", icon: CreditCard, tab: "add-card", roles: ["tourist"] },
-      { name: "Add Shipping Address", icon: HomeIcon, tab: "add-ship", roles: ["tourist"] },
-      { name: "Delete Account", icon: Trash2, tab: "delete-account", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
+      {
+        name: "Account",
+        icon: User,
+        tab: "info",
+        roles: [
+          "tourist",
+          "seller",
+          "advertiser",
+          "tour-guide",
+          "admin",
+          "tourism-governor",
+        ],
+      },
+      {
+        name: "Security",
+        icon: Lock,
+        tab: "security",
+        roles: [
+          "tourist",
+          "seller",
+          "advertiser",
+          "tour-guide",
+          "admin",
+          "tourism-governor",
+        ],
+      },
+      {
+        name: "Preferences",
+        icon: Settings,
+        tab: "preferences",
+        roles: ["tourist"],
+      },
+      {
+        name: "Points and Wallet",
+        icon: Wallet,
+        tab: "redeem-points",
+        roles: ["tourist"],
+      },
+      {
+        name: "Set Currency",
+        icon: DollarSign,
+        tab: "currency",
+        roles: ["tourist"],
+      },
+      {
+        name: "Add credit/debit cards",
+        icon: CreditCard,
+        tab: "add-card",
+        roles: ["tourist"],
+      },
+      {
+        name: "Add Shipping Address",
+        icon: HomeIcon,
+        tab: "add-ship",
+        roles: ["tourist"],
+      },
+      {
+        name: "Delete Account",
+        icon: Trash2,
+        tab: "delete-account",
+        roles: [
+          "tourist",
+          "seller",
+          "advertiser",
+          "tour-guide",
+          "admin",
+          "tourism-governor",
+        ],
+      },
     ],
     "Help and Support": [
-      { name: "File a Complaint", icon: AlertTriangle, tab: "complain", roles: ["tourist"] },
-      { name: "My Complaints", icon: FileText, tab: "my-complaints", roles: ["tourist"] },
-      { name: "FAQs", icon: HelpCircle, tab: "faqs", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
+      {
+        name: "File a Complaint",
+        icon: AlertTriangle,
+        tab: "complain",
+        roles: ["tourist"],
+      },
+      {
+        name: "My Complaints",
+        icon: FileText,
+        tab: "my-complaints",
+        roles: ["tourist"],
+      },
+      {
+        name: "FAQs",
+        icon: HelpCircle,
+        tab: "faqs",
+        roles: [
+          "tourist",
+          "seller",
+          "advertiser",
+          "tour-guide",
+          "admin",
+          "tourism-governor",
+        ],
+      },
     ],
     // "Display and Accessibility": [
     //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     // ],
     "Give Feedback": [
-      { name: "History", icon: HistoryIcon, tab: "history", roles: ["tourist"] },
-      { name: "Feedback", icon: MessageSquare, tab: "feedback", roles: ["tourist"] },
+      {
+        name: "History",
+        icon: HistoryIcon,
+        tab: "history",
+        roles: ["tourist"],
+      },
+      {
+        name: "Feedback",
+        icon: MessageSquare,
+        tab: "feedback",
+        roles: ["tourist"],
+      },
     ],
   };
 
-  const LogoutPopup = ({ onConfirm, onCancel }) => { return ( <div className="popup"> <div className="popup-content"> <h3>Are you sure you want to log out?</h3> <button onClick={onConfirm}>Yes</button> <button onClick={onCancel}>No</button> </div> </div> ); };
+  const LogoutPopup = ({ onConfirm, onCancel }) => {
+    return (
+      <div className="popup">
+        {" "}
+        <div className="popup-content">
+          {" "}
+          <h3>Are you sure you want to log out?</h3>{" "}
+          <button onClick={onConfirm}>Yes</button>{" "}
+          <button onClick={onCancel}>No</button>{" "}
+        </div>{" "}
+      </div>
+    );
+  };
 
-  const [showPopup, setShowPopup] = useState(false); 
- 
+  const [showPopup, setShowPopup] = useState(false);
+
   const logOut = async () => {
-     console.log("Logging out...");
-      try { const response = await fetch("http://localhost:4000/auth/logout");
-         if (response.ok) { 
-          Cookies.set("jwt", ""); 
-          Cookies.set("role", ""); 
-          Cookies.remove("jwt"); 
-          Cookies.remove("role"); 
-          console.log("Logged out successfully"); 
-          navigate("/login"); window.location.reload(); 
-        } 
-        else { 
-          console.error("Logout failed."); 
-        } } catch (error) { 
-          console.error("Error during logout:", error); 
-        } }; 
+    console.log("Logging out...");
+    try {
+      const response = await fetch("http://localhost:4000/auth/logout");
+      if (response.ok) {
+        Cookies.set("jwt", "");
+        Cookies.set("role", "");
+        Cookies.remove("jwt");
+        Cookies.remove("role");
+        console.log("Logged out successfully");
+        navigate("/login");
+        window.location.reload();
+      } else {
+        console.error("Logout failed.");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
 
-    const handleLogoutClick = () => { 
-      setShowPopup(true); };
+  const handleLogoutClick = () => {
+    setShowPopup(true);
+  };
 
-     const handleConfirmLogout = () => { 
-      setShowPopup(false); logOut(); }; 
+  const handleConfirmLogout = () => {
+    setShowPopup(false);
+    logOut();
+  };
 
-      const handleCancelLogout = () =>
-         { setShowPopup(false); }; 
-
+  const handleCancelLogout = () => {
+    setShowPopup(false);
+  };
 
   const role = getUserRole();
 
   return (
     <div>
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className="container mx-auto px-4 py-4 mt-4">
         <h1 className="text-3xl font-bold mb-8">My Account</h1>
@@ -748,7 +913,9 @@ export default function AccountManagement() {
             <nav>
               <ul className="space-y-2">
                 {Object.entries(menuStructure).map(([category, items]) => {
-                  const filteredItems = items.filter(item => item.roles.includes(role));
+                  const filteredItems = items.filter((item) =>
+                    item.roles.includes(role)
+                  );
                   if (filteredItems.length === 0) return null;
 
                   return (
@@ -798,8 +965,12 @@ export default function AccountManagement() {
                     <LogOut className="h-5 w-5 mr-3" />
                     Logout
                   </button>
-                  {showPopup && ( <LogoutPopup onConfirm={handleConfirmLogout} onCancel={handleCancelLogout} /> )}
-
+                  {showPopup && (
+                    <LogoutPopup
+                      onConfirm={handleConfirmLogout}
+                      onCancel={handleCancelLogout}
+                    />
+                  )}
                 </li>
               </ul>
             </nav>
