@@ -16,7 +16,7 @@ const getMaxPrice = async (req, res) => {
   } else {
     maxPrice = 0;
   }
-  // console.log("henaaaaaaaaaaaa", maxPrice);
+  console.log("henaaaaaaaaaaaa", maxPrice);
   res.status(200).json(maxPrice);
 };
 
