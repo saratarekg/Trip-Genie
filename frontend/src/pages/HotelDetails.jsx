@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const API_KEY = import.meta.env.VITE_HOTELS_API_KEY;
+const API_KEY = import.meta.env.VITE_HOTELS_API_KEY2;
 
 export default function HotelDetails() {
   const { hotelId } = useParams();
