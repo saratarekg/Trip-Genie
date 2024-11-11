@@ -9,7 +9,7 @@ upload product picture (hazem) (done)
 - "already have an account?" fe sign up teb2a fe kol el stages (7otooha 3al shemal) (zeina)
 - sort by preference msh 3and guest (habiba)
 - 2 comments shaklaha mot5alef (mesh mashakelna di khales ya aby)
-- add comment to itinerary btegy baad rate based (jamy)
+- add comment to itinerary btegy baad rate based (jamy) 
 -attended itineraries btfdl fl upcoming w fl history (aby)
 - booking more than one tickets shows 2 entries in upcoming 1 with one booked ticket and one with 2 and they both go to history as welli can delete toursit account when he has a booked activity (amy)
 
