@@ -113,7 +113,7 @@ const getActivitiesByPreferences = async (req, res) => {
     const { startDate, endDate, minRating, searchBy, sort, asc, myActivities } =
       req.query;
 
-    console.log("req query: ", req.query);
+    // console.log("req query: ", req.query);
 
     const filterResult = await Activity.filter(
       budget,

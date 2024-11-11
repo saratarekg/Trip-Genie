@@ -37,6 +37,8 @@ router.put("/add-default-shippingAdds/:id", touristController.changeDefaultShipp
 router.put("/update-shippingAdd/:id", touristController.updateShippingAddress);
 router.delete("/shippingAdds/:id", touristController.deleteShippingAddress);
 
+router.get("/historical-places-preference", historicalPlacesController.filterHistoricalPlacesByPreferences);
+
 
 router.put("/", touristController.updateTouristProfile);
 router.put("/preferences", touristController.updatePreferences);
@@ -126,6 +128,7 @@ router.get(
   "/historical-places/:id",
   historicalPlacesController.getHistoricalPlace
 );
+
 
 router.post("/purchase", purchaseController.createPurchase);
 router.get("/purchase", purchaseController.getPurchasesByTourist);
