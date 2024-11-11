@@ -56,8 +56,19 @@ export default function TouristAttendedActivities() {
     }
     navigate(`/activity/${activity._id}`);
   };
+  // const handleItineraryClick = (itinerary) => {
+  //   if (itinerary.isDeleted) {
+  //     return toast({
+  //       title: "Itinerary Unavailable",
+  //       description: "This itinerary no longer exists",
+  //       duration: 3000,
+  //     });
+  //   }
+  //   navigate(`/itinerary/${itinerary._id}`);
+  // };
+
   const handleItineraryClick = (itinerary) => {
-    if (itinerary.isDeleted) {
+    if (!itinerary) {
       return toast({
         title: "Itinerary Unavailable",
         description: "This itinerary no longer exists",
@@ -110,86 +121,100 @@ export default function TouristAttendedActivities() {
     <div>
       <Toaster />
       <h1 className="text-3xl font-bold mb-8">My Activities and Itineraries</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Itineraries</CardTitle>
-              <CardDescription>Your travel plans</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                {itineraries.length > 0
-                  ? itineraries.map((booking) => (
-                      <div key={booking._id} className="mb-4">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
-                          onClick={() =>
-                            handleItineraryClick(booking.itinerary)
-                          }
-                        >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          {booking.itinerary.title}
-                        </Button>
-                        <Separator className="my-2" />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+  <div className="md:col-span-2">
+    <Card>
+      <CardHeader>
+        <CardTitle>Itineraries</CardTitle>
+        <CardDescription>Your travel plans</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[400px]">
+          {itineraries.length > 0
+            ? itineraries.map((booking) => (
+                <div key={booking?._id} className="mb-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-left whitespace-normal"
+                    onClick={() => handleItineraryClick(booking.itinerary)}
+                  >
+                    <div className="flex items-start">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      <div>
+                        <span>{booking.itinerary?.title}</span>
+                        <div className="text-sm text-gray-500 mt-1">
+                        <span>
+  {` ${new Date(booking?.date).toLocaleDateString()}  -  ${booking?.numberOfTickets} Ticket(s) Booked`}
+</span>
+
+                          <span className="block">
+                          </span>
+                        </div>
                       </div>
-                    ))
-                  : noBookingsMessage}
-              </ScrollArea>
-            </CardContent>
-          </Card>
-        </div>
-        <div className="md:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Attended Activities</CardTitle>
-              <CardDescription>
-                Click on an activity to view details
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                {activities.length > 0
-                  ? activities.map((booking) => (
-                      <div key={booking._id} className="mb-4">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start"
-                          onClick={() => handleActivityClick(booking.activity)}
-                        >
-                          <div className="flex justify-between w-full">
-                            <span>{booking.activity.name}</span>
-                            <span className="text-gray-500">
-                              {new Date(
-                                booking.activity.timing
-                              ).toLocaleDateString()}
-                            </span>
-                            <span className="text-gray-500">
-                              {booking.numberOfTickets} Ticket(s) Booked
-                            </span>
-                          </div>
-                          <ChevronRight className="ml-2 h-4 w-4" />
-                        </Button>
-                        <Separator className="my-2" />
+                    </div>
+                  </Button>
+                  <Separator className="my-2" />
+                </div>
+              ))
+            : noBookingsMessage}
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  </div>
+
+  <div className="md:col-span-2">
+    <Card>
+      <CardHeader>
+        <CardTitle>Attended Activities</CardTitle>
+        <CardDescription>Click on an activity to view details</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[400px]">
+          {activities.length > 0
+            ? activities.map((booking) => (
+                <div key={booking._id} className="mb-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-left whitespace-normal"
+                    onClick={() => handleActivityClick(booking.activity)}
+                  >
+                    <div className="flex items-start">
+                      <ChevronRight className="mr-2 h-4 w-4" />
+                      <div>
+                        <span>{booking.activity.name}</span>
+                        <div className="text-sm text-gray-500 mt-1">
+                        <span>
+  {`${new Date(booking.activity.timing).toLocaleDateString()} - ${booking.numberOfTickets} Ticket(s) Booked`}
+</span>
+
+                          <span className="block">
+                          </span>
+                        </div>
                       </div>
-                    ))
-                  : noBookingsMessage}
-              </ScrollArea>
-            </CardContent>
-          </Card>
-          {selectedActivity && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle>Activity Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ActivityDetail id1={selectedActivity._id} />
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
+                    </div>
+                  </Button>
+                  <Separator className="my-2" />
+                </div>
+              ))
+            : noBookingsMessage}
+        </ScrollArea>
+      </CardContent>
+    </Card>
+
+    {selectedActivity && (
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Activity Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ActivityDetail id1={selectedActivity._id} />
+        </CardContent>
+      </Card>
+    )}
+  </div>
+</div>
+
+
     </div>
   );
 }

@@ -382,43 +382,43 @@ export default function Component() {
               <CardDescription>Your travel plans</CardDescription>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[500px]">
-                {" "}
-                {/* Updated ScrollArea height */}
-                {itineraries.length > 0
-                  ? itineraries.map((booking) => (
-                      <div key={booking._id} className="mb-4">
-                        <div className="flex items-center justify-between">
-                          <Button
-                            variant="ghost"
-                            className="w-full justify-start mr-2"
-                            onClick={() =>
-                              handleItineraryClick(booking.itinerary?._id)
-                            }
-                          >
-                            <Calendar className="mr-2 h-4 w-4" />
-                            {booking.itinerary?.title}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleViewBooking(booking)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteBooking(booking)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                        <Separator className="my-2" />
-                      </div>
-                    ))
-                  : noBookingsMessage}
-              </ScrollArea>
+            <ScrollArea className="h-[500px]">
+  {/* Updated ScrollArea height */}
+  {itineraries.length > 0
+    ? itineraries.map((booking) => (
+        <div key={booking._id} className="mb-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              className="w-full justify-start mr-2 text-left whitespace-normal"
+              onClick={() =>
+                handleItineraryClick(booking.itinerary?._id)
+              }
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              {booking.itinerary?.title}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleViewBooking(booking)}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDeleteBooking(booking)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+          <Separator className="my-2" />
+        </div>
+      ))
+    : noBookingsMessage}
+</ScrollArea>
+
             </CardContent>
           </Card>
         </div>
@@ -445,7 +445,7 @@ export default function Component() {
                               handleActivityClick(booking.activity?._id)
                             }
                           >
-                            <div className="flex justify-between w-full">
+                            <div className="flex justify-between w-full whitespace-normal">
                               <span>{booking.activity?.name}</span>
                             </div>
                             <ChevronRight className="ml-2 h-4 w-4" />
@@ -520,27 +520,16 @@ export default function Component() {
                       Date:
                     </span>
                     <span className="text-gray-800 text-base">
-                      {/* Format Date */}
-                      {new Date(
-                        selectedBooking.activity.timing
-                      ).toLocaleDateString()}
-                    </span>
+  {/* Format Date */}
+  {new Date(
+    selectedBooking.activity?.timing || selectedBooking.date
+  ).toLocaleDateString()}
+</span>
+
                   </div>
 
                   {/* Time Row (only for itinerary) */}
-                  {selectedBooking.itinerary && (
-                    <div className="flex items-center gap-4">
-                      <Clock className="w-5 h-5 text-gray-600" />{" "}
-                      {/* Clock Icon */}
-                      <span className="font-medium text-lg text-gray-700">
-                        Time:
-                      </span>
-                      <span className="text-gray-800 text-base">
-                        {selectedBooking.time}{" "}
-                        {/* Display time on a new line */}
-                      </span>
-                    </div>
-                  )}
+                 
                 </div>
                 {/* Tickets Row (for both Activity and Itinerary) */}
                 {selectedBooking.activity && (

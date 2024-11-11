@@ -8,7 +8,7 @@ rate tourguide and itinerary cuz based on booking!!
 upload product picture
 - "already have an account?" fe sign up teb2a fe kol el stages (7otooha 3al shemal)
 - pagination bayez fe all trip plans
-- 2 comments shaklaha mot5alef
+- 2 comments shaklaha mot5alef (mesh mashakelna di khales ya aby)
 - show complaint date in my complaints
 - SignUp , I accept and agree to the terms and conditions : the button is unclickable even though I have scrolled through all terms and conditions,
 I have to scroll for a second time for it to work. -Hazem
@@ -31,8 +31,19 @@ I have to scroll for a second time for it to work. -Hazem
 - upcoming travel plans delete doesn't work and the edit and delete buttons don't appear if the title is too long
 - I should be able to delete a comment
 
+UPDATE ITINERARY:
+i cannot update or delete a booked date!! 
+ask hadwa do we notify user wala n change el booking wala we cant do it if its booked
+
+make history w upcoming different pages lel itineraries w activities!
+
+save fel booking el itinerary title wel activity title 3shan when its delete men el db nafso.
+
+
 Hadwa's requests:
 - Add global search bar 
+
+
 
 Tourguide activities:
 - Allow tour guide to create own activities (done) or choose from available ones (sprint 3),
