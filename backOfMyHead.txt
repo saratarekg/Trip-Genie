@@ -1,5 +1,5 @@
 -------------------------------------------TESTING---------------------------------------------
--Booked Activity list isnt updated upon deleting one of them(lazem refresh) (amy)
+-Booked Activity list isnt updated upon deleting one of them(lazem refresh) (amy) done
 -F Booking itineraires, zorar book now, choosing date betdrab error (amy) done
 -Deleting/View booking buttons bto3 itineraires btdrb error(my account-> upcoming bookings -> itineraires -> delete and view buttons) (amy) done
 -Confirmation of booking a hotel & saving booking in database (sam)
