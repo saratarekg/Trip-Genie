@@ -15,6 +15,9 @@ const Complaint = require("../models/complaints");
 const cloudinary = require("../utils/cloudinary");
 const TouristTransportation = require("../models/touristTransportation");
 const Transportation = require("../models/transportation");
+const TouristFlight = require("../models/TouristFlight"); 
+const TouristHotel = require("../models/TouristHotel"); // Adjust path as needed
+
 
 const getAllTourists = async (req, res) => {
   try {
@@ -1378,7 +1381,99 @@ const updateShippingAddress = async (req, res) => {
   }
 };
 
+
+
+
+
+
+// Book a flight for a tourist
+const bookFlight = async (req, res) => {
+  try {
+    const { touristID, flightID } = req.body;
+
+    // Find or create a TouristFlight document for the tourist
+    let touristFlight = await TouristFlight.findOne({ touristID });
+
+    if (!touristFlight) {
+      // Create a new TouristFlight document if none exists for the tourist
+      touristFlight = new TouristFlight({
+        touristID,
+        flightIDs: [flightID] // Initialize with the new flight ID
+      });
+    } else {
+      // Add the flight ID to the flightIDs array if it doesn't already exist
+      if (!touristFlight.flightIDs.includes(flightID)) {
+        touristFlight.flightIDs.push(flightID);
+      }
+    }
+
+    // Save the updated or new TouristFlight document
+    await touristFlight.save();
+
+    res.status(200).json({ message: "Flight booked successfully", touristFlight });
+  } catch (error) {
+    res.status(500).json({ message: "Error booking flight", error: error.message });
+  }
+};
+
+
+
+
+
+
+// Book a hotel for a tourist
+const bookHotel = async (req, res) => {
+  try {
+    const { touristID, hotelID } = req.body;
+
+    // Find or create a TouristHotel document for the tourist
+    let touristHotel = await TouristHotel.findOne({ touristID });
+
+    if (!touristHotel) {
+      // Create a new TouristHotel document if none exists for the tourist
+      touristHotel = new TouristHotel({
+        touristID,
+        hotelIDs: [hotelID] // Initialize with the new hotel ID
+      });
+    } else {
+      // Add the hotel ID to the hotelIDs array if it doesn't already exist
+      if (!touristHotel.hotelIDs.includes(hotelID)) {
+        touristHotel.hotelIDs.push(hotelID);
+      }
+    }
+
+    // Save the updated or new TouristHotel document
+    await touristHotel.save();
+
+    res.status(200).json({ message: "Hotel booked successfully", touristHotel });
+  } catch (error) {
+    res.status(500).json({ message: "Error booking hotel", error: error.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
+  bookHotel,
+  bookFlight,
   removeProductFromWishlist,
   moveProductToCart,
   getAllTourists,
