@@ -412,7 +412,8 @@ const TourguideProfileCard = ({
 
         {userRole === 'tourist' && userBookings.some(booking => booking.itinerary?._id === itinerary._id) && (
           <div className="border-t pt-4 mt-4">
-            <div className="text-sm text-gray-500 mb-2">Rate Tour Guide:</div>
+            <div className="text-lg text-gray-600 font-semibold mb-2">Rate Tour Guide:</div>
+            <div className="text-sm text-gray-500 mb-2">Tap to Rate</div>
             <div className="flex gap-2">
               {[1, 2, 3, 4, 5].map(star => (
                 <Star
@@ -1452,7 +1453,7 @@ const ItineraryDetail = () => {
               </div>
             </div>
 
-            {userRole === "tourist" && (
+            {userRole === "tourist" && userBookings.some(booking => booking.itinerary?._id === itinerary._id)&&(
               <div className="border-t pt-4">
                 <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
                 <div
