@@ -259,7 +259,7 @@ const deleteTourGuideAccount = async (req, res) => {
     await TourGuide.findByIdAndDelete(res.locals.user_id);
 
     res
-      .status(201)
+      .status(200)
       .json({ message: "Tour guide account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -319,7 +319,7 @@ const deleteTourGuide = async (req, res) => {
     await TourGuide.findByIdAndDelete(id);
 
     res
-      .status(201)
+      .status(200)
       .json({ message: "Tour guide account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });

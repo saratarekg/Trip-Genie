@@ -433,13 +433,13 @@ const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
     const purchases = await Purchase.find({ status: "pending" });
-    purchases.forEach(async (purchase) => {
+    for (const purchase of purchases) {
       if (purchase.products.some((prod) => prod.product.toString() === id)) {
-        res.status(400).json({
+        return res.status(400).json({
           message: "Cannot delete product, there are pending purchases",
         });
       }
-    });
+    };
     const product = await Product.findByIdAndUpdate(id, { isDeleted: true });
     for (let i = 0; i < product.pictures.length; i++) {
       await cloudinary.uploader.destroy(product.pictures[i].public_id);
