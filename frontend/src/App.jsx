@@ -36,7 +36,7 @@ import CreateHpPage from "./pages/CreateHpPage.jsx";
 import Checkout from "./pages/checkout.jsx";
 import CheckoutPage from "./pages/checkout2.jsx";
 import AllActivities from "./components/all-activities.jsx";
-import { MyActivitiesComponent } from "./pages/myActivities.jsx";
+import MyActivitiesComponent from "./pages/myActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
 // import {Cart} from "./pages/AccountTourist.jsx";
