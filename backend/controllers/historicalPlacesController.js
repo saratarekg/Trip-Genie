@@ -231,6 +231,59 @@ const filterHistoricalPlacesByPreferences = async (req, res) => {
 
 };
 
+const theHolyAntiFilter = async (req, res) => {
+  // get all the historical places using promise
+  // get all historical places by preferences using promise
+  // get the set difference between them and return it 
+  try {
+    // First, call getAllHistoricalPlaces to get all historical places
+    const allHistoricalPlaces = await new Promise((resolve, reject) => {
+      getAllHistoricalPlaces(req, {
+        status: () => ({
+          json: resolve,
+        }),
+        locals: res.locals,
+      });
+    });
+  
+    // Then, call filterHistoricalPlacesByPreferences to get historical places based on user preferences
+    const preferredHistoricalPlaces = await new Promise((resolve, reject) => {
+      filterHistoricalPlacesByPreferences(req, {
+        status: () => ({
+          json: resolve,
+        }),
+        locals: res.locals,
+      });
+    });
+  
+    // Map historical place IDs for comparison
+    const allHistoricalPlaceIds = new Set(
+      allHistoricalPlaces.map((place) => place._id.toString())
+    );
+    const preferredHistoricalPlaceIds = new Set(
+      preferredHistoricalPlaces.map((place) => place._id.toString())
+    );
+  
+    // Find the set difference (places in allHistoricalPlaces but not in preferredHistoricalPlaces)
+    const differenceIds = [...allHistoricalPlaceIds].filter(
+      (id) => !preferredHistoricalPlaceIds.has(id)
+    );
+  
+    // Filter out the historical places that match the differenceIds from allHistoricalPlaces
+    const historicalPlacesDifference = allHistoricalPlaces.filter((place) =>
+      differenceIds.includes(place._id.toString())
+    );
+  
+    // Return the set difference
+    res.status(200).json(historicalPlacesDifference);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+  
+}
+
+
+
 const getHistoricalPlacesByGovernor = async (req, res) => {
   try {
     const governorId = res.locals.user_id; // Assuming governorId is passed in the request params
@@ -255,4 +308,5 @@ module.exports = {
   filterHistoricalPlaces,
   getHistoricalPlacesByGovernor,
   filterHistoricalPlacesByPreferences,
+  theHolyAntiFilter
 };

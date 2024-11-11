@@ -38,6 +38,8 @@ router.put("/update-shippingAdd/:id", touristController.updateShippingAddress);
 router.delete("/shippingAdds/:id", touristController.deleteShippingAddress);
 
 router.get("/historical-places-preference", historicalPlacesController.filterHistoricalPlacesByPreferences);
+router.get("/historical-places-not-preference", historicalPlacesController.theHolyAntiFilter);
+
 
 
 router.put("/", touristController.updateTouristProfile);
