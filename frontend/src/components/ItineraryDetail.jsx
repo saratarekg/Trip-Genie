@@ -10,9 +10,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import * as jwtDecode from 'jwt-decode';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Loader from './Loader';
+import Calendar from 'react-calendar';
+ import 'react-calendar/dist/Calendar.css';
 import {
   CheckCircle, XCircle, Star, Edit, Trash2, Mail, Phone, Award, Globe, Accessibility,
-  MapPin, Calendar, Clock, DollarSign, Info, ChevronLeft, ChevronRight, Share2, Link,
+  MapPin, Clock, DollarSign, Info, ChevronLeft, ChevronRight, Share2, Link,
   MessageSquare, Banknote, Smile, Frown,
   ThumbsUp,
   ThumbsDown,
@@ -29,6 +31,83 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimelinePreviewComponent } from "@/components/timeline-preview";
 import { ActivityTimeline } from "@/components/ItineraryTimeline";
+
+import { ChevronUp, ChevronDown } from 'lucide-react';
+
+const ImageGallery = ({ activities }) => {
+  // Collect all pictures from activities
+  const allPictures = activities.flatMap(activity => activity.pictures);
+
+  const [mainImage, setMainImage] = useState(allPictures[0]?.url);
+  const [startIndex, setStartIndex] = useState(0);
+
+  const handlePrev = () => {
+    setStartIndex((prevIndex) => Math.max(0, prevIndex - 1));
+  };
+
+  const handleNext = () => {
+    setStartIndex((prevIndex) => Math.min(allPictures.length - 5, prevIndex + 1));
+  };
+
+  return (
+    <div className="flex gap-4 h-full">
+      {/* Thumbnail Column */}
+      <div className="w-1/5 relative">
+        <div className="h-full overflow-hidden relative">
+          {allPictures.length > 5 && (
+            <button
+              onClick={handlePrev}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex === 0 ? 'bg-gray-400' : 'bg-black'
+              }`}
+              disabled={startIndex === 0}
+              aria-label="Previous images"
+            >
+              <ChevronUp size={20} />
+            </button>
+          )}
+          <div className="flex flex-col gap-2 h-full transition-transform duration-700 ease-in-out">
+            {allPictures.slice(startIndex, startIndex + 5).map((pic, index) => (
+              <img
+                key={startIndex + index}
+                src={pic.url}
+                alt={`Activity image ${startIndex + index + 1}`}
+                className="w-full h-[20%] object-cover rounded-lg cursor-pointer"
+                onClick={() => setMainImage(pic.url)}
+                style={{ transition: 'transform 0.7s ease-in-out' }}
+              />
+            ))}
+          </div>
+          {allPictures.length > 5 && (
+            <button
+              onClick={handleNext}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex >= allPictures.length - 5 ? 'bg-gray-400' : 'bg-black'
+              }`}
+              disabled={startIndex >= allPictures.length - 5}
+              aria-label="Next images"
+            >
+              <ChevronDown size={20} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Main Image Column */}
+      <div className="w-4/5 h-full">
+        <div className="h-full flex items-center justify-center">
+          <img
+            src={mainImage}
+            alt="Main activity image"
+            className="w-full h-full object-contain rounded-lg"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 
 const RatingDistributionBar = ({ percentage, count }) => (
   <div className="flex items-center gap-2 text-sm">
@@ -64,6 +143,102 @@ const getTotalRatingsTG = (profile) => {
 };
 
 
+
+
+const AvailableDatesSection = ({ availableDates, handleBookNowClick, selectedDate, setSelectedDate }) => {
+console.log(selectedDate);
+  const dates = availableDates.map((dateInfo) => new Date(dateInfo.date));
+
+  const tileContent = ({ date, view }) => {
+    if (view === 'month') {
+      if (dates.some((availableDate) => availableDate.toDateString() === date.toDateString())) {
+        return <div className="highlight"></div>;
+      }
+    }
+    return null;
+  };
+
+  return (
+    <div className="p-6 border-t border-gray-200 mt-6">
+      <h3 className="text-2xl font-semibold mb-2">Available Dates</h3>
+      <p>Select a date and book now!</p>
+      <Calendar
+        value={selectedDate}
+        tileDisabled={({ date }) => !dates.some((availableDate) => availableDate.toDateString() === date.toDateString())}
+        onClickDay={(value) => {
+          setSelectedDate(value);
+          handleBookNowClick(value);
+        }}
+        minDetail="month"
+        next2Label={null}
+        prev2Label={null}
+        tileContent={tileContent}
+        className="w-full custom-calendar"
+      />
+      <style jsx>{`
+        .react-calendar {
+          width: 100%;
+          max-width: 100%;
+          background: #B5D3D1;
+          font-family: Arial, Helvetica, sans-serif;
+          line-height: 1.125em;
+          border: none; /* Remove the outline */
+        }
+
+        .react-calendar__tile {
+          max-height: 40px;
+          text-align: center;
+          padding: 0.5em;
+          background: #B5D3D1; /* Match the background color */
+          border: none; /* Remove the outline */
+          transition: background-color 0.3s;
+        }
+
+        .react-calendar__tile:enabled:hover,
+        .react-calendar__tile:enabled:focus {
+          background-color: #388A94;
+          color: white;
+        }
+
+        .react-calendar__tile--now {
+          background: #F88C33;
+          color: white;
+        }
+
+        .react-calendar__tile--active {
+          background: #388A94;
+          color: white;
+        }
+
+        .react-calendar__navigation button {
+          color: #1A3B47;
+        }
+
+        .react-calendar__navigation button:enabled:hover,
+        .react-calendar__navigation button:enabled:focus {
+          background-color: #B5D3D1;
+        }
+
+        .highlight {
+          background-color: #388A94;
+          border-radius: 50%;
+          height: 10px;
+          width: 10px;
+          display: inline-block;
+          margin-top: 5px;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
 const TourguideProfileCard = ({
   handleQuickTourGuideRating,
   setShowTourGuideReviewDialog,
@@ -74,24 +249,103 @@ const TourguideProfileCard = ({
   userRole,
   userBookings,
   itinerary,
+  formatPrice,
+  canModify,
+  setShowDeleteConfirm,
+  handleUpdate,
+  handleActivationToggle,
+  isActivated,
+  isItineraryAvailable,
+  handleBookNowClick
 }) => {
   const [showMore, setShowMore] = useState(false);
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-md">
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <span className="text-3xl font-bold">Tour Guide</span>
-          <Badge
-            variant="secondary"
-            className="px-2 py-1 text-xs font-medium rounded-full bg-[#5D9297] hover:bg-[#5D9297]  text-white hover:text-white"
-          >
-            Verified Guide
-          </Badge>
-        </div>
+        <h1 className="text-3xl font-bold text-center">{itinerary.title}</h1>
+  <div className="mt-4 text-4xl font-semibold text-center">
+    {formatPrice(itinerary.price)}
+    <div className="text-sm text-gray-500 flex items-center justify-center mt-1">
+    <Info className="w-4 h-4 mr-1 text-gray-500" />
+      Prices include VAT
+    </div>
+  </div>
+
+
       </CardHeader>
       <CardContent>
-        <div className="flex items-center">
+        <div className="mt-4">
+          <div className="text-lg font-semibold">Pick-up Location:</div>
+          <div className="text-md text-gray-700">{itinerary.pickUpLocation}</div>
+        </div>
+        <div className="mt-2">
+          <div className="text-lg font-semibold">Drop-off Location:</div>
+          <div className="text-md text-gray-700">{itinerary.dropOffLocation}</div>
+        </div>
+        <div className="mt-4">
+          <div className="text-lg font-semibold">Language:</div>
+          <div className="text-md text-gray-700">{itinerary.language}</div>
+        </div>
+        <div className="mt-2">
+          <div className="text-lg font-semibold">Accessibility:</div>
+          <div className="text-md text-gray-700">{itinerary.accessibility ? "Yes" : "No"}</div>
+        </div>
+        {userRole === "tour-guide" && canModify && (
+  <div className="mt-3 space-y-3">
+    <Button
+      onClick={handleUpdate}
+      variant="default"
+      className="w-full flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
+    >
+      <Edit className="w-4 h-4 mr-2" />
+      Update
+    </Button>
+    <Button
+      onClick={() => setShowDeleteConfirm(true)}
+      variant="destructive"
+      className="w-full flex items-center"
+    >
+      <Trash2 className="w-4 h-4 mr-2" />
+      Delete
+    </Button>
+    <Button
+      onClick={() => handleActivationToggle()}
+      variant={isActivated ? "destructive" : "default"}
+      className={`w-full flex items-center ${isActivated ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+    >
+      {isActivated ? 'Deactivate' : 'Activate'}
+    </Button>
+  </div>
+)}
+ {userRole === 'tourist' && isItineraryAvailable() && (
+              isActivated ? (
+                <Button
+                  onClick={handleBookNowClick}
+                  className="w-full bg-[#5D9297] hover:[#388A94] text-white font-bold py-2 px-4 rounded mt-4"
+                >
+                  Book Now
+                </Button>
+              ) : (
+                <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
+                  Currently Unavailable
+                </div>
+              )
+            )}
+
+        <div className="mt-6 border-t border-gray-300 pt-4">
+          <div className="flex justify-between items-center">
+            <span className="text-3xl font-bold">Tour Guide</span>
+            <Badge
+              variant="secondary"
+              className="px-2 py-1 text-xs font-medium rounded-full bg-[#5D9297] hover:bg-[#5D9297] text-white hover:text-white"
+            >
+              Verified Guide
+            </Badge>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center">
           <Avatar className="h-16 w-16">
             <AvatarImage src={profile.avatarUrl} alt={profile.username} />
             <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
@@ -114,10 +368,8 @@ const TourguideProfileCard = ({
           <span>
             <StarRating rating={profile.rating} readOnly={true} />
           </span>
-
           <span className="ml-2 text-lg font-semibold">{profile.rating.toFixed(1)}</span>
         </div>
-
 
         {showMore && (
           <div className="mt-4 space-y-2">
@@ -158,8 +410,6 @@ const TourguideProfileCard = ({
           </Button>
         </div>
 
-
-
         {userRole === 'tourist' && userBookings.some(booking => booking.itinerary._id === itinerary._id) && (
           <div className="border-t pt-4 mt-4">
             <div className="text-sm text-gray-500 mb-2">Rate Tour Guide:</div>
@@ -184,11 +434,11 @@ const TourguideProfileCard = ({
         <Button onClick={onReviewClick} className="w-full bg-[#1A3B47]">
           See All Reviews
         </Button>
-        <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4 pt-8"></div>
       </CardContent>
     </Card>
   );
 };
+
 
 
 const ItineraryDetail = () => {
@@ -219,6 +469,7 @@ const ItineraryDetail = () => {
   const [showRateItineraryDialog, setShowRateItineraryDialog] = useState(false);
   const [itineraryRating, setItineraryRating] = useState(0);
   const [itineraryReview, setItineraryReview] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
   const [showFullComment, setShowFullComment] = useState(null);
   const [activityRating, setActivityRating] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -230,7 +481,6 @@ const ItineraryDetail = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [isActivated, setIsActivated] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [userBookings, setUserBookings] = useState([]);
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
@@ -267,6 +517,12 @@ const ItineraryDetail = () => {
       setUserId(decodedToken.id);
     }
   }, []);
+
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    handleDateChange(date);
+  };
 
   useEffect(() => {
     if (itinerary && userId) {
@@ -985,261 +1241,97 @@ const ItineraryDetail = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className="lg:w-2/3">
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-              <div className="p-6">
-
-                <div className="flex justify-between items-center mb-6">
-
-                  <h1 className="text-4xl font-bold">Itinerary Details</h1>
-
-                  <div>
-                    <ToastProvider>
-                      <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" size="sm" className="ml-auto">
-                            <Share2 className="h-4 w-4" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <div className="flex flex-col">
-                            <Button
-                              variant="ghost"
-                              onClick={handleCopyLink}
-                              className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                            >
-                              <Link className="mr-2 h-4 w-4" />
-                              Copy Link
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              onClick={handleEmailShare}
-                              className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                            >
-                              <Mail className="mr-2 h-4 w-4" />
-                              Share by Email
-                            </Button>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-
-                      <ToastViewport />
-
-                      {isToastOpen && (
-                        <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
-                          <ToastTitle>Link Copied</ToastTitle>
-                          <ToastDescription>
-                            The link has been copied to your clipboard.
-                          </ToastDescription>
-                          <ToastClose />
-                        </Toast>
-                      )}
-                    </ToastProvider>
-                  </div>
-
-
-                  <div className="flex items-center space-x-4">
-
-                    {!isActivated && userRole === "tour-guide" && (
-                      <div className="flex items-center bg-red-500 px-3 py-1 rounded-full">
-                        <span className="text-2xl font-semibold">
-
-                          <>Deactivated</>
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center bg-[#B5D3D1] px-3 py-1 rounded-full">
-                      {/* <DollarSign className="w-8 h-8 text-blue-500 mr-2" /> */}
-                      <span className="text-2xl text-[#1A3B47] font-semibold">
-                        {formatPrice(itinerary.price) || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center bg-yellow-100 px-3 py-1 rounded-full">
-                      <Star className="w-8 h-8 text-yellow-500 mr-2" />
-                      <span className="text-2xl font-semibold">
-                        {itinerary.rating ? itinerary.rating.toFixed(1) : "N/A"}
-                      </span>
-                    </div>
-                    <span className="text-sm font-normal ml-2">
-                      {itinerary.comments ? `(${itinerary.comments.length})` : "(0)"}
-                    </span>
-                  </div>
+  <div className="lg:w-3/4">
+    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-4xl font-bold">{itinerary.title}</h1>
+          <ToastProvider>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="ml-auto">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <div className="flex flex-col">
+                  <Button
+                    variant="ghost"
+                    onClick={handleCopyLink}
+                    className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                  >
+                    <Link className="mr-2 h-4 w-4" />
+                    Copy Link
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={handleEmailShare}
+                    className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    Share by Email
+                  </Button>
                 </div>
+              </PopoverContent>
+            </Popover>
+            <ToastViewport />
+            {isToastOpen && (
+              <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}>
+                <ToastTitle>Link Copied</ToastTitle>
+                <ToastDescription>The link has been copied to your clipboard.</ToastDescription>
+                <ToastClose />
+              </Toast>
+            )}
+          </ToastProvider>
+        </div>
 
+        <div className="w-full h-[400px]">
+          <ImageGallery activities={itinerary.activities} />
+        </div>
 
+        <AvailableDatesSection availableDates={itinerary.availableDates} handleBookNowClick={handleBookNowClick} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
+        <div className="flex flex-wrap gap-2 my-4">
+          {itinerary.activities.map((activity, index) =>
+            activity.category ? (
+              activity.category.map((cat, catIndex) => (
+                <Badge key={catIndex} variant="secondary">
+                  {cat.name}
+                </Badge>
+              ))
+            ) : null
+          )}
+          {itinerary.activities.map((activity, index) =>
+            activity.tags ? (
+              activity.tags.map((tag, tagIndex) => (
+                <Badge key={tagIndex} variant="outline">
+                  {tag.type}
+                </Badge>
+              ))
+            ) : null
+          )}
+        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <Globe className="w-6 h-6 mr-2 text-[#F88C33]" />
-                      <span className="text-gray-700">
-                        Language: {itinerary.language}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <Banknote className="w-6 h-6 mr-2 text-[#F88C33]" />
-                      <span className="text-gray-700">
-                        Price: {formatPrice(itinerary.price)}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <Accessibility className="w-6 h-6 mr-2 text-[#F88C33]" />
-                      <span className="text-gray-700">
-                        Accessibility: {itinerary.accessibility ? "Yes" : "No"}
-                      </span>
-                    </div>
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Activities</h2>
+          <ActivityTimeline activities={itinerary.activities} />
+        </div>
 
-                    <div className="flex items-center">
-                      <Accessibility className="w-6 h-6 mr-2 text-[#F88C33]" />
-                      <span className="text-gray-700">
-                        Repeatable: {itinerary.isRepeated ? "Yes" : "No"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <MapPin className="w-6 h-6 mr-2 text-[#F88C33]" />
-                      <span className="text-gray-700">
-                        Pick-up: {itinerary.pickUpLocation}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <MapPin className="w-6 h-6 mr-2 text-[#F88C33]" />
-                      <span className="text-gray-700">
-                        Drop-off: {itinerary.dropOffLocation}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6 border-t border-gray-200 mt-6">
-                  <h3 className="text-2xl font-semibold mb-4">Available Dates</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {itinerary.availableDates.map((dateInfo, index) => (
-                      <div key={index} className="bg-gray-100 p-4 rounded-lg">
-                        <div className="flex items-center mb-2">
-                          <Calendar className="w-5 h-5 mr-2 text-[#F88C33]" />
-                          <span className="font-semibold">
-                            {new Date(dateInfo.date).toLocaleDateString()}
-                          </span>
-                        </div>
-
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-8">
-                  <h2 className="text-2xl font-semibold mb-4">Activities</h2>
-                  <ActivityTimeline activities={itinerary.activities} />
-                  {/* {activities.length === 0 ? (
-                    <p>No activities found.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {activities.map((activity, index) => (
-                        <Card key={index}>
-                          <CardHeader>
-                            <CardTitle>{activity.name}</CardTitle>
-                            <CardDescription>
-                              {activity.description}
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-2">
-                              <div className="flex items-center">
-                                <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-                                <span className="text-sm">{activity.location?.address}</span>
-                              </div>
-                              <div className="flex items-center">
-                                <Clock className="w-4 h-4 mr-2 text-gray-500" />
-                                <span className="text-sm">
-                                  Duration: {activity.duration} hours
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                                <span className="text-sm">
-                                  {itinerary.isRepeated
-                                    ? new Date(activity.timing).toLocaleTimeString([], {
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })
-                                    : new Date(activity.timing).toLocaleString([], {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
-                                </span>
-                              </div>
-
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {activity.category &&
-                                  activity.category.map((cat, catIndex) => (
-                                    <Badge key={catIndex} variant="secondary">
-                                      {cat.name}
-                                    </Badge>
-                                  ))}
-                              </div>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {activity.tags &&
-                                  activity.tags.map((tag, tagIndex) => (
-                                    <Badge key={tagIndex} variant="outline">
-                                      {tag.type}
-                                    </Badge>
-                                  ))}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )} */}
-                </div>
-
-                {itinerary.location && (
-                  <div className="mt-8">
-                    <TimelinePreviewComponent />
-                  </div>
-                )}
-
-                {userRole === "tour-guide" && canModify && (
-                  <div className="mt-6 flex justify-end space-x-4">
-                    <Button
-                      onClick={handleUpdate}
-                      variant="default"
-                      className="flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Update
-                    </Button>
-                    <Button
-                      onClick={() => setShowDeleteConfirm(true)}
-                      variant="destructive"
-                      className="flex items-center"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </Button>
-
-                    <Button
-                      onClick={() => handleActivationToggle()}
-                      variant={isActivated ? "destructive" : "default"}
-                      className={`flex items-center ${isActivated ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-                    >
-                      {isActivated ? 'Deactivate' : 'Activate'}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
+        {itinerary.location && (
+          <div className="mt-8">
+            <TimelinePreviewComponent />
           </div>
+        )}
 
-          <div className="lg:w-1/3">
+       
+      </div>
+    </div>
+  </div>
+
+
+
+          <div className="lg:w-1/4">
+        
             {tourGuideProfile && (
               <TourguideProfileCard
                 profile={tourGuideProfile}
@@ -1252,22 +1344,18 @@ const ItineraryDetail = () => {
                 userTourGuideReview={userTourGuideReview}
                 handleQuickTourGuideRating={handleQuickTourGuideRating}
                 setShowTourGuideReviewDialog={setShowTourGuideReviewDialog}
+                formatPrice={formatPrice}
+                canModify={canModify}
+                handleUpdate={handleUpdate}
+                setShowDeleteConfirm={setShowDeleteConfirm}
+                handleActivationToggle={handleActivationToggle}
+                isActivated={isActivated}
+                isItineraryAvailable={isItineraryAvailable}
+                handleBookNowClick={handleBookNowClick}
+
               />
             )}
-            {userRole === 'tourist' && isItineraryAvailable() && (
-              isActivated ? (
-                <Button
-                  onClick={handleBookNowClick}
-                  className="w-full bg-[#5D9297] hover:[#388A94] text-white font-bold py-2 px-4 rounded mt-4"
-                >
-                  Book Now
-                </Button>
-              ) : (
-                <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
-                  Currently Unavailable
-                </div>
-              )
-            )}
+           
 
 
             {userRole === "admin" && (
@@ -1629,84 +1717,90 @@ const ItineraryDetail = () => {
         </Dialog>
 
 
+{userRole==="tourist" &&(
+<>
+    <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="date" className="text-right">
+              Date
+            </Label>
 
+            <Select onValueChange={handleDateSelect} value={selectedDate || undefined}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue>
+                  {selectedDate ? format(new Date(selectedDate), 'MMMM d, yyyy') : "Select a date"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {itinerary.availableDates
+                  .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0)) // Filter upcoming dates
+                  .map((dateInfo, index) => (
+                    <SelectItem key={index} value={dateInfo.date}>
+                      {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="tickets" className="text-right">
+              Tickets
+            </Label>
+            <Input
+              id="tickets"
+              type="number"
+              value={numberOfTickets}
+              onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Total Price</Label>
+            <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Payment Type</Label>
+            <RadioGroup
+              value={paymentType}
+              onValueChange={setPaymentType}
+              className="col-span-3"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="CreditCard" id="CreditCard" />
+                <Label htmlFor="CreditCard">Credit Card</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="DebitCard" id="DebitCard" />
+                <Label htmlFor="DebitCard">Debit Card</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Wallet" id="Wallet" />
+                <Label htmlFor="Wallet">Wallet</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          {bookingError && (
+            <div className="text-red-500 text-sm">{bookingError}</div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button onClick={() => setShowBookingDialog(false)} variant="outline">
+            Cancel
+          </Button>
+          <Button onClick={handleBooking} disabled={isBooking || !selectedDate}>
+            {isBooking ? "Booking..." : "Confirm Booking"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
+)}
 
-        <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="date" className="text-right">
-                  Date
-                </Label>
-                <Select onValueChange={setSelectedDate} value={selectedDate || undefined}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select a date" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {itinerary.availableDates
-                      .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0)) // Filter upcoming dates
-                      .map((dateInfo, index) => (
-                        <SelectItem key={index} value={dateInfo.date}>
-                          {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="tickets" className="text-right">
-                  Tickets
-                </Label>
-                <Input
-                  id="tickets"
-                  type="number"
-                  value={numberOfTickets}
-                  onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Total Price</Label>
-                <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Payment Type</Label>
-                <RadioGroup
-                  value={paymentType}
-                  onValueChange={setPaymentType}
-                  className="col-span-3"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="CreditCard" id="CreditCard" />
-                    <Label htmlFor="CreditCard">Credit Card</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="DebitCard" id="DebitCard" />
-                    <Label htmlFor="DebitCard">Debit Card</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Wallet" id="Wallet" />
-                    <Label htmlFor="Wallet">Wallet</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              {bookingError && (
-                <div className="text-red-500 text-sm">{bookingError}</div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button onClick={() => setShowBookingDialog(false)} variant="outline">
-                Cancel
-              </Button>
-              <Button onClick={handleBooking} disabled={isBooking || !selectedDate}>
-                {isBooking ? "Booking..." : "Confirm Booking"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
 
         <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>

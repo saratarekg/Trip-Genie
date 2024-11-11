@@ -50,10 +50,12 @@ buttons bardo can be better. maybe remove the drop shadow and make it an outline
 
 
 create itinerary seperate sections for days, and then create activities gowa el dates di, w fi option day off.
+have day title
+
 
 Orange: #F88C33
 Beige/Tan: #E6DCCF
 Light Aqua/Seafoam Green: #B5D3D1
 Teal: #5D9297
-Turquoise: #388A94
+Turquoise: #388A94 bg-[#388A94] hover:bg-[#2e6b77]
 Dark Teal/Blue: #1A3B47

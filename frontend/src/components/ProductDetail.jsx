@@ -98,6 +98,7 @@ const StarRating = ({ rating, onRatingChange = null }) => {
   );
 };
 
+
 const ImageGallery = ({ pictures }) => {
   const [mainImage, setMainImage] = useState(pictures[0]?.url);
   const [startIndex, setStartIndex] = useState(0);
@@ -118,28 +119,33 @@ const ImageGallery = ({ pictures }) => {
           {pictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className="absolute top-0 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full z-10"
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex === 0 ? 'bg-gray-400' : 'bg-black'
+              }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
               <ChevronUp size={20} />
             </button>
           )}
-          <div className="flex flex-col gap-2 h-full">
+          <div className="flex flex-col gap-2 h-full transition-transform duration-700 ease-in-out">
             {pictures.slice(startIndex, startIndex + 5).map((pic, index) => (
               <img
-                key={index}
+                key={startIndex + index}
                 src={pic.url}
                 alt={`Product image ${startIndex + index + 1}`}
                 className="w-full h-[20%] object-cover rounded-lg cursor-pointer"
                 onClick={() => setMainImage(pic.url)}
+                style={{ transition: 'transform 0.7s ease-in-out' }}
               />
             ))}
           </div>
           {pictures.length > 5 && (
             <button
               onClick={handleNext}
-              className="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white p-1 rounded-full z-10"
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex >= pictures.length - 5 ? 'bg-gray-400' : 'bg-black'
+              }`}
               disabled={startIndex >= pictures.length - 5}
               aria-label="Next images"
             >
@@ -162,6 +168,8 @@ const ImageGallery = ({ pictures }) => {
     </div>
   );
 };
+
+
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -1051,7 +1059,7 @@ const ProductDetail = () => {
                 {hasPurchased && (
                   <div className="mt-4 space-y-2">
                     <Button
-                      className="w-full mb-4"
+                      className="w-full mb-4 bg-[#388A94] hover:bg-[#2e6b77]"
                       onClick={() => setShowCommentDialog(true)}
                     >
                       {userReview ? "Edit Your Review" : "Write a Review"}
@@ -1241,7 +1249,7 @@ const ProductDetail = () => {
     Only {product.quantity} left in stock! Buy now!
   </p>
 ) : (
-  <span className="text-green-600 text-medium">
+  <span className="text-green-600 text-lg font-semibold">
     Still in stock!
   </span>
 )}
@@ -2017,6 +2025,7 @@ const ProductDetail = () => {
     {/* Dialog Footer */}
     <DialogFooter>
       <Button
+      className="bg-gray-300 hover:bg-gray-400"
         variant="outline"
         onClick={() => {
           setShowPurchaseConfirm(false);
@@ -2026,6 +2035,7 @@ const ProductDetail = () => {
         Cancel
       </Button>
       <Button
+      className="bg-[#1A3B47]"
         onClick={() => {
           handlePurchase(location);
           setShowPurchaseConfirm(false);
@@ -2127,7 +2137,7 @@ const ProductDetail = () => {
             </Button>
             <Button
               onClick={handleCommentSubmit}
-              className="bg-blue-500 border-blue-500 text-white hover:bg-blue-600"
+              className="bg-[#1A3B47]  text-white "
               disabled={rating === 0 || comment?.trim() === ""}
             >
               {userReview ? "Update Review" : "Submit Review"}

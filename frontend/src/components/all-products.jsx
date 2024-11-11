@@ -218,41 +218,49 @@ const ProductCard = ({
 
         {userInfo?.role === "tourist" && product.quantity > 0 ? (
           <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
-            <DialogTrigger asChild>
-              <Button
-                className="bg-orange-400 hover:bg-[#F88C99] text-white"
-                style={{
-                  borderRadius: "20px",
-                  padding: "4px 12px",
-                  fontSize: "14px",
-                }}
-              >
-                Buy Now
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Choose an option</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart(product);
-                    setIsPopupOpen(false);
-                  }}
-                >
-                  Add to Cart and Continue Shopping
-                </Button>
-                <Button onClick={handleCheckoutNow}>
-                  Add to cart and Checkout Now
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <DialogTrigger asChild>
+            <Button
+              className="bg-[#F88C33] hover:bg-orange-500 text-white"
+              style={{
+                borderRadius: "20px",
+                padding: "4px 12px",
+                fontSize: "14px",
+              }}
+            >
+              Buy Now
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-[#1A3B47] text-2xl">Choose an option</DialogTitle>
+            </DialogHeader>
+           
+            <div className="grid gap-4 py-4">
+
+<Button
+  className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
+  onClick={(e) => {
+    e.stopPropagation();
+    onAddToCart(product);
+    setIsPopupOpen(false);
+  }}
+>
+  Add to Cart and Continue Shopping
+</Button>
+<Button
+  className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
+  onClick={handleCheckoutNow}
+>
+  Add to cart and Checkout Now
+</Button>
+
+            </div>
+          </DialogContent>
+        </Dialog>
+        
         ) : (
           userInfo?.role === "tourist" && (
-            <span className="text-red-500 text-2xl font-bold">
+            <span className="text-red-500 text-lg font-bold">
               Out of stock
             </span>
           )
@@ -261,7 +269,7 @@ const ProductCard = ({
 
       {userInfo?.role === "tourist" && (
         <div className="absolute top-2 right-2 flex space-x-2">
-          {!isInCart && (
+          {!isInCart && product.quantity>0 && (
             <Button
               className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
               onClick={(e) => {
