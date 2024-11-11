@@ -3,8 +3,12 @@
 -F Booking itineraires, zorar book now, choosing date betdrab error
 -Deleting/View booking buttons bto3 itineraires btdrb error(my account-> upcoming bookings -> itineraires -> delete and view buttons)
 -Confirmation of booking a hotel & saving booking in database
-itinerary booking and view booking!!
-rate tourguide and itinerary cuz based on booking!!
+-itinerary booking and view booking!!
+-rate tourguide and itinerary cuz based on booking!!
+- "already have an account?" fe sign up teb2a fe kol el stages (7otooha 3al shemal)
+- pagination bayez fe all trip plans
+- 2 comments shaklaha mot5alef
+- show complaint date in my complaints
 
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
