@@ -10,7 +10,7 @@ upload product picture
 I have to scroll for a second time for it to work. -Hazem
 
 - When I deleted seller account, I instantly got redirected out and received a popup with "account deleted" without waiting for a request 
-
+i can delete toursit account when he has a booked activity
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
 - Allow user to enter shipping address and delivery preferences once in settings and auto-fill them later
