@@ -294,7 +294,6 @@ export default function AllActivities() {
 
   const fetchActivities = useCallback(
     async (params = {}) => {
-      setIsLoading(true);
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
