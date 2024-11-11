@@ -797,13 +797,14 @@ const deleteAccount = async (req, res) => {
     const bookedActivities = await ActivityBooking.find({
       user: res.locals.user_id,
     }).populate("activity");
-    bookedActivities.forEach((activity) => {
-      if (activity.timing > Date.now()) {
+
+    for (const booking of bookedActivities) {
+      if (booking.activity.timing > Date.now()) {
         return res
           .status(400)
           .json({ message: "Cannot delete account with active bookings" });
       }
-    });
+    }
 
     const bookedItineraries = await ItineraryBooking.find({
       user: res.locals.user_id,
@@ -829,20 +830,20 @@ const deleteAccount = async (req, res) => {
       touristID: res.locals.user_id,
     }).populate("transportationID");
 
-    transportations.forEach((transportation) => {
+    for (const transportation of transportations) {
       if (transportation.transportationID.timeDeparture > Date.now()) {
         return res.status(400).json({
           message: "Cannot delete account with active transportation bookings",
         });
       }
-    });
+    }
 
     await Complaint.deleteMany({ tourist: res.locals.user_id });
 
     if (tourist.profilePicture !== null) {
       await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
     }
-    await Tourist.findByIdAndDelete(res.locals.user_id);
+    console.log("alo");
     await TourGuide.updateMany(
       { "comments.tourist": res.locals.user_id }, // Match documents where a comment has the matching tourist
       { $pull: { comments: { tourist: res.locals.user_id } } } // Pull the comment where the tourist matches
@@ -859,6 +860,7 @@ const deleteAccount = async (req, res) => {
       { "reviews.tourist": res.locals.user_id }, // Match documents where a review has the matching tourist
       { $pull: { reviews: { tourist: res.locals.user_id } } } // Pull the review where the tourist matches
     );
+    await Tourist.findByIdAndDelete(res.locals.user_id);
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -879,13 +881,13 @@ const deleteTouristAccount = async (req, res) => {
     const bookedActivities = await ActivityBooking.find({
       user: req.params.id,
     }).populate("activity");
-    bookedActivities.forEach((activity) => {
-      if (activity.timing > Date.now()) {
+    for (const booking of bookedActivities) {
+      if (booking.activity.timing > Date.now()) {
         return res
           .status(400)
           .json({ message: "Cannot delete account with active bookings" });
       }
-    });
+    }
 
     const bookedItineraries = await ItineraryBooking.find({
       user: req.params.id,
@@ -911,20 +913,20 @@ const deleteTouristAccount = async (req, res) => {
       touristID: req.params.id,
     }).populate("transportationID");
 
-    transportations.forEach((transportation) => {
+    for (const transportation of transportations) {
       if (transportation.transportationID.timeDeparture > Date.now()) {
         return res.status(400).json({
           message: "Cannot delete account with active transportation bookings",
         });
       }
-    });
+    }
 
     await Complaint.deleteMany({ tourist: req.params.id });
 
     if (tourist.profilePicture !== null) {
       await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
     }
-    await Tourist.findByIdAndDelete(req.params.id);
+
     await TourGuide.updateMany(
       { "comments.tourist": req.params.id }, // Match documents where a comment has the matching tourist
       { $pull: { comments: { tourist: req.params.id } } } // Pull the comment where the tourist matches
@@ -941,6 +943,7 @@ const deleteTouristAccount = async (req, res) => {
       { "reviews.tourist": req.params.id }, // Match documents where a review has the matching tourist
       { $pull: { reviews: { tourist: req.params.id } } } // Pull the review where the tourist
     );
+    await Tourist.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
