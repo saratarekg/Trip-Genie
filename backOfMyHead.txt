@@ -14,7 +14,8 @@ upload product picture
 I have to scroll for a second time for it to work. -Hazem
 
 - When I deleted seller account, I instantly got redirected out and received a popup with "account deleted" without waiting for a request 
-
+- add comment to itinerary btegy baad rate based
+-attended itineraries btfdl fl upcoming msh fl history
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
 - Allow user to enter shipping address and delivery preferences once in settings and auto-fill them later
