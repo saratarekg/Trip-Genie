@@ -283,14 +283,27 @@ export default function Component() {
     setIsNotificationDialogOpen(true);
   };
 
+  const fetchUpdatedData = async () => {
+    try {
+      const [activitiesData, itinerariesData] = await Promise.all([
+        fetchData(userRole, "touristActivityBookings"),
+        fetchData(userRole, "touristItineraryBookings"),
+      ]);
+      setActivities(activitiesData);
+      setItineraries(itinerariesData);
+    } catch (error) {
+      console.error("Error fetching updated data:", error);
+      showNotification("Failed to update bookings. Please refresh the page.", "error");
+    }
+  };
+
   const confirmDelete = async () => {
     if (!selectedBooking) return;
 
     const bookingType = selectedBooking.activity ? "activity" : "itinerary";
     const bookingDate = new Date(selectedBooking[bookingType].timing);
     const now = new Date();
-    const hoursDifference =
-      (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const hoursDifference = (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
     if (hoursDifference < 48) {
       showNotification(
@@ -309,11 +322,8 @@ export default function Component() {
         }
       );
 
-      if (bookingType === "activity") {
-        setActivities(activities.filter((a) => a.id !== selectedBooking.id));
-      } else {
-        setItineraries(itineraries.filter((i) => i.id !== selectedBooking.id));
-      }
+      // Fetch updated data after successful deletion
+      await fetchUpdatedData();
 
       showNotification(
         "Your booking has been successfully cancelled.",
@@ -388,16 +398,15 @@ export default function Component() {
     ? itineraries.map((booking) => (
         <div key={booking._id} className="mb-4">
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              className="w-full justify-start mr-2 text-left whitespace-normal"
-              onClick={() =>
-                handleItineraryClick(booking.itinerary?._id)
-              }
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              {booking.itinerary?.title}
-            </Button>
+          <Button
+  variant="ghost"
+  className="w-full justify-start mr-2 text-left whitespace-normal"
+  onClick={() => handleItineraryClick(booking.itinerary?._id)}
+>
+  <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
+  {booking.itinerary?.title}
+</Button>
+
             <Button
               variant="ghost"
               size="icon"

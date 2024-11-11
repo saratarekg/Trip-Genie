@@ -1409,9 +1409,20 @@ export function SignupForm() {
             start exploring.
           </p>
           {renderStepIndicator()}
+            <div className="mt-4 text-center text-s">
+              <p className="text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-medium text-[#5D9297] hover:text-[#1A3B47]"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </div>
         </div>
         <div
-          className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto"
+          className="w-full md:w-3/5 p-6 max-h-[90vh] overflow-y-auto"
           ref={divRef}
         >
           <Form {...form}>
@@ -1496,19 +1507,7 @@ export function SignupForm() {
             </form>
           </Form>
 
-          {!userType && (
-            <div className="mt-4 text-center text-s">
-              <p className="text-gray-600">
-                Already have an account?{" "}
-                <Link
-                  to="/login"
-                  className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
-                >
-                  Sign in
-                </Link>
-              </p>
-            </div>
-          )}
+          
         </div>
       </div>
 
