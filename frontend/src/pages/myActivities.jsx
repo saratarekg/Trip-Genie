@@ -19,12 +19,7 @@ import {
 } from "@/components/ui/card";
 import { set } from "date-fns";
 import { Button } from "@/components/ui/button";
-import {
-  Trash2,
-  CheckCircle,
-  XCircle,
-  Edit,
-} from "lucide-react";
+import { Trash2, CheckCircle, XCircle, Edit } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -69,9 +64,15 @@ const DeleteConfirmationModal = ({
 };
 
 let exchangeRateForFilter = 1;
-const role = Cookies.get("role")
+const role = Cookies.get("role");
 
-const ActivityCard = ({ activity, onSelect, userInfo , onDeleteConfirm, setShowDeleteConfirm,}) => {
+const ActivityCard = ({
+  activity,
+  onSelect,
+  userInfo,
+  onDeleteConfirm,
+  setShowDeleteConfirm,
+}) => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
 
@@ -156,51 +157,50 @@ const ActivityCard = ({ activity, onSelect, userInfo , onDeleteConfirm, setShowD
     <Card
       className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
       onClick={() => onSelect(activity._id)}
-     
     >
       <div className="relative aspect-video overflow-hidden">
-  <img
-    src={
-      activity.pictures && activity.pictures.length > 0
-        ? activity.pictures[0]?.url
-        : defaultImage
-    }
-    alt={activity.name}
-    className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-  />
-  
-  {/* {(() => {
+        <img
+          src={
+            activity.pictures && activity.pictures.length > 0
+              ? activity.pictures[0]?.url
+              : defaultImage
+          }
+          alt={activity.name}
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
+
+        {/* {(() => {
     console.log("User Role:", role);
     console.log("User Info ID:", userInfo?.userId); // Use optional chaining to safely access userId
     console.log("Activity Advertiser ID:", activity?.advertiser); // Safely access activity.advertiser
     return null; // No visual output, just for logging
   })()}
    */}
-  {role === "advertiser" && userInfo?.userId === activity?.advertiser && (
-    <div className="absolute top-2 right-2 flex space-x-2">
-      <button
-        className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-        onClick={(e) => {
-          e.stopPropagation();
-          window.location.href = `/update-activity/${activity._id}`;
-        }}
-        aria-label="Edit activity"
-      >
-        <Edit className="h-4 w-4" />
-      </button>
-      <button
-        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDeleteConfirm(activity._id, activity.name);
-        }}
-        aria-label="Delete activity"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
-    </div>
-  )}
-</div>
+        {role === "advertiser" && userInfo?.userId === activity?.advertiser && (
+          <div className="absolute top-2 right-2 flex space-x-2">
+            <button
+              className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = `/update-activity/${activity._id}`;
+              }}
+              aria-label="Edit activity"
+            >
+              <Edit className="h-4 w-4" />
+            </button>
+            <button
+              className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteConfirm(activity._id, activity.name);
+              }}
+              aria-label="Delete activity"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
 
       <CardHeader className="p-4">
         <CardTitle className="text-xl font-semibold">{activity.name}</CardTitle>
@@ -263,10 +263,13 @@ export function MyActivitiesComponent() {
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [maxPriceOfActivities,setMaxPriceOfActivities] = useState(1000);
+  const [maxPriceOfActivities, setMaxPriceOfActivities] = useState(1000);
   const [priceRange, setPriceRange] = useState([0, maxPriceOfActivities]);
   const [maxPrice, setMaxPrice] = useState(maxPriceOfActivities);
-  const [initialPriceRange, setInitialPriceRange] = useState([0, maxPriceOfActivities]);
+  const [initialPriceRange, setInitialPriceRange] = useState([
+    0,
+    maxPriceOfActivities,
+  ]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
@@ -313,43 +316,43 @@ export function MyActivitiesComponent() {
         console.error("Error fetching user profile:", error);
         setUserInfo({ role });
       }
-    }  else {
+    } else {
       if (token) {
         const decodedToken = jwtDecode(token);
         setUserInfo({
           role,
-          userId: decodedToken.id
-        });        
-      }else{    
-          setUserInfo({ role ,
-           });
+          userId: decodedToken.id,
+        });
+      } else {
+        setUserInfo({ role });
+      }
     }
-    } 
   }, []);
 
   useEffect(() => {
-    if(!isPriceInitialized){
+    if (!isPriceInitialized) {
       fetchMaxPrice();
-      }
+    }
   }, [userInfo]);
 
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
-    const url = new URL(`http://localhost:4000/${role}/max-price-activities-my`);
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          // console.log("data: ",data);
-          setMaxPriceOfActivities(data);
-          setPriceRange([0, data]);
-          setInitialPriceRange([0, data]);
-          setIsPriceInitialized(true);
-          
-    };
+    const url = new URL(
+      `http://localhost:4000/${role}/max-price-activities-my`
+    );
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    // console.log("data: ",data);
+    setMaxPriceOfActivities(data);
+    setPriceRange([0, data]);
+    setInitialPriceRange([0, data]);
+    setIsPriceInitialized(true);
+  };
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -491,7 +494,9 @@ export function MyActivitiesComponent() {
         setIsSortedByPreference(true);
         setIsInitialized(true);
       } else {
-        const url = new URL(`http://localhost:4000/${role}/activities?myActivities=true`);
+        const url = new URL(
+          `http://localhost:4000/${role}/activities?myActivities=true`
+        );
         const response = await fetch(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -530,7 +535,9 @@ export function MyActivitiesComponent() {
     setIsSortedByPreference(false);
     try {
       const role = getUserRole();
-      const url = new URL(`http://localhost:4000/${role}/activities?myActivities=true`);
+      const url = new URL(
+        `http://localhost:4000/${role}/activities?myActivities=true`
+      );
 
       if (searchTerm) {
         url.searchParams.append("searchBy", searchTerm);
@@ -612,7 +619,6 @@ export function MyActivitiesComponent() {
         if (
           response.status === 400 &&
           errorData.message === "Cannot delete activity with existing bookings"
-         
         ) {
           setError("Cannot Delete Activity With Existing Bookings.");
           setDeleteError("Cannot Delete Activity With Existing Bookings.");
@@ -661,7 +667,9 @@ export function MyActivitiesComponent() {
         setActivities([...preferredActivities, ...otherActivities]);
         setIsSortedByPreference(true);
       } else {
-        const url = new URL(`http://localhost:4000/${role}/activities?myActivities=true`);
+        const url = new URL(
+          `http://localhost:4000/${role}/activities?myActivities=true`
+        );
         const response = await fetch(url, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -857,7 +865,6 @@ export function MyActivitiesComponent() {
         </div>
       )}
 
-      
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
@@ -905,9 +912,9 @@ export function MyActivitiesComponent() {
                 setShowDeleteSuccess(false);
                 navigate("/my-activities");
               }}
-              className = "bg-gray-400 hover:bg-gray-500"
+              className="bg-gray-400 hover:bg-gray-500"
             >
-             Close
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -15,6 +15,8 @@ import {
   Heart,
   Edit,
   Trash2,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +35,50 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import activityImage from "../assets/images/sam.png";
+import defaultImage from "../assets/images/default-image.jpg";
+import Loader from "../components/Loader.jsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  activityName,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
+        <p className="mb-6">
+          Are you sure you want to delete the activity "{activityName}"?
+        </p>
+        <div className="flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            onClick={onConfirm}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 let exchangeRateForFilter = 1;
 
@@ -282,7 +328,7 @@ const AllActivities = () => {
                 src={
                   activity.pictures && activity.pictures.length > 0
                     ? activity.pictures[0]?.url
-                    : "/placeholder.svg"
+                    : defaultImage
                 }
                 alt={activity.name}
                 className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
@@ -364,7 +410,7 @@ const AllActivities = () => {
                   className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDeleteConfirm(activity);
+                    onDeleteConfirm(activity._id, activity.name);
                   }}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -400,6 +446,53 @@ const AllActivities = () => {
     },
     [userInfo, exchangeRates, currencies]
   );
+
+  const handleDeleteConfirm = (id, name) => {
+    setActivityToDelete({ id, name });
+    setShowDeleteModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (!activityToDelete) return;
+
+    setIsLoading(true);
+    setDeleteError(null);
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/${role}/activities/${activityToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (
+          response.status === 400 &&
+          errorData.message === "Cannot delete activity with existing bookings"
+        ) {
+          // setError("Cannot Delete Activity With Existing Bookings.");
+          setDeleteError("Cannot Delete Activity With Existing Bookings.");
+          return;
+        }
+        throw new Error("Failed to delete activity");
+      }
+
+      setShowDeleteSuccess(true);
+      fetchActivities();
+    } catch (err) {
+      setError("Error deleting activity. Please try again later.");
+      console.error("Error deleting activity:", err);
+    } finally {
+      setIsLoading(false);
+      setShowDeleteModal(false);
+      setActivityToDelete(null);
+    }
+  };
 
   const filteredActivities = useMemo(() => {
     return activities.filter((activity) => {
@@ -464,7 +557,7 @@ const AllActivities = () => {
           userInfo={userInfo}
           exchangeRates={exchangeRates}
           currencies={currencies}
-          onDeleteConfirm={setActivityToDelete}
+          onDeleteConfirm={handleDeleteConfirm}
           setShowDeleteConfirm={setShowDeleteConfirm}
         />
       ));
@@ -736,301 +829,393 @@ const AllActivities = () => {
   };
 
   return (
-    <div className="bg-gray-100">
-      <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
-          <div className="flex-1">
-            <h1 className="text-5xl font-bold text-white mb-4">
-              All Activities
-            </h1>
-            <p className="text-gray-200">
-              <a
-                href="/"
-                className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
-              >
-                Home
-              </a>{" "}
-              / Activities
-            </p>
-          </div>
-          <div className="hidden lg:block w-1/3">
-            <img
-              src={activityImage}
-              alt="Decorative"
-              height="200"
-              width="200"
-              className="ml-auto"
-            />
-          </div>
-        </div>
-      </div>
-      <div className="container mx-auto px-4 py-8 lg:px-24">
-        <div className="flex gap-8">
-          {/* Filters Sidebar */}
-          <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
-              <Button
-                onClick={() => {
-                  setPriceRange([0, maxPriceOfActivities]);
-                  setDateRange({ start: "", end: "" });
-                  setSelectedCategories([]);
-                  setSelectedRating(null);
-                }}
-                size="sm"
-                className="text-gray-400 hover:text-gray-200 bg-transparent border-none"
-              >
-                Clear All
-              </Button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Price Range Filter */}
-              <div>
-                <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-                {isPriceInitialized && (
-                  <DualHandleSliderComponent
-                    min={0}
-                    max={maxPriceOfActivities}
-                    symbol={userInfo?.preferredCurrency?.symbol || "$"}
-                    step={10}
-                    values={priceRange}
-                    exchangeRate={exchangeRateForFilter}
-                    onChange={(values) => setPriceRange(values)}
-                    middleColor="#5D9297"
-                    colorRing="blue"
-                  />
-                )}
+    <div>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <div className="bg-gray-100">
+          <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
+            <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
+              <div className="flex-1">
+                <h1 className="text-5xl font-bold text-white mb-4">
+                  All Activities
+                </h1>
+                <p className="text-gray-200">
+                  <a
+                    href="/"
+                    className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
+                  >
+                    Home
+                  </a>{" "}
+                  / Activities
+                </p>
               </div>
-
-              {/* Date Range Filter */}
-              <div>
-                <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
-                <div className="space-y-2">
-                  <input
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) => {
-                      const newDateRange = {
-                        ...dateRange,
-                        start: e.target.value,
-                      };
-                      setDateRange(newDateRange);
-                      searchActivities(); // Trigger search immediately
+              <div className="hidden lg:block w-1/3">
+                <img
+                  src={activityImage}
+                  alt="Decorative"
+                  height="200"
+                  width="200"
+                  className="ml-auto"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="container mx-auto px-4 py-8 lg:px-24">
+            <div className="flex gap-8">
+              {/* Filters Sidebar */}
+              <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-[#1A3B47]">
+                    Filters
+                  </h2>
+                  <Button
+                    onClick={() => {
+                      setPriceRange([0, maxPriceOfActivities]);
+                      setDateRange({ start: "", end: "" });
+                      setSelectedCategories([]);
+                      setSelectedRating(null);
                     }}
-                    className="w-full p-2 border rounded"
-                  />
-                  <input
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) => {
-                      const newDateRange = {
-                        ...dateRange,
-                        end: e.target.value,
-                      };
-                      setDateRange(newDateRange);
-                      searchActivities(); // Trigger search immediately
-                    }}
-                    className="w-full p-2 border rounded"
-                  />
+                    size="sm"
+                    className="text-gray-400 hover:text-gray-200 bg-transparent border-none"
+                  >
+                    Clear All
+                  </Button>
+                </div>
+                <div className="space-y-6">
+                  {/* Price Range Filter */}
+                  <div>
+                    <h3 className="font-medium text-[#1A3B47] mb-2">
+                      Price Range
+                    </h3>
+                    {isPriceInitialized && (
+                      <DualHandleSliderComponent
+                        min={0}
+                        max={maxPriceOfActivities}
+                        symbol={userInfo?.preferredCurrency?.symbol || "$"}
+                        step={10}
+                        values={priceRange}
+                        exchangeRate={exchangeRateForFilter}
+                        onChange={(values) => setPriceRange(values)}
+                        middleColor="#5D9297"
+                        colorRing="blue"
+                      />
+                    )}
+                  </div>
+                  {/* Date Range Filter */}
+                  <div>
+                    <h3 className="font-medium text-[#1A3B47] mb-2">
+                      Date Range
+                    </h3>
+                    <div className="space-y-2">
+                      <input
+                        type="date"
+                        value={dateRange.start}
+                        onChange={(e) => {
+                          const newDateRange = {
+                            ...dateRange,
+                            start: e.target.value,
+                          };
+                          setDateRange(newDateRange);
+                          searchActivities(); // Trigger search immediately
+                        }}
+                        className="w-full p-2 border rounded"
+                      />
+                      <input
+                        type="date"
+                        value={dateRange.end}
+                        onChange={(e) => {
+                          const newDateRange = {
+                            ...dateRange,
+                            end: e.target.value,
+                          };
+                          setDateRange(newDateRange);
+                          searchActivities(); // Trigger search immediately
+                        }}
+                        className="w-full p-2 border rounded"
+                      />
+                    </div>
+                  </div>
+                  {/* Star Rating Filter */}
+                  <div>
+                    <h3 className="font-medium text-[#1A3B47] mb-2">
+                      Star Rating
+                    </h3>
+                    <div className="space-y-2">
+                      {[5, 4, 3, 2, 1].map((rating) => (
+                        <button
+                          key={rating}
+                          onClick={() =>
+                            setSelectedRating(
+                              rating === selectedRating ? null : rating
+                            )
+                          }
+                          className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
+                            selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                          }`}
+                        >
+                          {renderStars(rating)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Category Filter */}
+                  <div>
+                    <h3 className="font-medium text-[#1A3B47] mb-2">
+                      Category
+                    </h3>
+                    <ScrollArea className="h-[200px]">
+                      <div className="space-y-2">
+                        {categoryOptions.map((category) => (
+                          <div key={category._id} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id={category._id}
+                              checked={selectedCategories.includes(
+                                category.name
+                              )}
+                              onChange={() => {
+                                setSelectedCategories((prev) =>
+                                  prev.includes(category.name)
+                                    ? prev.filter(
+                                        (cat) => cat !== category.name
+                                      )
+                                    : [...prev, category.name]
+                                );
+                              }}
+                              className="mr-2"
+                            />
+                            <label
+                              htmlFor={category._id}
+                              className="text-sm text-gray-600"
+                            >
+                              {category.name}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
                 </div>
               </div>
-
-              {/* Star Rating Filter */}
-              <div>
-                <h3 className="font-medium text-[#1A3B47] mb-2">Star Rating</h3>
-                <div className="space-y-2">
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <button
-                      key={rating}
+              {/* Main Content */}
+              <div className="flex-1">
+                <div className="mb-4">
+                  <div className="relative flex-grow mb-4">
+                    <input
+                      type="text"
+                      placeholder="Search activities..."
+                      className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+                  </div>
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center space-x-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="whitespace-nowrap rounded-full"
+                        onClick={() => {
+                          setSortBy("rating");
+                          setSortOrder((prev) => (prev === 1 ? -1 : 1));
+                        }}
+                      >
+                        <ArrowUpDown className="w-4 h-4 mr-2" />
+                        Sort by Rating
+                        {sortBy === "rating" && (
+                          <span className="ml-2">
+                            {sortOrder === 1 ? "↓" : "↑"}
+                          </span>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="whitespace-nowrap rounded-full"
+                        onClick={() => {
+                          setSortBy("price");
+                          setSortOrder((prev) => (prev === 1 ? -1 : 1));
+                        }}
+                      >
+                        <ArrowUpDown className="w-4 h-4 mr-2" />
+                        Sort by Price
+                        {sortBy === "price" && (
+                          <span className="ml-2">
+                            {sortOrder === 1 ? "↓" : "↑"}
+                          </span>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`whitespace-nowrap rounded-full ${
+                          isSortedByPreference ? "bg-red-100" : ""
+                        }`}
+                        onClick={handleSortByPreference}
+                      >
+                        <Heart
+                          className={`w-4 h-4 mr-2 ${
+                            isSortedByPreference
+                              ? "fill-current text-red-500"
+                              : ""
+                          }`}
+                        />
+                        Sort by Preference
+                      </Button>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <span className="text-gray-500 text-sm">
+                        ({sortedActivities.length} items)
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="md:hidden"
+                        onClick={() => setFiltersVisible(!filtersVisible)}
+                      >
+                        <Filter className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                {isLoading ? (
+                  <div className="text-center py-8">Loading...</div>
+                ) : error ? (
+                  <div className="text-red-500 text-center py-8">{error}</div>
+                ) : sortedActivities.length === 0 ? (
+                  <div className="text-center py-8">No activities found</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {memoizedActivityCards}
+                  </div>
+                )}
+                {/* Pagination */}
+                {sortedActivities.length > 0 && (
+                  <div className="mt-8 flex justify-center items-center space-x-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
                       onClick={() =>
-                        setSelectedRating(
-                          rating === selectedRating ? null : rating
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm">
+                      Page {currentPage} of{" "}
+                      {Math.ceil(sortedActivities.length / 6)}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() =>
+                        setCurrentPage((prev) =>
+                          Math.min(
+                            prev + 1,
+                            Math.ceil(sortedActivities.length / 6)
+                          )
                         )
                       }
-                      className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
-                        selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                      }`}
+                      disabled={
+                        currentPage === Math.ceil(sortedActivities.length / 6)
+                      }
                     >
-                      {renderStars(rating)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Category Filter */}
-              <div>
-                <h3 className="font-medium text-[#1A3B47] mb-2">Category</h3>
-                <ScrollArea className="h-[200px]">
-                  <div className="space-y-2">
-                    {categoryOptions.map((category) => (
-                      <div key={category._id} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={category._id}
-                          checked={selectedCategories.includes(category.name)}
-                          onChange={() => {
-                            setSelectedCategories((prev) =>
-                              prev.includes(category.name)
-                                ? prev.filter((cat) => cat !== category.name)
-                                : [...prev, category.name]
-                            );
-                          }}
-                          className="mr-2"
-                        />
-                        <label
-                          htmlFor={category._id}
-                          className="text-sm text-gray-600"
-                        >
-                          {category.name}
-                        </label>
-                      </div>
-                    ))}
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
-                </ScrollArea>
+                )}
               </div>
             </div>
           </div>
-
-          {/* Main Content */}
-          <div className="flex-1">
-            <div className="mb-4">
-              <div className="relative flex-grow mb-4">
-                <input
-                  type="text"
-                  placeholder="Search activities..."
-                  className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
-              </div>
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="whitespace-nowrap rounded-full"
-                    onClick={() => {
-                      setSortBy("rating");
-                      setSortOrder((prev) => (prev === 1 ? -1 : 1));
-                    }}
-                  >
-                    <ArrowUpDown className="w-4 h-4 mr-2" />
-                    Sort by Rating
-                    {sortBy === "rating" && (
-                      <span className="ml-2">
-                        {sortOrder === 1 ? "↓" : "↑"}
-                      </span>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="whitespace-nowrap rounded-full"
-                    onClick={() => {
-                      setSortBy("price");
-                      setSortOrder((prev) => (prev === 1 ? -1 : 1));
-                    }}
-                  >
-                    <ArrowUpDown className="w-4 h-4 mr-2" />
-                    Sort by Price
-                    {sortBy === "price" && (
-                      <span className="ml-2">
-                        {sortOrder === 1 ? "↓" : "↑"}
-                      </span>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`whitespace-nowrap rounded-full ${
-                      isSortedByPreference ? "bg-red-100" : ""
-                    }`}
-                    onClick={handleSortByPreference}
-                  >
-                    <Heart
-                      className={`w-4 h-4 mr-2 ${
-                        isSortedByPreference ? "fill-current text-red-500" : ""
-                      }`}
-                    />
-                    Sort by Preference
-                  </Button>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-500 text-sm">
-                    ({sortedActivities.length} items)
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="md:hidden"
-                    onClick={() => setFiltersVisible(!filtersVisible)}
-                  >
-                    <Filter className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-            {isLoading ? (
-              <div className="text-center py-8">Loading...</div>
-            ) : error ? (
-              <div className="text-red-500 text-center py-8">{error}</div>
-            ) : sortedActivities.length === 0 ? (
-              <div className="text-center py-8">No activities found</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {memoizedActivityCards}
-              </div>
-            )}
-
-            {/* Pagination */}
-            {sortedActivities.length > 0 && (
-              <div className="mt-8 flex justify-center items-center space-x-4">
+          {alertMessage && (
+            <Alert
+              className={`fixed bottom-4 right-4 w-96 ${
+                alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+              } text-white`}
+            >
+              <AlertTitle>
+                {alertMessage.type === "success" ? "Success" : "Error"}
+              </AlertTitle>
+              <AlertDescription>{alertMessage.message}</AlertDescription>
+            </Alert>
+          )}
+          <DeleteConfirmationModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={handleDelete}
+            activityName={activityToDelete?.name}
+          />
+          <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Delete activity</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this activity?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
                 <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  disabled={currentPage === 1}
+                  variant="secondary"
+                  onClick={() => setShowDeleteConfirm(false)}
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  Cancel
                 </Button>
-                <span className="text-sm">
-                  Page {currentPage} of {Math.ceil(sortedActivities.length / 6)}
-                </span>
+                <Button variant="destructive" onClick={handleDelete}>
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+                  Activity Deleted
+                </DialogTitle>
+                <DialogDescription>
+                  The activity has been successfully deleted.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
                 <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(prev + 1, Math.ceil(sortedActivities.length / 6))
-                    )
-                  }
-                  disabled={
-                    currentPage === Math.ceil(sortedActivities.length / 6)
-                  }
+                  variant="default"
+                  onClick={() => {
+                    setShowDeleteSuccess(false);
+                    navigate("/my-activities");
+                  }}
+                  className="bg-gray-400 hover:bg-gray-500"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  Close
                 </Button>
-              </div>
-            )}
-          </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog
+            open={deleteError !== null}
+            onOpenChange={() => setDeleteError(null)}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+                  Failed to Delete activity
+                </DialogTitle>
+                <DialogDescription>
+                  {deleteError || "activity is already booked!"}
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="default" onClick={() => setDeleteError(null)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
-      </div>
-      {alertMessage && (
-        <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
-        >
-          <AlertTitle>
-            {alertMessage.type === "success" ? "Success" : "Error"}
-          </AlertTitle>
-          <AlertDescription>{alertMessage.message}</AlertDescription>
-        </Alert>
       )}
     </div>
   );

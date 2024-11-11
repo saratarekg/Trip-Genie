@@ -188,7 +188,7 @@ const ItineraryCard = ({
         </div>
         <div className="flex justify-between items-center mb-2">
           <span className="text-lg font-bold text-blue-600">
-            {formatPrice(itinerary.price)}/Day
+            {formatPrice(itinerary.price)}
           </span>
           <span className="text-sm text-gray-600">{itinerary.language}</span>
         </div>
@@ -315,28 +315,27 @@ export function MyItinerariesComponent() {
   };
 
   useEffect(() => {
-    if(!isPriceInitialized){
+    if (!isPriceInitialized) {
       fetchMaxPrice();
-      }
+    }
   }, [userInfo]);
 
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(`http://localhost:4000/${role}/max-price-itinerary-my`);
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          // console.log("data: ",data);
-          setMaxPriceOfItinerary(data);
-          setMaxPrice(data);
-          setPriceRange([0, data]);
-          setIsPriceInitialized(true);
-          
-    };
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    // console.log("data: ",data);
+    setMaxPriceOfItinerary(data);
+    setMaxPrice(data);
+    setPriceRange([0, data]);
+    setIsPriceInitialized(true);
+  };
 
   const getSymbol = () => {
     if (userInfo && userInfo.role === "tourist" && userInfo.preferredCurrency) {
@@ -538,11 +537,7 @@ export function MyItinerariesComponent() {
     } else {
       fetchItineraries();
     }
-}, [
-  sortBy,
-  sortOrder,
-  myItineraries,
-]);
+  }, [sortBy, sortOrder, myItineraries]);
 
   useEffect(() => {
     fetchItineraries();
@@ -722,37 +717,39 @@ export function MyItinerariesComponent() {
                 <Search className="absolute left-3 top-2.5 text-gray-400" />
               </div>
 
-              { isPriceInitialized && (<FilterComponent
-                filtersVisible={filtersVisible}
-                toggleFilters={toggleFilters}
-                sortOrder={sortOrder}
-                sortBy={sortBy}
-                myItineraries={myItineraries}
-                handlemyItineraries={handleMyItineraries}
-                handleSort={handleSort}
-                clearFilters={clearFilters}
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-                exchangeRate={'1'}
-                maxPrice={maxPriceOfItinerary}
-                price={price}
-                setPrice={setPrice}
-                dateRange={dateRange}
-                setDateRange={setDateRange}
-                selectedTypes={selectedTypes}
-                setSelectedTypes={setSelectedTypes}
-                selectedLanguages={selectedLanguages}
-                setSelectedLanguages={setSelectedLanguages}
-                searchItineraries={searchItineraries}
-                typesOptions={typesOptions}
-                languagesOptions={languagesOptions}
-                role={getUserRole()}
-                symbol={getSymbol()}
-                isBooked={isBooked}
-                setIsBooked={setIsBooked}
-                isSortedByPreference={isSortedByPreference}
-                handleSortByPreference={handleSortByPreference}
-              />)}
+              {isPriceInitialized && (
+                <FilterComponent
+                  filtersVisible={filtersVisible}
+                  toggleFilters={toggleFilters}
+                  sortOrder={sortOrder}
+                  sortBy={sortBy}
+                  myItineraries={myItineraries}
+                  handlemyItineraries={handleMyItineraries}
+                  handleSort={handleSort}
+                  clearFilters={clearFilters}
+                  priceRange={priceRange}
+                  setPriceRange={setPriceRange}
+                  exchangeRate={"1"}
+                  maxPrice={maxPriceOfItinerary}
+                  price={price}
+                  setPrice={setPrice}
+                  dateRange={dateRange}
+                  setDateRange={setDateRange}
+                  selectedTypes={selectedTypes}
+                  setSelectedTypes={setSelectedTypes}
+                  selectedLanguages={selectedLanguages}
+                  setSelectedLanguages={setSelectedLanguages}
+                  searchItineraries={searchItineraries}
+                  typesOptions={typesOptions}
+                  languagesOptions={languagesOptions}
+                  role={getUserRole()}
+                  symbol={getSymbol()}
+                  isBooked={isBooked}
+                  setIsBooked={setIsBooked}
+                  isSortedByPreference={isSortedByPreference}
+                  handleSortByPreference={handleSortByPreference}
+                />
+              )}
             </div>
 
             {error && (

@@ -194,7 +194,7 @@ const ItineraryCard = ({
         </div>
         <div className="flex justify-between items-center mb-2">
           <span className="text-lg font-bold text-blue-600">
-            {formatPrice(itinerary.price)}/Day
+            {formatPrice(itinerary.price)}
           </span>
           <span className="text-sm text-gray-600">{itinerary.language}</span>
         </div>

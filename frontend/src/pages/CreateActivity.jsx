@@ -48,21 +48,6 @@ const getMaxSeats = (vehicleType) => {
   }
 };
 
-const transportationSchema = z.object({
-  from: z.string().min(1, "From is required"),
-  to: z.string().min(1, "To is required"),
-  vehicleType: z.enum(vehicleTypes),
-  ticketCost: z.number().positive("Ticket cost must be positive"),
-  timeDeparture: z.string().min(1, "Departure time is required"),
-  estimatedDuration: z.number().positive("Duration must be positive"),
-  remainingSeats: z.number().int().positive("Remaining seats must be positive").refine((val, ctx) => {
-    const maxSeats = 100;
-    return val <= maxSeats;
-  }, {
-    message: "Remaining seats must not exceed the maximum for the selected vehicle type",
-  }),
-});
-
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
@@ -80,16 +65,13 @@ const schema = z.object({
   price: z.number().int().positive("Price must be a positive integer"),
   category: z
     .array(z.object({ value: z.string(), label: z.string() }))
-    .nonempty("At least one category is required"),
-  tags: z
-    .array(z.object({ value: z.string(), label: z.string() }))
-    .nonempty("At least one tag is required"),
+    .optional(),
+  tags: z.array(z.object({ value: z.string(), label: z.string() })).optional(),
   specialDiscount: z
     .number()
     .int()
     .nonnegative("Discount must be a non-negative integer"),
   pictures: z.array(z.string()).optional(),
-  transportations: z.array(z.string()).optional(),
 });
 
 export default function CreateActivity() {
@@ -109,7 +91,6 @@ export default function CreateActivity() {
       category: [],
       tags: [],
       pictures: [],
-      transportations: [],
     },
   });
 
@@ -129,24 +110,6 @@ export default function CreateActivity() {
   const [selectedCity, setSelectedCity] = useState(null);
   const [citiesLoading, setCitiesLoading] = useState(false);
   const [pictures, setPictures] = useState([]);
-
-  const [transportations, setTransportations] = useState([]);
-  const [showTransportationForm, setShowTransportationForm] = useState(false);
-  const [editingTransportationIndex, setEditingTransportationIndex] = useState(null);
-
-  const {
-    register: registerTransportation,
-    handleSubmit: handleSubmitTransportation,
-    reset: resetTransportation,
-    setValue: setTransportationValue,
-    control: controlTransportation,
-    watch: watchTransportation,
-    formState: { errors: transportationErrors },
-  } = useForm({
-    resolver: zodResolver(transportationSchema),
-  });
-
-  const selectedVehicleType = watchTransportation("vehicleType");
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -229,45 +192,6 @@ export default function CreateActivity() {
     }
   };
 
-
-  const onSubmitTransportation = async (data) => {
-    try {
-      if (!data.vehicleType) {
-        throw new Error("Please select a vehicle type");
-      }
-      const token = Cookies.get("jwt");
-      let response;
-      if (editingTransportationIndex !== null) {
-        // Update existing transportation
-        response = await axios.put(
-          `http://localhost:4000/advertiser/transportations/${transportations[editingTransportationIndex]._id}`,
-          data,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const updatedTransportations = [...transportations];
-        updatedTransportations[editingTransportationIndex] = response.data;
-        setTransportations(updatedTransportations);
-      } else {
-        // Create new transportation
-        response = await axios.post(
-          "http://localhost:4000/advertiser/transportations",
-          data,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setTransportations((prevTransportations) => [...prevTransportations, response.data]);
-      }
-      setShowTransportationForm(false);
-      resetTransportation();
-      setEditingTransportationIndex(null);
-    } catch (error) {
-      console.error("Failed to create/update transportation:", error);
-    }
-  };
-
   const onSubmit = async (data) => {
     setLoading(true);
     const token = Cookies.get("jwt");
@@ -290,11 +214,6 @@ export default function CreateActivity() {
 
     pictures.forEach((picture, index) => {
       formData.append("pictures", picture);
-    });
-
-    // Append transportation IDs
-    transportations.forEach((transport) => {
-      formData.append("transportations[]", transport._id);
     });
 
     try {
@@ -349,35 +268,8 @@ export default function CreateActivity() {
     return null;
   };
 
-  const handleEditTransportation = (index) => {
-    const transportation = transportations[index];
-    resetTransportation({
-      ...transportation,
-      timeDeparture: format(parseISO(transportation.timeDeparture), "yyyy-MM-dd'T'HH:mm"),
-    });
-    setEditingTransportationIndex(index);
-    setShowTransportationForm(true);
-  };
-
   const formatDate = (dateString) => {
     return format(parseISO(dateString), "dd/MM/yyyy HH:mm");
-  };
-
-  const handleDeleteTransportation = async (index) => {
-    try {
-      const token = Cookies.get("jwt");
-      await axios.delete(
-        `http://localhost:4000/advertiser/transportations/${transportations[index]._id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const updatedTransportations = transportations.filter((_, i) => i !== index);
-      setTransportations(updatedTransportations);
-      setEditingTransportationIndex(null);  // Reset editing index
-    } catch (error) {
-      console.error("Failed to delete transportation:", error);
-    }
   };
 
   return (
@@ -397,11 +289,15 @@ export default function CreateActivity() {
               Create New Activity
             </h2>
             <p className="text-sm mb-6 text-[#1A3B47]">
-              Create a new activity for your tours. Fill in the details carefully to ensure accurate information for your customers.
+              Create a new activity for your tours. Fill in the details
+              carefully to ensure accurate information for your customers.
             </p>
           </div>
           <div className="w-full md:w-3/4 p-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-4 gap-4">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="grid grid-cols-4 gap-4"
+            >
               <div className="col-span-2">
                 <Label htmlFor="name">Activity Name</Label>
                 <Controller
@@ -433,7 +329,9 @@ export default function CreateActivity() {
               <div className="col-span-2">
                 <Label htmlFor="country">Country</Label>
                 <Select
-                  onValueChange={(value) => handleCountryChange({ value, label: value })}
+                  onValueChange={(value) =>
+                    handleCountryChange({ value, label: value })
+                  }
                   value={selectedCountry?.value}
                 >
                   <SelectTrigger>
@@ -452,7 +350,9 @@ export default function CreateActivity() {
               <div className="col-span-2">
                 <Label htmlFor="city">City</Label>
                 <Select
-                  onValueChange={(value) => handleCityChange({ value, label: value })}
+                  onValueChange={(value) =>
+                    handleCityChange({ value, label: value })
+                  }
                   value={selectedCity?.value}
                   disabled={!selectedCountry || citiesLoading}
                 >
@@ -534,9 +434,7 @@ export default function CreateActivity() {
                   )}
                 />
                 {errors.price && (
-                  <p className="text-red-500 text-xs">
-                    {errors.price.message}
-                  </p>
+                  <p className="text-red-500 text-xs">{errors.price.message}</p>
                 )}
               </div>
 
@@ -561,7 +459,6 @@ export default function CreateActivity() {
                   </p>
                 )}
               </div>
-
 
               <div className="col-span-2">
                 <Label>Categories</Label>
@@ -686,7 +583,7 @@ export default function CreateActivity() {
         </div>
       </div>
 
-      <Dialog open={showTransportationForm} onOpenChange={setShowTransportationForm}>
+      {/* <Dialog open={showTransportationForm} onOpenChange={setShowTransportationForm}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingTransportationIndex !== null ? "Edit Transportation" : "Add Transportation"}</DialogTitle>
@@ -771,7 +668,7 @@ export default function CreateActivity() {
             </Button>
           </form>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
@@ -782,15 +679,18 @@ export default function CreateActivity() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={handleGoBack} className="bg-[#388A94] hover:bg-[#2c6d75] text-white">Go to All Activities</Button>
+            <Button
+              onClick={handleGoBack}
+              className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+            >
+              Go to All Activities
+            </Button>
             <Button variant="outline" onClick={handleCreateNew}>
               Create New Activity
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      </div>
-   
-    
+    </div>
   );
 }

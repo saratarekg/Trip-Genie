@@ -42,10 +42,10 @@ export const ItineraryCards = () => {
       const response = await fetch(
         `http://localhost:4000/${userRole}/populate`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             base: itineraryCurrency,
@@ -61,7 +61,7 @@ export const ItineraryCards = () => {
           [itineraryCurrency]: data.conversion_rate,
         }));
       } else {
-        console.error('Error in fetching exchange rate:', data.message);
+        console.error("Error in fetching exchange rate:", data.message);
       }
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
@@ -82,7 +82,7 @@ export const ItineraryCards = () => {
   };
 
   const formatPrice = (price, currency) => {
-    if (userRole === 'tourist' && userPreferredCurrency) {
+    if (userRole === "tourist" && userPreferredCurrency) {
       // console.log("exchangerates:", exchangeRates);
       // console.log("currency:", currency);
       // console.log("henaaaaaaa", exchangeRates[currency]);
@@ -102,10 +102,10 @@ export const ItineraryCards = () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === 'tourist') {
+    if (role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get('http://localhost:4000/tourist/', {
+        const response = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const currencyId = response.data.preferredCurrency;
@@ -122,7 +122,11 @@ export const ItineraryCards = () => {
 
   useEffect(() => {
     itineraries.forEach((itinerary) => {
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency._id !== itinerary.currency) {
+      if (
+        userRole === "tourist" &&
+        userPreferredCurrency &&
+        userPreferredCurrency._id !== itinerary.currency
+      ) {
         // console.log("ba fetch exchange rate", itinerary.currency);
         fetchExchangeRate(itinerary.currency);
         // console.log("exchangerates:", exchangeRates);
@@ -133,15 +137,16 @@ export const ItineraryCards = () => {
     });
   }, [userRole, userPreferredCurrency, itineraries]);
 
-
-
   return (
     <div className="container mx-auto px-24 py-12 flex flex-col md:flex-row">
       {/* Left Side: Itineraries Title, Line, Description, Button */}
       <div className="w-full md:w-2/6 pr-8 mb-8 md:mb-0">
         <h1 className="text-4xl font-bold text-[#1A3B47] mb-4">Itineraries</h1>
         <p className="text-[#1A3B47] mb-4">
-          Discover our curated itineraries designed for every traveler, blending cultural experiences with thrilling adventures. From serene escapes to adrenaline-filled expeditions, our diverse journeys cater to all preferences. Let us turn your travel dreams into reality!
+          Discover our curated itineraries designed for every traveler, blending
+          cultural experiences with thrilling adventures. From serene escapes to
+          adrenaline-filled expeditions, our diverse journeys cater to all
+          preferences. Let us turn your travel dreams into reality!
         </p>
 
         <div className="flex justify-center">
@@ -164,59 +169,61 @@ export const ItineraryCards = () => {
           //     ? itinerary.activities[0].pictures[0].url
           //     : defaultImage;
 
-          const firstAvailablePicture = itinerary.activities
-          ?.flatMap((activity) => activity.pictures ?? [])
-          .find((picture) => picture?.url)?.url || defaultImage;
+          const firstAvailablePicture =
+            itinerary.activities
+              ?.flatMap((activity) => activity.pictures ?? [])
+              .find((picture) => picture?.url)?.url || defaultImage;
 
-              return (
-                <Link to={`/itinerary/${itinerary._id}`} key={itinerary._id}>
-                  <div
-                    className="group relative bg-cover bg-center rounded-[26px] overflow-hidden"
-                    style={{
-                      width: "100%",
-                      height: "300px",
-                      backgroundImage: `url(${firstAvailablePicture})`,
-                    }}
-                  >
-                    {/* Gradient Overlay - hidden initially */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#002845] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-              
-                    {/* Itinerary content - hidden and slides up on hover */}
-                    <div className="absolute inset-x-0 bottom-0 p-5 text-white transform translate-y-full transition-transform duration-500 group-hover:translate-y-0">
-                      <div className="flex flex-col items-start w-full">
-                        <h3
-                          className="w-[90%] font-semibold text-lg leading-tight mb-2"
-                          style={{
-                            textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-                          }}
-                        >
-                          {itinerary.title}
-                        </h3>
-                        <span
-                          className="text-base font-medium"
-                          style={{
-                            textShadow: "2px 2px 5px rgba(0, 0, 0, 1)", // Increased shadow strength
-                          }}
-                        >
-                          {formatPrice(itinerary.price, itinerary.currency)}/Day
-                        </span>
-              
-                        <div
-                          className="mt-1 text-sm text-white/90"
-                          style={{
-                            textShadow: "1px 1px 3px rgba(0, 0, 0, 0.5)",
-                          }}
-                        >
-                          {itinerary.availableDates.length > 0
-                            ? new Date(itinerary.availableDates[0].date).toLocaleDateString()
-                            : "No dates available"}
-                        </div>
-                      </div>
+          return (
+            <Link to={`/itinerary/${itinerary._id}`} key={itinerary._id}>
+              <div
+                className="group relative bg-cover bg-center rounded-[26px] overflow-hidden"
+                style={{
+                  width: "100%",
+                  height: "300px",
+                  backgroundImage: `url(${firstAvailablePicture})`,
+                }}
+              >
+                {/* Gradient Overlay - hidden initially */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#002845] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+
+                {/* Itinerary content - hidden and slides up on hover */}
+                <div className="absolute inset-x-0 bottom-0 p-5 text-white transform translate-y-full transition-transform duration-500 group-hover:translate-y-0">
+                  <div className="flex flex-col items-start w-full">
+                    <h3
+                      className="w-[90%] font-semibold text-lg leading-tight mb-2"
+                      style={{
+                        textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      {itinerary.title}
+                    </h3>
+                    <span
+                      className="text-base font-medium"
+                      style={{
+                        textShadow: "2px 2px 5px rgba(0, 0, 0, 1)", // Increased shadow strength
+                      }}
+                    >
+                      {formatPrice(itinerary.price, itinerary.currency)}
+                    </span>
+
+                    <div
+                      className="mt-1 text-sm text-white/90"
+                      style={{
+                        textShadow: "1px 1px 3px rgba(0, 0, 0, 0.5)",
+                      }}
+                    >
+                      {itinerary.availableDates.length > 0
+                        ? new Date(
+                            itinerary.availableDates[0].date
+                          ).toLocaleDateString()
+                        : "No dates available"}
                     </div>
                   </div>
-                </Link>
-              );
-              
+                </div>
+              </div>
+            </Link>
+          );
         })}
       </div>
     </div>

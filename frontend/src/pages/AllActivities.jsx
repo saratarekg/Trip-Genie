@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import Cookies from "js-cookie";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import FilterComponent from "../components/FilterActivities.jsx";
@@ -18,12 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Trash2,
-  CheckCircle,
-  XCircle,
-  Edit,
-} from "lucide-react";
+import { Trash2, CheckCircle, XCircle, Edit } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -68,129 +69,130 @@ const DeleteConfirmationModal = ({
 };
 
 let exchangeRateForFilter = 1;
-const role = Cookies.get("role")
+const role = Cookies.get("role");
 
-const ActivityCard = React.memo(
-  ({ activity, onSelect, userInfo, exchangeRates, currencies , onDeleteConfirm, setShowDeleteConfirm,}) => {
-    const formatPrice = useCallback(
-      (price) => {
-        if (!userInfo || !price) return "";
+const ActivityCard = React.memo({
+  activity,
+  onSelect,
+  userInfo,
+  exchangeRates,
+  currencies,
+  onDeleteConfirm,
+  setShowDeleteConfirm,
+}) => {
+  const formatPrice = useCallback(
+    (price) => {
+      if (!userInfo || !price) return "";
 
-        if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
-          const baseRate = exchangeRates[activity.currency] || 1;
-          const targetRate =
-            exchangeRates[userInfo.preferredCurrency.code] || 1;
-          const exchangedPrice = (price / baseRate) * targetRate;
-          exchangeRateForFilter = targetRate / baseRate;
-          return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
-            2
-          )}`;
-        } else {
-          const currency = currencies.find((c) => c._id === activity.currency);
-          return `${currency ? currency.symbol : "$"}${price}`;
-        }
-      },
-      [userInfo, exchangeRates, currencies, activity.currency]
-    );
+      if (userInfo.role === "tourist" && userInfo.preferredCurrency) {
+        const baseRate = exchangeRates[activity.currency] || 1;
+        const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
+        const exchangedPrice = (price / baseRate) * targetRate;
+        exchangeRateForFilter = targetRate / baseRate;
+        return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(
+          2
+        )}`;
+      } else {
+        const currency = currencies.find((c) => c._id === activity.currency);
+        return `${currency ? currency.symbol : "$"}${price}`;
+      }
+    },
+    [userInfo, exchangeRates, currencies, activity.currency]
+  );
 
+  return (
+    <Card
+      className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
+      onClick={() => onSelect(activity._id)}
+    >
+      <div className="relative aspect-video overflow-hidden">
+        <img
+          src={
+            activity.pictures && activity.pictures.length > 0
+              ? activity.pictures[0]?.url
+              : defaultImage
+          }
+          alt={"hiii"}
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
 
-    
-
-    return (
-      <Card
-        className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
-        onClick={() => onSelect(activity._id)}
-      >
-        <div className="relative aspect-video overflow-hidden">
-          <img
-            src={
-              activity.pictures && activity.pictures.length > 0
-                ? activity.pictures[0]?.url
-                : defaultImage
-            }
-            alt={activity.name}
-            className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-          />
-
-          {role === "advertiser" && userInfo.userId === activity.advertiser && (
-        <div className="absolute top-2 right-2 flex space-x-2">
-          <button
-            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.href = `/update-activity/${activity._id}`;
-            }}
-            aria-label="Edit activity"
-          >
-            <Edit className="h-4 w-4" />
-          </button>
-          <button
-            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteConfirm(activity._id, activity.name);
-            }}
-            aria-label="Delete activity"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+        {role === "advertiser" && userInfo.userId === activity.advertiser && (
+          <div className="absolute top-2 right-2 flex space-x-2">
+            <button
+              className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = `/update-activity/${activity._id}`;
+              }}
+              aria-label="Edit activity"
+            >
+              <Edit className="h-4 w-4" />
+            </button>
+            <button
+              className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                c;
+                onDeleteConfirm(activity._id, activity.name);
+              }}
+              aria-label="Delete activity"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
+      <CardHeader className="p-4">
+        <CardTitle className="text-xl font-semibold">{activity.name}</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {activity.location.address}
+        </p>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-2">
+        <div className="flex items-center space-x-1">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              className={`h-4 w-4 ${
+                i < activity.rating
+                  ? "text-[#F88C33] fill-[#F88C33]"
+                  : "text-gray-300"
+              }`}
+            />
+          ))}
+          <span className="text-sm text-muted-foreground ml-1">
+            {activity.rating.toFixed(1)}
+          </span>
         </div>
-      )}
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-bold text-primary">
+            {formatPrice(activity.price)}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {activity.duration} hours
+          </span>
         </div>
-        <CardHeader className="p-4">
-          <CardTitle className="text-xl font-semibold">
-            {activity.name}
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            {activity.location.address}
-          </p>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 space-y-2">
-          <div className="flex items-center space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-4 w-4 ${
-                  i < activity.rating
-                    ? "text-[#F88C33] fill-[#F88C33]"
-                    : "text-gray-300"
-                }`}
-              />
-            ))}
-            <span className="text-sm text-muted-foreground ml-1">
-              {activity.rating.toFixed(1)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-lg font-bold text-primary">
-              {formatPrice(activity.price)}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {activity.duration} hours
-            </span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {new Date(activity.timing).toLocaleDateString()}
-          </p>
-        </CardContent>
-        <CardFooter className="p-4 pt-0">
-          <div className="flex flex-wrap gap-2">
-            {activity.tags.map((tag, index) => (
-              <Badge key={index} variant="outline">
-                {tag.type}
-              </Badge>
-            ))}
-            {activity.category.map((cat, index) => (
-              <Badge key={index} variant="secondary">
-                {cat.name}
-              </Badge>
-            ))}
-          </div>
-        </CardFooter>
-      </Card>
-    );
-  }
-);
+        <p className="text-sm text-muted-foreground">
+          {new Date(activity.timing).toLocaleDateString()}
+        </p>
+      </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <div className="flex flex-wrap gap-2">
+          {activity.tags.map((tag, index) => (
+            <Badge key={index} variant="outline">
+              {tag.type}
+            </Badge>
+          ))}
+          {activity.category.map((cat, index) => (
+            <Badge key={index} variant="secondary">
+              {cat.name}
+            </Badge>
+          ))}
+        </div>
+      </CardFooter>
+    </Card>
+  );
+};
 
 export function AllActivitiesComponent() {
   const [activities, setActivities] = useState([]);
@@ -201,10 +203,13 @@ export function AllActivitiesComponent() {
   const [sortOrder, setSortOrder] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [maxPriceOfActivities,setMaxPriceOfActivities] = useState(0);
-  const [priceRange, setPriceRange] = useState([0,maxPriceOfActivities]);
+  const [maxPriceOfActivities, setMaxPriceOfActivities] = useState(0);
+  const [priceRange, setPriceRange] = useState([0, maxPriceOfActivities]);
   const [maxPrice, setMaxPrice] = useState(maxPriceOfActivities);
-  const [initialPriceRange, setInitialPriceRange] = useState([0, maxPriceOfActivities]);
+  const [initialPriceRange, setInitialPriceRange] = useState([
+    0,
+    maxPriceOfActivities,
+  ]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [selectedCategories, setSelectedCategories] = useState([]);
   const activitiesPerPage = 6;
@@ -227,7 +232,7 @@ export function AllActivitiesComponent() {
   const isInitialMount = useRef(true);
   const fetchActivitiesRef = useRef(null);
   const searchActivitiesRef = useRef(null);
-  
+
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:4000/rates");
@@ -271,14 +276,10 @@ export function AllActivitiesComponent() {
           }
         );
 
-        
-          setUserInfo({
-            role,
-            preferredCurrency: currencyResponse.data
-          }); 
-        
-
-       
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data,
+        });
       } catch (error) {
         console.error("Error fetching user profile:", error);
         setUserInfo({ role });
@@ -288,11 +289,11 @@ export function AllActivitiesComponent() {
         const decodedToken = jwtDecode(token);
         setUserInfo({
           role,
-          userId: decodedToken.id
-        });        
-      }else{    
-          setUserInfo({ role  });
-    }
+          userId: decodedToken.id,
+        });
+      } else {
+        setUserInfo({ role });
+      }
     }
   }, []);
 
@@ -441,7 +442,6 @@ export function AllActivitiesComponent() {
             },
           }
         ).then((res) => res.json());
-       
 
         setActivities([...preferredActivities, ...otherActivities]);
         setIsSortedByPreference(true);
@@ -461,40 +461,37 @@ export function AllActivitiesComponent() {
       }
       fetchMaxPrice();
 
-
-
       setError(null);
     } catch (error) {
       console.error("Error fetching activities:", error);
       setError("Error fetching activities");
       setActivities([]);
-    }
-    finally {
+    } finally {
       setIsLoading(false);
       fetchActivitiesRef.current = false;
     }
   }, [userInfo, isSortedByPreference]);
 
   const fetchMaxPrice = async () => {
-  const role = getUserRole();
-  // console.log("Role:", role);
-  const token = Cookies.get("jwt");
-  const url = new URL(`http://localhost:4000/${role}/maxPriceActivities`);
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        // if (!response.ok) {
-        //   throw new Error(`HTTP error! status: ${response.status}`);
-        // }
-        const data = await response.json();
-        setMaxPriceOfActivities(data);
-        setInitialPriceRange([0, data]);
-        setIsPriceInitialized(true);
-        setPriceRange([0, data]);
-        // console.log("el max price",data);
-  }
+    const role = getUserRole();
+    // console.log("Role:", role);
+    const token = Cookies.get("jwt");
+    const url = new URL(`http://localhost:4000/${role}/maxPriceActivities`);
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! status: ${response.status}`);
+    // }
+    const data = await response.json();
+    setMaxPriceOfActivities(data);
+    setInitialPriceRange([0, data]);
+    setIsPriceInitialized(true);
+    setPriceRange([0, data]);
+    // console.log("el max price",data);
+  };
 
   const searchActivities = async () => {
     setIsSortedByPreference(false);
@@ -559,13 +556,11 @@ export function AllActivitiesComponent() {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
       setActivities([]);
-    }
-    finally {
+    } finally {
       setIsLoading(false);
       searchActivitiesRef.current = false;
     }
   };
-
 
   const handleDeleteConfirm = (id, name) => {
     setActivityToDelete({ id, name });
@@ -594,7 +589,6 @@ export function AllActivitiesComponent() {
         if (
           response.status === 400 &&
           errorData.message === "Cannot delete activity with existing bookings"
-         
         ) {
           setError("Cannot Delete Activity With Existing Bookings.");
           setDeleteError("Cannot Delete Activity With Existing Bookings.");
@@ -621,7 +615,6 @@ export function AllActivitiesComponent() {
       fetchActivities();
     }
   }, [fetchActivities]);
-
 
   const fetchActivitiesByPreference = useCallback(async () => {
     try {
@@ -775,32 +768,34 @@ export function AllActivitiesComponent() {
                     <Search className="absolute left-3 top-2.5 text-gray-400" />
                   </div>
 
-                  {(isPriceInitialized) && (<FilterComponent
-                    filtersVisible={filtersVisible}
-                    toggleFilters={toggleFilters}
-                    sortOrder={sortOrder}
-                    sortBy={sortBy}
-                    handleSort={handleSort}
-                    clearFilters={clearFilters}
-                    priceRange={priceRange}
-                    setPriceRange={setPriceRange}
-                    dateRange={dateRange}
-                    setDateRange={setDateRange}
-                    minStars={minStars}
-                    exchangeRate={exchangeRateForFilter}
-                    setMinStars={setMinStars}
-                    categoriesOptions={categoryOptions}
-                    searchActivites={searchActivities}
-                    selectedCategories={selectedCategories}
-                    setSelectedCategories={setSelectedCategories}
-                    myActivities={myActivities}
-                    symbol={getSymbol()}
-                    handlemyActivities={handlemyActivities}
-                    maxPrice={maxPriceOfActivities} // Pass maxPrice as a prop
-                    initialPriceRange={initialPriceRange}
-                    isSortedByPreference={isSortedByPreference}
-                    handleSortByPreference={handleSortByPreference}
-                  />)}
+                  {isPriceInitialized && (
+                    <FilterComponent
+                      filtersVisible={filtersVisible}
+                      toggleFilters={toggleFilters}
+                      sortOrder={sortOrder}
+                      sortBy={sortBy}
+                      handleSort={handleSort}
+                      clearFilters={clearFilters}
+                      priceRange={priceRange}
+                      setPriceRange={setPriceRange}
+                      dateRange={dateRange}
+                      setDateRange={setDateRange}
+                      minStars={minStars}
+                      exchangeRate={exchangeRateForFilter}
+                      setMinStars={setMinStars}
+                      categoriesOptions={categoryOptions}
+                      searchActivites={searchActivities}
+                      selectedCategories={selectedCategories}
+                      setSelectedCategories={setSelectedCategories}
+                      myActivities={myActivities}
+                      symbol={getSymbol()}
+                      handlemyActivities={handlemyActivities}
+                      maxPrice={maxPriceOfActivities} // Pass maxPrice as a prop
+                      initialPriceRange={initialPriceRange}
+                      isSortedByPreference={isSortedByPreference}
+                      handleSortByPreference={handleSortByPreference}
+                    />
+                  )}
 
                   {activities.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -860,7 +855,7 @@ export function AllActivitiesComponent() {
           </div>
         </div>
       )}
-           <DeleteConfirmationModal
+      <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
@@ -907,7 +902,7 @@ export function AllActivitiesComponent() {
                 setShowDeleteSuccess(false);
                 navigate("/activity");
               }}
-              className = "bg-gray-400 hover:bg-gray-500"
+              className="bg-gray-400 hover:bg-gray-500"
             >
               Close
             </Button>
