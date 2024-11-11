@@ -4,6 +4,7 @@
 -Deleting/View booking buttons bto3 itineraires btdrb error(my account-> upcoming bookings -> itineraires -> delete and view buttons)
 -Confirmation of booking a hotel & saving booking in database
 itinerary booking and view booking!!
+rate tourguide and itinerary cuz based on booking!!
 
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
