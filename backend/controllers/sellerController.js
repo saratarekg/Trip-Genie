@@ -88,15 +88,15 @@ const deleteSellerAccount = async (req, res) => {
     const products = await Product.find({ seller: res.locals.user_id });
     const productIDs = products.map((product) => product._id);
     const purchases = await Purchase.find({ status: "pending" });
-    purchases.forEach(async (purchase) => {
+    for (const purchase of purchases) {
       if (
         purchase.products.some((prod) => productIDs.includes(prod.product._id))
       ) {
-        res.status(400).json({
+        return res.status(400).json({
           message: "Cannot delete seller account, there are pending purchases",
         });
       }
-    });
+    }
 
     products.forEach(async (product) => {
       await Product.findByIdAndUpdate(product._id, { isDeleted: true });
@@ -141,15 +141,15 @@ const deleteSeller = async (req, res) => {
     const products = await Product.find({ seller: id });
     const productIDs = products.map((product) => product._id);
     const purchases = await Purchase.find({ status: "pending" });
-    purchases.forEach(async (purchase) => {
+    for (const purchase of purchases) {
       if (
         purchase.products.some((prod) => productIDs.includes(prod.product._id))
       ) {
-        res.status(400).json({
+        return res.status(400).json({
           message: "Cannot delete seller account, there are pending purchases",
         });
       }
-    });
+    }
 
     products.forEach(async (product) => {
       await Product.findByIdAndUpdate(product._id, { isDeleted: true });
