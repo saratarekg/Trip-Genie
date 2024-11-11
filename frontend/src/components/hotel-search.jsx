@@ -109,6 +109,10 @@ export default function HotelSearch() {
   };
 
   return (
+    <div>
+        <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6">Hotel Search</h1>
       <form onSubmit={handleSearch} className="space-y-4 mb-8">
@@ -220,6 +224,7 @@ export default function HotelSearch() {
           </Link>
         ))}
       </div>
+    </div>
     </div>
   );
 }
