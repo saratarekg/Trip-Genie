@@ -403,7 +403,7 @@ const TourguideProfileCard = ({
         <div className="mt-4">
           <Button
             variant="link"
-            className="w-full p-0 h-auto font-normal text-[#5D9297] hover:[#388A94]"
+            className="w-full p-0 h-auto mb-2 font-normal text-[#5D9297] hover:[#388A94]"
             onClick={() => setShowMore(!showMore)}
           >
             {showMore ? 'Less Info' : 'More Info'}
@@ -481,7 +481,6 @@ const ItineraryDetail = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [isActivated, setIsActivated] = useState(true);
-  const [selectedTime, setSelectedTime] = useState(null);
   const [userBookings, setUserBookings] = useState([]);
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
@@ -523,6 +522,16 @@ const ItineraryDetail = () => {
     setSelectedDate(date);
     handleDateChange(date);
   };
+
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+    // Find the available times for the selected date
+    const selectedDateInfo = itinerary.availableDates.find(
+      (dateInfo) => new Date(dateInfo.date).toDateString() === new Date(date).toDateString()
+    );
+ 
+  };
+
 
   useEffect(() => {
     if (itinerary && userId) {
@@ -822,7 +831,6 @@ const ItineraryDetail = () => {
           paymentAmount: totalPrice,
           numberOfTickets,
           date: selectedDate,
-          time: selectedTime
         }),
       });
 
@@ -1719,7 +1727,7 @@ const ItineraryDetail = () => {
 
 {userRole==="tourist" &&(
 <>
-    <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+<Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
@@ -1729,8 +1737,7 @@ const ItineraryDetail = () => {
             <Label htmlFor="date" className="text-right">
               Date
             </Label>
-
-            <Select onValueChange={handleDateSelect} value={selectedDate || undefined}>
+            <Select onValueChange={handleDateChange} value={selectedDate || undefined}>
               <SelectTrigger className="col-span-3">
                 <SelectValue>
                   {selectedDate ? format(new Date(selectedDate), 'MMMM d, yyyy') : "Select a date"}
@@ -1738,7 +1745,7 @@ const ItineraryDetail = () => {
               </SelectTrigger>
               <SelectContent>
                 {itinerary.availableDates
-                  .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0)) // Filter upcoming dates
+                  .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0))
                   .map((dateInfo, index) => (
                     <SelectItem key={index} value={dateInfo.date}>
                       {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
@@ -1747,6 +1754,7 @@ const ItineraryDetail = () => {
               </SelectContent>
             </Select>
           </div>
+         
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="tickets" className="text-right">
               Tickets
@@ -1792,7 +1800,7 @@ const ItineraryDetail = () => {
           <Button onClick={() => setShowBookingDialog(false)} variant="outline">
             Cancel
           </Button>
-          <Button onClick={handleBooking} disabled={isBooking || !selectedDate}>
+          <Button onClick={handleBooking} disabled={isBooking || !selectedDate }>
             {isBooking ? "Booking..." : "Confirm Booking"}
           </Button>
         </DialogFooter>
