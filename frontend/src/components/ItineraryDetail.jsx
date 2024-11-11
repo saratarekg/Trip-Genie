@@ -410,7 +410,7 @@ const TourguideProfileCard = ({
           </Button>
         </div>
 
-        {userRole === 'tourist' && userBookings.some(booking => booking.itinerary._id === itinerary._id) && (
+        {userRole === 'tourist' && userBookings.some(booking => booking.itinerary?._id === itinerary._id) && (
           <div className="border-t pt-4 mt-4">
             <div className="text-sm text-gray-500 mb-2">Rate Tour Guide:</div>
             <div className="flex gap-2">
@@ -1549,7 +1549,7 @@ const ItineraryDetail = () => {
             )}
 
 
-            {userBookings.some(booking => booking.itinerary._id === itinerary._id) && userRole !== "admin" && !userComment && (
+            {userBookings.some(booking => booking.itinerary?._id === itinerary._id) && userRole !== "admin" && !userComment && (
               <Button onClick={() => setShowRateItineraryDialog(true)} className="mt-4 mr-4">
                 Add a Review
               </Button>
