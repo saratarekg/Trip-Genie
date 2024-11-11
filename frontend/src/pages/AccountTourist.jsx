@@ -792,14 +792,7 @@ export default function AccountManagement() {
         name: "Delete Account",
         icon: Trash2,
         tab: "delete-account",
-        roles: [
-          "tourist",
-          "seller",
-          "advertiser",
-          "tour-guide",
-          "admin",
-          "tourism-governor",
-        ],
+        roles: ["tourist", "seller", "advertiser", "tour-guide"],
       },
     ],
     "Help and Support": [
