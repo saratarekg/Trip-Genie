@@ -6,7 +6,7 @@ import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import * as jwtDecode from "jwt-decode";
-import { Search, ChevronLeft, ChevronRight, Edit, Trash2 } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Edit, Trash2, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -216,6 +216,7 @@ export default function AllHistoricalPlacesComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [userRole, setUserRole] = useState("guest");
+  const [userInfo, setUserInfo] = useState(null);
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [typesOptions, setTypesOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -223,6 +224,7 @@ export default function AllHistoricalPlacesComponent() {
   const [historicalPlaceToDelete, setHistoricalPlaceToDelete] = useState(null);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [isSortedByPreference, setIsSortedByPreference] = useState(true);
   const navigate = useNavigate();
   const tripsPerPage = 6;
 
@@ -235,10 +237,10 @@ export default function AllHistoricalPlacesComponent() {
       setIsLoading(true);
       try {
         await Promise.all([
-          fetchHistoricalPlaces(),
-          fetchTypesAndPeriods(),
           fetchUserInfo(),
+          fetchTypesAndPeriods(),
         ]);
+        await fetchHistoricalPlaces(true);
       } catch (error) {
         console.error("Error in fetching data:", error);
       } finally {
@@ -249,7 +251,10 @@ export default function AllHistoricalPlacesComponent() {
   }, []);
 
   useEffect(() => {
-    searchHistoricalPlaces();
+    if (searchTerm !== "" || selectedTypes.length > 0) {
+      setIsSortedByPreference(false);
+      searchHistoricalPlaces();
+    }
   }, [searchTerm, selectedTypes]);
 
   const fetchUserInfo = async () => {
@@ -261,6 +266,7 @@ export default function AllHistoricalPlacesComponent() {
         const response = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setUserInfo(response.data);
         const currencyId = response.data.preferredCurrency;
         const currencyResponse = await axios.get(
           `http://localhost:4000/tourist/getCurrency/${currencyId}`,
@@ -275,23 +281,46 @@ export default function AllHistoricalPlacesComponent() {
     }
   };
 
-  const fetchHistoricalPlaces = async () => {
+  const fetchHistoricalPlaces = async (sortByPreference = false) => {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-      const response = await fetch(
-        `http://localhost:4000/${role}/historical-places`,
-        {
+      let url = `http://localhost:4000/${role}/historical-places`;
+      
+      if (sortByPreference && role === "tourist") {
+        const preferredResponse = await fetch(
+          "http://localhost:4000/tourist/historical-places-preference",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const preferredData = await preferredResponse.json();
+
+        const notPreferredResponse = await fetch(
+          "http://localhost:4000/tourist/historical-places-not-preference",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const notPreferredData = await notPreferredResponse.json();
+
+        setHistoricalPlaces([...preferredData, ...notPreferredData]);
+      } else {
+        const response = await fetch(url, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setHistoricalPlaces(data);
       }
-      const data = await response.json();
-      setHistoricalPlaces(data);
       setError(null);
     } catch (error) {
       console.error("Error fetching historical places:", error);
@@ -323,7 +352,8 @@ export default function AllHistoricalPlacesComponent() {
   const clearFilters = () => {
     setSearchTerm("");
     setSelectedTypes([]);
-    fetchHistoricalPlaces();
+    setIsSortedByPreference(true);
+    fetchHistoricalPlaces(true);
   };
 
   const handleDeleteConfirm = (id, name) => {
@@ -354,7 +384,7 @@ export default function AllHistoricalPlacesComponent() {
         }
         throw new Error("Failed to delete Historical Place");
       }
-      await fetchHistoricalPlaces();
+      await fetchHistoricalPlaces(isSortedByPreference);
       setShowDeleteSuccess(true);
     } catch (err) {
       setError("Error deleting Historical Place. Please try again later.");
@@ -393,6 +423,17 @@ export default function AllHistoricalPlacesComponent() {
       setError("Error fetching filtered results");
       setHistoricalPlaces([]);
     }
+  };
+
+  const handleSortByPreference = async () => {
+    setIsSortedByPreference(!isSortedByPreference);
+    if (!isSortedByPreference) {
+      await fetchHistoricalPlaces(true);
+    } else {
+      await fetchHistoricalPlaces(false);
+    }
+    setSearchTerm("");
+    setSelectedTypes([]);
   };
 
   return (
@@ -443,7 +484,6 @@ export default function AllHistoricalPlacesComponent() {
             <div className="mb-6">
               <h3 className="font-medium text-[#1A3B47] mb-2">Type</h3>
               <ScrollArea className="h-[150px]">
-                {console.log(typesOptions)}
                 {typesOptions.map((type) => (
                   <div key={type} className="flex items-center space-x-2 mb-2">
                     <Checkbox
@@ -521,6 +561,25 @@ export default function AllHistoricalPlacesComponent() {
                 <span className="text-gray-500 text-sm whitespace-nowrap">
                   ({historicalPlaces.length} places)
                 </span>
+                {userRole === "tourist" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`whitespace-nowrap rounded-full ${
+                      isSortedByPreference ? "bg-red-100" : ""
+                    }`}
+                    onClick={handleSortByPreference}
+                  >
+                    <Heart
+                      className={`w-4 h-4 mr-2 ${
+                        isSortedByPreference
+                          ? "fill-current text-red-500"
+                          : ""
+                      }`}
+                    />
+                    Sort by Preference
+                  </Button>
+                )}
               </div>
             </div>
 
