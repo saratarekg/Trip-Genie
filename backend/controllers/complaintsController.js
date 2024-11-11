@@ -113,12 +113,14 @@ const getComplaintDetails = async (req, res) => {
 
 const replyToComplaint = async (req, res) => {
   try {
-    const { id } = req.params; 
-    const { content } = req.body; 
+    const { id } = req.params;
+    const { content } = req.body;
 
     // Ensure content is provided
     if (!content) {
-      return res.status(400).json({ message: "Please provide a reply content" });
+      return res
+        .status(400)
+        .json({ message: "Please provide a reply content" });
     }
 
     // Check if the complaint exists
@@ -135,7 +137,9 @@ const replyToComplaint = async (req, res) => {
     // Save the updated complaint
     await complaint.save();
 
-    return res.status(200).json({ message: "Reply added successfully", complaint });
+    return res
+      .status(200)
+      .json({ message: "Reply added successfully", complaint });
   } catch (error) {
     console.error("Error replying to complaint:", error);
     res.status(500).json({ error: error.message });
@@ -156,12 +160,12 @@ const getTouristComplaints = async (req, res) => {
     // Fetch complaints and sort by creation date (most recent first)
     const complaints = await Complaint.find(query).sort({ createdAt: -1 });
 
-    // Check if any complaints are found
-    if (!complaints.length) {
-      return res
-        .status(404)
-        .json({ message: "No complaints found for this tourist" });
-    }
+    // // Check if any complaints are found
+    // if (!complaints.length) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "No complaints found for this tourist" });
+    // }
 
     // Return the complaints list
     return res.status(200).json(complaints);

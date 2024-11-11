@@ -173,6 +173,7 @@ export default function PasswordChanger() {
         <Button
           type="submit"
           className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+          disabled={newPasswordError !== "" || confirmPasswordError !== ""}
         >
           Change Password
         </Button>
