@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { Calendar as CalendarIcon, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -29,6 +29,7 @@ export default function HotelSearch() {
   const [error, setError] = useState(null);
   const [userCurrency, setUserCurrency] = useState({ code: 'USD', symbol: '$' });
   const [exchangeRates, setExchangeRates] = useState({});
+  const [showCheckInWarning, setShowCheckInWarning] = useState(false);
 
   const fetchUserCurrency = useCallback(async () => {
     try {
@@ -108,6 +109,21 @@ export default function HotelSearch() {
     }
   };
 
+  const handleCheckInDateChange = (date) => {
+    setCheckInDate(date);
+    setShowCheckInWarning(false);
+    // Ensure check-out date is at least one day after check-in date
+    if (!checkOutDate || date >= checkOutDate) {
+      setCheckOutDate(addDays(date, 1));
+    }
+  };
+
+  const handleCheckOutDateChange = (date) => {
+    if (checkInDate && date > checkInDate) {
+      setCheckOutDate(date);
+    }
+  };
+
   return (
     <div>
         <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
@@ -140,37 +156,61 @@ export default function HotelSearch() {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={checkInDate}
-                onSelect={setCheckInDate}
-                initialFocus
-              />
+            <Calendar
+              mode="single"
+              selected={checkInDate}
+              onSelect={handleCheckInDateChange}
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              initialFocus
+            />
             </PopoverContent>
           </Popover>
           <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-[240px] justify-start text-left font-normal",
-                  !checkOutDate && "text-muted-foreground"
-                )}
-                aria-label="Select check-out date"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {checkOutDate ? format(checkOutDate, "PPP") : <span>Check-out date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={checkOutDate}
-                onSelect={setCheckOutDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+  <div>
+    {checkInDate ? (
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className={cn(
+            "w-[240px] justify-start text-left font-normal",
+            !checkOutDate && "text-muted-foreground"
+          )}
+          aria-label="Select check-out date"
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {checkOutDate ? format(checkOutDate, "PPP") : <span>Check-out date</span>}
+        </Button>
+      </PopoverTrigger>
+    ) : (
+      <Button
+        variant="outline"
+        className="w-[240px] justify-start text-left font-normal text-muted-foreground"
+        onClick={() => setShowCheckInWarning(true)}
+        aria-label="Select check-out date"
+      >
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        <span>Check-out date</span>
+      </Button>
+    )}
+    {showCheckInWarning && !checkInDate && (
+      <p className="text-sm text-red-500 mt-1">Please select a check-in date first.</p>
+    )}
+  </div>
+  {checkInDate && (
+    <PopoverContent className="w-auto p-0" align="start">
+      <Calendar
+        mode="single"
+        selected={checkOutDate}
+        onSelect={handleCheckOutDateChange}
+        disabled={(date) => date <= checkInDate || date <= new Date()}
+        initialFocus
+      />
+    </PopoverContent>
+  )}
+</Popover>
+
+
+
         </div>
         <Input
           type="number"

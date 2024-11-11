@@ -17,6 +17,8 @@ and they both go to history as welli can delete toursit account when he has a bo
 
 -Historical type prefrences. (sam)
 -------------------------------------------TO DO---------------------------------------------
+- confirmation popup when deleting transportation/itinerary/activity
+- loyalty point lel products w hotels w transportation??
 
 - Send confirmation mail after booking a flight/hotel/transportation
 - Allow user to enter shipping address and delivery preferences once in settings and auto-fill them later

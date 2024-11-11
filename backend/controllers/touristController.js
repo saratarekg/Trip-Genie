@@ -245,7 +245,6 @@ const updateTouristProfile = async (req, res) => {
 
 const bookTransportation = async (req, res) => {
   const { transportationID, seatsToBook, paymentMethod } = req.body;
-  console.log(paymentMethod);
   const touristID = res.locals.user_id;
 
   try {
@@ -260,7 +259,9 @@ const bookTransportation = async (req, res) => {
       return res.status(400).json({ message: "Not enough seats available" });
     }
 
-    // Step 2: If payment method is wallet, check wallet balance and update it
+    // Step 2: Calculate total cost and handle wallet payment if applicable
+    const totalCost = transportation.ticketCost * seatsToBook;
+
     if (paymentMethod === "wallet") {
       const tourist = await Tourist.findById(touristID);
 
@@ -268,23 +269,19 @@ const bookTransportation = async (req, res) => {
         return res.status(404).json({ message: "Tourist not found" });
       }
 
-      const totalCost = transportation.ticketCost * seatsToBook;
-
-      console.log(tourist.wallet);
-
       if (tourist.wallet < totalCost) {
         return res.status(400).json({ message: "Not enough funds in wallet" });
       }
 
-      // Use findByIdAndUpdate to update the tourist's wallet
+      // Deduct the amount from the tourist's wallet
       await Tourist.findByIdAndUpdate(
         touristID,
-        { $inc: { wallet: -totalCost } }, // Decrease the wallet amount
+        { $inc: { wallet: -totalCost } },
         { new: true }
       );
     }
 
-    // Step 3: Decrease the remaining seats
+    // Step 3: Decrease the remaining seats in the transportation
     transportation.remainingSeats -= seatsToBook;
     await transportation.save();
 
@@ -292,21 +289,123 @@ const bookTransportation = async (req, res) => {
     const booking = new TouristTransportation({
       touristID,
       transportationID,
-      seatsToBook,
+      seatsBooked: seatsToBook,
+      totalCost,
+      paymentMethod,
     });
 
     const savedBooking = await booking.save();
 
     res.status(201).json({
-      message: "Transportation Booking successful",
+      message: "Transportation booking successful",
       booking: savedBooking,
       remainingSeats: transportation.remainingSeats,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
+const getUpcomingBookings = async (req, res) => {
+  const touristID = res.locals.user_id;
+
+  try {
+    // Find all upcoming bookings by comparing timeDeparture
+    const upcomingBookings = await TouristTransportation.find({ touristID })
+      .populate({
+        path: "transportationID",
+        match: { timeDeparture: { $gt: new Date() } }, // Only upcoming dates
+        select: "from to vehicleType ticketCost timeDeparture remainingSeats", // Select specific fields if needed
+      })
+      .exec();
+
+    // Filter out bookings where the transportationID does not match due to date filtering
+    const filteredBookings = upcomingBookings.filter((booking) => booking.transportationID);
+
+    res.status(200).json(filteredBookings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error retrieving upcoming bookings" });
+  }
+};
+
+// Method to get all previous bookings for a tourist
+const getPreviousBookings = async (req, res) => {
+  const touristID = res.locals.user_id;
+
+  try {
+    // Find all previous bookings by comparing timeDeparture
+    const previousBookings = await TouristTransportation.find({ touristID })
+      .populate({
+        path: "transportationID",
+        match: { timeDeparture: { $lt: new Date() } }, // Only past dates
+        select: "from to vehicleType ticketCost timeDeparture remainingSeats", // Select specific fields if needed
+      })
+      .exec();
+
+    // Filter out bookings where the transportationID does not match due to date filtering
+    const filteredBookings = previousBookings.filter((booking) => booking.transportationID);
+
+    res.status(200).json(filteredBookings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error retrieving previous bookings" });
+  }
+};
+
+const deleteBooking = async (req, res) => {
+  const { id } = req.params; // assuming bookingID is passed as a URL parameter
+  const touristID = res.locals.user_id;
+
+  try {
+    // Step 1: Find the booking to delete
+    const booking = await TouristTransportation.findById(id).populate("transportationID");
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    // Check if the booking belongs to the correct tourist
+    if (booking.touristID.toString() !== touristID) {
+      return res.status(403).json({ message: "You can only delete your own bookings" });
+    }
+
+    const transportation = booking.transportationID;
+
+    // Step 2: refund the cost to the tourist's wallet
+      const totalCost = transportation.ticketCost * booking.seatsBooked;
+      const tourist = await Tourist.findById(touristID);
+
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found" });
+      }
+
+      // Increment the wallet by the refund amount
+      console.log(tourist);
+      await Tourist.findByIdAndUpdate(
+        touristID,
+        { $inc: { wallet: totalCost } }, // Increase wallet by the refund amount
+        { new: true , runValidators: true }
+      );
+      
+
+    // Step 3: Delete the booking using findByIdAndDelete
+    await TouristTransportation.findByIdAndDelete(id);
+
+    // Step 4: Update the remaining seats in the transportation document
+    // console.log(booking.seatsToBook);
+    transportation.remainingSeats += booking.seatsBooked;
+    await transportation.save();
+
+    res.status(200).json({ message: "Booking successfully deleted and refunded (if wallet used)" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting booking" });
+  }
+};
+
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
@@ -1411,4 +1510,7 @@ module.exports = {
   deleteShippingAddress,
   updateShippingAddress,
   bookTransportation,
+  getUpcomingBookings,
+  getPreviousBookings,
+  deleteBooking,
 };

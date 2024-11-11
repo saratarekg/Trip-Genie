@@ -5,6 +5,7 @@ import {
   MapPin,
   ShoppingBag,
   User,
+  Car,
   Wallet,
   ShoppingCartIcon,
   Lock,
@@ -53,6 +54,8 @@ import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";
 import FAQ from "@/pages/FAQs";
 import TouristAttendedActivities from "@/pages/TouristAttended";
+import UpcomingTransportation from "@/pages/TransportationUpcomming";
+import HistoryTransportation from "@/pages/TransportationHistory";
 import AddCard from "@/pages/AddCard";
 import ShippingAddress from "@/pages/AddShippingAddress";
 import ShoppingCart from "@/components/touristCart.jsx";
@@ -149,6 +152,22 @@ const History = ({ user }) => {
     return <TouristAttendedActivities />;
   } else {
     return <div>History not available for {user.role}</div>;
+  }
+};
+
+const UpcommingTransportationBooking = ({ user }) => {
+  if (user.role === "tourist") {
+    return <UpcomingTransportation />;
+  } else {
+    return <div>Upcomming Transportations are not available for {user.role}</div>;
+  }
+};
+
+const HistoryTransportationBooking = ({ user }) => {
+  if (user.role === "tourist") {
+    return <HistoryTransportation />;
+  } else {
+    return <div>Upcomming Transportations are not available for {user.role}</div>;
   }
 };
 
@@ -682,6 +701,10 @@ export default function AccountManagement() {
         return <History user={user} />;
       case "upcoming":
         return <Upcoming user={user} />;
+      case "upcomingTransportation":
+        return <UpcommingTransportationBooking user={user} />;
+        case "historyTransportation":
+        return <HistoryTransportationBooking user={user} />;
       case "redeem-points":
         return <RedeemPoints user={user} onRedeemPoints={handleRedeemPoints} />;
       case "security":
@@ -724,6 +747,26 @@ export default function AccountManagement() {
         name: "Activities & Itineraries",
         icon: Calendar,
         tab: "upcoming",
+        roles: ["tourist"],
+      },
+      {
+        name: "Transportation",
+        icon: Car,
+        tab: "upcomingTransportation",
+        roles: ["tourist"],
+      },
+    ],
+    "History": [
+      {
+        name: "Activities & Itineraries",
+        icon: HistoryIcon,
+        tab: "history",
+        roles: ["tourist"],
+      },
+      {
+        name: "Transportation",
+        icon: HistoryIcon,
+        tab: "historyTransportation",
         roles: ["tourist"],
       },
     ],
@@ -827,12 +870,6 @@ export default function AccountManagement() {
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     // ],
     "Give Feedback": [
-      {
-        name: "History",
-        icon: HistoryIcon,
-        tab: "history",
-        roles: ["tourist"],
-      },
       {
         name: "Feedback",
         icon: MessageSquare,
