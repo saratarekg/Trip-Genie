@@ -3,12 +3,17 @@
 -F Booking itineraires, zorar book now, choosing date betdrab error
 -Deleting/View booking buttons bto3 itineraires btdrb error(my account-> upcoming bookings -> itineraires -> delete and view buttons)
 -Confirmation of booking a hotel & saving booking in database
--itinerary booking and view booking!!
--rate tourguide and itinerary cuz based on booking!!
+itinerary booking and view booking!!
+rate tourguide and itinerary cuz based on booking!!
+upload product picture
 - "already have an account?" fe sign up teb2a fe kol el stages (7otooha 3al shemal)
 - pagination bayez fe all trip plans
 - 2 comments shaklaha mot5alef
 - show complaint date in my complaints
+- SignUp , I accept and agree to the terms and conditions : the button is unclickable even though I have scrolled through all terms and conditions,
+I have to scroll for a second time for it to work. -Hazem
+
+- When I deleted seller account, I instantly got redirected out and received a popup with "account deleted" without waiting for a request 
 
 -------------------------------------------TO DO---------------------------------------------
 - Send confirmation mail after booking a flight/hotel/transportation
@@ -19,16 +24,10 @@
 - In admin, make "my account" logout only as there is no other active button except logout(habiba) done
 - show booked transportation in history
 - booking a transportation and flight using wallet actually uses the tourist's wallet 
-- enter removes available dates in create itinerary(done) Amy
-- categories and tags are optional in create activity inside create itinerary (done amy)
-- max price in price sliders (in activity, itineraries, preferences, products) by fetching the max price from the backend(done)radwa w sam
-- sort by preferences is activated on its own after being toggled off(done)sam
-- photos don't appear in wishlist  (DONE -HAZEM)
-- pop up when deleting an activity or itinerary fails because there are existing bookings(done)
-- hours and minutes input in add transportation and edit transportation
--filter price products msh shghal(done)
--page my products darba(done)Amy
--archive products filter msh shghal(done)habiba
+- "No rooms available for the selected dates" when no rooms are available 
+- check in dates should be in the future, check out dates after check in dates
+- upcoming travel plans delete doesn't work and the edit and delete buttons don't appear if the title is too long
+- I should be able to delete a comment
 
 Hadwa's requests:
 - Add global search bar 
@@ -57,6 +56,16 @@ New page:
 - In admin, make "my account" logout only as there is no other active button except logout(habiba) done
 - Provide the user with a City code list to choose from (Done) Radwa
 - pagination not working in activities(done) Sam
+- enter removes available dates in create itinerary(done) Amy
+- categories and tags are optional in create activity inside create itinerary (done amy)
+- max price in price sliders (in activity, itineraries, preferences, products) by fetching the max price from the backend(done)radwa w sam
+- sort by preferences is activated on its own after being toggled off(done)sam
+- photos don't appear in wishlist  (DONE -HAZEM)
+- pop up when deleting an activity or itinerary fails because there are existing bookings(done)
+- hours and minutes input in add transportation and edit transportation
+-filter price products msh shghal(done)
+-page my products darba(done)Amy
+-archive products filter msh shghal(done)habiba
 
 
 Hadwa's requests:
