@@ -1,0 +1,21 @@
+const mongoose = require("mongoose");
+
+const touristHotelSchema = new mongoose.Schema(
+  {
+    touristID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tourist",
+      required: true,
+    },
+    hotelIDs: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
+const TouristHotel = mongoose.model("TouristHotel", touristHotelSchema);
+module.exports = TouristHotel;

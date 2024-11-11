@@ -1,0 +1,22 @@
+const mongoose = require("mongoose");
+
+const touristFlightSchema = new mongoose.Schema(
+  {
+    touristID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tourist",
+      required: true,
+    },
+    flightIDs: [
+      {
+        type: String,
+        required: true,
+      }
+    ]
+  },
+  { timestamps: true }
+);
+
+const TouristFlight = mongoose.model("TouristFlight", touristFlightSchema);
+module.exports = TouristFlight;
+
