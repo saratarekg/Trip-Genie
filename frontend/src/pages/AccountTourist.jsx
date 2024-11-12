@@ -5,6 +5,7 @@ import {
   MapPin,
   ShoppingBag,
   User,
+  Car,
   Wallet,
   ShoppingCartIcon,
   Lock,
@@ -23,6 +24,8 @@ import {
   DollarSign,
   FileText,
   HomeIcon,
+  Plane,
+  Hotel,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -53,6 +56,8 @@ import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";
 import FAQ from "@/pages/FAQs";
 import TouristAttendedActivities from "@/pages/TouristAttended";
+import UpcomingTransportation from "@/pages/TransportationUpcomming";
+import HistoryTransportation from "@/pages/TransportationHistory";
 import AddCard from "@/pages/AddCard";
 import ShippingAddress from "@/pages/AddShippingAddress";
 import ShoppingCart from "@/components/touristCart.jsx";
@@ -89,6 +94,175 @@ const AccountInfo = ({ user }) => {
         </div>
       );
   }
+};
+
+const ExternalFlightBookings = ({ user }) => {
+  const [flights, setFlights] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [preferredCurrency, setPreferredCurrency] = useState({
+    code: "USD",
+    symbol: "$",
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const [flightsResponse, currencyResponse] = await Promise.all([
+          axios.get("http://localhost:4000/tourist/my-flights", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:4000/tourist/", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        setFlights(flightsResponse.data);
+
+        const currencyId = currencyResponse.data.preferredCurrency;
+        const currencyDetailsResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setPreferredCurrency(currencyDetailsResponse.data);
+
+        setIsLoading(false);
+      } catch (err) {
+        setError("Failed to fetch flight bookings or currency information");
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) return <div>Loading flight bookings...</div>;
+  if (error) return <div>{error}</div>;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">Flight Bookings</h2>
+      {flights.map((flight, index) => (
+        <Card key={index}>
+          <CardHeader>
+            <CardTitle>
+              {flight.from} to {flight.to}
+            </CardTitle>
+            <CardDescription>
+              Departure: {new Date(flight.departureDate).toLocaleString()}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Flight ID: {flight.flightID}</p>
+            <p>
+              Price: {preferredCurrency.symbol}
+              {flight.price}
+            </p>
+            <p>Number of Tickets: {flight.numberOfTickets}</p>
+            <p>Type: {flight.type}</p>
+            <p>Seat Type: {flight.seatType}</p>
+            <p>Flight Type: {flight.flightType}</p>
+            <p>Departure Date:  {new Date(flight.departureDate).toLocaleString()}</p>
+            <p>Arrival Date:  {new Date(flight.arrivalDate).toLocaleString()}</p>
+
+
+            {flight.returnDepartureDate && (
+              <p>
+                Return Departure:{" "}
+                {new Date(flight.returnDepartureDate).toLocaleString()}
+              </p>
+            )}
+
+            {flight.returnArrivalDate && (
+              <p>
+                Return Arrival:{" "}
+                {new Date(flight.returnArrivalDate).toLocaleString()}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+const ExternalHotelBookings = ({ user }) => {
+  const [hotels, setHotels] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [preferredCurrency, setPreferredCurrency] = useState({
+    code: "USD",
+    symbol: "$",
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const [hotelsResponse, currencyResponse] = await Promise.all([
+          axios.get("http://localhost:4000/tourist/my-hotels", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:4000/tourist/", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        setHotels(hotelsResponse.data);
+
+        const currencyId = currencyResponse.data.preferredCurrency;
+        const currencyDetailsResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setPreferredCurrency(currencyDetailsResponse.data);
+
+        setIsLoading(false);
+      } catch (err) {
+        setError("Failed to fetch hotel bookings or currency information");
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) return <div>Loading hotel bookings...</div>;
+  if (error) return <div>{error}</div>;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">Hotel Bookings</h2>
+      {hotels.map((hotel, index) => (
+        <Card key={index}>
+          <CardHeader>
+            <CardTitle>{hotel.hotelName}</CardTitle>
+            <CardDescription>
+              Check-in: {new Date(hotel.checkinDate).toLocaleDateString()}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p>Hotel ID: {hotel.hotelID}</p>
+            <p>
+              Check-out: {new Date(hotel.checkoutDate).toLocaleDateString()}
+            </p>
+            <p>Number of Rooms: {hotel.numberOfRooms}</p>
+            <p>Room Name: {hotel.roomName}</p>
+            <p>
+              Price: {preferredCurrency.symbol}
+              {hotel.price}
+            </p>
+            <p>Number of Adults: {hotel.numberOfAdults}</p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 };
 
 const Upcoming = ({ user }) => {
@@ -149,6 +323,26 @@ const History = ({ user }) => {
     return <TouristAttendedActivities />;
   } else {
     return <div>History not available for {user.role}</div>;
+  }
+};
+
+const UpcommingTransportationBooking = ({ user }) => {
+  if (user.role === "tourist") {
+    return <UpcomingTransportation />;
+  } else {
+    return (
+      <div>Upcomming Transportations are not available for {user.role}</div>
+    );
+  }
+};
+
+const HistoryTransportationBooking = ({ user }) => {
+  if (user.role === "tourist") {
+    return <HistoryTransportation />;
+  } else {
+    return (
+      <div>Upcomming Transportations are not available for {user.role}</div>
+    );
   }
 };
 
@@ -682,6 +876,10 @@ export default function AccountManagement() {
         return <History user={user} />;
       case "upcoming":
         return <Upcoming user={user} />;
+      case "upcomingTransportation":
+        return <UpcommingTransportationBooking user={user} />;
+      case "historyTransportation":
+        return <HistoryTransportationBooking user={user} />;
       case "redeem-points":
         return <RedeemPoints user={user} onRedeemPoints={handleRedeemPoints} />;
       case "security":
@@ -704,6 +902,10 @@ export default function AccountManagement() {
         return <CurrencyApp user={user} />;
       case "faqs":
         return <FAQs />;
+      case "flight-bookings":
+        return <ExternalFlightBookings user={user} />;
+      case "hotel-bookings":
+        return <ExternalHotelBookings user={user} />;
       default:
         return <AccountInfo user={user} />;
     }
@@ -724,6 +926,26 @@ export default function AccountManagement() {
         name: "Activities & Itineraries",
         icon: Calendar,
         tab: "upcoming",
+        roles: ["tourist"],
+      },
+      {
+        name: "Transportation",
+        icon: Car,
+        tab: "upcomingTransportation",
+        roles: ["tourist"],
+      },
+    ],
+    History: [
+      {
+        name: "Activities & Itineraries",
+        icon: HistoryIcon,
+        tab: "history",
+        roles: ["tourist"],
+      },
+      {
+        name: "Transportation",
+        icon: HistoryIcon,
+        tab: "historyTransportation",
         roles: ["tourist"],
       },
     ],
@@ -822,17 +1044,25 @@ export default function AccountManagement() {
         ],
       },
     ],
+    "External Bookings": [
+      {
+        name: "Flight Bookings",
+        icon: Plane,
+        tab: "flight-bookings",
+        roles: ["tourist"],
+      },
+      {
+        name: "Hotel Bookings",
+        icon: Hotel,
+        tab: "hotel-bookings",
+        roles: ["tourist"],
+      },
+    ],
     // "Display and Accessibility": [
     //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     // ],
     "Give Feedback": [
-      {
-        name: "History",
-        icon: HistoryIcon,
-        tab: "history",
-        roles: ["tourist"],
-      },
       {
         name: "Feedback",
         icon: MessageSquare,

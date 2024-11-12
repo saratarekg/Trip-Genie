@@ -259,7 +259,7 @@ export function NavbarComponent() {
                             className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200"
                             onClick={closeDropdown}
                           >
-                            Land transportation
+                            Vehicles
                           </Link>
                           <Link
                             to="/flights"

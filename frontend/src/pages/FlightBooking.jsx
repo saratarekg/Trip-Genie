@@ -178,6 +178,8 @@ function BookingPage() {
   const [searchParams] = useSearchParams();
   const [from, setFrom] = useState(searchParams.get("from") || "CAI");
   const [to, setTo] = useState(searchParams.get("to") || "CDG");
+  const [numberOfSeats, setNumberOfSeats] = useState(1);
+  const [seatType, setSeatType] = useState("Economy");
   const [departureDate, setDepartureDate] = useState(
     searchParams.get("departDate") || formatDate(new Date())
   );
@@ -233,6 +235,58 @@ function BookingPage() {
         </div>
       </>
     ) : null;
+  };
+
+  const handleBookNow = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/book-flight", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          flightID: `${Math.random().toString(36).substr(2, 9)}`,
+          from: selectedFlight.itineraries[0].segments[0].departure.iataCode,
+          to: selectedFlight.itineraries[0].segments[
+            selectedFlight.itineraries[0].segments.length - 1
+          ].arrival.iataCode,
+          departureDate: selectedFlight.itineraries[0].segments[0].departure.at,
+          arrivalDate:
+            selectedFlight.itineraries[0].segments[
+              selectedFlight.itineraries[0].segments.length - 1
+            ].arrival.at,
+          price: parseFloat(selectedFlight.price.total),
+          numberOfTickets: numberOfSeats,
+          type: selectedFlight.itineraries[1] ? "Round Trip" : "One Way",
+          returnDepartureDate: selectedFlight.itineraries[1]
+            ? selectedFlight.itineraries[1].segments[0].departure.at
+            : undefined,
+          returnArrivalDate: selectedFlight.itineraries[1]
+            ? selectedFlight.itineraries[1].segments[
+                selectedFlight.itineraries[1].segments.length - 1
+              ].arrival.at
+            : undefined,
+          seatType: seatType,
+          flightType: selectedFlight.itineraries[0].segments[0].carrierCode + " " + selectedFlight.itineraries[0].segments[0].number,
+          flightTypeReturn: selectedFlight.itineraries[1]
+            ? selectedFlight.itineraries[1].segments[0].carrierCode
+            : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Booking failed");
+      }
+
+      const data = await response.json();
+      console.log("Booking successful:", data);
+      setIsBookingConfirmationOpen(true);
+    } catch (error) {
+      console.error("Booking error:", error);
+      setError("Failed to book the flight. Please try again.");
+    }
   };
 
   async function refreshToken() {
@@ -421,10 +475,6 @@ function BookingPage() {
       mainContentRef.current.inert = false;
     }
     resetBookingForm();
-  };
-
-  const handleBookNow = () => {
-    setIsBookingConfirmationOpen(true);
   };
 
   const handleCloseAllPopups = () => {
@@ -878,6 +928,32 @@ function BookingPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
+
+                  <Select
+                    value={numberOfSeats.toString()}
+                    onValueChange={(value) => setNumberOfSeats(parseInt(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Number of Seats" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num} {num === 1 ? "Seat" : "Seats"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={seatType} onValueChange={setSeatType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seat Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Economy">Economy</SelectItem>
+                      <SelectItem value="Business">Business</SelectItem>
+                      <SelectItem value="First Class">First Class</SelectItem>
+                    </SelectContent>
+                  </Select>
 
                   <RadioGroup
                     value={paymentMethod}

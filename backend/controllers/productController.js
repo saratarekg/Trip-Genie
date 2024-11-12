@@ -469,7 +469,7 @@ const archiveProduct = async (req, res) => {
       status: "pending",
       "products.product": id,
     });
-    console.log(pendingPurchase);
+    // console.log(pendingPurchase);
     if (pendingPurchase) {
       return res
         .status(400)

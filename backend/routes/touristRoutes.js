@@ -37,6 +37,10 @@ router.put("/add-default-shippingAdds/:id", touristController.changeDefaultShipp
 router.put("/update-shippingAdd/:id", touristController.updateShippingAddress);
 router.delete("/shippingAdds/:id", touristController.deleteShippingAddress);
 
+router.get("/historical-places-preference", historicalPlacesController.filterHistoricalPlacesByPreferences);
+router.get("/historical-places-not-preference", historicalPlacesController.theHolyAntiFilter);
+
+
 
 router.put("/", touristController.updateTouristProfile);
 router.put("/preferences", touristController.updatePreferences);
@@ -127,6 +131,7 @@ router.get(
   historicalPlacesController.getHistoricalPlace
 );
 
+
 router.post("/purchase", purchaseController.createPurchase);
 router.get("/purchase", purchaseController.getPurchasesByTourist);
 router.delete("/purchase/:id", purchaseController.deletePurchase);
@@ -179,8 +184,16 @@ router.get("/complaints", complaintsController.getTouristComplaints);
 router.delete("/delete-account", touristController.deleteAccount);
 
 router.post("/book-transportation", touristController.bookTransportation); 
+router.get("/upcoming-transportation", touristController.getUpcomingBookings); 
+router.get("/history-transportation", touristController.getPreviousBookings); 
+router.delete("/transportation-booking/:id", touristController.deleteBooking);
 router.get("/transportations", transportationController.getAllTransportationsNew);
 
+router.post("/book-flight", touristController.bookFlight);
+router.get("/my-flights", touristController.getMyFlights);
+
+router.post("/book-hotel", touristController.bookHotel);
+router.get("/my-hotels", touristController.getMyHotels);
 
 
 module.exports = router;

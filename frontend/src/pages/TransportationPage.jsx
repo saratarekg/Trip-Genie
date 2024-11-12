@@ -262,6 +262,7 @@ setSelectedDate(null);
           response.data.message || "Failed to book transportation"
         );
       }
+      window.location.reload();
     } catch (error) {
       console.error("Error booking transportation:", error);
       setBookingError(
@@ -953,12 +954,23 @@ setSelectedDate(null);
             <div className="py-4">
             {bookingError}
             </div>
+            { 
+            bookingError !== "Transportation booking successful" ? (
               <DialogTitle>
                 <div className="flex items-center">
                   <XCircle className="w-6 h-6 text-red-500 mr-2" />
                   Failed to book transportation
                 </div>
               </DialogTitle>
+            ) : (
+              <DialogTitle>
+                <div className="flex items-center">
+                  <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                  Transportation booking successful
+                </div>
+              </DialogTitle>
+            )
+          }
             </DialogHeader>
            
             <DialogFooter>

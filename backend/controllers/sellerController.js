@@ -86,11 +86,16 @@ const deleteSellerAccount = async (req, res) => {
     }
 
     const products = await Product.find({ seller: res.locals.user_id });
-    const productIDs = products.map((product) => product._id);
-    const purchases = await Purchase.find({ status: "pending" });
+    const productIDs = products.map((product) => product._id.toString());
+    const purchases = await Purchase.find({ status: "pending" }).populate(
+      "products.product"
+    );
+
     for (const purchase of purchases) {
       if (
-        purchase.products.some((prod) => productIDs.includes(prod.product._id))
+        purchase.products.some((prod) =>
+          productIDs.includes(prod.product._id.toString())
+        )
       ) {
         return res.status(400).json({
           message: "Cannot delete seller account, there are pending purchases",
@@ -121,6 +126,7 @@ const deleteSellerAccount = async (req, res) => {
     files.forEach(async (file) => {
       await gfs.delete(file._id);
     });
+    throw new Error("test");
 
     await Seller.findByIdAndDelete(res.locals.user_id);
 
@@ -139,11 +145,15 @@ const deleteSeller = async (req, res) => {
     }
 
     const products = await Product.find({ seller: id });
-    const productIDs = products.map((product) => product._id);
-    const purchases = await Purchase.find({ status: "pending" });
+    const productIDs = products.map((product) => product._id.toString());
+    const purchases = await Purchase.find({ status: "pending" }).populate(
+      "products.product"
+    );
     for (const purchase of purchases) {
       if (
-        purchase.products.some((prod) => productIDs.includes(prod.product._id))
+        purchase.products.some((prod) =>
+          productIDs.includes(prod.product._id.toString())
+        )
       ) {
         return res.status(400).json({
           message: "Cannot delete seller account, there are pending purchases",

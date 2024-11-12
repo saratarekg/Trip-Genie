@@ -248,6 +248,7 @@ export default function AllActivities() {
   const [error, setError] = useState(null);
   const [alertMessage, setAlertMessage] = useState(null);
   const [isSortedByPreference, setIsSortedByPreference] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [currencies, setCurrencies] = useState([]);
   const [exchangeRates, setExchangeRates] = useState({});
@@ -297,30 +298,48 @@ export default function AllActivities() {
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
-        const url = new URL(`http://localhost:4000/${role}/activities`);
 
-        Object.keys(params).forEach((key) => {
-          if (key === "sort" && params[key] === "price") {
-            url.searchParams.append("sort", "price");
-            url.searchParams.append("asc", params.asc.toString());
-          } else {
-            url.searchParams.append(key, params[key]);
+        if (role === "tourist" && !isInitialized) {
+          const [preferredResponse, otherResponse] = await Promise.all([
+            axios.get("http://localhost:4000/tourist/activities-preference", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get(
+              "http://localhost:4000/tourist/activities-not-preference",
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            ),
+          ]);
+          setActivities([...preferredResponse.data, ...otherResponse.data]);
+          setIsSortedByPreference(true);
+          setIsInitialized(true);
+        } else {
+          const url = new URL(`http://localhost:4000/${role}/activities`);
+
+          Object.keys(params).forEach((key) => {
+            if (key === "sort" && params[key] === "price") {
+              url.searchParams.append("sort", "price");
+              url.searchParams.append("asc", params.asc.toString());
+            } else {
+              url.searchParams.append(key, params[key]);
+            }
+          });
+
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
-        });
 
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const data = await response.json();
+          setActivities(data);
         }
-
-        const data = await response.json();
-        setActivities(data);
         setError(null);
       } catch (error) {
         console.error("Error fetching activities:", error);
@@ -330,7 +349,7 @@ export default function AllActivities() {
         setIsLoading(false);
       }
     },
-    [getUserRole]
+    [getUserRole, isInitialized]
   );
 
   const fetchMaxPrice = useCallback(async () => {
@@ -468,6 +487,12 @@ export default function AllActivities() {
       fetchActivities();
     }
   }, [isSortedByPreference, fetchActivities]);
+
+  useEffect(() => {
+    if (userInfo) {
+      fetchActivities();
+    }
+  }, [userInfo, fetchActivities]);
 
   const clearFilters = () => {
     setSearchTerm("");

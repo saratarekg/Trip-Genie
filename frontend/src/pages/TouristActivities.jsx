@@ -293,7 +293,10 @@ export default function Component() {
       setItineraries(itinerariesData);
     } catch (error) {
       console.error("Error fetching updated data:", error);
-      showNotification("Failed to update bookings. Please refresh the page.", "error");
+      showNotification(
+        "Failed to update bookings. Please refresh the page.",
+        "error"
+      );
     }
   };
 
@@ -303,7 +306,8 @@ export default function Component() {
     const bookingType = selectedBooking.activity ? "activity" : "itinerary";
     const bookingDate = new Date(selectedBooking[bookingType].timing);
     const now = new Date();
-    const hoursDifference = (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const hoursDifference =
+      (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
     if (hoursDifference < 48) {
       showNotification(
@@ -392,42 +396,43 @@ export default function Component() {
               <CardDescription>Your travel plans</CardDescription>
             </CardHeader>
             <CardContent>
-            <ScrollArea className="h-[500px]">
-  {/* Updated ScrollArea height */}
-  {itineraries.length > 0
-    ? itineraries.map((booking) => (
-        <div key={booking._id} className="mb-4">
-          <div className="flex items-center justify-between">
-          <Button
-  variant="ghost"
-  className="w-full justify-start mr-2 text-left whitespace-normal"
-  onClick={() => handleItineraryClick(booking.itinerary?._id)}
->
-  <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
-  {booking.itinerary?.title}
-</Button>
+              <ScrollArea className="h-[500px]">
+                {/* Updated ScrollArea height */}
+                {itineraries.length > 0
+                  ? itineraries.map((booking) => (
+                      <div key={booking._id} className="mb-4">
+                        <div className="flex items-center justify-between">
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start mr-2 text-left whitespace-normal"
+                            onClick={() =>
+                              handleItineraryClick(booking.itinerary?._id)
+                            }
+                          >
+                            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
+                            {booking.itinerary?.title}
+                          </Button>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleViewBooking(booking)}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => handleDeleteBooking(booking)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-          <Separator className="my-2" />
-        </div>
-      ))
-    : noBookingsMessage}
-</ScrollArea>
-
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewBooking(booking)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteBooking(booking)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Separator className="my-2" />
+                      </div>
+                    ))
+                  : noBookingsMessage}
+              </ScrollArea>
             </CardContent>
           </Card>
         </div>
@@ -529,16 +534,15 @@ export default function Component() {
                       Date:
                     </span>
                     <span className="text-gray-800 text-base">
-  {/* Format Date */}
-  {new Date(
-    selectedBooking.activity?.timing || selectedBooking.date
-  ).toLocaleDateString()}
-</span>
-
+                      {/* Format Date */}
+                      {new Date(
+                        selectedBooking.activity?.timing.split("T")[0] ||
+                          selectedBooking.date.split("T")[0]
+                      ).toLocaleDateString()}
+                    </span>
                   </div>
 
                   {/* Time Row (only for itinerary) */}
-                 
                 </div>
                 {/* Tickets Row (for both Activity and Itinerary) */}
                 {selectedBooking.activity && (
