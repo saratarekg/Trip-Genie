@@ -269,7 +269,7 @@ function BookingPage() {
               ].arrival.at
             : undefined,
           seatType: seatType,
-          flightType: selectedFlight.itineraries[0].segments[0].carrierCode,
+          flightType: selectedFlight.itineraries[0].segments[0].carrierCode + " " + selectedFlight.itineraries[0].segments[0].number,
           flightTypeReturn: selectedFlight.itineraries[1]
             ? selectedFlight.itineraries[1].segments[0].carrierCode
             : undefined,

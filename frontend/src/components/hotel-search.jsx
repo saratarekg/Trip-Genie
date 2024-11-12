@@ -21,9 +21,9 @@ function cn(...classes) {
 
 export default function HotelSearch() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [checkInDate, setCheckInDate] = useState(new Date());
-  const [checkOutDate, setCheckOutDate] = useState(addDays(new Date(), 1));
-  const [adults, setAdults] = useState(1);
+  const [checkInDate, setCheckInDate] = useState(null);
+  const [checkOutDate, setCheckOutDate] = useState(null);
+  const [adults, setAdults] = useState(null);
   const [hotels, setHotels] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);

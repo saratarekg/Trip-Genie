@@ -32,7 +32,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -65,6 +64,35 @@ export default function HotelDetails() {
   const hotelPhotosFetched = useRef(false);
   const hotelFacilitiesFetched = useRef(false);
   const roomListFetched = useRef(false);
+
+  useEffect(() => {
+    const fetchCurrencyInfo = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch(
+          "http://localhost:4000/tourist/currencies/code",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch currency information");
+        }
+
+        const data = await response.json();
+        setCurrencyCode(data);
+      } catch (err) {
+        console.error("Failed to fetch currency information:", err);
+        setError("Failed to fetch currency information. Using default USD.");
+      }
+    };
+
+    fetchCurrencyInfo();
+  }, []);
 
   useEffect(() => {
     const fetchHotelDetails = async () => {
@@ -155,7 +183,6 @@ export default function HotelDetails() {
                   (room.facilities && room.facilities.length > 0)
                 );
 
-              // Group rooms by name
               const grouped = mergedRoomInfo.reduce((acc, room) => {
                 if (!acc[room.name]) {
                   acc[room.name] = [];
@@ -194,7 +221,6 @@ export default function HotelDetails() {
     });
     setIsBookingConfirmationOpen(true);
   };
-
 
   const handleConfirmBooking = async () => {
     try {
@@ -235,6 +261,29 @@ export default function HotelDetails() {
     }
   };
 
+  const renderFacilities = () => {
+    if (!hotelFacilities || hotelFacilities.length === 0) {
+      return null;
+    }
+
+    return (
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Facilities</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {hotelFacilities.map((facility, index) => (
+              <Badge key={index} variant="outline">
+                {facility.facility_name}
+              </Badge>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderRoomGroup = (roomName, rooms) => {
     const validRooms = rooms.filter(room => 
       room.bed_configurations && 
@@ -257,14 +306,14 @@ export default function HotelDetails() {
                 <CardHeader>
                   <CardTitle>{room.name}</CardTitle>
                   <CardDescription>
-                    {room.price && room.currency ? (
+                    {room.price ? (
                       <div>
                         <span className="font-semibold text-xl">
-                          Price:  {room.currency} {room.price}
+                          Price: {room.price} {currencyCode}
                         </span>
                         {room.allInclusivePrice && room.allInclusivePrice !== room.price && (
                           <div className="text-sm text-muted-foreground">
-                            All Inclusive: {room.currency} {room.allInclusivePrice}
+                            All Inclusive: {room.allInclusivePrice} {currencyCode}
                           </div>
                         )}
                       </div>
@@ -388,13 +437,15 @@ export default function HotelDetails() {
                   )
                 )}
                 <span className="ml-2">
-                  {hotelData.review_score} ({hotelData.review_nr} reviews)
+                  {hotelData.review_score/2} ({hotelData.review_nr} reviews)
                 </span>
               </div>
               <p>{hotelData.description_translations?.en}</p>
             </CardContent>
           </Card>
         </div>
+        {renderFacilities()} {/* Add this line to render the facilities section */}
+
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Room Types</CardTitle>
@@ -424,7 +475,7 @@ export default function HotelDetails() {
             {selectedRoom && (
               <div className="mt-4 space-y-4">
                 <p><strong>Room:</strong> {selectedRoom.name}</p>
-                <p><strong>Price:</strong> {selectedRoom.currency} {selectedRoom.totalPrice}</p>
+                <p><strong>Price:</strong> {selectedRoom.totalPrice} {currencyCode}</p>
                 <p><strong>Type:</strong> {selectedRoom.isAllInclusive ? 'All Inclusive' : 'Standard'}</p>
                 <p><strong>Check-in Date:</strong> {checkinDate}</p>
                 <p><strong>Check-out Date:</strong> {checkoutDate}</p>

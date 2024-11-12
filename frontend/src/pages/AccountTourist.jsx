@@ -100,7 +100,10 @@ const ExternalFlightBookings = ({ user }) => {
   const [flights, setFlights] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [preferredCurrency, setPreferredCurrency] = useState({ code: 'USD', symbol: '$' });
+  const [preferredCurrency, setPreferredCurrency] = useState({
+    code: "USD",
+    symbol: "$",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,9 +121,12 @@ const ExternalFlightBookings = ({ user }) => {
         setFlights(flightsResponse.data);
 
         const currencyId = currencyResponse.data.preferredCurrency;
-        const currencyDetailsResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const currencyDetailsResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setPreferredCurrency(currencyDetailsResponse.data);
 
         setIsLoading(false);
@@ -142,16 +148,39 @@ const ExternalFlightBookings = ({ user }) => {
       {flights.map((flight, index) => (
         <Card key={index}>
           <CardHeader>
-            <CardTitle>{flight.from} to {flight.to}</CardTitle>
-            <CardDescription>Departure: {new Date(flight.departureDate).toLocaleString()}</CardDescription>
+            <CardTitle>
+              {flight.from} to {flight.to}
+            </CardTitle>
+            <CardDescription>
+              Departure: {new Date(flight.departureDate).toLocaleString()}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <p>Flight ID: {flight.flightID}</p>
-            <p>Price: {preferredCurrency.symbol}{flight.price}</p>
+            <p>
+              Price: {preferredCurrency.symbol}
+              {flight.price}
+            </p>
             <p>Number of Tickets: {flight.numberOfTickets}</p>
             <p>Type: {flight.type}</p>
+            <p>Seat Type: {flight.seatType}</p>
+            <p>Flight Type: {flight.flightType}</p>
+            <p>Departure Date:  {new Date(flight.departureDate).toLocaleString()}</p>
+            <p>Arrival Date:  {new Date(flight.arrivalDate).toLocaleString()}</p>
+
+
             {flight.returnDepartureDate && (
-              <p>Return: {new Date(flight.returnDepartureDate).toLocaleString()}</p>
+              <p>
+                Return Departure:{" "}
+                {new Date(flight.returnDepartureDate).toLocaleString()}
+              </p>
+            )}
+
+            {flight.returnArrivalDate && (
+              <p>
+                Return Arrival:{" "}
+                {new Date(flight.returnArrivalDate).toLocaleString()}
+              </p>
             )}
           </CardContent>
         </Card>
@@ -164,7 +193,10 @@ const ExternalHotelBookings = ({ user }) => {
   const [hotels, setHotels] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [preferredCurrency, setPreferredCurrency] = useState({ code: 'USD', symbol: '$' });
+  const [preferredCurrency, setPreferredCurrency] = useState({
+    code: "USD",
+    symbol: "$",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -182,9 +214,12 @@ const ExternalHotelBookings = ({ user }) => {
         setHotels(hotelsResponse.data);
 
         const currencyId = currencyResponse.data.preferredCurrency;
-        const currencyDetailsResponse = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const currencyDetailsResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setPreferredCurrency(currencyDetailsResponse.data);
 
         setIsLoading(false);
@@ -207,14 +242,21 @@ const ExternalHotelBookings = ({ user }) => {
         <Card key={index}>
           <CardHeader>
             <CardTitle>{hotel.hotelName}</CardTitle>
-            <CardDescription>Check-in: {new Date(hotel.checkinDate).toLocaleDateString()}</CardDescription>
+            <CardDescription>
+              Check-in: {new Date(hotel.checkinDate).toLocaleDateString()}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <p>Hotel ID: {hotel.hotelID}</p>
-            <p>Check-out: {new Date(hotel.checkoutDate).toLocaleDateString()}</p>
+            <p>
+              Check-out: {new Date(hotel.checkoutDate).toLocaleDateString()}
+            </p>
             <p>Number of Rooms: {hotel.numberOfRooms}</p>
             <p>Room Name: {hotel.roomName}</p>
-            <p>Price: {preferredCurrency.symbol}{hotel.price}</p>
+            <p>
+              Price: {preferredCurrency.symbol}
+              {hotel.price}
+            </p>
             <p>Number of Adults: {hotel.numberOfAdults}</p>
           </CardContent>
         </Card>
