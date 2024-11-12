@@ -309,7 +309,7 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
         </p>
         <p className="text-lg font-medium text-gray-600">
           Loyalty Points:{" "}
-          <span className="text-blue-600">{user.loyaltyPoints} points</span>
+          <span className="text-blue-600">{(user.loyaltyPoints).toFixed(2)} points</span>
         </p>
       </div>
 
