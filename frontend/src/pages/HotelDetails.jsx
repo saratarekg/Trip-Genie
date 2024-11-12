@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   Carousel,
   CarouselContent,
@@ -32,11 +32,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Cookies from "js-cookie";
 
 const API_KEY = import.meta.env.VITE_HOTELS_API_KEY2;
 
 export default function HotelDetails() {
   const { hotelId } = useParams();
+  const [searchParams] = useSearchParams();
   const [hotelData, setHotelData] = useState(null);
   const [hotelPhotos, setHotelPhotos] = useState([]);
   const [hotelFacilities, setHotelFacilities] = useState([]);
@@ -46,6 +52,14 @@ export default function HotelDetails() {
   const [currencyCode, setCurrencyCode] = useState("USD");
   const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [numberOfRooms, setNumberOfRooms] = useState(1);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingError, setBookingError] = useState("");
+  const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
+
+  const checkinDate = searchParams.get("checkinDate");
+  const checkoutDate = searchParams.get("checkoutDate");
+  const numberOfAdults = parseInt(searchParams.get("adults") || "1", 10);
 
   const hotelDataFetched = useRef(false);
   const hotelPhotosFetched = useRef(false);
@@ -104,7 +118,7 @@ export default function HotelDetails() {
         );
 
         await fetchWithCache(
-          `https://booking-com.p.rapidapi.com/v1/hotels/room-list?checkin_date=2025-01-18&checkout_date=2025-01-19&hotel_id=${parsedHotelId}&adults_number_by_rooms=2&children_number_by_rooms=0&currency=${currencyCode}&units=metric&locale=en-gb`,
+          `https://booking-com.p.rapidapi.com/v1/hotels/room-list?checkin_date=${checkinDate}&checkout_date=${checkoutDate}&hotel_id=${parsedHotelId}&adults_number_by_rooms=${numberOfAdults}&children_number_by_rooms=0&currency=${currencyCode}&units=metric&locale=en-gb`,
           null,
           (data) => {
             if (data && data[0]) {
@@ -170,7 +184,7 @@ export default function HotelDetails() {
     };
 
     fetchHotelDetails();
-  }, [hotelId, currencyCode]);
+  }, [hotelId, currencyCode, checkinDate, checkoutDate, numberOfAdults]);
 
   const handleBookRoom = (room, isAllInclusive) => {
     setSelectedRoom({
@@ -179,6 +193,46 @@ export default function HotelDetails() {
       totalPrice: isAllInclusive ? room.allInclusivePrice : room.price
     });
     setIsBookingConfirmationOpen(true);
+  };
+
+
+  const handleConfirmBooking = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/book-hotel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          hotelID: hotelId,
+          hotelName: hotelData.name,
+          checkinDate,
+          checkoutDate,
+          numberOfRooms,
+          roomName: selectedRoom.name,
+          price: selectedRoom.totalPrice * numberOfRooms,
+          numberOfAdults,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Booking failed");
+      }
+
+      const data = await response.json();
+      console.log("Booking successful:", data);
+      setBookingSuccess(true);
+      setBookingError("");
+      setIsSuccessPopupOpen(true);
+    } catch (error) {
+      console.error("Booking error:", error);
+      setBookingError("Failed to book the hotel. Please try again.");
+      setBookingSuccess(false);
+    } finally {
+      setIsBookingConfirmationOpen(false);
+    }
   };
 
   const renderRoomGroup = (roomName, rooms) => {
@@ -206,7 +260,7 @@ export default function HotelDetails() {
                     {room.price && room.currency ? (
                       <div>
                         <span className="font-semibold text-xl">
-                          Price: {room.currency} {room.price}
+                          Price:  {room.currency} {room.price}
                         </span>
                         {room.allInclusivePrice && room.allInclusivePrice !== room.price && (
                           <div className="text-sm text-muted-foreground">
@@ -292,99 +346,130 @@ export default function HotelDetails() {
 
   return (
     <div>
-       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-    <div className="container mx-auto p-4 mt-5">
-      <h1 className="text-3xl font-bold mb-6">{hotelData.name}</h1>
-      <div className="flex flex-col md:flex-row gap-6 mb-6">
-        <div className="md:w-1/2">
-          <Carousel className="w-full max-w-xl">
-            <CarouselContent>
-              {hotelPhotos.map((photo, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                  <img
-                    src={photo.url_1440}
-                    alt={`Hotel photo ${index + 1}`}
-                    className="w-full h-64 object-cover rounded-lg"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
+      <div className="container mx-auto p-4 mt-5">
+        <h1 className="text-3xl font-bold mb-6">{hotelData.name}</h1>
+        <div className="flex flex-col md:flex-row gap-6 mb-6">
+          <div className="md:w-1/2">
+            <Carousel className="w-full max-w-xl">
+              <CarouselContent>
+                {hotelPhotos.map((photo, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                    <img
+                      src={photo.url_1440}
+                      alt={`Hotel photo ${index + 1}`}
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </div>
+          <Card className="md:w-1/2">
+            <CardHeader>
+              <CardTitle>Hotel Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-2">{hotelData.address}</p>
+              <p className="mb-2">
+                {hotelData.city}, {hotelData.country}
+              </p>
+              <div className="flex items-center mb-2">
+                {[...Array(Math.floor(hotelData.review_score / 2))].map(
+                  (_, i) => (
+                    <Star
+                      key={i}
+                      className="w-4 h-4 fill-yellow-400 text-yellow-400"
+                    />
+                  )
+                )}
+                <span className="ml-2">
+                  {hotelData.review_score} ({hotelData.review_nr} reviews)
+                </span>
+              </div>
+              <p>{hotelData.description_translations?.en}</p>
+            </CardContent>
+          </Card>
         </div>
-        <Card className="md:w-1/2">
+        <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Hotel Information</CardTitle>
+            <CardTitle>Room Types</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="mb-2">{hotelData.address}</p>
-            <p className="mb-2">
-              {hotelData.city}, {hotelData.country}
-            </p>
-            <div className="flex items-center mb-2">
-              {[...Array(Math.floor(hotelData.review_score / 2))].map(
-                (_, i) => (
-                  <Star
-                    key={i}
-                    className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                  />
-                )
-              )}
-              <span className="ml-2">
-                {hotelData.review_score} ({hotelData.review_nr} reviews)
-              </span>
-            </div>
-            <p>{hotelData.description_translations?.en}</p>
+            <Accordion type="single" collapsible className="w-full">
+              {Object.entries(groupedRooms)
+                .filter(([_, rooms]) => rooms.some(room => 
+                  room.bed_configurations && 
+                  room.bed_configurations.length > 0 && 
+                  room.facilities && 
+                  room.facilities.length > 0
+                ))
+                .map(([roomName, rooms]) => renderRoomGroup(roomName, rooms))
+              }
+            </Accordion>
           </CardContent>
         </Card>
+        <Dialog open={isBookingConfirmationOpen} onOpenChange={setIsBookingConfirmationOpen}>
+          <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Confirm Booking</DialogTitle>
+              <DialogDescription>
+                Please confirm your room booking details.
+              </DialogDescription>
+            </DialogHeader>
+            {selectedRoom && (
+              <div className="mt-4 space-y-4">
+                <p><strong>Room:</strong> {selectedRoom.name}</p>
+                <p><strong>Price:</strong> {selectedRoom.currency} {selectedRoom.totalPrice}</p>
+                <p><strong>Type:</strong> {selectedRoom.isAllInclusive ? 'All Inclusive' : 'Standard'}</p>
+                <p><strong>Check-in Date:</strong> {checkinDate}</p>
+                <p><strong>Check-out Date:</strong> {checkoutDate}</p>
+                <p><strong>Number of Adults:</strong> {numberOfAdults}</p>
+                <div className="space-y-2">
+                  <Label htmlFor="numberOfRooms">Number of Rooms</Label>
+                  <Select value={numberOfRooms.toString()} onValueChange={(value) => setNumberOfRooms(parseInt(value))}>
+                    <SelectTrigger id="numberOfRooms">
+                      <SelectValue placeholder="Select number of rooms" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button onClick={() => setIsBookingConfirmationOpen(false)}>Cancel</Button>
+              <Button onClick={handleConfirmBooking}>Confirm Booking</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={isSuccessPopupOpen} onOpenChange={setIsSuccessPopupOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Booking Successful</DialogTitle>
+              <DialogDescription>
+                Your hotel room has been booked successfully.
+              </DialogDescription>
+            </DialogHeader>
+            <Button onClick={() => setIsSuccessPopupOpen(false)}>Close</Button>
+          </DialogContent>
+        </Dialog>
+        {bookingError && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertTitle>Booking Error</AlertTitle>
+            <AlertDescription>{bookingError}</AlertDescription>
+          </Alert>
+        )}
       </div>
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Room Types</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            {Object.entries(groupedRooms)
-              .filter(([_, rooms]) => rooms.some(room => 
-                room.bed_configurations && 
-                room.bed_configurations.length > 0 && 
-                room.facilities && 
-                room.facilities.length > 0
-              ))
-              .map(([roomName, rooms]) => renderRoomGroup(roomName, rooms))
-            }
-          </Accordion>
-        </CardContent>
-      </Card>
-      <Dialog open={isBookingConfirmationOpen} onOpenChange={setIsBookingConfirmationOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Confirm Booking</DialogTitle>
-            <DialogDescription>
-              Please confirm your room booking details.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedRoom && (
-            <div className="mt-4">
-              <p><strong>Room:</strong> {selectedRoom.name}</p>
-              <p><strong>Price:</strong> {selectedRoom.currency} {selectedRoom.totalPrice}</p>
-              <p><strong>Type:</strong> {selectedRoom.isAllInclusive ? 'All Inclusive' : 'Standard'}</p>
-            </div>
-          )}
-          <DialogFooter>
-            <Button onClick={() => setIsBookingConfirmationOpen(false)}>Cancel</Button>
-            <Button onClick={() => {
-              // Handle booking confirmation here
-              setIsBookingConfirmationOpen(false);
-              // You might want to show a success message or redirect the user
-            }}>Confirm Booking</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
     </div>
   );
 }

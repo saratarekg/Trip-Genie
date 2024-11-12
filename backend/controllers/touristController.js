@@ -15,6 +15,8 @@ const Complaint = require("../models/complaints");
 const cloudinary = require("../utils/cloudinary");
 const TouristTransportation = require("../models/touristTransportation");
 const Transportation = require("../models/transportation");
+const TouristFlight = require("../models/touristFlight");
+const TouristHotel = require("../models/touristHotel");
 
 const getAllTourists = async (req, res) => {
   try {
@@ -242,6 +244,95 @@ const updateTouristProfile = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+const bookFlight = async (req, res) => {
+  const { flightID, from, to, departureDate, arrivalDate, price, numberOfTickets, type, returnDepartureDate, returnArrivalDate, seatType, flightType, flightTypeReturn } = req.body;
+  const touristID = res.locals.user_id;
+
+  try {
+    const booking = new TouristFlight({
+      touristID,
+      flightID,
+      from,
+      to,
+      departureDate,
+      arrivalDate,
+      price,
+      numberOfTickets,
+      type,
+      returnDepartureDate,
+      returnArrivalDate,
+      seatType, 
+      flightType, 
+      flightTypeReturn
+    });
+
+    const savedBooking = await booking.save();
+
+    res.status(201).json({
+      message: "Flight booking successful",
+      booking: savedBooking,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+const getMyFlights = async (req, res) => {
+  const touristID = res.locals.user_id;
+
+  try {
+    const flights = await TouristFlight.find({ touristID });
+
+    res.status(200).json(flights);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+const bookHotel = async (req, res) => {
+  const { hotelID,hotelName, checkinDate, checkoutDate, numberOfRooms, roomName, price, numberOfAdults } = req.body;
+  const touristID = res.locals.user_id;
+
+  try {
+    const booking = new TouristHotel({
+      touristID,
+      hotelID,
+      hotelName, 
+      checkinDate,
+      checkoutDate,
+      numberOfRooms,
+      roomName,
+      price,
+      numberOfAdults
+    });
+
+    const savedBooking = await booking.save();
+
+    res.status(201).json({
+      message: "Hotel booking successful",
+      booking: savedBooking,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+const getMyHotels = async (req, res) => {
+  const touristID = res.locals.user_id;
+
+  try {
+    const hotels = await TouristHotel.find({ touristID });
+
+    res.status(200).json(hotels);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+}
 
 const bookTransportation = async (req, res) => {
   const { transportationID, seatsToBook, paymentMethod } = req.body;
@@ -1513,4 +1604,8 @@ module.exports = {
   getUpcomingBookings,
   getPreviousBookings,
   deleteBooking,
+  bookFlight,
+  bookHotel,
+  getMyFlights, 
+  getMyHotels,
 };

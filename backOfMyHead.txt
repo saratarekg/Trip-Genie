@@ -11,9 +11,6 @@ upload product picture (hazem) (done)
 - 2 comments shaklaha mot5alef (mesh mashakelna di khales ya aby)
 - add comment to itinerary btegy baad rate based (jamy) (done)
 -attended itineraries btfdl fl upcoming w fl history (aby)
-- booking more than one tickets shows 2 
-entries in upcoming 1 with one booked ticket and one with 2 
-and they both go to history as welli can delete toursit account when he has a booked activity (amy) done
 
 -Historical type prefrences. (sam) (done)
 -------------------------------------------TO DO---------------------------------------------
@@ -46,11 +43,11 @@ Activity card:
 - Move map to the right (Ehab) check with hadwa the updated version
 
 
-New page:
 - Reduce white space
 - Map: Enter latitude and longitude 
 
 --------------------------------------------Done------------------------------------------
+- New page instead of pop ups in admin (alaa)(done) 
 - Allow tour guide to create own activities (done) or choose from available ones (sprint 3),
 - Ensure filter stars are consistent across all sections (done)
 - Remove white highlight from admin and add a highlight in its place(Habiba)

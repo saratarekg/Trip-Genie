@@ -189,6 +189,11 @@ router.get("/history-transportation", touristController.getPreviousBookings);
 router.delete("/transportation-booking/:id", touristController.deleteBooking);
 router.get("/transportations", transportationController.getAllTransportationsNew);
 
+router.post("/book-flight", touristController.bookFlight);
+router.get("/my-flights", touristController.getMyFlights);
+
+router.post("/book-hotel", touristController.bookHotel);
+router.get("/my-hotels", touristController.getMyHotels);
 
 
 module.exports = router;
