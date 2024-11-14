@@ -65,6 +65,8 @@ buttons bardo can be better. maybe remove the drop shadow and make it an outline
 create itinerary seperate sections for days, and then create activities gowa el dates di, w fi option day off.
 have day title
 
+product key features and maybe like colours/sizes men el product
+
 
 Orange: #F88C33
 Beige/Tan: #E6DCCF

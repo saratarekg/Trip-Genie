@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
+import Flag from 'react-world-flags';
 import Cookies from "js-cookie";
 import {
   Mail,
   Phone,
   User,
   AtSign,
-  Flag,
+
   Calendar,
   Wallet,
   GraduationCap,
@@ -126,7 +127,7 @@ export function TouristProfileComponent() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            base: "withEGP",
+            base: "67140446ee157ee4f239d523",
             target: tourist.preferredCurrency,
           }),
         });
@@ -303,13 +304,13 @@ export function TouristProfileComponent() {
   const getBadgeColor = () => {
     switch (tourist.loyaltyBadge) {
       case "Bronze":
-        return "bg-amber-600 text-white";
+        return "bg-amber-600 text-white hover:bg-amber-600 hover:text-white";
       case "Silver":
-        return "bg-gray-400 text-white";
+        return "bg-gray-400 text-white hover:bg-gray-400 hover:text-white";
       case "Gold":
-        return "bg-yellow-400 text-white";
+        return "bg-yellow-400 text-white hover:bg-yellow-400 hover:text-white";
       default:
-        return "bg-gray-200 text-gray-800";
+        return "bg-gray-200 text-gray-800 hover:bg-gray-200 hover:text-gray-800";
     }
   };
 
@@ -530,44 +531,55 @@ export function TouristProfileComponent() {
               </div>
 
               <div className="flex flex-col">
-                <label
-                  htmlFor="nationality"
-                  className="font-semibold text-teal-600"
-                >
-                  Nationality
-                </label>
-                {isEditing ? (
-                  <div className="flex flex-col w-full">
-                    <Select onValueChange={handleNationalityChange}>
-                      <SelectTrigger
-                        className={
-                          validationMessages.nationality ? "border-red-500" : ""
-                        }
-                      >
-                        <SelectValue placeholder={tourist.nationality.name} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {nationalities.map((nat) => (
-                          <SelectItem key={nat._id} value={nat._id}>
-                            {nat.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {validationMessages.nationality && (
-                      <span className="text-red-500 text-sm">
-                        {validationMessages.nationality}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <span>
-                    {tourist.nationality
-                      ? tourist.nationality.name
-                      : "Nationality not set"}
-                  </span>
-                )}
+  <label htmlFor="nationality" className="font-semibold text-teal-600">
+    Nationality
+  </label>
+  {isEditing ? (
+    <div className="flex flex-col w-full">
+      <Select onValueChange={handleNationalityChange}>
+        <SelectTrigger
+          className={validationMessages.nationality ? "border-red-500" : ""}
+        >
+          <SelectValue placeholder={tourist.nationality.name} />
+        </SelectTrigger>
+        <SelectContent>
+          {nationalities.map((nat) => (
+            <SelectItem key={nat._id} value={nat._id}>
+              {/* Display the flag next to the nationality name */}
+              <div className="flex items-center gap-2">
+                <Flag code={nat.countryCode} style={{
+    width: 25,
+    height: 17,
+    borderRadius: '4px',  // Adds rounded corners to the flag
+    overflow: 'hidden',   // Ensures the image content is clipped to the border radius
+  }} />
+                {nat.name}
               </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {validationMessages.nationality && (
+        <span className="text-red-500 text-sm">
+          {validationMessages.nationality}
+        </span>
+      )}
+    </div>
+  ) : (
+    <div className="flex items-center gap-2">
+<Flag
+  code={tourist.nationality.countryCode}
+  style={{
+    width: 30,
+    height: 20,
+    borderRadius: '4px',  // Adds rounded corners to the flag
+    overflow: 'hidden',   // Ensures the image content is clipped to the border radius
+  }}
+/>
+      <span>{tourist.nationality ? tourist.nationality.name : "Nationality not set"}</span>
+    </div>
+  )}
+</div>
             </div>
           </div>
 
