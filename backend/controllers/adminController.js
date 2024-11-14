@@ -7,6 +7,12 @@ const TourGuide = require("../models/tourGuide");
 const Grid = require("gridfs-stream");
 const express = require("express");
 const mongoose = require("mongoose");
+const ItineraryBooking = require("../models/itineraryBooking");
+const ActivityBooking = require("../models/activityBooking");
+const Purchase = require("../models/purchase");
+const ProductSales = require("../models/productSales");
+const Itinerary = require("../models/itinerary");
+const Activity = require("../models/activity");
 
 const addAdmin = async (req, res) => {
   try {
@@ -248,6 +254,205 @@ const usernameExists = async (username) => {
   }
 };
 
+const getUsersReport = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    let tourist, tourGuide, advertiser, seller, governor, admin;
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 1);
+      tourist = await Tourist.countDocuments({
+        createdAt: {
+          $gte: startDate,
+          $lt: endDate,
+        },
+      });
+      tourGuide = await TourGuide.countDocuments({
+        createdAt: {
+          $gte: startDate,
+          $lt: endDate,
+        },
+      });
+      advertiser = await Advertiser.countDocuments({
+        createdAt: {
+          $gte: startDate,
+          $lt: endDate,
+        },
+      });
+      seller = await Seller.countDocuments({
+        createdAt: {
+          $gte: startDate,
+          $lt: endDate,
+        },
+      });
+      governor = await TourismGovernor.countDocuments({
+        createdAt: {
+          $gte: startDate,
+          $lt: endDate,
+        },
+      });
+      admin = await Admin.countDocuments({
+        createdAt: {
+          $gte: startDate,
+          $lt: endDate,
+        },
+      });
+    } else {
+      tourist = await Tourist.countDocuments();
+      tourGuide = await TourGuide.countDocuments();
+      advertiser = await Advertiser.countDocuments();
+      seller = await Seller.countDocuments();
+      governor = await TourismGovernor.countDocuments();
+      admin = await Admin.countDocuments();
+    }
+
+    const total = tourist + tourGuide + advertiser + seller + governor + admin;
+
+    res.status(200).json({
+      tourist,
+      tourGuide,
+      advertiser,
+      seller,
+      governor,
+      admin,
+      total,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const getSalesReport = async (req, res) => {
+  try {
+    const { product, day, month, year } = req.query;
+    let query = {};
+    if (product) {
+      query.product = product;
+    }
+    if (month && year) {
+      query.month = month;
+      query.year = year;
+      if (day) {
+        query.day = day;
+      }
+    }
+    const productSales = await ProductSales.find(query).populate("product");
+    const adminProductsSales = productSales.filter(
+      (sale) =>
+        sale.product.seller === null || sale.product.seller === undefined
+    );
+    const totalAdminSalesRevenue = adminProductsSales.reduce(
+      (total, sale) => total + sale.revenue,
+      0
+    );
+
+    const sellerProductsSales = productSales
+      .filter(
+        (sale) =>
+          sale.product.seller !== null || sale.product.seller !== undefined
+      )
+      .map((sale) => {
+        return { ...sale, appRevenue: sale.revenue * 0.1 };
+      });
+    const totalSellerSalesRevenue = sellerProductsSales.reduce(
+      (total, sale) => total + sale.revenue,
+      0
+    );
+
+    res.status(200).json({
+      adminProductsSales,
+      sellerProductsSales,
+      totalAdminSalesRevenue,
+      totalSellerSalesRevenue,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message }); // Handle errors
+  }
+};
+
+const getItinerariesReport = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    const itineraries = await Itinerary.find(); // Fetch all itineraries
+
+    const query = {};
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0);
+      query.date = { $gte: startDate, $lt: endDate };
+    }
+
+    const itineraryBookings = await ItineraryBooking.find(query).populate(
+      "itinerary"
+    );
+    const itinerariesSales = itineraries.map((itinerary) => {
+      const totalRevenue = itineraryBookings.reduce((total, booking) => {
+        return booking.itinerary._id.equals(itinerary._id)
+          ? total + booking.paymentAmount
+          : total;
+      }, 0);
+      const appRevenue = totalRevenue * 0.1; // 10% of total revenue
+      return { itinerary, totalRevenue, appRevenue };
+    });
+    const totalItinerariesRevenue = itinerariesSales.reduce(
+      (total, sale) => total + sale.totalRevenue,
+      0
+    );
+    const totalItinerariesAppRevenue = itinerariesSales.reduce(
+      (total, sale) => total + sale.appRevenue,
+      0
+    );
+    res.status(200).json({
+      itinerariesSales,
+      totalItinerariesRevenue,
+      totalItinerariesAppRevenue,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message }); // Handle errors
+  }
+};
+
+const getActivitiesReport = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    let query = {};
+    if (month && year) {
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0);
+      query.timing = { $gte: startDate, $lt: endDate };
+    }
+
+    const activities = await Activity.find(query).populate("activity"); // Fetch all activities
+    const activityBookings = await ActivityBooking.find().populate("activity");
+
+    const activitiesSales = activities.map((activity) => {
+      const totalRevenue = activityBookings.reduce((total, booking) => {
+        return booking.activity._id.equals(activity._id)
+          ? total + booking.paymentAmount
+          : total;
+      }, 0);
+      const appRevenue = totalRevenue * 0.1; // 10% of total revenue
+      return { activity, totalRevenue, appRevenue };
+    });
+
+    const totalActivitiesRevenue = activitiesSales.reduce(
+      (total, sale) => total + sale.totalRevenue,
+      0
+    );
+    const totalActivitiesAppRevenue = activitiesSales.reduce(
+      (total, sale) => total + sale.appRevenue,
+      0
+    );
+
+    res.status(200).json({
+      activitiesSales,
+      totalActivitiesRevenue,
+      totalActivitiesAppRevenue,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message }); // Handle errors
+  }
+};
+
 module.exports = {
   addAdmin,
   getAdminByID,
@@ -260,4 +465,8 @@ module.exports = {
   getFile,
   deleteFile,
   getAdminProfile,
+  getUsersReport,
+  getSalesReport,
+  getItinerariesReport,
+  getActivitiesReport,
 };

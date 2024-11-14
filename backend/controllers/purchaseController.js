@@ -1,13 +1,27 @@
-const Product = require('../models/product'); // Assuming your model is in models/activityBooking.js
-const Purchase = require('../models/purchase'); // Assuming your Activity model is in models/activity.js
-const Tourist = require('../models/tourist'); // Assuming your Tourist model is in models/tourist.js
+const Product = require("../models/product"); // Assuming your model is in models/activityBooking.js
+const Purchase = require("../models/purchase"); // Assuming your Activity model is in models/activity.js
+const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
+const productSales = require("../models/productSales");
 
 exports.createPurchase = async (req, res) => {
-  const { products, paymentMethod, deliveryDate, deliveryType, deliveryTime, shippingAddress, locationType } = req.body;
-console.log(products,paymentMethod,shippingAddress);
+  const {
+    products,
+    paymentMethod,
+    deliveryDate,
+    deliveryType,
+    deliveryTime,
+    shippingAddress,
+    locationType,
+  } = req.body;
+  console.log(products, paymentMethod, shippingAddress);
   try {
     // Validate fields
-    if (!products || products.length === 0 || !paymentMethod || !shippingAddress) {
+    if (
+      !products ||
+      products.length === 0 ||
+      !paymentMethod ||
+      !shippingAddress
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -27,11 +41,32 @@ console.log(products,paymentMethod,shippingAddress);
       // Check if the product exists
       const productDoc = await Product.findById(product); // Use `product` which is the product ID
       if (!productDoc) {
-        return res.status(400).json({ message: `Product not found for ID ${product}` });
+        return res
+          .status(400)
+          .json({ message: `Product not found for ID ${product}` });
       }
 
       // Calculate the price for this product and add it to the total price
       totalPrice += productDoc.price * quantity;
+      const day = new Date().getDate();
+      const month = new Date().getMonth() + 1;
+      const year = new Date().getFullYear();
+      if (await productSales.findOne({ product, day, month, year })) {
+        await productSales.updateOne(
+          { product, day, month, year },
+          { $inc: { sales: quantity, revenue: productDoc.price * quantity } }
+        );
+      } else {
+        const newProductSales = new productSales({
+          product,
+          sales: quantity,
+          revenue: productDoc.price * quantity,
+          day,
+          month,
+          year,
+        });
+        await newProductSales.save();
+      }
     }
 
     // Add delivery price to the total
@@ -51,7 +86,9 @@ console.log(products,paymentMethod,shippingAddress);
     if (paymentMethod === "wallet") {
       // Check if the tourist has enough funds in their wallet
       if (tourist.wallet < totalPrice) {
-        return res.status(400).json({ message: "Insufficient funds in wallet" });
+        return res
+          .status(400)
+          .json({ message: "Insufficient funds in wallet" });
       }
 
       // Deduct the total price from the tourist's wallet
@@ -87,7 +124,7 @@ console.log(products,paymentMethod,shippingAddress);
         {
           $inc: {
             quantity: -quantity, // Decrease product quantity
-            sales: quantity,     // Increase product sales
+            sales: quantity, // Increase product sales
           },
         },
         { new: true, runValidators: true }
@@ -101,11 +138,9 @@ console.log(products,paymentMethod,shippingAddress);
   }
 };
 
-
-
 // Get all purchases by a specific tourist
 exports.getPurchasesByTourist = async (req, res) => {
-  const  touristId  = res.locals.user_id;
+  const touristId = res.locals.user_id;
 
   try {
     // Fetch all purchases made by the tourist
@@ -114,10 +149,12 @@ exports.getPurchasesByTourist = async (req, res) => {
       .exec();
 
     if (!purchases.length) {
-      return res.status(400).json({ message: "No purchases found for this tourist" });
+      return res
+        .status(400)
+        .json({ message: "No purchases found for this tourist" });
     }
 
-    return res.status(200).json( purchases );
+    return res.status(200).json(purchases);
   } catch (error) {
     console.error("Error fetching tourist purchases: ", error.message); // Print the error message to the console
     return res.status(500).json({ error: error.message }); // Return the error message in the response
@@ -135,7 +172,9 @@ exports.getPurchasesByProduct = async (req, res) => {
       .exec();
 
     if (!purchases.length) {
-      return res.status(404).json({ message: "No purchases found for this product" });
+      return res
+        .status(404)
+        .json({ message: "No purchases found for this product" });
     }
 
     return res.status(200).json({ purchases });
@@ -172,6 +211,20 @@ exports.deletePurchase = async (req, res) => {
 
     if (!purchase) {
       return res.status(404).json({ message: "Purchase not found" });
+    }
+
+    // Update the product sales accordingly
+    for (const item of purchase.products) {
+      const { product, quantity } = item;
+      await productSales.updateOne(
+        {
+          product,
+          day: purchase.createdAt.getDate(),
+          month: purchase.createdAt.getMonth() + 1,
+          year: purchase.createdAt.getFullYear(),
+        },
+        { $inc: { sales: -quantity, revenue: -product.price * quantity } }
+      );
     }
 
     return res.status(200).json({ message: "Purchase deleted successfully" });

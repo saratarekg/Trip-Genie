@@ -16,7 +16,7 @@ const upload = multer({ storage: storage });
 const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
 const currencyController = require("../controllers/currencyController");
-
+const itineraryBookingController = require("../controllers/itineraryBookingController");
 const transportationController = require("../controllers/transportationController");
 // Route for getting a single tour guide by ID
 router.get("/", getTourGuideProfile);
@@ -67,6 +67,11 @@ router.put(
 router.delete(
   "/transportations/:id",
   transportationController.deleteTransportation
+);
+
+router.get(
+  "/itineraries-report",
+  itineraryBookingController.getItinerariesReport
 );
 
 module.exports = router;

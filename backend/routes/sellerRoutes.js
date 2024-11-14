@@ -12,7 +12,10 @@ router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 router.get("/max-price-products", productController.getMaxPrice);
 router.get("/max-price-products-my", productController.getMaxPriceMy);
-router.get("/max-price-products-archived", productController.getMaxPriceArchived);
+router.get(
+  "/max-price-products-archived",
+  productController.getMaxPriceArchived
+);
 
 router.put("/", upload.single("logo"), sellerController.updateSeller);
 router.get("/", sellerController.getSeller);
@@ -35,5 +38,7 @@ router.put(
 router.put("/archiveproducts/:id", productController.archiveProduct);
 router.post("/password", sellerController.changePassword);
 router.delete("/delete-account", sellerController.deleteSellerAccount);
+
+router.get("/sales-report", sellerController.getSalesReport);
 
 module.exports = router;

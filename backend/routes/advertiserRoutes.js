@@ -7,6 +7,7 @@ const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const transportationController = require("../controllers/transportationController");
+const activityBookingController = require("../controllers/activityBookingController");
 
 const router = express.Router();
 
@@ -51,5 +52,7 @@ router.delete(
   "/transportations/:id",
   transportationController.deleteTransportation
 );
+
+router.get("/activities-report", activityBookingController.getBookingsReport);
 
 module.exports = router;

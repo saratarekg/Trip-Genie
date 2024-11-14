@@ -19,12 +19,21 @@ const upload = multer({ storage: storage });
 
 const router = express.Router();
 
-router.get("/historical-places",historicalPlacesController.getAllHistoricalPlaces);
-router.get("/historical-places/:id",historicalPlacesController.getHistoricalPlace);
+router.get(
+  "/historical-places",
+  historicalPlacesController.getAllHistoricalPlaces
+);
+router.get(
+  "/historical-places/:id",
+  historicalPlacesController.getHistoricalPlace
+);
 
 router.get("/max-price-products", productController.getMaxPrice);
 router.get("/max-price-products-my", productController.getMaxPriceMy);
-router.get("/max-price-products-archived", productController.getMaxPriceArchived);
+router.get(
+  "/max-price-products-archived",
+  productController.getMaxPriceArchived
+);
 router.get("/max-price-itinerary", itineraryController.getMaxPrice);
 
 router.post("/populate", currencyController.getExchangeRate);
@@ -40,7 +49,7 @@ router.post("/currencies/set", touristController.setCurrencyCode);
 router.post("/admins", adminController.addAdmin);
 router.post("/governors", tourismGovernorController.addTourismGovernor);
 
-router.get("/",adminController.getAdminProfile);
+router.get("/", adminController.getAdminProfile);
 
 // Route to delete an Advertiser
 router.delete("/reject/advertisers/:id", advertiserController.rejectAdvertiser);
@@ -162,5 +171,10 @@ router.get(
   tourGuideController.getUnacceptedTourGuides
 );
 router.put("/approve-tourGuide/:id", tourGuideController.approveTourGuide);
+
+router.get("/users-report", adminController.getUsersReport);
+router.get("/sales-report", adminController.getSalesReport);
+router.get("/itineraries-report", adminController.getItinerariesReport);
+router.get("/activities-report", adminController.getActivitiesReport);
 
 module.exports = router;

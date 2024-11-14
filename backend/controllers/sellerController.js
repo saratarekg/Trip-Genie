@@ -7,6 +7,7 @@ const Admin = require("../models/admin");
 const TourismGovernor = require("../models/tourismGovernor");
 const Purchase = require("../models/purchase");
 const cloudinary = require("../utils/cloudinary");
+const ProductSales = require("../models/productSales");
 
 // Update
 const updateSeller = async (req, res) => {
@@ -345,6 +346,46 @@ const usernameExists = async (username) => {
   }
 };
 
+const getSalesReport = async (req, res) => {
+  try {
+    const { product, day, month, year } = req.query;
+    let query = {};
+    if (product) {
+      query.product = product;
+    }
+    if (month && year) {
+      query.month = month;
+      query.year = year;
+      if (day) {
+        query.day = day;
+      }
+    }
+    const productSales = await ProductSales.find(query).populate("product");
+    const sellerProductsSales = productSales
+      .filter(
+        (sale) =>
+          sale.product.seller === res.locals.user_id &&
+          sale.product.isDeleted === false
+      )
+      .map((sale) => {
+        return { ...sale, revenueAfterCommission: sale.revenue * 0.9 };
+      });
+    const totalSellerSalesRevenue = sellerProductsSales.reduce(
+      (total, sale) => total + sale.revenue,
+      0
+    );
+    const totalRevenueAfterCommission = totalSellerSalesRevenue * 0.9;
+
+    res.status(200).json({
+      sellerProductsSales,
+      totalSellerSalesRevenue,
+      totalRevenueAfterCommission,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message }); // Handle errors
+  }
+};
+
 module.exports = {
   deleteSellerAccount,
   deleteSeller,
@@ -356,4 +397,5 @@ module.exports = {
   getUnacceptedSeller,
   approveSeller,
   rejectSeller,
+  getSalesReport,
 };
