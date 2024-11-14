@@ -498,7 +498,7 @@ export default function CheckoutPage() {
                         className="flex justify-between items-center cursor-pointer" 
                         onClick={() => toggleSection('address')}
                       >
-                        <h2 className="text-2xl font-bold text-[#1A3B47]">Address</h2>
+                        <h2 className="text-2xl font-bold text-[#1A3B47]">Delivery Address</h2>
                         {activeSection === 'address' ? <ChevronUp /> : <ChevronDown />}
                       </div>
                       {activeSection === 'address' && (
@@ -507,7 +507,7 @@ export default function CheckoutPage() {
                             <div className="mb-4">
                               <h3 className="font-semibold mb-2">Default Address</h3>
                               <div className="flex justify-between items-center">
-                                <p>{`${savedAddresses[0].streetNumber} ${savedAddresses[0].streetName}, ${savedAddresses[0].city}`}</p>
+                                <p>{`${savedAddresses[0].locationType} ${savedAddresses[0].streetNumber} ${savedAddresses[0].streetName}, ${savedAddresses[0].city}`}</p>
                                 <div className="flex items-center">
                                   <button onClick={(e) => { e.preventDefault(); setShowSavedAddresses(true); }} className="text-[#388A94] hover:underline mr-4">Change</button>
                                   <Popover>
