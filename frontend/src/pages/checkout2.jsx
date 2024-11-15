@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, Edit2, PlusCircle, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { format, addDays } from 'date-fns'
+import { format, addDays, addBusinessDays } from 'date-fns'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,7 +29,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog"
 import {
@@ -48,10 +48,6 @@ const checkoutSchema = z.object({
   state: z.string().min(1, "State is required"),
   postalCode: z.string().optional(),
   locationType: z.string().min(1, "Location type is required"),
-  deliveryDate: z.string().refine(
-    (date) => new Date(date) > new Date(),
-    "Delivery date must be in the future"
-  ),
   deliveryTime: z.string().min(1, "Delivery time is required"),
   deliveryType: z.string().min(1, "Delivery type is required"),
   paymentMethod: z.enum(["credit_card", "debit_card", "wallet", "cash_on_delivery"], {
@@ -77,6 +73,10 @@ export default function CheckoutPage() {
   const [showAddCardForm, setShowAddCardForm] = useState(false)
   const [showSavedAddresses, setShowSavedAddresses] = useState(false)
   const [showSavedCards, setShowSavedCards] = useState(false)
+  const [selectedAddress, setSelectedAddress] = useState(null)
+  const [selectedCard, setSelectedCard] = useState(null)
+  const router = useRouter()
+  const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState(null)
   const [addressDetails, setAddressDetails] = useState({
     streetName: '',
     streetNumber: '',
@@ -114,7 +114,6 @@ export default function CheckoutPage() {
       state: "",
       postalCode: "",
       locationType: "",
-      deliveryDate: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
       deliveryTime: "",
       deliveryType: "",
       paymentMethod: "",
@@ -142,14 +141,23 @@ export default function CheckoutPage() {
         setSavedCards(userData.cards || [])
         setSavedAddresses(userData.shippingAddresses || [])
 
-        // Set default address if available
+        // Set default address and card
         const defaultAddress = userData.shippingAddresses?.find(addr => addr.default)
+        const defaultCard = userData.cards?.find(card => card.default)
+
         if (defaultAddress) {
+          setSelectedAddress(defaultAddress)
           Object.keys(defaultAddress).forEach(key => {
             if (key !== 'default') {
               form.setValue(key, defaultAddress[key])
             }
           })
+        }
+
+        if (defaultCard) {
+          setSelectedCard(defaultCard)
+          form.setValue("paymentMethod", defaultCard.cardType === "Credit Card" ? "credit_card" : "debit_card")
+          form.setValue("selectedCard", defaultCard.cardNumber)
         }
 
         form.setValue("firstName", userData.fname || "")
@@ -188,83 +196,6 @@ export default function CheckoutPage() {
     setTotalAmount(total)
   }
 
-  const fetchExchangeRate = async () => {
-    try {
-      const token = Cookies.get("jwt")
-      const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            base: cartItems[0]?.product.currency,
-            target: userPreferredCurrency._id,
-          }),
-        }
-      )
-      const data = await response.json()
-
-      if (response.ok) {
-        setExchangeRates(data.conversion_rate)
-      } else {
-        console.error("Error in fetching exchange rate:", data.message)
-      }
-    } catch (error) {
-      console.error("Error fetching exchange rate:", error)
-    }
-  }
-
-  const getCurrencySymbol = async () => {
-    try {
-      const token = Cookies.get("jwt")
-      const response = await axios.get(
-        `http://localhost:4000/${userRole}/getCurrency/${cartItems[0]?.product.currency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      )
-      setCurrencySymbol(response.data)
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error)
-    }
-  }
-
-  const formatPrice = (price) => {
-    const roundedPrice = price
-    if (cartItems.length > 0) {
-      if (userRole === "tourist" && userPreferredCurrency) {
-        if (userPreferredCurrency._id === cartItems[0].product.currency) {
-          return `${userPreferredCurrency.symbol}${roundedPrice}`
-        } else {
-          const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2)
-          return `${userPreferredCurrency.symbol}${exchangedPrice}`
-        }
-      } else {
-        if (currencySymbol) {
-          return `${currencySymbol.symbol}${roundedPrice}`
-        }
-      }
-    }
-    return `$${roundedPrice}`
-  }
-
-  useEffect(() => {
-    if (cartItems.length > 0) {
-      if (
-        userRole === "tourist" &&
-        userPreferredCurrency &&
-        userPreferredCurrency._id !== cartItems[0].product.currency
-      ) {
-        fetchExchangeRate()
-      } else {
-        getCurrencySymbol()
-      }
-    }
-  }, [userRole, userPreferredCurrency, cartItems])
-
   const handleAddNewAddress = async (e) => {
     e.preventDefault()
     setIsLoading(true)
@@ -282,12 +213,21 @@ export default function CheckoutPage() {
         const userResponse = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
         })
-        setSavedAddresses(userResponse.data.shippingAddresses || [])
+        const newAddresses = userResponse.data.shippingAddresses || []
+        setSavedAddresses(newAddresses)
+        
+        const newAddress = newAddresses.find(addr => addr.streetName === addressDetails.streetName && addr.streetNumber === addressDetails.streetNumber)
+        if (newAddress) {
+          setSelectedAddress(newAddress)
+          Object.keys(newAddress).forEach(key => {
+            if (key !== 'default') {
+              form.setValue(key, newAddress[key])
+            }
+          })
+        }
         
         setShowAddForm(false)
-        Object.keys(addressDetails).forEach(key => {
-          form.setValue(key, addressDetails[key])
-        })
+        resetAddressDetails()
       }
     } catch (error) {
       console.error("Error adding new address:", error)
@@ -313,11 +253,18 @@ export default function CheckoutPage() {
         const userResponse = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
         })
-        setSavedCards(userResponse.data.cards || [])
+        const newCards = userResponse.data.cards || []
+        setSavedCards(newCards)
+        
+        const newCard = newCards.find(card => card.cardNumber === cardDetails.cardNumber)
+        if (newCard) {
+          setSelectedCard(newCard)
+          form.setValue("paymentMethod", newCard.cardType === "Credit Card" ? "credit_card" : "debit_card")
+          form.setValue("selectedCard", newCard.cardNumber)
+        }
         
         setShowAddCardForm(false)
-        form.setValue("paymentMethod", cardDetails.cardType === "Credit Card" ? "credit_card" : "debit_card")
-        form.setValue("selectedCard", cardDetails.cardNumber)
+        resetCardDetails()
       }
     } catch (error) {
       console.error("Error adding new card:", error)
@@ -349,7 +296,7 @@ export default function CheckoutPage() {
           locationType: data.locationType,
           deliveryType: data.deliveryType,
           deliveryTime: data.deliveryTime,
-          deliveryDate: data.deliveryDate,
+          deliveryDate: estimatedDeliveryDate,
         }),
       })
 
@@ -441,6 +388,54 @@ export default function CheckoutPage() {
     }
   }
 
+  const calculateDeliveryDate = (deliveryType) => {
+    const today = new Date()
+    let estimatedDate
+
+    switch (deliveryType) {
+      case 'Standard':
+        estimatedDate = addBusinessDays(today, 8)
+        break
+      case 'Express':
+        estimatedDate = addBusinessDays(today, 3)
+        break
+      case 'Next-Same':
+        estimatedDate = addDays(today, 1)
+        break
+      case 'International':
+        estimatedDate = addBusinessDays(today, 21)
+        break
+      default:
+        estimatedDate = addBusinessDays(today, 8)
+    }
+
+    setEstimatedDeliveryDate(estimatedDate)
+  }
+
+  const handleDeliveryTypeChange = (value) => {
+    form.setValue('deliveryType', value)
+    calculateDeliveryDate(value)
+  }
+
+  const formatPrice = (price) => {
+    const roundedPrice = price
+    if (cartItems.length > 0) {
+      if (userRole === "tourist" && userPreferredCurrency) {
+        if (userPreferredCurrency._id === cartItems[0].product.currency) {
+          return `${userPreferredCurrency.symbol}${roundedPrice}`
+        } else {
+          const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2)
+          return `${userPreferredCurrency.symbol}${exchangedPrice}`
+        }
+      } else {
+        if (currencySymbol) {
+          return `${currencySymbol.symbol}${roundedPrice}`
+        }
+      }
+    }
+    return `$${roundedPrice}`
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 pb-6">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
@@ -505,27 +500,39 @@ export default function CheckoutPage() {
                         <div className="mt-4">
                           {savedAddresses.length > 0 && (
                             <div className="mb-4">
-                              <h3 className="font-semibold mb-2">Default Address</h3>
-                              <div className="flex justify-between items-center">
-                                <p>{`${savedAddresses[0].locationType} ${savedAddresses[0].streetNumber} ${savedAddresses[0].streetName}, ${savedAddresses[0].city}`}</p>
-                                <div className="flex items-center">
-                                  <button onClick={(e) => { e.preventDefault(); setShowSavedAddresses(true); }} className="text-[#388A94] hover:underline mr-4">Change</button>
-                                  <Popover>
-                                    <PopoverTrigger>
-                                      <ChevronRight className="cursor-pointer" />
-                                    </PopoverTrigger>
-                                    <PopoverContent>
-                                      <h4 className="font-bold mb-2">{savedAddresses[0].locationType}</h4>
-                                      <p>{savedAddresses[0].streetNumber} {savedAddresses[0].streetName}</p>
-                                      <p>{savedAddresses[0].city}, {savedAddresses[0].state} {savedAddresses[0].postalCode}</p>
-                                      <p>{savedAddresses[0].country}</p>
-                                    </PopoverContent>
-                                  </Popover>
-                                </div>
+                              <div className="text-xl font-bold mb-2">
+                                {selectedAddress?.locationType}
+                              </div>
+                              <h4 className="font-semibold text-md mb-1">
+                                {`${selectedAddress?.streetNumber} ${selectedAddress?.streetName}, ${selectedAddress?.city}`}
+                              </h4>
+                              <div className="flex items-center justify-end">
+                                <button 
+                                  onClick={(e) => { e.preventDefault(); setShowSavedAddresses(true); }} 
+                                  className="text-[#388A94] hover:underline mr-4"
+                                >
+                                  Change
+                                </button>
+                                <Popover>
+                                  <PopoverTrigger>
+                                    <ChevronRight className="cursor-pointer" />
+                                  </PopoverTrigger>
+                                  <PopoverContent className="p-4">
+                                    <h4 className="font-bold mb-2">{selectedAddress?.locationType}</h4>
+                                    <p>{selectedAddress?.streetNumber} {selectedAddress?.streetName}</p>
+                                    <p>{selectedAddress?.city}, {selectedAddress?.state} {selectedAddress?.postalCode}</p>
+                                    <p>{selectedAddress?.country}</p>
+                                  </PopoverContent>
+                                </Popover>
                               </div>
                             </div>
                           )}
-                          <button onClick={(e) => { e.preventDefault(); setShowAddForm(true); }} className="text-[#388A94] hover:underline">Add New</button>
+                          <button 
+                            onClick={(e) => { e.preventDefault(); setShowAddForm(true); }} 
+                            className="text-[#388A94] hover:underline"
+                          >
+                            Add New
+                          </button>
                           
                           {showSavedAddresses && (
                             <Dialog open={showSavedAddresses} onOpenChange={setShowSavedAddresses}>
@@ -535,21 +542,23 @@ export default function CheckoutPage() {
                                 </DialogHeader>
                                 <div className="space-y-4">
                                   {savedAddresses.map((address, index) => (
-                                    <div key={index} className="flex justify-between items-center">
-                                      <div>
-                                        <p className="font-semibold">{address.locationType}</p>
-                                        <p>{address.streetNumber} {address.streetName}, {address.city}</p>
-                                      </div>
-                                      <Button onClick={() => {
+                                    <div 
+                                      key={index} 
+                                      className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md"
+                                      onClick={() => {
+                                        setSelectedAddress(address)
                                         Object.keys(address).forEach(key => {
                                           if (key !== 'default') {
                                             form.setValue(key, address[key])
                                           }
                                         })
                                         setShowSavedAddresses(false)
-                                      }}>
-                                        Select
-                                      </Button>
+                                      }}
+                                    >
+                                      <div>
+                                        <p className="font-semibold">{address.locationType}</p>
+                                        <p>{`${address.streetNumber} ${address.streetName}, ${address.city}`}</p>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -688,13 +697,15 @@ export default function CheckoutPage() {
                               </div>
                             </form>
                           )}
-                          <Button 
-                            type="button" 
-                            onClick={(e) => { e.preventDefault(); handleNextSection('address'); }}
-                            className="mt-4 bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
-                          >
-                            Next
-                          </Button>
+                          <div className="flex justify-end mt-4">
+                            <Button 
+                              type="button" 
+                              onClick={(e) => { e.preventDefault(); handleNextSection('address'); }}
+                              className="bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
+                            >
+                              Next
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -714,7 +725,7 @@ export default function CheckoutPage() {
                             {savedCards.length > 0 && (
                               <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100">
                                 <RadioGroupItem value="credit_card" id="credit_card" />
-                                <Label htmlFor="credit_card">{savedCards[0].cardType} (**** **** **** {savedCards[0].cardNumber.slice(-4)})</Label>
+                                <Label htmlFor="credit_card">{selectedCard?.cardType} (**** **** **** {selectedCard?.cardNumber.slice(-4)})</Label>
                                 <button onClick={(e) => { e.preventDefault(); setShowSavedCards(true); }} className="text-[#388A94] hover:underline ml-auto">Change</button>
                               </div>
                             )}
@@ -737,18 +748,20 @@ export default function CheckoutPage() {
                                 </DialogHeader>
                                 <div className="space-y-4">
                                   {savedCards.map((card, index) => (
-                                    <div key={index} className="flex justify-between items-center">
+                                    <div 
+                                      key={index} 
+                                      className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md"
+                                      onClick={() => {
+                                        setSelectedCard(card)
+                                        form.setValue("paymentMethod", card.cardType === "Credit Card" ? "credit_card" : "debit_card")
+                                        form.setValue("selectedCard", card.cardNumber)
+                                        setShowSavedCards(false)
+                                      }}
+                                    >
                                       <div>
                                         <p className="font-semibold">{card.cardType}</p>
                                         <p>**** **** **** {card.cardNumber.slice(-4)}</p>
                                       </div>
-                                      <Button onClick={() => {
-                                        form.setValue("paymentMethod", card.cardType === "Credit Card" ? "credit_card" : "debit_card")
-                                        form.setValue("selectedCard", card.cardNumber)
-                                        setShowSavedCards(false)
-                                      }}>
-                                        Select
-                                      </Button>
                                     </div>
                                   ))}
                                 </div>
@@ -849,14 +862,15 @@ export default function CheckoutPage() {
                               <FormItem>
                                 <FormLabel>Delivery Type</FormLabel>
                                 <FormControl>
-                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <Select onValueChange={handleDeliveryTypeChange} defaultValue={field.value}>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Select delivery type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="standard">Standard Delivery - {formatPrice(5.99)}</SelectItem>
-                                      <SelectItem value="express">Express Delivery - {formatPrice(9.99)}</SelectItem>
-                                      <SelectItem value="nextday">Next Day Delivery - {formatPrice(14.99)}</SelectItem>
+                                      <SelectItem value="Standard">Standard Shipping (2–8 business days) - {formatPrice(2.99)}</SelectItem>
+                                      <SelectItem value="Express">Express Shipping (1–3 business days) - {formatPrice(4.99)}</SelectItem>
+                                      <SelectItem value="Next-Same">Next-Day/Same-Day Shipping - {formatPrice(6.99)}</SelectItem>
+                                      <SelectItem value="International">International Shipping (7–21 business days) - {formatPrice(14.99)}</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </FormControl>
@@ -864,47 +878,34 @@ export default function CheckoutPage() {
                               </FormItem>
                             )}
                           />
-                          <div className="grid grid-cols-2 gap-4 mt-4">
-                            <FormField
-                              control={form.control}
-                              name="deliveryDate"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Delivery Date</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="date" 
-                                      {...field} 
-                                      min={format(addDays(new Date(), 1), 'yyyy-MM-dd')}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={form.control}
-                              name="deliveryTime"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Delivery Time</FormLabel>
-                                  <FormControl>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select time" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="morning">Morning (8 AM - 12 PM)</SelectItem>
-                                        <SelectItem value="afternoon">Afternoon (12 PM - 4 PM)</SelectItem>
-                                        <SelectItem value="evening">Evening (4 PM - 8 PM)</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                          {estimatedDeliveryDate && (
+                            <div className="mt-4">
+                              <Label>Estimated Delivery Date</Label>
+                              <p className="text-sm text-gray-600">{format(estimatedDeliveryDate, 'MMMM d, yyyy')}</p>
+                            </div>
+                          )}
+                          <FormField
+                            control={form.control}
+                            name="deliveryTime"
+                            render={({ field }) => (
+                              <FormItem className="mt-4">
+                                <FormLabel>Delivery Time</FormLabel>
+                                <FormControl>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select time" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="morning">Morning (8 AM - 12 PM)</SelectItem>
+                                      <SelectItem value="afternoon">Afternoon (12 PM - 4 PM)</SelectItem>
+                                      <SelectItem value="evening">Evening (4 PM - 8 PM)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </div>
                       )}
                     </div>
@@ -938,12 +939,18 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Delivery</span>
-                    <span>{formatPrice(form.watch('deliveryType') === 'express' ? 9.99 : 5.99)}</span>
+                    <span>{formatPrice(form.watch('deliveryType') === 'Express' ? 4.99 : form.watch('deliveryType') === 'Next-Same' ? 6.99 : form.watch('deliveryType') === 'International' ? 14.99 : 2.99)}</span>
                   </div>
+                  {estimatedDeliveryDate && (
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Estimated Delivery Date</span>
+                      <span>{format(estimatedDeliveryDate, 'MMMM d, yyyy')}</span>
+                    </div>
+                  )}
                   <div className="border-t pt-4">
                     <div className="flex justify-between font-bold">
                       <span>Total</span>
-                      <span>{formatPrice(totalAmount + (form.watch('deliveryType') === 'express' ? 9.99 : 5.99))}</span>
+                      <span>{formatPrice(totalAmount + (form.watch('deliveryType') === 'Express' ? 4.99 : form.watch('deliveryType') === 'Next-Same' ? 6.99 : form.watch('deliveryType') === 'International' ? 14.99 : 2.99))}</span>
                     </div>
                   </div>
                 </div>
@@ -969,17 +976,18 @@ export default function CheckoutPage() {
           <DialogFooter>
             <Button
               onClick={() => {
-                setIsStatusDialogOpen(false)
-                // Navigate to home page
+                setIsStatusDialogOpen(false);
+                router.push('/'); // Navigate to home page
               }}
               className="bg-[#5D9297] hover:bg-[#388A94]"
             >
               Go to Home
             </Button>
+            
             <Button
               onClick={() => {
-                setIsStatusDialogOpen(false)
-                // Navigate to all products page
+                setIsStatusDialogOpen(false);
+                router.push('/all-products'); // Navigate to the products page
               }}
               className="bg-[#1A3B47] hover:bg-[#388A94]"
             >
