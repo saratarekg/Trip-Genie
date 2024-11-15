@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle, Minus, Plus, Trash2, XCircle } from "lucide-react";
+import { Minus, Plus, Trash2, X, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Popup from "./popup";
@@ -51,12 +51,14 @@ const ShoppingCart = () => {
   const [popupType, setPopupType] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
+  const [showOrderSummary, setShowOrderSummary] = useState(true);
+  const [showProductList, setShowProductList] = useState(false);
+
 
   const [userRole, setUserRole] = useState("guest");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencies, setCurrencies] = useState([]);
-
   const openSuccessPopup = (message) => {
     setPopupType("success");
     setPopupOpen(true);
@@ -372,23 +374,22 @@ const ShoppingCart = () => {
 
   return (
     <div>
-      <div className="container p-5">
-        <Popup
-          isOpen={popupOpen}
-          onClose={closePopup}
-          type={popupType}
-          message={popupMessage}
-        />
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-      <h1 className="text-2xl font-bold mb-4">Shopping Cart</h1>
-      {cartItems?.length === 0 ? (
-        <p className="text-center text-gray-500 my-8">No items in cart</p>
-      ) : (
-        cartItems.map((item) => (
-          <div key={item.product?._id} className="flex flex-col border-b py-4">
-            <div className="flex items-center justify-between">
+   
+    <div className="flex h-screen ml-10 ">
+      <div className="flex-1 p-8">
+        <h1 className="text-3xl font-bold mb-6 flex justify-between items-center">
+          Shopping Cart
+          <span className="text-xl font-normal">({cartItems.length} items)</span>
+        </h1>
+        {cartItems?.length === 0 ? (
+          <p className="text-center text-gray-500 my-8">No items in cart</p>
+        ) : (
+          cartItems.map((item) => (
+            <div key={item.product?._id} className="flex items-center justify-between border-b py-4">
               <div className="flex items-center">
-                {console.log(item)}
                 <img
                   src={item.product?.pictures[0]?.url}
                   alt={item?.product?.name || "Product"}
@@ -396,574 +397,85 @@ const ShoppingCart = () => {
                   onClick={() => handleProductClick(item.product._id)}
                 />
                 <div>
-                  {item?.product ? (
-                    <>
-                      <h2
-                        className="text-lg font-semibold cursor-pointer hover:underline"
-                        onClick={() => handleProductClick(item.product._id)}
-                      >
-                        {item?.product?.name}
-                      </h2>
-                      <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
-  {item.product.description?.length > 100
-    ? `${item.product.description?.slice(0, 100)}...`
-    : item.product.description}
-</p>
-
-
-                    </>
-                  ) : (
-                    <p>Product is not available</p>
-                  )}
+                  <h2 className="text-lg font-semibold cursor-pointer hover:underline" onClick={() => handleProductClick(item.product._id)}>
+                    {item?.product?.name}
+                  </h2>
+                  <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
+                    {item.product.description?.length > 50 ? `${item.product.description?.slice(0, 50)}...` : item.product.description}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 rounded-full">
                   <Button
-                    onClick={() =>
-                      handleQuantityChange(
-                        item?.product?._id,
-                        Math.max(1, item?.quantity - 1)
-                      )
-                    }
-                    className={`px-2 py-1 rounded ${blueButtonStyle}`}
-                    disabled={
-                      item?.quantity <= 1 || item?.product?.quantity === 0
-                    }
-                    variant={
-                      item?.quantity <= 1 || item?.product?.quantity === 0
-                        ? "ghost"
-                        : "default"
-                    }
+                    onClick={() => handleQuantityChange(item?.product?._id, Math.max(1, item?.quantity - 1))}
+                    className="p-2 h-8 w-8 rounded-full bg-[#B5D3D1] flex items-center justify-center hover:bg-[#9FBFBB] transition duration-300 ease-in-out"
+                    disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
                   >
-                    <Minus className="h-4 w-4" />
+                    <Minus className="h-4 w-4 text-[#388A94] font-semibold" />
                   </Button>
-                  <span className="px-4 py-1 bg-gray-100 rounded">
-                    {item?.quantity}
-                  </span>
+                  <span className="px-4 py-1 text-xl">{item?.quantity}</span>
                   <Button
-                    onClick={() =>
-                      handleQuantityChange(
-                        item?.product?._id,
-                        item?.quantity + 1
-                      )
-                    }
-                    className={`px-2 py-1 rounded ${blueButtonStyle}`}
+                    onClick={() => handleQuantityChange(item?.product?._id, item?.quantity + 1)}
+                    className="p-2 h-8 w-8 rounded-full border bg-[#B5D3D1] flex items-center justify-center hover:bg-[#9FBFBB] transition duration-300 ease-in-out"
                     disabled={item?.quantity >= item?.product?.quantity}
-                    variant={
-                      item?.quantity >= item?.product?.quantity
-                        ? "ghost"
-                        : "default"
-                    }
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-4 w-4 text-[#388A94] font-semibold" />
                   </Button>
                 </div>
-                <span className="ml-4 font-semibold w-24 text-right">
+                <span className="ml-4 font-semibold w-24 text-right text-xl">
                   {item.priceLoading ? (
-                    <div className="animate-pulse bg-gray-200 h-6 w-full rounded"></div>
+                    <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
                   ) : (
-                    formatPrice(
-                      item?.product?.price * item?.quantity,
-                      item?.product?.currency
-                    )
+                    formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
                   )}
                 </span>
                 <Button
                   onClick={() => handleRemoveItem(item?.product?._id)}
-                  className="ml-4"
-                  variant="destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
+                  className="p-2 w-8 h-8 ml-4 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
               </div>
             </div>
-            <div className="mt-2">
-              {item?.product?.quantity === 0 && (
-                <p className="text-red-500 text-sm">
-                  This item is out of stock. Please remove it to proceed with
-                  checkout.
-                </p>
-              )}
-              {item?.quantity > item?.product?.quantity &&
-                item?.product?.quantity !== 0 && (
-                  <p className="text-red-500 text-sm">
-                    Only {item?.product?.quantity} left in stock. Please adjust
-                    the quantity.
-                  </p>
-                )}
-            </div>
-          </div>
-        ))
-      )}
-      {cartItems.length > 0 && (
-        <div className="mt-8 flex justify-between items-center">
-          <div className="text-xl font-bold">
-            Total:{" "}
-            {totalAmountLoading ? (
-              <span className="animate-pulse bg-gray-200 h-6 w-32 inline-block align-middle rounded"></span>
-            ) : (
-              formatPrice(
-                totalAmount,
-                userPreferredCurrency ? userPreferredCurrency.code : "USD"
-              )
-            )}
-          </div>
-          <Button
-            className="bg-[#000034]"
-            onClick={handleCheckout}
-            disabled={isCheckoutDisabled}
-          >
-            Checkout
-          </Button>
-        </div>
-      )}
-      {cartItems.some((item) => item?.product?.quantity === 0) && (
-        <p className="text-red-500 mt-4">
-          Some items in your cart are out of stock. Please remove them to
-          proceed with checkout.
-        </p>
-      )}
-      {cartItems.some((item) => item?.quantity > item?.product?.quantity) && (
-        <p className="text-red-500 mt-4">
-          Some items in your cart exceed available stock. Please adjust
-          quantities to proceed with checkout.
-        </p>
-      )}
+          ))
+        )}
+      </div>
+      <div className="w-80 bg-gray-200 p-8">
+        <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+        <div className="mb-4 w-full">
+        <span className=" font-bold text-xl">Products</span>
 
-      <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold">
-              Confirm Purchase
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Product Details</h2>
-
-            {cartItems.map((item, index) => (
-              <div key={index} className="my-4">
-                <p className="text-xl font-semibold">{item?.product?.name}</p>
-                <p className="text-lg">
-                  Quantity:
-                  <input
-                    type="number"
-                    value={item?.quantity}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value, 10);
-                      if (value > item?.product?.quantity || value < 1) {
-                        setQuantityError(true);
-                      } else {
-                        setQuantityError(false);
-                        handleQuantityChange(item?.product?._id, value);
-                      }
-                    }}
-                    className={`w-20 ml-2 border rounded-md ${
-                      quantityError ? "border-red-500" : ""
-                    }`}
-                    min="1"
-                    max={item?.product?.quantity}
-                  />
-                </p>
-                {quantityError && (
-                  <p className="text-red-500 text-sm mt-1">
-                    Unavailable amount, max is: {item?.product?.quantity}
-                  </p>
-                )}
-                <p className="text-xl">
-                  Price:{" "}
-                  {item?.priceLoading ? (
-                    <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
-                  ) : (
-                    formatPrice(
-                      item?.product?.price * item?.quantity,
-                      item?.product?.currency
-                    )
-                  )}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Payment & Delivery</h2>
-
-            <div className="my-4">
-              <label
-                htmlFor="deliveryDate"
-                className="block text-lg font-medium"
-              >
-                Delivery Date
-              </label>
-              <input
-                type="date"
-                id="deliveryDate"
-                value={deliveryDate}
-                onChange={(e) => setDeliveryDate(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-              />
-            </div>
-
-            <div className="my-4">
-              <label
-                htmlFor="deliveryTime"
-                className="block text-lg font-medium"
-              >
-                Delivery Time
-              </label>
-              <Select value={deliveryTime} onValueChange={setDeliveryTime}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select delivery time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="morning">
-                    Morning (8 AM - 12 PM)
-                  </SelectItem>
-                  <SelectItem value="midday">Midday (12 PM - 3 PM)</SelectItem>
-                  <SelectItem value="afternoon">
-                    Afternoon (3 PM - 6 PM)
-                  </SelectItem>
-                  <SelectItem value="night">Night (6 PM - 9 PM)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="my-4">
-              <label
-                htmlFor="deliveryType"
-                className="block text-lg font-medium"
-              >
-                Delivery Type
-              </label>
-              <Select value={deliveryType} onValueChange={setDeliveryType}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select delivery type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Standard">
-                    Standard Shipping (5-7 days) -{" "}
-                    {formatPrice(
-                      2.99,
-                      userPreferredCurrency ? userPreferredCurrency.code : "USD"
-                    )}
-                  </SelectItem>
-                  <SelectItem value="Express">
-                    Express Shipping (2-3 days) -{" "}
-                    {formatPrice(
-                      4.99,
-                      userPreferredCurrency ? userPreferredCurrency.code : "USD"
-                    )}
-                  </SelectItem>
-                  <SelectItem value="Next-Same">
-                    Next/Same Day Shipping -{" "}
-                    {formatPrice(
-                      6.99,
-                      userPreferredCurrency ? userPreferredCurrency.code : "USD"
-                    )}
-                  </SelectItem>
-                  <SelectItem value="International">
-                    International Shipping -{" "}
-                    {formatPrice(
-                      14.99,
-                      userPreferredCurrency ? userPreferredCurrency.code : "USD"
-                    )}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="my-4">
-              <label
-                htmlFor="paymentMethod"
-                className="block text-lg font-medium"
-              >
-                Payment Method
-              </label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="credit_card">Credit Card</SelectItem>
-                  <SelectItem value="debit_card">Debit Card</SelectItem>
-                  <SelectItem value="cash_on_delivery">
-                    Cash on Delivery
-                  </SelectItem>
-                  <SelectItem value="wallet">Wallet</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Address Details</h2>
-
-            <div className="my-4">
-              <label htmlFor="streetName" className="block text-lg font-medium">
-                Street Name
-              </label>
-              <input
-                type="text"
-                id="streetName"
-                value={streetName}
-                onChange={(e) => setStreetName(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter street name"
-              />
-            </div>
-
-            <div className="my-4">
-              <label
-                htmlFor="streetNumber"
-                className="block text-lg font-medium"
-              >
-                Street Number
-              </label>
-              <input
-                type="text"
-                id="streetNumber"
-                value={streetNumber}
-                onChange={(e) => setStreetNumber(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter street number"
-              />
-            </div>
-
-            <div className="my-4">
-              <label htmlFor="floorUnit" className="block text-lg font-medium">
-                Floor/Unit
-              </label>
-              <input
-                type="text"
-                id="floorUnit"
-                value={floorUnit}
-                onChange={(e) => setFloorUnit(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter floor/unit (optional)"
-              />
-            </div>
-
-            <div className="my-4">
-              <label htmlFor="city" className="block text-lg font-medium">
-                City
-              </label>
-              <input
-                type="text"
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter city"
-              />
-            </div>
-
-            <div className="my-4">
-              <label htmlFor="state" className="block text-lg font-medium">
-                State/Province/Region
-              </label>
-              <input
-                type="text"
-                id="state"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter state"
-              />
-            </div>
-
-            <div className="my-4">
-              <label htmlFor="country" className="block text-lg font-medium">
-                Country
-              </label>
-              <input
-                type="text"
-                id="country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter country"
-              />
-            </div>
-
-            <div className="my-4">
-              <label htmlFor="postalCode" className="block text-lg font-medium">
-                Postal/ZIP Code
-              </label>
-              <input
-                type="text"
-                id="postalCode"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter postal code (Optional)"
-              />
-            </div>
-
-            <div className="my-4">
-              <label htmlFor="landmark" className="block text-lg font-medium">
-                Landmark/Additional Info
-              </label>
-              <input
-                type="text"
-                id="landmark"
-                value={landmark}
-                onChange={(e) => setLandmark(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-                placeholder="Enter landmark or additional info (optional)"
-              />
-            </div>
-
-            <div className="my-4">
-              <label
-                htmlFor="locationType"
-                className="block text-lg font-medium"
-              >
-                Location Type
-              </label>
-              <Select value={locationType} onValueChange={setLocationType}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select location type" />
-                </SelectTrigger>
-                <SelectContent
-                  style={{ maxHeight: "200px", overflowY: "auto" }}
-                >
-                  <SelectItem value="home">Home</SelectItem>
-                  <SelectItem value="work">Work</SelectItem>
-                  <SelectItem value="apartment">Apartment/Condo</SelectItem>
-                  <SelectItem value="friend_family">
-                    Friend/Family's Address
-                  </SelectItem>
-                  <SelectItem value="po_box">PO Box</SelectItem>
-                  <SelectItem value="office">Office/Business</SelectItem>
-                  <SelectItem value="pickup_point">Pickup Point</SelectItem>
-                  <SelectItem value="vacation">
-                    Vacation/Temporary Address
-                  </SelectItem>
-                  <SelectItem value="school">School/University</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="my-4 border-t border-gray-300 pt-4">
-            <h2 className="text-2xl font-bold">Total Price</h2>
-            <div className="flex flex-col">
+            <div className="mt-2 space-y-2">
               {cartItems.map((item, index) => (
-                <div key={index} className="flex justify-between mt-2">
-                  <p className="text-lg">
-                    {item?.product?.name} x {item?.quantity}
-                  </p>
-                  <p className="text-lg">
-                    {item.priceLoading ? (
-                      <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
-                    ) : (
-                      formatPrice(
-                        item?.product?.price * item?.quantity,
-                        item?.product?.currency
-                      )
-                    )}
-                  </p>
+                <div key={index} className="flex justify-between text-base">
+                  <span>{item?.product?.name} x {item?.quantity}</span>
+                  <span>{formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)}</span>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between mt-2">
-              <p className="text-lg">Delivery Cost:</p>
-              <p className="text-lg">
-                {formatPrice(
-                  calculateDeliveryCost(deliveryType),
-                  userPreferredCurrency ? userPreferredCurrency.code : "USD"
-                )}
-              </p>
-            </div>
-            <div className="flex justify-between mt-4 font-bold">
-              <p className="text-lg">Total Price:</p>
-              <p className="text-lg">
-                {totalAmountLoading ? (
-                  <span className="animate-pulse bg-gray-200 h-6 w-32 inline-block align-middle rounded"></span>
-                ) : (
-                  formatPrice(
-                    totalAmount + calculateDeliveryCost(deliveryType),
-                    userPreferredCurrency ? userPreferredCurrency.code : "USD"
-                  )
-                )}
-              </p>
-            </div>
+          
+        </div>
+        <div className="border-t border-gray-200 pt-4 mt-4">
+          <div className="flex justify-between font-bold text-xl">
+            <span>Total:</span>
+            <span>
+              {totalAmountLoading ? (
+                <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
+              ) : (
+                formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")
+              )}
+            </span>
           </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowPurchaseConfirm(false);
-                resetFields();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                const fullLocation =
-                  "Street Name: " +
-                  streetName +
-                  ", Street Number: " +
-                  streetNumber +
-                  (floorUnit ? ", Floor/Unit: " + floorUnit : "") +
-                  ", State: " +
-                  state +
-                  ", City: " +
-                  city +
-                  ", Postal Code: " +
-                  postalCode +
-                  (landmark ? ", Landmark: " + landmark : "");
-
-                setLocation(fullLocation);
-                setTimeout(() => {
-                  resetFields();
-                }, 100);
-                setShowPurchaseConfirm(false);
-              }}
-              disabled={
-                !paymentMethod ||
-                !deliveryDate ||
-                !deliveryTime ||
-                !streetName ||
-                !streetNumber ||
-                !state ||
-                !city ||
-                quantityError ||
-                !locationType
-              }
-            >
-              Checkout
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={allPurchasesSuccessfulPopup}
-        onOpenChange={() => setAllPurchasesSuccessfulPopup(false)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
-              Success
-            </DialogTitle>
-          </DialogHeader>
-          <p>Purchase completed successfully!</p>
-          <DialogFooter>
-            <Button
-              variant="default"
-              onClick={() => setAllPurchasesSuccessfulPopup(false)}
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+        <Button
+          className="w-full mt-6 bg-[#1A3B47] text-white py-3 text-lg"
+          onClick={() => navigate("/checkout2")}
+          disabled={cartItems.length === 0}
+        >
+          Proceed to Checkout
+        </Button>
+      </div>
 
       <Dialog
         open={actionError !== null}
@@ -985,7 +497,7 @@ const ShoppingCart = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </div>
   );
 };
-
 export default ShoppingCart;

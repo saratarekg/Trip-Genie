@@ -950,7 +950,7 @@ export default function AccountManagement() {
       },
     ],
     Products: [
-      { name: "Cart", icon: ShoppingCartIcon, tab: "cart", roles: ["tourist"] },
+      // { name: "Cart", icon: ShoppingCartIcon, tab: "cart", roles: ["tourist"] },
       { name: "Wishlist", icon: Heart, tab: "wishlist", roles: ["tourist"] },
     ],
     "Settings and Privacy": [
