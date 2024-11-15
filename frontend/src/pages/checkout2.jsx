@@ -8,7 +8,7 @@ import { format, addDays, addBusinessDays } from 'date-fns'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useRouter } from 'next/navigation'
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -75,7 +75,7 @@ export default function CheckoutPage() {
   const [showSavedCards, setShowSavedCards] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [selectedCard, setSelectedCard] = useState(null)
-  const router = useRouter()
+  const navigate = useNavigate();
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState(null)
   const [addressDetails, setAddressDetails] = useState({
     streetName: '',
@@ -977,7 +977,7 @@ export default function CheckoutPage() {
             <Button
               onClick={() => {
                 setIsStatusDialogOpen(false);
-                router.push('/'); // Navigate to home page
+                navigate("/"); // Navigate to home page
               }}
               className="bg-[#5D9297] hover:bg-[#388A94]"
             >
@@ -987,7 +987,7 @@ export default function CheckoutPage() {
             <Button
               onClick={() => {
                 setIsStatusDialogOpen(false);
-                router.push('/all-products'); // Navigate to the products page
+                navigate("/all-products"); // Navigate to the products page
               }}
               className="bg-[#1A3B47] hover:bg-[#388A94]"
             >
