@@ -6,10 +6,12 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import { format, addDays, addBusinessDays } from 'date-fns'
 import * as z from 'zod'
+import { FaStar } from 'react-icons/fa';
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useForm } from 'react-hook-form'
 import { useNavigate } from "react-router-dom";
-
+import  ShippingAddress  from "@/pages/AddShippingAddress"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -69,6 +71,7 @@ export default function CheckoutPage() {
   const [savedCards, setSavedCards] = useState([])
   const [savedAddresses, setSavedAddresses] = useState([])
   const [totalAmount, setTotalAmount] = useState(0)
+  const [isPriceLoading, setIsPriceLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
   const [showAddCardForm, setShowAddCardForm] = useState(false)
   const [showSavedAddresses, setShowSavedAddresses] = useState(false)
@@ -76,6 +79,7 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [selectedCard, setSelectedCard] = useState(null)
   const navigate = useNavigate();
+  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState(null)
   const [addressDetails, setAddressDetails] = useState({
     streetName: '',
@@ -123,8 +127,20 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     fetchUserInfo()
-    fetchCart()
   }, [])
+
+
+  useEffect(() => {
+    const loadPrices = async () => {
+      setIsPriceLoading(true)
+      await fetchCart()
+      await fetchExchangeRate()
+      await getCurrencySymbol()
+      setIsPriceLoading(false)
+    }
+    loadPrices()
+  }, [userPreferredCurrency])
+
 
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest"
@@ -196,14 +212,13 @@ export default function CheckoutPage() {
     setTotalAmount(total)
   }
 
-  const handleAddNewAddress = async (e) => {
-    e.preventDefault()
+  const handleAddNewAddress = async (newAddress) => {
     setIsLoading(true)
     try {
       const token = Cookies.get("jwt")
       const response = await axios.post(
         "http://localhost:4000/tourist/addAddress",
-        addressDetails,
+        newAddress,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -216,18 +231,17 @@ export default function CheckoutPage() {
         const newAddresses = userResponse.data.shippingAddresses || []
         setSavedAddresses(newAddresses)
         
-        const newAddress = newAddresses.find(addr => addr.streetName === addressDetails.streetName && addr.streetNumber === addressDetails.streetNumber)
-        if (newAddress) {
-          setSelectedAddress(newAddress)
-          Object.keys(newAddress).forEach(key => {
+        const addedAddress = newAddresses.find(addr => addr.streetName === newAddress.streetName && addr.streetNumber === newAddress.streetNumber)
+        if (addedAddress) {
+          setSelectedAddress(addedAddress)
+          Object.keys(addedAddress).forEach(key => {
             if (key !== 'default') {
-              form.setValue(key, newAddress[key])
+              form.setValue(key, addedAddress[key])
             }
           })
         }
         
-        setShowAddForm(false)
-        resetAddressDetails()
+        setIsAddressDialogOpen(false)
       }
     } catch (error) {
       console.error("Error adding new address:", error)
@@ -417,7 +431,54 @@ export default function CheckoutPage() {
     calculateDeliveryDate(value)
   }
 
+  const fetchExchangeRate = async () => {
+    try {
+      const token = Cookies.get("jwt")
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/populate`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            base: cartItems[0]?.product.currency,
+            target: userPreferredCurrency._id,
+          }),
+        }
+      )
+      const data = await response.json()
+
+      if (response.ok) {
+        setExchangeRates(data.conversion_rate)
+      } else {
+        console.error("Error in fetching exchange rate:", data.message)
+      }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error)
+    }
+  }
+
+  const getCurrencySymbol = async () => {
+    try {
+      const token = Cookies.get("jwt")
+      const response = await axios.get(
+        `http://localhost:4000/${userRole}/getCurrency/${cartItems[0]?.product.currency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      setCurrencySymbol(response.data)
+    } catch (error) {
+      console.error("Error fetching currency symbol:", error)
+    }
+  }
+
   const formatPrice = (price) => {
+    if (isPriceLoading) {
+      return <div className="w-16 h-6 bg-gray-300 rounded-full animate-pulse"></div>
+    }
     const roundedPrice = price
     if (cartItems.length > 0) {
       if (userRole === "tourist" && userPreferredCurrency) {
@@ -527,13 +588,25 @@ export default function CheckoutPage() {
                               </div>
                             </div>
                           )}
-                          <button 
-                            onClick={(e) => { e.preventDefault(); setShowAddForm(true); }} 
-                            className="text-[#388A94] hover:underline"
-                          >
-                            Add New
-                          </button>
-                          
+                         <button 
+            onClick={(e) => { e.preventDefault(); setIsAddressDialogOpen(true); }} 
+            className="text-[#388A94] hover:underline"
+          >
+            Add New
+          </button>
+
+          <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
+  <DialogContent className="max-h-[80vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>Add New Address</DialogTitle>
+    </DialogHeader>
+    <ShippingAddress 
+  onSubmit={handleAddNewAddress} 
+  onCancel={() => (setIsAddressDialogOpen(false), fetchUserInfo())} 
+/>
+  </DialogContent>
+</Dialog>
+
                           {showSavedAddresses && (
                             <Dialog open={showSavedAddresses} onOpenChange={setShowSavedAddresses}>
                               <DialogContent>
@@ -921,42 +994,76 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div className="w-full md:w-1/3">
-            <Card className="bg-white">
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold text-[#1A3B47] mb-4">Order Summary</h2>
-                <div className="space-y-4">
-                  {cartItems.map((item, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span>{item?.product?.name} x {item?.quantity}</span>
-                      <span>{formatPrice(item?.totalPrice)}</span>
-                    </div>
-                  ))}
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between font-bold">
-                      <span>Subtotal</span>
-                      <span>{formatPrice(totalAmount)}</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Delivery</span>
-                    <span>{formatPrice(form.watch('deliveryType') === 'Express' ? 4.99 : form.watch('deliveryType') === 'Next-Same' ? 6.99 : form.watch('deliveryType') === 'International' ? 14.99 : 2.99)}</span>
-                  </div>
-                  {estimatedDeliveryDate && (
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>Estimated Delivery Date</span>
-                      <span>{format(estimatedDeliveryDate, 'MMMM d, yyyy')}</span>
-                    </div>
-                  )}
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between font-bold">
-                      <span>Total</span>
-                      <span>{formatPrice(totalAmount + (form.watch('deliveryType') === 'Express' ? 4.99 : form.watch('deliveryType') === 'Next-Same' ? 6.99 : form.watch('deliveryType') === 'International' ? 14.99 : 2.99))}</span>
-                    </div>
-                  </div>
+      <Card className="bg-white">
+        <CardContent className="p-6">
+          <h2 className="text-2xl font-bold text-[#1A3B47] mb-4">Order Summary</h2>
+          <div className="space-y-4">
+            {cartItems.map((item, index) => (
+              <TooltipProvider key={index}>
+                <div className="flex justify-between">
+                  {/* Product Name with Tooltip and Clickable Navigation */}
+                  <Tooltip>
+                    <TooltipTrigger
+                      onClick={() => navigate(`/product/${item?.product?._id}`)}
+                      className="text-black cursor-pointer hover:underline"
+                    >
+                      {item?.product?.name} x {item?.quantity}
+                    </TooltipTrigger>
+                    <TooltipContent className="w-48 p-2 text-sm whitespace-normal">
+  <p>
+    {item?.product?.description?.slice(0, 70)}
+    {item?.product?.description?.length > 70 ? "..." : ""}
+  </p>
+  <div className="flex items-center pt-1">
+    <FaStar className="text-yellow-500" />
+    <span className="ml-1">{item?.product?.rating.toFixed(1) || "N/A"}</span>
+  </div>
+</TooltipContent>
+
+                  </Tooltip>
+                  <span>{formatPrice(item?.totalPrice)}</span>
                 </div>
-              </CardContent>
-            </Card>
+              </TooltipProvider>
+            ))}
+            <div className="border-t pt-4">
+              <div className="flex justify-between font-bold">
+                <span>Subtotal</span>
+                <span>{formatPrice(totalAmount)}</span>
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <span>Delivery</span>
+              <span>
+                {formatPrice(
+                  form.watch('deliveryType') === 'Express' ? 4.99 :
+                  form.watch('deliveryType') === 'Next-Same' ? 6.99 :
+                  form.watch('deliveryType') === 'International' ? 14.99 : 2.99
+                )}
+              </span>
+            </div>
+            {estimatedDeliveryDate && (
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Estimated Delivery Date</span>
+                <span>{format(estimatedDeliveryDate, 'MMMM d, yyyy')}</span>
+              </div>
+            )}
+            <div className="border-t pt-4">
+              <div className="flex justify-between font-bold">
+                <span>Total</span>
+                <span>
+                  {formatPrice(
+                    totalAmount + 
+                    (form.watch('deliveryType') === 'Express' ? 4.99 :
+                    form.watch('deliveryType') === 'Next-Same' ? 6.99 :
+                    form.watch('deliveryType') === 'International' ? 14.99 : 2.99)
+                  )}
+                </span>
+              </div>
+            </div>
           </div>
+        </CardContent>
+      </Card>
+    </div>
         </div>
       </div>
 

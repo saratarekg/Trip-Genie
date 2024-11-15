@@ -1,0 +1,37 @@
+hadwas request sprint2
+
+deactivation itinerary elmfrood tetshal msh yktb currently unavailable fl sort by preference
+
+sort by preference bt3l2
+
+alwan profile w settings
+
+book transportation lw katab aktr mn available seats aolo en mfish kfaya
+
+check hn3ml eh f update itinerary lw booked
+
+sheel option debut aw credit hya msh fraa
+
+wallet bayza f profile info msh bt update
+
+redeem points tbaa kol 100 maamlsh redeem decimal
+
+success messages tbaa zy currency w toast f nfs elwaat
+
+flag inappropriate itinerary f admin mkano wehesh
+
+event yaany activity fa flag inappropriate activity kman msh itinerary bs
+
+search itinerary bybooz ***search kol haga btbooz😂
+
+admin w seller y view zy table feha product w amount sold w quantity items in stock
+
+admin by update products btaato bs bs ynf3 y delete aady
+
+nehgez awl yom evaluation sprint 3
+
+lw had by delete account tour guide msln w had 3aml book le haga ybaa hakhaly kol haga deactivated automatically hatta el booked, bs el booked tban lel aaml book
+
+sort by preference shklo w alwano mokhtlfa f kol page
+
+filter helwa eno automatic msh mhtag enter
