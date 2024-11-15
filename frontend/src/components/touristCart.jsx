@@ -406,24 +406,28 @@ const ShoppingCart = () => {
                 </div>
               </div>
               <div className="flex items-center">
-                <div className="flex items-center space-x-2 rounded-full">
-                  <Button
+              <div className="flex items-center justify-between w-32 h-10 border border-gray-300 rounded-md">
+              <Button
                     onClick={() => handleQuantityChange(item?.product?._id, Math.max(1, item?.quantity - 1))}
-                    className="p-2 h-8 w-8 rounded-full bg-[#B5D3D1] flex items-center justify-center hover:bg-[#9FBFBB] transition duration-300 ease-in-out"
-                    disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-black"
+                                        disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
                   >
-                    <Minus className="h-4 w-4 text-[#388A94] font-semibold" />
+                    <Minus className="h-5 w-5 text-[#388A94] font-semibold" />
                   </Button>
-                  <span className="px-4 py-1 text-xl">{item?.quantity}</span>
+                  <span className="text-center font-semibold text-xl text-black w-8">{item?.quantity}</span>
                   <Button
                     onClick={() => handleQuantityChange(item?.product?._id, item?.quantity + 1)}
-                    className="p-2 h-8 w-8 rounded-full border bg-[#B5D3D1] flex items-center justify-center hover:bg-[#9FBFBB] transition duration-300 ease-in-out"
-                    disabled={item?.quantity >= item?.product?.quantity}
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-black"
+                                        disabled={item?.quantity >= item?.product?.quantity}
                   >
-                    <Plus className="h-4 w-4 text-[#388A94] font-semibold" />
+                    <Plus className="h-5 w-5 text-[#388A94] font-semibold" />
                   </Button>
                 </div>
-                <span className="ml-4 font-semibold w-24 text-right text-xl">
+                <span className="ml-4 font-semibold w-24 text-right text-2xl">
                   {item.priceLoading ? (
                     <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
                   ) : (
@@ -431,10 +435,11 @@ const ShoppingCart = () => {
                   )}
                 </span>
                 <Button
-                  onClick={() => handleRemoveItem(item?.product?._id)}
-                  className="p-2 w-8 h-8 ml-4 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                variant="ghost"
+                  onClick={() => (item?.product?._id)}
+                  className="p-2 w-8 h-8 ml-4 text-red-500 hover:text-red-700  transition duration-300 ease-in-out"
                   >
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                    <Trash2 className="h-6 w-6 " />
                 </Button>
               </div>
             </div>
@@ -442,7 +447,7 @@ const ShoppingCart = () => {
         )}
       </div>
       <div className="w-80 bg-gray-200 p-8">
-        <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+        <h2 className="text-3xl font-bold mb-6">Order Summary</h2>
         <div className="mb-4 w-full">
         <span className=" font-bold text-xl">Products</span>
 
@@ -456,7 +461,7 @@ const ShoppingCart = () => {
             </div>
           
         </div>
-        <div className="border-t border-gray-200 pt-4 mt-4">
+        <div className="border-t border-gray-500 pt-4 mt-4">
           <div className="flex justify-between font-bold text-xl">
             <span>Total:</span>
             <span>

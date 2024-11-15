@@ -114,7 +114,7 @@ export default function CartDropdown({
 
   const handleRemoveItem = async (productId) => {
     try {
-      const token = Cookies.get("jwt")
+      const token = Cookies.get("jwt");
       const response = await fetch(
         `http://localhost:4000/tourist/remove/cart/${productId}`,
         {
@@ -123,14 +123,18 @@ export default function CartDropdown({
             Authorization: `Bearer ${token}`,
           },
         }
-      )
+      );
       if (response.ok) {
-        fetchCartItems()
+        // Directly update cartItems state to remove the item
+        setCartItems(prevItems => prevItems.filter(item => item.product._id !== productId));
       }
+      fetchCartItems()
     } catch (error) {
-      console.error("Error removing item:", error)
+      console.error("Error removing item:", error);
     }
-  }
+  };
+  
+ 
 
   useEffect(() => {
     fetchUserInfo()
@@ -155,7 +159,7 @@ export default function CartDropdown({
 <div className="pr-4 pl-4 pb-4">
         {/* Display "No products in cart" message if the cart is empty */}
         {cartItems.length === 0 ? (
-          <p className="text-center text-gray-500">No products in cart</p>
+    <p className="text-center text-gray-500">No products in cart</p>
         ) : (
           <div className="space-y-4">
             {cartItems.slice(0, 3).map((item, index) => (
@@ -176,38 +180,44 @@ export default function CartDropdown({
                     <div>
                       <span 
                         onClick={() => (navigate(`/product/${item.product._id}`), setIsCartOpen(false))} 
-                        className="font-medium text-black text-base cursor-pointer hover:underline"
+                        className="font-semibold text-black text-lg  cursor-pointer hover:underline"
                       >
                         {item.product.name}
                       </span>
                     </div>
-                    <p className="font-semibold text-black text-lg">
+                    <p className="font-semibold text-black text-xl">
                       {formatPrice(item.product.price, item.product.currency)}
                     </p>
                   </div>
 
                   <div className="flex justify-between items-center mt-2">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        onClick={() => handleQuantityChange(item.product._id, Math.max(1, item.quantity - 1))}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-black"
-                        disabled={item.quantity <= 1}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <span className="w-8 text-center text-black">{item.quantity}</span>
-                      <Button
-                        onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-black"
-                        disabled={item.quantity >= item.product.quantity}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  <div className="flex items-center gap-2">
+  <div className="flex items-center justify-between w-24 h-8 border border-gray-300 rounded-md">
+    <Button
+      onClick={() => handleQuantityChange(item.product._id, Math.max(1, item.quantity - 1))}
+      variant="ghost"
+      size="icon"
+      className="h-7 w-7 text-black"
+      disabled={item.quantity <= 1}
+    >
+      <Minus className="h-4 w-4" />
+    </Button>
+
+    <span className="text-center text-black w-8">{item.quantity}</span>
+
+    <Button
+      onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
+      variant="ghost"
+      size="icon"
+      className="h-7 w-7 text-black"
+      disabled={item.quantity >= item.product.quantity}
+    >
+      <Plus className="h-4 w-4" />
+    </Button>
+  </div>
+</div>
+
+
                     <Button
                       onClick={() => handleRemoveItem(item.product._id)}
                       variant="ghost"

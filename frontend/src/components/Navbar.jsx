@@ -36,6 +36,7 @@ const NavLink = ({ to, children }) => (
   <Link
     to={to}
     className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium"
+    onClick={() => setIsCartOpen(false)}
   >
     {children}
   </Link>
@@ -155,7 +156,7 @@ export function NavbarComponent() {
           {/* Logo */}
           <div className="flex-shrink-0 ml-8">
             <Link to="/" className="flex items-center">
-              <img src={logo} alt="logo" className="h-10 w-auto" />
+              <img src={logo} alt="logo" onClick={() => setIsCartOpen(false)} className="h-10 w-auto" />
             </Link>
           </div>
 
@@ -166,7 +167,7 @@ export function NavbarComponent() {
                 <>
                   <div className="relative" ref={itinerariesRef}>
                     <button
-                      onClick={() => toggleDropdown("itineraries")}
+                      onClick={() => toggleDropdown("itineraries") }
                       className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                     >
                       Itineraries
@@ -268,7 +269,7 @@ export function NavbarComponent() {
                     {/* Transportation Dropdown */}
                     <div className="relative" ref={transportationRef}>
                       <button
-                        onClick={() => toggleDropdown("transportation")}
+                        onClick={() => (toggleDropdown("transportation"),setIsCartOpen(false))}
                         className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                       >
                         Transportation
@@ -490,7 +491,8 @@ export function NavbarComponent() {
 
                     
                     <NavLinkIcon to="/account/wishlist">
-                      <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                      <button  onClick={() => setIsCartOpen(false)} className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
+                      
                         <Heart className="h-7 w-7" />
                         <span className="sr-only">Wishlist</span>
                       </button>
