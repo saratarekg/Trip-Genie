@@ -453,9 +453,9 @@ const ShoppingCart = () => {
 
             <div className="mt-2 space-y-2">
               {cartItems.map((item, index) => (
-                <div key={index} className="flex justify-between text-base">
+                <div key={index} className="flex justify-between text-base ">
                   <span>{item?.product?.name} x {item?.quantity}</span>
-                  <span>{formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)}</span>
+                  <span className="ml-3">{formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)}</span>
                 </div>
               ))}
             </div>
