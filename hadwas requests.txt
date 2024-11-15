@@ -6,7 +6,7 @@ sort by preference bt3l2
 
 alwan profile w settings
 
-book transportation lw katab aktr mn available seats aolo en mfish kfaya
+book transportation lw katab aktr mn available seats aolo en mfish kfaya (done amy)
 
 check hn3ml eh f update itinerary lw booked
 
@@ -18,7 +18,7 @@ redeem points tbaa kol 100 maamlsh redeem decimal
 
 success messages tbaa zy currency w toast f nfs elwaat
 
-flag inappropriate itinerary f admin mkano wehesh
+flag inappropriate itinerary f admin mkano wehesh (done)
 
 event yaany activity fa flag inappropriate activity kman msh itinerary bs
 

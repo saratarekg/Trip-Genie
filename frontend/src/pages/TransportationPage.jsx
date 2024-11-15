@@ -104,6 +104,7 @@ export default function TransportationPage() {
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [filteredTransportations, setFilteredTransportations] = useState([]);
+  const [exceededMax, setExceededMax] = useState(false);
   const transportationsPerPage = 6;
   
 
@@ -850,31 +851,37 @@ setSelectedDate(null);
             <DialogTitle>Book Transportation</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="seats" className="text-right">
-                Seats
-              </Label>
-              <Input
-                id="seats"
-                type="number"
-                className="col-span-3"
-                value={seatsToBook}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  setSeatsToBook(
-                    Math.max(
-                      0,
-                      Math.min(
-                        value,
-                        selectedTransportation?.remainingSeats || 0
-                      )
-                    )
-                  );
-                }}
-                min="0"
-                max={selectedTransportation?.remainingSeats}
-              />
-            </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+  <Label htmlFor="seats" className="text-right">
+    Seats
+  </Label>
+  <Input
+    id="seats"
+    type="number"
+    className="col-span-3"
+    value={seatsToBook}
+    onChange={(e) => {
+      const value = parseInt(e.target.value);
+      const maxSeats = selectedTransportation?.remainingSeats || 0;
+
+      if (value > maxSeats) {
+        setExceededMax(true); // show error message
+      } else {
+        setExceededMax(false); // hide error message
+      }
+
+      // Set seats within allowed range
+      setSeatsToBook(Math.max(0, Math.min(value, maxSeats)));
+    }}
+    min="0"
+    max={selectedTransportation?.remainingSeats}
+  />
+  {exceededMax && (
+    <p className="text-red-600 text-xs col-span-4">
+      Max seats is {selectedTransportation?.remainingSeats}.
+    </p>
+  )}
+</div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Total Price</Label>
               <div className="col-span-3">

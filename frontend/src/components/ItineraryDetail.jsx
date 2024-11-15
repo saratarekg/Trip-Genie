@@ -256,7 +256,12 @@ const TourguideProfileCard = ({
   handleActivationToggle,
   isActivated,
   isItineraryAvailable,
-  handleBookNowClick
+  handleBookNowClick,
+  isAppropriate,
+  dialogOpen,
+  handleOpenDialog,
+  handleCloseDialog,
+  handleConfirmFlag,
 }) => {
   const [showMore, setShowMore] = useState(false);
 
@@ -435,8 +440,55 @@ const TourguideProfileCard = ({
         <Button onClick={onReviewClick} className="w-full bg-[#1A3B47]">
           See All Reviews
         </Button>
+        {userRole === "admin" && (
+              <>
+              <div className="mt-6 border-t border-gray-300 pt-4"></div>
+                <Button
+                  className={`w-full mx-auto text-white ${isAppropriate
+                    ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                    : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                    }`}
+                  onClick={handleOpenDialog}
+                >
+                  {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
+                </Button>
+
+                {dialogOpen && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                      <div className="mb-4">
+                        <h2 className="text-lg font-semibold">Confirm Action</h2>
+                        <p className="text-gray-600 mt-2">
+                          Are you sure you want to change the status of this itinerary/event?
+                        </p>
+                      </div>
+                      <div className="flex justify-end space-x-4">
+                        <Button
+                          variant="outlined"
+                          onClick={handleCloseDialog}
+                          className="border-gray-300"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          color="secondary"
+                          onClick={handleConfirmFlag}
+                          className="bg-[#5D9297] hover:[#388A94] text-white"
+                        >
+                          Confirm
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+
+            )}
       </CardContent>
+      
     </Card>
+
+    
   );
 };
 
@@ -1361,55 +1413,20 @@ const ItineraryDetail = () => {
                 isActivated={isActivated}
                 isItineraryAvailable={isItineraryAvailable}
                 handleBookNowClick={handleBookNowClick}
+                isAppropriate={isAppropriate}
+                dialogOpen={dialogOpen}
+                handleOpenDialog={handleOpenDialog}
+                handleCloseDialog={handleCloseDialog}
+                handleConfirmFlag={handleConfirmFlag}
 
               />
             )}
+
+            
            
 
 
-            {userRole === "admin" && (
-              <>
-                <Button
-                  className={`w-4/5 mx-auto mt-2 text-white ${isAppropriate
-                    ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                    : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                    }`}
-                  onClick={handleOpenDialog}
-                >
-                  {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
-                </Button>
-
-                {dialogOpen && (
-                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                      <div className="mb-4">
-                        <h2 className="text-lg font-semibold">Confirm Action</h2>
-                        <p className="text-gray-600 mt-2">
-                          Are you sure you want to change the status of this itinerary/event?
-                        </p>
-                      </div>
-                      <div className="flex justify-end space-x-4">
-                        <Button
-                          variant="outlined"
-                          onClick={handleCloseDialog}
-                          className="border-gray-300"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          color="secondary"
-                          onClick={handleConfirmFlag}
-                          className="bg-[#5D9297] hover:[#388A94] text-white"
-                        >
-                          Confirm
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-
-            )}
+            
 
           </div>
         </div>

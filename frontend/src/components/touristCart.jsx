@@ -404,11 +404,13 @@ const ShoppingCart = () => {
                       >
                         {item?.product?.name}
                       </h2>
-                      <p className="text-sm text-gray-600">
-                        {item.product.description?.length > 150
-                          ? `${item.product.description?.slice(0, 150)}...`
-                          : item.product.description}
-                      </p>
+                      <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
+  {item.product.description?.length > 100
+    ? `${item.product.description?.slice(0, 100)}...`
+    : item.product.description}
+</p>
+
+
                     </>
                   ) : (
                     <p>Product is not available</p>
