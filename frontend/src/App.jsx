@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import Cookies from "js-cookie";
 import {
   BrowserRouter as Router,
   Route,
@@ -82,10 +83,12 @@ function AppContent() {
   const location = useLocation();
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/sign-up";
+  const role = Cookies.get("role");
+
   return (
     <div className="App">
       <ScrollToTop />
-      {!isAuthPage && <NavbarComponent />}
+      {!isAuthPage && role !== "admin" && <NavbarComponent />}
 
       <div className="pages">
         <Routes>
@@ -532,7 +535,19 @@ function AppContent() {
           />
         </Routes>
       </div>
-      {!isAuthPage && <FooterComponent />}
+      <ProtectedRoute
+                allowedRoles={[
+                  "tourist",
+                  "seller",
+                  "tour-guide",
+                  "advertiser",
+                  "tourism-governor",
+                  "guest",
+                ]}
+              >
+                {!isAuthPage && <FooterComponent />}
+              </ProtectedRoute>
+      
     </div>
   );
 }

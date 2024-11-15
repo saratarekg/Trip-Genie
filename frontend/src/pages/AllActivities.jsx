@@ -71,7 +71,7 @@ const DeleteConfirmationModal = ({
 let exchangeRateForFilter = 1;
 const role = Cookies.get("role");
 
-const ActivityCard = React.memo({
+const ActivityCard = React.memo(({
   activity,
   onSelect,
   userInfo,
@@ -192,7 +192,7 @@ const ActivityCard = React.memo({
       </CardFooter>
     </Card>
   );
-};
+});
 
 export function AllActivitiesComponent() {
   const [activities, setActivities] = useState([]);
