@@ -17,6 +17,7 @@ const TouristTransportation = require("../models/touristTransportation");
 const Transportation = require("../models/transportation");
 const TouristFlight = require("../models/touristFlight");
 const TouristHotel = require("../models/touristHotel");
+const PromoCode = require("../models/promoCode");
 
 const getAllTourists = async (req, res) => {
   try {
@@ -1723,7 +1724,6 @@ const updateShippingAddress = async (req, res) => {
         },
       }
     );
-    
 
     return res.status(200).json({
       message: "Address updated successfully",
@@ -1734,6 +1734,28 @@ const updateShippingAddress = async (req, res) => {
     return res
       .status(500)
       .json({ message: "An error occurred while updating the address" });
+  }
+};
+
+const applyPromoCode = async (req, res) => {
+  const { promoCode } = req.body;
+
+  try {
+    if (!promoCode) {
+      return res.status(400).json({ message: "Promo code is required." });
+    }
+
+    const promo = await PromoCode.usePromoCode(promoCode);
+
+    return res.status(200).json({
+      message: "Promo code applied successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({
+      message:
+        error.message || "An error occurred while applying the promo code",
+    });
   }
 };
 
@@ -1779,4 +1801,5 @@ module.exports = {
   getMyHotels,
   addAllToCart,
   removeAllFromWishlist,
+  applyPromoCode,
 };

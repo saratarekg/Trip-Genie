@@ -15,6 +15,7 @@ const transportationController = require("../controllers/transportationControlle
 
 const router = express.Router();
 
+
 router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
@@ -226,5 +227,8 @@ router.get("/my-flights", touristController.getMyFlights);
 
 router.post("/book-hotel", touristController.bookHotel);
 router.get("/my-hotels", touristController.getMyHotels);
+
+router.post("/promo-code", touristController.applyPromoCode);
+
 
 module.exports = router;

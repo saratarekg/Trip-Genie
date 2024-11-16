@@ -30,6 +30,11 @@ const promoCodeSchema = new Schema(
       min: [1, "Usage limit must be at least 1"],
     },
 
+    timesUsed: {
+      type: Number,
+      default: 0,
+    },
+
     dateRange: {
       start: {
         type: Date,
@@ -51,5 +56,40 @@ const promoCodeSchema = new Schema(
 );
 
 
+// Method to check and update the status of the promo code
+promoCodeSchema.methods.checkStatus = function () {
+  const now = new Date();
+  if (this.dateRange.end < now) {
+    this.status = "expired";
+  } else if (this.timesUsed >= this.usage_limit) {
+    this.status = "inactive";
+  } else {
+    this.status = "active";
+  }
+};
+
+// Static function to use a promo code
+promoCodeSchema.statics.usePromoCode = async function (code) {
+  const promo = await this.findOne({ code });
+
+  if (!promo) {
+    throw new Error("Promo code not found");
+  }
+
+  // Check and update status
+  promo.checkStatus();
+  if (promo.status !== "active") {
+    throw new Error(`Promo code is ${promo.status}`);
+  }
+
+  // Increment timesUsed and recheck status
+  promo.timesUsed += 1;
+  promo.checkStatus();
+  await promo.save();
+
+  return promo;
+};
+
 const PromoCode = mongoose.model("PromoCode", promoCodeSchema);
+
 module.exports = PromoCode;
