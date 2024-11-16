@@ -108,6 +108,7 @@ router.get(
   itineraryBookingController.getMyCurrentItineraries
 );
 
+router.put("/cancelPurchase/:id", purchaseController.cancelPurchase);
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);
 

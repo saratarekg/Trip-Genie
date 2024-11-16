@@ -270,3 +270,50 @@ exports.deletePurchase = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+//cancel a purchase
+exports.cancelPurchase = async (req, res) => {
+  const { purchaseId } = req.params;
+
+  try {
+    const purchase = await Purchase.findById(purchaseId)
+      .populate("products.product")
+      .exec();
+
+    if (!purchase) {
+      return res.status(404).json({ message: "Purchase not found" });
+    }
+
+    if (purchase.status === "cancelled") {
+      return res.status(400).json({ message: "Purchase already cancelled" });
+    }
+
+    if (purchase.status === "delivered") {
+      return res.status(400).json({ message: "Purchase already delivered" });
+    }
+
+    // Update the product sales accordingly
+    for (const item of purchase.products) {
+      const { product, quantity } = item;
+      await productSales.updateOne(
+        {
+          product,
+          day: purchase.createdAt.getDate(),
+          month: purchase.createdAt.getMonth() + 1,
+          year: purchase.createdAt.getFullYear(),
+        },
+        { $inc: { sales: -quantity, revenue: -product.price * quantity } }
+      );
+    }
+
+    await Purchase.findByIdAndUpdate(
+      purchaseId,
+      { status: "cancelled" },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json({ message: "Purchase cancelled successfully" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
