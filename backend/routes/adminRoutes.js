@@ -179,5 +179,9 @@ router.get("/activities-report", adminController.getActivitiesReport);
 
 
 router.post("/promo-code", adminController.addPromoCode);
+router.get("/promo-code", adminController.getPromoCodes);
+router.get("/promo-code/:id", adminController.getPromoCode);
+router.delete("/promo-code/:id", adminController.deletePromoCode);
+router.put("/promo-code/:id", adminController.updatePromoCode);
 
 module.exports = router;
