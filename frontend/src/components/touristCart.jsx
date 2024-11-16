@@ -387,63 +387,130 @@ const ShoppingCart = () => {
         {cartItems?.length === 0 ? (
           <p className="text-center text-gray-500 my-8">No items in cart</p>
         ) : (
-          cartItems.map((item) => (
-            <div key={item.product?._id} className="flex items-center justify-between border-b py-4">
-              <div className="flex items-center">
-                <img
-                  src={item.product?.pictures[0]?.url}
-                  alt={item?.product?.name || "Product"}
-                  className="w-20 h-20 object-cover mr-4 cursor-pointer"
-                  onClick={() => handleProductClick(item.product._id)}
-                />
-                <div>
-                  <h2 className="text-lg font-semibold cursor-pointer hover:underline" onClick={() => handleProductClick(item.product._id)}>
-                    {item?.product?.name}
-                  </h2>
-                  <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
-                    {item.product.description?.length > 50 ? `${item.product.description?.slice(0, 50)}...` : item.product.description}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center">
-              <div className="flex items-center justify-between w-32 h-10 border border-gray-300 rounded-md">
-              <Button
-                    onClick={() => handleQuantityChange(item?.product?._id, Math.max(1, item?.quantity - 1))}
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-black"
-                                        disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
-                  >
-                    <Minus className="h-5 w-5 text-[#388A94] font-semibold" />
-                  </Button>
-                  <span className="text-center font-semibold text-xl text-black w-8">{item?.quantity}</span>
-                  <Button
-                    onClick={() => handleQuantityChange(item?.product?._id, item?.quantity + 1)}
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-black"
-                                        disabled={item?.quantity >= item?.product?.quantity}
-                  >
-                    <Plus className="h-5 w-5 text-[#388A94] font-semibold" />
-                  </Button>
-                </div>
-                <span className="ml-4 font-semibold w-24 text-right text-2xl">
-                  {item.priceLoading ? (
-                    <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
-                  ) : (
-                    formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
-                  )}
-                </span>
-                <Button
-                variant="ghost"
-                  onClick={() => (item?.product?._id)}
-                  className="p-2 w-8 h-8 ml-4 text-red-500 hover:text-red-700  transition duration-300 ease-in-out"
-                  >
-                    <Trash2 className="h-6 w-6 " />
-                </Button>
-              </div>
+          <div className="space-y-6">
+  {/* Cart Items Wrapper with Scrollable Area */}
+  <div className="max-h-[500px] overflow-y-auto">
+    {cartItems.length > 4 ? (
+      cartItems.map((item) => (
+        <div key={item.product?._id} className="flex items-center justify-between border-b py-4">
+          <div className="flex items-center">
+            <img
+              src={item.product?.pictures[0]?.url}
+              alt={item?.product?.name || "Product"}
+              className="w-20 h-20 object-cover mr-4 cursor-pointer"
+              onClick={() => handleProductClick(item.product._id)}
+            />
+            <div>
+              <h2 className="text-lg font-semibold cursor-pointer hover:underline" onClick={() => handleProductClick(item.product._id)}>
+                {item?.product?.name}
+              </h2>
+              <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
+                {item.product.description?.length > 50 ? `${item.product.description?.slice(0, 50)}...` : item.product.description}
+              </p>
             </div>
-          ))
+          </div>
+          <div className="flex items-center">
+            <div className="flex items-center justify-between w-32 h-10 border border-gray-300 rounded-md">
+              <Button
+                onClick={() => handleQuantityChange(item?.product?._id, Math.max(1, item?.quantity - 1))}
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-black"
+                disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
+              >
+                <Minus className="h-5 w-5 text-[#388A94] font-semibold" />
+              </Button>
+              <span className="text-center font-semibold text-xl text-black w-8">{item?.quantity}</span>
+              <Button
+                onClick={() => handleQuantityChange(item?.product?._id, item?.quantity + 1)}
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-black"
+                disabled={item?.quantity >= item?.product?.quantity}
+              >
+                <Plus className="h-5 w-5 text-[#388A94] font-semibold" />
+              </Button>
+            </div>
+            <span className="ml-4 font-semibold w-24 text-right text-2xl">
+              {item.priceLoading ? (
+                <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
+              ) : (
+                formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
+              )}
+            </span>
+            <Button
+              variant="ghost"
+              onClick={() => handleRemoveItem(item?.product?._id)}
+              className="p-2 w-8 h-8 ml-4 text-red-500 hover:text-red-700 transition duration-300 ease-in-out"
+            >
+              <Trash2 className="h-6 w-6 " />
+            </Button>
+          </div>
+        </div>
+      ))
+    ) : (
+      // If less than 4 items, render normally without scroll
+      cartItems.map((item) => (
+        <div key={item.product?._id} className="flex items-center justify-between border-b py-4">
+          <div className="flex items-center">
+            <img
+              src={item.product?.pictures[0]?.url}
+              alt={item?.product?.name || "Product"}
+              className="w-20 h-20 object-cover mr-4 cursor-pointer"
+              onClick={() => handleProductClick(item.product._id)}
+            />
+            <div>
+              <h2 className="text-lg font-semibold cursor-pointer hover:underline" onClick={() => handleProductClick(item.product._id)}>
+                {item?.product?.name}
+              </h2>
+              <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
+                {item.product.description?.length > 50 ? `${item.product.description?.slice(0, 50)}...` : item.product.description}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <div className="flex items-center justify-between w-32 h-10 border border-gray-300 rounded-md">
+              <Button
+                onClick={() => handleQuantityChange(item?.product?._id, Math.max(1, item?.quantity - 1))}
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-black"
+                disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
+              >
+                <Minus className="h-5 w-5 text-[#388A94] font-semibold" />
+              </Button>
+              <span className="text-center font-semibold text-xl text-black w-8">{item?.quantity}</span>
+              <Button
+                onClick={() => handleQuantityChange(item?.product?._id, item?.quantity + 1)}
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-black"
+                disabled={item?.quantity >= item?.product?.quantity}
+              >
+                <Plus className="h-5 w-5 text-[#388A94] font-semibold" />
+              </Button>
+            </div>
+            <span className="ml-4 font-semibold w-24 text-right text-2xl">
+              {item.priceLoading ? (
+                <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
+              ) : (
+                formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
+              )}
+            </span>
+            <Button
+              variant="ghost"
+              onClick={() => handleRemoveItem(item?.product?._id)}
+              className="p-2 w-8 h-8 ml-4 text-red-500 hover:text-red-700 transition duration-300 ease-in-out"
+            >
+              <Trash2 className="h-6 w-6 " />
+            </Button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+</div>
+
         )}
       </div>
       <div className="w-80 bg-gray-200 p-8">

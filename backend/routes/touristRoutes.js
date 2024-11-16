@@ -52,11 +52,11 @@ router.delete("/remove/cart/:id", touristController.removeItemFromCart);
 router.put("/update/cart", touristController.updateCartProductQuantity);
 
 router.get("/wishlist", touristController.getWishlist);
-router.delete(
-  "/remove/wishlist/:id",
-  touristController.removeProductFromWishlist
-);
+router.delete("/remove/wishlist/:id",touristController.removeProductFromWishlist);
+router.delete("/remove/all/wishlist",touristController.removeAllFromWishlist);
+
 router.put("/move/wishlist/:id", touristController.moveProductToCart);
+router.put("/move/all/wishlist", touristController.addAllToCart);
 
 router.get("/", touristController.getTouristProfile);
 

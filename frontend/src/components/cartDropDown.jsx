@@ -176,19 +176,23 @@ export default function CartDropdown({
                 </div>
 
                 <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span 
-                        onClick={() => (navigate(`/product/${item.product._id}`), setIsCartOpen(false))} 
-                        className="font-semibold text-black text-lg  cursor-pointer hover:underline"
-                      >
-                        {item.product.name}
-                      </span>
-                    </div>
-                    <p className="font-semibold text-black text-xl">
-                      {formatPrice(item.product.price, item.product.currency)}
-                    </p>
-                  </div>
+  <div className="flex justify-between items-start">
+    <div>
+      <span 
+        onClick={() => (navigate(`/product/${item.product._id}`), setIsCartOpen(false))} 
+        className="font-semibold text-black text-xl cursor-pointer hover:underline"
+      >
+        {item.product.name}
+      </span>
+      {/* Size Information */}
+      <p className="text-base text-black mt-1">One Size</p>
+    </div>
+    <p className="font-semibold text-black text-xl">
+      {formatPrice(item.product.price, item.product.currency)}
+    </p>
+  </div>
+
+
 
                   <div className="flex justify-between items-center mt-2">
                   <div className="flex items-center gap-2">
@@ -233,18 +237,23 @@ export default function CartDropdown({
           </div>
         )}
 
-        {cartItems.length > 0 && (
-          <Button
-            className="w-full mt-4 text-white text-lg font-semibold bg-[#1A3B47] hover:bg-[#14303A] transition duration-300 ease-in-out"
-            onClick={() => {
-              navigate('/touristCart')
-              setIsCartOpen(false)
-              onClose()
-            }}
-          >
-            View All
-          </Button>
-        )}
+{cartItems.length > 0 && (
+  <>
+    <div className="flex justify-between items-center w-full border-t border-gray-300 px-4 py-2 mb-4">
+      <Button
+        className="w-full mt-4 text-white text-lg font-semibold bg-[#1A3B47] hover:bg-[#14303A] transition duration-300 ease-in-out"
+        onClick={() => {
+          navigate('/touristCart')
+          setIsCartOpen(false)
+          onClose()
+        }}
+      >
+        View All
+      </Button>
+    </div>
+  </>
+)}
+
       </div>
     </div>
   )

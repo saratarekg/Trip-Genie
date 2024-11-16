@@ -971,6 +971,112 @@ const moveProductToCart = async (req, res) => {
   }
 };
 
+// Method to add all products from wishlist to cart
+const addAllToCart = async (req, res) => {
+  const userId = res.locals.user_id; // Get logged-in user id
+
+  try {
+    // Find the user (tourist)
+    const user = await Tourist.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Iterate through each product in the user's wishlist
+    for (let item of user.wishlist) {
+      const productId = item.product;
+      const product = await Product.findById(productId);
+      if (!product) {
+        console.error(`Product with ID ${productId} not found in the database.`);
+        continue; // Skip this product if it's not found
+      }
+    
+      // Check if the product is already in the cart
+      const existingCartItem = user.cart.find(
+        (cartItem) => cartItem.product._id.toString() === productId.toString()
+       
+      );
+
+      if (existingCartItem) {
+        // If the product is already in the cart, update its quantity and totalPrice
+        await Tourist.updateOne(
+          { _id: userId, "cart.product": productId },
+          {
+            $set: {
+              "cart.$.quantity": existingCartItem.quantity + 1, // Increase the quantity by 1
+              "cart.$.totalPrice": (existingCartItem.quantity + 1) * product.price, // Update the total price
+            },
+          }
+        );
+      } else {
+        // If the product is not in the cart, add it with quantity 1 and set the totalPrice
+        await Tourist.findByIdAndUpdate(
+          userId,
+          {
+            $push: {
+              cart: {
+                product: productId,
+                quantity: 1,
+                totalPrice: product.price,
+              },
+            },
+          },
+          { new: true }
+        );
+      }
+    }
+
+    // After moving all items, remove them from the wishlist
+    await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $set: { wishlist: [] }, // Clear the wishlist
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "All products moved to cart",
+      cart: user.cart,
+      wishlist: [], // Wishlist should now be empty
+    });
+  } catch (error) {
+    console.error("Error occurred while adding all products to cart:", error);
+    res.status(500).json({ message: "An error occurred", error: error.message });
+  }
+};
+
+// Method to remove all products from the wishlist
+const removeAllFromWishlist = async (req, res) => {
+  const userId = res.locals.user_id; // Get logged-in user id
+
+  try {
+    // Find the user (tourist)
+    const user = await Tourist.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Remove all products from the wishlist
+    await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $set: { wishlist: [] }, // Set the wishlist to an empty array
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "All products removed from wishlist",
+      wishlist: [], // Wishlist is now empty
+    });
+  } catch (error) {
+    console.error("Error occurred while removing all products from wishlist:", error);
+    res.status(500).json({ message: "An error occurred", error: error.message });
+  }
+};
+
+
 const deleteAccount = async (req, res) => {
   try {
     const tourist = await Tourist.findById(res.locals.user_id).lean();
@@ -1608,4 +1714,6 @@ module.exports = {
   bookHotel,
   getMyFlights, 
   getMyHotels,
+  addAllToCart,
+  removeAllFromWishlist,
 };
