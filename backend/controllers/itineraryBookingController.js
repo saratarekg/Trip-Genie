@@ -287,3 +287,38 @@ exports.getItinerariesReport = async (req, res) => {
     res.status(500).json({ message: error.message }); // Handle errors
   }
 };
+
+exports.getMyCurrentItineraries = async (req, res) => {
+  try {
+    const itineraries = await ItineraryBooking.find({
+      user: res.locals.user_id,
+    }).populate("itinerary");
+
+    console.log(itineraries[0].itinerary);
+    const now = new Date();
+    const currentItineraries = itineraries.filter((itinerary) => {
+      //get the end time by looping over the activities and adding the duration to the start time checing the latest time
+      let endTime = new Date(itinerary.date);
+      itinerary.itinerary.activities.forEach((activity) => {
+        const activityEndTime = new Date(
+          activity.timing + activity.duration * 60 * 60 * 1000
+        );
+
+        if (activityEndTime > endTime) {
+          endTime = activityEndTime;
+        }
+      });
+
+      const startTime = new Date(itinerary.date);
+      console.log(startTime, endTime);
+      return startTime < now && now < endTime;
+    });
+
+    res.status(200).json(currentItineraries);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};

@@ -11,10 +11,9 @@ const sellerController = require("../controllers/sellerController");
 const complaintsController = require("../controllers/complaintsController.js");
 const purchaseController = require("../controllers/purchaseController.js");
 const currencyController = require("../controllers/currencyController");
-const transportationController = require("../controllers/transportationController.js")
+const transportationController = require("../controllers/transportationController.js");
 
 const router = express.Router();
-
 
 router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
@@ -33,14 +32,21 @@ router.delete("/card/:id", touristController.deleteCard);
 
 router.put("/add-shippingAdd", touristController.addShippingAddress);
 router.get("/shippingAdds", touristController.getAllShippingAddresses);
-router.put("/add-default-shippingAdds/:id", touristController.changeDefaultShippingAddress);
+router.put(
+  "/add-default-shippingAdds/:id",
+  touristController.changeDefaultShippingAddress
+);
 router.put("/update-shippingAdd/:id", touristController.updateShippingAddress);
 router.delete("/shippingAdds/:id", touristController.deleteShippingAddress);
 
-router.get("/historical-places-preference", historicalPlacesController.filterHistoricalPlacesByPreferences);
-router.get("/historical-places-not-preference", historicalPlacesController.theHolyAntiFilter);
-
-
+router.get(
+  "/historical-places-preference",
+  historicalPlacesController.filterHistoricalPlacesByPreferences
+);
+router.get(
+  "/historical-places-not-preference",
+  historicalPlacesController.theHolyAntiFilter
+);
 
 router.put("/", touristController.updateTouristProfile);
 router.put("/preferences", touristController.updatePreferences);
@@ -52,8 +58,11 @@ router.delete("/remove/cart/:id", touristController.removeItemFromCart);
 router.put("/update/cart", touristController.updateCartProductQuantity);
 
 router.get("/wishlist", touristController.getWishlist);
-router.delete("/remove/wishlist/:id",touristController.removeProductFromWishlist);
-router.delete("/remove/all/wishlist",touristController.removeAllFromWishlist);
+router.delete(
+  "/remove/wishlist/:id",
+  touristController.removeProductFromWishlist
+);
+router.delete("/remove/all/wishlist", touristController.removeAllFromWishlist);
 
 router.put("/move/wishlist/:id", touristController.moveProductToCart);
 router.put("/move/all/wishlist", touristController.addAllToCart);
@@ -72,10 +81,31 @@ router.get(
   "/itineraries-not-preference",
   itineraryController.theHolyAntiFilter
 );
-router.post("/itineraries/:itineraryId/activities", itineraryController.addActivityToItinerary);
-router.put("/itineraries/:itineraryId/activities/:activityId", itineraryController.editActivityInItinerary);
-router.delete("/itineraries/:itineraryId/activities/:activityId", itineraryController.removeActivityFromItinerary);
+router.post(
+  "/itineraries/:itineraryId/activities",
+  itineraryController.addActivityToItinerary
+);
+router.put(
+  "/itineraries/:itineraryId/activities/:activityId",
+  itineraryController.editActivityInItinerary
+);
+router.delete(
+  "/itineraries/:itineraryId/activities/:activityId",
+  itineraryController.removeActivityFromItinerary
+);
+router.get("/myCurrentPurchases", purchaseController.getMyCurrentPurchases);
+router.get("/myPastPurchases", purchaseController.getMyPastPurchases);
 
+router.get(
+  "/myCurrentActivities",
+  activityBookingController.getMyCurrentActivities
+);
+router.get("/myPastActivities", activityBookingController.getMyPastActivities);
+
+router.get(
+  "/myCurrentItineraries",
+  itineraryBookingController.getMyCurrentItineraries
+);
 
 router.get("/products", productController.getAllProducts);
 router.get("/products/:id", productController.getProductById);
@@ -131,7 +161,6 @@ router.get(
   historicalPlacesController.getHistoricalPlace
 );
 
-
 router.post("/purchase", purchaseController.createPurchase);
 router.get("/purchase", purchaseController.getPurchasesByTourist);
 router.delete("/purchase/:id", purchaseController.deletePurchase);
@@ -183,17 +212,19 @@ router.post("/redeem-points", touristController.redeemPoints);
 router.get("/complaints", complaintsController.getTouristComplaints);
 router.delete("/delete-account", touristController.deleteAccount);
 
-router.post("/book-transportation", touristController.bookTransportation); 
-router.get("/upcoming-transportation", touristController.getUpcomingBookings); 
-router.get("/history-transportation", touristController.getPreviousBookings); 
+router.post("/book-transportation", touristController.bookTransportation);
+router.get("/upcoming-transportation", touristController.getUpcomingBookings);
+router.get("/history-transportation", touristController.getPreviousBookings);
 router.delete("/transportation-booking/:id", touristController.deleteBooking);
-router.get("/transportations", transportationController.getAllTransportationsNew);
+router.get(
+  "/transportations",
+  transportationController.getAllTransportationsNew
+);
 
 router.post("/book-flight", touristController.bookFlight);
 router.get("/my-flights", touristController.getMyFlights);
 
 router.post("/book-hotel", touristController.bookHotel);
 router.get("/my-hotels", touristController.getMyHotels);
-
 
 module.exports = router;

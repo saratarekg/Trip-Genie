@@ -246,7 +246,21 @@ const updateTouristProfile = async (req, res) => {
 };
 
 const bookFlight = async (req, res) => {
-  const { flightID, from, to, departureDate, arrivalDate, price, numberOfTickets, type, returnDepartureDate, returnArrivalDate, seatType, flightType, flightTypeReturn } = req.body;
+  const {
+    flightID,
+    from,
+    to,
+    departureDate,
+    arrivalDate,
+    price,
+    numberOfTickets,
+    type,
+    returnDepartureDate,
+    returnArrivalDate,
+    seatType,
+    flightType,
+    flightTypeReturn,
+  } = req.body;
   const touristID = res.locals.user_id;
 
   try {
@@ -262,9 +276,9 @@ const bookFlight = async (req, res) => {
       type,
       returnDepartureDate,
       returnArrivalDate,
-      seatType, 
-      flightType, 
-      flightTypeReturn
+      seatType,
+      flightType,
+      flightTypeReturn,
     });
 
     const savedBooking = await booking.save();
@@ -277,7 +291,7 @@ const bookFlight = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const getMyFlights = async (req, res) => {
   const touristID = res.locals.user_id;
@@ -290,23 +304,32 @@ const getMyFlights = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const bookHotel = async (req, res) => {
-  const { hotelID,hotelName, checkinDate, checkoutDate, numberOfRooms, roomName, price, numberOfAdults } = req.body;
+  const {
+    hotelID,
+    hotelName,
+    checkinDate,
+    checkoutDate,
+    numberOfRooms,
+    roomName,
+    price,
+    numberOfAdults,
+  } = req.body;
   const touristID = res.locals.user_id;
 
   try {
     const booking = new TouristHotel({
       touristID,
       hotelID,
-      hotelName, 
+      hotelName,
       checkinDate,
       checkoutDate,
       numberOfRooms,
       roomName,
       price,
-      numberOfAdults
+      numberOfAdults,
     });
 
     const savedBooking = await booking.save();
@@ -319,7 +342,7 @@ const bookHotel = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const getMyHotels = async (req, res) => {
   const touristID = res.locals.user_id;
@@ -332,7 +355,7 @@ const getMyHotels = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const bookTransportation = async (req, res) => {
   const { transportationID, seatsToBook, paymentMethod } = req.body;
@@ -398,7 +421,6 @@ const bookTransportation = async (req, res) => {
   }
 };
 
-
 const getUpcomingBookings = async (req, res) => {
   const touristID = res.locals.user_id;
 
@@ -413,7 +435,9 @@ const getUpcomingBookings = async (req, res) => {
       .exec();
 
     // Filter out bookings where the transportationID does not match due to date filtering
-    const filteredBookings = upcomingBookings.filter((booking) => booking.transportationID);
+    const filteredBookings = upcomingBookings.filter(
+      (booking) => booking.transportationID
+    );
 
     res.status(200).json(filteredBookings);
   } catch (error) {
@@ -437,7 +461,9 @@ const getPreviousBookings = async (req, res) => {
       .exec();
 
     // Filter out bookings where the transportationID does not match due to date filtering
-    const filteredBookings = previousBookings.filter((booking) => booking.transportationID);
+    const filteredBookings = previousBookings.filter(
+      (booking) => booking.transportationID
+    );
 
     res.status(200).json(filteredBookings);
   } catch (error) {
@@ -452,7 +478,9 @@ const deleteBooking = async (req, res) => {
 
   try {
     // Step 1: Find the booking to delete
-    const booking = await TouristTransportation.findById(id).populate("transportationID");
+    const booking = await TouristTransportation.findById(id).populate(
+      "transportationID"
+    );
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
@@ -460,27 +488,28 @@ const deleteBooking = async (req, res) => {
 
     // Check if the booking belongs to the correct tourist
     if (booking.touristID.toString() !== touristID) {
-      return res.status(403).json({ message: "You can only delete your own bookings" });
+      return res
+        .status(403)
+        .json({ message: "You can only delete your own bookings" });
     }
 
     const transportation = booking.transportationID;
 
     // Step 2: refund the cost to the tourist's wallet
-      const totalCost = transportation.ticketCost * booking.seatsBooked;
-      const tourist = await Tourist.findById(touristID);
+    const totalCost = transportation.ticketCost * booking.seatsBooked;
+    const tourist = await Tourist.findById(touristID);
 
-      if (!tourist) {
-        return res.status(404).json({ message: "Tourist not found" });
-      }
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
 
-      // Increment the wallet by the refund amount
-      console.log(tourist);
-      await Tourist.findByIdAndUpdate(
-        touristID,
-        { $inc: { wallet: totalCost } }, // Increase wallet by the refund amount
-        { new: true , runValidators: true }
-      );
-      
+    // Increment the wallet by the refund amount
+    console.log(tourist);
+    await Tourist.findByIdAndUpdate(
+      touristID,
+      { $inc: { wallet: totalCost } }, // Increase wallet by the refund amount
+      { new: true, runValidators: true }
+    );
 
     // Step 3: Delete the booking using findByIdAndDelete
     await TouristTransportation.findByIdAndDelete(id);
@@ -490,13 +519,14 @@ const deleteBooking = async (req, res) => {
     transportation.remainingSeats += booking.seatsBooked;
     await transportation.save();
 
-    res.status(200).json({ message: "Booking successfully deleted and refunded (if wallet used)" });
+    res.status(200).json({
+      message: "Booking successfully deleted and refunded (if wallet used)",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error deleting booking" });
   }
 };
-
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
@@ -550,7 +580,7 @@ const redeemPoints = async (req, res) => {
     const pointsToRedeem = tourist.loyaltyPoints;
 
     // Calculate the redeemable cash based on all loyalty points
-    const redeemableCash = pointsToRedeem / 100 ;  // in EGP
+    const redeemableCash = pointsToRedeem / 100; // in EGP
     const updatedWalletinUSD = redeemableCash / 49.24; // in USD
 
     // Update the wallet and set loyalty points to 0
@@ -987,14 +1017,15 @@ const addAllToCart = async (req, res) => {
       const productId = item.product;
       const product = await Product.findById(productId);
       if (!product) {
-        console.error(`Product with ID ${productId} not found in the database.`);
+        console.error(
+          `Product with ID ${productId} not found in the database.`
+        );
         continue; // Skip this product if it's not found
       }
-    
+
       // Check if the product is already in the cart
       const existingCartItem = user.cart.find(
         (cartItem) => cartItem.product._id.toString() === productId.toString()
-       
       );
 
       if (existingCartItem) {
@@ -1004,7 +1035,8 @@ const addAllToCart = async (req, res) => {
           {
             $set: {
               "cart.$.quantity": existingCartItem.quantity + 1, // Increase the quantity by 1
-              "cart.$.totalPrice": (existingCartItem.quantity + 1) * product.price, // Update the total price
+              "cart.$.totalPrice":
+                (existingCartItem.quantity + 1) * product.price, // Update the total price
             },
           }
         );
@@ -1042,7 +1074,9 @@ const addAllToCart = async (req, res) => {
     });
   } catch (error) {
     console.error("Error occurred while adding all products to cart:", error);
-    res.status(500).json({ message: "An error occurred", error: error.message });
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };
 
@@ -1071,11 +1105,15 @@ const removeAllFromWishlist = async (req, res) => {
       wishlist: [], // Wishlist is now empty
     });
   } catch (error) {
-    console.error("Error occurred while removing all products from wishlist:", error);
-    res.status(500).json({ message: "An error occurred", error: error.message });
+    console.error(
+      "Error occurred while removing all products from wishlist:",
+      error
+    );
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };
-
 
 const deleteAccount = async (req, res) => {
   try {
@@ -1737,7 +1775,7 @@ module.exports = {
   deleteBooking,
   bookFlight,
   bookHotel,
-  getMyFlights, 
+  getMyFlights,
   getMyHotels,
   addAllToCart,
   removeAllFromWishlist,

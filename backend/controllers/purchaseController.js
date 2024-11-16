@@ -161,6 +161,44 @@ exports.getPurchasesByTourist = async (req, res) => {
   }
 };
 
+exports.getMyCurrentPurchases = async (req, res) => {
+  try {
+    const purchases = await Purchase.find({
+      tourist: res.locals.user_id,
+    }).populate("products.product");
+
+    const currentPurchases = purchases.filter(
+      (purchase) => new Date(purchase.deliveryDate) > new Date()
+    );
+
+    res.status(200).json(currentPurchases);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};
+
+exports.getMyPastPurchases = async (req, res) => {
+  try {
+    const purchases = await Purchase.find({
+      tourist: res.locals.user_id,
+    }).populate("products.product");
+
+    const pastPurchases = purchases.filter(
+      (purchase) => new Date(purchase.deliveryDate) < new Date()
+    );
+
+    res.status(200).json(pastPurchases);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};
+
 // Get all purchases by a specific product
 exports.getPurchasesByProduct = async (req, res) => {
   const { productId } = req.params;
