@@ -1652,15 +1652,40 @@ const updateShippingAddress = async (req, res) => {
       return res.status(400).json({ message: "Address updates are required." });
     }
 
-    const result = await Tourist.findOneAndUpdate(
-      { _id: res.locals.user_id, "shippingAddresses._id": id },
-      { $set: { "shippingAddresses.$": addressUpdates } },
-      { new: true }
+    // Find the tourist by their ID
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the address to update
+    const address = tourist.shippingAddresses.find(
+      (address) => address._id.toString() === id
     );
 
-    if (!result) {
-      return res.status(404).json({ message: "Tourist or address not found" });
+    if (!address) {
+      return res.status(404).json({ message: "Address not found" });
     }
+
+    // Update the address fields
+    const result = await Tourist.updateOne(
+      { _id: res.locals.user_id, "shippingAddresses._id": id },
+      {
+        $set: {
+          "shippingAddresses.$.streetName": addressUpdates.streetName,
+          "shippingAddresses.$.streetNumber": addressUpdates.streetNumber,
+          "shippingAddresses.$.floorUnit": addressUpdates.floorUnit,
+          "shippingAddresses.$.city": addressUpdates.city,
+          "shippingAddresses.$.state": addressUpdates.state,
+          "shippingAddresses.$.country": addressUpdates.country,
+          "shippingAddresses.$.postalCode": addressUpdates.postalCode,
+          "shippingAddresses.$.landmark": addressUpdates.landmark,
+          "shippingAddresses.$.locationType": addressUpdates.locationType,
+        },
+      }
+    );
+    
 
     return res.status(200).json({
       message: "Address updated successfully",
