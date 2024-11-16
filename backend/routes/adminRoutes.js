@@ -177,4 +177,7 @@ router.get("/sales-report", adminController.getSalesReport);
 router.get("/itineraries-report", adminController.getItinerariesReport);
 router.get("/activities-report", adminController.getActivitiesReport);
 
+
+router.post("/promo-code", adminController.addPromoCode);
+
 module.exports = router;

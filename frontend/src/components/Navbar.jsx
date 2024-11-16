@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-import CartDropdown from "@/components/cartDropDown"
+import CartDropdown from "@/components/cartDropDown";
 import logo from "../assets/images/TGlogo.svg";
 import {
   Menu,
@@ -87,27 +87,27 @@ export function NavbarComponent() {
   }, []);
 
   useEffect(() => {
-
-    fetchCartItems()
-  }, [])
-
+    fetchCartItems();
+  }, []);
 
   const fetchCartItems = useCallback(async () => {
     try {
-      const token = Cookies.get("jwt")
+      const token = Cookies.get("jwt");
+      const role = Cookies.get("role");
+      if (role !== "tourist") return;
       const response = await fetch("http://localhost:4000/tourist/cart", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
+      });
       if (response.ok) {
-        const data = await response.json()
-        setCartItems(data)
+        const data = await response.json();
+        setCartItems(data);
       }
     } catch (error) {
-      console.error("Error fetching cart items:", error)
+      console.error("Error fetching cart items:", error);
     }
-  }, [])
+  }, []);
 
   const logOut = async () => {
     console.log("Logging out...");
@@ -156,7 +156,12 @@ export function NavbarComponent() {
           {/* Logo */}
           <div className="flex-shrink-0 ml-8">
             <Link to="/" className="flex items-center">
-              <img src={logo} alt="logo" onClick={() => setIsCartOpen(false)} className="h-10 w-auto" />
+              <img
+                src={logo}
+                alt="logo"
+                onClick={() => setIsCartOpen(false)}
+                className="h-10 w-auto"
+              />
             </Link>
           </div>
 
@@ -167,7 +172,7 @@ export function NavbarComponent() {
                 <>
                   <div className="relative" ref={itinerariesRef}>
                     <button
-                      onClick={() => toggleDropdown("itineraries") }
+                      onClick={() => toggleDropdown("itineraries")}
                       className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                     >
                       Itineraries
@@ -269,7 +274,9 @@ export function NavbarComponent() {
                     {/* Transportation Dropdown */}
                     <div className="relative" ref={transportationRef}>
                       <button
-                        onClick={() => (toggleDropdown("transportation"),setIsCartOpen(false))}
+                        onClick={() => (
+                          toggleDropdown("transportation"), setIsCartOpen(false)
+                        )}
                         className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                       >
                         Transportation
@@ -475,24 +482,34 @@ export function NavbarComponent() {
                 </button>
                 {role === "tourist" && (
                   <>
-               <div className="relative mr-2 mt-1">
-  <button onClick={() => setIsCartOpen(!isCartOpen)} className="relative">
-    <ShoppingCart className="h-7 w-7 text-white" /> {/* Larger icon size */}
-    {cartItems.length > 0 && (
-      <div className="absolute top-0 right-0 flex items-center justify-center w-4 h-4 text-[12px] text-white bg-red-500 rounded-full"> {/* Smaller red circle */}
-        {cartItems.length}
-      </div>
-    )}
-  </button>
-  <CartDropdown isOpen={isCartOpen} setIsCartOpen={setIsCartOpen} isCartOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-</div>
+                    <div className="relative mr-2 mt-1">
+                      <button
+                        onClick={() => setIsCartOpen(!isCartOpen)}
+                        className="relative"
+                      >
+                        <ShoppingCart className="h-7 w-7 text-white" />{" "}
+                        {/* Larger icon size */}
+                        {cartItems.length > 0 && (
+                          <div className="absolute top-0 right-0 flex items-center justify-center w-4 h-4 text-[12px] text-white bg-red-500 rounded-full">
+                            {" "}
+                            {/* Smaller red circle */}
+                            {cartItems.length}
+                          </div>
+                        )}
+                      </button>
+                      <CartDropdown
+                        isOpen={isCartOpen}
+                        setIsCartOpen={setIsCartOpen}
+                        isCartOpen={isCartOpen}
+                        onClose={() => setIsCartOpen(false)}
+                      />
+                    </div>
 
-
-
-                    
                     <NavLinkIcon to="/account/wishlist">
-                      <button  onClick={() => setIsCartOpen(false)} className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
-                      
+                      <button
+                        onClick={() => setIsCartOpen(false)}
+                        className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2"
+                      >
                         <Heart className="h-7 w-7" />
                         <span className="sr-only">Wishlist</span>
                       </button>
