@@ -910,6 +910,10 @@ const updateCommentOnProduct = async (req, res) => {
   }
 };
 
+
+
+
+
 module.exports = {
   rateProduct,
   addCommentToProduct,

@@ -31,6 +31,9 @@ import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./pages/SignUp.jsx";
+
+import  SellerNotifications  from "./pages/SellerNotifications.jsx";
+
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import Checkout from "./pages/checkout.jsx";
@@ -378,6 +381,16 @@ function AppContent() {
                 allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
               >
                 <PrivacyPolicy />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["seller"]}
+              >
+                <SellerNotifications />
               </ProtectedRoute>
             }
           />

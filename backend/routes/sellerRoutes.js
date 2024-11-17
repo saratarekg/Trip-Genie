@@ -7,6 +7,14 @@ const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const currencyController = require("../controllers/currencyController");
+router.get("/notifications", sellerController.getSellerNotifications);
+
+router.get('/unseen-notifications',sellerController.hasUnseenNotifications);
+
+// POST /seller/mark-notifications-seen
+router.post('/mark-notifications-seen', sellerController.markNotificationsAsSeen);
+
+
 
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);

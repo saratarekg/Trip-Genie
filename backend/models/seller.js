@@ -62,15 +62,18 @@ const sellerSchema = new mongoose.Schema({
     },
   },
   notifications: [{
-   body: {
+    body: {
       type: String,
-
     },
     date: {
       type: Date,
       default: Date.now,
     },
-}],
+    seen: {
+      type: Boolean,
+      default: false,
+    }
+  }],
 });
 
 sellerSchema.pre("save", async function (next) {

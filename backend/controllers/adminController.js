@@ -520,6 +520,29 @@ const getActivitiesReport = async (req, res) => {
   }
 };
 
+const getAdminNotifications = async (req, res) => {
+  try {
+    // Get seller ID from res.locals
+    const AdminId = res.locals.user_id;
+
+    if (!AdminId) {
+      return res.status(400).json({ message: "Admin Id is required" });
+    }
+
+    // Find the seller and get their notifications
+    const admin = await Admin.findById(AdminId, "notifications");
+
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Return the notifications
+    return res.status(200).json({ notifications: admin.notifications });
+  } catch (error) {
+    console.error("Error fetching notifications:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 module.exports = {
   addAdmin,
   getAdminByID,
@@ -541,4 +564,5 @@ module.exports = {
   getPromoCode,
   deletePromoCode,
   updatePromoCode,
+  getAdminNotifications
 };
