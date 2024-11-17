@@ -5,17 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import {
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  Filter,
-  ArrowUpDown,
-  Heart,
-  Edit,
-  Trash2,
-} from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Star, Filter, ArrowUpDown, Heart, Edit, Trash2, Bookmark } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -38,9 +28,8 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
         />
       ))}
     </div>
@@ -56,18 +45,20 @@ const ActivityCard = ({
   exchangeRates,
   currencies,
   onDeleteConfirm,
+  onSaveToggle,
 }) => {
   const role = Cookies.get("role") || "guest";
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSaved, setIsSaved] = useState(activity.isSaved);
 
   useEffect(() => {
     const initializeCard = async () => {
       await Promise.all([
         userInfo &&
-        userInfo.role === "tourist" &&
-        userInfo.preferredCurrency !== activity.currency
+          userInfo.role === "tourist" &&
+          userInfo.preferredCurrency !== activity.currency
           ? fetchExchangeRate()
           : getCurrencySymbol(),
       ]);
@@ -107,6 +98,12 @@ const ActivityCard = ({
       }
     }
   }, [userInfo, activity]);
+
+  const handleSaveToggle = (e) => {
+    e.stopPropagation();
+    setIsSaved(!isSaved);
+    onSaveToggle(activity._id, !isSaved);
+  };
 
   const getCurrencySymbol = useCallback(async () => {
     if (userInfo) {
@@ -149,6 +146,16 @@ const ActivityCard = ({
             className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
           />
         </div>
+        <Button
+          className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center"
+          onClick={handleSaveToggle}
+        >
+          <Bookmark
+            className={`w-6 h-6 ${isSaved ? "fill-yellow-400" : "stroke-black"}`}
+            stroke="black" // Fallback in case stroke class isn't supported
+          />
+        </Button>
+
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(activity._id)}>
         <CardTitle className="text-lg text-[#1A3B47]">
@@ -381,6 +388,51 @@ export default function AllActivities() {
       console.error("Error fetching exchange rates:", error);
     }
   }, []);
+
+  const onSaveToggle = async (activityId, isSaved) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(`http://localhost:4000/tourist/toggle-save-activity/${activityId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ saved: isSaved }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update saved status");
+      }
+
+      // Update the local state
+      setActivities(activities.map(activity =>
+        activity._id === activityId ? { ...activity, saved: isSaved } : activity
+      ));
+
+      setAlertMessage({
+        type: "success",
+        message: isSaved ? "Activity saved successfully!" : "Activity unsaved successfully!",
+      });
+
+      // Hide the alert message after 2 seconds
+      setTimeout(() => {
+        setAlertMessage(null);
+      }, 2000);
+
+    } catch (error) {
+      console.error("Error updating saved status:", error);
+      setAlertMessage({
+        type: "error",
+        message: "Error updating saved status. Please try again.",
+      });
+
+      // Hide the alert message after 2 seconds
+      setTimeout(() => {
+        setAlertMessage(null);
+      }, 2000);
+    }
+  };
 
   const fetchCurrencies = useCallback(async () => {
     const role = Cookies.get("role");
@@ -675,9 +727,8 @@ export default function AllActivities() {
                           rating === selectedRating ? null : rating
                         )
                       }
-                      className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
-                        selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                      }`}
+                      className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                        }`}
                     >
                       {renderStars(rating)}
                     </button>
@@ -762,17 +813,15 @@ export default function AllActivities() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`whitespace-nowrap rounded-full ${
-                        isSortedByPreference ? "bg-red-100" : ""
-                      }`}
+                      className={`whitespace-nowrap rounded-full ${isSortedByPreference ? "bg-red-100" : ""
+                        }`}
                       onClick={handleSortByPreference}
                     >
                       <Heart
-                        className={`w-4 h-4 mr-2 ${
-                          isSortedByPreference
+                        className={`w-4 h-4 mr-2 ${isSortedByPreference
                             ? "fill-current text-red-500"
                             : ""
-                        }`}
+                          }`}
                       />
                       Sort by Preference
                     </Button>
@@ -815,6 +864,7 @@ export default function AllActivities() {
                       exchangeRates={exchangeRates}
                       currencies={currencies}
                       onDeleteConfirm={handleDeleteConfirm}
+                      onSaveToggle={onSaveToggle}
                     />
                   ))}
               </div>
@@ -858,9 +908,8 @@ export default function AllActivities() {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
