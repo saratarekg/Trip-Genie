@@ -317,18 +317,18 @@ const editProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    const product = await Product.findById(id);
-    const totalRating = product.reviews.reduce(
-      (acc, review) => acc + review.rating,
-      0
-    );
+    // const product = await Product.findById(id);
+    // const totalRating = product.reviews.reduce(
+    //   (acc, review) => acc + review.rating,
+    //   0
+    // );
 
-    if (product.reviews.length > 0) {
-      const newRating = totalRating / product.reviews.length;
-      updatedProduct.rating = await Product.findByIdAndUpdate(id, {
-        $set: { rating: newRating },
-      });
-    }
+    // if (product.reviews.length > 0) {
+    //   const newRating = totalRating / product.reviews.length;
+    //   updatedProduct.rating = await Product.findByIdAndUpdate(id, {
+    //     $set: { rating: newRating },
+    //   });
+    // }
 
     res.status(200).json(updatedProduct);
   } catch (error) {

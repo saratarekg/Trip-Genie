@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect ,useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -83,12 +83,18 @@ function ScrollToTop() {
 
 function AppContent() {
   const location = useLocation();
+  const [navKey, setNavKey] = useState(0);
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/sign-up";
+    useEffect(() => {
+      // Increment the key to force a re-render of the Navbar
+      setNavKey(prevKey => prevKey + 1);
+    }, [location]);
+
   return (
     <div className="App">
       <ScrollToTop />
-      {!isAuthPage && <NavbarComponent />}
+      {!isAuthPage && <NavbarComponent key={navKey} />}
 
       <div className="pages">
         <Routes>

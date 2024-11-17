@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import {  useLocation,Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import CartDropdown from "@/components/cartDropDown";
 import axios from 'axios'
+
+
 
 import logo from "../assets/images/TGlogo.svg";
 import {
@@ -58,6 +60,19 @@ export function NavbarComponent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
+  const [key, setKey] = useState(0);
+  const location = useLocation();
+
+  useEffect(() => {
+    // Increment the key to force a re-render of the Navbar
+    setKey(prevKey => prevKey + 1);
+    
+    // Close any open dropdowns when the route changes
+    setOpenDropdown(null);
+    
+    // Reset scroll position
+    window.scrollTo(0, 0);
+  }, [location]);
 
 
   const handleClickOutside = (event) => {
@@ -165,7 +180,7 @@ export function NavbarComponent() {
   };
 
   return (
-    <nav
+    <nav key={key}
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${role === "admin"
         ? isScrolled
           ? "bg-black/50"
