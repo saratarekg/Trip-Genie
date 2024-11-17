@@ -12,7 +12,6 @@ const sellerRoutes = require("./routes/sellerRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
 const apiRoutes = require("./routes/apiRoutes");
-
 //const productRoutes = require("./routes/productRoutes");
 const cookieParser = require("cookie-parser");
 const { requireAuth } = require("./middlewares/authMiddleware");
@@ -30,6 +29,8 @@ app.use(express.json({ limit: "50mb" }));
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(cookieParser());
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY)
 
 mongoose
   .connect(process.env.URI)
@@ -79,3 +80,34 @@ app.use("/advertiser", requireAuth("advertiser"), advertiserRoutes);
 
 // get currency rates from the database currencyrates model with id 6726a0e0206edfcc2ef30c16
 app.get("/rates", currencyRateController.getExchangeRate);
+
+
+//stripe payment
+app.post('/create-checkout-session', async (req, res) => {
+  try {
+    const { items, currency } = req.body;
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: items.map(item => ({
+        price_data: {
+          currency: currency,
+          product_data: {
+            name: item.product.name,
+          },
+          unit_amount: Math.round(item.totalPrice * 100), 
+        },
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      success_url: `http://localhost:3000/checkout2?success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `http://localhost:3000/checkout2`,
+    });
+
+    console.log('Checkout session created:', session.id);
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
