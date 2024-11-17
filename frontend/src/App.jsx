@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect ,useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -31,6 +31,10 @@ import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./pages/SignUp.jsx";
+
+import  SellerNotifications  from "./pages/SellerNotifications.jsx";
+import  AdminNotifications  from "./pages/AdminNotifications.jsx";
+
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import Checkout from "./pages/checkout.jsx";
@@ -80,12 +84,18 @@ function ScrollToTop() {
 
 function AppContent() {
   const location = useLocation();
+  const [navKey, setNavKey] = useState(0);
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/sign-up";
+    useEffect(() => {
+      // Increment the key to force a re-render of the Navbar
+      setNavKey(prevKey => prevKey + 1);
+    }, [location]);
+
   return (
     <div className="App">
       <ScrollToTop />
-      {!isAuthPage && <NavbarComponent />}
+      {!isAuthPage && <NavbarComponent key={navKey} />}
 
       <div className="pages">
         <Routes>
@@ -378,6 +388,26 @@ function AppContent() {
                 allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
               >
                 <PrivacyPolicy />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["seller"]}
+              >
+                <SellerNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin"]}
+              >
+                <AdminNotifications />
               </ProtectedRoute>
             }
           />

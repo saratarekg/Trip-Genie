@@ -10,7 +10,6 @@ const multer = require("multer");
 const cloudinary = require("../utils/cloudinary");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
-const bcrypt = require("bcryptjs");
 
 const createToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.SECRET, {
@@ -398,7 +397,7 @@ const forgotPassword = async (req, res) => {
     // (await TourismGovernor.findOne({ email }));
 
     if (!user) {
-      res.status(400).json({ message: "Email not found" });
+      return res.status(400).json({ message: "Email not found" });
     }
 
     const otp = crypto.randomInt(100000, 999999).toString(); // Generate 6-digit OTP
@@ -430,17 +429,19 @@ const verifyOtp = async (req, res) => {
     // (await TourismGovernor.findOne({ email }));
 
     if (!user) {
-      res.status(400).json({ message: "Email not found" });
+      return res.status(400).json({ message: "Email not found" });
     }
 
     const existingOTP = await OTP.findOne({ email, otp });
     if (!existingOTP) {
-      res.status(400).json({ message: "Incorrect OTP" });
+      return res.status(400).json({ message: "Incorrect OTP" });
     }
 
     if (existingOTP.expiry < Date.now()) {
-      res.status(400).json({ message: "OTP expired" });
+      return res.status(400).json({ message: "OTP expired" });
     }
+
+    await OTP.deleteOne({ email, otp });
 
     res.status(200).json({ message: "OTP verified" });
   } catch (err) {
@@ -460,7 +461,7 @@ const resetPassword = async (req, res) => {
     // (await TourismGovernor.findOne({ email }));
 
     if (!user) {
-      res.status(400).json({ message: "Email not found" });
+      return res.status(400).json({ message: "Email not found" });
     }
 
     user.password = password;

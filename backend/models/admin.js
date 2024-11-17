@@ -22,6 +22,19 @@ const adminSchema = new Schema(
       ],
       minlength: 8,
     },
+    notifications: [{
+      body: {
+        type: String,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+      seen: {
+        type: Boolean,
+        default: false,
+      }
+    }],
   },
   { timestamps: true }
 );

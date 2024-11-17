@@ -1,8 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import {  useLocation,Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import CartDropdown from "@/components/cartDropDown";
+import axios from 'axios'
+
+
+
 import logo from "../assets/images/TGlogo.svg";
 import {
   Menu,
@@ -55,6 +59,21 @@ export function NavbarComponent() {
   const transportationRef = useRef(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
+  const [key, setKey] = useState(0);
+  const location = useLocation();
+
+  useEffect(() => {
+    // Increment the key to force a re-render of the Navbar
+    setKey(prevKey => prevKey + 1);
+    
+    // Close any open dropdowns when the route changes
+    setOpenDropdown(null);
+    
+    // Reset scroll position
+    window.scrollTo(0, 0);
+  }, [location]);
+
 
   const handleClickOutside = (event) => {
     if (
@@ -66,6 +85,28 @@ export function NavbarComponent() {
       !transportationRef.current?.contains(event.target)
     ) {
       closeDropdown();
+    }
+  };
+
+  useEffect(() => {
+    if (role === "seller") {
+      checkUnseenNotifications();
+    }
+  }, [role]);
+
+  const checkUnseenNotifications = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/seller/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotifications(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotifications(false);
     }
   };
 
@@ -139,16 +180,15 @@ export function NavbarComponent() {
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        role === "admin"
-          ? isScrolled
-            ? "bg-black/50"
-            : "bg-[#1A3B47]"
-          : isScrolled
+    <nav key={key}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${role === "admin"
+        ? isScrolled
+          ? "bg-black/50"
+          : "bg-[#1A3B47]"
+        : isScrolled
           ? "bg-black/50"
           : ""
-      }`}
+        }`}
       style={isScrolled ? { backdropFilter: "saturate(180%) blur(8px)" } : {}}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -476,10 +516,21 @@ export function NavbarComponent() {
           <div className="hidden md:flex items-center">
             {role !== undefined && role !== "guest" && role !== "admin" && (
               <>
-                <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
-                  <Bell className="h-7 w-7" />
+                <button
+                  className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 relative"
+                  onClick={() => {
+                    if (role === "seller") {
+                      navigate("/seller-notifications");
+                    }
+                  }}
+                >
+                  <Bell className="h-7 w-7 relative" />
+                  {hasUnseenNotifications && (
+                    <span className="absolute top-1 right-2 block h-3 w-3 rounded-full bg-red-500" />
+                  )}
                   <span className="sr-only">Notifications</span>
                 </button>
+
                 {role === "tourist" && (
                   <>
                     <div className="relative mr-2 mt-1">

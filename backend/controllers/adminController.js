@@ -520,9 +520,79 @@ const getActivitiesReport = async (req, res) => {
   }
 };
 
+const getAdminNotifications = async (req, res) => {
+  try {
+    // Get seller ID from res.locals
+    const AdminId = res.locals.user_id;
+
+    if (!AdminId) {
+      return res.status(400).json({ message: "Admin Id is required" });
+    }
+
+    // Find the seller and get their notifications
+    const admin = await Admin.findById(AdminId, "notifications");
+
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+
+    // Return the notifications
+    return res.status(200).json({ notifications: admin.notifications });
+  } catch (error) {
+    console.error("Error fetching notifications:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const markNotificationsAsSeen = async (req, res) => {
+  try {
+    // Find the seller by their ID and update the notifications in one operation
+    const result = await Admin.updateOne(
+      { _id: res.locals.user_id }, // Find seller by user ID
+      {
+        $set: {
+          'notifications.$[elem].seen': true, // Set 'seen' to true for all unseen notifications
+        }
+      },
+      {
+        arrayFilters: [{ 'elem.seen': false }], // Only update notifications where seen is false
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ message: 'No unseen notifications found' });
+    }
+
+    res.json({ message: 'All notifications marked as seen' });
+  } catch (error) {
+    console.error("Error marking notifications as seen:", error.message);
+    res.status(500).json({ message: 'Error marking notifications as seen' });
+  }
+};
+
+const hasUnseenNotifications = async (req, res) => {
+  try {
+    // Find the seller by their ID
+    const admin = await Admin.findById(res.locals.user_id);
+
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+
+    // Check if there are any unseen notifications
+    const hasUnseen = seller.notifications.some(notification => !notification.seen);
+
+    res.json({ hasUnseen });
+  } catch (error) {
+    console.error("Error checking unseen notifications:", error.message);
+    res.status(500).json({ message: 'Error checking unseen notifications' });
+  }
+};
 module.exports = {
   addAdmin,
+  hasUnseenNotifications,
   getAdminByID,
+  markNotificationsAsSeen,
   getAllAdmins,
   deleteAdminAccount,
   getAllUsers,
@@ -541,4 +611,5 @@ module.exports = {
   getPromoCode,
   deletePromoCode,
   updatePromoCode,
+  getAdminNotifications
 };
