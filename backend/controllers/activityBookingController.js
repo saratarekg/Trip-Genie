@@ -331,3 +331,54 @@ exports.getBookingsReport = async (req, res) => {
     res.status(500).json({ message: error.message }); // Handle errors
   }
 };
+
+exports.getMyCurrentActivities = async (req, res) => {
+  try {
+    const activities = await ActivityBooking.find({
+      user: res.locals.user_id,
+    }).populate("activity");
+
+    const now = new Date();
+    const currentActivities = activities.filter((activity) => {
+      const startTime = new Date(activity.activity.timing);
+      const durationInMilliseconds =
+        activity.activity.duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      const endTime = new Date(startTime.getTime() + durationInMilliseconds);
+      console.log(startTime, endTime);
+      console.log(now);
+      return startTime < now && now < endTime;
+    });
+    console.log(currentActivities);
+
+    res.status(200).json(currentActivities);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};
+
+exports.getMyPastActivities = async (req, res) => {
+  try {
+    const activities = await ActivityBooking.find({
+      user: res.locals.user_id,
+    }).populate("activity");
+
+    const now = new Date();
+    const pastActivities = activities.filter((activity) => {
+      const startTime = new Date(activity.activity.timing);
+      const durationInMilliseconds =
+        activity.activity.duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      const endTime = new Date(startTime.getTime() + durationInMilliseconds);
+      return endTime < now;
+    });
+
+    res.status(200).json(pastActivities);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};

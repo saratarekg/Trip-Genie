@@ -239,9 +239,9 @@ const activitySchema = z.object({
   duration: z.number().min(1, "Duration is required"),
   activityTime: z.string().min(1, "Time is required"),
   tags: z.array(z.string()).optional(),
-  category: z.array(z.string()).optional(),  
+  category: z.array(z.string()).optional(),
   day: z.number().min(1, "Day is required"),
-})
+});
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -258,9 +258,14 @@ const formSchema = z.object({
     .min(1, "At least one date is required"),
   accessibility: z.boolean(),
   // isRepeated: z.boolean(),
-})
+});
 
-const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) => {
+const ActivityForm = ({
+  onSave,
+  onClose,
+  initialData = null,
+  itineraryDate,
+}) => {
   console.log(itineraryDate);
   const [tags, setTags] = useState([]);
   const [category, setCategory] = useState([]);
@@ -277,7 +282,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
   } = useForm({
     resolver: zodResolver(activitySchema),
     defaultValues: initialData || {},
-  })
+  });
 
   useEffect(() => {
     fetchTags();
@@ -288,19 +293,19 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
     if (initialData) {
       if (initialData.timing) {
         const dateTime = new Date(initialData.timing);
-        
+
         // Check if dateTime is valid
         if (!isNaN(dateTime.getTime())) {
           const hours = dateTime.getHours();
           const minutes = dateTime.getMinutes();
-      
+
           // Check if both hours and minutes are set (i.e., not 0 or NaN)
           if (hours !== null && minutes !== null) {
             setValue("activityTime", format(dateTime, "HH:mm"));
           }
         }
       }
-      
+
       setValue("tags", initialData.tags);
       setValue("category", initialData.category);
       setPictures(initialData.pictures || []);
@@ -347,12 +352,10 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
       ...data,
       timing: itineraryDate + "T" + data.activityTime,
       pictures: pictures,
-    }
-    onSave(newActivity)
-    onClose()
-  }
-
- 
+    };
+    onSave(newActivity);
+    onClose();
+  };
 
   return (
     <form onSubmit={handleSubmit(handleAddActivity)} className="space-y-4">
@@ -365,11 +368,12 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
             id="day"
             type="number"
             min="1"
-        
             {...register("day", { valueAsNumber: true })}
           />
           {errors.day && (
-            <p className="text-red-500 text-xs">{errors.numberOfDays.message}</p>
+            <p className="text-red-500 text-xs">
+              {errors.numberOfDays.message}
+            </p>
           )}
         </div>
 
@@ -381,7 +385,6 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
           )}
         </div>
       </div>
-
 
       <div>
         <Label htmlFor="description">Description</Label>
@@ -407,7 +410,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
           <Input
             id="duration"
             type="number"
-            min='0'
+            min="0"
             {...register("duration", { valueAsNumber: true })}
           />
           {errors.duration && (
@@ -442,10 +445,7 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
         </div>
       )} */}
 
-
       <div className="grid grid-cols-2 gap-2"></div>
-
-   
 
       <div className="col-span-2">
         <Label>Tags (Optional)</Label>
@@ -468,7 +468,6 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
             />
           )}
         />
-
       </div>
 
       <div className="col-span-2">
@@ -492,7 +491,6 @@ const ActivityForm = ({ onSave, onClose, initialData = null, itineraryDate }) =>
             />
           )}
         />
-
       </div>
 
       <div className="space-y-2">
@@ -574,18 +572,18 @@ const ItineraryForm = () => {
       day: 1,
       // isRepeated: false,
     },
-  })
+  });
 
-  const availableDates = watch("availableDates")
+  const availableDates = watch("availableDates");
   // const isRepeated = watch("isRepeated")
-  const itineraryDate = watch("availableDates[0].date")
+  const itineraryDate = watch("availableDates[0].date");
 
   const handleCreateItinerary = async (data) => {
     console.log("handleCreateItinerary called with data:", data);
     setLoading(true);
     setError("");
     setSuccess("");
-  
+
     try {
       if (activities.length === 0) {
         setError("Please add at least one activity.");
@@ -593,61 +591,81 @@ const ItineraryForm = () => {
         console.log("Error: No activities added.");
         return;
       }
-  
+
       // const hasEmptyDateOrTime = data.availableDates.some((date) => !date.date);
-  
+
       // if (hasEmptyDateOrTime) {
       //   setError("Please fill in all dates and times.");
       //   setLoading(false);
       //   console.log("Error: Empty date or time detected.");
       //   return;
       // }
-  
+
       // Sort activities by day and then by start time
       activities.sort((a, b) => {
         if (a.day === b.day) {
-          return new Date(`1970-01-01T${a.activityTime}`) - new Date(`1970-01-01T${b.activityTime}`);
+          return (
+            new Date(`1970-01-01T${a.activityTime}`) -
+            new Date(`1970-01-01T${b.activityTime}`)
+          );
         }
         return a.day - b.day;
       });
       console.log("Activities sorted by day and time:", activities);
-      
+
       const overlappingActivities = [];
-      
+
       // Loop through the activities and check for overlaps within the same day
       for (let i = 0; i < activities.length - 1; i++) {
         const currentActivity = activities[i];
         const nextActivity = activities[i + 1];
-      
+
         // Only check for overlaps if they are on the same day
         if (currentActivity.day === nextActivity.day) {
-          const currentEndTime = new Date(`1970-01-01T${currentActivity.activityTime}`);
-          currentEndTime.setMinutes(currentEndTime.getMinutes() + currentActivity.duration);
-      
-          const nextStartTime = new Date(`1970-01-01T${nextActivity.activityTime}`);
-      
+          const currentEndTime = new Date(
+            `1970-01-01T${currentActivity.activityTime}`
+          );
+          currentEndTime.setMinutes(
+            currentEndTime.getMinutes() + currentActivity.duration
+          );
+
+          const nextStartTime = new Date(
+            `1970-01-01T${nextActivity.activityTime}`
+          );
+
           console.log("Checking overlap:");
-          console.log("Current activity time string:", currentActivity.activityTime);
+          console.log(
+            "Current activity time string:",
+            currentActivity.activityTime
+          );
           console.log("Next activity time string:", nextActivity.activityTime);
           console.log("Current end time:", currentEndTime);
           console.log("Next start time:", nextStartTime);
-      
+
           // Check if the next activity starts before the current one ends
           if (nextStartTime < currentEndTime) {
             overlappingActivities.push({
               current: currentActivity,
               next: nextActivity,
             });
-            console.log("Overlap detected between activities:", currentActivity.name, "and", nextActivity.name);
+            console.log(
+              "Overlap detected between activities:",
+              currentActivity.name,
+              "and",
+              nextActivity.name
+            );
           }
         }
       }
-      
+
       if (overlappingActivities.length > 0) {
-        const errorMessage = overlappingActivities.map(({ current, next }) =>
-          `Activity "${current.name}" overlaps with "${next.name}" on day ${current.day}`
-        ).join('\n');
-        
+        const errorMessage = overlappingActivities
+          .map(
+            ({ current, next }) =>
+              `Activity "${current.name}" overlaps with "${next.name}" on day ${current.day}`
+          )
+          .join("\n");
+
         setError(`Error: Overlapping activities detected:\n${errorMessage}`);
         setLoading(false);
         console.log("Error: Overlapping activities detected:\n", errorMessage);
@@ -655,13 +673,12 @@ const ItineraryForm = () => {
       } else {
         console.log("No overlapping activities found.");
       }
-      
-      
+
       const token = Cookies.get("jwt");
       const role = Cookies.get("role") || "guest";
       console.log("Token:", token);
       console.log("Role:", role);
-  
+
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("language", data.language);
@@ -677,7 +694,7 @@ const ItineraryForm = () => {
         });
       });
       console.log("Form data prepared:", formData);
-  
+
       const response = await axios.post(
         `http://localhost:4000/${role}/itineraries`,
         formData,
@@ -696,7 +713,7 @@ const ItineraryForm = () => {
       console.log("Itinerary creation process completed.");
     }
   };
-  
+
   const handleGoBack = () => {
     setShowDialog(false);
     navigate("/all-itineraries");
@@ -708,20 +725,18 @@ const ItineraryForm = () => {
   };
 
   const handleAddActivity = (activity) => {
-    
-    console.log("Activity:", activity)
+    console.log("Activity:", activity);
     if (editingActivityIndex !== null) {
-      const updatedActivities = [...activities]
-      updatedActivities[editingActivityIndex] = activity
-      setActivities(updatedActivities)
-      setEditingActivityIndex(null)
+      const updatedActivities = [...activities];
+      updatedActivities[editingActivityIndex] = activity;
+      setActivities(updatedActivities);
+      setEditingActivityIndex(null);
     } else {
-      setActivities([...activities, activity])
+      setActivities([...activities, activity]);
     }
-    setValue("activities", activities)
-    setShowActivityForm(false)
-  }
-
+    setValue("activities", activities);
+    setShowActivityForm(false);
+  };
 
   const handleEditActivity = (index) => {
     const activityToEdit = activities[index];
@@ -736,10 +751,9 @@ const ItineraryForm = () => {
   };
 
   const addDate = (e) => {
-    e.preventDefault(); 
-      setValue("availableDates", [...availableDates, { date: "" }]);
+    e.preventDefault();
+    setValue("availableDates", [...availableDates, { date: "" }]);
   };
-
 
   const removeDate = (dateIndex) => {
     const newDates = [...availableDates];
@@ -885,7 +899,7 @@ const ItineraryForm = () => {
                 )}
               </div>
               <div className="col-span-2 flex items-center space-x-2">
-              <Controller
+                <Controller
                   name="accessibility"
                   control={control}
                   render={({ field }) => (
@@ -899,8 +913,7 @@ const ItineraryForm = () => {
                 <Label htmlFor="accessibility" className="text-sm font-medium">
                   Accessible for Disabled
                 </Label>
-                </div> 
-
+              </div>
 
               <div className="col-span-2 flex items-center space-x-2">
                 {/* 
@@ -920,7 +933,7 @@ const ItineraryForm = () => {
                     Repeatable Itinerary
                   </Label>
                 </div> */}
-  
+
                 {/* Explanation text below checkbox */}
                 {/* <p className="text-sm text-gray-600">
                   {isRepeated
@@ -928,7 +941,6 @@ const ItineraryForm = () => {
                     : "If the itinerary is not repeated, then it can span over multiple days but it only occurs once. You'll need to specify dates for each activity."}
                 </p> 
                 */}
-                
               </div>
 
               <div className="col-span-2 space-y-4 p-4 border rounded">
@@ -969,7 +981,7 @@ const ItineraryForm = () => {
                       )}
                     />
                     {/* Show remove button only if isRepeated is true or there's more than one date */}
-                    {(availableDates.length > 1) && (
+                    {availableDates.length > 1 && (
                       <Button
                         variant="destructive"
                         size="icon"
@@ -983,11 +995,11 @@ const ItineraryForm = () => {
                 ))}
 
                 {/* Show add date button only if isRepeated is true or no dates have been added */}
-                {(
+                {
                   <Button variant="outline" onClick={addDate} className="mt-2">
                     <Plus className="mr-2 h-4 w-4" /> Add Date
                   </Button>
-                )}
+                }
 
                 {/* Error message when no dates are added */}
                 {availableDates.length === 0 && (
@@ -1003,51 +1015,50 @@ const ItineraryForm = () => {
               </div>
 
               <div className="col-span-2">
-          <Label className="text-sm font-medium">Activities</Label>
-          {activities.map((activity, index) => (
-            <div
-              key={index}
-              className="mb-2 p-2 border rounded flex justify-between items-center"
-            >
-              <span>{activity.name}, Day:{activity.day}</span>
-              <div>
-                <Button
-                  type="button"
-                  onClick={() => handleEditActivity(index)}
-                  className="p-2 h-10 w-10 rounded-full bg-[#B5D3D1] hover:bg-[#5D9297] transition duration-300 ease-in-out mr-2"
-                >
-                  <Edit className="h-4 w-4 text-[#1A3B47]" />
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => handleDeleteActivity(index)}
-                  className="p-2 h-10 w-10 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
+                <Label className="text-sm font-medium">Activities</Label>
+                {activities.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="mb-2 p-2 border rounded flex justify-between items-center"
+                  >
+                    <span>
+                      {activity.name}, Day:{activity.day}
+                    </span>
+                    <div>
+                      <Button
+                        type="button"
+                        onClick={() => handleEditActivity(index)}
+                        className="p-2 h-10 w-10 rounded-full bg-[#B5D3D1] hover:bg-[#5D9297] transition duration-300 ease-in-out mr-2"
+                      >
+                        <Edit className="h-4 w-4 text-[#1A3B47]" />
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => handleDeleteActivity(index)}
+                        className="p-2 h-10 w-10 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                <div className="relative">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      setEditingActivityIndex(null);
+                      setShowActivityForm(true);
+                    }}
+                    className="w-full mt-2 bg-[#1A3B47]"
+                    disabled={!itineraryDate}
+                  >
+                    <PlusCircle className="w-4 h-4 mr-2" />
+                    Add Activity
+                  </Button>
+
+                  {/* Tooltip message when button is disabled */}
+                </div>
               </div>
-            </div>
-          ))}
-         <div className="relative">
-  <Button
-    type="button"
-    onClick={() => {
-      setEditingActivityIndex(null);
-      setShowActivityForm(true);
-    }}
-    className="w-full mt-2 bg-[#1A3B47]"
-    disabled={!itineraryDate}
-  >
-    <PlusCircle className="w-4 h-4 mr-2" />
-    Add Activity
-  </Button>
-
-  {/* Tooltip message when button is disabled */}
- 
-</div>
-
-          
-        </div>
 
               {error && (
                 <Alert variant="destructive" className="col-span-4">
@@ -1095,30 +1106,29 @@ const ItineraryForm = () => {
         </Dialog>
 
         <Dialog open={showActivityForm} onOpenChange={setShowActivityForm}>
-        <DialogContent className="sm:max-w-[700px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingActivityIndex !== null
-                ? "Edit Activity"
-                : "Add New Activity"}
-            </DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="max-h-[80vh]">
-            <ActivityForm
-              onSave={handleAddActivity}
-              onClose={() => setShowActivityForm(false)}
-              initialData={
-                editingActivityIndex !== null
-                  ? activities[editingActivityIndex]
-                  : null
-              }
-          
-              // isRepeated={isRepeated}
-              itineraryDate={itineraryDate}
-            />
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+          <DialogContent className="sm:max-w-[700px]">
+            <DialogHeader>
+              <DialogTitle>
+                {editingActivityIndex !== null
+                  ? "Edit Activity"
+                  : "Add New Activity"}
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[80vh]">
+              <ActivityForm
+                onSave={handleAddActivity}
+                onClose={() => setShowActivityForm(false)}
+                initialData={
+                  editingActivityIndex !== null
+                    ? activities[editingActivityIndex]
+                    : null
+                }
+                // isRepeated={isRepeated}
+                itineraryDate={itineraryDate}
+              />
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

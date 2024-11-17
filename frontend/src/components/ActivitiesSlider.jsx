@@ -28,6 +28,7 @@ export function Activities() {
         const token = Cookies.get("jwt");
         let role = Cookies.get("role");
         if (role === undefined) role = "guest";
+        if (role !== "tourist" && role !== "advertiser" && role != "guest") return
         const api = `http://localhost:4000/${role}/activities`;
         const response = await axios.get(api, {
           headers: {

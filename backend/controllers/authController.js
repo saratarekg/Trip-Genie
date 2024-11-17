@@ -5,8 +5,12 @@ const Tourist = require("../models/tourist");
 const Seller = require("../models/seller");
 const Advertiser = require("../models/advertiser");
 const TourGuide = require("../models/tourGuide");
+const OTP = require("../models/otp");
 const multer = require("multer");
 const cloudinary = require("../utils/cloudinary");
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 
 const createToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.SECRET, {
@@ -374,6 +378,100 @@ const checkUnique = async (req, res) => {
   }
 };
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user =
+      (await Tourist.findOne({ email })) ||
+      (await TourGuide.findOne({ email })) ||
+      (await Advertiser.findOne({ email })) ||
+      (await Seller.findOne({ email }));
+    // (await Admin.findOne({ email })) ||
+    // (await TourismGovernor.findOne({ email }));
+
+    if (!user) {
+      res.status(400).json({ message: "Email not found" });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString(); // Generate 6-digit OTP
+    const expiry = new Date(Date.now() + 600000); // 10 minutes from now
+    const newOTP = new OTP({ email, otp, expiry });
+    await newOTP.save();
+
+    await transporter.sendMail({
+      to: email,
+      subject: "Password Reset",
+      text: `Your OTP is ${otp}`,
+    });
+
+    res.status(200).json({ message: "OTP sent to your mail" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    const user =
+      (await Tourist.findOne({ email })) ||
+      (await TourGuide.findOne({ email })) ||
+      (await Advertiser.findOne({ email })) ||
+      (await Seller.findOne({ email }));
+    // (await Admin.findOne({ email })) ||
+    // (await TourismGovernor.findOne({ email }));
+
+    if (!user) {
+      res.status(400).json({ message: "Email not found" });
+    }
+
+    const existingOTP = await OTP.findOne({ email, otp });
+    if (!existingOTP) {
+      res.status(400).json({ message: "Incorrect OTP" });
+    }
+
+    if (existingOTP.expiry < Date.now()) {
+      res.status(400).json({ message: "OTP expired" });
+    }
+
+    res.status(200).json({ message: "OTP verified" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user =
+      (await Tourist.findOne({ email })) ||
+      (await TourGuide.findOne({ email })) ||
+      (await Advertiser.findOne({ email })) ||
+      (await Seller.findOne({ email }));
+    // (await Admin.findOne({ email })) ||
+    // (await TourismGovernor.findOne({ email }));
+
+    if (!user) {
+      res.status(400).json({ message: "Email not found" });
+    }
+
+    user.password = password;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 module.exports = {
   touristSignup,
   advertiserSignup,
@@ -382,4 +480,7 @@ module.exports = {
   login,
   logout,
   checkUnique,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
 };
