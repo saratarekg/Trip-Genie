@@ -189,13 +189,19 @@ app.post("/create-checkout-session", async (req, res) => {
 });
 
 const sendBirthdayEmail = async (tourist) => {
+  let code = "";
+  if (tourist.fname) {
+    code = `${tourist.fname.toUpperCase()}${tourist.dateOfBirth.getFullYear()}`;
+  } else {
+    code = `${tourist.username.toUpperCase()}${tourist.dateOfBirth.getFullYear()}`;
+  }
   const mailOptions = {
     to: tourist.email,
     subject: "Happy Birthday!",
-    html: `<h1>Happy Birthday, ${tourist.firstName}! 🎉🎂🎈</h1>
+    html: `<h1>Happy Birthday, ${tourist.fname}! 🎉🎂🎈</h1>
       <p>Wishing you a day filled with happiness and a year filled with joy.</p>
       <p>Here is your gift promo code which you could use on anything upon payment</p>
-      <h3>Code: <strong>${tourist.firstName.toUpperCase()}${tourist.dateOfBirth.getFullYear()}</strong></h3>
+      <h3>Code: <strong>${code}</strong></h3>
       <h3>Discount: <strong>50%</strong></h3>
       <h3>Usage Limit: <strong>1</strong></h3>
       <h3>Valid Until: <strong>${new Date(
@@ -207,8 +213,8 @@ const sendBirthdayEmail = async (tourist) => {
   };
 
   const promo = new promoCode({
-    code: `${tourist.firstName.toUpperCase()}${tourist.dateOfBirth.getFullYear()}`,
-    discount: 50,
+    code: code,
+    percentOff: 50,
     usage_limit: 1,
     dateRange: {
       start: new Date(),
