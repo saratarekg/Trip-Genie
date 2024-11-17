@@ -310,9 +310,7 @@ const WishlistPage = () => {
       : item.product.description}
   </p>
 </div>
-
-
-                <div className="flex items-end space-x-2">
+<div className="flex items-end space-x-2">
   <Button
     onClick={() => handleAddToCart(item.product._id)}
     className="bg-[#5D9297] hover:bg-[#388A94] text-white px-3 py-1 text-sm"
