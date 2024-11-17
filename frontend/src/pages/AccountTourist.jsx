@@ -949,10 +949,10 @@ export default function AccountManagement() {
         roles: ["tourist"],
       },
     ],
-    Products: [
-      // { name: "Cart", icon: ShoppingCartIcon, tab: "cart", roles: ["tourist"] },
-      { name: "Wishlist", icon: Heart, tab: "wishlist", roles: ["tourist"] },
-    ],
+    // Products: [
+    //   // { name: "Cart", icon: ShoppingCartIcon, tab: "cart", roles: ["tourist"] },
+    //   // { name: "Wishlist", icon: Heart, tab: "wishlist", roles: ["tourist"] },
+    // ],
     "Settings and Privacy": [
       {
         name: "Account",
@@ -1126,13 +1126,13 @@ export default function AccountManagement() {
   return (
     <div>
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className="container mx-auto px-4 py-4 mt-4">
         <h1 className="text-3xl font-bold mb-8">My Account</h1>
 
         <div className="flex flex-col md:flex-row gap-8">
-          <aside className="w-full md:w-1/4">
+          <aside className="w-full md:w-[16.6667%]">
             <nav>
               <ul className="space-y-2">
                 {Object.entries(menuStructure).map(([category, items]) => {
@@ -1199,7 +1199,7 @@ export default function AccountManagement() {
             </nav>
           </aside>
 
-          <main className="w-full md:w-3/4">
+          <main className="w-full md:w-[86.6667%]">
             <div className="bg-white p-6 rounded-lg shadow">
               {renderContent()}
             </div>

@@ -505,7 +505,7 @@ export function NavbarComponent() {
                       />
                     </div>
 
-                    <NavLinkIcon to="/account/wishlist">
+                    <NavLinkIcon to="/touristWishlist">
                       <button
                         onClick={() => setIsCartOpen(false)}
                         className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2"
