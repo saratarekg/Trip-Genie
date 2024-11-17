@@ -317,7 +317,7 @@ const editProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // const product = await Product.findById(id);
+    const product = await Product.findById(id);
     // const totalRating = product.reviews.reduce(
     //   (acc, review) => acc + review.rating,
     //   0
@@ -390,19 +390,19 @@ const editProductOfSeller = async (req, res) => {
     }
 
     let product = await Product.findById(id);
-    const totalRating = product.reviews.reduce(
-      (acc, review) => acc + review.rating,
-      0
-    );
+    // const totalRating = product.reviews.reduce(
+    //   (acc, review) => acc + review.rating,
+    //   0
+    // );
 
-    if (product.reviews.length > 0) {
-      const newRating = totalRating / product.reviews.length;
-      product = await Product.findByIdAndUpdate(
-        id,
-        { rating: newRating },
-        { new: true, runValidators: true }
-      );
-    }
+    // if (product.reviews.length > 0) {
+    //   const newRating = totalRating / product.reviews.length;
+    //   product = await Product.findByIdAndUpdate(
+    //     id,
+    //     { rating: newRating },
+    //     { new: true, runValidators: true }
+    //   );
+    // }
 
     res.status(200).json(product);
   } catch (error) {
