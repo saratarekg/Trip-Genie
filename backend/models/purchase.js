@@ -7,6 +7,11 @@ const purchaseSchema = new mongoose.Schema(
       ref: "Tourist", // Reference to the Tourist model (you will need to define this model)
       required: true,
     },
+    promoCode:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PromoCode",
+      default: null,
+    },
     products: [
       {
         product: {

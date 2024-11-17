@@ -231,5 +231,6 @@ router.get("/my-hotels", touristController.getMyHotels);
 
 router.post("/promo-code", touristController.applyPromoCode);
 
+router.post("/get/promo-code", touristController.getPromoCode);
 
 module.exports = router;

@@ -118,6 +118,7 @@ const getTouristProfile = async (req, res) => {
     // Find the tour guide by their ID
     const tourist = await Tourist.findById(touristId)
       .populate("nationality")
+      .populate("currentPromoCode")
       .exec();
 
     if (!tourist) {
@@ -743,7 +744,8 @@ const getCart = async (req, res) => {
 
     // Find the tourist by their user ID
     const tourist = await Tourist.findById(userId)
-      .populate("cart.product") // Populate product information in the cart
+      .populate("cart.product") 
+      .populate("currentPromoCode")
       .exec();
 
     // Check if the tourist exists
@@ -1759,6 +1761,79 @@ const applyPromoCode = async (req, res) => {
   }
 };
 
+// Controller function to retrieve a promo code using a POST request with the promo code in the body
+const getPromoCode = async (req, res) => {
+  const { code } = req.body;
+  const  touristId  = res.locals.user_id; // Assuming the tourist's ID is in `req.user` from authentication middleware
+  console.log("Received request to get promo code:", code);  // Log received code
+
+  try {
+    // Check if code is provided in the request body
+    if (!code) {
+      console.log("No promo code provided in the request body.");
+      return res.status(400).json({ message: "Promo code is required." });
+    }
+
+    // Convert code to uppercase and log it to ensure it's in the correct format
+    const promoCodeUpperCase = code.toUpperCase();
+    console.log("Searching for promo code (case-insensitive):", promoCodeUpperCase);
+
+    // Retrieve promo code from the database (case-insensitive search)
+    const promo = await PromoCode.findOne({ code: promoCodeUpperCase });
+
+    // Log the result of the database query
+    if (!promo) {
+      console.log("Promo code not found in the database:", promoCodeUpperCase);
+      return res.status(404).json({ message: "Promo code not found." });
+    } else {
+      console.log("Promo code found:", promo);
+    }
+
+ 
+
+    const currentDate = new Date();
+    const startDate = new Date(promo.dateRange.start);
+    const endDate = new Date(promo.dateRange.end);
+
+    
+
+    if ((promo.timesUsed <= promo.usage_limit) && (currentDate >= startDate || currentDate <= endDate) && (promo.status == 'active')) {
+      const tourist = await Tourist.findByIdAndUpdate(
+        touristId, // The ID of the tourist to find
+        { $set: { currentPromoCode: promo._id } }, // The update operation (sets the new promo code)
+        { new: true } // This option ensures that the returned document is the updated one
+      );
+      
+      if (!tourist) {
+        console.log("Tourist not found:", touristId);
+        return res.status(404).json({ message: "Tourist not found." });
+      }
+    }
+
+    // Save the promo code in the tourist's profile
+   
+
+    // Return promo code details along with a success message
+    return res.status(200).json({
+      promoCode: {
+        code: promo.code,
+        status: promo.status,
+        percentOff: promo.percentOff,
+        usage_limit: promo.usage_limit,
+        timesUsed: promo.timesUsed,
+        dateRange: promo.dateRange,
+      },
+    });
+  } catch (error) {
+    console.error("Error retrieving promo code:", error);  // Log any error that occurs
+    return res.status(500).json({
+      message: "An error occurred while retrieving the promo code.",
+    });
+  }
+};
+
+
+
 module.exports = {
   removeProductFromWishlist,
   moveProductToCart,
@@ -1802,4 +1877,5 @@ module.exports = {
   addAllToCart,
   removeAllFromWishlist,
   applyPromoCode,
+  getPromoCode,
 };

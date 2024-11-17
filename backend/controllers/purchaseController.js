@@ -2,6 +2,7 @@ const Product = require("../models/product"); // Assuming your model is in model
 const Purchase = require("../models/purchase"); // Assuming your Activity model is in models/activity.js
 const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
 const productSales = require("../models/productSales");
+const PromoCode = require("../models/promoCode");
 
 exports.createPurchase = async (req, res) => {
   const {
@@ -12,6 +13,7 @@ exports.createPurchase = async (req, res) => {
     deliveryTime,
     shippingAddress,
     locationType,
+    promoCode
   } = req.body;
   console.log(products, paymentMethod, shippingAddress);
   try {
@@ -99,6 +101,16 @@ exports.createPurchase = async (req, res) => {
       );
     }
 
+   
+    let usedPromoCode = null;
+    if (promoCode) {
+      try {
+        usedPromoCode = await PromoCode.usePromoCode(promoCode);
+      } catch (error) {
+        // If there's an error with the promo code, we'll just log it and continue without applying a discount
+        console.log(`Promo code error: ${error.message}`);
+      }
+    }
     // Create a new purchase with an array of products
     const newPurchase = new Purchase({
       tourist: userId,
@@ -111,6 +123,7 @@ exports.createPurchase = async (req, res) => {
       deliveryType,
       locationType,
       status: "pending",
+      promoCode: usedPromoCode,
     });
 
     // Save the purchase to the database
@@ -130,6 +143,12 @@ exports.createPurchase = async (req, res) => {
         { new: true, runValidators: true }
       );
     }
+
+    await Tourist.findByIdAndUpdate(
+      userId,
+      { $set: { currentPromoCode: null } },
+      { new: true, runValidators: true }
+    );
 
     return res.status(201).json({ message: "Purchase successful" });
   } catch (error) {
@@ -276,6 +295,7 @@ exports.cancelPurchase = async (req, res) => {
   const { purchaseId } = req.params;
 
   try {
+    // Fetch the purchase and populate the product details
     const purchase = await Purchase.findById(purchaseId)
       .populate("products.product")
       .exec();
@@ -284,6 +304,7 @@ exports.cancelPurchase = async (req, res) => {
       return res.status(404).json({ message: "Purchase not found" });
     }
 
+    // Check if the purchase is already cancelled or delivered
     if (purchase.status === "cancelled") {
       return res.status(400).json({ message: "Purchase already cancelled" });
     }
@@ -291,6 +312,11 @@ exports.cancelPurchase = async (req, res) => {
     if (purchase.status === "delivered") {
       return res.status(400).json({ message: "Purchase already delivered" });
     }
+
+    // Calculate the total refund amount
+    const totalRefund = purchase.products.reduce((total, item) => {
+      return total + (item.product.price * item.quantity);
+    }, 0);
 
     // Update the product sales accordingly
     for (const item of purchase.products) {
@@ -306,14 +332,26 @@ exports.cancelPurchase = async (req, res) => {
       );
     }
 
+    // Update the tourist's wallet with the refunded money
+    const tourist = await Tourist.findById(purchase.tourist); // assuming you store the tourist's ID in the purchase
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    tourist.wallet += totalRefund;  // Add the refund amount to the tourist's wallet
+    await tourist.save();
+
+    // Update the purchase status to 'cancelled'
     await Purchase.findByIdAndUpdate(
       purchaseId,
       { status: "cancelled" },
       { new: true, runValidators: true }
     );
 
-    return res.status(200).json({ message: "Purchase cancelled successfully" });
+    // Return success response
+    return res.status(200).json({ message: "Purchase cancelled successfully and refund issued" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
+

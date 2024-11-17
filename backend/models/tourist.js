@@ -96,7 +96,7 @@ const touristSchema = new Schema(
     },
     cart: [
       {
-        product: {
+        product: { // Reference to Product
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
@@ -105,6 +105,11 @@ const touristSchema = new Schema(
         totalPrice: { type: Number, required: true },
       },
     ],
+    currentPromoCode: {  // One promo code for the entire cart (instead of for each item)
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PromoCode",
+      default: null,  // Default is null if no promo code is applied
+    },
     wishlist: [
       {
         product: {

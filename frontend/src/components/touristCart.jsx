@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +55,14 @@ const ShoppingCart = () => {
   const [popupMessage, setPopupMessage] = useState("");
   const [showOrderSummary, setShowOrderSummary] = useState(true);
   const [showProductList, setShowProductList] = useState(false);
+
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDetails, setPromoDetails] = useState(null);
+  const [promoError, setPromoError] = useState('');
+  const [discountedTotal, setDiscountedTotal] = useState(0);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [currentPromoCode, setCurrentPromoCode] = useState('');
+
 
 
   const [userRole, setUserRole] = useState("guest");
@@ -121,6 +131,69 @@ const ShoppingCart = () => {
     }
   };
 
+  const handlePromoSubmit = async (e) => {
+    e.preventDefault();
+    setPromoError('');
+    setPromoDetails(null);
+    setDiscountAmount(0);
+    setDiscountedTotal(totalAmount);
+
+    if (!promoCode.trim()) {
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/tourist/get/promo-code', {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${Cookies.get('jwt')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: promoCode }),
+      });
+      
+      if (response.status === 404) {
+        setPromoError('Promo Code Not Found.');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch promo code details');
+      }
+
+      const data = await response.json();
+      const promo = data.promoCode;
+      console.log(promo);
+      console.log(promo.status);
+      if (promo.status === 'inactive') {
+        setPromoError('This promo code is currently inactive.');
+        return;
+      }
+
+      const currentDate = new Date();
+      const startDate = new Date(promo?.dateRange?.start);
+      const endDate = new Date(promo?.dateRange?.end);
+
+      if (currentDate < startDate || currentDate > endDate) {
+        setPromoError('This promo code is not valid for the current date.');
+        return;
+      }
+
+      if (promo.timesUsed >= promo.usage_limit) {
+        setPromoError('This promo code has reached its usage limit.');
+        return;
+      }
+
+      setPromoDetails(promo);
+      const discount = totalAmount * (promo.percentOff / 100);
+      setDiscountAmount(discount);
+      setDiscountedTotal(totalAmount - discount);
+    } catch (error) {
+      console.log(error);
+      setPromoError('Failed to apply promo code. Please try again.');
+    }
+  };
+
 
 
   const fetchExchangeRates = useCallback(async () => {
@@ -154,16 +227,23 @@ const ShoppingCart = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         const currencyId = response.data.preferredCurrency;
+        setCurrentPromoCode(response.data.currentPromoCode.code || '');
 
         const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserPreferredCurrency(response2.data);
+
+        if (response.data.currentPromoCode) {
+          setPromoCode(response.data.currentPromoCode.code);
+          handlePromoSubmit({ preventDefault: () => {} });
+        }
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
     }
   }, []);
+
 
   useEffect(() => {
     fetchUserInfo();
@@ -372,6 +452,10 @@ const ShoppingCart = () => {
     navigate(`/product/${productId}`);
   };
 
+  const getActivePromoCode = () => {
+    return promoDetails ? promoCode : currentPromoCode;
+  };
+
   return (
     <div>
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
@@ -513,11 +597,10 @@ const ShoppingCart = () => {
 
         )}
       </div>
-      <div className="w-80 bg-gray-200 p-8">
-        <h2 className="text-3xl font-bold mb-6">Order Summary</h2>
-        <div className="mb-4 w-full">
-        <span className=" font-bold text-xl">Products</span>
-
+      <div className="w-80 bg-gray-200 p-8 overflow-y-auto">
+          <h2 className="text-3xl font-bold mb-6">Order Summary</h2>
+          <div className="mb-4 w-full">
+            <span className="font-bold text-xl">Products</span>
             <div className="mt-2 space-y-2">
               {cartItems.map((item, index) => (
                 <div key={index} className="flex justify-between text-base ">
@@ -526,28 +609,75 @@ const ShoppingCart = () => {
                 </div>
               ))}
             </div>
-          
-        </div>
-        <div className="border-t border-gray-500 pt-4 mt-4">
-          <div className="flex justify-between font-bold text-xl">
-            <span>Total:</span>
-            <span>
-              {totalAmountLoading ? (
-                <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
-              ) : (
-                formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")
-              )}
-            </span>
           </div>
-        </div>
-        <Button
-          className="w-full mt-6 bg-[#1A3B47] text-white py-3 text-lg"
-          onClick={() => navigate("/checkout2")}
-          disabled={cartItems.length === 0}
-        >
-          Proceed to Checkout
-        </Button>
+          <div className="border-t border-gray-500 pt-4 mt-4">
+            <div className="flex justify-between font-bold text-xl">
+              <span>Subtotal:</span>
+              <span>
+                {totalAmountLoading ? (
+                  <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
+                ) : (
+                  formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")
+                )}
+              </span>
+            </div>
+          </div>
+          
+          <form onSubmit={handlePromoSubmit} className="mt-4">
+            <Label htmlFor="promo-code">Promo Code</Label>
+            <div className="flex mt-1">
+              <Input
+                id="promo-code"
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                placeholder={currentPromoCode || "Enter promo code"}
+                className="flex-grow"
+              />
+              <Button type="submit" className="ml-2" disabled={!promoCode.trim()}>
+                Apply
+              </Button>
+            </div>
+          </form>
+          {promoError && (
+            <p className="text-red-500 mt-2">{promoError}</p>
+          )}
+        {promoDetails && (
+  <div className="mt-2">
+    <p className="text-green-500">Promo applied: {promoDetails.percentOff}% off</p>
+  </div>
+)}
+
+<div className="border-t border-gray-500 pt-4 mt-4">
+  <div className="flex justify-between font-bold text-lg">
+    <span>Subtotal:</span>
+    <span>{formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
+  </div>
+
+  {promoDetails && (
+    <>
+      <div className="flex justify-between font-bold text-lg text-red-500 mt-2">
+        <span>Discount:</span>
+        <span>-{formatPrice(discountAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
       </div>
+    </>
+  )}
+<div className="border-t border-gray-500 mt-4"></div>
+  <div className="flex justify-between font-bold text-xl mt-4">
+    <span>Final Total:</span>
+    <span>{formatPrice(promoDetails ? discountedTotal : totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
+  </div>
+</div>
+
+
+          <Button
+            className="w-full mt-6 bg-[#1A3B47] text-white py-3 text-lg"
+            onClick={() => navigate("/checkout2")}
+            disabled={cartItems.length === 0}
+          >
+            Proceed to Checkout
+          </Button>
+        </div>
 
       <Dialog
         open={actionError !== null}

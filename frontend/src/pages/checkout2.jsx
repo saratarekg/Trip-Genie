@@ -104,6 +104,16 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [purchaseStatus, setPurchaseStatus] = useState(null)
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
+ 
+
+  const [promoCode, setPromoCode] = useState('')
+  const [promoDetails, setPromoDetails] = useState(null)
+  const [promoError, setPromoError] = useState('')
+  const [discountAmount, setDiscountAmount] = useState(0)
+  const [discountedTotal, setDiscountedTotal] = useState(0)
+  const [currentPromoCode, setCurrentPromoCode] = useState('')
+
+
 
   const form = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -181,6 +191,11 @@ export default function CheckoutPage() {
         form.setValue("email", userData.email || "")
         form.setValue("phone", userData.mobile || "")
 
+        if (response.data.currentPromoCode && response.data.currentPromoCode.code) {
+          setCurrentPromoCode(response.data.currentPromoCode.code)
+          setPromoCode(response.data.currentPromoCode.code)
+        }
+
         const response2 = await axios.get(
           `http://localhost:4000/tourist/getCurrency/${currencyId}`,
           {
@@ -188,6 +203,9 @@ export default function CheckoutPage() {
           }
         )
         setUserPreferredCurrency(response2.data)
+        if (response.data.currentPromoCode && response.data.currentPromoCode.code) {
+          await handlePromoSubmit({ preventDefault: () => {} })
+        }
       } catch (error) {
         console.error("Error fetching user profile:", error)
       }
@@ -211,6 +229,69 @@ export default function CheckoutPage() {
     const total = items.reduce((sum, item) => sum + item.totalPrice, 0)
     setTotalAmount(total)
   }
+
+  const handlePromoSubmit = async (e) => {
+    if (e) e.preventDefault()
+    setPromoError('')
+    setPromoDetails(null)
+    setDiscountAmount(0)
+    setDiscountedTotal(totalAmount)
+
+    if (!promoCode.trim()) {
+      return
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/tourist/get/promo-code', {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${Cookies.get('jwt')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: promoCode }),
+      })
+      
+      if (response.status === 404) {
+        setPromoError('Promo Code Not Found.')
+        return
+      }
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch promo code details')
+      }
+
+      const data = await response.json()
+      const promo = data.promoCode
+
+      if (promo.status === 'inactive') {
+        setPromoError('This promo code is currently inactive.')
+        return
+      }
+
+      const currentDate = new Date()
+      const startDate = new Date(promo?.dateRange?.start)
+      const endDate = new Date(promo?.dateRange?.end)
+
+      if (currentDate < startDate || currentDate > endDate) {
+        setPromoError('This promo code is not valid for the current date.')
+        return
+      }
+
+      if (promo.timesUsed >= promo.usage_limit) {
+        setPromoError('This promo code has reached its usage limit.')
+        return
+      }
+
+      setPromoDetails(promo)
+      const discount = totalAmount * (promo.percentOff / 100)
+      setDiscountAmount(discount)
+      setDiscountedTotal(totalAmount - discount)
+    } catch (error) {
+      console.error(error)
+      setPromoError('Failed to apply promo code. Please try again.')
+    }
+  }
+
 
   const handleAddNewAddress = async (newAddress) => {
     setIsLoading(true)
@@ -311,6 +392,7 @@ export default function CheckoutPage() {
           deliveryType: data.deliveryType,
           deliveryTime: data.deliveryTime,
           deliveryDate: estimatedDeliveryDate,
+          promoCode: promoCode,
         }),
       })
 
@@ -994,78 +1076,104 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div className="w-full md:w-1/3">
-      <Card className="bg-white">
-        <CardContent className="p-6">
-          <h2 className="text-2xl font-bold text-[#1A3B47] mb-4">Order Summary</h2>
-          <div className="space-y-4">
-            {cartItems.map((item, index) => (
-              <TooltipProvider key={index}>
-                <div className="flex justify-between">
-                  {/* Product Name with Tooltip and Clickable Navigation */}
-                  <Tooltip>
-                    <TooltipTrigger
-                      onClick={() => navigate(`/product/${item?.product?._id}`)}
-                      className="text-black cursor-pointer hover:underline"
-                    >
-                      {item?.product?.name} x {item?.quantity}
-                    </TooltipTrigger>
-                    <TooltipContent className="w-48 p-2 text-sm whitespace-normal">
-  <p>
-    {item?.product?.description?.slice(0, 70)}
-    {item?.product?.description?.length > 70 ? "..." : ""}
-  </p>
-  <div className="flex items-center pt-1">
-    <FaStar className="text-yellow-500" />
-    <span className="ml-1">{item?.product?.rating.toFixed(1) || "N/A"}</span>
-  </div>
-</TooltipContent>
-
-                  </Tooltip>
-                  <span>{formatPrice(item?.totalPrice)}</span>
-                </div>
-              </TooltipProvider>
-            ))}
-            <div className="border-t pt-4">
-              <div className="flex justify-between font-bold">
-                <span>Subtotal</span>
-                <span>{formatPrice(totalAmount)}</span>
-              </div>
-            </div>
-            <div className="flex justify-between">
-              <span>Delivery</span>
-              <span>
-                {formatPrice(
-                  form.watch('deliveryType') === 'Express' ? 4.99 :
-                  form.watch('deliveryType') === 'Next-Same' ? 6.99 :
-                  form.watch('deliveryType') === 'International' ? 14.99 : 2.99
-                )}
-              </span>
-            </div>
-            {estimatedDeliveryDate && (
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Estimated Delivery Date</span>
-                <span>{format(estimatedDeliveryDate, 'MMMM d, yyyy')}</span>
-              </div>
-            )}
-            <div className="border-t pt-4">
-              <div className="flex justify-between font-bold">
-                <span>Total</span>
-                <span>
-                  {formatPrice(
-                    totalAmount + 
-                    (form.watch('deliveryType') === 'Express' ? 4.99 :
-                    form.watch('deliveryType') === 'Next-Same' ? 6.99 :
-                    form.watch('deliveryType') === 'International' ? 14.99 : 2.99)
+            <Card className="bg-white">
+              <CardContent className="p-6">
+                <h2 className="text-2xl font-bold text-[#1A3B47] mb-4">Order Summary</h2>
+                <div className="space-y-4">
+                  {cartItems.map((item, index) => (
+                    <TooltipProvider key={index}>
+                      <div className="flex justify-between">
+                        <Tooltip>
+                          <TooltipTrigger
+                            onClick={() => navigate(`/product/${item?.product?._id}`)}
+                            className="text-black cursor-pointer hover:underline"
+                          >
+                            {item?.product?.name} x {item?.quantity}
+                          </TooltipTrigger>
+                          <TooltipContent className="w-48 p-2 text-sm whitespace-normal">
+                            <p>
+                              {item?.product?.description?.slice(0, 70)}
+                              {item?.product?.description?.length > 70 ? "..." : ""}
+                            </p>
+                            <div className="flex items-center pt-1">
+                              <FaStar className="text-yellow-500" />
+                              <span className="ml-1">{item?.product?.rating.toFixed(1) || "N/A"}</span>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                        <span>{formatPrice(item?.totalPrice)}</span>
+                      </div>
+                    </TooltipProvider>
+                  ))}
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between font-bold">
+                      <span>Subtotal</span>
+                      <span>{formatPrice(totalAmount)}</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Delivery</span>
+                    <span>
+                      {formatPrice(
+                        form.watch('deliveryType') === 'Express' ? 4.99 :
+                        form.watch('deliveryType') === 'Next-Same' ? 6.99 :
+                        form.watch('deliveryType') === 'International' ? 14.99 : 2.99
+                      )}
+                    </span>
+                  </div>
+                  {/* Promo Code Section */}
+                  <div className="border-t pt-4">
+                    <h3 className="text-lg font-semibold mb-2">Promo Code</h3>
+                    <form onSubmit={handlePromoSubmit} className="flex items-center space-x-2">
+                      <Input
+                        type="text"
+                        placeholder="Enter promo code"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        className="flex-grow"
+                      />
+                      <Button type="submit">Apply</Button>
+                    </form>
+                    {promoError && <p className="text-red-500 mt-2">{promoError}</p>}
+                    {promoDetails && (
+                      <div className="mt-4 p-4 bg-green-100 rounded-md">
+                        <p className="text-green-700">Promo code applied: {promoDetails.percentOff}% off</p>
+                        <p className="text-sm text-green-600 mt-1">Valid until: {format(new Date(promoDetails.dateRange.end), 'MMMM d, yyyy')}</p>
+                      </div>
+                    )}
+                  </div>
+                  {promoDetails && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount</span>
+                      <span>-{formatPrice(discountAmount)}</span>
+                    </div>
                   )}
-                </span>
-              </div>
-            </div>
+                  {estimatedDeliveryDate && (
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Estimated Delivery Date</span>
+                      <span>{format(estimatedDeliveryDate, 'MMMM d, yyyy')}</span>
+                    </div>
+                  )}
+                  <div className="border-t pt-4">
+                    <div className="flex justify-between font-bold">
+                      <span>Total</span>
+                      <span>
+                        {formatPrice(
+                          (promoDetails ? discountedTotal : totalAmount) + 
+                          (form.watch('deliveryType') === 'Express' ? 4.99 :
+                          form.watch('deliveryType') === 'Next-Same' ? 6.99 :
+                          form.watch('deliveryType') === 'International' ? 14.99 : 2.99)
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
-    </div>
         </div>
       </div>
+
 
       {/* Status Dialog */}
       <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
