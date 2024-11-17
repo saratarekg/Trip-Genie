@@ -509,12 +509,13 @@ export function NavbarComponent() {
                     }
                   }}
                 >
-                  <Bell className="h-7 w-7" />
+                  <Bell className="h-7 w-7 relative" />
                   {hasUnseenNotifications && (
-                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500" />
+                    <span className="absolute top-1 right-2 block h-3 w-3 rounded-full bg-red-500" />
                   )}
                   <span className="sr-only">Notifications</span>
                 </button>
+
                 {role === "tourist" && (
                   <>
                     <div className="relative mr-2 mt-1">
