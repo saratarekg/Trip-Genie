@@ -20,6 +20,11 @@ const upload = multer({ storage: storage });
 const router = express.Router();
 router.get("/notifications", adminController.getAdminNotifications);
 
+router.get('/unseen-notifications',adminController.hasUnseenNotifications);
+
+// POST /seller/mark-notifications-seen
+router.post('/mark-notifications-seen', adminController.markNotificationsAsSeen);
+
 
 router.get(
   "/historical-places",

@@ -24,14 +24,17 @@ const adminSchema = new Schema(
     },
     notifications: [{
       body: {
-         type: String,
-   
-       },
-       date: {
-         type: Date,
-         default: Date.now,
-       },
-   }],
+        type: String,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+      seen: {
+        type: Boolean,
+        default: false,
+      }
+    }],
   },
   { timestamps: true }
 );
