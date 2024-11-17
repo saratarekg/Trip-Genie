@@ -20,6 +20,7 @@ const getMaxPrice = async (req, res) => {
   res.status(200).json(maxPrice);
 };
 
+
 const getMaxPriceMy = async (req, res) => {
   const userId = res.locals.user_id;
 
@@ -33,6 +34,26 @@ const getMaxPriceMy = async (req, res) => {
     res.status(200).json(maxPrice);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Function to toggle the isSaved attribute
+const toggleSaveActivity = async (req, res) => {
+  const userId = res.locals.user_id;
+  const { id } = req.params;
+
+  try {
+    const activity = await Activity.findById(id);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found" });
+    }
+
+    activity.isSaved = !activity.isSaved;
+    await activity.save();
+
+    res.status(200).json({ message: `Activity ${activity.isSaved ? 'saved' : 'unsaved'} successfully` });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
   }
 };
 
@@ -609,4 +630,6 @@ module.exports = {
   updateCommentOnActivity,
   getMaxPrice,
   getMaxPriceMy,
+  toggleSaveActivity,
+
 };
