@@ -9,8 +9,6 @@ const OTP = require("../models/otp");
 const multer = require("multer");
 const cloudinary = require("../utils/cloudinary");
 const nodemailer = require("nodemailer");
-const crypto = require("crypto");
-const bcrypt = require("bcryptjs");
 
 const createToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.SECRET, {
