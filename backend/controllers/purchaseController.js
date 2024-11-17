@@ -50,25 +50,6 @@ exports.createPurchase = async (req, res) => {
 
       // Calculate the price for this product and add it to the total price
       totalPrice += productDoc.price * quantity;
-      const day = new Date().getDate();
-      const month = new Date().getMonth() + 1;
-      const year = new Date().getFullYear();
-      if (await productSales.findOne({ product, day, month, year })) {
-        await productSales.updateOne(
-          { product, day, month, year },
-          { $inc: { sales: quantity, revenue: productDoc.price * quantity } }
-        );
-      } else {
-        const newProductSales = new productSales({
-          product,
-          sales: quantity,
-          revenue: productDoc.price * quantity,
-          day,
-          month,
-          year,
-        });
-        await newProductSales.save();
-      }
     }
 
     // Add delivery price to the total
@@ -82,6 +63,16 @@ exports.createPurchase = async (req, res) => {
     } else {
       delPrice = 14.99; // International delivery
     }
+
+    const promoDetails = await PromoCode.findOne
+    ({
+      code: promoCode,
+    }
+    );
+
+
+    totalPrice = totalPrice - (totalPrice * promoDetails?.percentOff / 100 || 0);
+
     totalPrice += delPrice;
 
     // Check if the payment method is 'wallet'
@@ -108,9 +99,11 @@ exports.createPurchase = async (req, res) => {
         usedPromoCode = await PromoCode.usePromoCode(promoCode);
       } catch (error) {
         // If there's an error with the promo code, we'll just log it and continue without applying a discount
-        console.log(`Promo code error: ${error.message}`);
+        console.error(`Promo code error: ${error.message}`);
       }
     }
+
+
     // Create a new purchase with an array of products
     const newPurchase = new Purchase({
       tourist: userId,
@@ -132,7 +125,8 @@ exports.createPurchase = async (req, res) => {
     // Update the product's stock quantity and sales
     for (const item of products) {
       const { product, quantity } = item; // Using `product` (the productId)
-      await Product.findByIdAndUpdate(
+      
+      const productDoc = await Product.findByIdAndUpdate(
         product,
         {
           $inc: {
@@ -142,6 +136,36 @@ exports.createPurchase = async (req, res) => {
         },
         { new: true, runValidators: true }
       );
+
+      const day = new Date().getDate();
+      const month = new Date().getMonth() + 1;
+      const year = new Date().getFullYear();
+      let revenue = productDoc.price * quantity;
+      console.log("The revenue is tiy: ", revenue);
+      if (usedPromoCode) {
+        revenue = revenue - (revenue * usedPromoCode.percentOff / 100 || 0);
+        console.log("The revenue is bis: ", revenue);
+      }
+
+      console.log("The revenue is bts: ", revenue);
+
+
+      if (await productSales.findOne({ product, day, month, year })) {
+        await productSales.updateOne(
+          { product, day, month, year },
+          { $inc: { sales: quantity, revenue: revenue } }
+        );
+      } else {
+        const newProductSales = new productSales({
+          product,
+          sales: quantity,
+          revenue: revenue,
+          day,
+          month,
+          year,
+        });
+        await newProductSales.save();
+      }
     }
 
     await Tourist.findByIdAndUpdate(
@@ -268,6 +292,11 @@ exports.deletePurchase = async (req, res) => {
 
     if (!purchase) {
       return res.status(404).json({ message: "Purchase not found" });
+    }
+
+    if(purchase.promoCode){
+      
+
     }
 
     // Update the product sales accordingly
