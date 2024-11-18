@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from "react-router-dom";
 import ShippingAddress from "@/pages/AddShippingAddress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -82,6 +82,7 @@ const checkoutSchema = z.object({
 
 export default function CheckoutPage() {
   const [searchParams] = useSearchParams();
+  const [paySucess, setPaySucess] = useState(false);
   const [activeSection, setActiveSection] = useState("personal");
   const [userRole, setUserRole] = useState("tourist");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
@@ -130,9 +131,12 @@ export default function CheckoutPage() {
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountedTotal, setDiscountedTotal] = useState(0);
   const [currentPromoCode, setCurrentPromoCode] = useState("");
-  const [deliveryType, setDeliveryType] = useState( searchParams.get("deliveryType")  || "") ;
-  const [deliveryTime, setDeliveryTime] = useState( searchParams.get("deliveryTime")  || "") ;
-
+  const [deliveryType, setDeliveryType] = useState(
+    searchParams.get("deliveryType") || ""
+  );
+  const [deliveryTime, setDeliveryTime] = useState(
+    searchParams.get("deliveryTime") || ""
+  );
 
   const form = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -410,58 +414,115 @@ export default function CheckoutPage() {
 
   const handleStripeRedirect = async () => {
     try {
+      const DELIVERY_PRICES = {
+        Standard: formatPrice2(2.99),
+        Express: formatPrice2(4.99),
+        "Next-Same": formatPrice2(6.99),
+        International: formatPrice2(14.99),
+      };
+
       console.log("Redirecting to Stripe...");
-  
+
       const API_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
       const stripe = await loadStripe(API_KEY);
-      
-      const deliveryType = form.getValues("deliveryType");
-      const deliveryTime = form.getValues("deliveryTime");
-  
-      const response = await fetch('http://localhost:4000/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: cartItems.map(item => ({
-            product: {
-              name: item.product.name,
+
+      const response = await fetch(
+        "http://localhost:4000/create-checkout-session",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            items: cartItems.map((item) => ({
+              product: {
+                name: item.product.name,
+              },
+              quantity: item.quantity,
+              totalPrice: item.totalPrice,
+            })),
+            currency: userPreferredCurrency.code,
+            deliveryInfo: {
+              type: form.getValues("deliveryType"),
+              time: form.getValues("deliveryTime"),
+              deliveryPrice: DELIVERY_PRICES[form.getValues("deliveryType")],
             },
-            quantity: item.quantity,
-            totalPrice: item.totalPrice,
-          })),
-          currency: userPreferredCurrency.code,
-          deliveryType,
-          deliveryTime,
-        }),
-      });
-  
+          }),
+        }
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Server response:', errorData);
-        throw new Error(`Failed to create checkout session: ${errorData.error || response.statusText}`);
+        console.error("Server response:", errorData);
+        throw new Error(
+          `Failed to create checkout session: ${
+            errorData.error || response.statusText
+          }`
+        );
       }
-  
+
       const { id: sessionId } = await response.json();
-  
+
       if (!sessionId) {
-        throw new Error('No session ID returned from the server');
+        throw new Error("No session ID returned from the server");
       }
-  
-      console.log('Session ID received:', sessionId);
-  
+
+      console.log("Session ID received:", sessionId);
+
       const result = await stripe.redirectToCheckout({
         sessionId: sessionId,
       });
-  
+
       if (result.error) {
-        console.error('Stripe redirect error:', result.error);
+        console.error("Stripe redirect error:", result.error);
         throw new Error(result.error.message);
       }
     } catch (error) {
-      console.error('Error in redirecting to Stripe:', error);
+      console.error("Error in redirecting to Stripe:", error);
       // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  };
+
+  const completePurchase = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const products = cartItems.map((item) => ({
+        product: item.product._id,
+        quantity: item.quantity,
+      }));
+
+      const response = await fetch("http://localhost:4000/tourist/purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          products,
+          totalAmount,
+          paymentMethod: data.paymentMethod,
+          selectedCard: data.selectedCard,
+          shippingAddress: `${data.streetNumber} ${data.streetName}, ${data.city}, ${data.state} ${data.postalCode}`,
+          locationType: data.locationType,
+          deliveryType: data.deliveryType,
+          deliveryTime: data.deliveryTime,
+          deliveryDate: estimatedDeliveryDate,
+          promoCode: promoCode,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+
+      setPurchaseStatus("success");
+      setIsStatusDialogOpen(true);
+      emptyCart();
+    } catch (error) {
+      console.error("Error making purchase:", error);
+      setPurchaseStatus("error");
+      setIsStatusDialogOpen(true);
     }
   };
 
@@ -660,6 +721,20 @@ export default function CheckoutPage() {
       setCurrencySymbol(response.data);
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
+    }
+  };
+
+  const formatPrice2 = (price) => {
+    const roundedPrice = price;
+    if (cartItems.length > 0) {
+      if (userRole === "tourist" && userPreferredCurrency) {
+        if (userPreferredCurrency._id === cartItems[0].product.currency) {
+          return roundedPrice;
+        } else {
+          const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2);
+          return exchangedPrice;
+        }
+      }
     }
   };
 

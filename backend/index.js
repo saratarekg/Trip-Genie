@@ -172,23 +172,51 @@ app.get("/rates", currencyRateController.getExchangeRate);
 //stripe payment
 app.post("/create-checkout-session", async (req, res) => {
   try {
-    const { items, currency } = req.body;
+    const { items, currency, deliveryInfo } = req.body;
+
+    // Calculate the total price of items
+    const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
+
+    // Get the delivery price based on the delivery type
+    const deliveryPrice = deliveryInfo.deliveryPrice;
+
+    // Calculate the total price including delivery
+    const totalAmount = itemsTotal + deliveryPrice;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      line_items: items.map((item) => ({
-        price_data: {
-          currency: currency,
-          product_data: {
-            name: item.product.name,
+      line_items: [
+        ...items.map((item) => ({
+          price_data: {
+            currency: currency,
+            product_data: {
+              name: item.product.name,
+            },
+            unit_amount: Math.round(item.totalPrice * 100),
           },
-          unit_amount: Math.round(item.totalPrice * 100),
+          quantity: item.quantity,
+        })),
+        {
+          price_data: {
+            currency: currency,
+            product_data: {
+              name: `${deliveryInfo.type} Delivery`,
+            },
+            unit_amount: Math.round(deliveryInfo.deliveryPrice * 100),
+          },
+          quantity: 1,
         },
-        quantity: item.quantity,
-      })),
+      ],
       mode: "payment",
-      success_url: `http://localhost:3000/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}&delivery_type=${encodeURIComponent(deliveryType)}&delivery_time=${encodeURIComponent(deliveryTime)}`,
+      success_url: `http://localhost:3000/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}&delivery_type=${encodeURIComponent(
+        deliveryType
+      )}&delivery_time=${encodeURIComponent(deliveryTime)}`,
       cancel_url: `http://localhost:3000/checkout2`,
+      metadata: {
+        deliveryType: deliveryInfo.type,
+        deliveryTime: deliveryInfo.time,
+        deliveryPrice: deliveryInfo.deliveryPrice,
+      },
     });
 
     console.log("Checkout session created:", session.id);
