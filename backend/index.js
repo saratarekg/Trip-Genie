@@ -67,6 +67,14 @@ const checkAndUpdateRatesOnStart = async () => {
   }
 };
 
+const checkAndUpdateStatusOnStart = async () => {
+  try {
+    await purchaseController.updatePurchaseStatus();
+  } catch (error) {
+    console.error("Error updating purchase status on server start:", error);
+  }
+};
+
 const checkBirthdays = async () => {
   try {
     const today = new Date();
@@ -100,6 +108,7 @@ const checkBirthdays = async () => {
 
 // Run this function on server startup
 checkAndUpdateRatesOnStart();
+checkAndUpdateStatusOnStart();
 checkBirthdays();
 
 const sendBirthdayCards = async () => {
