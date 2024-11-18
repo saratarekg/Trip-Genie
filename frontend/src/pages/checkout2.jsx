@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
+import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import { format, addDays, addBusinessDays } from 'date-fns'
@@ -476,11 +477,67 @@ export default function CheckoutPage() {
     })
   }
 
-  const handleNextSection = (currentSection) => {
-    const sections = ['personal', 'address', 'payment', 'delivery']
-    const currentIndex = sections.indexOf(currentSection)
+  const handleNextSection = async (currentSection) => {
+    const sections = ['personal', 'address', 'payment', 'delivery'];
+    const currentIndex = sections.indexOf(currentSection);
     if (currentIndex < sections.length - 1) {
-      setActiveSection(sections[currentIndex + 1])
+      if (currentSection === 'payment' && form.watch('paymentMethod') === 'credit_card') {
+        await handleStripeRedirect();
+      } else {
+        setActiveSection(sections[currentIndex + 1]);
+      }
+    }
+  };
+
+  const handleStripeRedirect = async () => {
+    try {
+      console.log('Redirecting to Stripe...')
+  
+      const API_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+      const stripe = await loadStripe(API_KEY)
+      
+      const response = await fetch('http://localhost:4000/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: cartItems.map(item => ({
+            product: {
+              name: item.product.name,
+            },
+            quantity: item.quantity,
+            totalPrice: item.totalPrice,
+          })),
+          currency: userPreferredCurrency.code,
+        }),
+      })
+  
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Server response:', errorData)
+        throw new Error(`Failed to create checkout session: ${errorData.error || response.statusText}`)
+      }
+  
+      const { id: sessionId } = await response.json()
+  
+      if (!sessionId) {
+        throw new Error('No session ID returned from the server')
+      }
+  
+      console.log('Session ID received:', sessionId)
+  
+      const result = await stripe.redirectToCheckout({
+        sessionId: sessionId,
+      })
+  
+      if (result.error) {
+        console.error('Stripe redirect error:', result.error)
+        throw new Error(result.error.message)
+      }
+    } catch (error) {
+      console.error('Error in redirecting to Stripe:', error)
+      // Handle the error appropriately (e.g., show an error message to the user)
     }
   }
 
@@ -988,13 +1045,16 @@ export default function CheckoutPage() {
                               </div>
                             </form>
                           )}
-                          <Button 
-                            type="button" 
-                            onClick={(e) => { e.preventDefault(); handleNextSection('payment'); }}
-                            className="mt-4 bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
-                          >
-                            Next
-                          </Button>
+                              <Button 
+                                type="button" 
+                                onClick={(e) => { 
+                                  e.preventDefault(); 
+                                  handleNextSection('payment'); 
+                                }}
+                                className="mt-4 bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
+                              >
+                                {form.watch('paymentMethod') === 'credit_card' ? 'Proceed to Payment' : 'Next'}
+                              </Button>
                         </div>
                       )}
                     </div>
