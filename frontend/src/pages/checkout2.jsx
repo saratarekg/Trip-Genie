@@ -428,7 +428,7 @@ export default function CheckoutPage() {
               name: item.product.name,
             },
             quantity: item.quantity,
-            totalPrice: item.totalPrice,
+            totalPrice: formatPrice2( item.totalPrice),
           })),
           currency: userPreferredCurrency.code,
           deliveryInfo: {
@@ -706,13 +706,13 @@ export default function CheckoutPage() {
   const getDeliveryPrice = (deliveryType) => {
     switch (deliveryType) {
       case "Express":
-        return 4.99
+        return formatPrice2(4.99)
       case "Next-Same":
-        return 6.99
+        return formatPrice2(6.99)
       case "International":
-        return 14.99
+        return formatPrice2(14.99)
       default:
-        return 2.99
+        return formatPrice2(2.99)
     }
   }
 
