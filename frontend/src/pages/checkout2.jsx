@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import { format, addDays, addBusinessDays } from 'date-fns'
 import * as z from 'zod'
-import { FaStar } from 'react-icons/fa';
+import { FaStar } from 'react-icons/fa'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { useForm } from 'react-hook-form'
-import { useNavigate } from "react-router-dom";
-import  ShippingAddress  from "@/pages/AddShippingAddress"
+import { useNavigate } from "react-router-dom"
+import ShippingAddress from "@/pages/AddShippingAddress"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -79,7 +79,7 @@ export default function CheckoutPage() {
   const [showSavedCards, setShowSavedCards] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [selectedCard, setSelectedCard] = useState(null)
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState(null)
   const [addressDetails, setAddressDetails] = useState({
@@ -105,16 +105,12 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [purchaseStatus, setPurchaseStatus] = useState(null)
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
- 
-
   const [promoCode, setPromoCode] = useState('')
   const [promoDetails, setPromoDetails] = useState(null)
   const [promoError, setPromoError] = useState('')
   const [discountAmount, setDiscountAmount] = useState(0)
   const [discountedTotal, setDiscountedTotal] = useState(0)
   const [currentPromoCode, setCurrentPromoCode] = useState('')
-
-
 
   const form = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -140,7 +136,6 @@ export default function CheckoutPage() {
     fetchUserInfo()
   }, [])
 
-
   useEffect(() => {
     const loadPrices = async () => {
       setIsPriceLoading(true)
@@ -151,7 +146,6 @@ export default function CheckoutPage() {
     }
     loadPrices()
   }, [userPreferredCurrency])
-
 
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest"
@@ -168,7 +162,6 @@ export default function CheckoutPage() {
         setSavedCards(userData.cards || [])
         setSavedAddresses(userData.shippingAddresses || [])
 
-        // Set default address and card
         const defaultAddress = userData.shippingAddresses?.find(addr => addr.default)
         const defaultCard = userData.cards?.find(card => card.default)
 
@@ -293,7 +286,6 @@ export default function CheckoutPage() {
     }
   }
 
-
   const handleAddNewAddress = async (newAddress) => {
     setIsLoading(true)
     try {
@@ -369,46 +361,104 @@ export default function CheckoutPage() {
     }
   }
 
-  const onSubmit = async (data) => {
+  const handleStripeRedirect = async () => {
     try {
-      const token = Cookies.get("jwt")
-      const products = cartItems.map((item) => ({
-        product: item.product._id,
-        quantity: item.quantity,
-      }))
-
-      const response = await fetch("http://localhost:4000/tourist/purchase", {
-        method: "POST",
+      console.log('Redirecting to Stripe...')
+  
+      const API_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+      const stripe = await loadStripe(API_KEY)
+      
+      const response = await fetch('http://localhost:4000/create-checkout-session', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          products,
-          totalAmount,
-          paymentMethod: data.paymentMethod,
-          selectedCard: data.selectedCard,
-          shippingAddress: `${data.streetNumber} ${data.streetName}, ${data.city}, ${data.state} ${data.postalCode}`,
-          locationType: data.locationType,
-          deliveryType: data.deliveryType,
-          deliveryTime: data.deliveryTime,
-          deliveryDate: estimatedDeliveryDate,
-          promoCode: promoCode,
+          items: cartItems.map(item => ({
+            product: {
+              name: item.product.name,
+            },
+            quantity: item.quantity,
+            totalPrice: item.totalPrice,
+          })),
+          currency: userPreferredCurrency.code,
         }),
       })
-
+  
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message)
+        console.error('Server response:', errorData)
+        throw new Error(`Failed to create checkout session: ${errorData.error || response.statusText}`)
       }
-
-      setPurchaseStatus('success')
-      setIsStatusDialogOpen(true)
-      emptyCart()
+  
+      const { id: sessionId } = await response.json()
+  
+      if (!sessionId) {
+        throw new Error('No session ID returned from the server')
+      }
+  
+      console.log('Session ID received:', sessionId)
+  
+      const result = await stripe.redirectToCheckout({
+        sessionId: sessionId,
+      })
+  
+      if (result.error) {
+        console.error('Stripe redirect error:', result.error)
+        throw new Error(result.error.message)
+      }
     } catch (error) {
-      console.error('Error making purchase:', error)
-      setPurchaseStatus('error')
-      setIsStatusDialogOpen(true)
+      console.error('Error in redirecting to Stripe:', error)
+      // Handle the error appropriately (e.g., show an error message to the user)
+    }
+  }
+
+  const onSubmit = async (data) => {
+    console.log("submitting")
+
+    if (data.paymentMethod === 'credit_card') {
+      await handleStripeRedirect()
+    } else {
+      try {
+        const token = Cookies.get("jwt")
+        const products = cartItems.map((item) => ({
+          product: item.product._id,
+          quantity: item.quantity,
+        }))
+
+        const response = await fetch("http://localhost:4000/tourist/purchase", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            products,
+            totalAmount,
+            paymentMethod: data.paymentMethod,
+            selectedCard: data.selectedCard,
+            shippingAddress: `${data.streetNumber} ${data.streetName}, ${data.city}, ${data.state} ${data.postalCode}`,
+            locationType: data.locationType,
+            deliveryType: data.deliveryType,
+            deliveryTime: data.deliveryTime,
+            deliveryDate: estimatedDeliveryDate,
+            promoCode: promoCode,
+          }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message)
+        }
+
+        setPurchaseStatus('success')
+        setIsStatusDialogOpen(true)
+        emptyCart()
+      } catch (error) {
+        console.error('Error making purchase:', error)
+        setPurchaseStatus('error')
+        setIsStatusDialogOpen(true)
+      }
     }
   }
 
@@ -477,67 +527,11 @@ export default function CheckoutPage() {
     })
   }
 
-  const handleNextSection = async (currentSection) => {
-    const sections = ['personal', 'address', 'payment', 'delivery'];
-    const currentIndex = sections.indexOf(currentSection);
+  const handleNextSection = (currentSection) => {
+    const sections = ['personal', 'address', 'payment', 'delivery']
+    const currentIndex = sections.indexOf(currentSection)
     if (currentIndex < sections.length - 1) {
-      if (currentSection === 'payment' && form.watch('paymentMethod') === 'credit_card') {
-        await handleStripeRedirect();
-      } else {
-        setActiveSection(sections[currentIndex + 1]);
-      }
-    }
-  };
-
-  const handleStripeRedirect = async () => {
-    try {
-      console.log('Redirecting to Stripe...')
-  
-      const API_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-      const stripe = await loadStripe(API_KEY)
-      
-      const response = await fetch('http://localhost:4000/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: cartItems.map(item => ({
-            product: {
-              name: item.product.name,
-            },
-            quantity: item.quantity,
-            totalPrice: item.totalPrice,
-          })),
-          currency: userPreferredCurrency.code,
-        }),
-      })
-  
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error('Server response:', errorData)
-        throw new Error(`Failed to create checkout session: ${errorData.error || response.statusText}`)
-      }
-  
-      const { id: sessionId } = await response.json()
-  
-      if (!sessionId) {
-        throw new Error('No session ID returned from the server')
-      }
-  
-      console.log('Session ID received:', sessionId)
-  
-      const result = await stripe.redirectToCheckout({
-        sessionId: sessionId,
-      })
-  
-      if (result.error) {
-        console.error('Stripe redirect error:', result.error)
-        throw new Error(result.error.message)
-      }
-    } catch (error) {
-      console.error('Error in redirecting to Stripe:', error)
-      // Handle the error appropriately (e.g., show an error message to the user)
+      setActiveSection(sections[currentIndex + 1])
     }
   }
 
@@ -678,7 +672,7 @@ export default function CheckoutPage() {
                           </div>
                           <Button 
                             type="button" 
-                            onClick={(e) => { e.preventDefault(); handleNextSection('personal'); }}
+                            onClick={() => handleNextSection('personal')}
                             className="col-span-2 mt-4 bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
                           >
                             Next
@@ -727,24 +721,24 @@ export default function CheckoutPage() {
                               </div>
                             </div>
                           )}
-                         <button 
-            onClick={(e) => { e.preventDefault(); setIsAddressDialogOpen(true); }} 
-            className="text-[#388A94] hover:underline"
-          >
-            Add New
-          </button>
+                          <button 
+                            onClick={(e) => { e.preventDefault(); setIsAddressDialogOpen(true); }} 
+                            className="text-[#388A94] hover:underline"
+                          >
+                            Add New
+                          </button>
 
-          <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
-  <DialogContent className="max-h-[80vh] overflow-y-auto">
-    <DialogHeader>
-      <DialogTitle>Add New Address</DialogTitle>
-    </DialogHeader>
-    <ShippingAddress 
-  onSubmit={handleAddNewAddress} 
-  onCancel={() => (setIsAddressDialogOpen(false), fetchUserInfo())} 
-/>
-  </DialogContent>
-</Dialog>
+                          <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
+                            <DialogContent className="max-h-[80vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Add New Address</DialogTitle>
+                              </DialogHeader>
+                              <ShippingAddress 
+                                onSubmit={handleAddNewAddress} 
+                                onCancel={() => (setIsAddressDialogOpen(false), fetchUserInfo())} 
+                              />
+                            </DialogContent>
+                          </Dialog>
 
                           {showSavedAddresses && (
                             <Dialog open={showSavedAddresses} onOpenChange={setShowSavedAddresses}>
@@ -778,141 +772,10 @@ export default function CheckoutPage() {
                             </Dialog>
                           )}
                           
-                          {showAddForm && (
-                            <form onSubmit={handleAddNewAddress} className="mt-4 border border-gray-300 rounded-md p-4 bg-white">
-                              <h3 className="text-lg font-semibold mb-4">Add New Address</h3>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <Label htmlFor="streetName">Street Name</Label>
-                                  <Input
-                                    id="streetName"
-                                    name="streetName"
-                                    value={addressDetails.streetName}
-                                    onChange={handleInputChange}
-                                    className={errors.streetName ? 'border-red-500' : ''}
-                                  />
-                                  {errors.streetName && <span className="text-red-500 text-sm">{errors.streetName}</span>}
-                                </div>
-                                <div>
-                                  <Label htmlFor="streetNumber">Street Number</Label>
-                                  <Input
-                                    id="streetNumber"
-                                    name="streetNumber"
-                                    value={addressDetails.streetNumber}
-                                    onChange={handleInputChange}
-                                    className={errors.streetNumber ? 'border-red-500' : ''}
-                                  />
-                                  {errors.streetNumber && <span className="text-red-500 text-sm">{errors.streetNumber}</span>}
-                                </div>
-                                <div>
-                                  <Label htmlFor="floorUnit">Floor/Unit</Label>
-                                  <Input
-                                    id="floorUnit"
-                                    name="floorUnit"
-                                    value={addressDetails.floorUnit}
-                                    onChange={handleInputChange}
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="city">City</Label>
-                                  <Input
-                                    id="city"
-                                    name="city"
-                                    value={addressDetails.city}
-                                    onChange={handleInputChange}
-                                    className={errors.city ? 'border-red-500' : ''}
-                                  />
-                                  {errors.city && <span className="text-red-500 text-sm">{errors.city}</span>}
-                                </div>
-                                <div>
-                                  <Label htmlFor="state">State</Label>
-                                  <Input
-                                    id="state"
-                                    name="state"
-                                    value={addressDetails.state}
-                                    onChange={handleInputChange}
-                                    className={errors.state ? 'border-red-500' : ''}
-                                  />
-                                  {errors.state && <span className="text-red-500 text-sm">{errors.state}</span>}
-                                </div>
-                                <div>
-                                  <Label htmlFor="postalCode">Postal Code</Label>
-                                  <Input
-                                    id="postalCode"
-                                    name="postalCode"
-                                    value={addressDetails.postalCode}
-                                    onChange={handleInputChange}
-                                    className={errors.postalCode ? 'border-red-500' : ''}
-                                  />
-                                  {errors.postalCode && <span className="text-red-500 text-sm">{errors.postalCode}</span>}
-                                </div>
-                                <div>
-                                  <Label htmlFor="country">Country</Label>
-                                  <Input
-                                    id="country"
-                                    name="country"
-                                    value={addressDetails.country}
-                                    onChange={handleInputChange}
-                                    className={errors.country ? 'border-red-500' : ''}
-                                  />
-                                  {errors.country && <span className="text-red-500 text-sm">{errors.country}</span>}
-                                </div>
-                                <div>
-                                  <Label htmlFor="landmark">Landmark</Label>
-                                  <Input
-                                    id="landmark"
-                                    name="landmark"
-                                    value={addressDetails.landmark}
-                                    onChange={handleInputChange}
-                                  />
-                                </div>
-                                <div className="col-span-2">
-                                  <Label htmlFor="locationType">Location Type</Label>
-                                  <Select name="locationType" value={addressDetails.locationType} onValueChange={(value) => handleInputChange({ target: { name: 'locationType', value } })}>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select location type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="home">Home</SelectItem>
-                                      <SelectItem value="work">Work</SelectItem>
-                                      <SelectItem value="apartment">Apartment</SelectItem>
-                                      <SelectItem value="friend_family">Friend/Family</SelectItem>
-                                      <SelectItem value="po_box">PO Box</SelectItem>
-                                      <SelectItem value="office">Office</SelectItem>
-                                      <SelectItem value="pickup_point">Pickup Point</SelectItem>
-                                      <SelectItem value="vacation">Vacation</SelectItem>
-                                      <SelectItem value="school">School</SelectItem>
-                                      <SelectItem value="other">Other</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div className="col-span-2">
-                                  <Label className="flex items-center space-x-2">
-                                    <input
-                                      type="checkbox"
-                                      name="default"
-                                      checked={addressDetails.default}
-                                      onChange={handleInputChange}
-                                      className="rounded-md"
-                                    />
-                                    <span>Set as Default Address</span>
-                                  </Label>
-                                </div>
-                              </div>
-                              <div className="flex justify-end mt-4">
-                                <Button type="button" variant="outline" onClick={() => { setShowAddForm(false); resetAddressDetails(); }} className="mr-2">
-                                  Cancel
-                                </Button>
-                                <Button type="submit" disabled={isLoading}>
-                                  {isLoading ? 'Processing...' : 'Submit'}
-                                </Button>
-                              </div>
-                            </form>
-                          )}
                           <div className="flex justify-end mt-4">
                             <Button 
                               type="button" 
-                              onClick={(e) => { e.preventDefault(); handleNextSection('address'); }}
+                              onClick={() => handleNextSection('address')}
                               className="bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
                             >
                               Next
@@ -1045,16 +908,15 @@ export default function CheckoutPage() {
                               </div>
                             </form>
                           )}
-                              <Button 
-                                type="button" 
-                                onClick={(e) => { 
-                                  e.preventDefault(); 
-                                  handleNextSection('payment'); 
-                                }}
-                                className="mt-4 bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
-                              >
-                                {form.watch('paymentMethod') === 'credit_card' ? 'Proceed to Payment' : 'Next'}
-                              </Button>
+                          <div className="flex justify-end mt-4">
+                            <Button 
+                              type="button" 
+                              onClick={() => handleNextSection('payment')}
+                              className="bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
+                            >
+                              Next
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1234,7 +1096,6 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-
       {/* Status Dialog */}
       <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
         <DialogContent>
@@ -1251,8 +1112,8 @@ export default function CheckoutPage() {
           <DialogFooter>
             <Button
               onClick={() => {
-                setIsStatusDialogOpen(false);
-                navigate("/"); // Navigate to home page
+                setIsStatusDialogOpen(false)
+                navigate("/")
               }}
               className="bg-[#5D9297] hover:bg-[#388A94]"
             >
@@ -1261,8 +1122,8 @@ export default function CheckoutPage() {
             
             <Button
               onClick={() => {
-                setIsStatusDialogOpen(false);
-                navigate("/all-products"); // Navigate to the products page
+                setIsStatusDialogOpen(false)
+                navigate("/all-products")
               }}
               className="bg-[#1A3B47] hover:bg-[#388A94]"
             >
