@@ -230,9 +230,6 @@ checkUpcomingEvents = async () => {
       return activityDate >= today && activityDate <= new Date(twoDays);
     });
 
-    console.log("activities", activities);
-    console.log("itineraries", itineraries);
-
     // Send reminder emails to the tourists
     itineraries.forEach((itinerary) => {
       emailService.sendItineraryReminder(itinerary);

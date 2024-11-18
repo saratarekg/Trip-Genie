@@ -1,15 +1,7 @@
 const ItineraryBooking = require("../models/itineraryBooking");
 const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const emailService = require("../services/emailService");
 
 // Create a new itinerary booking
 exports.createBooking = async (req, res) => {
@@ -63,29 +55,11 @@ exports.createBooking = async (req, res) => {
     // Save the booking
     await newBooking.save();
 
-    // Format the date to "MM/DD/YYYY"
-    const formattedDate = new Date(date).toLocaleDateString("en-US");
-
-    // Send email to user with booking details
-    const mailOptions = {
-      to: user.email,
-      subject: "Booking Confirmation",
-      html: `<h1>Booking Confirmation</h1>
-      <p>Thank you for booking with us. Here are your booking details:</p>
-      <p><strong>Booking ID: ${newBooking._id}</p>
-      <p><strong>Itinerary: ${itineraryExists.title}</p>
-      <p><strong>Payment Type: ${paymentType}</p>
-      <p><strong>Payment Amount: ${paymentAmount}</p>
-      <p><strong>Number of Tickets: ${numberOfTickets}</p>
-      <p><strong>Date: ${formattedDate}</p>
-      <p>Enjoy your experience!</p>`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-      }
-    });
+    await emailService.sendItineraryBookingConfirmationEmail(
+      user.email,
+      newBooking,
+      itineraryExists
+    );
 
     // Calculate loyalty points based on the user's badge level
     const loyaltyPoints = calculateLoyaltyPoints(

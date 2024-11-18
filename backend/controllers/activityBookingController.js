@@ -1,15 +1,7 @@
 const ActivityBooking = require("../models/activityBooking"); // Assuming your model is in models/activityBooking.js
 const Activity = require("../models/activity"); // Assuming your Activity model is in models/activity.js
 const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const emailService = require("../services/emailService");
 
 // Create a new booking
 exports.createBooking = async (req, res) => {
@@ -53,30 +45,11 @@ exports.createBooking = async (req, res) => {
 
     await newBooking.save();
 
-    // Send an email to the user with the booking details
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: user.email,
-      subject: "Booking Confirmation",
-      html: `<h1>Booking Confirmation</h1>
-      <p>Thank you for booking with us. Here are your booking details:</p>
-      <p><strong>Booking ID: ${newBooking._id}</p>
-      <p><strong>Activity: ${activityExists.name}</p>
-      <p><strong>Location: ${activityExists.location.address}</p>
-      <p><strong>Date: ${new Date(activityExists.timing).toLocaleDateString(
-        "en-US"
-      )}</p>
-      <p><strong>Payment Type: ${paymentType}</p>
-      <p><strong>Payment Amount: ${paymentAmount}</p>
-      <p><strong>Number of Tickets: ${numberOfTickets}</p>
-      <p>Enjoy your experience!</p>`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log(error);
-      }
-    });
+    await emailService.sendActivityBookingConfirmationEmail(
+      user.email,
+      newBooking,
+      activityExists
+    );
 
     // Calculate loyalty points based on the user's badge level
     const loyaltyPoints = calculateLoyaltyPoints(

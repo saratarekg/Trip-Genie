@@ -3,15 +3,7 @@ const Purchase = require("../models/purchase"); // Assuming your Activity model 
 const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
 const productSales = require("../models/productSales");
 const PromoCode = require("../models/promoCode");
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const emailService = require("../services/emailService");
 
 exports.createPurchase = async (req, res) => {
   const {
@@ -133,37 +125,11 @@ exports.createPurchase = async (req, res) => {
         return { product, quantity: item.quantity };
       })
     );
-    // Send an email to the tourist with order details
-    const mailOptions = {
-      to: tourist.email,
-      subject: "Purchase Confirmation",
-      html: `<h1>Thank you for your purchase!</h1>
-      <p>Your order has been placed successfully. Here are the details:</p>
-      <p><strong>Order ID:</strong> ${newPurchase._id}</p>
-      <p><strong>Delivery Date:</strong> ${new Date(
-        newPurchase.deliveryDate
-      ).toLocaleDateString("en-US")}</p>
-      <p><strong>Delivery Time:</strong> ${newPurchase.deliveryTime}</p>
-      <p><strong>Delivery Address:</strong> ${newPurchase.shippingAddress}</p>
-      <p><strong>Delivery Type:</strong> ${newPurchase.deliveryType}</p>
-      <p><strong>Payment Method:</strong> ${newPurchase.paymentMethod}</p>
-      <p><strong>Total Price:</strong> $${newPurchase.totalPrice}</p>
-      <p><strong>Products:</strong></p>
-      <ul>
-        ${productsDetails
-          .map(
-            (item) =>
-              `<li>${item.quantity} x ${item.product.name} - $${item.product.price}</li>`
-          )
-          .join("")}
-      </ul>`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Email error: ", error.message);
-      }
-    });
+    await emailService.sendPurchaseConfirmationEmail(
+      tourist.email,
+      newPurchase,
+      productsDetails
+    );
 
     // Update the product's stock quantity and sales
     for (const item of products) {

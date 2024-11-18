@@ -1,17 +1,7 @@
 const mongoose = require("mongoose");
 const Seller = require("./seller");
 const Admin = require("./admin");
-
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
-
+const emailService = require("../services/emailService");
 
 const productSchema = new mongoose.Schema(
   {
@@ -187,29 +177,28 @@ productSchema.statics.filterByPrice = async function (minPrice, maxPrice) {
 //       });
 //     }
 
-
 //   }
 
 // });
 
 productSchema.post("findOneAndUpdate", async function (doc) {
   console.log("Product out of stock3");
-  console.log("xxxxxx",this.quantity);
+  console.log("xxxxxx", this.quantity);
   if (doc.quantity === 0) {
     console.log("Product out of stock2");
 
-
     if (doc.seller === undefined || doc.seller === null) {
-      await Admin.updateMany({}, {
-        $push: {
-          notifications: {
-            body: `Product ${doc.name} is out of stock`
-          }
+      await Admin.updateMany(
+        {},
+        {
+          $push: {
+            notifications: {
+              body: `Product ${doc.name} is out of stock`,
+            },
+          },
         }
-      });
-
-    }
-    else {
+      );
+    } else {
       await Seller.findByIdAndUpdate(
         doc.seller,
         {
@@ -224,31 +213,10 @@ productSchema.post("findOneAndUpdate", async function (doc) {
 
       const seller = await Seller.findById(doc.seller);
 
-      const mailOptions = {
-        to: seller.email,
-        subject: "Product Out of Stock Notification",
-        html: `<h1>Product Out of Stock</h1>
-        <p>Dear ${seller.name},</p>
-        <p>We wanted to inform you that your product is currently out of stock:</p>
-        <p><strong>Product Name:</strong> ${doc.name}</p>
-        <p>Please update the stock availability in your dashboard for this product.</p>
-        <p>Thank you for your attention.</p>
-        <p>Best regards,<br>Trip Genie</p>`,
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error("Email error: ", error.message);
-        }
-      });
+      await emailService.sendOutOfStockEmail(seller, doc);
     }
-
-
   }
-
 });
-
-
 
 const Product = mongoose.model("Product", productSchema);
 module.exports = Product;

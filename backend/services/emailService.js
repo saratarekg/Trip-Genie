@@ -94,8 +94,132 @@ const sendActivityReminder = async (activity) => {
   });
 };
 
+const sendActivityBookingConfirmationEmail = async (
+  email,
+  booking,
+  activity
+) => {
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: "Booking Confirmation",
+    html: `<h1>Booking Confirmation</h1>
+        <p>Thank you for booking with us. Here are your booking details:</p>
+        <p><strong>Booking ID: ${booking._id}</p>
+        <p><strong>Activity: ${activity.name}</p>
+        <p><strong>Location: ${activity.location.address}</p>
+        <p><strong>Date: ${new Date(activity.timing).toLocaleDateString(
+          "en-US"
+        )}</p>
+        <p><strong>Payment Type: ${booking.paymentType}</p>
+        <p><strong>Payment Amount: ${booking.paymentAmount}</p>
+        <p><strong>Number of Tickets: ${booking.numberOfTickets}</p>
+        <p>Enjoy your experience!</p>`,
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(
+        "Error sending activity booking confirmation email:",
+        error
+      );
+    }
+  });
+};
+
+const sendItineraryBookingConfirmationEmail = async (
+  email,
+  booking,
+  itinerary
+) => {
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: "Booking Confirmation",
+    html: `<h1>Booking Confirmation</h1>
+            <p>Thank you for booking with us. Here are your booking details:</p>
+            <p><strong>Booking ID: ${booking._id}</p>
+            <p><strong>Itinerary: ${itinerary.title}</p>
+            <p><strong>Date: ${new Date(booking.date).toLocaleDateString(
+              "en-US"
+            )}</p>
+            <p><strong>Payment Type: ${booking.paymentType}</p>
+            <p><strong>Payment Amount: ${booking.paymentAmount}</p>
+            <p><strong>Number of Tickets: ${booking.numberOfTickets}</p>
+            <p>Enjoy your trip!</p>`,
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(
+        "Error sending itinerary booking confirmation email:",
+        error
+      );
+    }
+  });
+};
+
+const sendPurchaseConfirmationEmail = async (
+  email,
+  purchase,
+  productsDetails
+) => {
+  // Send an email to the tourist with order details
+  const mailOptions = {
+    to: email,
+    subject: "Purchase Confirmation",
+    html: `<h1>Thank you for your purchase!</h1>
+        <p>Your order has been placed successfully. Here are the details:</p>
+        <p><strong>Order ID:</strong> ${purchase._id}</p>
+        <p><strong>Delivery Date:</strong> ${new Date(
+          purchase.deliveryDate
+        ).toLocaleDateString("en-US")}</p>
+        <p><strong>Delivery Time:</strong> ${purchase.deliveryTime}</p>
+        <p><strong>Delivery Address:</strong> ${purchase.shippingAddress}</p>
+        <p><strong>Delivery Type:</strong> ${purchase.deliveryType}</p>
+        <p><strong>Payment Method:</strong> ${purchase.paymentMethod}</p>
+        <p><strong>Total Price:</strong> $${purchase.totalPrice}</p>
+        <p><strong>Products:</strong></p>
+        <ul>
+          ${productsDetails
+            .map(
+              (item) =>
+                `<li>${item.quantity} x ${item.product.name} - $${item.product.price}</li>`
+            )
+            .join("")}
+        </ul>`,
+  };
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending purchase confirmation email:", error);
+    }
+  });
+};
+
+const sendOutOfStockEmail = async (seller, product) => {
+  const mailOptions = {
+    to: seller.email,
+    subject: "Product Out of Stock Notification",
+    html: `<h1>Product Out of Stock</h1>
+            <p>Dear ${seller.name},</p>
+            <p>We wanted to inform you that your product is currently out of stock:</p>
+            <p><strong>Product Name:</strong> ${product.name}</p>
+            <p>Please update the stock availability this product.</p>
+            <p>Thank you for your attention.</p>
+            <p>Best regards,<br>Trip Genie</p>`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending out of stock email:", error);
+    }
+  });
+};
+
 module.exports = {
   sendBirthdayEmail,
   sendItineraryReminder,
   sendActivityReminder,
+  sendActivityBookingConfirmationEmail,
+  sendItineraryBookingConfirmationEmail,
+  sendPurchaseConfirmationEmail,
+  sendOutOfStockEmail,
 };
