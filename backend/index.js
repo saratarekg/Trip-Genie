@@ -15,6 +15,7 @@ const apiRoutes = require("./routes/apiRoutes");
 const nodemailer = require("nodemailer");
 const promoCode = require("./models/promoCode");
 const JobStatus = require("./models/JobStatus");
+const purchaseController = require("./controllers/purchaseController");
 
 const Tourist = require("./models/tourist");
 
@@ -132,6 +133,7 @@ cron.schedule("0 0 * * *", async () => {
   );
   await currencyRateController.updateRatesAgainstUSD();
   await sendBirthdayCards();
+  await purchaseController.updatePurchaseStatus();
   JobStatus.findOneAndUpdate(
     { jobName: "BirthdayJob" },
     { lastRun: new Date() },
