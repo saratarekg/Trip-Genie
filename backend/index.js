@@ -12,10 +12,9 @@ const sellerRoutes = require("./routes/sellerRoutes");
 const tourGuideRoutes = require("./routes/tourGuideRoutes");
 const advertiserRoutes = require("./routes/advertiserRoutes");
 const apiRoutes = require("./routes/apiRoutes");
-const nodemailer = require("nodemailer");
-const promoCode = require("./models/promoCode");
 const JobStatus = require("./models/JobStatus");
 const purchaseController = require("./controllers/purchaseController");
+const emailService = require("./services/emailService");
 
 const Tourist = require("./models/tourist");
 
@@ -26,6 +25,8 @@ const { getAllLanguages } = require("./controllers/itineraryController");
 const cron = require("node-cron");
 const currencyRateController = require("./controllers/currencyRateController");
 const Grid = require("gridfs-stream");
+const ItineraryBooking = require("./models/itineraryBooking");
+const ActivityBooking = require("./models/activityBooking");
 
 const PORT = process.env.PORT;
 
@@ -36,14 +37,6 @@ app.use(express.json({ limit: "50mb" }));
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(cookieParser());
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
-
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
 
 const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
 
@@ -57,84 +50,6 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-// Check and update the exchange rates when the server starts
-const checkAndUpdateRatesOnStart = async () => {
-  try {
-    console.log("Checking exchange rates on server start...");
-    await currencyRateController.updateRatesAgainstUSD();
-  } catch (error) {
-    console.error("Error updating rates on server start:", error);
-  }
-};
-
-const checkAndUpdateStatusOnStart = async () => {
-  try {
-    await purchaseController.updatePurchaseStatus();
-  } catch (error) {
-    console.error("Error updating purchase status on server start:", error);
-  }
-};
-
-const checkBirthdays = async () => {
-  try {
-    const today = new Date();
-    const todayMonth = today.getMonth();
-    const todayDay = today.getDate();
-    let lastRunDate = new Date();
-    console.log("Checking birthdays on server start...");
-
-    // Fetch the last run date from JobStatus
-    let jobStatus = await JobStatus.findOne({ jobName: "BirthdayJob" });
-    if (jobStatus) {
-      lastRunDate = jobStatus.lastRun || new Date(today - 86400000); // Default to 1 day before
-      // If the last run date is not today, check for birthdays
-      if (
-        lastRunDate.getDate() !== todayDay ||
-        lastRunDate.getMonth() !== todayMonth
-      ) {
-        console.log("Checking for birthdays...");
-        await sendBirthdayCards();
-        jobStatus.lastRun = today;
-        await jobStatus.save();
-      }
-    } else {
-      jobStatus = new JobStatus({ jobName: "BirthdayJob" });
-      await jobStatus.save();
-    }
-  } catch (error) {
-    console.error("Error checking birthdays:", error);
-  }
-};
-
-// Run this function on server startup
-checkAndUpdateRatesOnStart();
-checkAndUpdateStatusOnStart();
-checkBirthdays();
-
-const sendBirthdayCards = async () => {
-  const today = new Date(); // Get today's date
-  const todayMonth = today.getMonth(); // Get the month (0-11)
-  const todayDay = today.getDate(); // Get the day (1-31)
-
-  try {
-    // Fetch all tourists from the database
-    const tourists = await Tourist.find();
-
-    // Filter tourists whose DOB matches today's month and day
-    const birthdayTourists = tourists.filter((tourist) => {
-      const dob = new Date(tourist.dateOfBirth); // Convert DOB to Date object
-      return dob.getMonth() === todayMonth && dob.getDate() === todayDay;
-    });
-
-    // Send birthday emails to the filtered tourists
-    birthdayTourists.forEach((tourist) => {
-      sendBirthdayEmail(tourist);
-    });
-  } catch (error) {
-    console.error("Error sending birthday cards:", error);
-  }
-};
-
 // Schedule the task to run once every day at midnight (server time)
 cron.schedule("0 0 * * *", async () => {
   console.log(
@@ -143,6 +58,7 @@ cron.schedule("0 0 * * *", async () => {
   await currencyRateController.updateRatesAgainstUSD();
   await sendBirthdayCards();
   await purchaseController.updatePurchaseStatus();
+  checkUpcomingEvents();
   JobStatus.findOneAndUpdate(
     { jobName: "BirthdayJob" },
     { lastRun: new Date() },
@@ -227,45 +143,121 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-const sendBirthdayEmail = async (tourist) => {
-  let code = "";
-  if (tourist.fname) {
-    code = `${tourist.fname.toUpperCase()}${tourist.dateOfBirth.getFullYear()}`;
-  } else {
-    code = `${tourist.username.toUpperCase()}${tourist.dateOfBirth.getFullYear()}`;
+// Check and update the exchange rates when the server starts
+const checkAndUpdateRatesOnStart = async () => {
+  try {
+    console.log("Checking exchange rates on server start...");
+    await currencyRateController.updateRatesAgainstUSD();
+  } catch (error) {
+    console.error("Error updating rates on server start:", error);
   }
-  const mailOptions = {
-    to: tourist.email,
-    subject: "Happy Birthday!",
-    html: `<h1>Happy Birthday, ${tourist.fname}! 🎉🎂🎈</h1>
-      <p>Wishing you a day filled with happiness and a year filled with joy.</p>
-      <p>Here is your gift promo code which you could use on anything upon payment</p>
-      <h3>Code: <strong>${code}</strong></h3>
-      <h3>Discount: <strong>50%</strong></h3>
-      <h3>Usage Limit: <strong>1</strong></h3>
-      <h3>Valid Until: <strong>${new Date(
-        new Date().setFullYear(new Date().getFullYear() + 1)
-      ).toDateString()}</strong></h3>
-      <p>May all wishes come true!\n</p>
-      <p>Best wishes,</p>
-      <p>Trip Genie team</p>`,
-  };
-
-  const promo = new promoCode({
-    code: code,
-    percentOff: 50,
-    usage_limit: 1,
-    dateRange: {
-      start: new Date(),
-      end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-    },
-  });
-
-  await promo.save();
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error("Error sending birthday email:", error);
-    }
-  });
 };
+
+const checkAndUpdateStatusOnStart = async () => {
+  try {
+    await purchaseController.updatePurchaseStatus();
+  } catch (error) {
+    console.error("Error updating purchase status on server start:", error);
+  }
+};
+
+const checkBirthdays = async () => {
+  try {
+    const today = new Date();
+    const todayMonth = today.getMonth();
+    const todayDay = today.getDate();
+    let lastRunDate = new Date();
+    console.log("Checking birthdays on server start...");
+
+    // Fetch the last run date from JobStatus
+    let jobStatus = await JobStatus.findOne({ jobName: "BirthdayJob" });
+    if (jobStatus) {
+      lastRunDate = jobStatus.lastRun || new Date(today - 86400000); // Default to 1 day before
+      // If the last run date is not today, check for birthdays
+      if (
+        lastRunDate.getDate() !== todayDay ||
+        lastRunDate.getMonth() !== todayMonth
+      ) {
+        console.log("Checking for birthdays...");
+        await sendBirthdayCards();
+        jobStatus.lastRun = today;
+        await jobStatus.save();
+      }
+    } else {
+      jobStatus = new JobStatus({ jobName: "BirthdayJob" });
+      await jobStatus.save();
+    }
+  } catch (error) {
+    console.error("Error checking birthdays:", error);
+  }
+};
+
+checkUpcomingEvents = async () => {
+  try {
+    const today = new Date();
+    const twoDays = new Date();
+    twoDays.setDate(twoDays.getDate() + 2);
+
+    // Find itinerary bookings that are starting in 2 days from now
+    const itineraries = await ItineraryBooking.find({
+      date: {
+        $gte: today,
+        $lte: new Date(twoDays),
+      },
+      isReminderSent: false,
+    }).populate("itinerary user");
+
+    let activities = await ActivityBooking.find({
+      isReminderSent: false,
+    }).populate("activity user");
+
+    activities = activities.filter((activity) => {
+      const activityDate = new Date(activity.activity.timing);
+      return activityDate >= today && activityDate <= new Date(twoDays);
+    });
+
+    console.log("activities", activities);
+    console.log("itineraries", itineraries);
+
+    // Send reminder emails to the tourists
+    itineraries.forEach((itinerary) => {
+      emailService.sendItineraryReminder(itinerary);
+    });
+
+    activities.forEach((activity) => {
+      emailService.sendActivityReminder(activity);
+    });
+  } catch (error) {
+    console.error("Error sending reminder emails:", error);
+  }
+};
+
+const sendBirthdayCards = async () => {
+  const today = new Date(); // Get today's date
+  const todayMonth = today.getMonth(); // Get the month (0-11)
+  const todayDay = today.getDate(); // Get the day (1-31)
+
+  try {
+    // Fetch all tourists from the database
+    const tourists = await Tourist.find();
+
+    // Filter tourists whose DOB matches today's month and day
+    const birthdayTourists = tourists.filter((tourist) => {
+      const dob = new Date(tourist.dateOfBirth); // Convert DOB to Date object
+      return dob.getMonth() === todayMonth && dob.getDate() === todayDay;
+    });
+
+    // Send birthday emails to the filtered tourists
+    birthdayTourists.forEach((tourist) => {
+      emailService.sendBirthdayEmail(tourist);
+    });
+  } catch (error) {
+    console.error("Error sending birthday cards:", error);
+  }
+};
+
+// Run this function on server startup
+checkAndUpdateRatesOnStart();
+checkAndUpdateStatusOnStart();
+checkBirthdays();
+checkUpcomingEvents();
