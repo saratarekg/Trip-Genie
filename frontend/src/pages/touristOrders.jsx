@@ -139,7 +139,7 @@ export default function OrdersPage() {
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-100">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         </div>
@@ -147,14 +147,29 @@ export default function OrdersPage() {
       <div className="container mx-auto p-6">
       <h1 className="text-5xl font-bold mb-3 text-[#1A3B47]">Orders</h1>
         <div className="flex justify-between items-center mb-6">
-          <Tabs defaultValue="all" value={filter} onValueChange={setFilter}>
-            <TabsList className="bg-[#B5D3D1]">
-              <TabsTrigger value="all" className="data-[state=active]:bg-[#388A94] data-[state=active]:text-white">All</TabsTrigger>
-              <TabsTrigger value="pending" className="data-[state=active]:bg-[#388A94] data-[state=active]:text-white">Pending</TabsTrigger>
-              <TabsTrigger value="delivered" className="data-[state=active]:bg-[#388A94] data-[state=active]:text-white">Completed</TabsTrigger>
-              <TabsTrigger value="cancelled" className="data-[state=active]:bg-[#388A94] data-[state=active]:text-white">Cancelled</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        <div className='mr-2' >
+  <button 
+    onClick={() => setFilter('all')} 
+    className={`px-4 py-2 mr-2 rounded ${filter === 'all' ? 'bg-[#388A94] text-white' : 'bg-white text-black'}`}>
+    All
+  </button>
+  <button 
+    onClick={() => setFilter('pending')} 
+    className={`px-4 py-2 mr-2 rounded ${filter === 'pending' ? 'bg-[#388A94] text-white' : 'bg-white text-black'}`}>
+    Pending
+  </button>
+  <button 
+    onClick={() => setFilter('delivered')} 
+    className={`px-4 py-2 mr-2 rounded ${filter === 'delivered' ? 'bg-[#388A94] text-white' : 'bg-white text-black'}`}>
+    Completed
+  </button>
+  <button 
+    onClick={() => setFilter('cancelled')} 
+    className={`px-4 py-2 mr-2 rounded ${filter === 'cancelled' ? 'bg-[#388A94] text-white' : 'bg-white text-black'}`}>
+    Cancelled
+  </button>
+</div>
+
           
           <div className="relative w-[350px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
