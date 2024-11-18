@@ -361,16 +361,17 @@ exports.deletePurchase = async (req, res) => {
 
 //cancel a purchase
 exports.cancelPurchase = async (req, res) => {
-  const { purchaseId } = req.params;
+  const {id} = req.params;
+  console.log(id);
 
   try {
     // Fetch the purchase and populate the product details
-    const purchase = await Purchase.findById(purchaseId)
+    const purchase = await Purchase.findById(id)
       .populate("products.product")
       .exec();
 
     if (!purchase) {
-      return res.status(404).json({ message: "Purchase not found" });
+      return res.status(400).json({ message: "Purchase not found" });
     }
 
     // Check if the purchase is already cancelled or delivered
@@ -402,17 +403,24 @@ exports.cancelPurchase = async (req, res) => {
     }
 
     // Update the tourist's wallet with the refunded money
-    const tourist = await Tourist.findById(purchase.tourist); // assuming you store the tourist's ID in the purchase
-    if (!tourist) {
-      return res.status(404).json({ message: "Tourist not found" });
+    const touristId = purchase.tourist; // assuming purchase contains the tourist's ID
+    
+    // Update the tourist's wallet balance by finding the tourist and adding the refund amount
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      touristId,
+      { $inc: { wallet: totalRefund } }, // increment the wallet by totalRefund
+      { new: true } // return the updated document
+    );
+    
+    if (!updatedTourist) {
+      return res.status(400).json({ message: "Tourist not found" });
     }
-
-    tourist.wallet += totalRefund; // Add the refund amount to the tourist's wallet
-    await tourist.save();
+    
+    
 
     // Update the purchase status to 'cancelled'
     await Purchase.findByIdAndUpdate(
-      purchaseId,
+      id,
       { status: "cancelled" },
       { new: true, runValidators: true }
     );
@@ -422,6 +430,7 @@ exports.cancelPurchase = async (req, res) => {
       .status(200)
       .json({ message: "Purchase cancelled successfully and refund issued" });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: error.message });
   }
 };

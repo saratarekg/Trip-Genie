@@ -43,6 +43,7 @@ import AllActivities from "./components/all-activities.jsx";
 import MyActivitiesComponent from "./pages/myActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
+import OrdersPage from "./pages/touristOrders.jsx";
 // import {Cart} from "./pages/AccountTourist.jsx";
 // import {RedeemPoints} from "./pages/AccountTourist.jsx";
 // import {AccountInfo} from "./pages/AccountTourist.jsx";
@@ -113,6 +114,18 @@ function AppContent() {
                 ]}
               >
                 <Home />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/orders"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "tourist",
+                ]}
+              >
+                <OrdersPage />
               </ProtectedRoute>
             }
           />

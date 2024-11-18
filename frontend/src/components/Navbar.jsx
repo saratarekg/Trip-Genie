@@ -25,6 +25,7 @@ import {
   Bell,
   ChevronUp,
   ArchiveIcon,
+  Package,
 } from "lucide-react";
 
 const NavLinkIcon = ({ to, children }) => (
@@ -622,6 +623,14 @@ export function NavbarComponent() {
                         >
                           <AlertTriangle className="mr-2 h-4 w-4" />
                           Help & Support
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <Package className="mr-2 h-4 w-4" />
+                          Orders
                         </Link>
                       </>
                     )}
