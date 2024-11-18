@@ -436,17 +436,11 @@ exports.cancelPurchase = async (req, res) => {
 //update the status of a purchase daily using cron job
 exports.updatePurchaseStatus = async () => {
   try {
-    const purchases = await Purchase.find({ status: "pending" });
-
-    for (const purchase of purchases) {
-      if (new Date(purchase.deliveryDate) < new Date()) {
-        await Purchase.findByIdAndUpdate(
-          purchase._id,
-          { status: "delivered" },
-          { new: true, runValidators: true }
-        );
-      }
-    }
+    await Purchase.updateMany(
+      { status: "pending", deliveryDate: { $lt: new Date() } },
+      { $set: { status: "delivered" } },
+      { runValidators: true }
+    );
   } catch (error) {
     console.error("Error updating purchase status:", error);
   }
