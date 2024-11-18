@@ -1,36 +1,34 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, ChevronRight } from "lucide-react";
-import { loadStripe } from "@stripe/stripe-js";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { format, addDays, addBusinessDays } from "date-fns";
-import * as z from "zod";
-import { FaStar } from "react-icons/fa";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useEffect } from "react"
+import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
+import { loadStripe } from "@stripe/stripe-js"
+import axios from "axios"
+import Cookies from "js-cookie"
+import { format, addDays, addBusinessDays } from "date-fns"
+import * as z from "zod"
+import { FaStar } from "react-icons/fa"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
-import ShippingAddress from "@/pages/AddShippingAddress";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+} from "@/components/ui/tooltip"
+import { useForm } from "react-hook-form"
+import { useNavigate } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
+import ShippingAddress from "@/pages/AddShippingAddress"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 import {
   Form,
   FormControl,
@@ -38,19 +36,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/popover"
 
 const checkoutSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -78,30 +76,30 @@ const checkoutSchema = z.object({
       message: "Please select a card",
       path: ["selectedCard"],
     }),
-});
+})
 
 export default function CheckoutPage() {
-  const [searchParams] = useSearchParams();
-  const [paySucess, setPaySucess] = useState(false);
-  const [activeSection, setActiveSection] = useState("personal");
-  const [userRole, setUserRole] = useState("tourist");
-  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
-  const [exchangeRates, setExchangeRates] = useState({});
-  const [currencySymbol, setCurrencySymbol] = useState({});
-  const [cartItems, setCartItems] = useState([]);
-  const [savedCards, setSavedCards] = useState([]);
-  const [savedAddresses, setSavedAddresses] = useState([]);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [isPriceLoading, setIsPriceLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showAddCardForm, setShowAddCardForm] = useState(false);
-  const [showSavedAddresses, setShowSavedAddresses] = useState(false);
-  const [showSavedCards, setShowSavedCards] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(null);
-  const [selectedCard, setSelectedCard] = useState(null);
-  const navigate = useNavigate();
-  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
-  const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState(null);
+  const [searchParams] = useSearchParams()
+  const [paySucess, setPaySucess] = useState(false)
+  const [activeSection, setActiveSection] = useState("personal")
+  const [userRole, setUserRole] = useState("tourist")
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null)
+  const [exchangeRates, setExchangeRates] = useState({})
+  const [currencySymbol, setCurrencySymbol] = useState({})
+  const [cartItems, setCartItems] = useState([])
+  const [savedCards, setSavedCards] = useState([])
+  const [savedAddresses, setSavedAddresses] = useState([])
+  const [totalAmount, setTotalAmount] = useState(0)
+  const [isPriceLoading, setIsPriceLoading] = useState(true)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [showAddCardForm, setShowAddCardForm] = useState(false)
+  const [showSavedAddresses, setShowSavedAddresses] = useState(false)
+  const [showSavedCards, setShowSavedCards] = useState(false)
+  const [selectedAddress, setSelectedAddress] = useState(null)
+  const [selectedCard, setSelectedCard] = useState(null)
+  const navigate = useNavigate()
+  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
+  const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState(null)
   const [addressDetails, setAddressDetails] = useState({
     streetName: "",
     streetNumber: "",
@@ -113,30 +111,30 @@ export default function CheckoutPage() {
     landmark: "",
     locationType: "",
     default: false,
-  });
+  })
   const [cardDetails, setCardDetails] = useState({
     cardNumber: "",
     expiryDate: "",
     holderName: "",
     cvv: "",
     cardType: "",
-  });
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [purchaseStatus, setPurchaseStatus] = useState(null);
-  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
-  const [promoCode, setPromoCode] = useState("");
-  const [promoDetails, setPromoDetails] = useState(null);
-  const [promoError, setPromoError] = useState("");
-  const [discountAmount, setDiscountAmount] = useState(0);
-  const [discountedTotal, setDiscountedTotal] = useState(0);
-  const [currentPromoCode, setCurrentPromoCode] = useState("");
+  })
+  const [errors, setErrors] = useState({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [purchaseStatus, setPurchaseStatus] = useState(null)
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
+  const [promoCode, setPromoCode] = useState("")
+  const [promoDetails, setPromoDetails] = useState(null)
+  const [promoError, setPromoError] = useState("")
+  const [discountAmount, setDiscountAmount] = useState(0)
+  const [discountedTotal, setDiscountedTotal] = useState(0)
+  const [currentPromoCode, setCurrentPromoCode] = useState("")
   const [deliveryType, setDeliveryType] = useState(
     searchParams.get("deliveryType") || ""
-  );
+  )
   const [deliveryTime, setDeliveryTime] = useState(
     searchParams.get("deliveryTime") || ""
-  );
+  )
 
   const form = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -156,74 +154,74 @@ export default function CheckoutPage() {
       paymentMethod: "",
       selectedCard: "",
     },
-  });
+  })
 
   useEffect(() => {
-    fetchUserInfo();
-  }, []);
+    fetchUserInfo()
+  }, [])
 
   useEffect(() => {
     const loadPrices = async () => {
-      setIsPriceLoading(true);
-      await fetchCart();
-      await fetchExchangeRate();
-      await getCurrencySymbol();
-      setIsPriceLoading(false);
-    };
-    loadPrices();
-  }, [userPreferredCurrency]);
+      setIsPriceLoading(true)
+      await fetchCart()
+      await fetchExchangeRate()
+      await getCurrencySymbol()
+      setIsPriceLoading(false)
+    }
+    loadPrices()
+  }, [userPreferredCurrency])
 
   const fetchUserInfo = async () => {
-    const role = Cookies.get("role") || "guest";
-    setUserRole(role);
+    const role = Cookies.get("role") || "guest"
+    setUserRole(role)
 
     if (role === "tourist") {
       try {
-        const token = Cookies.get("jwt");
+        const token = Cookies.get("jwt")
         const response = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        const userData = response.data;
-        const currencyId = userData.preferredCurrency;
-        setSavedCards(userData.cards || []);
-        setSavedAddresses(userData.shippingAddresses || []);
+        })
+        const userData = response.data
+        const currencyId = userData.preferredCurrency
+        setSavedCards(userData.cards || [])
+        setSavedAddresses(userData.shippingAddresses || [])
 
         const defaultAddress = userData.shippingAddresses?.find(
           (addr) => addr.default
-        );
-        const defaultCard = userData.cards?.find((card) => card.default);
+        )
+        const defaultCard = userData.cards?.find((card) => card.default)
 
         if (defaultAddress) {
-          setSelectedAddress(defaultAddress);
+          setSelectedAddress(defaultAddress)
           Object.keys(defaultAddress).forEach((key) => {
             if (key !== "default") {
-              form.setValue(key, defaultAddress[key]);
+              form.setValue(key, defaultAddress[key])
             }
-          });
+          })
         }
 
         if (defaultCard) {
-          setSelectedCard(defaultCard);
+          setSelectedCard(defaultCard)
           form.setValue(
             "paymentMethod",
             defaultCard.cardType === "Credit Card"
               ? "credit_card"
               : "debit_card"
-          );
-          form.setValue("selectedCard", defaultCard.cardNumber);
+          )
+          form.setValue("selectedCard", defaultCard.cardNumber)
         }
 
-        form.setValue("firstName", userData.fname || "");
-        form.setValue("lastName", userData.lname || "");
-        form.setValue("email", userData.email || "");
-        form.setValue("phone", userData.mobile || "");
+        form.setValue("firstName", userData.fname || "")
+        form.setValue("lastName", userData.lname || "")
+        form.setValue("email", userData.email || "")
+        form.setValue("phone", userData.mobile || "")
 
         if (
           response.data.currentPromoCode &&
           response.data.currentPromoCode.code
         ) {
-          setCurrentPromoCode(response.data.currentPromoCode.code);
-          setPromoCode(response.data.currentPromoCode.code);
+          setCurrentPromoCode(response.data.currentPromoCode.code)
+          setPromoCode(response.data.currentPromoCode.code)
         }
 
         const response2 = await axios.get(
@@ -231,47 +229,47 @@ export default function CheckoutPage() {
           {
             headers: { Authorization: `Bearer ${token}` },
           }
-        );
-        setUserPreferredCurrency(response2.data);
+        )
+        setUserPreferredCurrency(response2.data)
         if (
           response.data.currentPromoCode &&
           response.data.currentPromoCode.code
         ) {
-          await handlePromoSubmit({ preventDefault: () => {} });
+          await handlePromoSubmit({ preventDefault: () => {} })
         }
       } catch (error) {
-        console.error("Error fetching user profile:", error);
+        console.error("Error fetching user profile:", error)
       }
     }
-  };
+  }
 
   const fetchCart = async () => {
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const response = await axios.get("http://localhost:4000/tourist/cart", {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      setCartItems(response.data || []);
-      calculateTotal(response.data);
+      })
+      setCartItems(response.data || [])
+      calculateTotal(response.data)
     } catch (error) {
-      console.error("Error fetching cart:", error);
+      console.error("Error fetching cart:", error)
     }
-  };
+  }
 
   const calculateTotal = (items) => {
-    const total = items.reduce((sum, item) => sum + item.totalPrice, 0);
-    setTotalAmount(total);
-  };
+    const total = items.reduce((sum, item) => sum + item.totalPrice, 0)
+    setTotalAmount(total)
+  }
 
   const handlePromoSubmit = async (e) => {
-    if (e) e.preventDefault();
-    setPromoError("");
-    setPromoDetails(null);
-    setDiscountAmount(0);
-    setDiscountedTotal(totalAmount);
+    if (e) e.preventDefault()
+    setPromoError("")
+    setPromoDetails(null)
+    setDiscountAmount(0)
+    setDiscountedTotal(totalAmount)
 
     if (!promoCode.trim()) {
-      return;
+      return
     }
 
     try {
@@ -285,259 +283,202 @@ export default function CheckoutPage() {
           },
           body: JSON.stringify({ code: promoCode }),
         }
-      );
+      )
 
       if (response.status === 404) {
-        setPromoError("Promo Code Not Found.");
-        return;
+        setPromoError("Promo Code Not Found.")
+        return
       }
 
       if (!response.ok) {
-        throw new Error("Failed to fetch promo code details");
+        throw new Error("Failed to fetch promo code details")
       }
 
-      const data = await response.json();
-      const promo = data.promoCode;
+      const data = await response.json()
+      const promo = data.promoCode
 
       if (promo.status === "inactive") {
-        setPromoError("This promo code is currently inactive.");
-        return;
+        setPromoError("This promo code is currently inactive.")
+        return
       }
 
-      const currentDate = new Date();
-      const startDate = new Date(promo?.dateRange?.start);
-      const endDate = new Date(promo?.dateRange?.end);
+      const currentDate = new Date()
+      const startDate = new Date(promo?.dateRange?.start)
+      const endDate = new Date(promo?.dateRange?.end)
 
       if (currentDate < startDate || currentDate > endDate) {
-        setPromoError("This promo code is not valid for the current date.");
-        return;
+        setPromoError("This promo code is not valid for the current date.")
+        return
       }
 
       if (promo.timesUsed >= promo.usage_limit) {
-        setPromoError("This promo code has reached its usage limit.");
-        return;
+        setPromoError("This promo code has reached its usage limit.")
+        return
       }
 
-      setPromoDetails(promo);
-      const discount = totalAmount * (promo.percentOff / 100);
-      setDiscountAmount(discount);
-      setDiscountedTotal(totalAmount - discount);
+      setPromoDetails(promo)
+      const discount = totalAmount * (promo.percentOff / 100)
+      setDiscountAmount(discount)
+      setDiscountedTotal(totalAmount - discount)
     } catch (error) {
-      console.error(error);
-      setPromoError("Failed to apply promo code. Please try again.");
+      console.error(error)
+      setPromoError("Failed to apply promo code. Please try again.")
     }
-  };
+  }
 
   const handleAddNewAddress = async (newAddress) => {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const response = await axios.post(
         "http://localhost:4000/tourist/addAddress",
         newAddress,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      );
+      )
 
       if (response.status === 200) {
         const userResponse = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        const newAddresses = userResponse.data.shippingAddresses || [];
-        setSavedAddresses(newAddresses);
+        })
+        const newAddresses = userResponse.data.shippingAddresses || []
+        setSavedAddresses(newAddresses)
 
         const addedAddress = newAddresses.find(
           (addr) =>
             addr.streetName === newAddress.streetName &&
             addr.streetNumber === newAddress.streetNumber
-        );
+        )
         if (addedAddress) {
-          setSelectedAddress(addedAddress);
+          setSelectedAddress(addedAddress)
           Object.keys(addedAddress).forEach((key) => {
             if (key !== "default") {
-              form.setValue(key, addedAddress[key]);
+              form.setValue(key, addedAddress[key])
             }
-          });
+          })
         }
 
-        setIsAddressDialogOpen(false);
+        setIsAddressDialogOpen(false)
       }
     } catch (error) {
-      console.error("Error adding new address:", error);
+      console.error("Error adding new address:", error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   const handleAddNewCard = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const response = await axios.post(
         "http://localhost:4000/tourist/addCard",
         cardDetails,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      );
+      )
 
       if (response.status === 200) {
         const userResponse = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        const newCards = userResponse.data.cards || [];
-        setSavedCards(newCards);
+        })
+        const newCards = userResponse.data.cards || []
+        setSavedCards(newCards)
 
         const newCard = newCards.find(
           (card) => card.cardNumber === cardDetails.cardNumber
-        );
+        )
         if (newCard) {
-          setSelectedCard(newCard);
+          setSelectedCard(newCard)
           form.setValue(
             "paymentMethod",
             newCard.cardType === "Credit Card" ? "credit_card" : "debit_card"
-          );
-          form.setValue("selectedCard", newCard.cardNumber);
+          )
+          form.setValue("selectedCard", newCard.cardNumber)
         }
 
-        setShowAddCardForm(false);
-        resetCardDetails();
+        setShowAddCardForm(false)
+        resetCardDetails()
       }
     } catch (error) {
-      console.error("Error adding new card:", error);
+      console.error("Error adding new card:", error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  const handleStripeRedirect = async () => {
+  const handleStripeRedirect = async (data) => {
     try {
-      const DELIVERY_PRICES = {
-        Standard: formatPrice2(2.99),
-        Express: formatPrice2(4.99),
-        "Next-Same": formatPrice2(6.99),
-        International: formatPrice2(14.99),
-      };
+      console.log("Redirecting to Stripe...")
 
-      console.log("Redirecting to Stripe...");
+      const API_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+      const stripe = await loadStripe(API_KEY)
 
-      const API_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-      const stripe = await loadStripe(API_KEY);
-
-      const response = await fetch(
-        "http://localhost:4000/create-checkout-session",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            items: cartItems.map((item) => ({
-              product: {
-                name: item.product.name,
-              },
-              quantity: item.quantity,
-              totalPrice: item.totalPrice,
-            })),
-            currency: userPreferredCurrency.code,
-            deliveryInfo: {
-              type: form.getValues("deliveryType"),
-              time: form.getValues("deliveryTime"),
-              deliveryPrice: DELIVERY_PRICES[form.getValues("deliveryType")],
-            },
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Server response:", errorData);
-        throw new Error(
-          `Failed to create checkout session: ${
-            errorData.error || response.statusText
-          }`
-        );
-      }
-
-      const { id: sessionId } = await response.json();
-
-      if (!sessionId) {
-        throw new Error("No session ID returned from the server");
-      }
-
-      console.log("Session ID received:", sessionId);
-
-      const result = await stripe.redirectToCheckout({
-        sessionId: sessionId,
-      });
-
-      if (result.error) {
-        console.error("Stripe redirect error:", result.error);
-        throw new Error(result.error.message);
-      }
-    } catch (error) {
-      console.error("Error in redirecting to Stripe:", error);
-      // Handle the error appropriately (e.g., show an error message to the user)
-    }
-  };
-
-  const completePurchase = async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const products = cartItems.map((item) => ({
-        product: item.product._id,
-        quantity: item.quantity,
-      }));
-
-      const response = await fetch("http://localhost:4000/tourist/purchase", {
+      const response = await fetch("http://localhost:4000/create-checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          products,
-          totalAmount,
-          paymentMethod: data.paymentMethod,
-          selectedCard: data.selectedCard,
-          shippingAddress: `${data.streetNumber} ${data.streetName}, ${data.city}, ${data.state} ${data.postalCode}`,
-          locationType: data.locationType,
-          deliveryType: data.deliveryType,
-          deliveryTime: data.deliveryTime,
-          deliveryDate: estimatedDeliveryDate,
-          promoCode: promoCode,
+          items: cartItems.map((item) => ({
+            product: {
+              name: item.product.name,
+            },
+            quantity: item.quantity,
+            totalPrice: item.totalPrice,
+          })),
+          currency: userPreferredCurrency.code,
+          deliveryInfo: {
+            type: data.deliveryType,
+            time: data.deliveryTime,
+            deliveryPrice: getDeliveryPrice(data.deliveryType),
+          },
         }),
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message);
+        const errorData = await response.json()
+        console.error("Server response:", errorData)
+        throw new Error(`Failed to create checkout session: ${errorData.error || response.statusText}`)
       }
 
-      setPurchaseStatus("success");
-      setIsStatusDialogOpen(true);
-      emptyCart();
+      const { id: sessionId } = await response.json()
+
+      if (!sessionId) {
+        throw new Error("No session ID returned from the server")
+      }
+
+      console.log("Session ID received:", sessionId)
+
+      const result = await stripe.redirectToCheckout({
+        sessionId: sessionId,
+      })
+
+      if (result.error) {
+        console.error("Stripe redirect error:", result.error)
+        throw new Error(result.error.message)
+      }
     } catch (error) {
-      console.error("Error making purchase:", error);
-      setPurchaseStatus("error");
-      setIsStatusDialogOpen(true);
+      console.error("Error in redirecting to Stripe:", error)
+      // Handle the error appropriately (e.g., show an error message to the user)
     }
-  };
+  }
 
   const onSubmit = async (data) => {
-    console.log("submitting");
+    console.log("submitting", data)
 
     if (data.paymentMethod === "credit_card") {
-      await handleStripeRedirect();
+      await handleStripeRedirect(data)
     } else {
       try {
-        const token = Cookies.get("jwt");
+        const token = Cookies.get("jwt")
         const products = cartItems.map((item) => ({
           product: item.product._id,
           quantity: item.quantity,
-        }));
+        }))
 
         const response = await fetch("http://localhost:4000/tourist/purchase", {
           method: "POST",
@@ -554,32 +495,32 @@ export default function CheckoutPage() {
             locationType: data.locationType,
             deliveryType: data.deliveryType,
             deliveryTime: data.deliveryTime,
-            deliveryDate: estimatedDeliveryDate,
+            deliveryDate: estimatedDeliveryDate ? format(estimatedDeliveryDate, "yyyy-MM-dd") : null,
             promoCode: promoCode,
           }),
-        });
+        })
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message);
+          const errorData = await response.json()
+          throw new Error(errorData.message)
         }
 
-        setPurchaseStatus("success");
-        setIsStatusDialogOpen(true);
-        emptyCart();
+        setPurchaseStatus("success")
+        setIsStatusDialogOpen(true)
+        emptyCart()
       } catch (error) {
-        console.error("Error making purchase:", error);
-        setPurchaseStatus("error");
-        setIsStatusDialogOpen(true);
+        console.error("Error making purchase:", error)
+        setPurchaseStatus("error")
+        setIsStatusDialogOpen(true)
       }
     }
-  };
+  }
 
   const emptyCart = async () => {
     try {
-      setCartItems([]);
+      setCartItems([])
 
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const emptyCartResponse = await fetch(
         "http://localhost:4000/tourist/empty/cart",
         {
@@ -588,35 +529,35 @@ export default function CheckoutPage() {
             Authorization: `Bearer ${token}`,
           },
         }
-      );
+      )
 
       if (emptyCartResponse.ok) {
-        console.log("Cart emptied successfully.");
+        console.log("Cart emptied successfully.")
       } else {
-        console.error("Failed to empty the cart.");
+        console.error("Failed to empty the cart.")
       }
     } catch (error) {
-      console.error("Error emptying cart items:", error);
+      console.error("Error emptying cart items:", error)
     }
-  };
+  }
 
   const toggleSection = (section) => {
-    setActiveSection(activeSection === section ? "" : section);
-  };
+    setActiveSection(activeSection === section ? "" : section)
+  }
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e.target
     if (type === "checkbox") {
-      setAddressDetails((prev) => ({ ...prev, [name]: checked }));
+      setAddressDetails((prev) => ({ ...prev, [name]: checked }))
     } else {
-      setAddressDetails((prev) => ({ ...prev, [name]: value }));
+      setAddressDetails((prev) => ({ ...prev, [name]: value }))
     }
-  };
+  }
 
   const handleCardInputChange = (e) => {
-    const { name, value } = e.target;
-    setCardDetails((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setCardDetails((prev) => ({ ...prev, [name]: value }))
+  }
 
   const resetAddressDetails = () => {
     setAddressDetails({
@@ -630,8 +571,8 @@ export default function CheckoutPage() {
       landmark: "",
       locationType: "",
       default: false,
-    });
-  };
+    })
+  }
 
   const resetCardDetails = () => {
     setCardDetails({
@@ -640,49 +581,49 @@ export default function CheckoutPage() {
       holderName: "",
       cvv: "",
       cardType: "",
-    });
-  };
+    })
+  }
 
   const handleNextSection = (currentSection) => {
-    const sections = ["personal", "address", "payment", "delivery"];
-    const currentIndex = sections.indexOf(currentSection);
+    const sections = ["personal", "address", "payment", "delivery"]
+    const currentIndex = sections.indexOf(currentSection)
     if (currentIndex < sections.length - 1) {
-      setActiveSection(sections[currentIndex + 1]);
+      setActiveSection(sections[currentIndex + 1])
     }
-  };
+  }
 
   const calculateDeliveryDate = (deliveryType) => {
-    const today = new Date();
-    let estimatedDate;
+    const today = new Date()
+    let estimatedDate
 
     switch (deliveryType) {
       case "Standard":
-        estimatedDate = addBusinessDays(today, 8);
-        break;
+        estimatedDate = addBusinessDays(today, 8)
+        break
       case "Express":
-        estimatedDate = addBusinessDays(today, 3);
-        break;
+        estimatedDate = addBusinessDays(today, 3)
+        break
       case "Next-Same":
-        estimatedDate = addDays(today, 1);
-        break;
+        estimatedDate = addDays(today, 1)
+        break
       case "International":
-        estimatedDate = addBusinessDays(today, 21);
-        break;
+        estimatedDate = addBusinessDays(today, 21)
+        break
       default:
-        estimatedDate = addBusinessDays(today, 8);
+        estimatedDate = addBusinessDays(today, 8)
     }
 
-    setEstimatedDeliveryDate(estimatedDate);
-  };
+    setEstimatedDeliveryDate(estimatedDate)
+  }
 
   const handleDeliveryTypeChange = (value) => {
-    form.setValue("deliveryType", value);
-    calculateDeliveryDate(value);
-  };
+    form.setValue("deliveryType", value)
+    calculateDeliveryDate(value)
+  }
 
   const fetchExchangeRate = async () => {
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const response = await fetch(
         `http://localhost:4000/${userRole}/populate`,
         {
@@ -696,71 +637,84 @@ export default function CheckoutPage() {
             target: userPreferredCurrency._id,
           }),
         }
-      );
-      const data = await response.json();
+      )
+      const data = await response.json()
 
       if (response.ok) {
-        setExchangeRates(data.conversion_rate);
+        setExchangeRates(data.conversion_rate)
       } else {
-        console.error("Error in fetching exchange rate:", data.message);
+        console.error("Error in fetching exchange rate:", data.message)
       }
     } catch (error) {
-      console.error("Error fetching exchange rate:", error);
+      console.error("Error fetching exchange rate:", error)
     }
-  };
+  }
 
   const getCurrencySymbol = async () => {
     try {
-      const token = Cookies.get("jwt");
+      const token = Cookies.get("jwt")
       const response = await axios.get(
         `http://localhost:4000/${userRole}/getCurrency/${cartItems[0]?.product.currency}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      );
-      setCurrencySymbol(response.data);
+      )
+      setCurrencySymbol(response.data)
     } catch (error) {
-      console.error("Error fetching currency symbol:", error);
+      console.error("Error fetching currency symbol:", error)
     }
-  };
+  }
 
   const formatPrice2 = (price) => {
-    const roundedPrice = price;
+    const roundedPrice = price
     if (cartItems.length > 0) {
       if (userRole === "tourist" && userPreferredCurrency) {
         if (userPreferredCurrency._id === cartItems[0].product.currency) {
-          return roundedPrice;
+          return roundedPrice
         } else {
-          const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2);
-          return exchangedPrice;
+          const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2)
+          return exchangedPrice
         }
       }
     }
-  };
+  }
 
   const formatPrice = (price) => {
     if (isPriceLoading) {
       return (
         <div className="w-16 h-6 bg-gray-300 rounded-full animate-pulse"></div>
-      );
+      )
     }
-    const roundedPrice = price;
+    const roundedPrice = price
     if (cartItems.length > 0) {
       if (userRole === "tourist" && userPreferredCurrency) {
         if (userPreferredCurrency._id === cartItems[0].product.currency) {
-          return `${userPreferredCurrency.symbol}${roundedPrice}`;
+          return `${userPreferredCurrency.symbol}${roundedPrice}`
         } else {
-          const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2);
-          return `${userPreferredCurrency.symbol}${exchangedPrice}`;
+          const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2)
+          return `${userPreferredCurrency.symbol}${exchangedPrice}`
         }
       } else {
         if (currencySymbol) {
-          return `${currencySymbol.symbol}${roundedPrice}`;
+          return `${currencySymbol.symbol}${roundedPrice}`
         }
       }
     }
-    return `$${roundedPrice}`;
-  };
+    return `$${roundedPrice}`
+  }
+
+  const getDeliveryPrice = (deliveryType) => {
+    switch (deliveryType) {
+      case "Express":
+        return 4.99
+      case "Next-Same":
+        return 6.99
+      case "International":
+        return 14.99
+      default:
+        return 2.99
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 pb-6">
@@ -852,8 +806,8 @@ export default function CheckoutPage() {
                               <div className="flex items-center justify-end">
                                 <button
                                   onClick={(e) => {
-                                    e.preventDefault();
-                                    setShowSavedAddresses(true);
+                                    e.preventDefault()
+                                    setShowSavedAddresses(true)
                                   }}
                                   className="text-[#388A94] hover:underline mr-4"
                                 >
@@ -884,8 +838,8 @@ export default function CheckoutPage() {
                           )}
                           <button
                             onClick={(e) => {
-                              e.preventDefault();
-                              setIsAddressDialogOpen(true);
+                              e.preventDefault()
+                              setIsAddressDialogOpen(true)
                             }}
                             className="text-[#388A94] hover:underline"
                           >
@@ -924,13 +878,13 @@ export default function CheckoutPage() {
                                       key={index}
                                       className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md"
                                       onClick={() => {
-                                        setSelectedAddress(address);
+                                        setSelectedAddress(address)
                                         Object.keys(address).forEach((key) => {
                                           if (key !== "default") {
-                                            form.setValue(key, address[key]);
+                                            form.setValue(key, address[key])
                                           }
-                                        });
-                                        setShowSavedAddresses(false);
+                                        })
+                                        setShowSavedAddresses(false)
                                       }}
                                     >
                                       <div>
@@ -994,8 +948,8 @@ export default function CheckoutPage() {
                                 </Label>
                                 <button
                                   onClick={(e) => {
-                                    e.preventDefault();
-                                    setShowSavedCards(true);
+                                    e.preventDefault()
+                                    setShowSavedCards(true)
                                   }}
                                   className="text-[#388A94] hover:underline ml-auto"
                                 >
@@ -1019,8 +973,8 @@ export default function CheckoutPage() {
                           </RadioGroup>
                           <button
                             onClick={(e) => {
-                              e.preventDefault();
-                              setShowAddCardForm(true);
+                              e.preventDefault()
+                              setShowAddCardForm(true)
                             }}
                             className="text-[#388A94] hover:underline mt-4"
                           >
@@ -1042,18 +996,18 @@ export default function CheckoutPage() {
                                       key={index}
                                       className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md"
                                       onClick={() => {
-                                        setSelectedCard(card);
+                                        setSelectedCard(card)
                                         form.setValue(
                                           "paymentMethod",
                                           card.cardType === "Credit Card"
                                             ? "credit_card"
                                             : "debit_card"
-                                        );
+                                        )
                                         form.setValue(
                                           "selectedCard",
                                           card.cardNumber
-                                        );
-                                        setShowSavedCards(false);
+                                        )
+                                        setShowSavedCards(false)
                                       }}
                                     >
                                       <div>
@@ -1154,8 +1108,8 @@ export default function CheckoutPage() {
                                   type="button"
                                   variant="outline"
                                   onClick={() => {
-                                    setShowAddCardForm(false);
-                                    resetCardDetails();
+                                    setShowAddCardForm(false)
+                                    resetCardDetails()
                                   }}
                                   className="mr-2"
                                 >
@@ -1439,8 +1393,8 @@ export default function CheckoutPage() {
           <DialogFooter>
             <Button
               onClick={() => {
-                setIsStatusDialogOpen(false);
-                navigate("/");
+                setIsStatusDialogOpen(false)
+                navigate("/")
               }}
               className="bg-[#5D9297] hover:bg-[#388A94]"
             >
@@ -1449,8 +1403,8 @@ export default function CheckoutPage() {
 
             <Button
               onClick={() => {
-                setIsStatusDialogOpen(false);
-                navigate("/all-products");
+                setIsStatusDialogOpen(false)
+                navigate("/all-products")
               }}
               className="bg-[#1A3B47] hover:bg-[#388A94]"
             >
@@ -1460,5 +1414,5 @@ export default function CheckoutPage() {
         </DialogContent>
       </Dialog>
     </div>
-  );
+  )
 }

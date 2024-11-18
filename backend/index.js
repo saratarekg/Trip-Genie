@@ -208,9 +208,7 @@ app.post("/create-checkout-session", async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `http://localhost:3000/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}&delivery_type=${encodeURIComponent(
-        deliveryType
-      )}&delivery_time=${encodeURIComponent(deliveryTime)}`,
+      success_url: `http://localhost:3000/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `http://localhost:3000/checkout2`,
       metadata: {
         deliveryType: deliveryInfo.type,
