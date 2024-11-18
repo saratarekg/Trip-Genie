@@ -361,7 +361,7 @@ exports.deletePurchase = async (req, res) => {
 
 //cancel a purchase
 exports.cancelPurchase = async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   console.log(id);
 
   try {
@@ -404,19 +404,17 @@ exports.cancelPurchase = async (req, res) => {
 
     // Update the tourist's wallet with the refunded money
     const touristId = purchase.tourist; // assuming purchase contains the tourist's ID
-    
+
     // Update the tourist's wallet balance by finding the tourist and adding the refund amount
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
       { $inc: { wallet: totalRefund } }, // increment the wallet by totalRefund
       { new: true } // return the updated document
     );
-    
+
     if (!updatedTourist) {
       return res.status(400).json({ message: "Tourist not found" });
     }
-    
-    
 
     // Update the purchase status to 'cancelled'
     await Purchase.findByIdAndUpdate(
@@ -432,5 +430,24 @@ exports.cancelPurchase = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: error.message });
+  }
+};
+
+//update the status of a purchase daily using cron job
+exports.updatePurchaseStatus = async () => {
+  try {
+    const purchases = await Purchase.find({ status: "pending" });
+
+    for (const purchase of purchases) {
+      if (new Date(purchase.deliveryDate) < new Date()) {
+        await Purchase.findByIdAndUpdate(
+          purchase._id,
+          { status: "delivered" },
+          { new: true, runValidators: true }
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Error updating purchase status:", error);
   }
 };
