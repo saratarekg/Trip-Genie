@@ -208,7 +208,7 @@ app.post("/create-checkout-session", async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `http://localhost:3000/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.origin}/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}&deliveryType=${encodeURIComponent(deliveryInfo.type)}&deliveryTime=${encodeURIComponent(deliveryInfo.time)}`,
       cancel_url: `http://localhost:3000/checkout2`,
       metadata: {
         deliveryType: deliveryInfo.type,
@@ -224,6 +224,20 @@ app.post("/create-checkout-session", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
+app.get('/check-payment-status', async (req, res) => {
+  const { session_id } = req.query;
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+    res.json({ status: session.payment_status });
+  } catch (error) {
+    console.error('Error retrieving payment status:', error);
+    res.status(500).json({ error: 'Error retrieving payment status' });
+  }
+});
+
 
 const sendBirthdayEmail = async (tourist) => {
   let code = "";

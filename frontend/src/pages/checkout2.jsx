@@ -79,7 +79,7 @@ const checkoutSchema = z.object({
 })
 
 export default function CheckoutPage() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [paySucess, setPaySucess] = useState(false)
   const [activeSection, setActiveSection] = useState("personal")
   const [userRole, setUserRole] = useState("tourist")
@@ -129,12 +129,8 @@ export default function CheckoutPage() {
   const [discountAmount, setDiscountAmount] = useState(0)
   const [discountedTotal, setDiscountedTotal] = useState(0)
   const [currentPromoCode, setCurrentPromoCode] = useState("")
-  const [deliveryType, setDeliveryType] = useState(
-    searchParams.get("deliveryType") || ""
-  )
-  const [deliveryTime, setDeliveryTime] = useState(
-    searchParams.get("deliveryTime") || ""
-  )
+  const [paySuccess, setPaySuccess] = useState(false)
+
 
   const form = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -149,8 +145,8 @@ export default function CheckoutPage() {
       state: "",
       postalCode: "",
       locationType: "",
-      deliveryTime: "",
-      deliveryType: "",
+      deliveryType: searchParams.get("deliveryType") || "",
+      deliveryTime: searchParams.get("deliveryTime") || "",
       paymentMethod: "",
       selectedCard: "",
     },
@@ -242,6 +238,107 @@ export default function CheckoutPage() {
       }
     }
   }
+
+  //sam here, you can use this useeffect to check if the sessionID is valid but I am gonna do it l8r <3
+  // useEffect(() => {
+  //   const checkPaymentStatus = async () => {
+  //     const sessionId = searchParams.get("session_id")
+  //     if (sessionId) {
+  //       try {
+  //         const response = await axios.get(`http://localhost:4000/check-payment-status?session_id=${sessionId}`)
+  //         if (response.data.status === "complete") {
+  //           setPaySuccess(true)
+  //           await completePurchase(form.getValues())
+  //         }
+  //       } catch (error) {
+  //         console.error("Error checking payment status:", error)
+  //       }
+  //     }
+  //   }
+
+  //   checkPaymentStatus()
+  //   fetchCart()
+  // }, [searchParams])
+
+
+  useEffect(() => {
+    const checkPaymentStatus = async () => {
+      const sessionId = searchParams.get("session_id")
+      const success = searchParams.get("success")
+      const deliveryType = searchParams.get("deliveryType")
+      const deliveryTime = searchParams.get("deliveryTime")
+
+      console.log("Session ID:", sessionId)
+  
+      if (sessionId && success === "true") {
+        try {
+          const response = await axios.get(`http://localhost:4000/check-payment-status?session_id=${sessionId}`)
+          if (response.data.status === "complete") {
+            setPaySuccess(true)
+            // Update form values with the returned delivery information
+            form.setValue("deliveryType", deliveryType)
+            form.setValue("deliveryTime", deliveryTime)
+            await completePurchase({
+              ...form.getValues(),
+              deliveryType,
+              deliveryTime,
+            })
+          }
+        } catch (error) {
+          console.error("Error checking payment status:", error)
+        }
+      }
+    }
+  
+    checkPaymentStatus()
+    fetchCart()
+  }, [searchParams])
+
+
+  const completePurchase = async (data) => {
+    try {
+      const token = Cookies.get("jwt")
+      const products = cartItems.map((item) => ({
+        product: item.product._id,
+        quantity: item.quantity,
+      }))
+  
+      const response = await fetch("http://localhost:4000/tourist/purchase", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          products,
+          totalAmount,
+          paymentMethod: data.paymentMethod,
+          selectedCard: data.selectedCard,
+          shippingAddress: `${data.streetNumber} ${data.streetName}, ${data.city}, ${data.state} ${data.postalCode}`,
+          locationType: data.locationType,
+          deliveryType: data.deliveryType,
+          deliveryTime: data.deliveryTime,
+          deliveryDate: estimatedDeliveryDate ? format(estimatedDeliveryDate, "yyyy-MM-dd") : null,
+          promoCode: data.promoCode,
+        }),
+      })
+  
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message)
+      }
+  
+      await emptyCart()
+      setPurchaseStatus("success")
+      setIsStatusDialogOpen(true)
+    } catch (error) {
+      console.error("Error completing purchase:", error)
+      setPurchaseStatus("error")
+      setIsStatusDialogOpen(true)
+    }
+  }
+
+
 
   const fetchCart = async () => {
     try {
@@ -468,54 +565,17 @@ export default function CheckoutPage() {
   }
 
   const onSubmit = async (data) => {
-    console.log("submitting", data)
-
     if (data.paymentMethod === "credit_card") {
+      const newSearchParams = new URLSearchParams(searchParams)
+      newSearchParams.set("deliveryType", data.deliveryType)
+      newSearchParams.set("deliveryTime", data.deliveryTime)
+      setSearchParams(newSearchParams)
+
       await handleStripeRedirect(data)
     } else {
-      try {
-        const token = Cookies.get("jwt")
-        const products = cartItems.map((item) => ({
-          product: item.product._id,
-          quantity: item.quantity,
-        }))
-
-        const response = await fetch("http://localhost:4000/tourist/purchase", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            products,
-            totalAmount,
-            paymentMethod: data.paymentMethod,
-            selectedCard: data.selectedCard,
-            shippingAddress: `${data.streetNumber} ${data.streetName}, ${data.city}, ${data.state} ${data.postalCode}`,
-            locationType: data.locationType,
-            deliveryType: data.deliveryType,
-            deliveryTime: data.deliveryTime,
-            deliveryDate: estimatedDeliveryDate ? format(estimatedDeliveryDate, "yyyy-MM-dd") : null,
-            promoCode: promoCode,
-          }),
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.message)
-        }
-
-        setPurchaseStatus("success")
-        setIsStatusDialogOpen(true)
-        emptyCart()
-      } catch (error) {
-        console.error("Error making purchase:", error)
-        setPurchaseStatus("error")
-        setIsStatusDialogOpen(true)
-      }
+      await completePurchase(data)
     }
   }
-
   const emptyCart = async () => {
     try {
       setCartItems([])
