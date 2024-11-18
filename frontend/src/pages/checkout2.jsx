@@ -273,16 +273,22 @@ export default function CheckoutPage() {
       if (sessionId && success === "true") {
         try {
           const response = await axios.get(`http://localhost:4000/check-payment-status?session_id=${sessionId}`)
-          if (response.data.status === "complete") {
+
+          console.log("Payment status response:", response.data)
+
+          if (response.data.status === "paid") {
             setPaySuccess(true)
-            // Update form values with the returned delivery information
             form.setValue("deliveryType", deliveryType)
             form.setValue("deliveryTime", deliveryTime)
+
+            console.log("Completing purchase...")
             await completePurchase({
               ...form.getValues(),
               deliveryType,
               deliveryTime,
             })
+
+            console.log("Purchase completed.")
           }
         } catch (error) {
           console.error("Error checking payment status:", error)
