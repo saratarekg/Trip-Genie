@@ -383,14 +383,51 @@ exports.cancelPurchase = async (req, res) => {
       return res.status(400).json({ message: "Purchase already delivered" });
     }
 
-    // Calculate the total refund amount
-    const totalRefund = purchase.products.reduce((total, item) => {
-      return total + item.product.price * item.quantity;
-    }, 0);
+    // Calculate the total refund amount keeping in mind if the purchase was with a promo code
+    let totalRefund = 0;
+    for (const item of purchase.products) {
+      const { product, quantity } = item;
+      totalRefund += product.price * quantity;
+    }
+
+    // Add delivery price to the total
+    let delPrice = 0;
+    if (deliveryType === "Standard") {
+      delPrice = 2.99;
+    } else if (deliveryType === "Express") {
+      delPrice = 4.99;
+    } else if (deliveryType === "Next-Same") {
+      delPrice = 6.99;
+    } else {
+      delPrice = 14.99; // International delivery
+    }
+
+    //get promodetails by id
+    const promoDetails = await PromoCode.findById(purchase.promoCode);
+
+    if (purchase.promoCode) {
+      totalRefund =
+        totalRefund - ((totalRefund * promoDetails.percentOff) / 100 || 0);
+      //reduce the times used of the promo code
+      const promo = PromoCode.findByIdAndUpdate(
+        purchase.promoCode,
+        { $inc: { timesUsed: -1 } },
+        { new: true, runValidators: true }
+      );
+
+      promo.checkStatus();
+    }
+
+    totalRefund += delPrice;
 
     // Update the product sales accordingly
     for (const item of purchase.products) {
       const { product, quantity } = item;
+      let revenue = product.price * quantity;
+      if (purchase.promoCode) {
+        revenue = revenue - ((revenue * promoDetails.percentOff) / 100 || 0);
+      }
+
       await productSales.updateOne(
         {
           product,
@@ -398,7 +435,7 @@ exports.cancelPurchase = async (req, res) => {
           month: purchase.createdAt.getMonth() + 1,
           year: purchase.createdAt.getFullYear(),
         },
-        { $inc: { sales: -quantity, revenue: -product.price * quantity } }
+        { $inc: { sales: -quantity, revenue: -revenue } }
       );
     }
 

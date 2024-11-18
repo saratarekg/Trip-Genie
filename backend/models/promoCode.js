@@ -55,7 +55,6 @@ const promoCodeSchema = new Schema(
   { timestamps: true }
 );
 
-
 // Method to check and update the status of the promo code
 promoCodeSchema.methods.checkStatus = function () {
   const now = new Date();
