@@ -31,6 +31,13 @@ const activitySchema = new Schema(
         },
       },
     },
+
+    appropriate: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
+    
     isSaved:{
       type: Boolean,
       default: false,

@@ -218,7 +218,7 @@ function AppContent() {
             path="/activity"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest" , "admin"]}
               >
                 <AllActivities />
               </ProtectedRoute>
@@ -480,7 +480,7 @@ function AppContent() {
             path="/activity/:id"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest", "admin"]}
               >
                 <ActivityDetail />
               </ProtectedRoute>

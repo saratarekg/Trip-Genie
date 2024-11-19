@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import {  useLocation,Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import CartDropdown from "@/components/cartDropDown";
@@ -67,10 +67,10 @@ export function NavbarComponent() {
   useEffect(() => {
     // Increment the key to force a re-render of the Navbar
     setKey(prevKey => prevKey + 1);
-    
+
     // Close any open dropdowns when the route changes
     setOpenDropdown(null);
-    
+
     // Reset scroll position
     window.scrollTo(0, 0);
   }, [location]);
@@ -449,6 +449,10 @@ export function NavbarComponent() {
 
                   <NavLink to="/all-historical-places">
                     Historical Places
+                  </NavLink>
+
+                  <NavLink to="/activity" className="hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium">
+                    Activities
                   </NavLink>
                 </div>
               )}

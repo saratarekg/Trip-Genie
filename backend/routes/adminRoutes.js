@@ -13,6 +13,7 @@ const complaintsController = require("../controllers/complaintsController.js");
 const itineraryController = require("../controllers/itineraryController.js");
 const currencyController = require("../controllers/currencyController");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
+const activityController = require("../controllers/activityController");
 const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
@@ -159,6 +160,7 @@ router.get("/complaint/:id", complaintsController.getComplaintDetails);
 router.put("/complaint/:id/status", complaintsController.markComplaintStatus);
 
 router.put("/itineraries/:id", itineraryController.flagItinerary);
+router.put("/activities/:id", activityController.flagActivity);
 router.get("/itineraries", itineraryController.getAllItinerariesAdmin);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 router.post("/password", adminController.changePassword);
@@ -190,5 +192,10 @@ router.get("/promo-code", adminController.getPromoCodes);
 router.get("/promo-code/:id", adminController.getPromoCode);
 router.delete("/promo-code/:id", adminController.deletePromoCode);
 router.put("/promo-code/:id", adminController.updatePromoCode);
+
+router.get("/maxPriceActivities", activityController.getMaxPrice);
+router.get("/activities", activityController.getAllActivitiesAdmin);
+router.get("/activities/:id", activityController.getActivityById);
+
 
 module.exports = router;

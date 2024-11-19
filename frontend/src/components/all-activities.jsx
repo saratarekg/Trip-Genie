@@ -146,15 +146,18 @@ const ActivityCard = ({
             className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
           />
         </div>
-        <Button
-          className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center"
-          onClick={handleSaveToggle}
-        >
-          <Bookmark
-            className={`w-6 h-6 ${isSaved ? "fill-yellow-400" : "stroke-black"}`}
-            stroke="black" // Fallback in case stroke class isn't supported
-          />
-        </Button>
+        {role === "tourist" && (
+          <Button
+            className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center"
+            onClick={handleSaveToggle}
+          >
+            <Bookmark
+              className={`w-6 h-6 ${isSaved ? "fill-yellow-400" : "stroke-black"}`}
+              stroke="black" // Fallback in case stroke class isn't supported
+            />
+          </Button>
+        )}
+
 
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(activity._id)}>
@@ -819,8 +822,8 @@ export default function AllActivities() {
                     >
                       <Heart
                         className={`w-4 h-4 mr-2 ${isSortedByPreference
-                            ? "fill-current text-red-500"
-                            : ""
+                          ? "fill-current text-red-500"
+                          : ""
                           }`}
                       />
                       Sort by Preference

@@ -305,7 +305,7 @@ export function Dashboard() {
               </div>
             </TabsContent>
             <TabsContent value="activities" className="space-y-4 pt-4">
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-4">
                 <Card className="bg-white border-[#808080] border">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-[#003f66]">
@@ -360,6 +360,23 @@ export function Dashboard() {
                     </Link>
                   </CardContent>
                 </Card>
+                <Card className="bg-white border-[#808080] border">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-[#003f66]">
+            <div className="flex items-center">
+              <Activity className="w-4 h-4 mr-2 text-[#F88C33]" />
+              Manage Activities
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Link to="/activity">
+            <Button className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200">
+              Manage
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
               </div>
             </TabsContent>
             <TabsContent value="giftshop" className="space-y-4 pt-4">

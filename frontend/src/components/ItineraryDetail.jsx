@@ -11,7 +11,7 @@ import * as jwtDecode from 'jwt-decode';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Loader from './Loader';
 import Calendar from 'react-calendar';
- import 'react-calendar/dist/Calendar.css';
+import 'react-calendar/dist/Calendar.css';
 import {
   CheckCircle, XCircle, Star, Edit, Trash2, Mail, Phone, Award, Globe, Accessibility,
   MapPin, Clock, DollarSign, Info, ChevronLeft, ChevronRight, Share2, Link,
@@ -57,9 +57,8 @@ const ImageGallery = ({ activities }) => {
           {allPictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
-                startIndex === 0 ? 'bg-gray-400' : 'bg-black'
-              }`}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex === 0 ? 'bg-gray-400' : 'bg-black'
+                }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
@@ -81,9 +80,8 @@ const ImageGallery = ({ activities }) => {
           {allPictures.length > 5 && (
             <button
               onClick={handleNext}
-              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
-                startIndex >= allPictures.length - 5 ? 'bg-gray-400' : 'bg-black'
-              }`}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= allPictures.length - 5 ? 'bg-gray-400' : 'bg-black'
+                }`}
               disabled={startIndex >= allPictures.length - 5}
               aria-label="Next images"
             >
@@ -146,7 +144,7 @@ const getTotalRatingsTG = (profile) => {
 
 
 const AvailableDatesSection = ({ availableDates, handleBookNowClick, selectedDate, setSelectedDate }) => {
-console.log(selectedDate);
+  console.log(selectedDate);
   const dates = availableDates.map((dateInfo) => new Date(dateInfo.date));
 
   const tileContent = ({ date, view }) => {
@@ -269,13 +267,13 @@ const TourguideProfileCard = ({
     <Card className="w-full max-w-md">
       <CardHeader>
         <h1 className="text-3xl font-bold text-center">{itinerary.title}</h1>
-  <div className="mt-4 text-4xl font-semibold text-center">
-    {formatPrice(itinerary.price)}
-    <div className="text-sm text-gray-500 flex items-center justify-center mt-1">
-    <Info className="w-4 h-4 mr-1 text-gray-500" />
-      Prices include VAT
-    </div>
-  </div>
+        <div className="mt-4 text-4xl font-semibold text-center">
+          {formatPrice(itinerary.price)}
+          <div className="text-sm text-gray-500 flex items-center justify-center mt-1">
+            <Info className="w-4 h-4 mr-1 text-gray-500" />
+            Prices include VAT
+          </div>
+        </div>
 
 
       </CardHeader>
@@ -297,46 +295,46 @@ const TourguideProfileCard = ({
           <div className="text-md text-gray-700">{itinerary.accessibility ? "Yes" : "No"}</div>
         </div>
         {userRole === "tour-guide" && canModify && (
-  <div className="mt-3 space-y-3">
-    <Button
-      onClick={handleUpdate}
-      variant="default"
-      className="w-full flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
-    >
-      <Edit className="w-4 h-4 mr-2" />
-      Update
-    </Button>
-    <Button
-      onClick={() => setShowDeleteConfirm(true)}
-      variant="destructive"
-      className="w-full flex items-center"
-    >
-      <Trash2 className="w-4 h-4 mr-2" />
-      Delete
-    </Button>
-    <Button
-      onClick={() => handleActivationToggle()}
-      variant={isActivated ? "destructive" : "default"}
-      className={`w-full flex items-center ${isActivated ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-    >
-      {isActivated ? 'Deactivate' : 'Activate'}
-    </Button>
-  </div>
-)}
- {userRole === 'tourist' && isItineraryAvailable() && (
-              isActivated ? (
-                <Button
-                  onClick={handleBookNowClick}
-                  className="w-full bg-[#5D9297] hover:[#388A94] text-white font-bold py-2 px-4 rounded mt-4"
-                >
-                  Book Now
-                </Button>
-              ) : (
-                <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
-                  Currently Unavailable
-                </div>
-              )
-            )}
+          <div className="mt-3 space-y-3">
+            <Button
+              onClick={handleUpdate}
+              variant="default"
+              className="w-full flex items-center bg-[#1a202c] hover:bg-[#2d3748]"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Update
+            </Button>
+            <Button
+              onClick={() => setShowDeleteConfirm(true)}
+              variant="destructive"
+              className="w-full flex items-center"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+            <Button
+              onClick={() => handleActivationToggle()}
+              variant={isActivated ? "destructive" : "default"}
+              className={`w-full flex items-center ${isActivated ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+            >
+              {isActivated ? 'Deactivate' : 'Activate'}
+            </Button>
+          </div>
+        )}
+        {userRole === 'tourist' && isItineraryAvailable() && (
+          isActivated ? (
+            <Button
+              onClick={handleBookNowClick}
+              className="w-full bg-[#5D9297] hover:[#388A94] text-white font-bold py-2 px-4 rounded mt-4"
+            >
+              Book Now
+            </Button>
+          ) : (
+            <div className="w-full bg-red-600 text-white font-bold py-2 px-4 rounded mt-4 text-center">
+              Currently Unavailable
+            </div>
+          )
+        )}
 
         <div className="mt-6 border-t border-gray-300 pt-4">
           <div className="flex justify-between items-center">
@@ -441,54 +439,54 @@ const TourguideProfileCard = ({
           See All Reviews
         </Button>
         {userRole === "admin" && (
-              <>
-              <div className="mt-6 border-t border-gray-300 pt-4"></div>
-                <Button
-                  className={`w-full mx-auto text-white ${isAppropriate
-                    ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                    : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                    }`}
-                  onClick={handleOpenDialog}
-                >
-                  {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
-                </Button>
+          <>
+            <div className="mt-6 border-t border-gray-300 pt-4"></div>
+            <Button
+              className={`w-full mx-auto text-white ${isAppropriate
+                ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                }`}
+              onClick={handleOpenDialog}
+            >
+              {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
+            </Button>
 
-                {dialogOpen && (
-                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                      <div className="mb-4">
-                        <h2 className="text-lg font-semibold">Confirm Action</h2>
-                        <p className="text-gray-600 mt-2">
-                          Are you sure you want to change the status of this itinerary/event?
-                        </p>
-                      </div>
-                      <div className="flex justify-end space-x-4">
-                        <Button
-                          variant="outlined"
-                          onClick={handleCloseDialog}
-                          className="border-gray-300"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          color="secondary"
-                          onClick={handleConfirmFlag}
-                          className="bg-[#5D9297] hover:[#388A94] text-white"
-                        >
-                          Confirm
-                        </Button>
-                      </div>
-                    </div>
+            {dialogOpen && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                  <div className="mb-4">
+                    <h2 className="text-lg font-semibold">Confirm Action</h2>
+                    <p className="text-gray-600 mt-2">
+                      Are you sure you want to change the status of this itinerary/event?
+                    </p>
                   </div>
-                )}
-              </>
-
+                  <div className="flex justify-end space-x-4">
+                    <Button
+                      variant="outlined"
+                      onClick={handleCloseDialog}
+                      className="border-gray-300"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      color="secondary"
+                      onClick={handleConfirmFlag}
+                      className="bg-[#5D9297] hover:[#388A94] text-white"
+                    >
+                      Confirm
+                    </Button>
+                  </div>
+                </div>
+              </div>
             )}
+          </>
+
+        )}
       </CardContent>
-      
+
     </Card>
 
-    
+
   );
 };
 
@@ -582,7 +580,7 @@ const ItineraryDetail = () => {
     const selectedDateInfo = itinerary.availableDates.find(
       (dateInfo) => new Date(dateInfo.date).toDateString() === new Date(date).toDateString()
     );
- 
+
   };
 
 
@@ -1302,97 +1300,97 @@ const ItineraryDetail = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-  <div className="lg:w-3/4">
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-bold">{itinerary.title}</h1>
-          <ToastProvider>
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="ml-auto">
-                  <Share2 className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <div className="flex flex-col">
-                  <Button
-                    variant="ghost"
-                    onClick={handleCopyLink}
-                    className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                  >
-                    <Link className="mr-2 h-4 w-4" />
-                    Copy Link
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={handleEmailShare}
-                    className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                  >
-                    <Mail className="mr-2 h-4 w-4" />
-                    Share by Email
-                  </Button>
+          <div className="lg:w-3/4">
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-4xl font-bold">{itinerary.title}</h1>
+                  <ToastProvider>
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="ml-auto">
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <div className="flex flex-col">
+                          <Button
+                            variant="ghost"
+                            onClick={handleCopyLink}
+                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                          >
+                            <Link className="mr-2 h-4 w-4" />
+                            Copy Link
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={handleEmailShare}
+                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                          >
+                            <Mail className="mr-2 h-4 w-4" />
+                            Share by Email
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <ToastViewport />
+                    {isToastOpen && (
+                      <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}>
+                        <ToastTitle>Link Copied</ToastTitle>
+                        <ToastDescription>The link has been copied to your clipboard.</ToastDescription>
+                        <ToastClose />
+                      </Toast>
+                    )}
+                  </ToastProvider>
                 </div>
-              </PopoverContent>
-            </Popover>
-            <ToastViewport />
-            {isToastOpen && (
-              <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}>
-                <ToastTitle>Link Copied</ToastTitle>
-                <ToastDescription>The link has been copied to your clipboard.</ToastDescription>
-                <ToastClose />
-              </Toast>
-            )}
-          </ToastProvider>
-        </div>
 
-        <div className="w-full h-[400px]">
-          <ImageGallery activities={itinerary.activities} />
-        </div>
+                <div className="w-full h-[400px]">
+                  <ImageGallery activities={itinerary.activities} />
+                </div>
 
-        <AvailableDatesSection availableDates={itinerary.availableDates} handleBookNowClick={handleBookNowClick} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+                <AvailableDatesSection availableDates={itinerary.availableDates} handleBookNowClick={handleBookNowClick} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
-        <div className="flex flex-wrap gap-2 my-4">
-          {itinerary.activities.map((activity, index) =>
-            activity.category ? (
-              activity.category.map((cat, catIndex) => (
-                <Badge key={catIndex} variant="secondary">
-                  {cat.name}
-                </Badge>
-              ))
-            ) : null
-          )}
-          {itinerary.activities.map((activity, index) =>
-            activity.tags ? (
-              activity.tags.map((tag, tagIndex) => (
-                <Badge key={tagIndex} variant="outline">
-                  {tag.type}
-                </Badge>
-              ))
-            ) : null
-          )}
-        </div>
+                <div className="flex flex-wrap gap-2 my-4">
+                  {itinerary.activities.map((activity, index) =>
+                    activity.category ? (
+                      activity.category.map((cat, catIndex) => (
+                        <Badge key={catIndex} variant="secondary">
+                          {cat.name}
+                        </Badge>
+                      ))
+                    ) : null
+                  )}
+                  {itinerary.activities.map((activity, index) =>
+                    activity.tags ? (
+                      activity.tags.map((tag, tagIndex) => (
+                        <Badge key={tagIndex} variant="outline">
+                          {tag.type}
+                        </Badge>
+                      ))
+                    ) : null
+                  )}
+                </div>
 
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">Activities</h2>
-          <ActivityTimeline activities={itinerary.activities} />
-        </div>
+                <div className="mt-8">
+                  <h2 className="text-2xl font-semibold mb-4">Activities</h2>
+                  <ActivityTimeline activities={itinerary.activities} />
+                </div>
 
-        {itinerary.location && (
-          <div className="mt-8">
-            <TimelinePreviewComponent />
+                {itinerary.location && (
+                  <div className="mt-8">
+                    <TimelinePreviewComponent />
+                  </div>
+                )}
+
+
+              </div>
+            </div>
           </div>
-        )}
-
-       
-      </div>
-    </div>
-  </div>
 
 
 
           <div className="lg:w-1/4">
-        
+
             {tourGuideProfile && (
               <TourguideProfileCard
                 profile={tourGuideProfile}
@@ -1422,11 +1420,11 @@ const ItineraryDetail = () => {
               />
             )}
 
-            
-           
 
 
-            
+
+
+
 
           </div>
         </div>
@@ -1470,7 +1468,7 @@ const ItineraryDetail = () => {
               </div>
             </div>
 
-            {userRole === "tourist" && userBookings.some(booking => booking.itinerary?._id === itinerary._id)&&(
+            {userRole === "tourist" && userBookings.some(booking => booking.itinerary?._id === itinerary._id) && (
               <div className="border-t pt-4">
                 <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
                 <div
@@ -1481,8 +1479,8 @@ const ItineraryDetail = () => {
                     <Star
                       key={star}
                       className={`w-8 h-8 cursor-pointer ${(isRatingHovered ? quickRating >= star : quickRating >= star)
-                          ? "text-[#F88C33] fill-current"
-                          : "text-gray-300"
+                        ? "text-[#F88C33] fill-current"
+                        : "text-gray-300"
                         }`}
                       onMouseEnter={() => {
                         setIsRatingHovered(true);
@@ -1743,89 +1741,89 @@ const ItineraryDetail = () => {
         </Dialog>
 
 
-{userRole==="tourist" &&(
-<>
-<Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="date" className="text-right">
-              Date
-            </Label>
-            <Select onValueChange={handleDateChange} value={selectedDate || undefined}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue>
-                  {selectedDate ? format(new Date(selectedDate), 'MMMM d, yyyy') : "Select a date"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {itinerary.availableDates
-                  .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0))
-                  .map((dateInfo, index) => (
-                    <SelectItem key={index} value={dateInfo.date}>
-                      {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-         
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="tickets" className="text-right">
-              Tickets
-            </Label>
-            <Input
-              id="tickets"
-              type="number"
-              value={numberOfTickets}
-              onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Total Price</Label>
-            <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Payment Type</Label>
-            <RadioGroup
-              value={paymentType}
-              onValueChange={setPaymentType}
-              className="col-span-3"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="CreditCard" id="CreditCard" />
-                <Label htmlFor="CreditCard">Credit Card</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="DebitCard" id="DebitCard" />
-                <Label htmlFor="DebitCard">Debit Card</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="Wallet" id="Wallet" />
-                <Label htmlFor="Wallet">Wallet</Label>
-              </div>
-            </RadioGroup>
-          </div>
-          {bookingError && (
-            <div className="text-red-500 text-sm">{bookingError}</div>
-          )}
-        </div>
-        <DialogFooter>
-          <Button onClick={() => setShowBookingDialog(false)} variant="outline">
-            Cancel
-          </Button>
-          <Button onClick={handleBooking} disabled={isBooking || !selectedDate }>
-            {isBooking ? "Booking..." : "Confirm Booking"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-    </>
-)}
+        {userRole === "tourist" && (
+          <>
+            <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="date" className="text-right">
+                      Date
+                    </Label>
+                    <Select onValueChange={handleDateChange} value={selectedDate || undefined}>
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue>
+                          {selectedDate ? format(new Date(selectedDate), 'MMMM d, yyyy') : "Select a date"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {itinerary.availableDates
+                          .filter(dateInfo => new Date(dateInfo.date) >= new Date().setHours(0, 0, 0, 0))
+                          .map((dateInfo, index) => (
+                            <SelectItem key={index} value={dateInfo.date}>
+                              {format(new Date(dateInfo.date), 'MMMM d, yyyy')}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="tickets" className="text-right">
+                      Tickets
+                    </Label>
+                    <Input
+                      id="tickets"
+                      type="number"
+                      value={numberOfTickets}
+                      onChange={(e) => setNumberOfTickets(Math.max(1, parseInt(e.target.value)))}
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Total Price</Label>
+                    <div className="col-span-3">{formatPrice(calculateTotalPrice())}</div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label className="text-right">Payment Type</Label>
+                    <RadioGroup
+                      value={paymentType}
+                      onValueChange={setPaymentType}
+                      className="col-span-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="CreditCard" id="CreditCard" />
+                        <Label htmlFor="CreditCard">Credit Card</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="DebitCard" id="DebitCard" />
+                        <Label htmlFor="DebitCard">Debit Card</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="Wallet" id="Wallet" />
+                        <Label htmlFor="Wallet">Wallet</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  {bookingError && (
+                    <div className="text-red-500 text-sm">{bookingError}</div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button onClick={() => setShowBookingDialog(false)} variant="outline">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleBooking} disabled={isBooking || !selectedDate}>
+                    {isBooking ? "Booking..." : "Confirm Booking"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
 
 
 
