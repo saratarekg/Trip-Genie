@@ -4,6 +4,7 @@ const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
 const ActivityBooking = require("../models/activityBooking");
 const cloudinary = require("../utils/cloudinary");
+const emailService = require("../services/emailService");
 
 // Function to get the maximum price from activities
 const getMaxPrice = async (req, res) => {
@@ -19,7 +20,6 @@ const getMaxPrice = async (req, res) => {
   console.log("henaaaaaaaaaaaa", maxPrice);
   res.status(200).json(maxPrice);
 };
-
 
 const getMaxPriceMy = async (req, res) => {
   const userId = res.locals.user_id;
@@ -51,7 +51,11 @@ const toggleSaveActivity = async (req, res) => {
     activity.isSaved = !activity.isSaved;
     await activity.save();
 
-    res.status(200).json({ message: `Activity ${activity.isSaved ? 'saved' : 'unsaved'} successfully` });
+    res.status(200).json({
+      message: `Activity ${
+        activity.isSaved ? "saved" : "unsaved"
+      } successfully`,
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }
@@ -141,7 +145,6 @@ const getAllActivitiesAdmin = async (req, res) => {
   }
 };
 
-
 const getAllActivities = async (req, res) => {
   try {
     const {
@@ -208,7 +211,9 @@ const getAllActivities = async (req, res) => {
 const flagActivity = async (req, res) => {
   try {
     // Find the activity by ID
-    const activity = await Activity.findById(req.params.id);
+    const activity = await Activity.findById(req.params.id).populate(
+      "advertiser"
+    );
 
     if (!activity) {
       return res.status(404).json({ message: "Activity not found" });
@@ -226,6 +231,10 @@ const flagActivity = async (req, res) => {
     await Activity.findByIdAndUpdate(req.params.id, {
       appropriate,
     });
+
+    if (appropriate === false) {
+      await emailService.sendActivityFlaggedEmail(activity);
+    }
 
     res.status(200).json({ message: "Activity flagged successfully" });
   } catch (error) {
@@ -654,9 +663,6 @@ const addCommentToActivity = async (req, res) => {
   }
 };
 
-
-
-
 const updateCommentOnActivity = async (req, res) => {
   try {
     const { rating, content, username } = req.body;
@@ -750,5 +756,4 @@ module.exports = {
   getMaxPriceMy,
   toggleSaveActivity,
   flagActivity,
-
 };

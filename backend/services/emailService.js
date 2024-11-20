@@ -214,6 +214,46 @@ const sendOutOfStockEmail = async (seller, product) => {
   });
 };
 
+const sendItineraryFlaggedEmail = async (itinerary) => {
+  const mailOptions = {
+    to: itinerary.tourGuide.email,
+    subject: "Itinerary Flagged as Inappropriate",
+    html: `<h1>Itinerary Flagged as Inappropriate</h1>
+            <p>Dear ${itinerary.tourGuide.name},</p>
+            <p>We wanted to inform you that your itinerary has been flagged as inappropriate:</p>
+            <p><strong>Itinerary Title:</strong> ${itinerary.title}</p>
+            <p>Please review the itinerary and make the necessary changes.</p>
+            <p>Thank you for your attention.</p>
+            <p>Best regards,<br>Trip Genie</p>`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending itinerary flagged email:", error);
+    }
+  });
+};
+
+const sendActivityFlaggedEmail = async (activity) => {
+  const mailOptions = {
+    to: activity.advertiser.email,
+    subject: "Activity Flagged as Inappropriate",
+    html: `<h1>Activity Flagged as Inappropriate</h1>
+            <p>Dear ${activity.advertiser.name},</p>
+            <p>We wanted to inform you that your activity has been flagged as inappropriate:</p>
+            <p><strong>Activity Name:</strong> ${activity.name}</p>
+            <p>Please review the activity and make the necessary changes.</p>
+            <p>Thank you for your attention.</p>
+            <p>Best regards,<br>Trip Genie</p>`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending activity flagged email:", error);
+    }
+  });
+};
+
 module.exports = {
   sendBirthdayEmail,
   sendItineraryReminder,
@@ -222,4 +262,6 @@ module.exports = {
   sendItineraryBookingConfirmationEmail,
   sendPurchaseConfirmationEmail,
   sendOutOfStockEmail,
+  sendItineraryFlaggedEmail,
+  sendActivityFlaggedEmail,
 };

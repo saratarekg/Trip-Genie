@@ -2,6 +2,7 @@ const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
 const ItineraryBooking = require("../models/itineraryBooking");
 const cloudinary = require("../utils/cloudinary");
+const emailService = require("../services/emailService");
 
 // import { ItineraryBooking } from './models/itineraryBooking';
 
@@ -552,7 +553,9 @@ const updateItinerary = async (req, res) => {
 const flagItinerary = async (req, res) => {
   try {
     // Find the itinerary by ID
-    const itinerary = await Itinerary.findById(req.params.id);
+    const itinerary = await Itinerary.findById(req.params.id).populate(
+      "tourGuide"
+    );
 
     if (!itinerary) {
       return res.status(404).json({ message: "Itinerary not found" });
@@ -570,6 +573,10 @@ const flagItinerary = async (req, res) => {
     await Itinerary.findByIdAndUpdate(req.params.id, {
       appropriate,
     });
+
+    if (!appropriate) {
+      await emailService.sendItineraryFlaggedEmail(itinerary);
+    }
 
     res.status(200).json({ message: "Itinerary updated successfully" });
   } catch (error) {
