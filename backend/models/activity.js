@@ -37,11 +37,6 @@ const activitySchema = new Schema(
       required: true,
       default: true,
     },
-    
-    isSaved:{
-      type: Boolean,
-      default: false,
-    },
     duration: {
       type: Number,
       required: true,

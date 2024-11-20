@@ -26,6 +26,7 @@ import {
   HomeIcon,
   Plane,
   Hotel,
+  Bookmark,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";

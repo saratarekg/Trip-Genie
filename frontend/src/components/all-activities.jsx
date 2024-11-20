@@ -45,13 +45,11 @@ const ActivityCard = ({
   exchangeRates,
   currencies,
   onDeleteConfirm,
-  onSaveToggle,
 }) => {
   const role = Cookies.get("role") || "guest";
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isSaved, setIsSaved] = useState(activity.isSaved);
 
   useEffect(() => {
     const initializeCard = async () => {
@@ -99,11 +97,6 @@ const ActivityCard = ({
     }
   }, [userInfo, activity]);
 
-  const handleSaveToggle = (e) => {
-    e.stopPropagation();
-    setIsSaved(!isSaved);
-    onSaveToggle(activity._id, !isSaved);
-  };
 
   const getCurrencySymbol = useCallback(async () => {
     if (userInfo) {
@@ -146,17 +139,6 @@ const ActivityCard = ({
             className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
           />
         </div>
-        {role === "tourist" && (
-          <Button
-            className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center"
-            onClick={handleSaveToggle}
-          >
-            <Bookmark
-              className={`w-6 h-6 ${isSaved ? "fill-yellow-400" : "stroke-black"}`}
-              stroke="black" // Fallback in case stroke class isn't supported
-            />
-          </Button>
-        )}
 
 
       </CardHeader>
@@ -392,50 +374,6 @@ export default function AllActivities() {
     }
   }, []);
 
-  const onSaveToggle = async (activityId, isSaved) => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch(`http://localhost:4000/tourist/toggle-save-activity/${activityId}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ saved: isSaved }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update saved status");
-      }
-
-      // Update the local state
-      setActivities(activities.map(activity =>
-        activity._id === activityId ? { ...activity, saved: isSaved } : activity
-      ));
-
-      setAlertMessage({
-        type: "success",
-        message: isSaved ? "Activity saved successfully!" : "Activity unsaved successfully!",
-      });
-
-      // Hide the alert message after 2 seconds
-      setTimeout(() => {
-        setAlertMessage(null);
-      }, 2000);
-
-    } catch (error) {
-      console.error("Error updating saved status:", error);
-      setAlertMessage({
-        type: "error",
-        message: "Error updating saved status. Please try again.",
-      });
-
-      // Hide the alert message after 2 seconds
-      setTimeout(() => {
-        setAlertMessage(null);
-      }, 2000);
-    }
-  };
 
   const fetchCurrencies = useCallback(async () => {
     const role = Cookies.get("role");
@@ -867,7 +805,6 @@ export default function AllActivities() {
                       exchangeRates={exchangeRates}
                       currencies={currencies}
                       onDeleteConfirm={handleDeleteConfirm}
-                      onSaveToggle={onSaveToggle}
                     />
                   ))}
               </div>
