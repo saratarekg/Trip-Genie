@@ -358,11 +358,11 @@ exports.cancelPurchase = async (req, res) => {
 
     // Add delivery price to the total
     let delPrice = 0;
-    if (deliveryType === "Standard") {
+    if (purchase.deliveryType === "Standard") {
       delPrice = 2.99;
-    } else if (deliveryType === "Express") {
+    } else if (purchase.deliveryType === "Express") {
       delPrice = 4.99;
-    } else if (deliveryType === "Next-Same") {
+    } else if (purchase.deliveryType === "Next-Same") {
       delPrice = 6.99;
     } else {
       delPrice = 14.99; // International delivery
