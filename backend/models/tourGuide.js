@@ -90,6 +90,19 @@ const tourGuideSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    notifications: [{
+      body: {
+        type: String,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+      seen: {
+        type: Boolean,
+        default: false,
+      }
+    }],
     files: {
       IDFilename: {
         type: String,

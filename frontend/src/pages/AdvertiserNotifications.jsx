@@ -17,7 +17,7 @@ export default function SellerNotifications() {
             setLoading(true)
             setError(null)
             const response = await axios.get(
-                `http://localhost:4000/seller/notifications`,
+                `http://localhost:4000/advertiser/notifications`,
                 {
                     headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
                 }
@@ -51,7 +51,7 @@ export default function SellerNotifications() {
     const markNotificationsAsSeen = async () => {
         try {
             await axios.post(
-                `http://localhost:4000/seller/mark-notifications-seen`,
+                `http://localhost:4000/advertiser/mark-notifications-seen`,
                 {},
                 {
                     headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -106,7 +106,7 @@ export default function SellerNotifications() {
                                         New
                                     </span>
                                 )}
-                                <p className="text-[#E6DCCF] max-w-[90%] mb-1">{notification.body}</p>
+                                <p className="text-[#E6DCCF] max-w-[90%]  mb-1">{notification.body}</p>
                                 <p className="text-xs text-[#B5D3D1]">{formatDate(notification.date)}</p>
                             </li>
                         ))}

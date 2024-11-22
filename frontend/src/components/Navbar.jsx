@@ -5,7 +5,10 @@ import { useNavigate } from "react-router-dom";
 import CartDropdown from "@/components/cartDropDown";
 import axios from 'axios'
 
-import { NotificationsDropdown } from '@/components/SellerNotificationsDropdown'
+import { NotificationsDropdownSeller } from '@/components/SellerNotificationsDropdown'
+import { NotificationsDropdownTourGuide } from '@/components/TourGuideNotificationsDropdown'
+import { NotificationsDropdownAdvertiser } from '@/components/AdvertiserNotificationsDropdown'
+import { NotificationsDropdownAdmin } from '@/components/AdminNotificationsDropdown'
 
 
 
@@ -63,7 +66,12 @@ export function NavbarComponent() {
   const transportationRef = useRef(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
-  const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
+  const [hasUnseenNotificationsSeller, setHasUnseenNotificationsSeller] = useState(false);
+  const [hasUnseenNotificationsTourGuide, setHasUnseenNotificationsTourGuide] = useState(false);
+  const [hasUnseenNotificationsAdvertiser, setHasUnseenNotificationsAdvertiser] = useState(false);
+  const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] = useState(false);
+  
+
   const [key, setKey] = useState(0);
   const location = useLocation();
 
@@ -94,11 +102,36 @@ export function NavbarComponent() {
 
   useEffect(() => {
     if (role === "seller") {
-      checkUnseenNotifications();
+      checkUnseenNotificationsSeller();
+    }
+    if (role === "tour-guide") {
+      checkUnseenNotificationsTourGuide();
+    }
+    if (role === "advertiser") {
+      checkUnseenNotificationsAdvertiser();
+    }
+    if (role === "admin") {
+      checkUnseenNotificationsAdmin();
     }
   }, [role]);
 
-  const checkUnseenNotifications = async () => {
+  const checkUnseenNotificationsAdmin = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/admin/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsAdmin(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsAdmin(false);
+    }
+  };
+
+  const checkUnseenNotificationsSeller = async () => {
     try {
       const response = await axios.get(
         `http://localhost:4000/seller/unseen-notifications`,
@@ -106,11 +139,41 @@ export function NavbarComponent() {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
       );
-      setHasUnseenNotifications(response.data.hasUnseen);
+      setHasUnseenNotificationsSeller(response.data.hasUnseen);
     } catch (error) {
       console.error('Error checking unseen notifications:', error);
       // Silently fail but don't show the notification dot
-      setHasUnseenNotifications(false);
+      setHasUnseenNotificationsSeller(false);
+    }
+  };
+  const checkUnseenNotificationsTourGuide = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/tour-guide/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsTourGuide(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsTourGuide(false);
+    }
+  };
+  const checkUnseenNotificationsAdvertiser = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/advertiser/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsAdvertiser(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsAdvertiser(false);
     }
   };
 
@@ -522,9 +585,12 @@ export function NavbarComponent() {
 
           {/* Login, Sign Up, Notifications, and Menu Button */}
           <div className="hidden md:flex items-center">
-            {role !== undefined && role !== "guest" && role !== "admin" && (
+            {role !== undefined && role !== "guest"  && (
               <>
-                {role === "seller" && <NotificationsDropdown />}
+                {role === "seller" && <NotificationsDropdownSeller />}
+                {role === "tour-guide" && <NotificationsDropdownTourGuide />}
+                {role === "advertiser" && <NotificationsDropdownAdvertiser />}
+                {role === "admin" && <NotificationsDropdownAdmin />}
                 {role === "tourist" && (
                   <>
                     <div className="relative mr-2 mt-1">

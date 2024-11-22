@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function NotificationsDropdownSeller() {
+export function NotificationsDropdownAdvertiser() {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
   const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false)
@@ -30,7 +30,7 @@ export function NotificationsDropdownSeller() {
   const checkUnseenNotifications = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:4000/seller/unseen-notifications`,
+        `http://localhost:4000/advertiser/unseen-notifications`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
@@ -45,7 +45,7 @@ export function NotificationsDropdownSeller() {
     try {
       setLoading(true)
       const response = await axios.get(
-        `http://localhost:4000/seller/notifications`,
+        `http://localhost:4000/advertiser/notifications`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
@@ -66,7 +66,7 @@ export function NotificationsDropdownSeller() {
   const markNotificationsAsSeen = async () => {
     try {
       await axios.post(
-        `http://localhost:4000/seller/mark-notifications-seen`,
+        `http://localhost:4000/advertiser/mark-notifications-seen`,
         {},
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -137,7 +137,7 @@ export function NotificationsDropdownSeller() {
         <div className="p-3 border-t border-gray-200">
           <Button 
             className="w-full bg-[#388A94] hover:bg-[#5D9297] text-white"
-            onClick={() => window.location.href = '/seller-notifications'}
+            onClick={() => window.location.href = '/advertiser-notifications'}
           >
             View All
           </Button>
