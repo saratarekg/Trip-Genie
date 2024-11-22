@@ -260,11 +260,13 @@ exports.getTouristAttendedItineraries = async (req, res) => {
 
 exports.getItinerariesReport = async (req, res) => {
   try {
-    const { startDate, endDate, month, year, selectedItineraries } = req.query;
+    const { startDate, endDate, month, year } = req.query;
+    let selectedItineraries = req.query.selectedItineraries;
     const tourGuideId = res.locals.user_id; // Get the user's ID from response locals
     const itineraries = await Itinerary.find({ tourGuide: tourGuideId }); // Fetch all itineraries
     let itineraryIds = itineraries.map((itinerary) => itinerary._id); // Extract itinerary IDs
     if (selectedItineraries) {
+      selectedItineraries = selectedItineraries.split(",");
       itineraryIds = itineraryIds.filter((itineraryId) =>
         selectedItineraries.includes(itineraryId.toString())
       );
@@ -277,8 +279,8 @@ exports.getItinerariesReport = async (req, res) => {
         date: { $gte: startDate, $lt: endDate },
       }).populate("itinerary");
     } else if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
       bookings = await ItineraryBooking.find({
         itinerary: { $in: itineraryIds },
         date: { $gte: startDate, $lt: endDate },

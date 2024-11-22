@@ -260,8 +260,8 @@ const getUsersReport = async (req, res) => {
     const { month, year } = req.query;
     let tourist, tourGuide, advertiser, seller, governor, admin;
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 1);
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 1);
       tourist = await Tourist.countDocuments({
         createdAt: {
           $gte: startDate,
@@ -396,10 +396,10 @@ const getSalesReport = async (req, res) => {
       query.product = product;
     }
     if (month && year) {
-      query.month = month;
-      query.year = year;
+      query.month = parseInt(month);
+      query.year = parseInt(year);
       if (day) {
-        query.day = day;
+        query.day = parseInt(day);
       }
     }
     const productSales = await ProductSales.find(query).populate("product");
@@ -443,8 +443,8 @@ const getItinerariesReport = async (req, res) => {
 
     const query = {};
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
       query.date = { $gte: startDate, $lt: endDate };
     }
 
@@ -483,8 +483,8 @@ const getActivitiesReport = async (req, res) => {
     const { month, year } = req.query;
     let query = {};
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
       query.timing = { $gte: startDate, $lt: endDate };
     }
 
@@ -537,7 +537,9 @@ const getAdminNotifications = async (req, res) => {
     }
 
     // Sort notifications in descending order based on the 'date' field
-    const sortedNotifications = admin.notifications.sort((a, b) => b.date - a.date);
+    const sortedNotifications = admin.notifications.sort(
+      (a, b) => b.date - a.date
+    );
 
     // Return the sorted notifications
     return res.status(200).json({ notifications: sortedNotifications });
@@ -554,22 +556,22 @@ const markNotificationsAsSeen = async (req, res) => {
       { _id: res.locals.user_id }, // Find seller by user ID
       {
         $set: {
-          'notifications.$[elem].seen': true, // Set 'seen' to true for all unseen notifications
-        }
+          "notifications.$[elem].seen": true, // Set 'seen' to true for all unseen notifications
+        },
       },
       {
-        arrayFilters: [{ 'elem.seen': false }], // Only update notifications where seen is false
+        arrayFilters: [{ "elem.seen": false }], // Only update notifications where seen is false
       }
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ message: 'No unseen notifications found' });
+      return res.status(404).json({ message: "No unseen notifications found" });
     }
 
-    res.json({ message: 'All notifications marked as seen' });
+    res.json({ message: "All notifications marked as seen" });
   } catch (error) {
     console.error("Error marking notifications as seen:", error.message);
-    res.status(500).json({ message: 'Error marking notifications as seen' });
+    res.status(500).json({ message: "Error marking notifications as seen" });
   }
 };
 
@@ -579,16 +581,18 @@ const hasUnseenNotifications = async (req, res) => {
     const admin = await Admin.findById(res.locals.user_id);
 
     if (!admin) {
-      return res.status(404).json({ message: 'admin not found' });
+      return res.status(404).json({ message: "admin not found" });
     }
 
     // Check if there are any unseen notifications
-    const hasUnseen = admin.notifications.some(notification => !notification.seen);
+    const hasUnseen = admin.notifications.some(
+      (notification) => !notification.seen
+    );
 
     res.json({ hasUnseen });
   } catch (error) {
     console.error("Error checking unseen notifications:", error.message);
-    res.status(500).json({ message: 'Error checking unseen notifications' });
+    res.status(500).json({ message: "Error checking unseen notifications" });
   }
 };
 
@@ -615,5 +619,5 @@ module.exports = {
   getPromoCode,
   deletePromoCode,
   updatePromoCode,
-  getAdminNotifications
+  getAdminNotifications,
 };

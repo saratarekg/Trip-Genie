@@ -299,7 +299,8 @@ exports.getTouristAttendedBookings = async (req, res) => {
 
 exports.getBookingsReport = async (req, res) => {
   try {
-    const { startDate, endDate, month, year, selectedActivities } = req.query; // Get the month from the query string
+    const { startDate, endDate, month, year } = req.query; // Get the month from the query string
+    let selectedActivities = req.query.selectedActivities; // Get the selected activities from the query string
     const advertiserId = res.locals.user_id; // Get the user's ID from response locals
     let activities = [];
 
@@ -310,8 +311,8 @@ exports.getBookingsReport = async (req, res) => {
         timing: { $gte: startDate, $lt: endDate },
       });
     } else if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
       activities = await Activity.find({
         advertiser: advertiserId,
         timing: { $gte: startDate, $lt: endDate },
@@ -322,6 +323,7 @@ exports.getBookingsReport = async (req, res) => {
 
     let activityIds = activities.map((activity) => activity._id);
     if (selectedActivities) {
+      selectedActivities = selectedActivities.split(",");
       activityIds = activityIds.filter((activityId) =>
         selectedActivities.includes(activityId.toString())
       );
