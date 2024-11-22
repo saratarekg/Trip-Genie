@@ -34,6 +34,9 @@ import { SignupForm } from "./pages/SignUp.jsx";
 
 import  SellerNotifications  from "./pages/SellerNotifications.jsx";
 import  AdminNotifications  from "./pages/AdminNotifications.jsx";
+import  AdvertiserNotifications  from "./pages/AdvertiserNotifications.jsx";
+import  TourGuideNotifications  from "./pages/TourGuideNotifications.jsx";
+
 
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
@@ -411,6 +414,26 @@ function AppContent() {
                 allowedRoles={["seller"]}
               >
                 <SellerNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tour-guide-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["tour-guide"]}
+              >
+                <TourGuideNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/advertiser-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser"]}
+              >
+                <AdvertiserNotifications />
               </ProtectedRoute>
             }
           />

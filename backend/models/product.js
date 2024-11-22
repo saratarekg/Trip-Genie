@@ -182,8 +182,7 @@ productSchema.statics.filterByPrice = async function (minPrice, maxPrice) {
 // });
 
 productSchema.post("findOneAndUpdate", async function (doc) {
-  console.log("Product out of stock3");
-  console.log("xxxxxx", this.quantity);
+ 
   if (doc.quantity === 0) {
     console.log("Product out of stock2");
 

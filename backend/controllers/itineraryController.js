@@ -1,5 +1,7 @@
 const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
+const TourGuide = require("../models/tourGuide");
+
 const ItineraryBooking = require("../models/itineraryBooking");
 const cloudinary = require("../utils/cloudinary");
 const emailService = require("../services/emailService");
@@ -576,6 +578,17 @@ const flagItinerary = async (req, res) => {
 
     if (!appropriate) {
       await emailService.sendItineraryFlaggedEmail(itinerary);
+
+      // Add a notification to the advertiser's notifications array
+      const notification = {
+        body: `Your activity "${itinerary.title}" has been flagged as inappropriate by the admin.`,
+        date: new Date(),
+        seen: false,
+      };
+
+      await TourGuide.findByIdAndUpdate(itinerary.tourGuide._id, {
+        $push: { notifications: notification },
+      });
     }
 
     res.status(200).json({ message: "Itinerary updated successfully" });

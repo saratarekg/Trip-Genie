@@ -1,6 +1,8 @@
 const Activity = require("../models/activity");
 const Category = require("../models/category");
 const Itinerary = require("../models/itinerary");
+const Advertiser = require("../models/advertiser");
+
 const Tourist = require("../models/tourist");
 const ActivityBooking = require("../models/activityBooking");
 const cloudinary = require("../utils/cloudinary");
@@ -234,6 +236,18 @@ const flagActivity = async (req, res) => {
 
     if (appropriate === false) {
       await emailService.sendActivityFlaggedEmail(activity);
+
+      // Add a notification to the advertiser's notifications array
+      const notification = {
+        body: `Your activity "${activity.name}" has been flagged as inappropriate by the admin.`,
+        date: new Date(),
+        seen: false,
+      };
+
+      await Advertiser.findByIdAndUpdate(activity.advertiser._id, {
+        $push: { notifications: notification },
+      });
+
     }
 
     res.status(200).json({ message: "Activity flagged successfully" });

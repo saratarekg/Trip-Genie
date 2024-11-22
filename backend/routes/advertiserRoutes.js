@@ -14,6 +14,13 @@ const router = express.Router();
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
+router.get("/notifications", advertiserController.getAdvertiserNotifications);
+
+router.get('/unseen-notifications',advertiserController.hasUnseenNotifications);
+
+// POST /seller/mark-notifications-seen
+router.post('/mark-notifications-seen', advertiserController.markNotificationsAsSeen);
+
 router.post(
   "/activities",
   upload.array("pictures", 10),
