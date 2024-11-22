@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { BarChart, Users, Gift, Activity, MessageSquare, Map, LogOut, Home, ChevronDown } from 'lucide-react';
+import { BarChart, Users, Gift, Activity, MessageSquare, Map, LogOut, Home, ChevronDown, Bell } from 'lucide-react'; // Import Bell icon
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
+import logo from "../assets/images/TGlogo.svg";
 
 const tabs = [
   { id: 'dashboard', title: 'Dashboard', icon: Home },
@@ -33,6 +36,7 @@ const tabs = [
     subItems: [
       { id: 'manage-categories', title: 'Manage Categories' },
       { id: 'manage-tags', title: 'Manage Tags' },
+      { id: 'manage-activities', title: 'Manage Activities' } // New sub-item
     ]
   },
   { id: 'manage-itineraries', title: 'Manage Itineraries', icon: Map },
@@ -57,9 +61,29 @@ export function DashboardSidebar({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [openMenu, setOpenMenu] = useState(null);
+  const navigate = useNavigate();
 
   const toggleMenu = (menuId) => {
     setOpenMenu(openMenu === menuId ? null : menuId);
+  };
+
+  const logOut = async () => {
+    console.log("Logging out...");
+    try {
+      const response = await fetch("http://localhost:4000/auth/logout");
+
+      if (response.ok) {
+        Cookies.remove("jwt");
+        Cookies.remove("role");
+        console.log("Logged out successfully");
+        navigate("/login");
+        window.location.reload();
+      } else {
+        console.error("Logout failed.");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   return (
@@ -69,23 +93,37 @@ export function DashboardSidebar({
       } transition-all duration-300 ease-in-out ${className}`}
     >
       {/* Sidebar Header */}
-      <div className="flex items-center justify-end h-16 px-4 border-b border-[#1A3B47]/20 bg-[#1A3B47]">
-        <button
-          className="text-white hover:bg-white/10 p-2 rounded-md"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          <div className="flex flex-col items-center justify-center w-6 h-6">
-            <div className="w-4 h-0.5 bg-white mb-1"></div>
-            <div className="w-4 h-0.5 bg-white mb-1"></div>
-            <div className="w-4 h-0.5 bg-white"></div>
-          </div>
-          <span className="sr-only">Toggle sidebar</span>
-        </button>
+      <div className="flex items-center justify-between h-16 px-4 border-b border-[#1A3B47]/20 bg-[#1A3B47]">
+        {!isCollapsed && <img src={logo} alt="Logo" className="h-8 w-8 flex-grow" />}
+        <div className="flex items-center">
+          {!isCollapsed && (
+            <button className="text-white hover:bg-white/10 p-2 rounded-md">
+              <Bell className="h-6 w-6" />
+            </button>
+          )}
+          <button
+            className="text-white hover:bg-white/10 p-2 rounded-md"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            <div className="flex flex-col items-center justify-center w-6 h-6">
+              <div className="w-4 h-0.5 bg-white mb-1"></div>
+              <div className="w-4 h-0.5 bg-white mb-1"></div>
+              <div className="w-4 h-0.5 bg-white"></div>
+            </div>
+            <span className="sr-only">Toggle sidebar</span>
+          </button>
+        </div>
       </div>
 
       {/* Sidebar Content */}
       <div className="flex-1 overflow-y-auto bg-[#1A3B47]">
         <div className="p-2 space-y-1">
+          {isCollapsed && (
+            <button className="flex items-center w-full p-2 rounded-md text-white hover:bg-white/10">
+              <Bell className="h-5 w-5 mr-3" />
+              <span className="sr-only">Notifications</span>
+            </button>
+          )}
           {tabs.map((tab) => (
             <React.Fragment key={tab.id}>
               {tab.subItems ? (
@@ -140,6 +178,7 @@ export function DashboardSidebar({
       <div className="border-t border-[#1A3B47]/20 p-4 bg-[#1A3B47]">
         <button
           className="w-full flex items-center justify-start text-white hover:bg-white/10 p-2 rounded-md"
+          onClick={logOut}
         >
           <LogOut className="h-5 w-5 mr-3" />
           {!isCollapsed && <span>Logout</span>}

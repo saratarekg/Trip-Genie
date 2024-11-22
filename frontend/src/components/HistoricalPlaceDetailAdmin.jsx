@@ -223,7 +223,7 @@ const HistoricalPlaceDetail = ({ id }) => {
   }
 
   return (
-    <div>
+    <div style={{ backgroundColor: "#B5D3D1" }}> {/* Light Aqua/Seafoam Green */}
       <div className="bg-gray-100">
         <div className="container mx-auto px-4">
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -242,10 +242,9 @@ const HistoricalPlaceDetail = ({ id }) => {
                             <Badge
                               key={index}
                               variant="secondary"
-                              className="text-lg px-4 py-2 rounded-full flex items-center" // Adjust font size, padding, and make it a flex container
+                              className="text-lg px-4 py-2 rounded-full font-semibold flex text-[#1A3B47] items-center bg-[#B5D3D1] hover:bg-[#B5D3D1] hover:text-[#1A3B47]"
                             >
-                              <Tag className="mr-2" />{" "}
-                              {/* Adds an icon-like tag inside the badge */}
+                              <Tag className="mr-2" />
                               {historicalTag.type}
                             </Badge>
                           )
@@ -254,6 +253,33 @@ const HistoricalPlaceDetail = ({ id }) => {
                     ) : (
                       <p>No tags available</p>
                     )}
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="ml-auto">
+                          <Share2 className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <div className="flex flex-col">
+                          <Button
+                            variant="ghost"
+                            onClick={handleCopyLink}
+                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                          >
+                            <Link className="mr-2 h-4 w-4" />
+                            Copy Link
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={handleEmailShare}
+                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                          >
+                            <Mail className="mr-2 h-4 w-4" />
+                            Share by Email
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
                 <p className="text-gray-600 mt-2">
@@ -286,34 +312,6 @@ const HistoricalPlaceDetail = ({ id }) => {
 
                 <div className="md:w-1/3 space-y-4">
                   <ToastProvider>
-                    <Popover open={open} onOpenChange={setOpen}>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="ml-auto">
-                          <Share2 className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <div className="flex flex-col">
-                          <Button
-                            variant="ghost"
-                            onClick={handleCopyLink}
-                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                          >
-                            <Link className="mr-2 h-4 w-4" />
-                            Copy Link
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            onClick={handleEmailShare}
-                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
-                          >
-                            <Mail className="mr-2 h-4 w-4" />
-                            Share by Email
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-
                     <ToastViewport />
 
                     {isToastOpen && (

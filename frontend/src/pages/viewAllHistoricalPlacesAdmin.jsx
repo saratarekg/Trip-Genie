@@ -291,7 +291,7 @@ export default function AllHistoricalPlacesComponent() {
       <div className="container mx-auto">
         {selectedHistoricalPlaceId ? (
           <div>
-            <Button onClick={handleBackToAll} className="mb-4 bg-[#5D9297] text-white">
+            <Button onClick={handleBackToAll} className="mb-4 bg-[#5D9297] text-white text-base">
               Back to All Historical Places
             </Button>
             <HistoricalPlaceDetail id={selectedHistoricalPlaceId} />

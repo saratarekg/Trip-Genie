@@ -5,11 +5,19 @@ import AdminGovernorPage from "./AdminGovernorPage.jsx";
 import TagsPage from "./TagsPage.jsx";
 import CategoriesPage from "./CategoriesPage.jsx";
 import { DeleteAccount } from "../components/DeleteAccPopout.jsx";
-import { ViewComplaintDetails } from "../components/ViewComplaintDetails.jsx"
+import { ViewComplaintDetails } from "../components/ViewComplaintDetails.jsx";
 import ViewAllHistoricalPlaces from "./viewAllHistoricalPlacesAdmin.jsx";
+import { AllProducts } from "../components/all-products-admin.jsx";
+import CreateProductForm from "../components/CreateProductAdmin.jsx";
+import ProductArchive from "../components/product-archive-admin.jsx";
+import { MyProducts } from "../components/myProductsAdmin.jsx";
+import ProductDetail from "../components/ProductDetailAdmin.jsx";
+// import ManageActivitiesPage from "./ManageActivitiesPage.jsx"; // Import the new component
 
 export function DashboardContent({ activeTab, tabs, setActiveTab }) {
   const [selectedComplaintId, setSelectedComplaintId] = useState(null);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [previousTab, setPreviousTab] = useState(null);
 
   useEffect(() => {
     const savedTab = localStorage.getItem("activeTab");
@@ -20,6 +28,8 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
 
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
+    setSelectedComplaintId(null); // Reset selectedComplaintId when activeTab changes
+    setSelectedProductId(null); // Reset selectedProductId when activeTab changes
   }, [activeTab]);
 
   const getActiveTabDetails = () => {
@@ -51,6 +61,14 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
             complaintId={selectedComplaintId}
             onBack={() => setSelectedComplaintId(null)}
           />
+        ) : selectedProductId ? (
+          <ProductDetail
+            productId={selectedProductId}
+            onBack={() => {
+              setSelectedProductId(null);
+              setActiveTab(previousTab);
+            }}
+          />
         ) : activeTab === 'review-registration' ? (
           <UserApproval />
         ) : activeTab === 'complaints' ? (
@@ -64,15 +82,24 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
         ) : activeTab === 'manage-accounts' ? (
           <DeleteAccount />
         ) : activeTab === 'my-products' ? (
-          <div className="p-4 bg-gray-100 rounded">Content for My Products goes here.</div>
+          <MyProducts onSelectProduct={(id) => {
+            setPreviousTab(activeTab);
+            setSelectedProductId(id);
+          }} />
         ) : activeTab === 'create-product' ? (
-          <div className="p-4 bg-gray-100 rounded">Content for Create Product goes here.</div>
+          <CreateProductForm />
         ) : activeTab === 'archived-products' ? (
-          <div className="p-4 bg-gray-100 rounded">Content for Archived Products goes here.</div>
+          <ProductArchive onSelectProduct={(id) => {
+            setPreviousTab(activeTab);
+            setSelectedProductId(id);
+          }} />
         ) : activeTab === 'create-promo-code' ? (
           <div className="p-4 bg-gray-100 rounded">Content for Create Promo Code goes here.</div>
         ) : activeTab === 'manage-products' ? (
-          <div className="p-4 bg-gray-100 rounded">Content for Manage Products goes here.</div>
+          <AllProducts onSelectProduct={(id) => {
+            setPreviousTab(activeTab);
+            setSelectedProductId(id);
+          }} />
         ) : activeTab === 'historical-places' ? (
           <ViewAllHistoricalPlaces />
         ) : (

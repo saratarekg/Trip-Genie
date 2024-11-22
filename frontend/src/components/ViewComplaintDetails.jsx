@@ -138,7 +138,7 @@ export const ViewComplaintDetails = ({ complaintId, onBack }) => {
   return (
     <div className="">
       <div className="container mx-auto px-8">
-        <Button onClick={onBack} className="mb-4 bg-[#5D9297] text-white">
+        <Button onClick={onBack} className="mb-4 bg-[#5D9297] text-white text-base">
           Back to Complaints
         </Button>
         <Card className="max-w-[1200px] mx-auto p-8 shadow-xl rounded-lg ">

@@ -75,6 +75,7 @@ const tabs = [
     subItems: [
       { id: 'manage-categories', title: 'Manage Categories' },
       { id: 'manage-tags', title: 'Manage Tags' },
+      { id: 'manage-activities', title: 'Manage Activities' } // New sub-item
     ]
   },
   { id: 'manage-itineraries', title: 'Manage Itineraries', icon: 'Map' },

@@ -360,6 +360,24 @@ export function Dashboard() {
                     </Link>
                   </CardContent>
                 </Card>
+                <Card className="bg-white border-[#808080] border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-[#003f66]">
+                      <div className="flex items-center">
+                        <Activity className="w-4 h-4 mr-2 text-[#F88C33]" />
+                        Manage Activities
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      onClick={() => navigate('/manage-activities')}
+                      className="w-full bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200"
+                    >
+                      Manage
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
             <TabsContent value="giftshop" className="space-y-4 pt-4">
