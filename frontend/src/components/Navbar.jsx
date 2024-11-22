@@ -8,6 +8,7 @@ import axios from 'axios'
 import { NotificationsDropdownSeller } from '@/components/SellerNotificationsDropdown'
 import { NotificationsDropdownTourGuide } from '@/components/TourGuideNotificationsDropdown'
 import { NotificationsDropdownAdvertiser } from '@/components/AdvertiserNotificationsDropdown'
+import { NotificationsDropdownAdmin } from '@/components/AdminNotificationsDropdown'
 
 
 
@@ -68,6 +69,7 @@ export function NavbarComponent() {
   const [hasUnseenNotificationsSeller, setHasUnseenNotificationsSeller] = useState(false);
   const [hasUnseenNotificationsTourGuide, setHasUnseenNotificationsTourGuide] = useState(false);
   const [hasUnseenNotificationsAdvertiser, setHasUnseenNotificationsAdvertiser] = useState(false);
+  const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] = useState(false);
   
 
   const [key, setKey] = useState(0);
@@ -108,7 +110,26 @@ export function NavbarComponent() {
     if (role === "advertiser") {
       checkUnseenNotificationsAdvertiser();
     }
+    if (role === "admin") {
+      checkUnseenNotificationsAdmin();
+    }
   }, [role]);
+
+  const checkUnseenNotificationsAdmin = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/admin/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsAdmin(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsAdmin(false);
+    }
+  };
 
   const checkUnseenNotificationsSeller = async () => {
     try {
@@ -564,11 +585,12 @@ export function NavbarComponent() {
 
           {/* Login, Sign Up, Notifications, and Menu Button */}
           <div className="hidden md:flex items-center">
-            {role !== undefined && role !== "guest" && role !== "admin" && (
+            {role !== undefined && role !== "guest"  && (
               <>
                 {role === "seller" && <NotificationsDropdownSeller />}
                 {role === "tour-guide" && <NotificationsDropdownTourGuide />}
                 {role === "advertiser" && <NotificationsDropdownAdvertiser />}
+                {role === "admin" && <NotificationsDropdownAdmin />}
                 {role === "tourist" && (
                   <>
                     <div className="relative mr-2 mt-1">

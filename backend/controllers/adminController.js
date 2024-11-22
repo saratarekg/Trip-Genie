@@ -523,21 +523,24 @@ const getActivitiesReport = async (req, res) => {
 const getAdminNotifications = async (req, res) => {
   try {
     // Get seller ID from res.locals
-    const AdminId = res.locals.user_id;
+    const adminId = res.locals.user_id;
 
-    if (!AdminId) {
-      return res.status(400).json({ message: "Admin Id is required" });
+    if (!adminId) {
+      return res.status(400).json({ message: "admin ID is required" });
     }
 
     // Find the seller and get their notifications
-    const admin = await Admin.findById(AdminId, "notifications");
+    const admin = await Admin.findById(adminId, "notifications");
 
     if (!admin) {
-      return res.status(404).json({ message: "Admin not found" });
+      return res.status(404).json({ message: "admin not found" });
     }
 
-    // Return the notifications
-    return res.status(200).json({ notifications: admin.notifications });
+    // Sort notifications in descending order based on the 'date' field
+    const sortedNotifications = admin.notifications.sort((a, b) => b.date - a.date);
+
+    // Return the sorted notifications
+    return res.status(200).json({ notifications: sortedNotifications });
   } catch (error) {
     console.error("Error fetching notifications:", error.message);
     return res.status(500).json({ message: "Internal server error" });
@@ -576,11 +579,11 @@ const hasUnseenNotifications = async (req, res) => {
     const admin = await Admin.findById(res.locals.user_id);
 
     if (!admin) {
-      return res.status(404).json({ message: 'Admin not found' });
+      return res.status(404).json({ message: 'admin not found' });
     }
 
     // Check if there are any unseen notifications
-    const hasUnseen = seller.notifications.some(notification => !notification.seen);
+    const hasUnseen = admin.notifications.some(notification => !notification.seen);
 
     res.json({ hasUnseen });
   } catch (error) {
@@ -588,6 +591,7 @@ const hasUnseenNotifications = async (req, res) => {
     res.status(500).json({ message: 'Error checking unseen notifications' });
   }
 };
+
 module.exports = {
   addAdmin,
   hasUnseenNotifications,
