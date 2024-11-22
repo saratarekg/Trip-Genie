@@ -5,7 +5,8 @@ import AdminGovernorPage from "./AdminGovernorPage.jsx";
 import TagsPage from "./TagsPage.jsx";
 import CategoriesPage from "./CategoriesPage.jsx";
 import { DeleteAccount } from "../components/DeleteAccPopout.jsx";
-import { ViewComplaintDetails } from "../components/ViewComplaintDetails.jsx";
+import { ViewComplaintDetails } from "../components/ViewComplaintDetails.jsx"
+import ViewAllHistoricalPlaces from "./viewAllHistoricalPlacesAdmin.jsx";
 
 export function DashboardContent({ activeTab, tabs, setActiveTab }) {
   const [selectedComplaintId, setSelectedComplaintId] = useState(null);
@@ -73,7 +74,7 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
         ) : activeTab === 'manage-products' ? (
           <div className="p-4 bg-gray-100 rounded">Content for Manage Products goes here.</div>
         ) : activeTab === 'historical-places' ? (
-          <div className="p-4 bg-gray-100 rounded">Content for Historical Places goes here.</div>
+          <ViewAllHistoricalPlaces />
         ) : (
           <div className="p-4 bg-gray-100 rounded">
             Content for {activeTabDetails.title} goes here.
