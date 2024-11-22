@@ -325,15 +325,14 @@ const logout = (req, res) => {
 };
 
 const emailExists = async (email) => {
-  if (await Tourist.findOne({ email })) {
-    return true;
-  } else if (await TourGuide.findOne({ email })) {
-    return true;
-  } else if (await Advertiser.findOne({ email })) {
-    return true;
-  } else if (await Seller.findOne({ email })) {
-    return true;
-  } else {
+  if (
+    (await Tourist.findOne({ email })) ||
+    (await TourGuide.findOne({ email })) ||
+    (await Advertiser.findOne({ email })) ||
+    (await Seller.findOne({ email })) ||
+    (await Admin.findOne({ email })) ||
+    (await TourismGovernor.findOne({ email }))
+  ) {
     console.log("email does not exist");
     return false;
   }
@@ -392,9 +391,9 @@ const forgotPassword = async (req, res) => {
       (await Tourist.findOne({ email })) ||
       (await TourGuide.findOne({ email })) ||
       (await Advertiser.findOne({ email })) ||
-      (await Seller.findOne({ email }));
-    // (await Admin.findOne({ email })) ||
-    // (await TourismGovernor.findOne({ email }));
+      (await Seller.findOne({ email })) ||
+      (await Admin.findOne({ email })) ||
+      (await TourismGovernor.findOne({ email }));
 
     if (!user) {
       return res.status(400).json({ message: "Email not found" });
@@ -424,9 +423,9 @@ const verifyOtp = async (req, res) => {
       (await Tourist.findOne({ email })) ||
       (await TourGuide.findOne({ email })) ||
       (await Advertiser.findOne({ email })) ||
-      (await Seller.findOne({ email }));
-    // (await Admin.findOne({ email })) ||
-    // (await TourismGovernor.findOne({ email }));
+      (await Seller.findOne({ email })) ||
+      (await Admin.findOne({ email })) ||
+      (await TourismGovernor.findOne({ email }));
 
     if (!user) {
       return res.status(400).json({ message: "Email not found" });
@@ -456,9 +455,9 @@ const resetPassword = async (req, res) => {
       (await Tourist.findOne({ email })) ||
       (await TourGuide.findOne({ email })) ||
       (await Advertiser.findOne({ email })) ||
-      (await Seller.findOne({ email }));
-    // (await Admin.findOne({ email })) ||
-    // (await TourismGovernor.findOne({ email }));
+      (await Seller.findOne({ email })) ||
+      (await Admin.findOne({ email })) ||
+      (await TourismGovernor.findOne({ email }));
 
     if (!user) {
       return res.status(400).json({ message: "Email not found" });

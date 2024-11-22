@@ -17,11 +17,13 @@ const PromoCode = require("../models/promoCode");
 
 const addAdmin = async (req, res) => {
   try {
-    // console.log(req.body);
-    if (await usernameExists(req.body.username)) {
+    const { username, email, password } = req.body;
+    if (await usernameExists(username)) {
       throw new Error("Username already exists");
+    } else if (await emailExists(email)) {
+      throw new Error("Email already exists");
     }
-    const admin = new Admin(req.body);
+    const admin = new Admin({ username, email, password });
 
     admin
       .save()
@@ -248,6 +250,21 @@ const usernameExists = async (username) => {
     (await Seller.findOne({ username })) ||
     (await Admin.findOne({ username })) ||
     (await TourismGovernor.findOne({ username }))
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+const emailExists = async (email) => {
+  if (
+    (await Tourist.findOne({ email })) ||
+    (await TourGuide.findOne({ email })) ||
+    (await Advertiser.findOne({ email })) ||
+    (await Seller.findOne({ email })) ||
+    (await Admin.findOne({ email })) ||
+    (await TourismGovernor.findOne({ email }))
   ) {
     return true;
   } else {

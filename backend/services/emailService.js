@@ -194,12 +194,12 @@ const sendPurchaseConfirmationEmail = async (
   });
 };
 
-const sendOutOfStockEmail = async (seller, product) => {
+const sendOutOfStockEmail = async (email, name, product) => {
   const mailOptions = {
-    to: seller.email,
+    to: email,
     subject: "Product Out of Stock Notification",
     html: `<h1>Product Out of Stock</h1>
-            <p>Dear ${seller.name},</p>
+            <p>Dear ${name},</p>
             <p>We wanted to inform you that your product is currently out of stock:</p>
             <p><strong>Product Name:</strong> ${product.name}</p>
             <p>Please update the stock availability this product.</p>

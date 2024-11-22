@@ -182,7 +182,6 @@ productSchema.statics.filterByPrice = async function (minPrice, maxPrice) {
 // });
 
 productSchema.post("findOneAndUpdate", async function (doc) {
- 
   if (doc.quantity === 0) {
     console.log("Product out of stock2");
 
@@ -197,6 +196,15 @@ productSchema.post("findOneAndUpdate", async function (doc) {
           },
         }
       );
+
+      const admins = await Admin.find();
+      admins.forEach(async (admin) => {
+        await emailService.sendOutOfStockEmail(
+          admin.email,
+          admin.username,
+          doc
+        );
+      });
     } else {
       await Seller.findByIdAndUpdate(
         doc.seller,
@@ -212,7 +220,7 @@ productSchema.post("findOneAndUpdate", async function (doc) {
 
       const seller = await Seller.findById(doc.seller);
 
-      await emailService.sendOutOfStockEmail(seller, doc);
+      await emailService.sendOutOfStockEmail(seller.email, seller.name, doc);
     }
   }
 });
