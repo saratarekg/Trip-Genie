@@ -187,8 +187,21 @@ const getItinerariesByPreference = async (req, res) => {
         },
       },
     });
-
     query.push({ isDeleted: false });
+
+    const userRole = res.locals.user_role;
+    const userId = res.locals.user_id;
+    if (userRole === "tourist") {
+      const bookedItineraries = await ItineraryBooking.find({
+        user: userId,
+      }).distinct("itinerary");
+      query.push({
+        $or: [{ isActivated: true }, { _id: { $in: bookedItineraries } }],
+      });
+    } else {
+      query.push({ isActivated: true });
+    }
+
     let itinerariesQuery = Itinerary.find({
       $and: query,
     })
