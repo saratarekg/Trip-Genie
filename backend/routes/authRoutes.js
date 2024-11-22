@@ -66,4 +66,8 @@ router.get("/check-unique", authController.checkUnique);
 router.get("/logout", authController.logout);
 router.post("/login", authController.login);
 
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password", authController.resetPassword);
+router.post("/verify-otp", authController.verifyOtp);
+
 module.exports = router;

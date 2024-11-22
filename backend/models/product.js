@@ -1,4 +1,7 @@
 const mongoose = require("mongoose");
+const Seller = require("./seller");
+const Admin = require("./admin");
+const emailService = require("../services/emailService");
 
 const productSchema = new mongoose.Schema(
   {
@@ -123,6 +126,104 @@ productSchema.statics.filterByPrice = async function (minPrice, maxPrice) {
     res.status(500).json({ error: error.message });
   }
 };
+
+// productSchema.post("save", async function (doc) {
+//   console.log("Product out of stock4");
+
+//   if (doc.quantity === 0) {
+//     console.log("Product out of stock");
+
+//     if (doc.seller === undefined || doc.seller === null) {
+//       await Admin.updateMany({}, {
+//         $push: {
+//           notifications: {
+//             body: `Product ${doc.name} is out of stock`
+//           }
+//         }
+//       });
+
+//     }
+//     else {
+//       await Seller.findByIdAndUpdate(
+//         doc.seller,
+//         {
+//           $push: {
+//             notifications: {
+//               body: `Product ${doc.name} is out of stock`,
+//             },
+//           },
+//         },
+//         { new: true }
+//       );
+
+//       const seller = await Seller.findById(doc.seller);
+
+//       const mailOptions = {
+//         to: seller.email,
+//         subject: "Product Out of Stock Notification",
+//         html: `<h1>Product Out of Stock</h1>
+//       <p>Dear ${seller.name},</p>
+//       <p>We wanted to inform you that your product is currently out of stock:</p>
+//       <p><strong>Product Name:</strong> ${doc.name}</p>
+//       <p>Please update the stock availability in your dashboard this product.</p>
+//       <p>Thank you for your attention.</p>
+//       <p>Best regards,<br>Trip Genie</p>`,
+//       };
+
+//       transporter.sendMail(mailOptions, (error, info) => {
+//         if (error) {
+//           console.error("Email error: ", error.message);
+//         }
+//       });
+//     }
+
+//   }
+
+// });
+
+productSchema.post("findOneAndUpdate", async function (doc) {
+  if (doc.quantity === 0) {
+    console.log("Product out of stock2");
+
+    if (doc.seller === undefined || doc.seller === null) {
+      await Admin.updateMany(
+        {},
+        {
+          $push: {
+            notifications: {
+              body: `Product ${doc.name} is out of stock`,
+            },
+          },
+        }
+      );
+
+      const admins = await Admin.find();
+      admins.forEach(async (admin) => {
+        await emailService.sendOutOfStockEmail(
+          admin.email,
+          admin.username,
+          doc
+        );
+      });
+    } else {
+      await Seller.findByIdAndUpdate(
+        doc.seller,
+        {
+          $push: {
+            notifications: {
+              body: `Product ${doc.name} is out of stock`,
+            },
+          },
+        },
+        { new: true }
+      );
+
+      const seller = await Seller.findById(doc.seller);
+
+      await emailService.sendOutOfStockEmail(seller.email, seller.name, doc);
+    }
+  }
+});
 
 const Product = mongoose.model("Product", productSchema);
 module.exports = Product;

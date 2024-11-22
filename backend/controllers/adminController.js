@@ -13,14 +13,17 @@ const Purchase = require("../models/purchase");
 const ProductSales = require("../models/productSales");
 const Itinerary = require("../models/itinerary");
 const Activity = require("../models/activity");
+const PromoCode = require("../models/promoCode");
 
 const addAdmin = async (req, res) => {
   try {
-    // console.log(req.body);
-    if (await usernameExists(req.body.username)) {
+    const { username, email, password } = req.body;
+    if (await usernameExists(username)) {
       throw new Error("Username already exists");
+    } else if (await emailExists(email)) {
+      throw new Error("Email already exists");
     }
-    const admin = new Admin(req.body);
+    const admin = new Admin({ username, email, password });
 
     admin
       .save()
@@ -254,13 +257,28 @@ const usernameExists = async (username) => {
   }
 };
 
+const emailExists = async (email) => {
+  if (
+    (await Tourist.findOne({ email })) ||
+    (await TourGuide.findOne({ email })) ||
+    (await Advertiser.findOne({ email })) ||
+    (await Seller.findOne({ email })) ||
+    (await Admin.findOne({ email })) ||
+    (await TourismGovernor.findOne({ email }))
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 const getUsersReport = async (req, res) => {
   try {
     const { month, year } = req.query;
     let tourist, tourGuide, advertiser, seller, governor, admin;
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 1);
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 1);
       tourist = await Tourist.countDocuments({
         createdAt: {
           $gte: startDate,
@@ -321,6 +339,72 @@ const getUsersReport = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const addPromoCode = async (req, res) => {
+  try {
+    const promoCode = new PromoCode(req.body);
+    await promoCode.save();
+    res.status(201).json({ promoCode });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// getPromoCodes
+const getPromoCodes = async (req, res) => {
+  try {
+    const promoCodes = await PromoCode.find();
+    res.status(200).json({ promoCodes });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//getPromoCode
+
+const getPromoCode = async (req, res) => {
+  try {
+    const promoCode = await PromoCode.findById(req.params.id);
+    if (!promoCode) {
+      return res.status(404).json({ message: "Promo code not found" });
+    }
+    res.status(200).json(promoCode);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//deletePromoCode
+const deletePromoCode = async (req, res) => {
+  try {
+    const promoCode = await PromoCode.findByIdAndDelete(req.params.id);
+    if (!promoCode) {
+      return res.status(404).json({ message: "Promo code not found" });
+    }
+    res.status(201).json({ message: "Promo code deleted" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//updatePromoCode
+
+const updatePromoCode = async (req, res) => {
+  try {
+    const promoCode = await PromoCode.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!promoCode) {
+      return res.status(404).json({ message: "Promo code not found" });
+    }
+    res.status(201).json({ promoCode });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getSalesReport = async (req, res) => {
   try {
     const { product, day, month, year } = req.query;
@@ -329,10 +413,10 @@ const getSalesReport = async (req, res) => {
       query.product = product;
     }
     if (month && year) {
-      query.month = month;
-      query.year = year;
+      query.month = parseInt(month);
+      query.year = parseInt(year);
       if (day) {
-        query.day = day;
+        query.day = parseInt(day);
       }
     }
     const productSales = await ProductSales.find(query).populate("product");
@@ -376,8 +460,8 @@ const getItinerariesReport = async (req, res) => {
 
     const query = {};
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
       query.date = { $gte: startDate, $lt: endDate };
     }
 
@@ -416,8 +500,8 @@ const getActivitiesReport = async (req, res) => {
     const { month, year } = req.query;
     let query = {};
     if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
       query.timing = { $gte: startDate, $lt: endDate };
     }
 
@@ -453,9 +537,87 @@ const getActivitiesReport = async (req, res) => {
   }
 };
 
+const getAdminNotifications = async (req, res) => {
+  try {
+    // Get seller ID from res.locals
+    const adminId = res.locals.user_id;
+
+    if (!adminId) {
+      return res.status(400).json({ message: "admin ID is required" });
+    }
+
+    // Find the seller and get their notifications
+    const admin = await Admin.findById(adminId, "notifications");
+
+    if (!admin) {
+      return res.status(404).json({ message: "admin not found" });
+    }
+
+    // Sort notifications in descending order based on the 'date' field
+    const sortedNotifications = admin.notifications.sort(
+      (a, b) => b.date - a.date
+    );
+
+    // Return the sorted notifications
+    return res.status(200).json({ notifications: sortedNotifications });
+  } catch (error) {
+    console.error("Error fetching notifications:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const markNotificationsAsSeen = async (req, res) => {
+  try {
+    // Find the seller by their ID and update the notifications in one operation
+    const result = await Admin.updateOne(
+      { _id: res.locals.user_id }, // Find seller by user ID
+      {
+        $set: {
+          "notifications.$[elem].seen": true, // Set 'seen' to true for all unseen notifications
+        },
+      },
+      {
+        arrayFilters: [{ "elem.seen": false }], // Only update notifications where seen is false
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ message: "No unseen notifications found" });
+    }
+
+    res.json({ message: "All notifications marked as seen" });
+  } catch (error) {
+    console.error("Error marking notifications as seen:", error.message);
+    res.status(500).json({ message: "Error marking notifications as seen" });
+  }
+};
+
+const hasUnseenNotifications = async (req, res) => {
+  try {
+    // Find the seller by their ID
+    const admin = await Admin.findById(res.locals.user_id);
+
+    if (!admin) {
+      return res.status(404).json({ message: "admin not found" });
+    }
+
+    // Check if there are any unseen notifications
+    const hasUnseen = admin.notifications.some(
+      (notification) => !notification.seen
+    );
+
+    res.json({ hasUnseen });
+  } catch (error) {
+    console.error("Error checking unseen notifications:", error.message);
+    res.status(500).json({ message: "Error checking unseen notifications" });
+  }
+};
+
 module.exports = {
   addAdmin,
+  hasUnseenNotifications,
   getAdminByID,
+  markNotificationsAsSeen,
   getAllAdmins,
   deleteAdminAccount,
   getAllUsers,
@@ -469,4 +631,10 @@ module.exports = {
   getSalesReport,
   getItinerariesReport,
   getActivitiesReport,
+  addPromoCode,
+  getPromoCodes,
+  getPromoCode,
+  deletePromoCode,
+  updatePromoCode,
+  getAdminNotifications,
 };

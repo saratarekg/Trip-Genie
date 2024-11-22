@@ -2,6 +2,8 @@ const Product = require("../models/product"); // Assuming your model is in model
 const Purchase = require("../models/purchase"); // Assuming your Activity model is in models/activity.js
 const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
 const productSales = require("../models/productSales");
+const PromoCode = require("../models/promoCode");
+const emailService = require("../services/emailService");
 
 exports.createPurchase = async (req, res) => {
   const {
@@ -12,6 +14,7 @@ exports.createPurchase = async (req, res) => {
     deliveryTime,
     shippingAddress,
     locationType,
+    promoCode,
   } = req.body;
   console.log(products, paymentMethod, shippingAddress);
   try {
@@ -48,25 +51,6 @@ exports.createPurchase = async (req, res) => {
 
       // Calculate the price for this product and add it to the total price
       totalPrice += productDoc.price * quantity;
-      const day = new Date().getDate();
-      const month = new Date().getMonth() + 1;
-      const year = new Date().getFullYear();
-      if (await productSales.findOne({ product, day, month, year })) {
-        await productSales.updateOne(
-          { product, day, month, year },
-          { $inc: { sales: quantity, revenue: productDoc.price * quantity } }
-        );
-      } else {
-        const newProductSales = new productSales({
-          product,
-          sales: quantity,
-          revenue: productDoc.price * quantity,
-          day,
-          month,
-          year,
-        });
-        await newProductSales.save();
-      }
     }
 
     // Add delivery price to the total
@@ -80,6 +64,14 @@ exports.createPurchase = async (req, res) => {
     } else {
       delPrice = 14.99; // International delivery
     }
+
+    const promoDetails = await PromoCode.findOne({
+      code: promoCode,
+    });
+
+    totalPrice =
+      totalPrice - ((totalPrice * promoDetails?.percentOff) / 100 || 0);
+
     totalPrice += delPrice;
 
     // Check if the payment method is 'wallet'
@@ -99,6 +91,16 @@ exports.createPurchase = async (req, res) => {
       );
     }
 
+    let usedPromoCode = null;
+    if (promoCode) {
+      try {
+        usedPromoCode = await PromoCode.usePromoCode(promoCode);
+      } catch (error) {
+        // If there's an error with the promo code, we'll just log it and continue without applying a discount
+        console.error(`Promo code error: ${error.message}`);
+      }
+    }
+
     // Create a new purchase with an array of products
     const newPurchase = new Purchase({
       tourist: userId,
@@ -111,15 +113,29 @@ exports.createPurchase = async (req, res) => {
       deliveryType,
       locationType,
       status: "pending",
+      promoCode: usedPromoCode,
     });
 
     // Save the purchase to the database
     await newPurchase.save();
 
+    const productsDetails = await Promise.all(
+      products.map(async (item) => {
+        const product = await Product.findById(item.product);
+        return { product, quantity: item.quantity };
+      })
+    );
+    await emailService.sendPurchaseConfirmationEmail(
+      tourist.email,
+      newPurchase,
+      productsDetails
+    );
+
     // Update the product's stock quantity and sales
     for (const item of products) {
       const { product, quantity } = item; // Using `product` (the productId)
-      await Product.findByIdAndUpdate(
+
+      const productDoc = await Product.findByIdAndUpdate(
         product,
         {
           $inc: {
@@ -129,7 +145,42 @@ exports.createPurchase = async (req, res) => {
         },
         { new: true, runValidators: true }
       );
+
+      const day = new Date().getDate();
+      const month = new Date().getMonth() + 1;
+      const year = new Date().getFullYear();
+      let revenue = productDoc.price * quantity;
+      console.log("The revenue is tiy: ", revenue);
+      if (usedPromoCode) {
+        revenue = revenue - ((revenue * usedPromoCode.percentOff) / 100 || 0);
+        console.log("The revenue is bis: ", revenue);
+      }
+
+      console.log("The revenue is bts: ", revenue);
+
+      if (await productSales.findOne({ product, day, month, year })) {
+        await productSales.updateOne(
+          { product, day, month, year },
+          { $inc: { sales: quantity, revenue: revenue } }
+        );
+      } else {
+        const newProductSales = new productSales({
+          product,
+          sales: quantity,
+          revenue: revenue,
+          day,
+          month,
+          year,
+        });
+        await newProductSales.save();
+      }
     }
+
+    await Tourist.findByIdAndUpdate(
+      userId,
+      { $set: { currentPromoCode: null } },
+      { new: true, runValidators: true }
+    );
 
     return res.status(201).json({ message: "Purchase successful" });
   } catch (error) {
@@ -158,6 +209,44 @@ exports.getPurchasesByTourist = async (req, res) => {
   } catch (error) {
     console.error("Error fetching tourist purchases: ", error.message); // Print the error message to the console
     return res.status(500).json({ error: error.message }); // Return the error message in the response
+  }
+};
+
+exports.getMyCurrentPurchases = async (req, res) => {
+  try {
+    const purchases = await Purchase.find({
+      tourist: res.locals.user_id,
+    }).populate("products.product");
+
+    const currentPurchases = purchases.filter(
+      (purchase) => new Date(purchase.deliveryDate) > new Date()
+    );
+
+    res.status(200).json(currentPurchases);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};
+
+exports.getMyPastPurchases = async (req, res) => {
+  try {
+    const purchases = await Purchase.find({
+      tourist: res.locals.user_id,
+    }).populate("products.product");
+
+    const pastPurchases = purchases.filter(
+      (purchase) => new Date(purchase.deliveryDate) < new Date()
+    );
+
+    res.status(200).json(pastPurchases);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };
 
@@ -213,6 +302,9 @@ exports.deletePurchase = async (req, res) => {
       return res.status(404).json({ message: "Purchase not found" });
     }
 
+    if (purchase.promoCode) {
+    }
+
     // Update the product sales accordingly
     for (const item of purchase.products) {
       const { product, quantity } = item;
@@ -230,5 +322,129 @@ exports.deletePurchase = async (req, res) => {
     return res.status(200).json({ message: "Purchase deleted successfully" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
+  }
+};
+
+//cancel a purchase
+exports.cancelPurchase = async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+
+  try {
+    // Fetch the purchase and populate the product details
+    const purchase = await Purchase.findById(id)
+      .populate("products.product")
+      .exec();
+
+    if (!purchase) {
+      return res.status(400).json({ message: "Purchase not found" });
+    }
+
+    // Check if the purchase is already cancelled or delivered
+    if (purchase.status === "cancelled") {
+      return res.status(400).json({ message: "Purchase already cancelled" });
+    }
+
+    if (purchase.status === "delivered") {
+      return res.status(400).json({ message: "Purchase already delivered" });
+    }
+
+    // Calculate the total refund amount keeping in mind if the purchase was with a promo code
+    let totalRefund = 0;
+    for (const item of purchase.products) {
+      const { product, quantity } = item;
+      totalRefund += product.price * quantity;
+    }
+
+    // Add delivery price to the total
+    let delPrice = 0;
+    if (purchase.deliveryType === "Standard") {
+      delPrice = 2.99;
+    } else if (purchase.deliveryType === "Express") {
+      delPrice = 4.99;
+    } else if (purchase.deliveryType === "Next-Same") {
+      delPrice = 6.99;
+    } else {
+      delPrice = 14.99; // International delivery
+    }
+
+    //get promodetails by id
+    const promoDetails = await PromoCode.findById(purchase.promoCode);
+
+    if (purchase.promoCode) {
+      totalRefund =
+        totalRefund - ((totalRefund * promoDetails.percentOff) / 100 || 0);
+      //reduce the times used of the promo code
+      const promo = PromoCode.findByIdAndUpdate(
+        purchase.promoCode,
+        { $inc: { timesUsed: -1 } },
+        { new: true, runValidators: true }
+      );
+
+      promo.checkStatus();
+    }
+
+    totalRefund += delPrice;
+
+    // Update the product sales accordingly
+    for (const item of purchase.products) {
+      const { product, quantity } = item;
+      let revenue = product.price * quantity;
+      if (purchase.promoCode) {
+        revenue = revenue - ((revenue * promoDetails.percentOff) / 100 || 0);
+      }
+
+      await productSales.updateOne(
+        {
+          product,
+          day: purchase.createdAt.getDate(),
+          month: purchase.createdAt.getMonth() + 1,
+          year: purchase.createdAt.getFullYear(),
+        },
+        { $inc: { sales: -quantity, revenue: -revenue } }
+      );
+    }
+
+    // Update the tourist's wallet with the refunded money
+    const touristId = purchase.tourist; // assuming purchase contains the tourist's ID
+
+    // Update the tourist's wallet balance by finding the tourist and adding the refund amount
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      touristId,
+      { $inc: { wallet: totalRefund } }, // increment the wallet by totalRefund
+      { new: true } // return the updated document
+    );
+
+    if (!updatedTourist) {
+      return res.status(400).json({ message: "Tourist not found" });
+    }
+
+    // Update the purchase status to 'cancelled'
+    await Purchase.findByIdAndUpdate(
+      id,
+      { status: "cancelled" },
+      { new: true, runValidators: true }
+    );
+
+    // Return success response
+    return res
+      .status(200)
+      .json({ message: "Purchase cancelled successfully and refund issued" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//update the status of a purchase daily using cron job
+exports.updatePurchaseStatus = async () => {
+  try {
+    await Purchase.updateMany(
+      { status: "pending", deliveryDate: { $lt: new Date() } },
+      { $set: { status: "delivered" } },
+      { runValidators: true }
+    );
+  } catch (error) {
+    console.error("Error updating purchase status:", error);
   }
 };

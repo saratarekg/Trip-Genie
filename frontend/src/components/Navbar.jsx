@@ -1,7 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useLocation, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+import CartDropdown from "@/components/cartDropDown";
+import axios from 'axios'
+
+import { NotificationsDropdownSeller } from '@/components/SellerNotificationsDropdown'
+import { NotificationsDropdownTourGuide } from '@/components/TourGuideNotificationsDropdown'
+import { NotificationsDropdownAdvertiser } from '@/components/AdvertiserNotificationsDropdown'
+import { NotificationsDropdownAdmin } from '@/components/AdminNotificationsDropdown'
+
+
+
+
 import logo from "../assets/images/TGlogo.svg";
 import {
   Menu,
@@ -20,6 +31,7 @@ import {
   Bell,
   ChevronUp,
   ArchiveIcon,
+  Package,
 } from "lucide-react";
 
 const NavLinkIcon = ({ to, children }) => (
@@ -35,6 +47,7 @@ const NavLink = ({ to, children }) => (
   <Link
     to={to}
     className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium"
+    onClick={() => setIsCartOpen(false)}
   >
     {children}
   </Link>
@@ -51,6 +64,28 @@ export function NavbarComponent() {
   const activitiesRef = useRef(null);
   const historicalRef = useRef(null);
   const transportationRef = useRef(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartItems, setCartItems] = useState([]);
+  const [hasUnseenNotificationsSeller, setHasUnseenNotificationsSeller] = useState(false);
+  const [hasUnseenNotificationsTourGuide, setHasUnseenNotificationsTourGuide] = useState(false);
+  const [hasUnseenNotificationsAdvertiser, setHasUnseenNotificationsAdvertiser] = useState(false);
+  const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] = useState(false);
+  
+
+  const [key, setKey] = useState(0);
+  const location = useLocation();
+
+  useEffect(() => {
+    // Increment the key to force a re-render of the Navbar
+    setKey(prevKey => prevKey + 1);
+
+    // Close any open dropdowns when the route changes
+    setOpenDropdown(null);
+
+    // Reset scroll position
+    window.scrollTo(0, 0);
+  }, [location]);
+
 
   const handleClickOutside = (event) => {
     if (
@@ -62,6 +97,83 @@ export function NavbarComponent() {
       !transportationRef.current?.contains(event.target)
     ) {
       closeDropdown();
+    }
+  };
+
+  useEffect(() => {
+    if (role === "seller") {
+      checkUnseenNotificationsSeller();
+    }
+    if (role === "tour-guide") {
+      checkUnseenNotificationsTourGuide();
+    }
+    if (role === "advertiser") {
+      checkUnseenNotificationsAdvertiser();
+    }
+    if (role === "admin") {
+      checkUnseenNotificationsAdmin();
+    }
+  }, [role]);
+
+  const checkUnseenNotificationsAdmin = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/admin/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsAdmin(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsAdmin(false);
+    }
+  };
+
+  const checkUnseenNotificationsSeller = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/seller/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsSeller(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsSeller(false);
+    }
+  };
+  const checkUnseenNotificationsTourGuide = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/tour-guide/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsTourGuide(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsTourGuide(false);
+    }
+  };
+  const checkUnseenNotificationsAdvertiser = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/advertiser/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsAdvertiser(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsAdvertiser(false);
     }
   };
 
@@ -80,6 +192,29 @@ export function NavbarComponent() {
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("scroll", handleScroll);
     };
+  }, []);
+
+  useEffect(() => {
+    fetchCartItems();
+  }, []);
+
+  const fetchCartItems = useCallback(async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = Cookies.get("role");
+      if (role !== "tourist") return;
+      const response = await fetch("http://localhost:4000/tourist/cart", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data);
+      }
+    } catch (error) {
+      console.error("Error fetching cart items:", error);
+    }
   }, []);
 
   const logOut = async () => {
@@ -112,16 +247,15 @@ export function NavbarComponent() {
   };
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        role === "admin"
-          ? isScrolled
-            ? "bg-black/50"
-            : "bg-[#1A3B47]"
-          : isScrolled
+    <nav key={key}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${role === "admin"
+        ? isScrolled
+          ? "bg-black/50"
+          : "bg-[#1A3B47]"
+        : isScrolled
           ? "bg-black/50"
           : ""
-      }`}
+        }`}
       style={isScrolled ? { backdropFilter: "saturate(180%) blur(8px)" } : {}}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -129,7 +263,12 @@ export function NavbarComponent() {
           {/* Logo */}
           <div className="flex-shrink-0 ml-8">
             <Link to="/" className="flex items-center">
-              <img src={logo} alt="logo" className="h-10 w-auto" />
+              <img
+                src={logo}
+                alt="logo"
+                onClick={() => setIsCartOpen(false)}
+                className="h-10 w-auto"
+              />
             </Link>
           </div>
 
@@ -242,7 +381,9 @@ export function NavbarComponent() {
                     {/* Transportation Dropdown */}
                     <div className="relative" ref={transportationRef}>
                       <button
-                        onClick={() => toggleDropdown("transportation")}
+                        onClick={() => (
+                          toggleDropdown("transportation"), setIsCartOpen(false)
+                        )}
                         className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
                       >
                         Transportation
@@ -374,6 +515,10 @@ export function NavbarComponent() {
                   <NavLink to="/all-historical-places">
                     Historical Places
                   </NavLink>
+
+                  <NavLink to="/activity" className="hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium">
+                    Activities
+                  </NavLink>
                 </div>
               )}
               {role === "tourism-governor" && (
@@ -439,23 +584,43 @@ export function NavbarComponent() {
 
           {/* Login, Sign Up, Notifications, and Menu Button */}
           <div className="hidden md:flex items-center">
-            {role !== undefined && role !== "guest" && role !== "admin" && (
+            {role !== undefined && role !== "guest"  && (
               <>
-                <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
-                  <Bell className="h-5 w-5" />
-                  <span className="sr-only">Notifications</span>
-                </button>
+                {role === "seller" && <NotificationsDropdownSeller />}
+                {role === "tour-guide" && <NotificationsDropdownTourGuide />}
+                {role === "advertiser" && <NotificationsDropdownAdvertiser />}
+                {role === "admin" && <NotificationsDropdownAdmin />}
                 {role === "tourist" && (
                   <>
-                    <NavLinkIcon to="/account/cart">
-                      <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
-                        <ShoppingCart className="h-5 w-5" />
-                        <span className="sr-only">Cart</span>
+                    <div className="relative mr-2 mt-1">
+                      <button
+                        onClick={() => setIsCartOpen(!isCartOpen)}
+                        className="relative"
+                      >
+                        <ShoppingCart className="h-7 w-7 text-white" />{" "}
+                        {/* Larger icon size */}
+                        {cartItems.length > 0 && (
+                          <div className="absolute top-0 right-0 flex items-center justify-center w-4 h-4 text-[12px] text-white bg-red-500 rounded-full">
+                            {" "}
+                            {/* Smaller red circle */}
+                            {cartItems.length}
+                          </div>
+                        )}
                       </button>
-                    </NavLinkIcon>
-                    <NavLinkIcon to="/account/wishlist">
-                      <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2">
-                        <Heart className="h-5 w-5" />
+                      <CartDropdown
+                        isOpen={isCartOpen}
+                        setIsCartOpen={setIsCartOpen}
+                        isCartOpen={isCartOpen}
+                        onClose={() => setIsCartOpen(false)}
+                      />
+                    </div>
+
+                    <NavLinkIcon to="/touristWishlist">
+                      <button
+                        onClick={() => setIsCartOpen(false)}
+                        className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2"
+                      >
+                        <Heart className="h-7 w-7" />
                         <span className="sr-only">Wishlist</span>
                       </button>
                     </NavLinkIcon>
@@ -516,6 +681,14 @@ export function NavbarComponent() {
                         >
                           <AlertTriangle className="mr-2 h-4 w-4" />
                           Help & Support
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                          onClick={closeDropdown}
+                        >
+                          <Package className="mr-2 h-4 w-4" />
+                          Orders
                         </Link>
                       </>
                     )}

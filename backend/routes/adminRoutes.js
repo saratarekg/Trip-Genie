@@ -13,11 +13,19 @@ const complaintsController = require("../controllers/complaintsController.js");
 const itineraryController = require("../controllers/itineraryController.js");
 const currencyController = require("../controllers/currencyController");
 const historicalPlacesController = require("../controllers/historicalPlacesController");
+const activityController = require("../controllers/activityController");
 const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const router = express.Router();
+router.get("/notifications", adminController.getAdminNotifications);
+
+router.get('/unseen-notifications',adminController.hasUnseenNotifications);
+
+// POST /seller/mark-notifications-seen
+router.post('/mark-notifications-seen', adminController.markNotificationsAsSeen);
+
 
 router.get(
   "/historical-places",
@@ -152,6 +160,7 @@ router.get("/complaint/:id", complaintsController.getComplaintDetails);
 router.put("/complaint/:id/status", complaintsController.markComplaintStatus);
 
 router.put("/itineraries/:id", itineraryController.flagItinerary);
+router.put("/activities/:id", activityController.flagActivity);
 router.get("/itineraries", itineraryController.getAllItinerariesAdmin);
 router.get("/itineraries/:id", itineraryController.getItineraryById);
 router.post("/password", adminController.changePassword);
@@ -176,5 +185,17 @@ router.get("/users-report", adminController.getUsersReport);
 router.get("/sales-report", adminController.getSalesReport);
 router.get("/itineraries-report", adminController.getItinerariesReport);
 router.get("/activities-report", adminController.getActivitiesReport);
+
+
+router.post("/promo-code", adminController.addPromoCode);
+router.get("/promo-code", adminController.getPromoCodes);
+router.get("/promo-code/:id", adminController.getPromoCode);
+router.delete("/promo-code/:id", adminController.deletePromoCode);
+router.put("/promo-code/:id", adminController.updatePromoCode);
+
+router.get("/maxPriceActivities", activityController.getMaxPrice);
+router.get("/activities", activityController.getAllActivitiesAdmin);
+router.get("/activities/:id", activityController.getActivityById);
+
 
 module.exports = router;

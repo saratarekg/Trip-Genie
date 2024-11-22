@@ -1,6 +1,7 @@
 const ItineraryBooking = require("../models/itineraryBooking");
 const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
+const emailService = require("../services/emailService");
 
 // Create a new itinerary booking
 exports.createBooking = async (req, res) => {
@@ -51,6 +52,15 @@ exports.createBooking = async (req, res) => {
       date,
     });
 
+    // Save the booking
+    await newBooking.save();
+
+    await emailService.sendItineraryBookingConfirmationEmail(
+      user.email,
+      newBooking,
+      itineraryExists
+    );
+
     // Calculate loyalty points based on the user's badge level
     const loyaltyPoints = calculateLoyaltyPoints(
       paymentAmount,
@@ -77,9 +87,6 @@ exports.createBooking = async (req, res) => {
     if (!updatedTourist) {
       return res.status(400).json({ message: "Tourist not found" });
     }
-
-    // Save the booking
-    await newBooking.save();
 
     res.status(201).json({
       message: "Booking created successfully",
@@ -253,15 +260,27 @@ exports.getTouristAttendedItineraries = async (req, res) => {
 
 exports.getItinerariesReport = async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { startDate, endDate, month, year } = req.query;
+    let selectedItineraries = req.query.selectedItineraries;
     const tourGuideId = res.locals.user_id; // Get the user's ID from response locals
     const itineraries = await Itinerary.find({ tourGuide: tourGuideId }); // Fetch all itineraries
-    const itineraryIds = itineraries.map((itinerary) => itinerary._id); // Extract itinerary IDs
+    let itineraryIds = itineraries.map((itinerary) => itinerary._id); // Extract itinerary IDs
+    if (selectedItineraries) {
+      selectedItineraries = selectedItineraries.split(",");
+      itineraryIds = itineraryIds.filter((itineraryId) =>
+        selectedItineraries.includes(itineraryId.toString())
+      );
+    }
 
     let bookings;
-    if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+    if (startDate && endDate) {
+      bookings = await ItineraryBooking.find({
+        itinerary: { $in: itineraryIds },
+        date: { $gte: startDate, $lt: endDate },
+      }).populate("itinerary");
+    } else if (month && year) {
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
       bookings = await ItineraryBooking.find({
         itinerary: { $in: itineraryIds },
         date: { $gte: startDate, $lt: endDate },
@@ -272,18 +291,68 @@ exports.getItinerariesReport = async (req, res) => {
       }).populate("itinerary");
     }
 
+    let totalRevenue = 0;
+    let totalTickets = 0;
+
     // Calculate total number of tickets for each itinerary
     const itineraryReport = itineraries.map((itinerary) => {
-      const totalTickets = bookings.reduce((total, booking) => {
+      const tickets = bookings.reduce((total, booking) => {
         return booking.itinerary._id.equals(itinerary._id)
           ? total + booking.numberOfTickets
           : total;
       }, 0);
-      return { itinerary, totalTickets };
+
+      //Get the revenue for the itinerary
+      const revenue = bookings.reduce((total, booking) => {
+        return booking.itinerary._id.equals(itinerary._id)
+          ? total + booking.paymentAmount
+          : total;
+      }, 0);
+
+      totalRevenue += revenue;
+      totalTickets += tickets;
+
+      return { itinerary, tickets, revenue: revenue * 0.9 }; // Return itinerary report
     });
 
-    res.status(200).json(itineraryReport); // Respond with itinerary report
+    totalRevenue *= 0.9;
+    res.status(200).json({ itineraryReport, totalRevenue, totalTickets });
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors
+  }
+};
+
+exports.getMyCurrentItineraries = async (req, res) => {
+  try {
+    const itineraries = await ItineraryBooking.find({
+      user: res.locals.user_id,
+    }).populate("itinerary");
+
+    console.log(itineraries[0].itinerary);
+    const now = new Date();
+    const currentItineraries = itineraries.filter((itinerary) => {
+      //get the end time by looping over the activities and adding the duration to the start time checing the latest time
+      let endTime = new Date(itinerary.date);
+      itinerary.itinerary.activities.forEach((activity) => {
+        const activityEndTime = new Date(
+          activity.timing + activity.duration * 60 * 60 * 1000
+        );
+
+        if (activityEndTime > endTime) {
+          endTime = activityEndTime;
+        }
+      });
+
+      const startTime = new Date(itinerary.date);
+      console.log(startTime, endTime);
+      return startTime < now && now < endTime;
+    });
+
+    res.status(200).json(currentItineraries);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };

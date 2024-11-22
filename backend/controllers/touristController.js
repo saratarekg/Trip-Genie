@@ -17,6 +17,7 @@ const TouristTransportation = require("../models/touristTransportation");
 const Transportation = require("../models/transportation");
 const TouristFlight = require("../models/touristFlight");
 const TouristHotel = require("../models/touristHotel");
+const PromoCode = require("../models/promoCode");
 
 const getAllTourists = async (req, res) => {
   try {
@@ -73,7 +74,7 @@ const updateTourist = async (req, res) => {
       picture = null;
       if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
-        console.log("Profile picture deleted");
+    
       }
     } else if (profilePicture.public_id === undefined) {
       const result = await cloudinary.uploader.upload(profilePicture, {
@@ -81,7 +82,7 @@ const updateTourist = async (req, res) => {
       });
       if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
-        console.log("Profile picture xxxxx");
+        
       }
       picture = {
         public_id: result.public_id,
@@ -117,6 +118,7 @@ const getTouristProfile = async (req, res) => {
     // Find the tour guide by their ID
     const tourist = await Tourist.findById(touristId)
       .populate("nationality")
+      .populate("currentPromoCode")
       .exec();
 
     if (!tourist) {
@@ -187,9 +189,9 @@ const updatePreferences = async (req, res) => {
 const updateTouristProfile = async (req, res) => {
   try {
     const tourist1 = await Tourist.findById(res.locals.user_id).lean();
-    console.log(tourist1);
+    
     let picture = tourist1.profilePicture;
-    console.log(picture);
+  
     const { nationality, mobile, jobOrStudent, profilePicture } = req.body;
     let { email, username } = req.body;
     email = email.toLowerCase();
@@ -246,7 +248,21 @@ const updateTouristProfile = async (req, res) => {
 };
 
 const bookFlight = async (req, res) => {
-  const { flightID, from, to, departureDate, arrivalDate, price, numberOfTickets, type, returnDepartureDate, returnArrivalDate, seatType, flightType, flightTypeReturn } = req.body;
+  const {
+    flightID,
+    from,
+    to,
+    departureDate,
+    arrivalDate,
+    price,
+    numberOfTickets,
+    type,
+    returnDepartureDate,
+    returnArrivalDate,
+    seatType,
+    flightType,
+    flightTypeReturn,
+  } = req.body;
   const touristID = res.locals.user_id;
 
   try {
@@ -262,9 +278,9 @@ const bookFlight = async (req, res) => {
       type,
       returnDepartureDate,
       returnArrivalDate,
-      seatType, 
-      flightType, 
-      flightTypeReturn
+      seatType,
+      flightType,
+      flightTypeReturn,
     });
 
     const savedBooking = await booking.save();
@@ -277,7 +293,7 @@ const bookFlight = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const getMyFlights = async (req, res) => {
   const touristID = res.locals.user_id;
@@ -290,23 +306,32 @@ const getMyFlights = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const bookHotel = async (req, res) => {
-  const { hotelID,hotelName, checkinDate, checkoutDate, numberOfRooms, roomName, price, numberOfAdults } = req.body;
+  const {
+    hotelID,
+    hotelName,
+    checkinDate,
+    checkoutDate,
+    numberOfRooms,
+    roomName,
+    price,
+    numberOfAdults,
+  } = req.body;
   const touristID = res.locals.user_id;
 
   try {
     const booking = new TouristHotel({
       touristID,
       hotelID,
-      hotelName, 
+      hotelName,
       checkinDate,
       checkoutDate,
       numberOfRooms,
       roomName,
       price,
-      numberOfAdults
+      numberOfAdults,
     });
 
     const savedBooking = await booking.save();
@@ -319,7 +344,7 @@ const bookHotel = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const getMyHotels = async (req, res) => {
   const touristID = res.locals.user_id;
@@ -332,7 +357,7 @@ const getMyHotels = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
 
 const bookTransportation = async (req, res) => {
   const { transportationID, seatsToBook, paymentMethod } = req.body;
@@ -398,7 +423,6 @@ const bookTransportation = async (req, res) => {
   }
 };
 
-
 const getUpcomingBookings = async (req, res) => {
   const touristID = res.locals.user_id;
 
@@ -413,7 +437,9 @@ const getUpcomingBookings = async (req, res) => {
       .exec();
 
     // Filter out bookings where the transportationID does not match due to date filtering
-    const filteredBookings = upcomingBookings.filter((booking) => booking.transportationID);
+    const filteredBookings = upcomingBookings.filter(
+      (booking) => booking.transportationID
+    );
 
     res.status(200).json(filteredBookings);
   } catch (error) {
@@ -437,7 +463,9 @@ const getPreviousBookings = async (req, res) => {
       .exec();
 
     // Filter out bookings where the transportationID does not match due to date filtering
-    const filteredBookings = previousBookings.filter((booking) => booking.transportationID);
+    const filteredBookings = previousBookings.filter(
+      (booking) => booking.transportationID
+    );
 
     res.status(200).json(filteredBookings);
   } catch (error) {
@@ -452,7 +480,9 @@ const deleteBooking = async (req, res) => {
 
   try {
     // Step 1: Find the booking to delete
-    const booking = await TouristTransportation.findById(id).populate("transportationID");
+    const booking = await TouristTransportation.findById(id).populate(
+      "transportationID"
+    );
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
@@ -460,27 +490,27 @@ const deleteBooking = async (req, res) => {
 
     // Check if the booking belongs to the correct tourist
     if (booking.touristID.toString() !== touristID) {
-      return res.status(403).json({ message: "You can only delete your own bookings" });
+      return res
+        .status(403)
+        .json({ message: "You can only delete your own bookings" });
     }
 
     const transportation = booking.transportationID;
 
     // Step 2: refund the cost to the tourist's wallet
-      const totalCost = transportation.ticketCost * booking.seatsBooked;
-      const tourist = await Tourist.findById(touristID);
+    const totalCost = transportation.ticketCost * booking.seatsBooked;
+    const tourist = await Tourist.findById(touristID);
 
-      if (!tourist) {
-        return res.status(404).json({ message: "Tourist not found" });
-      }
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
 
-      // Increment the wallet by the refund amount
-      console.log(tourist);
-      await Tourist.findByIdAndUpdate(
-        touristID,
-        { $inc: { wallet: totalCost } }, // Increase wallet by the refund amount
-        { new: true , runValidators: true }
-      );
-      
+    // Increment the wallet by the refund amount
+    await Tourist.findByIdAndUpdate(
+      touristID,
+      { $inc: { wallet: totalCost } }, // Increase wallet by the refund amount
+      { new: true, runValidators: true }
+    );
 
     // Step 3: Delete the booking using findByIdAndDelete
     await TouristTransportation.findByIdAndDelete(id);
@@ -490,13 +520,14 @@ const deleteBooking = async (req, res) => {
     transportation.remainingSeats += booking.seatsBooked;
     await transportation.save();
 
-    res.status(200).json({ message: "Booking successfully deleted and refunded (if wallet used)" });
+    res.status(200).json({
+      message: "Booking successfully deleted and refunded (if wallet used)",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error deleting booking" });
   }
 };
-
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
@@ -522,10 +553,9 @@ const usernameExists = async (username) => {
     (await Admin.findOne({ username })) ||
     (await TourismGovernor.findOne({ username }))
   ) {
-    console.log("username exists");
     return true;
   } else {
-    console.log("username does not exist");
+    
     return false;
   }
 };
@@ -550,7 +580,7 @@ const redeemPoints = async (req, res) => {
     const pointsToRedeem = tourist.loyaltyPoints;
 
     // Calculate the redeemable cash based on all loyalty points
-    const redeemableCash = pointsToRedeem / 100 ;  // in EGP
+    const redeemableCash = pointsToRedeem / 100; // in EGP
     const updatedWalletinUSD = redeemableCash / 49.24; // in USD
 
     // Update the wallet and set loyalty points to 0
@@ -648,7 +678,6 @@ const getCurrencyID = async (req, res) => {
 const setCurrencyCode = async (req, res) => {
   try {
     const { currencyId } = req.body; // Get currency ID from request body
-    console.log(currencyId);
 
     // Check if the currency exists
     const currency = await Currency.findById(currencyId);
@@ -712,7 +741,8 @@ const getCart = async (req, res) => {
 
     // Find the tourist by their user ID
     const tourist = await Tourist.findById(userId)
-      .populate("cart.product") // Populate product information in the cart
+      .populate("cart.product") 
+      .populate("currentPromoCode")
       .exec();
 
     // Check if the tourist exists
@@ -737,12 +767,7 @@ const removeItemFromCart = async (req, res) => {
 
   try {
     // Debug: Log incoming request data
-    console.log(
-      "Removing item with productId:",
-      productId,
-      "for userId:",
-      userId
-    );
+  
 
     // Find the tourist and update the cart by removing the product
     const user = await Tourist.findByIdAndUpdate(
@@ -804,8 +829,7 @@ const updateCartProductQuantity = async (req, res) => {
   try {
     // Validate that the new quantity is greater than 0
     if (newQuantity <= 0) {
-      console.log(1);
-
+   
       return res
         .status(400)
         .json({ message: "Quantity must be greater than 0" });
@@ -824,20 +848,15 @@ const updateCartProductQuantity = async (req, res) => {
     );
 
     if (!user) {
-      console.log(2);
+
       return res.status(400).json({ message: "User not found" });
     }
 
     const cartItem = user.cart.find((item) => {
-      console.log("Iterating over cart item:", item); // Log every iteration
+
       return item.product._id.toString() === productId.toString();
     });
 
-    if (cartItem) {
-      console.log("Found cart item:", cartItem);
-    } else {
-      console.log("No matching cart item found for productId:", productId);
-    }
     if (!cartItem) {
       return res.status(400).json({ message: "Product not found in cart" });
     }
@@ -856,7 +875,6 @@ const updateCartProductQuantity = async (req, res) => {
 
 const removeProductFromWishlist = async (req, res) => {
   const productId = req.params.id; // Extract productId from the request params
-  console.log("Removing product with ID:", productId); // Debug log the productId being passed
   const userId = res.locals.user_id; // Get the logged-in user id
 
   try {
@@ -866,8 +884,6 @@ const removeProductFromWishlist = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Debug log the current wishlist
-    console.log("Current wishlist:", user.wishlist);
 
     // Now, proceed to remove the product from the wishlist
     const updatedUser = await Tourist.findByIdAndUpdate(
@@ -882,8 +898,7 @@ const removeProductFromWishlist = async (req, res) => {
       return res.status(404).json({ message: "Failed to update user" });
     }
 
-    // Debug log the updated wishlist
-    console.log("Updated wishlist:", updatedUser.wishlist);
+ 
 
     res.status(200).json({
       message: "Product removed from wishlist",
@@ -971,6 +986,120 @@ const moveProductToCart = async (req, res) => {
   }
 };
 
+// Method to add all products from wishlist to cart
+const addAllToCart = async (req, res) => {
+  const userId = res.locals.user_id; // Get logged-in user id
+
+  try {
+    // Find the user (tourist)
+    const user = await Tourist.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Iterate through each product in the user's wishlist
+    for (let item of user.wishlist) {
+      const productId = item.product;
+      const product = await Product.findById(productId);
+      if (!product) {
+        console.error(
+          `Product with ID ${productId} not found in the database.`
+        );
+        continue; // Skip this product if it's not found
+      }
+
+      // Check if the product is already in the cart
+      const existingCartItem = user.cart.find(
+        (cartItem) => cartItem.product._id.toString() === productId.toString()
+      );
+
+      if (existingCartItem) {
+        // If the product is already in the cart, update its quantity and totalPrice
+        await Tourist.updateOne(
+          { _id: userId, "cart.product": productId },
+          {
+            $set: {
+              "cart.$.quantity": existingCartItem.quantity + 1, // Increase the quantity by 1
+              "cart.$.totalPrice":
+                (existingCartItem.quantity + 1) * product.price, // Update the total price
+            },
+          }
+        );
+      } else {
+        // If the product is not in the cart, add it with quantity 1 and set the totalPrice
+        await Tourist.findByIdAndUpdate(
+          userId,
+          {
+            $push: {
+              cart: {
+                product: productId,
+                quantity: 1,
+                totalPrice: product.price,
+              },
+            },
+          },
+          { new: true }
+        );
+      }
+    }
+
+    // After moving all items, remove them from the wishlist
+    await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $set: { wishlist: [] }, // Clear the wishlist
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "All products moved to cart",
+      cart: user.cart,
+      wishlist: [], // Wishlist should now be empty
+    });
+  } catch (error) {
+    console.error("Error occurred while adding all products to cart:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};
+
+// Method to remove all products from the wishlist
+const removeAllFromWishlist = async (req, res) => {
+  const userId = res.locals.user_id; // Get logged-in user id
+
+  try {
+    // Find the user (tourist)
+    const user = await Tourist.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Remove all products from the wishlist
+    await Tourist.findByIdAndUpdate(
+      userId,
+      {
+        $set: { wishlist: [] }, // Set the wishlist to an empty array
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "All products removed from wishlist",
+      wishlist: [], // Wishlist is now empty
+    });
+  } catch (error) {
+    console.error(
+      "Error occurred while removing all products from wishlist:",
+      error
+    );
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};
+
 const deleteAccount = async (req, res) => {
   try {
     const tourist = await Tourist.findById(res.locals.user_id).lean();
@@ -1031,7 +1160,7 @@ const deleteAccount = async (req, res) => {
     if (tourist.profilePicture !== null) {
       await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
     }
-    console.log("alo");
+ 
     await TourGuide.updateMany(
       { "comments.tourist": res.locals.user_id }, // Match documents where a comment has the matching tourist
       { $pull: { comments: { tourist: res.locals.user_id } } } // Pull the comment where the tourist matches
@@ -1353,7 +1482,7 @@ const addShippingAddress = async (req, res) => {
       default: isDefault,
     } = req.body;
 
-    console.log(streetName, streetNumber, city, state, country);
+ 
     if (!streetName || !streetNumber || !city || !state || !country) {
       return res
         .status(400)
@@ -1546,15 +1675,39 @@ const updateShippingAddress = async (req, res) => {
       return res.status(400).json({ message: "Address updates are required." });
     }
 
-    const result = await Tourist.findOneAndUpdate(
-      { _id: res.locals.user_id, "shippingAddresses._id": id },
-      { $set: { "shippingAddresses.$": addressUpdates } },
-      { new: true }
+    // Find the tourist by their ID
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Find the address to update
+    const address = tourist.shippingAddresses.find(
+      (address) => address._id.toString() === id
     );
 
-    if (!result) {
-      return res.status(404).json({ message: "Tourist or address not found" });
+    if (!address) {
+      return res.status(404).json({ message: "Address not found" });
     }
+
+    // Update the address fields
+    const result = await Tourist.updateOne(
+      { _id: res.locals.user_id, "shippingAddresses._id": id },
+      {
+        $set: {
+          "shippingAddresses.$.streetName": addressUpdates.streetName,
+          "shippingAddresses.$.streetNumber": addressUpdates.streetNumber,
+          "shippingAddresses.$.floorUnit": addressUpdates.floorUnit,
+          "shippingAddresses.$.city": addressUpdates.city,
+          "shippingAddresses.$.state": addressUpdates.state,
+          "shippingAddresses.$.country": addressUpdates.country,
+          "shippingAddresses.$.postalCode": addressUpdates.postalCode,
+          "shippingAddresses.$.landmark": addressUpdates.landmark,
+          "shippingAddresses.$.locationType": addressUpdates.locationType,
+        },
+      }
+    );
 
     return res.status(200).json({
       message: "Address updated successfully",
@@ -1567,6 +1720,156 @@ const updateShippingAddress = async (req, res) => {
       .json({ message: "An error occurred while updating the address" });
   }
 };
+
+const applyPromoCode = async (req, res) => {
+  const { promoCode } = req.body;
+
+  try {
+    if (!promoCode) {
+      return res.status(400).json({ message: "Promo code is required." });
+    }
+
+    const promo = await PromoCode.usePromoCode(promoCode);
+
+    return res.status(200).json({
+      message: "Promo code applied successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(400).json({
+      message:
+        error.message || "An error occurred while applying the promo code",
+    });
+  }
+};
+
+// Add an activity to saved activities
+const getSavedActivities = async (req, res) => {
+  try {
+    console.log("ehab");
+    console.log("sam");
+    const tourist = await Tourist.findById(res.locals.user_id);
+     
+    console.log(tourist);
+    if (!tourist) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    // Safely map over savedActivity and check if activity is valid
+    const savedActivities = tourist.savedActivity; 
+    res.status(200).json(savedActivities);
+  } catch (error) {
+    console.error('Error fetching saved activities:', error);
+    res.status(500).json({ message: 'Error fetching saved activities', error: error.message });
+  }
+};
+  
+// Add an activity to saved activities
+const saveActivity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const touristId = res.locals.user_id;
+   
+
+    // Find the tourist and check if the activity is already saved
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    const activityIndex = tourist.savedActivity.findIndex(
+      item => item && item.activity && item.activity.toString() === id
+    );
+
+    if (activityIndex > -1) {
+      // Activity is already saved, so remove it using $pull
+      await Tourist.updateOne(
+        { _id: touristId },
+        { $pull: { savedActivity: { activity: id } } }
+      );
+      return res.status(200).json({ message: 'Activity removed from saved list', success: true });
+    } else {
+      // Activity is not saved, so add it using $push
+      await Tourist.updateOne(
+        { _id: touristId },
+        { $push: { savedActivity: { activity: id } } }
+      );
+      return res.status(200).json({ message: 'Activity saved successfully', success: true });
+    }
+  } catch (error) {
+    console.error('Error saving/removing activity:', error);
+    res.status(500).json({ message: 'Error saving/removing activity', error: error.message });
+  }
+};
+
+
+// Controller function to retrieve a promo code using a POST request with the promo code in the body
+const getPromoCode = async (req, res) => {
+  const { code } = req.body;
+  const  touristId  = res.locals.user_id; // Assuming the tourist's ID is in `req.user` from authentication middleware
+  
+
+  try {
+    // Check if code is provided in the request body
+    if (!code) {
+      
+      return res.status(400).json({ message: "Promo code is required." });
+    }
+
+    // Convert code to uppercase and log it to ensure it's in the correct format
+    const promoCodeUpperCase = code.toUpperCase();
+
+    // Retrieve promo code from the database (case-insensitive search)
+    const promo = await PromoCode.findOne({ code: promoCodeUpperCase });
+
+    // Log the result of the database query
+    if (!promo) {
+    
+      return res.status(404).json({ message: "Promo code not found." });
+    }
+ 
+
+    const currentDate = new Date();
+    const startDate = new Date(promo.dateRange.start);
+    const endDate = new Date(promo.dateRange.end);
+
+    
+
+    if ((promo.timesUsed <= promo.usage_limit) && (currentDate >= startDate || currentDate <= endDate) && (promo.status == 'active')) {
+      const tourist = await Tourist.findByIdAndUpdate(
+        touristId, // The ID of the tourist to find
+        { $set: { currentPromoCode: promo._id } }, // The update operation (sets the new promo code)
+        { new: true } // This option ensures that the returned document is the updated one
+      );
+      
+      if (!tourist) {
+        return res.status(404).json({ message: "Tourist not found." });
+      }
+    }
+
+    // Save the promo code in the tourist's profile
+   
+
+    // Return promo code details along with a success message
+    return res.status(200).json({
+      promoCode: {
+        code: promo.code,
+        status: promo.status,
+        percentOff: promo.percentOff,
+        usage_limit: promo.usage_limit,
+        timesUsed: promo.timesUsed,
+        dateRange: promo.dateRange,
+      },
+    });
+  } catch (error) {
+    console.error("Error retrieving promo code:", error);  // Log any error that occurs
+    return res.status(500).json({
+      message: "An error occurred while retrieving the promo code.",
+    });
+  }
+};
+
+
 
 module.exports = {
   removeProductFromWishlist,
@@ -1606,6 +1909,12 @@ module.exports = {
   deleteBooking,
   bookFlight,
   bookHotel,
-  getMyFlights, 
+  getMyFlights,
   getMyHotels,
+  addAllToCart,
+  removeAllFromWishlist,
+  applyPromoCode,
+  getPromoCode,
+  getSavedActivities,
+  saveActivity
 };

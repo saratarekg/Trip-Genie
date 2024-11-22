@@ -12,7 +12,7 @@ const {
 const multer = require("multer");
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
-
+const tourGuideController = require("../controllers/tourGuideController.js");
 const itineraryController = require("../controllers/itineraryController.js");
 const activityController = require("../controllers/activityController.js");
 const currencyController = require("../controllers/currencyController");
@@ -24,6 +24,13 @@ router.get("/", getTourGuideProfile);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/maxPriceActivities", activityController.getMaxPrice);
 router.get("/currencies", currencyController.getSupportedCurrencies);
+
+router.get("/notifications", tourGuideController.getTourGuideNotifications);
+
+router.get('/unseen-notifications',tourGuideController.hasUnseenNotifications);
+
+// POST /seller/mark-notifications-seen
+router.post('/mark-notifications-seen', tourGuideController.markNotificationsAsSeen);
 
 router.get("/max-price-itinerary", itineraryController.getMaxPrice);
 router.get("/max-price-itinerary-my", itineraryController.getMaxPriceMy);

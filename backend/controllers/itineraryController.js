@@ -1,7 +1,10 @@
 const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
+const TourGuide = require("../models/tourGuide");
+
 const ItineraryBooking = require("../models/itineraryBooking");
 const cloudinary = require("../utils/cloudinary");
+const emailService = require("../services/emailService");
 
 // import { ItineraryBooking } from './models/itineraryBooking';
 
@@ -184,8 +187,21 @@ const getItinerariesByPreference = async (req, res) => {
         },
       },
     });
-
     query.push({ isDeleted: false });
+
+    const userRole = res.locals.user_role;
+    const userId = res.locals.user_id;
+    if (userRole === "tourist") {
+      const bookedItineraries = await ItineraryBooking.find({
+        user: userId,
+      }).distinct("itinerary");
+      query.push({
+        $or: [{ isActivated: true }, { _id: { $in: bookedItineraries } }],
+      });
+    } else {
+      query.push({ isActivated: true });
+    }
+
     let itinerariesQuery = Itinerary.find({
       $and: query,
     })
@@ -552,7 +568,9 @@ const updateItinerary = async (req, res) => {
 const flagItinerary = async (req, res) => {
   try {
     // Find the itinerary by ID
-    const itinerary = await Itinerary.findById(req.params.id);
+    const itinerary = await Itinerary.findById(req.params.id).populate(
+      "tourGuide"
+    );
 
     if (!itinerary) {
       return res.status(404).json({ message: "Itinerary not found" });
@@ -570,6 +588,21 @@ const flagItinerary = async (req, res) => {
     await Itinerary.findByIdAndUpdate(req.params.id, {
       appropriate,
     });
+
+    if (!appropriate) {
+      await emailService.sendItineraryFlaggedEmail(itinerary);
+
+      // Add a notification to the advertiser's notifications array
+      const notification = {
+        body: `Your activity "${itinerary.title}" has been flagged as inappropriate by the admin.`,
+        date: new Date(),
+        seen: false,
+      };
+
+      await TourGuide.findByIdAndUpdate(itinerary.tourGuide._id, {
+        $push: { notifications: notification },
+      });
+    }
 
     res.status(200).json({ message: "Itinerary updated successfully" });
   } catch (error) {

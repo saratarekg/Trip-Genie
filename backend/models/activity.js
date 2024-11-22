@@ -31,6 +31,12 @@ const activitySchema = new Schema(
         },
       },
     },
+
+    appropriate: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
     duration: {
       type: Number,
       required: true,

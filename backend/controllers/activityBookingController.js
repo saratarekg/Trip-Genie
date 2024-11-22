@@ -1,6 +1,7 @@
 const ActivityBooking = require("../models/activityBooking"); // Assuming your model is in models/activityBooking.js
 const Activity = require("../models/activity"); // Assuming your Activity model is in models/activity.js
 const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
+const emailService = require("../services/emailService");
 
 // Create a new booking
 exports.createBooking = async (req, res) => {
@@ -43,6 +44,12 @@ exports.createBooking = async (req, res) => {
     });
 
     await newBooking.save();
+
+    await emailService.sendActivityBookingConfirmationEmail(
+      user.email,
+      newBooking,
+      activityExists
+    );
 
     // Calculate loyalty points based on the user's badge level
     const loyaltyPoints = calculateLoyaltyPoints(
@@ -292,14 +299,20 @@ exports.getTouristAttendedBookings = async (req, res) => {
 
 exports.getBookingsReport = async (req, res) => {
   try {
-    const { month, year } = req.query; // Get the month from the query string
+    const { startDate, endDate, month, year } = req.query; // Get the month from the query string
+    let selectedActivities = req.query.selectedActivities; // Get the selected activities from the query string
     const advertiserId = res.locals.user_id; // Get the user's ID from response locals
     let activities = [];
 
     let bookings;
-    if (month && year) {
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+    if (startDate && endDate) {
+      activities = await Activity.find({
+        advertiser: advertiserId,
+        timing: { $gte: startDate, $lt: endDate },
+      });
+    } else if (month && year) {
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
       activities = await Activity.find({
         advertiser: advertiserId,
         timing: { $gte: startDate, $lt: endDate },
@@ -308,26 +321,99 @@ exports.getBookingsReport = async (req, res) => {
       activities = await Activity.find({ advertiser: advertiserId });
     }
 
-    const activityIds = activities.map((activity) => activity._id);
+    let activityIds = activities.map((activity) => activity._id);
+    if (selectedActivities) {
+      selectedActivities = selectedActivities.split(",");
+      activityIds = activityIds.filter((activityId) =>
+        selectedActivities.includes(activityId.toString())
+      );
+    }
     bookings = await ActivityBooking.find({
       activity: { $in: activityIds },
     }).populate("activity");
 
+    let totalRevenue = 0;
+    let totalTickets = 0;
+
     // Calculate total number of tickets for each activity
     const activityReport = activities.map((activity) => {
-      const totalTickets = bookings.reduce((total, booking) => {
+      const tickets = bookings.reduce((total, booking) => {
         return booking.activity._id.toString() === activity._id.toString()
           ? total + booking.numberOfTickets
           : total;
       }, 0);
+
+      // Calculate total revenue for each activity
+      const revenue = bookings.reduce((total, booking) => {
+        return booking.activity._id.toString() === activity._id.toString()
+          ? total + booking.paymentAmount
+          : total;
+      }, 0);
+
+      totalRevenue += revenue; // Add revenue to total revenue
+      totalTickets += tickets; // Add tickets to total tickets
+
       return {
-        activity: activity,
-        totalTickets: totalTickets,
+        activity,
+        tickets,
+        revenue: revenue * 0.9, // 10% commission for the platform
       };
     });
 
-    res.status(200).json(activityReport); // Respond with activity report
+    totalRevenue *= 0.9; // 10% commission for the platform
+    res.status(200).json({ activityReport, totalRevenue, totalTickets });
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors
+  }
+};
+
+exports.getMyCurrentActivities = async (req, res) => {
+  try {
+    const activities = await ActivityBooking.find({
+      user: res.locals.user_id,
+    }).populate("activity");
+
+    const now = new Date();
+    const currentActivities = activities.filter((activity) => {
+      const startTime = new Date(activity.activity.timing);
+      const durationInMilliseconds =
+        activity.activity.duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      const endTime = new Date(startTime.getTime() + durationInMilliseconds);
+      console.log(startTime, endTime);
+      console.log(now);
+      return startTime < now && now < endTime;
+    });
+    console.log(currentActivities);
+
+    res.status(200).json(currentActivities);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
+  }
+};
+
+exports.getMyPastActivities = async (req, res) => {
+  try {
+    const activities = await ActivityBooking.find({
+      user: res.locals.user_id,
+    }).populate("activity");
+
+    const now = new Date();
+    const pastActivities = activities.filter((activity) => {
+      const startTime = new Date(activity.activity.timing);
+      const durationInMilliseconds =
+        activity.activity.duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      const endTime = new Date(startTime.getTime() + durationInMilliseconds);
+      return endTime < now;
+    });
+
+    res.status(200).json(pastActivities);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };

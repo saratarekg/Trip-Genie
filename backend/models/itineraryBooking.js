@@ -30,6 +30,11 @@ const itineraryBookingSchema = new Schema(
       type: Date,
       required: true,
     },
+    isReminderSent: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   { timestamps: true }
 );

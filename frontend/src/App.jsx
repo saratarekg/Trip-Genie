@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect ,useState } from "react";
 import Cookies from "js-cookie";
 import {
   BrowserRouter as Router,
@@ -32,6 +32,13 @@ import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./pages/SignUp.jsx";
+
+import  SellerNotifications  from "./pages/SellerNotifications.jsx";
+import  AdminNotifications  from "./pages/AdminNotifications.jsx";
+import  AdvertiserNotifications  from "./pages/AdvertiserNotifications.jsx";
+import  TourGuideNotifications  from "./pages/TourGuideNotifications.jsx";
+
+
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
 import Checkout from "./pages/checkout.jsx";
@@ -40,6 +47,7 @@ import AllActivities from "./components/all-activities.jsx";
 import MyActivitiesComponent from "./pages/myActivities.jsx";
 import ActivityDetail from "./pages/SingleActivity.jsx";
 import FileComplaint from "./pages/FileComplaint.jsx";
+import OrdersPage from "./pages/touristOrders.jsx";
 // import {Cart} from "./pages/AccountTourist.jsx";
 // import {RedeemPoints} from "./pages/AccountTourist.jsx";
 // import {AccountInfo} from "./pages/AccountTourist.jsx";
@@ -81,14 +89,20 @@ function ScrollToTop() {
 
 function AppContent() {
   const location = useLocation();
+  const [navKey, setNavKey] = useState(0);
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/sign-up";
+    useEffect(() => {
+      // Increment the key to force a re-render of the Navbar
+      setNavKey(prevKey => prevKey + 1);
+    }, [location]);
+
   const role = Cookies.get("role");
 
   return (
     <div className="App">
       <ScrollToTop />
-      {!isAuthPage && role !== "admin" && <NavbarComponent />}
+      {!isAuthPage & role !== "admin" && <NavbarComponent key={navKey} />}
 
       <div className="pages">
         <Routes>
@@ -106,6 +120,18 @@ function AppContent() {
                 ]}
               >
                 <Home />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/orders"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "tourist",
+                ]}
+              >
+                <OrdersPage />
               </ProtectedRoute>
             }
           />
@@ -198,7 +224,7 @@ function AppContent() {
             path="/activity"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest" , "admin"]}
               >
                 <AllActivities />
               </ProtectedRoute>
@@ -385,6 +411,46 @@ function AppContent() {
             }
           />
           <Route
+            path="/seller-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["seller"]}
+              >
+                <SellerNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tour-guide-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["tour-guide"]}
+              >
+                <TourGuideNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/advertiser-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["advertiser"]}
+              >
+                <AdvertiserNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin"]}
+              >
+                <AdminNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/faqs"
             element={
               <ProtectedRoute
@@ -440,7 +506,7 @@ function AppContent() {
             path="/activity/:id"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest"]}
+                allowedRoles={["advertiser", "tour-guide", "tourist", "guest", "admin"]}
               >
                 <ActivityDetail />
               </ProtectedRoute>

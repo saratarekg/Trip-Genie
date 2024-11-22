@@ -3,15 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle, XCircle } from "lucide-react";
 import Loader from "./Loader";
 
@@ -40,12 +32,9 @@ const WishlistPage = () => {
   const fetchCurrencies = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await axios.get(
-        "http://localhost:4000/tourist/currencies",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await axios.get("http://localhost:4000/tourist/currencies", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setCurrencies(response.data);
     } catch (error) {
       console.error("Error fetching currencies:", error);
@@ -63,9 +52,7 @@ const WishlistPage = () => {
       if (userRole === "tourist" && userPreferredCurrency) {
         const baseRate = exchangeRates[productCurrency] || 1;
         const targetRate = exchangeRates[userPreferredCurrency.code] || 1;
-        const exchangedPrice = Math.round(
-          (roundedPrice / baseRate) * targetRate
-        );
+        const exchangedPrice = Math.round((roundedPrice / baseRate) * targetRate);
         return `${userPreferredCurrency.symbol}${exchangedPrice}`;
       }
       const currency = currencies.find((c) => c._id === productCurrency);
@@ -92,12 +79,9 @@ const WishlistPage = () => {
         const currencyId = response.data.preferredCurrency;
 
         if (currencyId) {
-          const response2 = await axios.get(
-            `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
+          const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           setUserPreferredCurrency(response2.data);
         } else {
           console.error("No preferred currency found for user");
@@ -141,10 +125,7 @@ const WishlistPage = () => {
         }
         return {
           ...item,
-          formattedPrice: formatPrice(
-            item.product.price,
-            item.product.currency
-          ),
+          formattedPrice: formatPrice(item.product.price, item.product.currency),
         };
       });
 
@@ -182,21 +163,16 @@ const WishlistPage = () => {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:4000/tourist/remove/wishlist/${productId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`http://localhost:4000/tourist/remove/wishlist/${productId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to remove item from wishlist");
       }
-      setWishlistItems(
-        wishlistItems.filter((item) => item.product._id !== productId)
-      );
+      setWishlistItems(wishlistItems.filter((item) => item.product._id !== productId));
       setActionSuccess("Item removed from wishlist successfully!");
     } catch (error) {
       setActionError("Error removing item from wishlist. Please try again.");
@@ -217,16 +193,13 @@ const WishlistPage = () => {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:4000/tourist/move/wishlist/${productId}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`http://localhost:4000/tourist/move/wishlist/${productId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to add item to cart");
       }
@@ -238,6 +211,57 @@ const WishlistPage = () => {
     }
   };
 
+  const handleAddAllToCart = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      if (!token) {
+        setActionError("Authentication error. Please log in again.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:4000/tourist/move/all/wishlist", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to add all items to cart");
+      }
+      setActionSuccess("All items added to cart successfully!");
+      fetchWishlistItems();
+    } catch (error) {
+      setActionError("Error adding all items to cart. Please try again.");
+      console.error("Error adding all items to cart:", error);
+    }
+  };
+
+  const handleEmptyWishlist = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      if (!token) {
+        setActionError("Authentication error. Please log in again.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:4000/tourist/remove/all/wishlist", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to empty wishlist");
+      }
+      setWishlistItems([]);
+      setActionSuccess("Wishlist emptied successfully!");
+    } catch (error) {
+      setActionError("Error emptying wishlist. Please try again.");
+      console.error("Error emptying wishlist:", error);
+    }
+  };
+
   if (loading) return <Loader />;
 
   if (error) {
@@ -245,61 +269,85 @@ const WishlistPage = () => {
   }
 
   return (
+    <div>
+    <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+    </div>
+
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">My Wishlist</h1>
+      <h1 className="text-4xl font-bold mb-6 text-left">My Wishlist</h1>
       {wishlistItems.length === 0 ? (
-        <p className="text-center text-gray-500 text-lg">
-          Your wishlist is empty.
-        </p>
+        <p className="text-center text-gray-500 text-lg">Your wishlist is empty.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {wishlistItems.map((item) => (
-            <Card key={item._id} className="overflow-hidden">
-              <CardHeader>
-                <CardTitle
-                  className="cursor-pointer hover:underline"
+        <div className="space-y-6">
+          <div className="">
+            {wishlistItems.map((item) => (
+              <div
+                key={item._id}
+                className="flex flex-col lg:flex-row items-start lg:items-center border-b border-gray-300 "
+              >
+                <div
+                  className="w-28 h-28 mb-4 mt-4 lg:mb-0 cursor-pointer relative"
                   onClick={() => navigate(`/product/${item.product._id}`)}
                 >
-                  {item.product.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <img
-                  src={
-                    item.product.pictures[0]?.url ||
-                    "/placeholder.svg?height=192&width=256"
-                  }
-                  alt={item.product.name}
-                  className="w-full h-48 object-cover mb-4 cursor-pointer rounded-md"
-                  onClick={() => navigate(`/product/${item.product._id}`)}
-                />
-                <p className="text-xl font-semibold mb-2">
-                  {item.formattedPrice}
-                </p>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                  {item.product.description}
-                </p>
-                <div className="flex justify-between">
-                  <Button
-                    variant="outline"
-                    onClick={() => handleRemoveFromWishlist(item.product._id)}
-                  >
-                    Remove
-                  </Button>
-                  <Button onClick={() => handleAddToCart(item.product._id)}>
-                    Add to Cart
-                  </Button>
+                  <img
+                    src={item.product.pictures[0]?.url}
+                    alt={item.product.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <div className="flex flex-col flex-grow mb-4 lg:mb-0 lg:pl-4">
+  <h2
+    className="cursor-pointer hover:underline text-xl font-semibold"
+    onClick={() => navigate(`/product/${item.product._id}`)}
+  >
+    {item.product.name}
+  </h2>
+  <p className="text-2xl font-semibold mb-2">{item.formattedPrice}</p>
+  <p className="text-sm text-gray-600 mb-4 overflow-hidden text-ellipsis whitespace-normal break-words line-clamp-2 max-h-12">
+    {item.product.description.length > 70
+      ? item.product.description.substring(0, 70) + "..."
+      : item.product.description}
+  </p>
+</div>
+<div className="flex items-end space-x-2">
+  <Button
+    onClick={() => handleAddToCart(item.product._id)}
+    className="bg-[#5D9297] hover:bg-[#388A94] text-white px-3 py-1 text-sm"
+  >
+    Add to Cart
+  </Button>
+  <Button
+    variant="outline"
+    className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white transition duration-300 ease-in-out px-3 py-1 text-sm"
+    onClick={() => handleRemoveFromWishlist(item.product._id)}
+  >
+    Remove
+  </Button>
+</div>
+
+              </div>
+            ))}
+          </div>
         </div>
       )}
+      <div className="mt-6 flex justify-between">
+        <Button
+          variant="outline"
+          className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white transition duration-300 ease-in-out px-3 py-1 text-sm"
+          onClick={handleEmptyWishlist}
+        >
+          Empty Wishlist
+        </Button>
+        <Button
+          onClick={handleAddAllToCart}
+          className="bg-[#1A3B47] hover:bg-[#388A94] text-white px-3 py-1 text-sm"
+        >
+          Add All to Cart
+        </Button>
+      </div>
 
-      <Dialog
-        open={actionSuccess !== null}
-        onOpenChange={() => setActionSuccess(null)}
-      >
+      <Dialog open={actionSuccess !== null} onOpenChange={() => setActionSuccess(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -316,10 +364,7 @@ const WishlistPage = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={actionError !== null}
-        onOpenChange={() => setActionError(null)}
-      >
+      <Dialog open={actionError !== null} onOpenChange={() => setActionError(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -336,7 +381,11 @@ const WishlistPage = () => {
         </DialogContent>
       </Dialog>
     </div>
+  </div>
   );
+  
+  
+  
 };
 
 export default WishlistPage;

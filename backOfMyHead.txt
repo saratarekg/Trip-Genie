@@ -123,3 +123,9 @@ Admin:
 - Change hide to back and improve its appearance (done)
 - Add search to users (done) habiba
 - Add color behind navbar at the beginning so that logo appears.(done)
+
+
+--------------------------------------------Sprint 3------------------------------------------
+
+-Saved button and functionality in activity details men gowa
+-saved for itineraries(mesh lazem)

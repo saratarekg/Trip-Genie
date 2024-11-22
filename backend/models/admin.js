@@ -12,6 +12,13 @@ const adminSchema = new Schema(
       minlength: 3,
       match: [/^\S+$/, "Username should not contain spaces."],
     },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      match: [/.+@.+\..+/, "Please enter a valid email address"],
+    },
     password: {
       type: String,
       required: true,
@@ -22,6 +29,21 @@ const adminSchema = new Schema(
       ],
       minlength: 8,
     },
+    notifications: [
+      {
+        body: {
+          type: String,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        seen: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -33,7 +55,11 @@ adminSchema.pre("save", async function (next) {
 });
 
 adminSchema.statics.login = async function (username, password) {
-  const admin = await this.findOne({ username });
+  let admin = await this.findOne({ username });
+  if (admin === null || admin === undefined) {
+    admin = await this.findOne({ email: username });
+  }
+
   if (admin) {
     const auth = await bcrypt.compare(password, admin.password);
     if (auth) {
