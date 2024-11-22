@@ -17,7 +17,7 @@ const getMaxPrice = async (req, res) => {
   } else {
     maxPrice = 0;
   }
-  console.log("henaaaaaaaaaaaa", maxPrice);
+
   res.status(200).json(maxPrice);
 };
 
@@ -37,29 +37,6 @@ const getMaxPriceMy = async (req, res) => {
   }
 };
 
-// Function to toggle the isSaved attribute
-const toggleSaveActivity = async (req, res) => {
-  const userId = res.locals.user_id;
-  const { id } = req.params;
-
-  try {
-    const activity = await Activity.findById(id);
-    if (!activity) {
-      return res.status(404).json({ message: "Activity not found" });
-    }
-
-    activity.isSaved = !activity.isSaved;
-    await activity.save();
-
-    res.status(200).json({
-      message: `Activity ${
-        activity.isSaved ? "saved" : "unsaved"
-      } successfully`,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-};
 
 const getAllActivitiesAdmin = async (req, res) => {
   try {
@@ -168,7 +145,7 @@ const getAllActivities = async (req, res) => {
       category,
       minRating
     );
-    console.log(1);
+  
     const searchResult = await Activity.findByFields(searchBy);
 
     const searchResultIds = searchResult.map((activity) => activity._id);
@@ -268,18 +245,10 @@ const getActivitiesByPreferences = async (req, res) => {
       minRating
     );
 
-    console.log("budget: ", budget);
-    console.log("price: ", price);
-    console.log("startDate: ", startDate);
-    console.log("endDate: ", endDate);
-    console.log("categories: ", categories);
-    console.log("minRating: ", minRating);
-
-    console.log("filterResult: ", filterResult);
+    
 
     const searchResult = await Activity.findByFields(searchBy);
 
-    console.log("searchResult: ", searchResult);
 
     const searchResultIds = searchResult.map((activity) => activity._id);
     const filterResultIds = filterResult.map((activity) => activity._id);
@@ -406,8 +375,7 @@ const createActivity = async (req, res) => {
 
   let imagesBuffer = [];
   try {
-    console.log("I am here!");
-
+   
     const pictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
@@ -463,6 +431,16 @@ const deleteActivity = async (req, res) => {
       return res.status(400).json({
         message: "Cannot delete activity with existing bookings",
       });
+    }
+
+    //remove activity from saved activities list for each tourist
+    const tourists = await Tourist.find({ "savedActivity.activity": req.params.id });
+    for (let i = 0; i < tourists.length; i++) {
+      const index = tourists[i].savedActivity.findIndex(
+        item => item && item.activity && item.activity.toString() === req.params.id
+      );
+      tourists[i].savedActivity.splice(index, 1);
+      await Tourist.findByIdAndUpdate(tourists[i]._id, { savedActivity: tourists[i].savedActivity });
     }
 
     //remove the images from cloudinary
@@ -754,6 +732,5 @@ module.exports = {
   updateCommentOnActivity,
   getMaxPrice,
   getMaxPriceMy,
-  toggleSaveActivity,
   flagActivity,
 };

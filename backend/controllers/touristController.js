@@ -74,7 +74,7 @@ const updateTourist = async (req, res) => {
       picture = null;
       if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
-        console.log("Profile picture deleted");
+    
       }
     } else if (profilePicture.public_id === undefined) {
       const result = await cloudinary.uploader.upload(profilePicture, {
@@ -82,7 +82,7 @@ const updateTourist = async (req, res) => {
       });
       if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
-        console.log("Profile picture xxxxx");
+        
       }
       picture = {
         public_id: result.public_id,
@@ -189,9 +189,9 @@ const updatePreferences = async (req, res) => {
 const updateTouristProfile = async (req, res) => {
   try {
     const tourist1 = await Tourist.findById(res.locals.user_id).lean();
-    console.log(tourist1);
+    
     let picture = tourist1.profilePicture;
-    console.log(picture);
+  
     const { nationality, mobile, jobOrStudent, profilePicture } = req.body;
     let { email, username } = req.body;
     email = email.toLowerCase();
@@ -506,7 +506,6 @@ const deleteBooking = async (req, res) => {
     }
 
     // Increment the wallet by the refund amount
-    console.log(tourist);
     await Tourist.findByIdAndUpdate(
       touristID,
       { $inc: { wallet: totalCost } }, // Increase wallet by the refund amount
@@ -554,10 +553,9 @@ const usernameExists = async (username) => {
     (await Admin.findOne({ username })) ||
     (await TourismGovernor.findOne({ username }))
   ) {
-    console.log("username exists");
     return true;
   } else {
-    console.log("username does not exist");
+    
     return false;
   }
 };
@@ -680,7 +678,6 @@ const getCurrencyID = async (req, res) => {
 const setCurrencyCode = async (req, res) => {
   try {
     const { currencyId } = req.body; // Get currency ID from request body
-    console.log(currencyId);
 
     // Check if the currency exists
     const currency = await Currency.findById(currencyId);
@@ -770,12 +767,7 @@ const removeItemFromCart = async (req, res) => {
 
   try {
     // Debug: Log incoming request data
-    console.log(
-      "Removing item with productId:",
-      productId,
-      "for userId:",
-      userId
-    );
+  
 
     // Find the tourist and update the cart by removing the product
     const user = await Tourist.findByIdAndUpdate(
@@ -837,8 +829,7 @@ const updateCartProductQuantity = async (req, res) => {
   try {
     // Validate that the new quantity is greater than 0
     if (newQuantity <= 0) {
-      console.log(1);
-
+   
       return res
         .status(400)
         .json({ message: "Quantity must be greater than 0" });
@@ -857,20 +848,15 @@ const updateCartProductQuantity = async (req, res) => {
     );
 
     if (!user) {
-      console.log(2);
+
       return res.status(400).json({ message: "User not found" });
     }
 
     const cartItem = user.cart.find((item) => {
-      console.log("Iterating over cart item:", item); // Log every iteration
+
       return item.product._id.toString() === productId.toString();
     });
 
-    if (cartItem) {
-      console.log("Found cart item:", cartItem);
-    } else {
-      console.log("No matching cart item found for productId:", productId);
-    }
     if (!cartItem) {
       return res.status(400).json({ message: "Product not found in cart" });
     }
@@ -889,7 +875,6 @@ const updateCartProductQuantity = async (req, res) => {
 
 const removeProductFromWishlist = async (req, res) => {
   const productId = req.params.id; // Extract productId from the request params
-  console.log("Removing product with ID:", productId); // Debug log the productId being passed
   const userId = res.locals.user_id; // Get the logged-in user id
 
   try {
@@ -899,8 +884,6 @@ const removeProductFromWishlist = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Debug log the current wishlist
-    console.log("Current wishlist:", user.wishlist);
 
     // Now, proceed to remove the product from the wishlist
     const updatedUser = await Tourist.findByIdAndUpdate(
@@ -915,8 +898,7 @@ const removeProductFromWishlist = async (req, res) => {
       return res.status(404).json({ message: "Failed to update user" });
     }
 
-    // Debug log the updated wishlist
-    console.log("Updated wishlist:", updatedUser.wishlist);
+ 
 
     res.status(200).json({
       message: "Product removed from wishlist",
@@ -1178,7 +1160,7 @@ const deleteAccount = async (req, res) => {
     if (tourist.profilePicture !== null) {
       await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
     }
-    console.log("alo");
+ 
     await TourGuide.updateMany(
       { "comments.tourist": res.locals.user_id }, // Match documents where a comment has the matching tourist
       { $pull: { comments: { tourist: res.locals.user_id } } } // Pull the comment where the tourist matches
@@ -1500,7 +1482,7 @@ const addShippingAddress = async (req, res) => {
       default: isDefault,
     } = req.body;
 
-    console.log(streetName, streetNumber, city, state, country);
+ 
     if (!streetName || !streetNumber || !city || !state || !country) {
       return res
         .status(400)
@@ -1761,34 +1743,90 @@ const applyPromoCode = async (req, res) => {
   }
 };
 
+// Add an activity to saved activities
+const getSavedActivities = async (req, res) => {
+  try {
+    console.log("ehab");
+    console.log("sam");
+    const tourist = await Tourist.findById(res.locals.user_id);
+     
+    console.log(tourist);
+    if (!tourist) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    // Safely map over savedActivity and check if activity is valid
+    const savedActivities = tourist.savedActivity; 
+    res.status(200).json(savedActivities);
+  } catch (error) {
+    console.error('Error fetching saved activities:', error);
+    res.status(500).json({ message: 'Error fetching saved activities', error: error.message });
+  }
+};
+  
+// Add an activity to saved activities
+const saveActivity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const touristId = res.locals.user_id;
+   
+
+    // Find the tourist and check if the activity is already saved
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    const activityIndex = tourist.savedActivity.findIndex(
+      item => item && item.activity && item.activity.toString() === id
+    );
+
+    if (activityIndex > -1) {
+      // Activity is already saved, so remove it using $pull
+      await Tourist.updateOne(
+        { _id: touristId },
+        { $pull: { savedActivity: { activity: id } } }
+      );
+      return res.status(200).json({ message: 'Activity removed from saved list', success: true });
+    } else {
+      // Activity is not saved, so add it using $push
+      await Tourist.updateOne(
+        { _id: touristId },
+        { $push: { savedActivity: { activity: id } } }
+      );
+      return res.status(200).json({ message: 'Activity saved successfully', success: true });
+    }
+  } catch (error) {
+    console.error('Error saving/removing activity:', error);
+    res.status(500).json({ message: 'Error saving/removing activity', error: error.message });
+  }
+};
+
+
 // Controller function to retrieve a promo code using a POST request with the promo code in the body
 const getPromoCode = async (req, res) => {
   const { code } = req.body;
   const  touristId  = res.locals.user_id; // Assuming the tourist's ID is in `req.user` from authentication middleware
-  console.log("Received request to get promo code:", code);  // Log received code
+  
 
   try {
     // Check if code is provided in the request body
     if (!code) {
-      console.log("No promo code provided in the request body.");
+      
       return res.status(400).json({ message: "Promo code is required." });
     }
 
     // Convert code to uppercase and log it to ensure it's in the correct format
     const promoCodeUpperCase = code.toUpperCase();
-    console.log("Searching for promo code (case-insensitive):", promoCodeUpperCase);
 
     // Retrieve promo code from the database (case-insensitive search)
     const promo = await PromoCode.findOne({ code: promoCodeUpperCase });
 
     // Log the result of the database query
     if (!promo) {
-      console.log("Promo code not found in the database:", promoCodeUpperCase);
+    
       return res.status(404).json({ message: "Promo code not found." });
-    } else {
-      console.log("Promo code found:", promo);
     }
-
  
 
     const currentDate = new Date();
@@ -1805,7 +1843,6 @@ const getPromoCode = async (req, res) => {
       );
       
       if (!tourist) {
-        console.log("Tourist not found:", touristId);
         return res.status(404).json({ message: "Tourist not found." });
       }
     }
@@ -1878,4 +1915,6 @@ module.exports = {
   removeAllFromWishlist,
   applyPromoCode,
   getPromoCode,
+  getSavedActivities,
+  saveActivity
 };

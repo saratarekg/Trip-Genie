@@ -233,7 +233,9 @@ router.post("/promo-code", touristController.applyPromoCode);
 
 router.post("/get/promo-code", touristController.getPromoCode);
 
-// Add the route for saving and unsaving activities
-router.post('/toggle-save-activity/:id', activityController.toggleSaveActivity);
 
+router.get('/saved-activities', touristController.getSavedActivities);
+// router.get('/saved-itineraries', touristController.getSavedItineraries);
+router.post('/save-activity/:id', touristController.saveActivity);
+// router.post('/save-itinerary/:id', touristController.saveItinerary);
 module.exports = router;

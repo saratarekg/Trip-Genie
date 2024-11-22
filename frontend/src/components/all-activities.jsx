@@ -45,11 +45,42 @@ const ActivityCard = ({
   exchangeRates,
   currencies,
   onDeleteConfirm,
+  savedActivities,
+  onActivitySaved,
 }) => {
   const role = Cookies.get("role") || "guest";
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (savedActivities && savedActivities.length > 0) {
+      setIsSaved(savedActivities.some(savedActivity => savedActivity.activity.toString() === activity._id.toString()));
+      
+    }
+    console.log(isSaved);
+  }, [savedActivities, activity._id]);
+
+  const handleSaveToggle = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.post(
+        `http://localhost:4000/tourist/save-activity/${activity._id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.success) {
+        const newSavedState = !isSaved;
+        setIsSaved(newSavedState);
+        if (onActivitySaved) {
+          onActivitySaved(activity._id, newSavedState);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling save activity:", error);
+    }
+  };
 
   useEffect(() => {
     const initializeCard = async () => {
@@ -126,7 +157,7 @@ const ActivityCard = ({
   }
 
   return (
-    <Card className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
+    <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
       <CardHeader className="p-0" onClick={() => onSelect(activity._id)}>
         <div className="relative aspect-video overflow-hidden">
           <img
@@ -139,16 +170,23 @@ const ActivityCard = ({
             className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
           />
         </div>
-
-
+        {userInfo?.role === "tourist" && (
+          <Button
+            className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSaveToggle();
+            }}
+          >
+            <Bookmark
+              className={`w-6 h-6 ${isSaved ? "fill-yellow-400 stroke-black stroke-[1.5]" : "stroke-black"}`}
+            />
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(activity._id)}>
-        <CardTitle className="text-lg text-[#1A3B47]">
-          {activity.name}
-        </CardTitle>
-        <p className="text-sm text-gray-500 mt-1">
-          {activity.location.address}
-        </p>
+        <CardTitle className="text-lg text-[#1A3B47]">{activity.name}</CardTitle>
+        <p className="text-sm text-gray-500 mt-1">{activity.location.address}</p>
         <div className="mt-2 flex items-center">
           {renderStars(activity.rating)}
           <span className="ml-2 text-sm text-gray-600">
@@ -181,9 +219,7 @@ const ActivityCard = ({
           <span className="text-2xl font-bold text-[#388A94]">
             {formatPrice(activity.price)}
           </span>
-          <span className="text-sm text-gray-500">
-            {activity.duration} hours
-          </span>
+          <span className="text-sm text-gray-500">{activity.duration} hours</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {activity.tags?.map((tag, index) => (
@@ -222,6 +258,7 @@ const ActivityCard = ({
       )}
     </Card>
   );
+
 };
 
 export default function AllActivities() {
@@ -247,12 +284,57 @@ export default function AllActivities() {
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const activitiesPerPage = 6;
+  const [savedActivities, setSavedActivities] = useState([]);
 
   const navigate = useNavigate();
 
   const getUserRole = useCallback(() => {
     return Cookies.get("role") || "guest";
   }, []);
+
+  const fetchSavedActivities = useCallback(async () => {
+    if (userInfo?.role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist/saved-activities", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSavedActivities(response.data);
+      } catch (error) {
+        console.error("Error fetching saved activities:", error);
+      }
+    }
+  }, [userInfo]);
+
+  useEffect(() => {
+    fetchSavedActivities();
+  }, [fetchSavedActivities]);
+
+
+  const handleSaveActivity = async (activityId) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.post(
+        `http://localhost:4000/toursit/save-activity/${activityId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.status === 200) {
+        fetchSavedActivities();
+        setAlertMessage({
+          type: "success",
+          message: "Activity saved/unsaved successfully!",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving/unsaving activity:", error);
+      setAlertMessage({
+        type: "error",
+        message: "Error saving/unsaving activity. Please try again.",
+      });
+    }
+  };
 
   const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
@@ -805,6 +887,8 @@ export default function AllActivities() {
                       exchangeRates={exchangeRates}
                       currencies={currencies}
                       onDeleteConfirm={handleDeleteConfirm}
+                      onSaveActivity={handleSaveActivity}
+                      savedActivities={savedActivities}
                     />
                   ))}
               </div>

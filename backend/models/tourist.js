@@ -35,6 +35,7 @@ const touristSchema = new Schema(
       trim: true,
       minlength: [3, "Username must be at least 3 characters long"],
     },
+
     mobile: {
       type: String,
       required: true,
@@ -103,6 +104,24 @@ const touristSchema = new Schema(
         },
         quantity: { type: Number, required: true, min: 1 },
         totalPrice: { type: Number, required: true },
+      },
+    ],
+    savedActivity: [
+      {
+        activity: { // Reference to Product
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Activity",
+          // required: true,
+        }
+      },
+    ],
+    savedItinerary: [
+      {
+        activity: { // Reference to Product
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Itinerary",
+          required: true,
+        }
       },
     ],
     currentPromoCode: {  // One promo code for the entire cart (instead of for each item)
