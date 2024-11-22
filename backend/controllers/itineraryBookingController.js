@@ -260,13 +260,23 @@ exports.getTouristAttendedItineraries = async (req, res) => {
 
 exports.getItinerariesReport = async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { startDate, endDate, month, year, selectedItineraries } = req.query;
     const tourGuideId = res.locals.user_id; // Get the user's ID from response locals
     const itineraries = await Itinerary.find({ tourGuide: tourGuideId }); // Fetch all itineraries
-    const itineraryIds = itineraries.map((itinerary) => itinerary._id); // Extract itinerary IDs
+    let itineraryIds = itineraries.map((itinerary) => itinerary._id); // Extract itinerary IDs
+    if (selectedItineraries) {
+      itineraryIds = itineraryIds.filter((itineraryId) =>
+        selectedItineraries.includes(itineraryId.toString())
+      );
+    }
 
     let bookings;
-    if (month && year) {
+    if (startDate && endDate) {
+      bookings = await ItineraryBooking.find({
+        itinerary: { $in: itineraryIds },
+        date: { $gte: startDate, $lt: endDate },
+      }).populate("itinerary");
+    } else if (month && year) {
       const startDate = new Date(year, month - 1, 1);
       const endDate = new Date(year, month, 0);
       bookings = await ItineraryBooking.find({
@@ -279,17 +289,31 @@ exports.getItinerariesReport = async (req, res) => {
       }).populate("itinerary");
     }
 
+    let totalRevenue = 0;
+    let totalTickets = 0;
+
     // Calculate total number of tickets for each itinerary
     const itineraryReport = itineraries.map((itinerary) => {
-      const totalTickets = bookings.reduce((total, booking) => {
+      const tickets = bookings.reduce((total, booking) => {
         return booking.itinerary._id.equals(itinerary._id)
           ? total + booking.numberOfTickets
           : total;
       }, 0);
-      return { itinerary, totalTickets };
+
+      //Get the revenue for the itinerary
+      const revenue = bookings.reduce((total, booking) => {
+        return booking.itinerary._id.equals(itinerary._id)
+          ? total + booking.paymentAmount
+          : total;
+      }, 0);
+
+      totalRevenue += revenue;
+      totalTickets += tickets;
+
+      return { itinerary, tickets, revenue: revenue * 0.9 }; // Return itinerary report
     });
 
-    res.status(200).json(itineraryReport); // Respond with itinerary report
+    res.status(200).json({ itineraryReport, totalRevenue, totalTickets });
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors
   }

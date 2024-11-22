@@ -299,12 +299,17 @@ exports.getTouristAttendedBookings = async (req, res) => {
 
 exports.getBookingsReport = async (req, res) => {
   try {
-    const { month, year } = req.query; // Get the month from the query string
+    const { startDate, endDate, month, year, selectedActivities } = req.query; // Get the month from the query string
     const advertiserId = res.locals.user_id; // Get the user's ID from response locals
     let activities = [];
 
     let bookings;
-    if (month && year) {
+    if (startDate && endDate) {
+      activities = await Activity.find({
+        advertiser: advertiserId,
+        timing: { $gte: startDate, $lt: endDate },
+      });
+    } else if (month && year) {
       const startDate = new Date(year, month - 1, 1);
       const endDate = new Date(year, month, 0);
       activities = await Activity.find({
@@ -315,25 +320,44 @@ exports.getBookingsReport = async (req, res) => {
       activities = await Activity.find({ advertiser: advertiserId });
     }
 
-    const activityIds = activities.map((activity) => activity._id);
+    let activityIds = activities.map((activity) => activity._id);
+    if (selectedActivities) {
+      activityIds = activityIds.filter((activityId) =>
+        selectedActivities.includes(activityId.toString())
+      );
+    }
     bookings = await ActivityBooking.find({
       activity: { $in: activityIds },
     }).populate("activity");
 
+    let totalRevenue = 0;
+    let totalTickets = 0;
+
     // Calculate total number of tickets for each activity
     const activityReport = activities.map((activity) => {
-      const totalTickets = bookings.reduce((total, booking) => {
+      const tickets = bookings.reduce((total, booking) => {
         return booking.activity._id.toString() === activity._id.toString()
           ? total + booking.numberOfTickets
           : total;
       }, 0);
+
+      // Calculate total revenue for each activity
+      const revenue = bookings.reduce((total, booking) => {
+        return booking.activity._id.toString() === activity._id.toString()
+          ? total + booking.paymentAmount
+          : total;
+      }, 0);
+
+      totalRevenue += revenue; // Add revenue to total revenue
+      totalTickets += tickets; // Add tickets to total tickets
+
       return {
-        activity: activity,
-        totalTickets: totalTickets,
+        activity,
+        tickets,
       };
     });
 
-    res.status(200).json(activityReport); // Respond with activity report
+    res.status(200).json({ activityReport, totalRevenue, totalTickets });
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors
   }
