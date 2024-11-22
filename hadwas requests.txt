@@ -1,6 +1,6 @@
 hadwas request sprint2
 
-deactivation itinerary elmfrood tetshal msh yktb currently unavailable fl sort by preference
+deactivation itinerary elmfrood tetshal msh yktb currently unavailable fl sort by preference (done aby)
 
 sort by preference bt3l2
 
@@ -24,7 +24,7 @@ event yaany activity fa flag inappropriate activity kman msh itinerary bs
 
 search itinerary bybooz ***search kol haga btbooz😂
 
-admin w seller y view zy table feha product w amount sold w quantity items in stock
+admin w seller y view zy table feha product w amount sold w quantity items in stock (awel etnen fel sales report)
 
 admin by update products btaato bs bs ynf3 y delete aady
 
