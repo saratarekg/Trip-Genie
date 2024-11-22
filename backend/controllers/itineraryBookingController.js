@@ -313,6 +313,7 @@ exports.getItinerariesReport = async (req, res) => {
       return { itinerary, tickets, revenue: revenue * 0.9 }; // Return itinerary report
     });
 
+    totalRevenue *= 0.9;
     res.status(200).json({ itineraryReport, totalRevenue, totalTickets });
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors

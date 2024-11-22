@@ -354,9 +354,11 @@ exports.getBookingsReport = async (req, res) => {
       return {
         activity,
         tickets,
+        revenue: revenue * 0.9, // 10% commission for the platform
       };
     });
 
+    totalRevenue *= 0.9; // 10% commission for the platform
     res.status(200).json({ activityReport, totalRevenue, totalTickets });
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors
