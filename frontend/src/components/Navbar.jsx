@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import CartDropdown from "@/components/cartDropDown";
 import axios from 'axios'
 
+import { NotificationsDropdown } from '@/components/SellerNotificationsDropdown'
+
+
 
 
 import logo from "../assets/images/TGlogo.svg";
@@ -521,21 +524,7 @@ export function NavbarComponent() {
           <div className="hidden md:flex items-center">
             {role !== undefined && role !== "guest" && role !== "admin" && (
               <>
-                <button
-                  className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 relative"
-                  onClick={() => {
-                    if (role === "seller") {
-                      navigate("/seller-notifications");
-                    }
-                  }}
-                >
-                  <Bell className="h-7 w-7 relative" />
-                  {hasUnseenNotifications && (
-                    <span className="absolute top-1 right-2 block h-3 w-3 rounded-full bg-red-500" />
-                  )}
-                  <span className="sr-only">Notifications</span>
-                </button>
-
+                {role === "seller" && <NotificationsDropdown />}
                 {role === "tourist" && (
                   <>
                     <div className="relative mr-2 mt-1">
