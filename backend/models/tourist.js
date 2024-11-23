@@ -111,13 +111,13 @@ const touristSchema = new Schema(
         activity: { // Reference to Product
           type: mongoose.Schema.Types.ObjectId,
           ref: "Activity",
-          // required: true,
+          required: true,
         }
       },
     ],
     savedItinerary: [
       {
-        activity: { // Reference to Product
+        itinerary: { // Reference to Product
           type: mongoose.Schema.Types.ObjectId,
           ref: "Itinerary",
           required: true,

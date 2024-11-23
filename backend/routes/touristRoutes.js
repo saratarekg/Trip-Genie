@@ -235,7 +235,7 @@ router.post("/get/promo-code", touristController.getPromoCode);
 
 
 router.get('/saved-activities', touristController.getSavedActivities);
-// router.get('/saved-itineraries', touristController.getSavedItineraries);
+router.get('/saved-itineraries', touristController.getSavedItineraries);
 router.post('/save-activity/:id', touristController.saveActivity);
-// router.post('/save-itinerary/:id', touristController.saveItinerary);
+router.post('/save-itinerary/:id', touristController.saveItinerary);
 module.exports = router;
