@@ -32,6 +32,7 @@ const ProductReport = () => {
   const [productNames, setProductNames] = useState([]);
   const [filteredSales, setFilteredSales] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalAppRevenue, setAppTotalRevenue] = useState(0);
   const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
   const [isFiltering, setIsFiltering] = useState(false);
 
@@ -63,6 +64,7 @@ const ProductReport = () => {
         setProductNames(uniqueProductNames);
 
         setTotalRevenue(response.data.totalSellerSalesRevenue);
+        setAppTotalRevenue(response.data.totalSellerSalesRevenue);
         setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.sellerProductsSales, 'all'));
 
         filterSalesData(response.data.sellerProductsSales);
@@ -91,7 +93,7 @@ const ProductReport = () => {
     setIsFiltering(true);
     setTimeout(() => {
       const filtered = salesData.filter(item => {
-        const itemDate = new Date(item.createdAt);
+        const itemDate = new Date(item.product.createdAt);
         return (
           (!filters.product || (item.product && item.product.name === filters.product)) &&
           (!filters.year || itemDate.getFullYear().toString() === filters.year) &&
@@ -142,13 +144,13 @@ const ProductReport = () => {
     }
 
     salesData.forEach(item => {
-      const date = new Date(item.createdAt);
+      const date = new Date(item.product.createdAt);
       if (date >= startDate && date <= now) {
         const key = groupingFunction(date);
         const index = data.findIndex(d => d.date === format(date, dateFormat));
         if (index !== -1) {
           data[index].sales += item.sales;
-          data[index].revenue += item.revenue;
+          data[index].revenue += (item.appRevenue);
         }
       }
     });
@@ -160,20 +162,21 @@ const ProductReport = () => {
     if (!salesData) return 0;
     const now = new Date();
     return salesData.reduce((sum, item) => {
-      const saleDate = new Date(item.createdAt);
+      const saleDate = new Date(item.product.createdAt);
+      console.log(`Sale Date: ${saleDate}, Revenue: ${item.revenue}`);
       switch (period) {
         case 'today':
-          return sum + (saleDate.toDateString() === now.toDateString() ? item.revenue : 0);
+          return sum + (saleDate.toDateString() === now.toDateString() ? (item.appRevenue) : 0);
         case 'week':
           const weekAgo = subDays(now, 7);
-          return sum + (saleDate >= weekAgo ? item.revenue : 0);
+          return sum + (saleDate >= weekAgo ? (item.appRevenue) : 0);
         case 'month':
-          return sum + (saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear() ? item.revenue : 0);
+          return sum + (saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear() ? (item.appRevenue) : 0);
         case 'year':
-          return sum + (saleDate.getFullYear() === now.getFullYear() ? item.revenue : 0);
+          return sum + (saleDate.getFullYear() === now.getFullYear() ? (item.appRevenue) : 0);
         case 'all':
         default:
-          return sum + item.revenue;
+          return sum + (item.appRevenue);
       }
     }, 0);
   };
@@ -184,19 +187,19 @@ const ProductReport = () => {
 
   if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
 
-  const fillPercentage = (selectedPeriodRevenue / totalRevenue) * 100;
+  const fillPercentage = (selectedPeriodRevenue / totalAppRevenue) * 100;
 
   const thisMonthSales = calculatePeriodRevenue(salesReport.sellerProductsSales, 'month');
   const lastMonthSales = (() => {
     const lastMonth = subMonths(new Date(), 1);
     return salesReport.sellerProductsSales.reduce((sum, item) => {
-      const saleDate = new Date(item.createdAt);
+      const saleDate = new Date(item.product.createdAt);
       return sum + (saleDate.getMonth() === lastMonth.getMonth() && 
-                   saleDate.getFullYear() === lastMonth.getFullYear() ? item.revenue : 0);
+                   saleDate.getFullYear() === lastMonth.getFullYear() ? (item.appRevenue) : 0);
     }, 0);
   })();
 
-  const thisMonthChange = ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
+  const thisMonthChange = lastMonthSales === 0 ? 100 : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
   return (
     <div className="p-6 bg-[#E6DCCF]/10 min-h-screen">
@@ -255,11 +258,14 @@ const ProductReport = () => {
                 </div>
               </div>
               <div className="text-center mt-4">
-                <p className="text-base font-semibold text-[#1A3B47]">
+                {/* <p className="text-base font-semibold text-[#1A3B47]">
                   {totalRevenue !== null && `Total: $${totalRevenue.toFixed(2)}`}
-                </p>
+                </p> */}
                 <p className="text-base text-[#5D9297]">
                   {(fillPercentage).toFixed(1)}% of total
+                </p>
+                <p className="text-base font-semibold text-[#1A3B47]">
+                  {totalAppRevenue !== null && `Commision Revenue: $${totalAppRevenue?.toFixed(2)}`}
                 </p>
               </div>
             </CardContent>
@@ -491,7 +497,7 @@ font-bold text-[#1A3B47]">Sales Analytics</CardTitle>
                             {item.revenue !== null && `$${item.revenue.toFixed(2)}`}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${(item.revenue * 0.1).toFixed(2)}
+                            ${(item.appRevenue).toFixed(2)}
                           </td>
                         </motion.tr>
                       ))}

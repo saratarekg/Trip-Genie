@@ -127,8 +127,8 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
           <ItineraryReport />
         ) : activeTab === 'activity-reports' ? (
           <ActivityReport />
-        // ) : activeTab === 'seller-product-sales-report' ? (
-        //   <ProductReportSeller />
+        ) : activeTab === 'seller-product-sales-report' ? (
+          <ProductReportSeller />
         ) : (
           <div className="p-4 bg-gray-100 rounded">
             Content for {activeTabDetails.title} goes here.
