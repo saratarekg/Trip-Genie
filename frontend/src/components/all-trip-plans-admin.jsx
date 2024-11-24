@@ -51,19 +51,19 @@ const DeleteConfirmationModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
-        <p className="mb-6">
+        <h2 className="text-xl font-bold mb-4 text-[#1A3B47]">Confirm Deletion</h2>
+        <p className="mb-6 text-[#1A3B47]">
           Are you sure you want to delete the itinerary "{itineraryTitle}"?
         </p>
         <div className="flex justify-end space-x-4">
           <button
-            className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
+            className="px-4 py-2 bg-[#E6DCCF] text-[#1A3B47] rounded hover:bg-[#F88C33] transition-colors"
             onClick={onClose}
           >
             Cancel
           </button>
           <button
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            className="px-4 py-2 bg-[#F88C33] text-white rounded hover:bg-[#E6DCCF] transition-colors"
             onClick={onConfirm}
           >
             Delete
@@ -190,18 +190,18 @@ const ItineraryCard = ({
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xl font-semibold">{itinerary.title}</h3>
+          <h3 className="text-xl font-semibold text-[#1A3B47]">{itinerary.title}</h3>
           {!itinerary.isActivated && (
-            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+            <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
               {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
             </span>
           )}
         </div>
         <div className="flex justify-between items-center mb-2">
-          <span className="text-lg font-bold text-blue-600">
+          <span className="text-lg font-bold text-[#388A94]">
             {formatPrice(itinerary.price)}
           </span>
-          <span className="text-sm text-gray-600">{itinerary.language}</span>
+          <span className="text-sm text-[#1A3B47]">{itinerary.language}</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {itinerary.activities?.flatMap((activity, index) => [
@@ -216,7 +216,7 @@ const ItineraryCard = ({
               .map((cat) => (
                 <span
                   key={`cat-${index}-${cat.id || cat.name}`}
-                  className="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full"
+                  className="bg-[#E6DCCF] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
                 >
                   {cat.name}
                 </span>
@@ -233,7 +233,7 @@ const ItineraryCard = ({
               .map((tag) => (
                 <span
                   key={`tag-${index}-${tag.id || tag.type}`}
-                  className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full"
+                  className="bg-[#B5D3D1] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
                 >
                   {tag.type}
                 </span>
@@ -245,7 +245,7 @@ const ItineraryCard = ({
       {role === "tour-guide" && userId === itinerary.tourGuide._id && (
         <div className="absolute top-2 right-2 flex space-x-2">
           <button
-            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            className="p-2 bg-[#5D9297] text-white rounded-full hover:bg-[#388A94] transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               window.location.href = `/update-itinerary/${itinerary._id}`;
@@ -255,7 +255,7 @@ const ItineraryCard = ({
             <Edit className="h-4 w-4" />
           </button>
           <button
-            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+            className="p-2 bg-[#F88C33] text-white rounded-full hover:bg-[#E6DCCF] transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onDeleteConfirm(itinerary._id, itinerary.title);
@@ -749,7 +749,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                 <Button
                   onClick={clearFilters}
                   size="sm"
-                  className="text-gray-400 hover:text-gray-200 bg-transparent border-none"
+                  className="text-[#1A3B47] hover:text-[#E6DCCF] bg-transparent border-none"
                 >
                   Clear All
                 </Button>
@@ -778,7 +778,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
               <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
               <div className="flex flex-col space-y-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">From:</label>
+                  <label className="block text-sm font-medium text-[#1A3B47]">From:</label>
                   <input
                     type="date"
                     value={dateRange.lower}
@@ -787,7 +787,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">To:</label>
+                  <label className="block text-sm font-medium text-[#1A3B47]">To:</label>
                   <input
                     type="date"
                     value={dateRange.upper}
@@ -818,7 +818,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                       />
                       <label
                         htmlFor={`type-${type}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
                       >
                         {type}
                       </label>
@@ -846,7 +846,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                       />
                       <label
                         htmlFor={`language-${language}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
                       >
                         {language}
                       </label>
@@ -878,7 +878,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   <Button
                   variant="outline"
                   size="sm"
-                  className="whitespace-nowrap rounded-full"
+                  className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
                   onClick={() => handleSort("price")}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-2" />
@@ -887,7 +887,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="whitespace-nowrap rounded-full"
+                  className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
                   onClick={() => handleSort("rating")}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-2" />
@@ -897,7 +897,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
               </div>
 
               {error && (
-                <div className="text-red-500 text-center mb-4">{error}</div>
+                <div className="text-[#F88C33] text-center mb-4">{error}</div>
               )}
 
               {/* Itineraries Grid */}
@@ -926,10 +926,11 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   disabled={currentPage === 1}
                   variant="outline"
                   size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-[#1A3B47]">
                   Page {currentPage} of {Math.ceil(itineraries.length / tripsPerPage)}
                 </span>
                 <Button
@@ -937,6 +938,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   disabled={currentPage === Math.ceil(itineraries.length / tripsPerPage)}
                   variant="outline"
                   size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -956,8 +958,8 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Itinerary</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[#1A3B47]">Delete Itinerary</DialogTitle>
+            <DialogDescription className="text-[#1A3B47]">
               Are you sure you want to delete this itinerary?
             </DialogDescription>
           </DialogHeader>
@@ -965,10 +967,11 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
             <Button
               variant="secondary"
               onClick={() => setShowDeleteConfirm(false)}
+              className="text-[#1A3B47] border-[#1A3B47]"
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
+            <Button variant="destructive" onClick={handleDelete} className="bg-[#F88C33] text-white">
               Delete
             </Button>
           </DialogFooter>
@@ -978,11 +981,11 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
       <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              <CheckCircle className="w-6 h-6 text-green-500 inline-block mr-2" />
+            <DialogTitle className="text-[#1A3B47]">
+              <CheckCircle className="w-6 h-6 text-[#388A94] inline-block mr-2" />
               Itinerary Deleted
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[#1A3B47]">
               The itinerary has been successfully deleted.
             </DialogDescription>
           </DialogHeader>
@@ -993,7 +996,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                 setShowDeleteSuccess(false);
                 navigate("/all-itineraries");
               }}
-              className="bg-gray-400 hover:bg-gray-500"
+              className="bg-[#E6DCCF] hover:bg-[#F88C33]"
             >
               Close
             </Button>
@@ -1007,16 +1010,16 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+            <DialogTitle className="text-[#1A3B47]">
+              <XCircle className="w-6 h-6 text-[#F88C33] inline-block mr-2" />
               Failed to Delete Itinerary
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[#1A3B47]">
               {deleteError || "Itinerary is already booked!"}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="default" onClick={() => setDeleteError(null)}>
+            <Button variant="default" onClick={() => setDeleteError(null)} className="bg-[#E6DCCF] hover:bg-[#F88C33]">
               Close
             </Button>
           </DialogFooter>

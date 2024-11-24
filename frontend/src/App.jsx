@@ -102,7 +102,7 @@ function AppContent() {
   return (
     <div className="App">
       <ScrollToTop />
-      {!isAuthPage & role !== "admin" && <NavbarComponent key={navKey} />}
+      {!isAuthPage && role !== "admin" && <NavbarComponent key={navKey} />}
 
       <div className="pages">
         <Routes>
@@ -601,19 +601,20 @@ function AppContent() {
           />
         </Routes>
       </div>
-      <ProtectedRoute
-                allowedRoles={[
-                  "tourist",
-                  "seller",
-                  "tour-guide",
-                  "advertiser",
-                  "tourism-governor",
-                  "guest",
-                ]}
-              >
-                {!isAuthPage && <FooterComponent />}
-              </ProtectedRoute>
-      
+      {!isAuthPage && role !== "admin" && (
+        <ProtectedRoute
+          allowedRoles={[
+            "tourist",
+            "seller",
+            "tour-guide",
+            "advertiser",
+            "tourism-governor",
+            "guest",
+          ]}
+        >
+          <FooterComponent />
+        </ProtectedRoute>
+      )}
     </div>
   );
 }
