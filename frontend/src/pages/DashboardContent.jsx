@@ -12,10 +12,10 @@ import CreateProductForm from "../components/CreateProductAdmin.jsx";
 import ProductArchive from "../components/product-archive-admin.jsx";
 import { MyProducts } from "../components/myProductsAdmin.jsx";
 import ProductDetail from "../components/ProductDetailAdmin.jsx";
-import ItineraryDetailAdmin from "../components/ItineraryDetailAdmin.jsx";
+import ItineraryDetail from "../components/ItineraryDetailAdmin.jsx";
 import AllTripPlansAdmin from "../components/all-trip-plans-admin.jsx";
 import ProductReport from "../components/ProductReport.jsx";
-// import ProductReportSeller from "../components/ProductReportSeller.jsx";
+import ProductReportSeller from "../components/ProductReportSeller.jsx";
 import ItineraryReport from "../components/ItineraryReport.jsx";
 import ActivityReport from "@/components/ActivityReport.jsx";
 
@@ -76,8 +76,8 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
             }}
           />
         ) : selectedItineraryId ? (
-          <ItineraryDetailAdmin
-            itineraryId={selectedItineraryId}
+          <ItineraryDetail
+            id={selectedItineraryId}
             onBack={() => setSelectedItineraryId(null)}
           />
         ) : activeTab === 'all-trip-plans' ? (

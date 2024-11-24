@@ -326,6 +326,7 @@ export default function AllHistoricalPlacesComponent() {
                               : prev.filter((t) => t !== type)
                           );
                         }}
+                        className="text-teal-500" // Use custom teal color
                       />
                       <label
                         htmlFor={`type-${type}`}

@@ -477,8 +477,8 @@ const TourguideProfileCard = ({
 
 
 
-const ItineraryDetail = () => {
-  const { id } = useParams();
+const ItineraryDetail = ({ id }) => {
+  // const { id } = useParams();
   const [itinerary, setItinerary] = useState(null);
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1167,31 +1167,15 @@ const ItineraryDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <button
+      <Button
         onClick={() => navigate('/all-itineraries')}
-        className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
+        className="mb-4 bg-[#5D9297] text-white text-base"
       >
         <ChevronLeft className="w-5 h-5 mr-2" />
-        Back to All Trip Plans
-      </button>
-      <nav className="bg-[#1a202c] shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="text-xl font-semibold text-white"></div>
-          </div>
-        </div>
-      </nav>
+        Back to All Itineraries
+      </Button>
 
-      <div className="bg-[#1a202c] text-white py-20 px-4">
-        <div className="container mx-auto text-center">
-
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            {itinerary.title}
-          </h1>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 ">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-3/4">
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
