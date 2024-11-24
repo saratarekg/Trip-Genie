@@ -58,7 +58,7 @@ const ActivityReport = () => {
         if (response.data && response.data.activitiesSales) {
           updateGraphData(response.data.activitiesSales, graphPeriod);
           
-          const uniqueActivityNames = [...new Set(response.data.activitiesSales.map(item => item.activity.title))];
+          const uniqueActivityNames = [...new Set(response.data.activitiesSales.map(item => item.activity.name))];
           setActivityNames(uniqueActivityNames);
 
           setTotalRevenue(response.data.totalActivitiesRevenue || 0);
@@ -97,18 +97,20 @@ const ActivityReport = () => {
       return;
     }
     setIsFiltering(true);
-    // console.log(filters.year);
+    // console.log(filters.activity);
     setTimeout(() => {
       const filtered = salesData.filter(item => {
         const itemDate = new Date(item.activity.createdAt);
+        // console.log(item.activity.name);
         return (
-          (!filters.activity || item.activity.title === filters.activity) &&
+          (!filters.activity || item.activity.name === filters.activity) &&
           (!filters.year || itemDate.getFullYear() === parseInt(filters.year, 10)) &&
           (!filters.month || (itemDate.getMonth() + 1) === parseInt(filters.month, 10))
         );
       });
       setFilteredSales(filtered);
-      // console.log(filtered);
+      
+    //   console.log(filtered);
       setIsFiltering(false);
     }, 300);
   };
@@ -211,7 +213,7 @@ const ActivityReport = () => {
     }, 0) || 0;
   })();
 
-  const thisMonthChange = lastMonthSales ? ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100 : 0;
+  const thisMonthChange = lastMonthSales === 0 ? 100 : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
   return (
     <div className="p-6 bg-[#E6DCCF]/10 min-h-screen">
@@ -486,8 +488,10 @@ const ActivityReport = () => {
                           exit={{ opacity: 0, y: -20 }}
                           transition={{ duration: 0.2, delay: index * 0.05 }}
                         >
-                          <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.activity.title}</td>
+                          <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {Math.round(item.totalRevenue / item.activity.price)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.activity.name}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             ${parseFloat(item.totalRevenue).toFixed(2)}
                           </td>

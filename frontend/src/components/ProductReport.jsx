@@ -194,7 +194,7 @@ const ProductReport = () => {
     }, 0);
   })();
 
-  const thisMonthChange = ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
+  const thisMonthChange = lastMonthSales === 0 ? 100 : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
   return (
     <div className="p-6 bg-[#E6DCCF]/10 min-h-screen">
