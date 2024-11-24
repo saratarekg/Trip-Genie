@@ -10,7 +10,7 @@ exports.createBooking = async (req, res) => {
     const { itinerary, paymentType, paymentAmount, numberOfTickets, date } =
       req.body;
 
-    // Check if the itinerary exists
+    // Step 1: Check if the itinerary exists
     const itineraryExists = await Itinerary.findById(itinerary);
     const user = await Tourist.findById(userId); // Get the user details, including wallet balance
 
@@ -23,7 +23,8 @@ exports.createBooking = async (req, res) => {
     }
 
     let walletBalance = user.wallet;
-    // Check if payment type is "Wallet"
+
+    // Step 2: Handle Wallet payment type
     if (paymentType === "Wallet") {
       if (walletBalance < paymentAmount) {
         return res
@@ -33,16 +34,19 @@ exports.createBooking = async (req, res) => {
 
       // Deduct the payment amount from the user's wallet
       walletBalance -= paymentAmount;
+
+      // Add a transaction to history for payment
+
     }
 
-    // Update itinerary's `isBooked` status
+    // Step 3: Update itinerary's `isBooked` status
     await Itinerary.findByIdAndUpdate(
       itinerary,
       { isBooked: true },
       { new: true }
     );
 
-    // Create the booking
+    // Step 4: Create the booking
     const newBooking = new ItineraryBooking({
       itinerary,
       paymentType,
@@ -55,39 +59,52 @@ exports.createBooking = async (req, res) => {
     // Save the booking
     await newBooking.save();
 
+    // Send email confirmation
     await emailService.sendItineraryBookingConfirmationEmail(
       user.email,
       newBooking,
       itineraryExists
     );
 
-    // Calculate loyalty points based on the user's badge level
-    const loyaltyPoints = calculateLoyaltyPoints(
-      paymentAmount,
-      user.loyaltyBadge
-    );
+    // Step 5: Calculate loyalty points based on the user's badge level
+    const loyaltyPoints = calculateLoyaltyPoints(paymentAmount, user.loyaltyBadge);
 
-    // Update total points and loyalty points using findByIdAndUpdate
-    const totalPoints = user.totalPoints + loyaltyPoints; // Calculate total points
+    // Calculate total points after adding new loyalty points
+    const totalPoints = user.totalPoints + loyaltyPoints;
 
-    // Update the tourist's record in the database
+    const updateFields = {
+      $inc: {
+        totalPoints: loyaltyPoints, // Increment total points
+        loyaltyPoints: loyaltyPoints, // Increment current loyalty points
+      },
+      loyaltyBadge: determineBadgeLevel(totalPoints), // Update loyalty badge based on total points
+    };
+    
+    // Conditionally add wallet balance and history only for wallet payments
+    if (paymentMethod === 'wallet') {
+      updateFields.wallet = walletBalance; // Update wallet balance
+      updateFields.$push = {
+        history: {
+          transactionType: 'payment',
+          amount: paymentAmount,
+          details: `Paid via Wallet: Booked Itinerary: ${itineraryExists.name} - ${numberOfTickets} tickets`,
+        },
+      };
+    }
+    
     const updatedTourist = await Tourist.findByIdAndUpdate(
       userId,
-      {
-        $inc: {
-          totalPoints: loyaltyPoints, // Increment total points
-          loyaltyPoints: loyaltyPoints, // Increment current loyalty points
-        },
-        loyaltyBadge: determineBadgeLevel(totalPoints),
-        wallet: walletBalance,
-      },
-      { new: true, runValidators: true }
+      updateFields,
+      { new: true, runValidators: true } // Ensure it returns the updated tourist
     );
+    
+  
 
     if (!updatedTourist) {
       return res.status(400).json({ message: "Tourist not found" });
     }
 
+    // Respond with the updated booking and tourist profile
     res.status(201).json({
       message: "Booking created successfully",
       booking: newBooking,
@@ -100,6 +117,7 @@ exports.createBooking = async (req, res) => {
     });
   }
 };
+
 
 const calculateLoyaltyPoints = (paymentAmount, badgeLevel) => {
   let pointsMultiplier = 0;
@@ -191,32 +209,52 @@ exports.updateBooking = async (req, res) => {
 // Delete a booking by ID
 exports.deleteBooking = async (req, res) => {
   try {
+    // Step 1: Find and delete the booking
     const deletedBooking = await ItineraryBooking.findByIdAndDelete(
       req.params.id
     );
     if (!deletedBooking) {
       return res.status(404).json({ message: "Booking not found" });
     }
-    const touristId = res.locals.user_id; // Assuming 'tourist' is a reference in the booking schema
-    const bookingAmount = deletedBooking.paymentAmount; // Assuming 'amount' is the field for booking cost
 
+    // Step 2: Get the tourist's ID from the response locals and booking amount
+    const touristId = res.locals.user_id; // Assuming 'tourist' is a reference in the booking schema
+    const bookingAmount = deletedBooking.paymentAmount; // Amount that was refunded
+
+    // Step 3: Find the tourist to update their wallet and history
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
-      { $inc: { wallet: bookingAmount } }, // Increment the wallet balance by the booking amount
-      { new: true, runValidators: true } // Return updated tourist and run validations
+      {
+        $inc: { wallet: bookingAmount }, // Increment the wallet balance by the booking amount (refund)
+        $push: { // Add the refund as a transaction to the history
+          history: {
+            transactionType: 'deposit',
+            amount: bookingAmount,
+            details: `Refund for canceled itinerary booking: ${deletedBooking.itineraryName} - ${deletedBooking.numberOfTickets} tickets`,
+          }
+        }
+      },
+      { new: true, runValidators: true } // Ensure it returns the updated tourist and runs validators
     );
 
     if (!updatedTourist) {
       return res.status(400).json({ message: "Tourist not found" });
     }
 
-    res.status(200).json({ message: "Booking deleted successfully" });
+    // Step 4: Respond with a success message
+    res.status(200).json({
+      message: "Booking deleted successfully and amount refunded",
+      wallet: updatedTourist.wallet,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to delete booking", error: error.message });
+    console.log(error.message);
+    res.status(500).json({
+      message: "Failed to delete booking",
+      error: error.message,
+    });
   }
 };
+
 
 exports.getTouristBookings = async (req, res) => {
   try {

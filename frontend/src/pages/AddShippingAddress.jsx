@@ -1,28 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { Trash2, X, Edit } from 'lucide-react'; // Importing Edit icon
+import { Eye, Star } from 'lucide-react';
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
-export default function ShippingAddress() {
+export default function ShippingAddresses() {
   const [addresses, setAddresses] = useState([]);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showRemoveConfirm, setShowRemoveConfirm] = useState(null);
-  const [currentAddressId, setCurrentAddressId] = useState(null); // For tracking the address to update
+  const [showModal, setShowModal] = useState(false);
+  const [currentAddressId, setCurrentAddressId] = useState(null);
   const [addressDetails, setAddressDetails] = useState({
     streetName: '',
     streetNumber: '',
     floorUnit: '',
     city: '',
     state: '',
-    postalCode: '',
     country: '',
+    postalCode: '',
     landmark: '',
-    locationType: 'home', // Default value
+    locationType: 'home',
     default: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' });
-  const [errors, setErrors] = useState({});
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [addressToDelete, setAddressToDelete] = useState(null);
+
 
   useEffect(() => {
     fetchAddresses();
@@ -34,99 +37,72 @@ export default function ShippingAddress() {
       const response = await axios.get('http://localhost:4000/tourist/shippingAdds', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAddresses(Array.isArray(response.data.shippingAddresses) ? response.data.shippingAddresses : []);
+      setAddresses(response.data.shippingAddresses || []);
     } catch (error) {
       console.error('Error fetching addresses:', error);
-      setMessage({ text: "Failed to fetch addresses. Please try again.", type: "error" });
-      setAddresses([]);
-      hideMessageAfterDelay();
     }
   };
 
-  const hideMessageAfterDelay = () => {
-    setTimeout(() => {
-      setMessage({ text: '', type: '' });
-    }, 5000);
+  const handleOpenModal = (address = null) => {
+    if (address) {
+      setAddressDetails(address);
+      setCurrentAddressId(address._id);
+    } else {
+      resetAddressDetails();
+    }
+    setShowModal(true);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setAddressDetails((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-    setErrors((prev) => ({ ...prev, [name]: '' }));
+  const handleCloseModal = () => {
+    setShowModal(false);
+    resetAddressDetails();
   };
 
-  const validateAddress = () => {
-    const newErrors = {};
-    if (!addressDetails.streetName.trim()) {
-      newErrors.streetName = "Street name is required";
-    }
-    if (!addressDetails.streetNumber.trim()) {
-      newErrors.streetNumber = "Street number is required";
-    }
-    if (!addressDetails.city.trim()) {
-      newErrors.city = "City is required";
-    }
-    if (!addressDetails.state.trim()) {
-      newErrors.state = "State is required";
-    }
-    if (!addressDetails.postalCode) {
-      newErrors.postalCode = "Postal code is required";
-    } else if (!/^\d{5}(?:[-\s]\d{4})?$/.test(addressDetails.postalCode)) {
-      newErrors.postalCode = "Please enter a valid postal code (5 digits)";
-    }
-    if (!addressDetails.country.trim()) {
-      newErrors.country = "Country is required";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const resetAddressDetails = () => {
+    setAddressDetails({
+      streetName: '',
+      streetNumber: '',
+      floorUnit: '',
+      city: '',
+      state: '',
+      country: '',
+      postalCode: '',
+      landmark: '',
+      locationType: 'home',
+      default: false,
+    });
+    setCurrentAddressId(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateAddress()) return;
 
     setIsLoading(true);
-    setMessage({ text: '', type: '' });
-
     try {
       const token = Cookies.get('jwt');
+      console.log(addressDetails);
       if (currentAddressId) {
-        // Updating an existing address
+        // Update address
         await axios.put(
           `http://localhost:4000/tourist/update-shippingAdd/${currentAddressId}`,
           addressDetails,
           { headers: { Authorization: `Bearer ${token}` } },
         );
-        setMessage({ text: "Shipping address updated successfully", type: "success" });
       } else {
-        // Adding a new address
+        // Add new address
         await axios.put(
           'http://localhost:4000/tourist/add-shippingAdd',
           addressDetails,
           { headers: { Authorization: `Bearer ${token}` } },
         );
-        setMessage({ text: "Shipping address added successfully", type: "success" });
       }
-
-      hideMessageAfterDelay();
-      setShowAddForm(false);
       fetchAddresses();
-      resetAddressDetails();
+      handleCloseModal();
     } catch (error) {
-      setMessage({ text: error.response?.data?.message || "Failed to process address. Please try again.", type: "error" });
-      hideMessageAfterDelay();
+      console.error('Error saving address:', error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleEditAddress = (address) => {
-    setAddressDetails(address); // Populate form with selected address details
-    setCurrentAddressId(address._id); // Set the current address ID for updating
-    setShowAddForm(true); // Show the add form
   };
 
   const handleSetDefault = async (addressId) => {
@@ -138,266 +114,375 @@ export default function ShippingAddress() {
         { headers: { Authorization: `Bearer ${token}` } },
       );
       fetchAddresses();
-      setMessage({ text: "Default address updated successfully", type: "success" });
-      hideMessageAfterDelay();
     } catch (error) {
-      setMessage({ text: "Failed to update default address. Please try again.", type: "error" });
-      hideMessageAfterDelay();
+      console.error('Error setting default address:', error);
     }
   };
 
-  const handleRemoveAddress = async (addressId) => {
+  const openDelete = () => {
+    setIsDeleteConfirmOpen(true);
+  };
+
+  // Function to close the modal (if the user cancels)
+  const closeDelete = () => {
+    setIsDeleteConfirmOpen(false);
+  };
+
+  const handleDelete = async () => {
     try {
       const token = Cookies.get('jwt');
       await axios.delete(
-        `http://localhost:4000/tourist/shippingAdds/${addressId}`,
+        `http://localhost:4000/tourist/shippingAdds/${addressToDelete}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       fetchAddresses();
-      setMessage({ text: "Address removed successfully", type: "success" });
-      hideMessageAfterDelay();
+      setIsDeleteConfirmOpen(false);
     } catch (error) {
-      setMessage({ text: "Failed to remove address. Please try again.", type: "error" });
-      hideMessageAfterDelay();
-    } finally {
-      setShowRemoveConfirm(null);
+      console.error('Error deleting address:', error);
     }
   };
 
-  const resetAddressDetails = () => {
-    setAddressDetails({
-      streetName: '',
-      streetNumber: '',
-      floorUnit: '',
-      city: '',
-      state: '',
-      postalCode: '',
-      country: '',
-      landmark: '',
-      locationType: 'home',
-      default: false,
-    });
-    setCurrentAddressId(null); // Reset the current address ID
-  };
-
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Your Shipping Addresses</h2>
-
-      {/* Notification Message */}
-      {message.text && (
-        <div className={`p-4 mb-4 rounded-md ${message.type === 'success' ? 'bg-[#B5D3D1] text-[#1A3B47]' : 'bg-red-100 text-red-700'}`}>
-          {message.text}
-        </div>
-      )}
-
-      {/* Scrollable Addresses Container */}
-      <div className="max-h-[220px] overflow-y-auto space-y-4 mb-4">
-  {Array.isArray(addresses) && addresses.length > 0 ? (
-    addresses.map((address) => (
-      <div key={address._id} className="border rounded-md p-4 flex justify-between items-center bg-white shadow-sm">
-        <div className="flex flex-col">
-          {/* Location Title */}
-          <p className="text-lg font-semibold text-gray-700 mb-1">
-            {address.locationType}
-          </p>
-          {/* Address Details */}
-          <p className="font-semibold text-sm">
-            {address.streetName}, {address.streetNumber} {address.floorUnit && `(${address.floorUnit})`}, {address.city}, {address.state}, {address.postalCode}, {address.country}
-          </p>
-          {/* Default Badge */}
-          {address.default && (
-            <span className="bg-[#B5D3D1] text-[#1A3B47] text-xs font-medium px-2 py-0.5 mt-1 w-max rounded">
-              Default
-            </span>
-          )}
-        </div>
-        <div className="flex space-x-2 items-center">
-          {/* Set as Default Button */}
-          {!address.default && (
-            <button
-              onClick={() => handleSetDefault(address._id)}
-              className="px-2 py-1 text-white text-xs rounded-md bg-[#388A94] hover:bg-[#1A3B47] transition duration-300 ease-in-out"
-            >
-              Set as Default
-            </button>
-          )}
-          {/* Edit Address Button */}
-          <button
-            onClick={() => handleEditAddress(address)}
-            className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 transition duration-300 ease-in-out"
-          >
-            <Edit className="h-4 w-4 text-blue-500" />
-          </button>
-          {/* Delete Address Button */}
-          <button
-            onClick={() => setShowRemoveConfirm(address._id)}
-            className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </button>
-        </div>
-      </div>
-    ))
-  ) : (
-    <p>No addresses available.</p>
-  )}
+    <div className="max-w-3xl mx-auto bg-white border rounded-lg shadow-md p-6">
+      {/* Header */}
+      <div className="mb-4 flex items-center justify-between">
+  <h2 className="text-xl font-bold text-gray-800 mb-0">Shipping Addresses</h2>
+  <Button
+    onClick={() => handleOpenModal()}
+    variant="outline"
+    size="sm"
+    className="bg-gray-200 text-gray-700 hover:bg-gray-300"
+  >
+    Add More
+  </Button>
 </div>
 
 
-      {/* Confirm Removal of Address */}
-      {showRemoveConfirm && (
-        <div className="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 mb-4">
-          <p>Are you sure you want to delete this address?</p>
-          <div className="flex space-x-2 mt-2">
-            <button onClick={() => handleRemoveAddress(showRemoveConfirm)} className="bg-red-600 text-white px-4 py-2 rounded-md">Yes</button>
-            <button onClick={() => setShowRemoveConfirm(null)} className="bg-gray-300 text-black px-4 py-2 rounded-md">No</button>
+      {/* Scrollable Address List */}
+      <div className="border rounded-md bg-gray-50 p-2 max-h-[200px] overflow-y-auto">
+        {addresses.length > 0 ? (
+          addresses.map((address) => (
+<div
+  key={address._id}
+  className="bg-white  rounded-md mb-2 pb-2 pr-3 pl-3 pt-2 h-[120px] overflow-hidden flex flex-col"
+>
+  {/* Header with location type and View More button beside it */}
+  <div className="flex justify-between items-start ">
+    <p className="font-bold text-[#1A3B47] text-base">{address.locationType.toUpperCase()}</p>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button
+          variant="link"
+          size="sm"
+          className="text-[#388A94]"
+        >
+          View Details
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader className="bg-[#388A94] text-white p-4 rounded-t-lg">
+          <DialogTitle className="text-xl font-semibold">Address Details</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 p-4 bg-[#F4F4F4] rounded-b-lg">
+          <p><strong className="text-[#1A3B47]">Street:</strong> {address.streetName} {address.streetNumber}</p>
+          {address.floorUnit && <p><strong className="text-[#1A3B47]">Floor/Unit:</strong> {address.floorUnit}</p>}
+          <p><strong className="text-[#1A3B47]">City:</strong> {address.city}</p>
+          <p><strong className="text-[#1A3B47]">State:</strong> {address.state}</p>
+          <p><strong className="text-[#1A3B47]">Country:</strong> {address.country}</p>
+          <p><strong className="text-[#1A3B47]">Postal Code:</strong> {address.postalCode}</p>
+          {address.landmark && <p><strong className="text-[#1A3B47]">Landmark:</strong> {address.landmark}</p>}
+          <p><strong className="text-[#1A3B47]">Location Type:</strong> {address.locationType}</p>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </div>
+
+  {/* Default tag */}
+  {address.default && (
+    <span className="text-xs text-blue-500 font-medium">Default</span>
+  )}
+
+  {/* Display main address details in a horizontal layout */}
+  <div className="text-xs text-gray-600 flex flex-col">
+  <div className="flex">
+    <p className="mr-2">{address.streetName} {address.streetNumber}</p>
+    <p>{address.city}, {address.state}</p>
+  </div>
+  <div className="flex ">
+    <p className="mr-2">{address.postalCode}</p>
+    {address.landmark && <p>{address.landmark}</p>}
+  </div>
+</div>
+
+
+  {/* Bottom Action Buttons */}
+  <div className="flex justify-between items-center mt-1 space-x-2 ">
+    <div className="flex space-x-2">
+      <Button
+        onClick={() => handleOpenModal(address)}
+        variant="link"
+        size="sm"
+        className="text-[#1A3B47] "
+      >
+        Edit
+      </Button>
+      <Button
+  onClick={() => {
+    setAddressToDelete(address._id); // Set the address ID
+    openDelete(); // Open the delete confirmation modal
+  }}
+  variant="link"
+  size="sm"
+  className="text-[#1A3B47]"
+>
+  Delete
+</Button>
+
+    </div>
+
+    <Button
+      onClick={() => handleSetDefault(address._id)}
+      variant="link"
+      size="sm"
+      className={`text-[#1A3B47] ${address.default ? 'cursor-not-allowed' : ''}`}
+      disabled={address.default}
+    >
+      Set as Default
+    </Button>
+  </div>
+</div>
+
+
+
+
+          ))
+        ) : (
+          <p className="text-gray-500">No addresses available. Add one to get started.</p>
+        )}
+      </div>
+
+      {/* Address Form Modal */}
+      {showModal && (
+        <Dialog open={showModal} onOpenChange={setShowModal}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{currentAddressId ? 'Edit Address' : 'Add Address'}</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[500px] overflow-y-auto">
+              <form onSubmit={handleSubmit} className="space-y-4 p-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Street Name</label>
+                  <input
+                    type="text"
+                    name="streetName"
+                    value={addressDetails.streetName}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        streetName: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Street Number</label>
+                  <input
+                    type="text"
+                    name="streetNumber"
+                    value={addressDetails.streetNumber}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        streetNumber: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Floor/Unit</label>
+                  <input
+                    type="text"
+                    name="floorUnit"
+                    value={addressDetails.floorUnit}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        floorUnit: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">City</label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={addressDetails.city}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        city: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">State</label>
+                  <input
+                    type="text"
+                    name="state"
+                    value={addressDetails.state}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        state: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Country</label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={addressDetails.country}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        country: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Postal Code</label>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    value={addressDetails.postalCode}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        postalCode: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Landmark</label>
+                  <input
+                    type="text"
+                    name="landmark"
+                    value={addressDetails.landmark}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        landmark: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Location Type</label>
+                  <select
+                    name="locationType"
+                    value={addressDetails.locationType}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        locationType: e.target.value,
+                      }))
+                    }
+                    className="mt-1 block w-full border rounded-md p-2"
+                    required
+                  >
+                    <option value="home">Home</option>
+                    <option value="work">Work</option>
+                    <option value="apartment">Apartment</option>
+                    <option value="friend_family">Friend/Family</option>
+                    <option value="po_box">PO Box</option>
+                    <option value="office">Office</option>
+                    <option value="pickup_point">Pickup Point</option>
+                    <option value="vacation">Vacation</option>
+                    <option value="school">School</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="default"
+                    checked={addressDetails.default}
+                    onChange={(e) =>
+                      setAddressDetails((prev) => ({
+                        ...prev,
+                        default: e.target.checked,
+                      }))
+                    }
+                    className="mr-2"
+                  />
+                  <label className="text-sm font-medium text-gray-700">Set as default</label>
+                </div>
+                <div className="mt-6 flex justify-end space-x-4">
+                  <Button
+                    type="button"
+                    onClick={handleCloseModal}
+                    variant="outline"
+                    className="bg-gray-200 hover:bg-gray-300"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-[#1A3B47]"
+                  >
+                    {isLoading ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </form>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+      )}
+       {isDeleteConfirmOpen && (
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-md shadow-lg max-w-sm w-full">
+            <h3 className="text-lg font-semibold mb-4">
+              Are you sure you want to delete this address?
+            </h3>
+            <div className="flex justify-between">
+              <button
+                onClick={closeDelete}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md"
+              >
+                No
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-md"
+              >
+                Yes,Delete Address
+              </button>
+            </div>
           </div>
         </div>
       )}
-
-      {/* Address Form */}
-      {showAddForm && (
-        <form onSubmit={handleSubmit} className="mt-4 border border-gray-300 rounded-md p-4 bg-white">
-          <h3 className="text-lg font-semibold">{currentAddressId ? "Update Address" : "Add New Address"}</h3>
-
-          <div className="flex flex-col space-y-2 mt-2">
-            <label>
-              Street Name:
-              <input
-                type="text"
-                name="streetName"
-                value={addressDetails.streetName}
-                onChange={handleInputChange}
-                className={`border ${errors.streetName ? 'border-red-500' : 'border-gray-300'} rounded-md p-2 w-full`}
-              />
-              {errors.streetName && <span className="text-red-500 text-sm">{errors.streetName}</span>}
-            </label>
-            <label>
-              Street Number:
-              <input
-                type="text"
-                name="streetNumber"
-                value={addressDetails.streetNumber}
-                onChange={handleInputChange}
-                className={`border ${errors.streetNumber ? 'border-red-500' : 'border-gray-300'} rounded-md p-2 w-full`}
-              />
-              {errors.streetNumber && <span className="text-red-500 text-sm">{errors.streetNumber}</span>}
-            </label>
-            <label>
-              Floor/Unit:
-              <input
-                type="text"
-                name="floorUnit"
-                value={addressDetails.floorUnit}
-                onChange={handleInputChange}
-                className="border border-gray-300 rounded-md p-2 w-full"
-              />
-            </label>
-            <label>
-              City:
-              <input
-                type="text"
-                name="city"
-                value={addressDetails.city}
-                onChange={handleInputChange}
-                className={`border ${errors.city ? 'border-red-500' : 'border-gray-300'} rounded-md p-2 w-full`}
-              />
-              {errors.city && <span className="text-red-500 text-sm">{errors.city}</span>}
-            </label>
-            <label>
-              State:
-              <input
-                type="text"
-                name="state"
-                value={addressDetails.state}
-                onChange={handleInputChange}
-                className={`border ${errors.state ? 'border-red-500' : 'border-gray-300'} rounded-md p-2 w-full`}
-              />
-              {errors.state && <span className="text-red-500 text-sm">{errors.state}</span>}
-            </label>
-            <label>
-              Postal Code:
-              <input
-                type="text"
-                name="postalCode"
-                value={addressDetails.postalCode}
-                onChange={handleInputChange}
-                className={`border ${errors.postalCode ? 'border-red-500' : 'border-gray-300'} rounded-md p-2 w-full`}
-              />
-              {errors.postalCode && <span className="text-red-500 text-sm">{errors.postalCode}</span>}
-            </label>
-            <label>
-              Country:
-              <input
-                type="text"
-                name="country"
-                value={addressDetails.country}
-                onChange={handleInputChange}
-                className={`border ${errors.country ? 'border-red-500' : 'border-gray-300'} rounded-md p-2 w-full`}
-              />
-              {errors.country && <span className="text-red-500 text-sm">{errors.country}</span>}
-            </label>
-            <label>
-              Landmark:
-              <input
-                type="text"
-                name="landmark"
-                value={addressDetails.landmark}
-                onChange={handleInputChange}
-                className="border border-gray-300 rounded-md p-2 w-full"
-              />
-            </label>
-            <label>
-  Location Type:
-  <select
-    name="locationType"
-    value={addressDetails.locationType}
-    onChange={handleInputChange}
-    className="border border-gray-300 rounded-md p-2 w-full"
-  >
-    <option value="">Select location type</option>
-    <option value="home">Home</option>
-    <option value="work">Work</option>
-    <option value="apartment">Apartment</option>
-    <option value="friend_family">Friend/Family</option>
-    <option value="po_box">PO Box</option>
-    <option value="office">Office</option>
-    <option value="pickup_point">Pickup Point</option>
-    <option value="vacation">Vacation</option>
-    <option value="school">School</option>
-    <option value="other">Other</option>
-  </select>
-</label>
-
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="default"
-                checked={addressDetails.default}
-                onChange={handleInputChange}
-                className="rounded-md"
-              />
-              <span>Set as Default Address</span>
-            </label>
-          </div>
-
-          <div className="flex justify-end mt-4">
-            <button type="button" onClick={() => { setShowAddForm(false); resetAddressDetails(); }} className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-md mr-2 transition duration-300 ease-in-out">Cancel</button>
-            <button type="submit" className={`px-4 py-2 rounded-md ${isLoading ? 'bg-gray-400' : 'bg-[#388A94] hover:bg-[#1A3B47] transition duration-300 ease-in-out'} text-white`}>
-              {isLoading ? 'Processing...' : 'Submit'}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Add New Address Button */}
-      <button
-        onClick={() => { setShowAddForm(true); resetAddressDetails(); }}
-        className="flex items-center justify-center w-full py-2 bg-[#F88C33] text-white rounded-md hover:bg-orange-500 transition duration-300 ease-in-out mb-4"
-      >
-        Add New Address
-      </button>
     </div>
   );
 }
+

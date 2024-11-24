@@ -1,0 +1,111 @@
+/* Styling for the custom scrollbar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background-color: #388A94;
+  border-radius: 20px;
+}
+
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #388A94 transparent;
+}
+
+/* Initial state of the submenu items - hidden */
+.sidebar-scroll .submenu-entering {
+  opacity: 0;               /* Make submenu items fully invisible */
+  visibility: hidden;       /* Prevent submenu from being interactable */
+  height: 0;                /* Collapse the submenu */
+  overflow: hidden;         /* Prevent content from overflowing */
+  transition: height 0.5s ease-in-out, opacity 0.5s ease-in-out;  /* Apply transition only to height and opacity */
+}
+
+/* When the category is open */
+.sidebar-scroll .open-category ul.submenu-entering {
+  opacity: 1;               /* Make the submenu visible */
+  visibility: visible;      /* Allow interaction with submenu */
+  height: auto;             /* Allow height to expand */
+  transition: height 1s ease-in-out; /* Ensure smooth height transition */
+}
+
+/* Apply slide-in and fade-in animation to each item individually */
+.sidebar-scroll .open-category ul.submenu-entering > li {
+  opacity: 0;               /* Items are hidden initially */
+  transform: translateX(-10px); /* Items start from the left */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; /* Apply opacity and transform transitions */
+}
+
+/* Sequential delay for each child (e.g., 7 items) */
+.sidebar-scroll .open-category ul.submenu-entering > li:nth-child(1) {
+  transition-delay: 0s; /* No delay for the first item */
+}
+.sidebar-scroll .open-category ul.submenu-entering > li:nth-child(2) {
+  transition-delay: 0.1s; /* Slight delay for the second item */
+}
+.sidebar-scroll .open-category ul.submenu-entering > li:nth-child(3) {
+  transition-delay: 0.2s;
+}
+.sidebar-scroll .open-category ul.submenu-entering > li:nth-child(4) {
+  transition-delay: 0.3s;
+}
+.sidebar-scroll .open-category ul.submenu-entering > li:nth-child(5) {
+  transition-delay: 0.4s;
+}
+.sidebar-scroll .open-category ul.submenu-entering > li:nth-child(6) {
+  transition-delay: 0.5s;
+}
+.sidebar-scroll .open-category ul.submenu-entering > li:nth-child(7) {
+  transition-delay: 0.6s;
+}
+
+/* When items are visible (after open-category triggers) */
+.sidebar-scroll .open-category ul.submenu-entering > li {
+  opacity: 1; /* Fade in */
+  transform: translateX(0); /* Slide into place */
+}
+
+/* Apply animation for submenu items (alternative approach) */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Apply the animation to the list items (if you're using the keyframes approach) */
+.sidebar-scroll ul.submenu-entering > li {
+  animation: slideIn 0.5s ease-in-out forwards;
+}
+
+/* Delays for 7 children */
+.sidebar-scroll ul.submenu-entering > li:nth-child(1) {
+  animation-delay: 0s;
+}
+.sidebar-scroll ul.submenu-entering > li:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.sidebar-scroll ul.submenu-entering > li:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.sidebar-scroll ul.submenu-entering > li:nth-child(4) {
+  animation-delay: 0.3s;
+}
+.sidebar-scroll ul.submenu-entering > li:nth-child(5) {
+  animation-delay: 0.4s;
+}
+.sidebar-scroll ul.submenu-entering > li:nth-child(6) {
+  animation-delay: 0.5s;
+}
+.sidebar-scroll ul.submenu-entering > li:nth-child(7) {
+  animation-delay: 0.6s;
+}

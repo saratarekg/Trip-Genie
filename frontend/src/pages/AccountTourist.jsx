@@ -27,12 +27,15 @@ import {
   Plane,
   Hotel,
   Bookmark,
+  ChevronLeft,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Popup from "@/components/popup";
 import "@/styles/Popup.css";
+import Sidebar from '@/components/Sidebar';
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -55,8 +58,12 @@ import { TouristProfileComponent } from "@/components/touristProfile";
 import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";
+import TouristItineraries from "@/pages/TouristItineraries";
+
 import FAQ from "@/pages/FAQs";
 import TouristAttendedActivities from "@/pages/TouristAttended";
+import TouristAttendedItineraries from "@/pages/TouristAttendedItineraries";
+
 import UpcomingTransportation from "@/pages/TransportationUpcomming";
 import HistoryTransportation from "@/pages/TransportationHistory";
 import AddCard from "@/pages/AddCard";
@@ -78,7 +85,7 @@ const AccountInfo = ({ user }) => {
     case "tour-guide":
       return <TourGuideProfileComponent />;
     case "tourist":
-      return <TouristProfileComponent />;
+      return <TouristProfileComponent tourist={user} />;
     default:
       return (
         <div>
@@ -327,6 +334,14 @@ const History = ({ user }) => {
   }
 };
 
+const HistoryItineraries = ({ user }) => {
+  if (user.role === "tourist") {
+    return <TouristAttendedItineraries />;
+  } else {
+    return <div>History not available for {user.role}</div>;
+  }
+};
+
 const UpcommingTransportationBooking = ({ user }) => {
   if (user.role === "tourist") {
     return <UpcomingTransportation />;
@@ -336,6 +351,17 @@ const UpcommingTransportationBooking = ({ user }) => {
     );
   }
 };
+
+const UpcomingItineraries = ({ user }) => {
+  if (user.role === "tourist") {
+    return <TouristItineraries />;
+  } else {
+    return (
+      <div>Upcomming Itineraries are not available for {user.role}</div>
+    );
+  }
+};
+
 
 const HistoryTransportationBooking = ({ user }) => {
   if (user.role === "tourist") {
@@ -793,8 +819,14 @@ export default function AccountManagement() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   const getUserRole = () => Cookies.get("role") || "guest";
+  const role = getUserRole();
+
+
+
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -875,8 +907,12 @@ export default function AccountManagement() {
         return <Wishlist user={user} />;
       case "history":
         return <History user={user} />;
-      case "upcoming":
+        case "historyItineraries":
+        return <HistoryItineraries user={user} />;
+      case "upcomingActivities":
         return <Upcoming user={user} />;
+        case "upcomingItineraries":
+        return <UpcomingItineraries user={user} />;
       case "upcomingTransportation":
         return <UpcommingTransportationBooking user={user} />;
       case "historyTransportation":
@@ -924,9 +960,15 @@ export default function AccountManagement() {
   const menuStructure = {
     "Upcoming Bookings": [
       {
-        name: "Activities & Itineraries",
+        name: "Activities",
         icon: Calendar,
-        tab: "upcoming",
+        tab: "upcomingActivities",
+        roles: ["tourist"],
+      },
+      {
+        name: "Itineraries",
+        icon: Calendar,
+        tab: "upcomingItineraries",
         roles: ["tourist"],
       },
       {
@@ -938,7 +980,13 @@ export default function AccountManagement() {
     ],
     History: [
       {
-        name: "Activities & Itineraries",
+        name: "Itineraries",
+        icon: HistoryIcon,
+        tab: "historyItineraries",
+        roles: ["tourist"],
+      },
+      {
+        name: "Activities",
         icon: HistoryIcon,
         tab: "history",
         roles: ["tourist"],
@@ -951,8 +999,8 @@ export default function AccountManagement() {
       },
     ],
     // Products: [
-    //   // { name: "Cart", icon: ShoppingCartIcon, tab: "cart", roles: ["tourist"] },
-    //   // { name: "Wishlist", icon: Heart, tab: "wishlist", roles: ["tourist"] },
+    //   { name: "Cart", icon: ShoppingCartIcon, tab: "cart", roles: ["tourist"] },
+    //   { name: "Wishlist", icon: Heart, tab: "wishlist", roles: ["tourist"] },
     // ],
     "Settings and Privacy": [
       {
@@ -987,30 +1035,30 @@ export default function AccountManagement() {
         tab: "preferences",
         roles: ["tourist"],
       },
-      {
-        name: "Points and Wallet",
-        icon: Wallet,
-        tab: "redeem-points",
-        roles: ["tourist"],
-      },
-      {
-        name: "Set Currency",
-        icon: DollarSign,
-        tab: "currency",
-        roles: ["tourist"],
-      },
-      {
-        name: "Add credit/debit cards",
-        icon: CreditCard,
-        tab: "add-card",
-        roles: ["tourist"],
-      },
-      {
-        name: "Add Shipping Address",
-        icon: HomeIcon,
-        tab: "add-ship",
-        roles: ["tourist"],
-      },
+      // {
+      //   name: "Points and Wallet",
+      //   icon: Wallet,
+      //   tab: "redeem-points",
+      //   roles: ["tourist"],
+      // },
+      // {
+      //   name: "Set Currency",
+      //   icon: DollarSign,
+      //   tab: "currency",
+      //   roles: ["tourist"],
+      // },
+      // {
+      //   name: "Add credit/debit cards",
+      //   icon: CreditCard,
+      //   tab: "add-card",
+      //   roles: ["tourist"],
+      // },
+      // {
+      //   name: "Add Shipping Address",
+      //   icon: HomeIcon,
+      //   tab: "add-ship",
+      //   roles: ["tourist"],
+      // },
       {
         name: "Delete Account",
         icon: Trash2,
@@ -1019,12 +1067,12 @@ export default function AccountManagement() {
       },
     ],
     "Help and Support": [
-      {
-        name: "File a Complaint",
-        icon: AlertTriangle,
-        tab: "complain",
-        roles: ["tourist"],
-      },
+      // {
+      //   name: "File a Complaint",
+      //   icon: AlertTriangle,
+      //   tab: "complain",
+      //   roles: ["tourist"],
+      // },
       {
         name: "My Complaints",
         icon: FileText,
@@ -1063,14 +1111,7 @@ export default function AccountManagement() {
     //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     // ],
-    "Give Feedback": [
-      {
-        name: "Feedback",
-        icon: MessageSquare,
-        tab: "feedback",
-        roles: ["tourist"],
-      },
-    ],
+  
   };
 
   const LogoutPopup = ({ onConfirm, onCancel }) => {
@@ -1122,91 +1163,29 @@ export default function AccountManagement() {
     setShowPopup(false);
   };
 
-  const role = getUserRole();
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
 
-  return (
+
+   return (
     <div>
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-      <div className="container mx-auto px-4 py-4 mt-4">
-        <h1 className="text-3xl font-bold mb-8">My Account</h1>
-
-        <div className="flex flex-col md:flex-row gap-8">
-          <aside className="w-full md:w-[16.6667%]">
-            <nav>
-              <ul className="space-y-2">
-                {Object.entries(menuStructure).map(([category, items]) => {
-                  const filteredItems = items.filter((item) =>
-                    item.roles.includes(role)
-                  );
-                  if (filteredItems.length === 0) return null;
-
-                  return (
-                    <li key={category} className="mb-4">
-                      <button
-                        onClick={() =>
-                          setExpandedMenu(
-                            expandedMenu === category ? null : category
-                          )
-                        }
-                        className="flex items-center justify-between w-full text-left text-gray-700 hover:text-orange-500 py-2"
-                      >
-                        <span>{category}</span>
-                        <ChevronRight
-                          className={`h-5 w-5 transform transition-transform ${
-                            expandedMenu === category ? "rotate-90" : ""
-                          }`}
-                        />
-                      </button>
-                      {expandedMenu === category && (
-                        <ul className="ml-4 mt-2 space-y-2">
-                          {filteredItems.map((item) => (
-                            <li key={item.tab}>
-                              <button
-                                onClick={() => handleTabClick(item.tab)}
-                                className={`flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left ${
-                                  activeTab === item.tab
-                                    ? "text-orange-500 font-medium border-l-4 border-orange-500 pl-2"
-                                    : ""
-                                }`}
-                              >
-                                <item.icon className="h-5 w-5 mr-3" />
-                                {item.name}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  );
-                })}
-                <li>
-                  <button
-                    onClick={handleLogoutClick}
-                    className="flex items-center text-gray-700 hover:text-orange-500 py-2 w-full text-left"
-                  >
-                    <LogOut className="h-5 w-5 mr-3" />
-                    Logout
-                  </button>
-                  {showPopup && (
-                    <LogoutPopup
-                      onConfirm={handleConfirmLogout}
-                      onCancel={handleCancelLogout}
-                    />
-                  )}
-                </li>
-              </ul>
-            </nav>
-          </aside>
-
-          <main className="w-full md:w-[86.6667%]">
-            <div className="bg-white p-6 rounded-lg shadow">
-              {renderContent()}
-            </div>
-          </main>
-        </div>
-
+      <div className="flex min-h-screen bg-gray-100">
+        <Sidebar
+          menuStructure={menuStructure}
+          role={role}
+          activeTab={activeTab}
+          onTabClick={handleTabClick}
+        />
+        <main className=" flex-1 p-8">
+          <div className="w-full mx-auto">
+            {renderContent()}
+          </div>
+        </main>
+        
         {showDeleteAccount && (
           <DeleteAccount onClose={() => setShowDeleteAccount(false)} />
         )}
@@ -1214,3 +1193,4 @@ export default function AccountManagement() {
     </div>
   );
 }
+

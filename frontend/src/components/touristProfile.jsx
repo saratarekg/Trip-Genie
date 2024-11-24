@@ -1,39 +1,27 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import axios from "axios";
-import Flag from 'react-world-flags';
-import Cookies from "js-cookie";
-import {
-  Mail,
-  Phone,
-  User,
-  AtSign,
+'use client'
 
-  Calendar,
-  Wallet,
-  GraduationCap,
-  Award,
-  Star,
-  BriefcaseBusiness,
-  Camera,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import PhoneInput from "react-phone-input-2";
-import { ImageCropper } from "@/components/ImageCropper";
-import { X, ZoomIn, ZoomOut } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import "react-phone-input-2/lib/style.css";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import zIndex from "@mui/material/styles/zIndex";
-import { Modal } from "@/components/Modal";
+import React, { useState, useEffect, useCallback } from "react"
+import axios from "axios"
+import Flag from 'react-world-flags'
+import Cookies from "js-cookie"
+import { format, isToday, isThisWeek, isThisMonth, isThisYear } from 'date-fns'
+import { Activity, ShoppingCart, Plane, Calendar, Wallet, Award, Bell, ShoppingBasket, Bus, Map, User } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Modal } from "@/components/Modal"
+import { ImageCropper } from "@/components/ImageCropper"
+import ShippingAddress from "@/pages/AddShippingAddress"
+import Popup from "@/components/popup"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import PhoneInput from "react-phone-input-2"
+import "react-phone-input-2/lib/style.css"
+import { parsePhoneNumberFromString } from "libphonenumber-js"
+import { Label } from "@/components/ui/label"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 const convertUrlToBase64 = async (url) => {
   const response = await fetch(url);
@@ -45,9 +33,32 @@ const convertUrlToBase64 = async (url) => {
   });
 };
 
-// Custom validator for mobile number
+const getTransactionIcon = (details) => {
+  if (details.toLowerCase().includes('activity')) return <Activity className="w-6 h-6" />;
+  if (details.toLowerCase().includes('itinerary')) return <Map  className="w-6 h-6" />;
+  if (details.toLowerCase().includes('transportation')) return <Bus className="w-6 h-6" />;
+  if (details.toLowerCase().includes('order')) return <ShoppingBasket  className="w-6 h-6" />;
+  return <Wallet className="w-6 h-6" />;
+};
+
+const groupTransactionsByDate = (transactions) => {
+  const grouped = {};
+  transactions.forEach(transaction => {
+    const date = new Date(transaction.timestamp);
+    let key;
+    if (isToday(date)) key = 'Today';
+    else if (isThisWeek(date)) key = 'This Week';
+    else if (isThisMonth(date)) key = 'This Month';
+    else if (isThisYear(date)) key = 'This Year';
+    else key = format(date, 'MMMM yyyy');
+
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(transaction);
+  });
+  return grouped;
+};
+
 const phoneValidator = (value) => {
-  console.log("value", value);
   const phoneNumber = parsePhoneNumberFromString("+" + value);
   return phoneNumber ? phoneNumber.isValid() : false;
 };
@@ -62,6 +73,7 @@ export function TouristProfileComponent() {
   const [nationalities, setNationalities] = useState([]);
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [currencyCode, setCurrencyCode] = useState(null);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isImageModalOpen, setImageModalOpen] = useState(false);
@@ -70,8 +82,35 @@ export function TouristProfileComponent() {
   const [newImage, setNewImage] = useState(false);
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
   const [base64Image, setBase64Image] = useState(null);
+  const [rates, setRates] = useState({});
+  const [currencies, setCurrencies] = useState([]);
+  const [activeTab, setActiveTab] = useState("wallet");
 
   const getUserRole = () => Cookies.get("role") || "guest";
+
+  const convertCurrency = useCallback((amount, fromCurrency, toCurrency) => {
+    console.log(amount, fromCurrency, toCurrency, rates);
+    if (typeof fromCurrency === "string" && typeof toCurrency === "string") {
+      return (amount / rates[fromCurrency]) * rates[toCurrency];
+    }
+    else if (typeof fromCurrency !== "string" && typeof toCurrency === "string") {
+      return (amount / rates[fromCurrency.code]) * rates[toCurrency];
+    }
+    else if (typeof fromCurrency !== "string" && typeof toCurrency !== "string") {
+      return (amount / rates[fromCurrency?.code]) * rates[toCurrency?.code];
+    }
+   else if (typeof fromCurrency === "string" && typeof toCurrency !== "string") {
+      return (amount / rates[fromCurrency]) * rates[toCurrency?.code];
+    }
+   else if (!rates[fromCurrency] || !rates[toCurrency.code]) return amount;
+    return (amount / rates[fromCurrency]) * rates[toCurrency?.code];
+  }, [rates]);
+
+  const formatCurrency = useCallback((amount, currency) => {
+    console.log(amount,currency);
+    const currencyInfo = currencies.find((c) => c.code === currencyCode);
+    return `${currencyInfo ? currencyInfo.symbol : ""}${amount.toFixed(2)}`;
+  }, [currencies]);
 
   useEffect(() => {
     const fetchTouristProfile = async () => {
@@ -83,7 +122,6 @@ export function TouristProfileComponent() {
           headers: { Authorization: `Bearer ${token}` },
         });
         response.data.mobile = response.data.mobile.slice(1);
-        console.log("response.data", response.data);
         setTourist(response.data);
         setEditedTourist(response.data);
         setSelectedImage(response.data.profilePicture);
@@ -103,14 +141,47 @@ export function TouristProfileComponent() {
     fetchTouristProfile();
   }, []);
 
+  useEffect(() => {
+    const fetchNationalities = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:4000/api/nationalities"
+        );
+        setNationalities(response.data);
+      } catch (error) {
+        console.error("Error fetching nationalities:", error);
+      }
+    };
+    fetchNationalities();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (activeTab === "wallet") {
+        try {
+          const token = Cookies.get("jwt");
+          const [ratesResponse, currenciesResponse] = await Promise.all([
+            axios.get("http://localhost:4000/rates", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get("http://localhost:4000/tourist/currencies", {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
+          setRates(ratesResponse.data.rates);
+          setCurrencies(currenciesResponse.data);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      }
+    };
+    fetchData();
+  }, [activeTab]);
+
   const openModal = () => {
     setModalOpen(true);
-    setDropdownOpen(false); // Close the dropdown when opening the modal
+    setDropdownOpen(false);
   };
-
-  // const closeModal = () => {
-  //   setModalOpen(false);
-  // };
 
   const toggleDropdown = () => {
     setDropdownOpen(!isDropdownOpen);
@@ -152,6 +223,7 @@ export function TouristProfileComponent() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      setCurrencyCode(response.data.code);
       setCurrencySymbol(response.data.symbol);
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
@@ -177,29 +249,15 @@ export function TouristProfileComponent() {
     setModalOpen(false);
     setImageModalOpen(false);
   };
+
   const handleImageCropped = (newImage) => {
     setNewImage(newImage);
-    console.log("newImage");
   };
+
   const handleFirstSave = () => {
     setSelectedImage(newImage);
-
     setShowModal(false);
   };
-
-  useEffect(() => {
-    const fetchNationalities = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:4000/api/nationalities"
-        );
-        setNationalities(response.data);
-      } catch (error) {
-        console.error("Error fetching nationalities:", error);
-      }
-    };
-    fetchNationalities();
-  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } =
@@ -218,10 +276,12 @@ export function TouristProfileComponent() {
     setSelectedImage(tourist.profilePicture)
     setDropdownOpen(false);
     setIsEditing(false);
+    setValidationMessages({});
+
   };
 
   const validateFields = () => {
-    const { email, mobile, nationality, jobOrStudent } = editedTourist;
+    const { email, mobile, nationality, jobOrStudent, fname, lname } = editedTourist;
     const messages = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -236,8 +296,9 @@ export function TouristProfileComponent() {
       messages.mobile = "Invalid phone number.";
     }
     if (!nationality) messages.nationality = "Nationality is required.";
-    if (!jobOrStudent)
-      messages.jobOrStudent = "Job or student status is required.";
+    if (!jobOrStudent) messages.jobOrStudent = "Occupation is required.";
+    if (!fname) messages.fname = "First name is required.";
+    if (!lname) messages.lname = "Last name is required.";
 
     setValidationMessages(messages);
     return Object.keys(messages).length === 0;
@@ -247,9 +308,11 @@ export function TouristProfileComponent() {
     if (!validateFields()) return;
 
     try {
-      console.log("editedTourist", editedTourist);
       const finalTourist = { ...editedTourist };
       finalTourist.mobile = "+" + editedTourist.mobile;
+      finalTourist.fname = editedTourist.fname;
+      finalTourist.lname = editedTourist.lname;
+
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const api = `http://localhost:4000/${role}`;
@@ -265,6 +328,7 @@ export function TouristProfileComponent() {
         setTourist(response.data.tourist);
         setIsEditing(false);
         setError("");
+        setValidationMessages({});
       }
     } catch (err) {
       if (err.response?.data?.message === "Email already exists") {
@@ -275,6 +339,317 @@ export function TouristProfileComponent() {
     }
   };
 
+  const handleRedeemPoints = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const api = `http://localhost:4000/${role}/redeem-points`;
+      const response = await axios.post(
+        api,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setTourist((prevTourist) => ({
+        ...prevTourist,
+        wallet: response.data.walletBalance,
+        loyaltyPoints: response.data.remainingPoints,
+      }));
+
+      return response.data;
+    } catch (error) {
+      console.error("Error redeeming points:", error);
+      throw new Error(
+        error.response?.data?.error ||
+          "Failed to redeem points. Please try again."
+      );
+    }
+  };
+
+  const RedeemPoints = ({ user, onRedeemPoints }) => {
+    const [isRedeeming, setIsRedeeming] = useState(false);
+    const [redeemError, setRedeemError] = useState(null);
+    const [redeemSuccess, setRedeemSuccess] = useState(null);
+    const [preferredCurrency, setPreferredCurrency] = useState("USD");
+  
+    useEffect(() => {
+      const fetchUserInfo = async () => {
+        const role = Cookies.get("role") || "guest";
+        if (role === "tourist") {
+          try {
+            const token = Cookies.get("jwt");
+            if (!token) {
+              console.error("No JWT token found");
+              return;
+            }
+const response = await axios.get("http://localhost:4000/tourist/", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const currencyId = response.data.preferredCurrency;
+    
+            if (currencyId) {
+              const response2 = await axios.get(
+                `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              );
+              setPreferredCurrency(response2.data);
+            } else {
+              console.error("No preferred currency found for user");
+            }
+          } catch (error) {
+            console.error("Error fetching user profile:", error);
+          }
+        }
+      };
+      fetchUserInfo();
+    }, []);
+  
+    const convertedWalletAmount = convertCurrency(
+      user.wallet,
+      "USD",
+      preferredCurrency
+    );
+    const pointsValueInEGP = user.loyaltyPoints / 100;
+    const pointsValueInUSD = convertCurrency(pointsValueInEGP, "EGP", "USD");
+    const pointsValueInPreferredCurrency = convertCurrency(
+      pointsValueInUSD,
+      "USD",
+      preferredCurrency
+    );
+  
+    const handleRedeemClick = async () => {
+      setIsRedeeming(true);
+      setRedeemError(null);
+      setRedeemSuccess(null);
+  
+      try {
+        await onRedeemPoints(user.loyaltyPoints);
+        setRedeemSuccess(`Successfully redeemed ${user.loyaltyPoints} points`);
+      } catch (error) {
+        setRedeemError(
+          error.message || "An error occurred while redeeming points"
+        );
+      } finally {
+        setIsRedeeming(false);
+      }
+    };
+  
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Redeem Loyalty Points</CardTitle>
+          <CardDescription>Convert your loyalty points into wallet balance.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">Available Wallet Balance:</span>
+            <span className="text-lg font-bold text-[#388A94]">
+              {formatCurrency(convertedWalletAmount, preferredCurrency)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium">Loyalty Points:</span>
+            <span className="text-lg font-bold text-[#1A3B47]">
+              {(user.loyaltyPoints).toFixed(2)} points
+            </span>
+          </div>
+          <Button
+            onClick={handleRedeemClick}
+            disabled={isRedeeming || user.loyaltyPoints === 0}
+            className="w-full text-base text-[#388A94] bg-gray-200 hover:bg-gray-300"
+          >
+            {isRedeeming
+              ? "Redeeming..."
+              : `Redeem Points for ${formatCurrency(
+                  pointsValueInPreferredCurrency,
+                  preferredCurrency
+                )}`}
+          </Button>
+        </CardContent>
+        <CardFooter>
+          {redeemError && (
+            <p className="text-red-500 text-sm">{redeemError}</p>
+          )}
+          {redeemSuccess && (
+            <p className="text-green-500 text-sm">{redeemSuccess}</p>
+          )}
+        </CardFooter>
+      </Card>
+    );
+  };
+  
+  const CurrencyApp = ({ user }) => {
+    const [currencies, setCurrencies] = useState([]);
+    const [preferredCurrency, setPreferredCurrency] = useState(null);
+    const [selectedCurrency, setSelectedCurrency] = useState("");
+  
+    const fetchPreferredCurrencyCode = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const codeResponse = await axios.get(
+          "http://localhost:4000/tourist/currencies/idd",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const preferredCurrencyCode = codeResponse.data;
+        console.log("Preferred Currency Code:", preferredCurrencyCode);
+
+        const currencyResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${preferredCurrencyCode}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setPreferredCurrency(currencyResponse.data);
+      } catch (error) {
+        console.error("Error fetching preferred currency details:", error);
+      }
+    };
+  
+    useEffect(() => {
+      const fetchSupportedCurrencies = async () => {
+        try {
+          const token = Cookies.get("jwt");
+          const response = await axios.get(
+            "http://localhost:4000/tourist/currencies",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setCurrencies(response.data);
+        } catch (error) {
+          console.error("Error fetching supported currencies:", error);
+        }
+      };
+
+      fetchSupportedCurrencies();
+      fetchPreferredCurrencyCode();
+    }, [user]);
+  
+    const handleSetPreferredCurrency = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        await axios.post(
+          "http://localhost:4000/tourist/currencies/set",
+          { currencyId: selectedCurrency },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        openSuccessPopup("Preferred currency set successfully!");
+
+        fetchPreferredCurrencyCode();
+      } catch (error) {
+        console.error("Error setting preferred currency:", error);
+        openErrorPopup(error);
+      }
+    };
+  
+    const [popupType, setPopupType] = useState("");
+    const [popupOpen, setPopupOpen] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+  
+    const openSuccessPopup = (message) => {
+      setPopupType("success");
+      setPopupOpen(true);
+      setPopupMessage(message);
+    };
+  
+    const openErrorPopup = (message) => {
+      setPopupType("error");
+      setPopupOpen(true);
+      setPopupMessage(message);
+    };
+  
+    const closePopup = () => {
+      setPopupOpen(false);
+    };
+  
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Preferred Currency</CardTitle>
+          <CardDescription>
+            {preferredCurrency
+              ? `Current: ${preferredCurrency.name} (${preferredCurrency.code})`
+              : "Loading..."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="currency-select">Select New Preferred Currency</Label>
+              <Select
+                value={selectedCurrency}
+                onValueChange={(value) => setSelectedCurrency(value)}
+              >
+                <SelectTrigger id="currency-select">
+                  <SelectValue placeholder="Choose Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencies.map((currency) => (
+                    <SelectItem key={currency._id} value={currency._id}>
+                      {currency.name} ({currency.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              onClick={handleSetPreferredCurrency}
+              disabled={!selectedCurrency}
+              className="w-full bg-[#388A94] hover:bg-[#2e6b77]"
+            >
+              Set Preferred Currency
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const getDefaultAddress = () => {
+    const defaultAddress = tourist.shippingAddresses.find(addr => addr.default);
+    return defaultAddress
+      ? {
+          streetName: defaultAddress.streetName,
+          city: defaultAddress.city,
+          postalCode: defaultAddress.postalCode,
+        }
+      : null;
+  };
+
+  const getBadgeColor = () => {
+    switch (tourist.loyaltyBadge) {
+      case "Bronze":
+        return "bg-amber-600";
+      case "Silver":
+        return "bg-gray-400";
+      case "Gold":
+        return "bg-yellow-400";
+      default:
+        return "bg-gray-200";
+    }
+  };
+
+  const CustomFlag = ({ countryCode }) => {
+    return (
+      <Flag
+        code={countryCode}
+        style={{
+          width: 25,
+          height: 17,
+          borderRadius: '4px',
+          overflow: 'hidden',
+        }}
+      />
+    );
+  };
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -301,92 +676,43 @@ export function TouristProfileComponent() {
     );
   }
 
-  const getBadgeColor = () => {
-    switch (tourist.loyaltyBadge) {
-      case "Bronze":
-        return "bg-amber-600 text-white hover:bg-amber-600 hover:text-white";
-      case "Silver":
-        return "bg-gray-400 text-white hover:bg-gray-400 hover:text-white";
-      case "Gold":
-        return "bg-yellow-400 text-white hover:bg-yellow-400 hover:text-white";
-      default:
-        return "bg-gray-200 text-gray-800 hover:bg-gray-200 hover:text-gray-800";
-    }
-  };
-
   return (
-    <div className="bg-beige-100 min-h-screen py-10 flex justify-center">
-      <div className="w-full max-w-3xl bg-white shadow-xl rounded-lg p-8">
-        {/* Profile Image Section */}
-        <div className="flex justify-center mb-8 relative">
+    <div className="container mx-auto px-4">
+    <h1 className="text-3xl font-bold mb-2">My Account</h1>
+    <p className="text-sm text-gray-500 mb-6">Settings / Account</p>
+    
+      <div className="grid grid-cols-12 gap-6">
+        {/* Merged Profile Picture and Info Card - 8 columns */}
+        <Card className="col-span-7">
+  <CardContent className="py-4">
+    <div className="flex">
+      {/* Profile Picture Section */}
+      <div className="w-1/3 pr-4">
+        <div className="relative">
           <button
-            className="w-32 h-32 bg-gray-300 rounded-full overflow-hidden shadow-xl flex justify-center items-center"
+            className="w-24 h-24 mx-auto bg-gray-200 rounded-full overflow-hidden flex items-center justify-center"
             onClick={toggleDropdown}
             disabled={!selectedImage && !isEditing}
           >
             {selectedImage ? (
-              selectedImage.public_id ? (
-                <img
-                  src={selectedImage.url}
-                  alt="User"
-                  className="w-32 h-32 rounded-full"
-                />
-              ) : (
-                <img
-                  src={selectedImage}
-                  alt="User"
-                  className="w-32 h-32 rounded-full"
-                />
-              )
+              <img
+                src={selectedImage.url || selectedImage}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
             ) : (
-              <User className="w-12 h-12 text-white" />
+              <User className="w-10 h-10 text-gray-400" />
+            )}
+            {isEditing && (
+              <div className="h-24 w-24 absolute bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs text-center">
+                  Edit Profile Picture
+                </span>
+              </div>
             )}
           </button>
-          <div className="absolute top-full mt-2 left-0 bg-white  rounded-lg shadow-lg z-10 w-32">
-            <Modal show={showModal} onClose={closeModal}>
-              <h2 className="text-lg font-bold mb-4">Update Profile Picture</h2>
-              <ImageCropper
-                onImageCropped={handleImageCropped}
-                currentImage={
-                  selectedImage
-                    ? selectedImage.public_id
-                      ? base64Image
-                      : selectedImage
-                    : null
-                }
-              />
-              <div className="mt-4 flex justify-end">
-                <Button
-                  onClick={handleFirstSave}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
-                >
-                  Save
-                </Button>
-
-                <Button
-                  onClick={closeModal}
-                  className="px-4 py-2 ml-4 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200"
-                >
-                  Close
-                </Button>
-              </div>
-            </Modal>
-          </div>
-
-          {/* Camera Icon */}
-          {isEditing && (
-            <div className="absolute top-20 left-0.4  bg-white p-1 rounded-full shadow-md cursor-pointer">
-              <Camera
-                className="w-5 h-5 text-gray-600"
-                style={{ cursor: "pointer" }}
-                onClick={toggleDropdown}
-              />
-            </div>
-          )}
-
-          {/* Dropdown Menu (View, Update, Delete) */}
           {isDropdownOpen && (
-            <div className="absolute top-full mt-2 top-15 left-0.4 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
+            <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
               <ul className="py-2">
                 {selectedImage && (
                   <li
@@ -422,120 +748,126 @@ export function TouristProfileComponent() {
             </div>
           )}
         </div>
+        <div className="mt-3 text-center">
+          <div className="flex items-center justify-center gap-2">
+            <h2 className="text-xl font-bold">{tourist.username}</h2>
+            <div
+              className={`w-7 h-7 flex items-center justify-center rounded-full ${getBadgeColor()}`}
+            >
+              <Award className="w-4 h-4 text-white" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">{tourist.email}</p>
+        </div>
+        {isEditing ? (
+          <>
+           <div className="mt-4 flex flex-col space-y-2 w-full">
+  <Button
+    onClick={handleUpdate}
+    className="w-full  bg-[#388A94] hover:bg-[#2e6b77]"
+  >
+    Update
+  </Button>
+  <Button
+    onClick={handleDiscard}
+    variant="outline"
+    className="w-full"
+  >
+    Cancel
+  </Button>
+</div>
 
-        {/* Profile Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-black-600">
-            {tourist.username}
-          </h2>
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <AtSign className="w-4 h-4 text-gray-500" />
-            <p className="text-lg font-semibold text-black-600">
-              {tourist.username}
+          </>
+        ) : (
+          <div className="mt-4 flex justify-end w-full">
+            <Button
+              onClick={() => setIsEditing(true)}
+              className="w-full bg-[#1A3B47]"
+            >
+              Edit Profile
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Vertical Separator */}
+      <div className="border-r border-gray-200 mx-4"></div>
+
+      {/* Profile Info Section */}
+      <div className="w-2/3 pl-4 space-y-4">
+        {/* Row 1 */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-xs text-gray-500">First Name</p>
+            {isEditing ? (
+              <div>
+                <Input
+                  type="text"
+                  name="fname"
+                  value={editedTourist.fname}
+                  onChange={handleInputChange}
+                  className={validationMessages.fname ? "border-red-500" : ""}
+                />
+                {validationMessages.fname && (
+                  <p className="text-red-500 text-xs mt-1">{validationMessages.fname}</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm font-medium">{tourist.fname}</p>
+            )}
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Last Name</p>
+            {isEditing ? (
+              <div>
+              <Input
+                type="text"
+                name="lname"
+                value={editedTourist.lname}
+                onChange={handleInputChange}
+                className={validationMessages.lname ? "border-red-500" : ""}
+              />
+               {validationMessages.lname && (
+                  <p className="text-red-500 text-xs mt-1">{validationMessages.lname}</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm font-medium">{tourist.lname}</p>
+            )}
+          </div>
+         
+        </div>
+
+        <Separator />
+
+        {/* Row 2 */}
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <p className="text-xs text-gray-500">Street Address</p>
+            <p className="text-sm font-medium">
+              {getDefaultAddress()?.streetName || "N/A"}
+            </p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">City</p>
+            <p className="text-sm font-medium">{getDefaultAddress()?.city || "N/A"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">ZIP Code</p>
+            <p className="text-sm font-medium">
+              {getDefaultAddress()?.postalCode || "N/A"}
             </p>
           </div>
         </div>
 
-        {/* Badge Section */}
-        <div className="text-center mb-6">
-          <Badge
-            className={`${getBadgeColor()} px-3 py-1 text-lg font-semibold rounded-full inline-flex items-center gap-2 cursor-default`}
-          >
-            <Award className="w-5 h-5" />
-            {tourist.loyaltyBadge}
-          </Badge>
-        </div>
+        <Separator />
 
-        {/* Dividing sections */}
-        <div className="space-y-8">
-          {/* Contact Info Section */}
-          <div className="border-t border-gray-300 pt-4">
-            <h3 className="text-xl font-semibold mb-4 text-black-600">
-              Contact Info
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col">
-                <label htmlFor="email" className="font-semibold text-teal-600">
-                  Email
-                </label>
-                {isEditing ? (
-                  <Input
-                    type="email"
-                    name="email"
-                    value={editedTourist.email}
-                    onChange={handleInputChange}
-                    className={validationMessages.email ? "border-red-500" : ""}
-                    placeholder="Email"
-                  />
-                ) : (
-                  <span>{tourist.email}</span>
-                )}
-                {validationMessages.email && (
-                  <span className="text-red-500 text-sm">
-                    {validationMessages.email}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <label htmlFor="mobile" className="font-semibold text-teal-600">
-                  Phone Number
-                </label>
-                {isEditing ? (
-                  <PhoneInput
-                    style={{ zIndex: 0 }}
-                    country={"eg"}
-                    value={editedTourist.mobile}
-                    onChange={handleInputChange}
-                    excludeCountries={["il"]}
-                    inputProps={{
-                      name: "mobile",
-                      required: true,
-                      placeholder: tourist.mobile,
-                      className: `w-full p-2 ${
-                        validationMessages.mobile
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`,
-                    }}
-                    className="w-full"
-                    inputStyle={{ width: "60%", marginLeft: "45px" }}
-                  />
-                ) : (
-                  <span>{tourist.mobile}</span>
-                )}
-                {validationMessages.mobile && (
-                  <span className="text-red-500 text-sm">
-                    {validationMessages.mobile}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Personal Information Section */}
-          <div className="border-t border-gray-300 pt-4">
-            <h3 className="text-xl font-semibold mb-4 text-black-600">
-              Personal Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col">
-                  <label htmlFor="dob" className="font-semibold text-teal-600">
-                    Date of Birth
-                  </label>
-                  <span>
-                    {new Date(tourist.dateOfBirth).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex flex-col">
-  <label htmlFor="nationality" className="font-semibold text-teal-600">
-    Nationality
-  </label>
-  {isEditing ? (
-    <div className="flex flex-col w-full">
+        {/* Row 3 */}
+        <div className="grid grid-cols-3 gap-4">
+  {/* Nationality field spans two columns */}
+  <div className="col-span-2">
+    <p className="text-xs text-gray-500">Nationality</p>
+    {isEditing ? (
       <Select onValueChange={handleNationalityChange}>
         <SelectTrigger
           className={validationMessages.nationality ? "border-red-500" : ""}
@@ -545,103 +877,244 @@ export function TouristProfileComponent() {
         <SelectContent>
           {nationalities.map((nat) => (
             <SelectItem key={nat._id} value={nat._id}>
-              {/* Display the flag next to the nationality name */}
               <div className="flex items-center gap-2">
-                <Flag code={nat.countryCode} style={{
-    width: 25,
-    height: 17,
-    borderRadius: '4px',  // Adds rounded corners to the flag
-    overflow: 'hidden',   // Ensures the image content is clipped to the border radius
-  }} />
+                <Flag
+                  code={nat.countryCode}
+                  style={{
+                    width: 25,
+                    height: 17,
+                    borderRadius: "4px",
+                    overflow: "hidden",
+                  }}
+                />
                 {nat.name}
               </div>
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {validationMessages.nationality && (
-        <span className="text-red-500 text-sm">
-          {validationMessages.nationality}
-        </span>
-      )}
-    </div>
+    ) : (
+      <p className="text-sm font-medium">{tourist.nationality.name}</p>
+    )}
+  </div>
+
+  {/* Occupation field takes one column */}
+  <div>
+    <p className="text-xs text-gray-500">Occupation</p>
+    {isEditing ? (
+      <div>
+      <Input
+        type="text"
+        name="jobOrStudent"
+        value={editedTourist.jobOrStudent}
+        onChange={handleInputChange}
+        className={validationMessages.jobOrStudent ? "border-red-500" : ""}
+      />
+       {validationMessages.jobOrStudent && (
+                  <p className="text-red-500 text-xs mt-1">{validationMessages.jobOrStudent}</p>
+                )}
+      </div>
+    ) : (
+      <p className="text-sm font-medium">
+        {tourist.jobOrStudent || "Not Specified"}
+      </p>
+    )}
+  </div>
+</div>
+
+{/* Separator */}
+<Separator className="my-4" />
+
+{/* Row 4 (Phone Number and Register Date) */}
+<div className="grid grid-cols-3 gap-4">
+  {/* Phone Number spans two columns */}
+  <div className="col-span-2">
+  <p className="text-xs text-gray-500">Phone Number</p>
+  {isEditing ? (
+  <div className="relative">
+   <PhoneInput
+          country="eg"
+          value={editedTourist.mobile}
+          onChange={(value) =>
+            handleInputChange({ target: { name: 'mobile', value } })
+          }
+          inputProps={{
+            name: 'mobile',
+            required: true,
+            className: `w-full pt-2 pb-2 pl-11 ${validationMessages.mobile ? 'border-red-500' : 'border-gray-300'}`,
+          }}
+          containerClass="w-full"
+          disableDropdown={false}  // Ensures the dropdown is visible
+          // Use a custom flag component for the country code dropdown
+          customFlagComponent={CustomFlag}
+        />
+        {validationMessages.mobile && (
+          <span className="text-red-500 text-xs">{validationMessages.mobile}</span>
+        )}
+      </div>
+
   ) : (
-    <div className="flex items-center gap-2">
-<Flag
-  code={tourist.nationality.countryCode}
-  style={{
-    width: 30,
-    height: 20,
-    borderRadius: '4px',  // Adds rounded corners to the flag
-    overflow: 'hidden',   // Ensures the image content is clipped to the border radius
-  }}
-/>
-      <span>{tourist.nationality ? tourist.nationality.name : "Nationality not set"}</span>
-    </div>
+    <p className="text-sm font-medium">+{tourist.mobile}</p>
   )}
 </div>
-            </div>
+
+
+  {/* Register Date */}
+  <div>
+            <p className="text-xs text-gray-500">Birthday</p>
+            <p className="text-sm font-medium">
+              {new Date(tourist.dateOfBirth).toLocaleDateString()}
+            </p>
           </div>
+</div>
 
-          {/* Account Status Section */}
-          <div className="border-t border-gray-300 pt-4">
-            <h3 className="text-xl font-semibold mb-4 text-black-600">
-              Account Status
-            </h3>
-            <div className="flex items-center gap-2">
-              <label htmlFor="wallet" className="font-semibold text-teal-600">
-                Wallet Balance
-              </label>
-              <span>{formatWallet(tourist.wallet)}</span>
-            </div>
 
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="loyaltyPoints"
-                className="font-semibold text-teal-600"
-              >
-                Loyalty Points
-              </label>
-              <span>{tourist.loyaltyPoints.toLocaleString()} points</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-6 flex justify-center gap-4">
-          {isEditing ? (
-            <>
-              <Button
-                onClick={handleUpdate}
-                className="w-32 bg-orange-500 text-white"
-              >
-                Save Changes
-              </Button>
-              <Button
-                onClick={handleDiscard}
-                className="w-32 bg-gray-500 text-white"
-              >
-                Discard
-              </Button>
-            </>
-          ) : (
-            <Button
-              onClick={() => setIsEditing(true)}
-              className="flex items-center justify-center  py-2 bg-[#F88C33] text-white rounded-md hover:bg-orange-500 transition duration-300 ease-in-out mb-4"
-            >
-              Edit Profile
-            </Button>
-          )}
-        </div>
-
-        {/* Image Viewer Modal */}
-        <Modal
-          show={isImageViewerOpen}
-          onClose={() => setIsImageViewerOpen(false)}
-          isImageViewer={true}
-          imageUrl={selectedImage?.url || selectedImage}
-        />
+        {/* Edit Button below email */}
+        
       </div>
     </div>
-  );
+  </CardContent>
+</Card>
+
+
+
+
+         {/* Shipping Addresses - 4 columns */}
+         <div className="col-span-5">
+          <ShippingAddress addresses={tourist.shippingAddresses} />
+        </div>
+
+        {/* Tabs Section - spans 8 columns */}
+        <div className="col-span-8">
+          <Tabs defaultValue="wallet" onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="wallet">View Wallet Balance</TabsTrigger>
+              <TabsTrigger value="currency">Change Currency</TabsTrigger>
+              <TabsTrigger value="points">Redeem Points</TabsTrigger>
+            </TabsList>
+            <TabsContent value="wallet">
+  <Card>
+    <CardContent className="pt-6">
+      {/* Current Balance */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-lg">Current Balance</span>
+        </div>
+        <span className="text-xl font-bold">
+          {formatWallet(tourist.wallet)}
+        </span>
+      </div>
+
+      {/* Wallet History */}
+      <div className="mt-2 overflow-y-auto max-h-[200px]">
+  <h3 className="text-lg font-semibold mb-2">Wallet History</h3>
+  {tourist.history && Array.isArray(tourist.history) && tourist.history.length > 0 ? (
+    <div className="space-y-4">
+      {Object.entries(groupTransactionsByDate(tourist.history)).map(([date, transactions]) => (
+        <div key={date}>
+          <h4 className="text-md font-semibold mb-2">{date}</h4>
+          <ul className="">
+            {transactions.map((entry, index) => (
+              <li key={index} className="flex justify-between items-center pl-4 pr-4 pb-3 pt-3 bg-white rounded-md">
+                <div className="flex items-center gap-3">
+                  <div className="bg-gray-100 rounded-full p-2">
+                    {getTransactionIcon(entry.details)}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">
+                      {entry.details || "Transaction"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                    {format(new Date(entry.timestamp), 'dd,MM,yyyy HH:mm')}
+                    </p>
+                  </div>
+                </div>
+                <div
+                  className={`text-sm font-bold ${
+                    entry.transactionType === "deposit"
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {entry.transactionType === "deposit" ? "+" : "-"}
+                  {formatCurrency(convertCurrency(entry.amount, "USD", currencyCode), tourist.preferredCurrency)}                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-sm text-gray-500">
+      {tourist.history && Array.isArray(tourist.history)
+        ? "No transactions found"
+        : "Wallet history not available"}
+    </p>
+  )}
+</div>
+
+    </CardContent>
+  </Card>
+</TabsContent>
+
+            <TabsContent value="currency">
+              <CurrencyApp user={tourist} />
+            </TabsContent>
+            <TabsContent value="points">
+              <RedeemPoints user={tourist} onRedeemPoints={handleRedeemPoints} />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Notifications - 4 columns */}
+        <Card className="col-span-4">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Notifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-500">You have no new notifications.</p>
+          </CardContent>
+        </Card>
+
+       
+      </div>
+
+      {/* Profile Picture Update Modal */}
+      <Modal show={showModal} onClose={closeModal}>
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-4">Update Profile Picture</h2>
+          <ImageCropper
+            onImageCropped={handleImageCropped}
+            currentImage={selectedImage?.url || selectedImage}
+          />
+          <div className="mt-6 flex justify-end gap-3">
+            <Button onClick={handleFirstSave} className="bg-[#F88C33]">
+              Save
+            </Button>
+            <Button onClick={closeModal} variant="outline">
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Image Viewer Modal */}
+      <Modal
+        show={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+        isImageViewer={true}
+        imageUrl={selectedImage?.url || selectedImage}
+      />
+    </div>
+  )
 }
+
+
+
+
+
+
+
