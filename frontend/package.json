@@ -87,6 +87,7 @@
     "react-switch": "^7.0.0",
     "react-toastify": "^10.0.6",
     "react-world-flags": "^1.6.0",
+    "recharts": "^2.13.3",
     "slick-carousel": "^1.8.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",

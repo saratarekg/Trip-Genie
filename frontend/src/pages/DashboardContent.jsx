@@ -12,12 +12,18 @@ import CreateProductForm from "../components/CreateProductAdmin.jsx";
 import ProductArchive from "../components/product-archive-admin.jsx";
 import { MyProducts } from "../components/myProductsAdmin.jsx";
 import ProductDetail from "../components/ProductDetailAdmin.jsx";
-// import ManageActivitiesPage from "./ManageActivitiesPage.jsx"; // Import the new component
+import ItineraryDetailAdmin from "../components/ItineraryDetailAdmin.jsx";
+import AllTripPlansAdmin from "../components/all-trip-plans-admin.jsx";
+import ProductReport from "../components/ProductReport.jsx";
+// import ProductReportSeller from "../components/ProductReportSeller.jsx";
+import ItineraryReport from "../components/ItineraryReport.jsx";
+import ActivityReport from "@/components/ActivityReport.jsx";
 
 export function DashboardContent({ activeTab, tabs, setActiveTab }) {
   const [selectedComplaintId, setSelectedComplaintId] = useState(null);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [previousTab, setPreviousTab] = useState(null);
+  const [selectedItineraryId, setSelectedItineraryId] = useState(null);
 
   useEffect(() => {
     const savedTab = localStorage.getItem("activeTab");
@@ -69,6 +75,13 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
               setActiveTab(previousTab);
             }}
           />
+        ) : selectedItineraryId ? (
+          <ItineraryDetailAdmin
+            itineraryId={selectedItineraryId}
+            onBack={() => setSelectedItineraryId(null)}
+          />
+        ) : activeTab === 'all-trip-plans' ? (
+          <AllTripPlansAdmin onSelectItinerary={setSelectedItineraryId} />
         ) : activeTab === 'review-registration' ? (
           <UserApproval />
         ) : activeTab === 'complaints' ? (
@@ -102,6 +115,20 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
           }} />
         ) : activeTab === 'historical-places' ? (
           <ViewAllHistoricalPlaces />
+        ) : activeTab === 'manage-itineraries' ? (
+          <AllTripPlansAdmin onSelectItinerary={setSelectedItineraryId} />
+        ) : activeTab === 'products-reports' ? (
+          <div className="p-4 bg-gray-100 rounded">Content for Products Reports goes here.</div>
+        ) : activeTab === 'itinerary-sales-report' ? (
+          <ItineraryReport />
+        ) : activeTab === 'my-product-sales-report' ? (
+          <ProductReport />
+        ) : activeTab === 'itinerary-sales-report' ? (
+          <ItineraryReport />
+        ) : activeTab === 'activity-reports' ? (
+          <ActivityReport />
+        // ) : activeTab === 'seller-product-sales-report' ? (
+        //   <ProductReportSeller />
         ) : (
           <div className="p-4 bg-gray-100 rounded">
             Content for {activeTabDetails.title} goes here.

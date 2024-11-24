@@ -94,12 +94,13 @@ const tabs = [
   { id: 'historical-places', title: 'Historical Places', icon: 'Map' },
   { 
     id: 'reports', 
-    title: 'Reports', 
+    title: 'Sales Reports', 
     icon: 'BarChart',
     subItems: [
-      { id: 'sales-reports', title: 'Sales Reports' },
-      { id: 'activity-reports', title: 'Activity Reports' },
-      { id: 'products-reports', title: 'Products Reports' },
+      { id: 'itinerary-sales-report', title: 'Itineraries Report' },
+      { id: 'activity-reports', title: 'Activities Report' },
+      { id: 'my-product-sales-report', title: 'My Products Report'},
+      { id: 'seller-product-sales-report', title: 'Seller\'s Products Report' },
     ]
   },
 ];
