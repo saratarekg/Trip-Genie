@@ -285,6 +285,16 @@ const touristSchema = new Schema(
         },
       },
     ],
+    history: [{
+      timestamp: { type: Date, default: Date.now },
+      transactionType: { 
+        type: String, 
+        enum: ['payment', 'deposit'],  // Specifies the type of transaction
+        required: true 
+      },
+      amount: Number,  // The amount involved in the transaction
+      details: String, 
+    }],
   },
   { timestamps: true }
 );
@@ -298,6 +308,31 @@ touristSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
+
+// touristSchema.pre('save', function(next) {
+//   if (this.isModified('wallet')) {
+//     const previousAmount = this.wallet.amount - this.get('wallet.amount'); // Previous wallet amount before change
+//     let transactionType;
+
+//     if (previousAmount > this.wallet.amount) {
+//       // If amount has decreased, it's a payment
+//       transactionType = 'payment';
+//     } else if (previousAmount < this.wallet.amount) {
+//       // If amount has increased, it's a deposit
+//       transactionType = 'deposit';
+//     }
+
+//     this.history.push({
+//       timestamp: new Date(),
+//       transactionType, // Automatically set based on change
+//       amount: Math.abs(previousAmount - this.wallet.amount), // Store the absolute value of the change
+//       balanceAfter: this.wallet.amount, // Current wallet balance after transaction
+//       details: transactionType === 'payment' ? `Paid ${Math.abs(previousAmount - this.wallet.amount)}` : `Deposited ${Math.abs(previousAmount - this.wallet.amount)}`,
+//     });
+//   }
+//   next();
+// });
+
 
 touristSchema.statics.login = async function (username, password) {
   let tourist = await this.findOne({ username });

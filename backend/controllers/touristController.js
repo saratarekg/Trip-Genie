@@ -192,7 +192,7 @@ const updateTouristProfile = async (req, res) => {
     
     let picture = tourist1.profilePicture;
   
-    const { nationality, mobile, jobOrStudent, profilePicture } = req.body;
+    const { nationality, mobile, jobOrStudent, profilePicture, fname, lname } = req.body;
     let { email, username } = req.body;
     email = email.toLowerCase();
     username = username.toLowerCase();
@@ -230,6 +230,8 @@ const updateTouristProfile = async (req, res) => {
         mobile,
         jobOrStudent,
         profilePicture: picture,
+        fname,
+        lname
       },
       { new: true }
     )
@@ -375,9 +377,10 @@ const bookTransportation = async (req, res) => {
       return res.status(400).json({ message: "Not enough seats available" });
     }
 
-    // Step 2: Calculate total cost and handle wallet payment if applicable
+    // Step 2: Calculate total cost
     const totalCost = transportation.ticketCost * seatsToBook;
 
+    // Step 3: Handle wallet payment if applicable
     if (paymentMethod === "wallet") {
       const tourist = await Tourist.findById(touristID);
 
@@ -389,19 +392,28 @@ const bookTransportation = async (req, res) => {
         return res.status(400).json({ message: "Not enough funds in wallet" });
       }
 
-      // Deduct the amount from the tourist's wallet
+      // Deduct amount and update history
       await Tourist.findByIdAndUpdate(
         touristID,
-        { $inc: { wallet: -totalCost } },
+        {
+          $inc: { wallet: -totalCost },
+          $push: {
+            history: {
+              transactionType: "payment",
+              amount: totalCost,
+              details: `Payment for transportation booking - ID: ${transportation._id}`,
+            },
+          },
+        },
         { new: true }
       );
     }
 
-    // Step 3: Decrease the remaining seats in the transportation
+    // Step 4: Decrease remaining seats in the transportation
     transportation.remainingSeats -= seatsToBook;
     await transportation.save();
 
-    // Step 4: Create a new booking record in TouristTransportation
+    // Step 5: Create a new booking record in TouristTransportation
     const booking = new TouristTransportation({
       touristID,
       transportationID,
@@ -412,6 +424,7 @@ const bookTransportation = async (req, res) => {
 
     const savedBooking = await booking.save();
 
+    // Step 6: Send response
     res.status(201).json({
       message: "Transportation booking successful",
       booking: savedBooking,
@@ -422,6 +435,7 @@ const bookTransportation = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const getUpcomingBookings = async (req, res) => {
   const touristID = res.locals.user_id;
@@ -475,11 +489,11 @@ const getPreviousBookings = async (req, res) => {
 };
 
 const deleteBooking = async (req, res) => {
-  const { id } = req.params; // assuming bookingID is passed as a URL parameter
-  const touristID = res.locals.user_id;
+  const { id } = req.params; // Booking ID from URL
+  const touristID = res.locals.user_id; // Tourist ID from authenticated user context
 
   try {
-    // Step 1: Find the booking to delete
+    // Step 1: Find the booking with the associated transportation details
     const booking = await TouristTransportation.findById(id).populate(
       "transportationID"
     );
@@ -488,46 +502,66 @@ const deleteBooking = async (req, res) => {
       return res.status(404).json({ message: "Booking not found" });
     }
 
-    // Check if the booking belongs to the correct tourist
+    // Ensure the booking belongs to the authenticated tourist
     if (booking.touristID.toString() !== touristID) {
-      return res
-        .status(403)
-        .json({ message: "You can only delete your own bookings" });
+      return res.status(403).json({ message: "Unauthorized: Cannot delete others' bookings" });
     }
 
     const transportation = booking.transportationID;
 
-    // Step 2: refund the cost to the tourist's wallet
-    const totalCost = transportation.ticketCost * booking.seatsBooked;
-    const tourist = await Tourist.findById(touristID);
+    if (!transportation) {
+      return res.status(404).json({ message: "Associated transportation not found" });
+    }
 
+    // Step 2: Calculate the refund amount and update the tourist's wallet
+    const refundAmount = transportation.ticketCost * booking.seatsBooked;
+
+    const tourist = await Tourist.findById(touristID);
     if (!tourist) {
       return res.status(404).json({ message: "Tourist not found" });
     }
 
-    // Increment the wallet by the refund amount
+    // Refund the amount to the tourist's wallet
     await Tourist.findByIdAndUpdate(
       touristID,
-      { $inc: { wallet: totalCost } }, // Increase wallet by the refund amount
+      { $inc: { wallet: refundAmount } }, // Increment wallet by refundAmount
       { new: true, runValidators: true }
     );
 
-    // Step 3: Delete the booking using findByIdAndDelete
-    await TouristTransportation.findByIdAndDelete(id);
+    // Optionally, log the transaction in the tourist's history
+    await Tourist.findByIdAndUpdate(
+      touristID,
+      {
+        $push: {
+          history: {
+            transactionType: "deposit",
+            amount: refundAmount,
+            details: `Refund for cancelled transportation booking - ID: ${booking._id}`,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
 
-    // Step 4: Update the remaining seats in the transportation document
-    // console.log(booking.seatsToBook);
+    // Step 3: Restore the seats to the transportation document
     transportation.remainingSeats += booking.seatsBooked;
     await transportation.save();
 
+    // Step 4: Delete the booking
+    await TouristTransportation.findByIdAndDelete(id);
+
+    // Step 5: Respond with success
     res.status(200).json({
-      message: "Booking successfully deleted and refunded (if wallet used)",
+      message: "Booking successfully deleted and refund issued",
+      refundAmount,
+      remainingSeats: transportation.remainingSeats,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting booking" });
+    console.error("Error deleting booking:", error);
+    res.status(500).json({ message: "Failed to delete booking", error: error.message });
   }
 };
+
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
@@ -1691,7 +1725,23 @@ const updateShippingAddress = async (req, res) => {
       return res.status(404).json({ message: "Address not found" });
     }
 
-    // Update the address fields
+    // If the updated address is set as default, loop through other addresses and set them to false
+    if (addressUpdates.default) {
+      // Update all other addresses to set `default` to false
+      await Tourist.updateOne(
+        { _id: res.locals.user_id },
+        {
+          $set: {
+            "shippingAddresses.$[elem].default": false
+          },
+        },
+        {
+          arrayFilters: [{ "elem._id": { $ne: id } }], // Exclude the address being updated
+        }
+      );
+    }
+
+    // Update the specific address with new details
     const result = await Tourist.updateOne(
       { _id: res.locals.user_id, "shippingAddresses._id": id },
       {
@@ -1705,10 +1755,12 @@ const updateShippingAddress = async (req, res) => {
           "shippingAddresses.$.postalCode": addressUpdates.postalCode,
           "shippingAddresses.$.landmark": addressUpdates.landmark,
           "shippingAddresses.$.locationType": addressUpdates.locationType,
+          "shippingAddresses.$.default": addressUpdates.default, // Ensure default status is updated as well
         },
       }
     );
 
+    // Respond with success message and the updated addresses
     return res.status(200).json({
       message: "Address updated successfully",
       shippingAddresses: result.shippingAddresses,
@@ -1720,6 +1772,7 @@ const updateShippingAddress = async (req, res) => {
       .json({ message: "An error occurred while updating the address" });
   }
 };
+
 
 const applyPromoCode = async (req, res) => {
   const { promoCode } = req.body;

@@ -86,7 +86,15 @@ exports.createPurchase = async (req, res) => {
       // Deduct the total price from the tourist's wallet
       await Tourist.findByIdAndUpdate(
         userId,
-        { $inc: { wallet: -totalPrice } },
+        {
+          $push: {
+            history: {
+              transactionType: "payment",
+              amount: totalPrice,
+              details: `Products order - Total: $${totalPrice}`,
+            },
+          },
+        },
         { new: true, runValidators: true }
       );
     }
@@ -411,9 +419,19 @@ exports.cancelPurchase = async (req, res) => {
     // Update the tourist's wallet balance by finding the tourist and adding the refund amount
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
-      { $inc: { wallet: totalRefund } }, // increment the wallet by totalRefund
+      { $inc: { wallet: totalRefund }, 
+      $push: {
+        history: {
+          transactionType: "deposit",
+          amount: totalRefund,
+          details: `Cancelled Order - Total: $${totalRefund}`,
+        },
+      }, }, // increment the wallet by totalRefund
       { new: true } // return the updated document
     );
+
+  
+  
 
     if (!updatedTourist) {
       return res.status(400).json({ message: "Tourist not found" });

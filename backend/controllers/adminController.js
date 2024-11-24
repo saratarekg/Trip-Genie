@@ -435,10 +435,13 @@ const getSalesReport = async (req, res) => {
           sale.product.seller !== null || sale.product.seller !== undefined
       )
       .map((sale) => {
-        return { ...sale, appRevenue: sale.revenue * 0.1 };
+        const plainSale = sale.toObject();
+        return { ...plainSale, appRevenue: plainSale.revenue * 0.1 };
       });
+
+    console.log(sellerProductsSales);
     const totalSellerSalesRevenue = sellerProductsSales.reduce(
-      (total, sale) => total + sale.revenue,
+      (total, sale) => total + sale.appRevenue,
       0
     );
 
@@ -510,7 +513,6 @@ const getActivitiesReport = async (req, res) => {
 
     const activitiesSales = activities.map((activity) => {
       const totalRevenue = activityBookings.reduce((total, booking) => {
-        // console.log(booking.activity.id, activity.id);
         return booking.activity && booking.activity.id == activity.id
           ? total + booking.paymentAmount
           : total;
@@ -534,7 +536,6 @@ const getActivitiesReport = async (req, res) => {
       totalActivitiesAppRevenue,
     });
   } catch (error) {
-    console.log(error.message);
     res.status(500).json({ message: error.message }); // Handle errors
   }
 };

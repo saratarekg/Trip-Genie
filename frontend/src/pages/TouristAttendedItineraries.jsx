@@ -120,38 +120,36 @@ export default function TouristAttendedActivities() {
   return (
     <div>
       <Toaster />
-      <h1 className="text-3xl font-bold mb-8">My Attended Activities</h1>
-      <div >
-
-
+      <h1 className="text-3xl font-bold mb-8">My Attended Itineraries</h1>
+      <div>
         <div >
           <Card>
             <CardHeader>
-              <CardTitle>Attended Activities</CardTitle>
-              <CardDescription>
-                Click on an activity to view details
-              </CardDescription>
+              <CardTitle>Itineraries</CardTitle>
+              <CardDescription>Your travel plans</CardDescription>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[400px]">
-                {activities.length > 0
-                  ? activities.map((booking) => (
-                      <div key={booking._id} className="mb-4">
+                {itineraries.length > 0
+                  ? itineraries.map((booking) => (
+                      <div key={booking?._id} className="mb-4">
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-left whitespace-normal"
-                          onClick={() => handleActivityClick(booking.activity)}
+                          onClick={() =>
+                            handleItineraryClick(booking.itinerary)
+                          }
                         >
                           <div className="flex items-start">
-                            <ChevronRight className="mr-2 h-4 w-4" />
+                            <Calendar className="mr-2 h-4 w-4" />
                             <div>
-                              <span>{booking.activity.name}</span>
+                              <span>{booking.itinerary?.title}</span>
                               <div className="text-sm text-gray-500 mt-1">
                                 <span>
-                                  {`${new Date(
-                                    booking.activity.timing.split("T")[0]
-                                  ).toLocaleDateString()} - ${
-                                    booking.numberOfTickets
+                                  {` ${new Date(
+                                    booking?.date.split("T")[0]
+                                  ).toLocaleDateString()}  -  ${
+                                    booking?.numberOfTickets
                                   } Ticket(s) Booked`}
                                 </span>
 
@@ -167,18 +165,8 @@ export default function TouristAttendedActivities() {
               </ScrollArea>
             </CardContent>
           </Card>
-
-          {selectedActivity && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle>Activity Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ActivityDetail id1={selectedActivity._id} />
-              </CardContent>
-            </Card>
-          )}
         </div>
+
       </div>
     </div>
   );

@@ -39,10 +39,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-const fetchData = async (userRole, dataType) => {
+const fetchData = async (userRole) => {
   try {
     const response = await axios.get(
-      `http://localhost:4000/${userRole}/${dataType}`,
+      `http://localhost:4000/${userRole}/touristItineraryBookings`,
       {
         headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
       }
@@ -52,14 +52,13 @@ const fetchData = async (userRole, dataType) => {
     if (error.response && error.response.status === 400) {
       return [];
     }
-    console.error(`Error fetching ${dataType}:`, error);
+    console.error(`Error fetching Itineraries:`, error);
     throw error;
   }
 };
 
 export default function Component() {
   const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
-  const [activities, setActivities] = useState([]);
   const [itineraries, setItineraries] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -146,52 +145,8 @@ export default function Component() {
     }
   }, [userRole, userPreferredCurrency, selectedBooking]);
 
-  useEffect(() => {
-    if (selectedBooking) {
-      if (selectedBooking.activity) {
-        if (
-          userRole === "tourist" &&
-          userPreferredCurrency &&
-          userPreferredCurrency !== selectedBooking.activity.currency
-        ) {
-          fetchExchangeRateActivity(selectedBooking);
-        } else {
-          getCurrencySymbolActivity(selectedBooking);
-        }
-      }
-    }
-  }, [userRole, userPreferredCurrency, selectedBooking]);
 
-  const fetchExchangeRateActivity = async (booking) => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // Ensure content type is set to JSON
-          },
-          body: JSON.stringify({
-            base: booking.activity.currency, // Sending base currency ID
-            target: userPreferredCurrency._id, // Sending target currency ID
-          }),
-        }
-      );
-      // Parse the response JSON
-      const data = await response.json();
 
-      if (response.ok) {
-        setExchangeRateActivity(data.conversion_rate);
-      } else {
-        // Handle possible errors
-        console.error("Error in fetching exchange rate:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching exchange rate:", error);
-    }
-  };
 
   const getCurrencySymbolItinerary = async (booking) => {
     try {
@@ -209,21 +164,7 @@ export default function Component() {
     }
   };
 
-  const getCurrencySymbolActivity = async (booking) => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/${userRole}/getCurrency/${booking.activity.currency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
 
-      setCurrencySymbol(response.data);
-    } catch (error) {
-      console.error("Error fetching currensy symbol:", error);
-    }
-  };
 
   const formatPrice = (price, type) => {
     if (selectedBooking) {
@@ -239,18 +180,6 @@ export default function Component() {
             selectedBooking.paymentAmount * exchangeRateItinerary;
           return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
         }
-      } else if (
-        userRole === "tourist" &&
-        userPreferredCurrency &&
-        selectedBooking.activity
-      ) {
-        if (userPreferredCurrency === selectedBooking.activity.currency) {
-          return `${userPreferredCurrency.symbol}${selectedBooking.paymentAmount}`;
-        } else {
-          const exchangedPrice =
-            selectedBooking.paymentAmount * exchangeRateActivity;
-          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-        }
       } else {
         if (currencySymbol) {
           return `${currencySymbol.symbol}${selectedBooking.paymentAmount}`;
@@ -259,9 +188,7 @@ export default function Component() {
     }
   };
 
-  const handleActivityClick = (id) => {
-    navigate(`/activity/${id}`);
-  };
+
 
   const handleItineraryClick = (id) => {
     navigate(`/itinerary/${id}`);
@@ -285,11 +212,9 @@ export default function Component() {
 
   const fetchUpdatedData = async () => {
     try {
-      const [activitiesData, itinerariesData] = await Promise.all([
-        fetchData(userRole, "touristActivityBookings"),
+      const [itinerariesData] = await Promise.all([
         fetchData(userRole, "touristItineraryBookings"),
       ]);
-      setActivities(activitiesData);
       setItineraries(itinerariesData);
     } catch (error) {
       console.error("Error fetching updated data:", error);
@@ -352,11 +277,9 @@ export default function Component() {
       setIsLoading(true);
       setError(null);
       try {
-        const [activitiesData, itinerariesData] = await Promise.all([
-          fetchData(role, "touristActivityBookings"),
+        const [ itinerariesData] = await Promise.all([
           fetchData(role, "touristItineraryBookings"),
         ]);
-        setActivities(activitiesData);
         setItineraries(itinerariesData);
         fetchUserInfo();
       } catch (err) {
@@ -378,45 +301,41 @@ export default function Component() {
         No bookings for you yet
       </p>
       <p className="text-gray-500 mt-2">
-        Start exploring and book your first activity!
+        Start exploring and book your first itinerary!
       </p>
     </div>
   );
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Upcoming Activities</h1>
+      <h1 className="text-3xl font-bold mb-8">My Upcoming Itineraries</h1>
       <div>
         {" "}
-
+        {/* Updated grid layout */}
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Booked Activities</CardTitle>
-              <CardDescription>
-                Click on an activity to view details
-              </CardDescription>
+              <CardTitle>Itineraries</CardTitle>
+              <CardDescription>Your travel plans</CardDescription>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-[500px]">
-                {" "}
                 {/* Updated ScrollArea height */}
-                {activities.length > 0
-                  ? activities.map((booking) => (
+                {itineraries.length > 0
+                  ? itineraries.map((booking) => (
                       <div key={booking._id} className="mb-4">
                         <div className="flex items-center justify-between">
                           <Button
                             variant="ghost"
-                            className="w-full justify-start mr-2"
+                            className="w-full justify-start mr-2 text-left whitespace-normal"
                             onClick={() =>
-                              handleActivityClick(booking.activity?._id)
+                              handleItineraryClick(booking.itinerary?._id)
                             }
                           >
-                            <div className="flex justify-between w-full whitespace-normal">
-                              <span>{booking.activity?.name}</span>
-                            </div>
-                            <ChevronRight className="ml-2 h-4 w-4" />
+                            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
+                            {booking.itinerary?.title}
                           </Button>
+
                           <Button
                             variant="ghost"
                             size="icon"
@@ -440,6 +359,7 @@ export default function Component() {
             </CardContent>
           </Card>
         </div>
+        
       </div>
 
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>

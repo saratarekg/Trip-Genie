@@ -29,9 +29,8 @@ exports.createBooking = async (req, res) => {
           .json({ message: "Insufficient funds in wallet" });
       }
 
-      // Deduct the payment amount from the user's wallet
       walletBalance = user.wallet - paymentAmount;
-      // Save the updated wallet balance
+
     }
 
     // Create a new booking
@@ -61,18 +60,32 @@ exports.createBooking = async (req, res) => {
     const totalPoints = user.totalPoints + loyaltyPoints; // Calculate total points
 
     // Update the tourist's record in the database
+    const updateFields = {
+      $inc: {
+        totalPoints: loyaltyPoints, // Increment total points
+        loyaltyPoints: loyaltyPoints, // Increment current loyalty points
+      },
+      loyaltyBadge: determineBadgeLevel(totalPoints), // Update loyalty badge based on total points
+    };
+    
+    // Conditionally add wallet balance and history only for wallet payments
+    if (paymentMethod === 'wallet') {
+      updateFields.wallet = walletBalance; // Update wallet balance
+      updateFields.$push = {
+        history: {
+          transactionType: 'payment',
+          amount: paymentAmount,
+          details: `Booked an Activity: ${activityExists.name} - ${numberOfTickets} tickets`,
+        },
+      };
+    }
+    
     const updatedTourist = await Tourist.findByIdAndUpdate(
       userId,
-      {
-        $inc: {
-          totalPoints: loyaltyPoints, // Increment total points
-          loyaltyPoints: loyaltyPoints, // Increment current loyalty points
-        },
-        loyaltyBadge: determineBadgeLevel(totalPoints),
-        wallet: walletBalance,
-      },
-      { new: true, runValidators: true }
+      updateFields,
+      { new: true, runValidators: true } // Ensure it returns the updated tourist
     );
+    
 
     if (!updatedTourist) {
       return res.status(404).json({ message: "Tourist not found" });
@@ -190,13 +203,24 @@ exports.deleteBooking = async (req, res) => {
 
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
-      { $inc: { wallet: bookingAmount } }, // Increment the wallet balance by the booking amount
+      { 
+        $inc: { wallet: bookingAmount }, // Increment the wallet balance by the booking amount (Refund)
+        $push: {
+          history: {
+            transactionType: 'deposit', // Mark it as a deposit
+            amount: bookingAmount, // The amount refunded
+            details: `Refunded for Booking: Activity - ${booking.activity.name}, ${booking.numberOfTickets} tickets` // Details of the refund
+          }
+        }
+      },
       { new: true, runValidators: true } // Return updated tourist and run validations
     );
 
     if (!updatedTourist) {
       return res.status(400).json({ message: "Tourist not found" });
     }
+
+    
 
     // Step 3: Delete the booking after wallet update
     const deletedBooking = await ActivityBooking.findByIdAndDelete(
