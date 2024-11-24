@@ -187,8 +187,21 @@ const getItinerariesByPreference = async (req, res) => {
         },
       },
     });
-
     query.push({ isDeleted: false });
+
+    const userRole = res.locals.user_role;
+    const userId = res.locals.user_id;
+    if (userRole === "tourist") {
+      const bookedItineraries = await ItineraryBooking.find({
+        user: userId,
+      }).distinct("itinerary");
+      query.push({
+        $or: [{ isActivated: true }, { _id: { $in: bookedItineraries } }],
+      });
+    } else {
+      query.push({ isActivated: true });
+    }
+
     let itinerariesQuery = Itinerary.find({
       $and: query,
     })
@@ -622,6 +635,18 @@ const deleteItinerary = async (req, res) => {
       });
     }
 
+    // Remove itinerary from saved itinerary list for each tourist
+
+    const tourists = await Tourist.find({ "savedItinerary.itinerary": req.params.id });
+    for (let i = 0; i < tourists.length; i++) {
+      const index = tourists[i].savedItinerary.findIndex(
+        item => item && item.itinerary && item.itinerary.toString() === req.params.id
+      );
+      if (index !== -1) {
+        tourists[i].savedItinerary.splice(index, 1);
+        await Tourist.findByIdAndUpdate(tourists[i]._id, { savedItinerary: tourists[i].savedItinerary });
+      }
+    }
     // If all checks pass, delete the itinerary
     await Itinerary.findByIdAndDelete(req.params.id);
 
@@ -856,9 +881,8 @@ const toggleActivationStatus = async (req, res) => {
 
     // Return the updated itinerary details
     return res.status(200).json({
-      message: `Itinerary ${
-        updatedItinerary.isActivated ? "activated" : "deactivated"
-      } successfully`,
+      message: `Itinerary ${updatedItinerary.isActivated ? "activated" : "deactivated"
+        } successfully`,
       itinerary: updatedItinerary,
     });
   } catch (error) {

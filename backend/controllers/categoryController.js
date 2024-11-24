@@ -1,5 +1,6 @@
 const Category = require("../models/category");
 const Activity = require("../models/activity");
+const Itinerary = require("../models/itinerary");
 
 const createCategory = async (req, res) => {
   const { name } = req.body;

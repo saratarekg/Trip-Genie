@@ -47,12 +47,12 @@ export function FooterComponent() {
         { name: 'Itineraries', link: '/all-itineraries' },
         { name: 'Products', link: '/all-products' }
       ],
-      admin: [
-        { name: 'Historical Places', link: 'all-historical-places' },
-        { name: 'Activities', link: '/activity' },
-        { name: 'Itineraries', link: '/all-itineraries' },
-        { name: 'Products', link: '/all-products' }
-      ],
+      // admin: [
+      //   { name: 'Historical Places', link: 'all-historical-places' },
+      //   { name: 'Activities', link: '/activity' },
+      //   { name: 'Itineraries', link: '/all-itineraries' },
+      //   { name: 'Products', link: '/all-products' }
+      // ],
       guest: [
         { name: 'Historical Places', link: '/all-historical-places' },
         { name: 'Activities', link: '/activity' },

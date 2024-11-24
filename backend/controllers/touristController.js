@@ -1795,15 +1795,66 @@ const applyPromoCode = async (req, res) => {
     });
   }
 };
+// Get saved itineraries
+const getSavedItineraries = async (req, res) => {
+  try {
+    const tourist = await Tourist.findById(res.locals.user_id);
+     
+    if (!tourist) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    // Safely access savedItineraries
+    const savedItineraries = tourist.savedItinerary || []; 
+    res.status(200).json(savedItineraries);
+  } catch (error) {
+    console.error('Error fetching saved itineraries:', error);
+    res.status(500).json({ message: 'Error fetching saved itineraries', error: error.message });
+  }
+};
+  
+// Add or remove an itinerary from saved itineraries
+const saveItinerary = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const touristId = res.locals.user_id;
+   
+    // Find the tourist and check if the itinerary is already saved
+    const tourist = await Tourist.findById(touristId);
+    if (!tourist) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+
+    const itineraryIndex = tourist.savedItinerary.findIndex(
+      item => item && item.itinerary && item.itinerary.toString() === id
+    );
+
+    if (itineraryIndex > -1) {
+      // Itinerary is already saved, so remove it using $pull
+      await Tourist.updateOne(
+        { _id: touristId },
+        { $pull: { savedItinerary: { itinerary: id } } }
+      );
+      return res.status(200).json({ message: 'Itinerary removed from saved list', success: true });
+    } else {
+      // Itinerary is not saved, so add it using $push
+      await Tourist.updateOne(
+        { _id: touristId },
+        { $push: { savedItinerary: { itinerary: id } } }
+      );
+      return res.status(200).json({ message: 'Itinerary saved successfully', success: true });
+    }
+  } catch (error) {
+    console.error('Error saving/removing itinerary:', error);
+    res.status(500).json({ message: 'Error saving/removing itinerary', error: error.message });
+  }
+};
 
 // Add an activity to saved activities
 const getSavedActivities = async (req, res) => {
   try {
-    console.log("ehab");
-    console.log("sam");
     const tourist = await Tourist.findById(res.locals.user_id);
      
-    console.log(tourist);
     if (!tourist) {
       return res.status(404).json({ message: 'Tourist not found' });
     }
@@ -1854,6 +1905,7 @@ const saveActivity = async (req, res) => {
     res.status(500).json({ message: 'Error saving/removing activity', error: error.message });
   }
 };
+
 
 
 // Controller function to retrieve a promo code using a POST request with the promo code in the body
@@ -1969,5 +2021,8 @@ module.exports = {
   applyPromoCode,
   getPromoCode,
   getSavedActivities,
-  saveActivity
+  saveActivity,
+  getSavedItineraries,
+  saveItinerary,
+
 };

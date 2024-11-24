@@ -511,7 +511,6 @@ export function NavbarComponent() {
                       </div>
                     )}
                   </div>
-                  {/* <NavLink to="/create-historical-tag">Create Historical Tag</NavLink> */}
 
                   <NavLink to="/all-historical-places">
                     Historical Places

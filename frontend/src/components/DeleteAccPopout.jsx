@@ -109,16 +109,12 @@ export function DeleteAccount() {
   );
 
   return (
-    <div className="bg-[#E6DCCF] min-h-[calc(100vh-11rem)] pb-8">
-      <div className="w-full bg-[#5D9297] py-6 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-      </div>
-
-      <div className="container mx-auto px-4 pt-12 max-w-5xl">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-[#1A3B47] mb-4">
+    <div className="min-h-[calc(100vh-11rem)]">
+      <div className="container mx-auto px-4">
+        <div className="p-6">
+          {/* <h1 className="text-2xl font-bold text-[#1A3B47] mb-4">
             Manage User Accounts
-          </h1>
+          </h1> */}
 
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:space-x-4">
             <Select
@@ -155,7 +151,7 @@ export function DeleteAccount() {
                 filteredUsers.map((user) => (
                   <div
                     key={user._id}
-                    className="flex justify-between items-center py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-[#5D9297] transition-colors"
+                    className="flex justify-between items-center py-2 px-3 bg-white rounded-lg border border-gray-200 hover:border-[#5D9297] hover:shadow-md transition-colors"
                   >
                     <div className="flex items-center space-x-2">
                       <User className="w-5 h-5 text-[#5D9297]" />

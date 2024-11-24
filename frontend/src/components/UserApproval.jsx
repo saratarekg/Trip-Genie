@@ -13,6 +13,15 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
+import { CheckCircle, XCircle } from 'lucide-react';
 
 export default function UserApproval() {
   const [advertisers, setAdvertisers] = useState([]);
@@ -23,6 +32,9 @@ export default function UserApproval() {
   const [dialogMessage, setDialogMessage] = useState("");
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('');
 
   useEffect(() => {
     fetchAdvertisers();
@@ -119,7 +131,10 @@ export default function UserApproval() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      showDialog(`Successfully approved the ${role}.`);
+      setToastMessage(`Successfully approved the ${role}.`);
+      setToastType("success");
+      setIsToastOpen(true);
+      setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
       // Re-fetch the user type list after approval
       role === "advertiser"
         ? fetchAdvertisers()
@@ -127,7 +142,10 @@ export default function UserApproval() {
         ? fetchSellers()
         : fetchTourGuides();
     } catch (err) {
-      setError(`Failed to approve ${role}`);
+      setToastMessage(`Failed to approve ${role}`);
+      setToastType("error");
+      setIsToastOpen(true);
+      setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
       console.error(err);
     }
   };
@@ -141,7 +159,10 @@ export default function UserApproval() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      showDialog(`Successfully rejected the ${role}.`);
+      setToastMessage(`Successfully rejected the ${role}.`);
+      setToastType("success");
+      setIsToastOpen(true);
+      setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
       // Re-fetch the user type list after rejection
       if (role === "advertiser") {
         fetchAdvertisers();
@@ -151,7 +172,10 @@ export default function UserApproval() {
         fetchTourGuides();
       }
     } catch (err) {
-      setError(`Failed to reject ${role}`);
+      setToastMessage(`Failed to reject ${role}`);
+      setToastType("error");
+      setIsToastOpen(true);
+      setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
       console.error(err);
     }
   };
@@ -235,94 +259,117 @@ export default function UserApproval() {
     ));
 
   return (
-    <div className="bg-[#E6DCCF] min-h-screen flex flex-col">
-      <div className="w-full bg-[#1A3B47] py-6 sm:py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-      </div>
+    <div className="flex flex-col">
+      <ToastProvider>
+        <div className="flex-grow container mx-auto px-4 sm:py-8 flex items-center justify-center">
+          <div className="w-full">
+            <div className="p-4 sm:p-6">
+              {/* <h1 className="text-xl sm:text-2xl font-bold text-[#003f66] mb-4 sm:mb-6">
+                User Approval Dashboard
+              </h1> */}
 
-      <div className="flex-grow container mx-auto px-4 py-6 sm:py-8 flex items-center justify-center">
-        <div className="w-full max-w-4xl">
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#003f66] mb-4 sm:mb-6">
-              User Approval Dashboard
-            </h1>
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md text-sm sm:text-base">
+                  {error}
+                </div>
+              )}
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md text-sm sm:text-base">
-                {error}
-              </div>
-            )}
-
-            {advertisers.length === 0 &&
-            sellers.length === 0 &&
-            tourGuides.length === 0 ? (
-              <div className="flex items-center justify-center h-24 sm:h-32">
-                <p className="text-base sm:text-lg text-[#003f66] text-center px-4">
-                  No users to Accept/Reject. Please check again later!
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2 auto-rows-auto">
-                {renderUserCards(advertisers, "advertiser")}
-                {renderUserCards(sellers, "seller")}
-                {renderUserCards(tourGuides, "tourGuide")}
-              </div>
-            )}
+              {advertisers.length === 0 &&
+              sellers.length === 0 &&
+              tourGuides.length === 0 ? (
+                <div className="flex items-center justify-center h-24 sm:h-32">
+                  <p className="text-base sm:text-lg text-[#003f66] text-center px-4">
+                    No users to Accept/Reject. Please check again later!
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2 auto-rows-auto">
+                  {renderUserCards(advertisers, "advertiser")}
+                  {renderUserCards(sellers, "seller")}
+                  {renderUserCards(tourGuides, "tourGuide")}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[#003f66]">
-              Success
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
-              {dialogMessage}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button
-              onClick={() => setDialogOpen(false)}
-              className="bg-[#5D9297] hover:bg-[#388A94] text-white"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-[#003f66]">
+                Success
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 mt-2">
+                {dialogMessage}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button
+                onClick={() => setDialogOpen(false)}
+                className="bg-[#5D9297] hover:bg-[#388A94] text-white"
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
-        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-[#003f66]">
-              Confirm Action
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
-              Are you sure you want to proceed with this action?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4 space-x-2">
-            <Button
-              onClick={() => {
-                confirmAction();
-                setConfirmDialogOpen(false);
-              }}
-              className="bg-[#5D9297] hover:bg-[#388A94] text-white"
-            >
-              Yes
-            </Button>
-            <Button
-              onClick={() => setConfirmDialogOpen(false)}
-              variant="outline"
-              className="border-[#808080] text-[#003f66] hover:bg-gray-100"
-            >
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+          <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-[#003f66]">
+                Confirm Action
+              </DialogTitle>
+              <DialogDescription className="text-gray-600 mt-2">
+                Are you sure you want to proceed with this action?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4 space-x-2">
+              <Button
+                onClick={() => {
+                  confirmAction();
+                  setConfirmDialogOpen(false);
+                }}
+                className="bg-[#5D9297] hover:bg-[#388A94] text-white"
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => setConfirmDialogOpen(false)}
+                variant="outline"
+                className="border-[#808080] text-[#003f66] hover:bg-gray-100"
+              >
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <ToastViewport />
+        {isToastOpen && (
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={2000}
+            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+          >
+            <div className="flex items-center">
+              {toastType === 'success' ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                <ToastDescription>
+                  {toastMessage}
+                </ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
+          </Toast>
+        )}
+      </ToastProvider>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 const Tag = require("../models/tag");
 const Activity = require("../models/activity");
+const Itinerary = require("../models/itinerary");
 
 const addTag = async (req, res) => {
   const { type } = req.body;

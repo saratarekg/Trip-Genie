@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function ViewComplaints() {
+export function ViewComplaints({ onSelectComplaint }) {
   const [complaints, setComplaints] = useState([]);
   const [error, setError] = useState(null);
   const [status, setStatus] = useState("");
@@ -68,16 +68,16 @@ export function ViewComplaints() {
   };
 
   return (
-    <div className="bg-[#E6DCCF] min-h-screen">
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+    <div className="min-h-screen p-6">
+      {/* <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-      </div>
+      </div> */}
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold text-[#003f66] mb-6">
+      <div className="container mx-auto px-4">
+        <div className="">
+          {/* <h1 className="text-2xl font-bold text-[#003f66] mb-6">
             Complaints Dashboard
-          </h1>
+          </h1> */}
 
           {error ? (
             <div className="text-red-500 p-4 rounded-md bg-red-50 mb-4">
@@ -94,13 +94,13 @@ export function ViewComplaints() {
                   <thead>
                     <tr className="bg-[#5D9297] text-white text-base font-bold">
                       <th className="px-6 py-3 text-left uppercase tracking-wider">
-                        Complaint No.
+                        ID
                       </th>
                       <th className="px-6 py-3 text-left uppercase tracking-wider">
                         Tourist
                       </th>
                       <th className="px-6 py-3 text-left uppercase tracking-wider">
-                        Subject
+                        Complaint Content
                       </th>
 
                       <th className="px-6 py-3 text-left uppercase tracking-wider">
@@ -182,25 +182,24 @@ export function ViewComplaints() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`px-2 py-1 inline-flex leading-5 font-semibold rounded-full ${
+                            className={`px-2 py-1 inline-flex leading-5 font-semibold rounded-md ${
                               complaint.status === "resolved"
                                 ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-800"
+                                : "bg-yellow-100 text-yellow-700"
                             }`}
                           >
                             {complaint.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
-                          <Link to={`/complaint/${complaint._id}`}>
-                            <Button
-                              className="!bg-[#5D9297] !text-white border !border-[#2D6F77] 
-                              hover:!bg-[#1A3B47] hover:!text-white active:!bg-[#1A3B47] 
-                              active:transform active:scale-95 transition-all duration-200"
-                            >
-                              View
-                            </Button>
-                          </Link>
+                          <Button
+                            onClick={() => onSelectComplaint(complaint._id)}
+                            className="!bg-[#5D9297] !text-white border !border-[#2D6F77] 
+                            hover:!bg-[#1A3B47] hover:!text-white active:!bg-[#1A3B47] 
+                            active:transform active:scale-95 transition-all duration-200"
+                          >
+                            View
+                          </Button>
                         </td>
                       </tr>
                     ))}

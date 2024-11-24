@@ -8,15 +8,15 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
-  Bookmark,
   ArrowUpDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import FilterComponent from "./Filter.jsx";
 import defaultImage from "../assets/images/default-image.jpg";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Loader from "./Loader.jsx";
 import { Button } from "@/components/ui/button";
 import * as jwtDecode from "jwt-decode";
@@ -36,8 +36,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import DualHandleSliderComponent from "./dual-handle-slider";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 let exchangeRateForFilter = 1;
 
@@ -83,13 +82,10 @@ const ItineraryCard = ({
   setSelectedItinerary,
   userInfo,
   onDeleteConfirm,
-  savedItineraries = [],
-  onItinerarySaved,
 }) => {
   const [exchangeRate, setExchangeRate] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [userId, setUserId] = useState(null);
-  const [isSaved, setIsSaved] = useState(false);
 
   const fetchExchangeRate = useCallback(async () => {
     if (!userInfo || !userInfo.preferredCurrency) return;
@@ -138,45 +134,6 @@ const ItineraryCard = ({
     // }
   }, [userInfo.role, itinerary.currency]);
 
-  
-  useEffect(() => {
-    // Add null checks and ensure both values exist before comparison
-    if (savedItineraries && savedItineraries.length > 0 && itinerary && itinerary._id) {
-      setIsSaved(
-        savedItineraries.some(
-          (savedItinerary) => 
-            savedItinerary?.itinerary && 
-            savedItinerary.itinerary.toString() === itinerary._id.toString()
-        )
-      );
-    }
-  }, [savedItineraries, itinerary]);
-
-
-  const handleSaveToggle = async () => {
-    if (!itinerary || !itinerary._id) return; // Add guard clause
-
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.post(
-        `http://localhost:4000/tourist/save-itinerary/${itinerary._id}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (response.data.success) {
-        const newSavedState = !isSaved;
-        setIsSaved(newSavedState);
-        if (onItinerarySaved) {
-          onItinerarySaved(itinerary._id, newSavedState);
-        }
-      }
-    } catch (error) {
-      console.error("Error toggling save itinerary:", error);
-    }
-  };
-
-
-
   useEffect(() => {
     if (
       userInfo.role === "tourist" &&
@@ -219,121 +176,101 @@ const ItineraryCard = ({
     ?.flatMap((activity) => activity.pictures ?? [])
     .find((picture) => picture?.url)?.url;
 
-    return (
-      <div
-        className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative"
-        onClick={() => onSelect(itinerary._id)}
-      >
-        {/* Save Button for tourists */}
-        {userInfo.role === "tourist" && (
-          <button
-            className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-20 w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-0"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent parent click handler
-              handleSaveToggle();
-            }}
-            aria-label="Save itinerary"
-          >
-            <Bookmark
-              className={`w-6 h-6 ${
-                isSaved ? "fill-yellow-400 stroke-black stroke-[1.5]" : "stroke-black"
-              }`}
-            />
-          </button>
-        )}
-    
-        <div className="relative aspect-video overflow-hidden">
-          <img
-            src={firstAvailablePicture || defaultImage}
-            alt={itinerary.title}
-            className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-          />
-        </div>
-    
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-semibold text-[#1A3B47]">{itinerary.title}</h3>
-            {!itinerary.isActivated && (
-              <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
-                {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
-              </span>
-            )}
-          </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-lg font-bold text-[#388A94]">
-              {formatPrice(itinerary.price)}
-            </span>
-            <span className="text-sm text-[#1A3B47]">{itinerary.language}</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {itinerary.activities?.flatMap((activity, index) => [
-              ...(activity.category
-                ?.filter((cat) => {
-                  if (uniqueCategories.has(cat.name)) {
-                    return false;
-                  }
-                  uniqueCategories.add(cat.name);
-                  return true;
-                })
-                .map((cat) => (
-                  <span
-                    key={`cat-${index}-${cat.id || cat.name}`}
-                    className="bg-[#E6DCCF] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
-                  >
-                    {cat.name}
-                  </span>
-                )) || []),
-    
-              ...(activity.tags
-                ?.filter((tag) => {
-                  if (uniqueTags.has(tag.type)) {
-                    return false;
-                  }
-                  uniqueTags.add(tag.type);
-                  return true;
-                })
-                .map((tag) => (
-                  <span
-                    key={`tag-${index}-${tag.id || tag.type}`}
-                    className="bg-[#B5D3D1] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
-                  >
-                    {tag.type}
-                  </span>
-                )) || []),
-            ])}
-          </div>
-        </div>
-    
-        {role === "tour-guide" && userId === itinerary.tourGuide._id && (
-          <div className="absolute top-2 right-2 flex space-x-2">
-            <button
-              className="p-2 bg-[#5D9297] text-white rounded-full hover:bg-[#388A94] transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.location.href = `/update-itinerary/${itinerary._id}`;
-              }}
-              aria-label="Edit itinerary"
-            >
-              <Edit className="h-4 w-4" />
-            </button>
-            <button
-              className="p-2 bg-[#F88C33] text-white rounded-full hover:bg-[#E6DCCF] transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteConfirm(itinerary._id, itinerary.title);
-              }}
-              aria-label="Delete itinerary"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        )}
+  return (
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative"
+      onClick={() => onSelect(itinerary._id)}
+    >
+      <div className="relative aspect-video overflow-hidden">
+        <img
+          src={firstAvailablePicture || defaultImage}
+          alt={itinerary.title}
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
       </div>
-    );
-    
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xl font-semibold text-[#1A3B47]">{itinerary.title}</h3>
+          {!itinerary.isActivated && (
+            <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
+              {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
+            </span>
+          )}
+        </div>
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-lg font-bold text-[#388A94]">
+            {formatPrice(itinerary.price)}
+          </span>
+          <span className="text-sm text-[#1A3B47]">{itinerary.language}</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {itinerary.activities?.flatMap((activity, index) => [
+            ...(activity.category
+              ?.filter((cat) => {
+                if (uniqueCategories.has(cat.name)) {
+                  return false;
+                }
+                uniqueCategories.add(cat.name);
+                return true;
+              })
+              .map((cat) => (
+                <span
+                  key={`cat-${index}-${cat.id || cat.name}`}
+                  className="bg-[#E6DCCF] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
+                >
+                  {cat.name}
+                </span>
+              )) || []),
+
+            ...(activity.tags
+              ?.filter((tag) => {
+                if (uniqueTags.has(tag.type)) {
+                  return false;
+                }
+                uniqueTags.add(tag.type);
+                return true;
+              })
+              .map((tag) => (
+                <span
+                  key={`tag-${index}-${tag.id || tag.type}`}
+                  className="bg-[#B5D3D1] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
+                >
+                  {tag.type}
+                </span>
+              )) || []),
+          ])}
+        </div>
+      </div>
+
+      {role === "tour-guide" && userId === itinerary.tourGuide._id && (
+        <div className="absolute top-2 right-2 flex space-x-2">
+          <button
+            className="p-2 bg-[#5D9297] text-white rounded-full hover:bg-[#388A94] transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `/update-itinerary/${itinerary._id}`;
+            }}
+            aria-label="Edit itinerary"
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+          <button
+            className="p-2 bg-[#F88C33] text-white rounded-full hover:bg-[#E6DCCF] transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteConfirm(itinerary._id, itinerary.title);
+            }}
+            aria-label="Delete itinerary"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };
 
-export function AllItinerariesComponent() {
+export function AllItinerariesComponent({ onSelectItinerary }) {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
@@ -362,11 +299,9 @@ export function AllItinerariesComponent() {
   const [isSortedByPreference, setIsSortedByPreference] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
-  const [alertMessage, setAlertMessage] = useState(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itineraryToDelete, setItineraryToDelete] = useState(null);
-  const [savedItineraries, setSavedItineraries] = useState([]);
 
   const navigate = useNavigate();
 
@@ -420,37 +355,7 @@ export function AllItinerariesComponent() {
       fetchMaxPrice();
       }
   }, [userInfo]);
-  const fetchSavedItineraries = useCallback(async () => {
-    if (userInfo?.role === "tourist") {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/saved-itineraries", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSavedItineraries(response.data);
-      } catch (error) {
-        console.error("Error fetching saved itineraries:", error);
-      }
-    }
-  }, [userInfo]);
 
-  useEffect(() => {
-    fetchSavedItineraries();
-  }, [fetchSavedItineraries]);
-
-  const handleItinerarySaved = useCallback((itineraryId, isSaved) => {
-    setAlertMessage({
-      type: "success",
-      message: isSaved ? "Itinerary saved successfully!" : "Itinerary unsaved successfully!",
-    });
-    
-    // Clear the alert message after 2 seconds
-    setTimeout(() => {
-      setAlertMessage(null);
-    }, 2000);
-
-    fetchSavedItineraries();
-  }, [fetchSavedItineraries]);
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
@@ -519,7 +424,7 @@ export function AllItinerariesComponent() {
   };
 
   const handleItinerarySelect = (id) => {
-    navigate(`/itinerary/${id}`);
+    onSelectItinerary(id);
   };
 
   const fetchItineraries = useCallback(async () => {
@@ -654,6 +559,9 @@ export function AllItinerariesComponent() {
     }
   };
 
+  useEffect(() => {
+    searchItineraries();
+  }, [priceRange, dateRange, selectedTypes, selectedLanguages, isBooked]);
 
   useEffect(() => {
     fetchItineraries();
@@ -685,10 +593,6 @@ export function AllItinerariesComponent() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
-
-  useEffect(() => {
-    searchItineraries();
-  }, [priceRange, dateRange, selectedTypes, selectedLanguages, isBooked]);
 
   useEffect(() => {
       if (sortBy || sortOrder || myItineraries) {
@@ -729,11 +633,25 @@ export function AllItinerariesComponent() {
     setMyItineraries(false);
     setIsBooked(false);
     setPriceRange([0, maxPriceOfItinerary]);
-    fetchItineraries();
+    searchItineraries();
   };
 
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
+  };
+
+  const handleLowerDateChange = (e) => {
+    const newLowerDate = e.target.value;
+    if (newLowerDate > dateRange.upper) {
+      setDateRange({ lower: newLowerDate, upper: newLowerDate });
+    } else {
+      setDateRange({ ...dateRange, lower: newLowerDate });
+    }
+  };
+
+  const handleUpperDateChange = (e) => {
+    const newUpperDate = e.target.value;
+    setDateRange({ ...dateRange, upper: newUpperDate });
   };
 
   // const handleDelete = async () => {
@@ -770,20 +688,6 @@ export function AllItinerariesComponent() {
   //     setIsLoading(false);
   //   }
   // };
-
-  const handleLowerDateChange = (e) => {
-    const newLowerDate = e.target.value;
-    if (newLowerDate > dateRange.upper) {
-      setDateRange({ lower: newLowerDate, upper: newLowerDate });
-    } else {
-      setDateRange({ ...dateRange, lower: newLowerDate });
-    }
-  };
-
-  const handleUpperDateChange = (e) => {
-    const newUpperDate = e.target.value;
-    setDateRange({ ...dateRange, upper: newUpperDate });
-  };
 
   const handleDeleteConfirm = (id, title) => {
     setItineraryToDelete({ id, title });
@@ -832,22 +736,12 @@ export function AllItinerariesComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-          </div>
+    <div className="bg-gray-100 min-h-screen">
       {isLoading ? (
         <Loader />
       ) : (
         <div className="container mx-auto px-4 py-8">
-           <div className=" px-4 sm:px-6 lg:px-8 mb-4">
-            <div className="max-w-7xl mx-auto">
-              <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
-                All Trip Plans
-              </h1>
-            </div>
-          
-          <div className="flex gap-8 px-4 sm:px-6 lg:px-8 mb-4">
+          <div className="flex gap-8">
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
@@ -1021,8 +915,6 @@ export function AllItinerariesComponent() {
                       setShowDeleteConfirm={setShowDeleteConfirm}
                       setSelectedItinerary={setSelectedItinerary}
                       onDeleteConfirm={handleDeleteConfirm}
-                      savedItineraries={savedItineraries}
-                      onItinerarySaved={handleItinerarySaved}
                     />
                   ))}
               </div>
@@ -1052,7 +944,6 @@ export function AllItinerariesComponent() {
                 </Button>
               </div>
             </div>
-          </div>
           </div>
         </div>
       )}
@@ -1134,17 +1025,6 @@ export function AllItinerariesComponent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {alertMessage && (
-        <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
-        >
-          <AlertTitle>
-            {alertMessage.type === "success" ? "Success" : "Error"}
-          </AlertTitle>
-          <AlertDescription>{alertMessage.message}</AlertDescription>
-        </Alert>
-      )}
     </div>
   );
 }

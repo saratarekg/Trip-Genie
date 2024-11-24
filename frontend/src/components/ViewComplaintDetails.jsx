@@ -21,19 +21,18 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-export const ViewComplaintDetails = () => {
+export const ViewComplaintDetails = ({ complaintId, onBack }) => {
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [replyContent, setReplyContent] = useState("");
-  const { id } = useParams();
 
   const fetchComplaintDetails = async () => {
     try {
       const token = Cookies.get("jwt");
       let role = Cookies.get("role") || "guest";
 
-      const api = `http://localhost:4000/${role}/complaint/${id}`;
+      const api = `http://localhost:4000/${role}/complaint/${complaintId}`;
       const response = await axios.get(api, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -50,7 +49,8 @@ export const ViewComplaintDetails = () => {
 
   useEffect(() => {
     fetchComplaintDetails();
-  }, [id]);
+  }, [complaintId]);
+
   const handleReply = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -59,7 +59,7 @@ export const ViewComplaintDetails = () => {
         return;
       }
       const response = await axios.post(
-        `http://localhost:4000/admin/complaint/${id}/reply`,
+        `http://localhost:4000/admin/complaint/${complaintId}/reply`,
         { content: replyContent },
         {
           headers: {
@@ -82,7 +82,7 @@ export const ViewComplaintDetails = () => {
     try {
       const token = Cookies.get("jwt");
       await axios.put(
-        `http://localhost:4000/admin/complaint/${id}/status`,
+        `http://localhost:4000/admin/complaint/${complaintId}/status`,
         { status: newStatus },
         {
           headers: {
@@ -99,9 +99,9 @@ export const ViewComplaintDetails = () => {
   const getStatusBadgeVariant = (status) => {
     switch (status.toLowerCase()) {
       case "resolved":
-        return "bg-green-100 text-green-800 border-green-300";
+        return "bg-green-100 text-green-800 border-green-100";
       case "pending":
-        return "bg-orange-100 text-orange-800 border-orange-300";
+        return "bg-yellow-200 text-yellow-800 border-yellow-200";
       case "new":
         return "bg-blue-100 text-blue-800 border-blue-300";
       default:
@@ -136,8 +136,11 @@ export const ViewComplaintDetails = () => {
   }
 
   return (
-    <div className="bg-[#E6DCCF] min-h-screen">
-      <div className="bg-[#E6DCCF] container mx-auto py-8 px-4 mt-[65px]">
+    <div className="">
+      <div className="container mx-auto px-8">
+        <Button onClick={onBack} className="mb-4 bg-[#5D9297] text-white text-base">
+          Back to Complaints
+        </Button>
         <Card className="max-w-[1200px] mx-auto p-8 shadow-xl rounded-lg ">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2 space-y-8">
@@ -160,7 +163,7 @@ export const ViewComplaintDetails = () => {
                 <Badge
                   variant="static"
                   className={`${getStatusBadgeVariant(complaint.status)} 
-                  text-sm py-1.5 px-4 rounded-full font-semibold whitespace-nowrap`}
+                  text-sm py-1.5 px-4 rounded-md font-semibold whitespace-nowrap`}
                 >
                   {complaint.status}
                 </Badge>
