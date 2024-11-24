@@ -336,6 +336,20 @@ export default function AllActivities() {
     }
   };
 
+  const handleActivitySaved = useCallback((activityId, isSaved) => {
+    setAlertMessage({
+      type: "success",
+      message: isSaved ? "Activity saved successfully!" : "Activity unsaved successfully!",
+    });
+    
+    // Clear the alert message after 3 seconds
+    setTimeout(() => {
+      setAlertMessage(null);
+    }, 2000);
+
+    fetchSavedActivities();
+  }, [fetchSavedActivities]);
+
   const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
     const token = Cookies.get("jwt");
@@ -880,15 +894,15 @@ export default function AllActivities() {
                   )
                   .map((activity) => (
                     <ActivityCard
-                      key={activity._id}
-                      activity={activity}
-                      onSelect={handleActivitySelect}
-                      userInfo={userInfo}
-                      exchangeRates={exchangeRates}
-                      currencies={currencies}
-                      onDeleteConfirm={handleDeleteConfirm}
-                      onSaveActivity={handleSaveActivity}
-                      savedActivities={savedActivities}
+                    key={activity._id}
+                    activity={activity}
+                    onSelect={handleActivitySelect}
+                    userInfo={userInfo}
+                    exchangeRates={exchangeRates}
+                    currencies={currencies}
+                    onDeleteConfirm={handleDeleteConfirm}
+                    savedActivities={savedActivities}
+                    onActivitySaved={handleActivitySaved}
                     />
                   ))}
               </div>
