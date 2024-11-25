@@ -182,6 +182,10 @@ productSchema.statics.filterByPrice = async function (minPrice, maxPrice) {
 // });
 
 productSchema.post("findOneAndUpdate", async function (doc) {
+  // if (!doc) {
+  //   console.log("No document found for findOneAndUpdate hook.");
+  //   return;
+  // }
   if (doc.quantity === 0) {
     console.log("Product out of stock2");
 
@@ -192,6 +196,7 @@ productSchema.post("findOneAndUpdate", async function (doc) {
           $push: {
             notifications: {
               body: `Product <b>${doc.name}</b> is out of stock`,
+              link: `/product/${doc._id}`,
             },
           },
         }
@@ -212,6 +217,8 @@ productSchema.post("findOneAndUpdate", async function (doc) {
           $push: {
             notifications: {
               body: `Product <b>${doc.name}</b> is out of stock`,
+              link: `/product/${doc._id}`,
+
             },
           },
         },
