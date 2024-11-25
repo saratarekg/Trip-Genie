@@ -45,19 +45,24 @@ const advertiserSchema = new Schema(
       type: String,
       required: true,
     },
-    notifications: [{
-      body: {
-        type: String,
+    notifications: [
+      {
+        body: {
+          type: String,
+        },
+        link: {
+          type: String,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        seen: {
+          type: Boolean,
+          default: false,
+        },
       },
-      date: {
-        type: Date,
-        default: Date.now,
-      },
-      seen: {
-        type: Boolean,
-        default: false,
-      }
-    }],
+    ],
     logo: {
       public_id: { type: String },
       url: { type: String },

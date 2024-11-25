@@ -215,7 +215,8 @@ const flagActivity = async (req, res) => {
 
       // Add a notification to the advertiser's notifications array
       const notification = {
-        body: `Your activity "${activity.name}" has been flagged as inappropriate by the admin.`,
+        body: `Your activity <b>${activity.name}</b> has been flagged as inappropriate by the admin.`,
+        link: `/activity/${req.params.id}`,
         date: new Date(),
         seen: false,
       };

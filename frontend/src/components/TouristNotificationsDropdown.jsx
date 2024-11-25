@@ -135,7 +135,7 @@ export function NotificationsDropdownTourist() {
               {notifications.map((notification, index) => (
                 <li
                   key={index}
-                  className="p-4 hover:bg-gray-50 transition-colors relative"
+                  className="p-4 hover:bg-gray-50 transition-colors relative cursor-pointer"
                   onClick={() => navigate(notification.link)}
                 >
                   {!notification.seen && (

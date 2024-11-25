@@ -617,7 +617,8 @@ const flagItinerary = async (req, res) => {
 
       // Add a notification to the advertiser's notifications array
       const notification = {
-        body: `Your activity <b>${itinerary.title}</b> has been flagged as inappropriate by the admin.`,
+        body: `Your itinerary <b>${itinerary.title}</b> has been flagged as inappropriate by the admin.`,
+        link: `/itinerary/${req.params.id}`,
         date: new Date(),
         seen: false,
       };
