@@ -392,7 +392,7 @@ export default function Component() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Booked Activities</CardTitle>
+              <CardTitle>Upcoming Activities</CardTitle>
               <CardDescription>
                 Click on an activity to view details
               </CardDescription>

@@ -125,7 +125,7 @@ export default function TouristAttendedActivities() {
         <div >
           <Card>
             <CardHeader>
-              <CardTitle>Itineraries</CardTitle>
+              <CardTitle>Attended Itineraries</CardTitle>
               <CardDescription>Your travel plans</CardDescription>
             </CardHeader>
             <CardContent>
