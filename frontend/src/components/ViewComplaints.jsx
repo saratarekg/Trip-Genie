@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Filter } from "lucide-react";
+import { ArrowUpDown, Filter, CheckCircle, Clock } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -16,12 +16,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function ViewComplaints({ onSelectComplaint }) {
   const [complaints, setComplaints] = useState([]);
   const [error, setError] = useState(null);
   const [status, setStatus] = useState("");
   const [sortOrder, setSortOrder] = useState(-1);
+  const [isFiltering, setIsFiltering] = useState(false);
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -88,22 +90,21 @@ export function ViewComplaints({ onSelectComplaint }) {
               No complaints found.
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="bg-[#5D9297] text-white text-base font-bold">
-                      <th className="px-6 py-3 text-left uppercase tracking-wider">
+            <div >
+              <div className="overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         ID
                       </th>
-                      <th className="px-6 py-3 text-left uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Tourist
                       </th>
-                      <th className="px-6 py-3 text-left uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Complaint Content
                       </th>
-
-                      <th className="px-6 py-3 text-left uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Date
                         <TooltipProvider>
                           <Tooltip>
@@ -120,7 +121,7 @@ export function ViewComplaints({ onSelectComplaint }) {
                           </Tooltip>
                         </TooltipProvider>
                       </th>
-                      <th className="px-6 py-3 text-left uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                         <DropdownMenu>
                           <TooltipProvider>
@@ -130,7 +131,7 @@ export function ViewComplaints({ onSelectComplaint }) {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="ml-1 hover:bg-[#4A7A7E] text-white"
+                                    className="ml-1 text-[#4A7A7E] hover:text-[#2D6F77] focus:ring-0 focus:ring-offset-0"
                                   >
                                     <Filter className="h-3 w-4" />
                                   </Button>
@@ -157,53 +158,69 @@ export function ViewComplaints({ onSelectComplaint }) {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </th>
-                      <th className="px-6 py-3 text-right uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Action
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 text-base">
-                    {complaints.map((complaint, index) => (
-                      <tr
-                        key={complaint._id}
-                        className="hover:bg-gray-50 transition-colors"
+                  <AnimatePresence mode="wait">
+                    {!isFiltering && (
+                      <motion.tbody
+                        key="table-body"
+                        className="bg-white divide-y divide-gray-200"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-[#2D6F77]">
-                          {complaint.number}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                          {complaint.tourist.username}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                          {complaint.title}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-gray-600">
-                          {formatDate(complaint.createdAt)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`px-2 py-1 inline-flex leading-5 font-semibold rounded-md ${
-                              complaint.status === "resolved"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
+                        {complaints.map((complaint, index) => (
+                          <motion.tr
+                            key={complaint._id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.2, delay: index * 0.05 }}
                           >
-                            {complaint.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
-                          <Button
-                            onClick={() => onSelectComplaint(complaint._id)}
-                            className="!bg-[#5D9297] !text-white border !border-[#2D6F77] 
-                            hover:!bg-[#1A3B47] hover:!text-white active:!bg-[#1A3B47] 
-                            active:transform active:scale-95 transition-all duration-200"
-                          >
-                            View
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
+                            <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {complaint.number}
+                            </td>
+                            <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                              {complaint.tourist.username}
+                            </td>
+                            <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                              {complaint.title}
+                            </td>
+                            <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                              {formatDate(complaint.createdAt)}
+                            </td>
+                            <td className="px-6 py-2 whitespace-nowrap">
+                              <span className="inline-flex items-center leading-5 font-semibold">
+                                {complaint.status === "resolved" ? (
+                                  <>
+                                    <CheckCircle className="w-4 h-4 text-[#5D9297] mr-1" />
+                                    <span className="text-[#5D9297]">Resolved</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Clock className="w-4 h-4 text-[#D4C4B2] mr-1" />
+                                    <span className="text-[#D4C4B2]">Pending</span>
+                                  </>
+                                )}
+                              </span>
+                            </td>
+                            <td className="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
+                              <span
+                                onClick={() => onSelectComplaint(complaint._id)}
+                                className="text-[#B5D3D1] cursor-pointer hover:text-[#1A3B47] hover:underline"
+                              >
+                                View
+                              </span>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </motion.tbody>
+                    )}
+                  </AnimatePresence>
                 </table>
               </div>
             </div>
