@@ -235,7 +235,7 @@ checkUpcomingEvents = async () => {
       await Tourist.findByIdAndUpdate(itinerary.user._id.toString(), {
         $push: {
           notifications: {
-            body: `Your booked itinerary ${itinerary.itinerary.title} is starting in 2 days`,
+            body: `Your booked itinerary <b>${itinerary.itinerary.title}</b> is starting in 2 days`,
             link: `/itinerary/${itinerary.itinerary._id}`,
           },
         },
@@ -247,7 +247,7 @@ checkUpcomingEvents = async () => {
       await Tourist.findByIdAndUpdate(activity.user._id.toString(), {
         $push: {
           notifications: {
-            body: `Your booked activity ${activity.activity.name} is starting in 2 days`,
+            body: `Your booked activity <b>${activity.activity.name}</b> is starting in 2 days`,
             link: `/activity/${activity.activity._id}`,
           },
         },
