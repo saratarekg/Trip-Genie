@@ -1850,30 +1850,32 @@ const saveItinerary = async (req, res) => {
   }
 };
 
-// Add an activity to saved activities
+// Get saved activities
 const getSavedActivities = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(res.locals.user_id);
+    const tourist = await Tourist.findById(res.locals.user_id).populate('savedActivity.activity');
      
     if (!tourist) {
       return res.status(404).json({ message: 'Tourist not found' });
     }
 
-    // Safely map over savedActivity and check if activity is valid
-    const savedActivities = tourist.savedActivity; 
+    // Filter out any null activities and map to return only the activity data
+    const savedActivities = tourist.savedActivity
+      .filter(item => item.activity)
+      .map(item => item.activity);
+
     res.status(200).json(savedActivities);
   } catch (error) {
     console.error('Error fetching saved activities:', error);
     res.status(500).json({ message: 'Error fetching saved activities', error: error.message });
   }
 };
-  
-// Add an activity to saved activities
+
+// Add or remove an activity from saved activities
 const saveActivity = async (req, res) => {
   try {
     const { id } = req.params;
     const touristId = res.locals.user_id;
-   
 
     // Find the tourist and check if the activity is already saved
     const tourist = await Tourist.findById(touristId);
@@ -1886,17 +1888,19 @@ const saveActivity = async (req, res) => {
     );
 
     if (activityIndex > -1) {
-      // Activity is already saved, so remove it using $pull
-      await Tourist.updateOne(
-        { _id: touristId },
-        { $pull: { savedActivity: { activity: id } } }
+      // Activity is already saved, so remove it
+      await Tourist.findByIdAndUpdate(
+        touristId,
+        { $pull: { savedActivity: { activity: id } } },
+        { new: true }
       );
       return res.status(200).json({ message: 'Activity removed from saved list', success: true });
     } else {
-      // Activity is not saved, so add it using $push
-      await Tourist.updateOne(
-        { _id: touristId },
-        { $push: { savedActivity: { activity: id } } }
+      // Activity is not saved, so add it
+      await Tourist.findByIdAndUpdate(
+        touristId,
+        { $push: { savedActivity: { activity: id } } },
+        { new: true }
       );
       return res.status(200).json({ message: 'Activity saved successfully', success: true });
     }
@@ -1905,6 +1909,8 @@ const saveActivity = async (req, res) => {
     res.status(500).json({ message: 'Error saving/removing activity', error: error.message });
   }
 };
+
+
 
 
 
