@@ -168,6 +168,7 @@ export default function CheckoutPage() {
   }, [userPreferredCurrency])
 
   const fetchUserInfo = async () => {
+    
     const role = Cookies.get("role") || "guest"
     setUserRole(role)
 
@@ -787,8 +788,8 @@ export default function CheckoutPage() {
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
       </div>
-      <div className="max-w-6xl mx-auto pt-6">
-        <h1 className="text-4xl font-bold mb-8 text-center text-[#1A3B47]">
+      <div className="max-w-7xl mx-auto pt-6">
+        <h1 className="text-4xl font-bold mb-8 text-[#1A3B47]">
           Checkout
         </h1>
         <div className="flex flex-col md:flex-row gap-6">

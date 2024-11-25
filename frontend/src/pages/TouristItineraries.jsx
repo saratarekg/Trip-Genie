@@ -315,7 +315,7 @@ export default function Component() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Itineraries</CardTitle>
+              <CardTitle>Upcoming Itineraries</CardTitle>
               <CardDescription>Your travel plans</CardDescription>
             </CardHeader>
             <CardContent>
