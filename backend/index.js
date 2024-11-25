@@ -231,27 +231,29 @@ checkUpcomingEvents = async () => {
     });
 
     // Send reminder emails to the tourists
-    itineraries.forEach((itinerary) => {
-      Tourist.findByIdAndUpdate(itinerary.user._id, {
+    for (itinerary of itineraries) {
+      await Tourist.findByIdAndUpdate(itinerary.user._id.toString(), {
         $push: {
           notifications: {
             body: `Your booked itinerary ${itinerary.itinerary.title} is starting in 2 days`,
+            link: `/itinerary/${itinerary.itinerary._id}`,
           },
         },
       });
       emailService.sendItineraryReminder(itinerary);
-    });
+    }
 
-    activities.forEach((activity) => {
-      Tourist.findByIdAndUpdate(activity.user._id, {
+    for (activity of activities) {
+      await Tourist.findByIdAndUpdate(activity.user._id.toString(), {
         $push: {
           notifications: {
             body: `Your booked activity ${activity.activity.name} is starting in 2 days`,
+            link: `/activity/${activity.activity._id}`,
           },
         },
       });
       emailService.sendActivityReminder(activity);
-    });
+    }
   } catch (error) {
     console.error("Error sending reminder emails:", error);
   }

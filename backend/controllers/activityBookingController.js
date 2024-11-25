@@ -69,7 +69,7 @@ exports.createBooking = async (req, res) => {
     };
     
     // Conditionally add wallet balance and history only for wallet payments
-    if (paymentMethod === 'wallet') {
+    if (paymentType === 'wallet') {
       updateFields.wallet = walletBalance; // Update wallet balance
       updateFields.$push = {
         history: {
@@ -98,6 +98,7 @@ exports.createBooking = async (req, res) => {
       tourist: updatedTourist,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message, error });
   }
 };

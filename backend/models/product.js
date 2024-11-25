@@ -191,7 +191,7 @@ productSchema.post("findOneAndUpdate", async function (doc) {
         {
           $push: {
             notifications: {
-              body: `Product ${doc.name} is out of stock`,
+              body: `Product <b>${doc.name}</b> is out of stock`,
             },
           },
         }
@@ -211,7 +211,7 @@ productSchema.post("findOneAndUpdate", async function (doc) {
         {
           $push: {
             notifications: {
-              body: `Product ${doc.name} is out of stock`,
+              body: `Product <b>${doc.name}</b> is out of stock`,
             },
           },
         },

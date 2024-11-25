@@ -24,7 +24,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -155,8 +161,9 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -277,7 +284,7 @@ const ActivityDetail = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   {transport.vehicleType === "Bus" ||
-                    transport.vehicleType === "Microbus" ? (
+                  transport.vehicleType === "Microbus" ? (
                     <Bus className="w-5 h-5 mr-2 text-blue-500" />
                   ) : (
                     <Car className="w-5 h-5 mr-2 text-green-500" />
@@ -392,19 +399,20 @@ const ActivityDetail = () => {
 
       const token = Cookies.get("jwt");
 
-      const response = await fetch(`http://localhost:4000/${userRole}/activities/${activity._id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ appropriate: updatedStatus, }),
-      });
-
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/activities/${activity._id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ appropriate: updatedStatus }),
+        }
+      );
 
       setIsAppropriate(updatedStatus); // Update state to reflect the new status
       setDialogOpen(false); // Close the dialog
-
     } catch (error) {
       console.error("Failed to update itinerary status:", error);
     }
@@ -711,7 +719,7 @@ const ActivityDetail = () => {
       const additionalPrice =
         userBooking.paymentAmount +
         calculateDiscountedPrice(activity.price, activity.specialDiscount) *
-        additionalTickets;
+          additionalTickets;
 
       const response = await axios.put(
         `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
@@ -732,7 +740,7 @@ const ActivityDetail = () => {
       console.error("Error updating booking:", error);
       setBookingError(
         error.response?.data?.message ||
-        "An error occurred while updating the booking."
+          "An error occurred while updating the booking."
       );
     } finally {
       setIsBooking(false);
@@ -980,7 +988,7 @@ const ActivityDetail = () => {
       </div>
 
       <div className="bg-gray-100">
-        <div className="container " >
+        <div className="container ">
           <div className="pt-4">
             <div className="flex flex-col md:flex-row gap-8">
               <div className="md:col-span-2">
@@ -992,7 +1000,11 @@ const ActivityDetail = () => {
                         <ToastProvider>
                           <Popover open={open} onOpenChange={setOpen}>
                             <PopoverTrigger asChild>
-                              <Button variant="outline" size="sm" className="ml-4">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="ml-4"
+                              >
                                 <Share2 className="h-4 w-4" />
                               </Button>
                             </PopoverTrigger>
@@ -1036,7 +1048,6 @@ const ActivityDetail = () => {
                         </ToastProvider>
                       </div>
                     </CardTitle>
-
 
                     <CardDescription className="flex items-center justify-end"></CardDescription>
                   </CardHeader>
@@ -1083,15 +1094,8 @@ const ActivityDetail = () => {
                       />
                     </div>
                   </CardContent>
-
-
                 </Card>
-
-
               </div>
-
-
-
 
               <div className="flex flex-col md:flex-col gap-8">
                 <div className="flex-1 bg-white shadow-md rounded-lg p-4">
@@ -1100,15 +1104,26 @@ const ActivityDetail = () => {
                       <div className="">
                         <h1 className="text-3xl font-bold">{activity.name}</h1>
                       </div>
+                      {(userRole === "advertiser" || userRole === "admin") &&
+                        !activity.isBookingOpen && (
+                          <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
+                            Booking is currently closed.
+                          </div>
+                        )}
                       <div className="flex items-center">
                         {/* Rating Badge */}
                         <div className="flex items-center px-3 py-1 rounded-full">
-                          <StarRating rating={activity.rating} readOnly={true} />
+                          <StarRating
+                            rating={activity.rating}
+                            readOnly={true}
+                          />
                         </div>
 
                         {/* Rating Count outside the badge */}
                         <span className="text-sm font-normal ml-2">
-                          {activity.comments ? `(${activity.comments.length})` : "(0)"}
+                          {activity.comments
+                            ? `(${activity.comments.length})`
+                            : "(0)"}
                         </span>
                       </div>
                       <div className="flex items-start">
@@ -1121,7 +1136,10 @@ const ActivityDetail = () => {
                             <div className="flex items-baseline">
                               <span className="text-4xl font-bold text-gray-900">
                                 {formatPrice(
-                                  calculateDiscountedPrice(activity.price, activity.specialDiscount)
+                                  calculateDiscountedPrice(
+                                    activity.price,
+                                    activity.specialDiscount
+                                  )
                                 )}
                               </span>
                               <span className="ml-3 text-xl font-semibold text-red-600">
@@ -1134,21 +1152,18 @@ const ActivityDetail = () => {
                           </div>
                         </div>
                       </div>
-
                       <div className="flex items-center">
                         <MapPin className="w-5 h-5 mr-2 text-orange-500" />
                         <span className="text-gray-700">
                           Location: {activity.location.address}
                         </span>
                       </div>
-
                       <div className="flex items-center">
                         <Calendar className="w-5 h-5 mr-2 text-orange-500" />
                         <span className="text-gray-700">
                           Date: {new Date(activity.timing).toLocaleDateString()}
                         </span>
                       </div>
-
                       <div className="flex items-center">
                         <Clock className="w-5 h-5 mr-2 text-orange-500" />
                         <span className="text-gray-700">
@@ -1159,35 +1174,50 @@ const ActivityDetail = () => {
                           })}
                         </span>
                       </div>
-
-
                       <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
                         {isExpanded
                           ? activity.description
-                          : `${activity.description.substring(0, 130)}...`}
-                        <button onClick={toggleExpanded} className="text-blue-500 hover:underline ml-2">
-                          {isExpanded ? "View Less" : "View More"}
-                        </button>
+                          : `${activity.description.substring(0, 130)}${
+                              activity.description.length > 130 ? "..." : ""
+                            }`}
+                        {activity.description.length > 130 && (
+                          <button
+                            onClick={toggleExpanded}
+                            className="text-blue-500 hover:underline ml-2"
+                          >
+                            {isExpanded ? "View Less" : "View More"}
+                          </button>
+                        )}
                       </div>
-
-
-
                       {userRole === "tourist" && !isActivityPassed() && (
                         <>
-                          <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+                          <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-3"></div>
+
+                          {!activity.isBookingOpen && (
+                            <div className="mb-3 p-3 bg-blue-50 text-blue-700 border border-blue-300 rounded-md shadow-sm text-center">
+                              <strong>Save this activity</strong> to get
+                              notified when booking opens.
+                            </div>
+                          )}
 
                           <Button
                             onClick={handleBookNowClick}
-                            className="w-full bg-[#388A94] hover:bg-[#2B6870] text-white font-bold py-2 px-4 rounded mt-4"
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg ${
+                              activity.isBookingOpen
+                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                            }`}
+                            disabled={!activity.isBookingOpen}
                           >
-                            {"Book Now"}
+                            {activity.isBookingOpen
+                              ? "Book Now"
+                              : "Booking Closed"}
                           </Button>
                         </>
                       )}
-
                       {canModify && (
                         <>
-                          <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
+                          <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-2"></div>
                           <Button
                             onClick={handleUpdate}
                             variant="default"
@@ -1204,19 +1234,15 @@ const ActivityDetail = () => {
                           </Button>
                         </>
                       )}
-
-
-
-
                       <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
-
                     </div>
-
                   </div>
 
                   <CardHeader>
                     <div className="flex justify-between items-center">
-                      <span className="text-3xl font-bold -ml-2 ">Advertiser Profile</span>
+                      <span className="text-3xl font-bold -ml-2 ">
+                        Advertiser Profile
+                      </span>
                       <Badge
                         variant="secondary"
                         className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
@@ -1285,22 +1311,28 @@ const ActivityDetail = () => {
                       <>
                         <div className="mt-6 border-t border-gray-300 pt-4"></div>
                         <Button
-                          className={`w-full mx-auto text-white ${isAppropriate
-                            ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                            : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                            }`}
+                          className={`w-full mx-auto text-white ${
+                            isAppropriate
+                              ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                              : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                          }`}
                           onClick={handleOpenDialog}
                         >
-                          {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
+                          {isAppropriate
+                            ? "Flag as Inappropriate"
+                            : "Flag as Appropriate"}
                         </Button>
 
                         {dialogOpen && (
                           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                             <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
                               <div className="mb-4">
-                                <h2 className="text-lg font-semibold">Confirm Action</h2>
+                                <h2 className="text-lg font-semibold">
+                                  Confirm Action
+                                </h2>
                                 <p className="text-gray-600 mt-2">
-                                  Are you sure you want to change the status of this itinerary/event?
+                                  Are you sure you want to change the status of
+                                  this itinerary/event?
                                 </p>
                               </div>
                               <div className="flex justify-end space-x-4">
@@ -1323,12 +1355,8 @@ const ActivityDetail = () => {
                           </div>
                         )}
                       </>
-
                     )}
                   </CardContent>
-
-
-
                 </div>
 
                 {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
@@ -1339,7 +1367,6 @@ const ActivityDetail = () => {
           {"Update Booking"}
           </Button>
           )} */}
-
               </div>
             </div>
 
@@ -1392,7 +1419,9 @@ const ActivityDetail = () => {
 
                 {userRole === "tourist" && userComment && (
                   <div className="border-t pt-4">
-                    <div className="text-sm text-gray-500 mb-2">Tap to Rate:</div>
+                    <div className="text-sm text-gray-500 mb-2">
+                      Tap to Rate:
+                    </div>
                     <div
                       className="flex gap-2"
                       onMouseLeave={() => setIsRatingHovered(false)}
@@ -1400,14 +1429,15 @@ const ActivityDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${(
-                            isRatingHovered
-                              ? quickRating >= star
-                              : quickRating >= star
-                          )
-                            ? "text-yellow-500 fill-current"
-                            : "text-gray-300"
-                            }`}
+                          className={`w-8 h-8 cursor-pointer ${
+                            (
+                              isRatingHovered
+                                ? quickRating >= star
+                                : quickRating >= star
+                            )
+                              ? "text-yellow-500 fill-current"
+                              : "text-gray-300"
+                          }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -1531,8 +1561,6 @@ const ActivityDetail = () => {
               )}
             </div>
           </div>
-
-
 
           <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
             <DialogContent className="sm:max-w-[425px]">
@@ -1704,7 +1732,6 @@ const ActivityDetail = () => {
           </Dialog>
         </div>
 
-
         {/* Full Comment Dialog */}
         <Dialog
           open={!!showFullComment}
@@ -1717,7 +1744,10 @@ const ActivityDetail = () => {
             <ScrollArea className="max-h-[60vh] overflow-auto">
               <div className="space-y-4">
                 <div>
-                  <StarRating rating={showFullComment?.rating} readOnly={true} />
+                  <StarRating
+                    rating={showFullComment?.rating}
+                    readOnly={true}
+                  />
                   <p className="text-sm text-gray-500 mt-1">
                     {showFullComment && formatCommentDate(showFullComment.date)}
                   </p>
@@ -1727,7 +1757,9 @@ const ActivityDetail = () => {
                     <Smile className="w-5 h-5 mr-2 text-green-500" />
                     Liked:
                   </h4>
-                  <p>{showFullComment?.content?.liked || "Nothing mentioned"}</p>
+                  <p>
+                    {showFullComment?.content?.liked || "Nothing mentioned"}
+                  </p>
                 </div>
                 <div>
                   <h4 className="font-semibold flex items-center">
@@ -1856,7 +1888,10 @@ const ActivityDetail = () => {
               <label className="block text-sm font-medium text-gray-700">
                 Your Rating
               </label>
-              <StarRating rating={activityRating} setRating={setActivityRating} />
+              <StarRating
+                rating={activityRating}
+                setRating={setActivityRating}
+              />
             </div>
             <DialogFooter>
               <Button onClick={handleActivityRating}>Submit My Rating</Button>
@@ -1869,8 +1904,8 @@ const ActivityDetail = () => {
             <DialogHeader>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this activity? This action cannot
-                be undone.
+                Are you sure you want to delete this activity? This action
+                cannot be undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -1915,7 +1950,6 @@ const ActivityDetail = () => {
             </DialogHeader>
             <DialogFooter>
               <Button onClick={handleDeleteSuccess} variant="default">
-
                 Back to All Activities
               </Button>
             </DialogFooter>
@@ -1996,7 +2030,10 @@ const ActivityDetail = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={handleTransportationBooking} disabled={isBooking}>
+              <Button
+                onClick={handleTransportationBooking}
+                disabled={isBooking}
+              >
                 {isBooking ? "Booking..." : "Confirm Booking"}
               </Button>
             </DialogFooter>
@@ -2011,7 +2048,8 @@ const ActivityDetail = () => {
             <DialogHeader>
               <DialogTitle>Transportation Booked Successfully</DialogTitle>
               <DialogDescription>
-                Your transportation has been booked. Thank you for your purchase!
+                Your transportation has been booked. Thank you for your
+                purchase!
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

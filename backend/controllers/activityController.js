@@ -558,7 +558,7 @@ const updateActivity = async (req, res) => {
         await Tourist.findByIdAndUpdate(tourists[i]._id, {
           $push: {
             notifications: {
-              body: `The activity "${activity.name}" is now available for booking`,
+              body: `The activity <b>${activity.name}</b> is now available for booking`,
               link: `/activity/${req.params.id}`,
             },
           },

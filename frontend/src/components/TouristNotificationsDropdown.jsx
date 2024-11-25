@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export function NotificationsDropdownTourGuide() {
+export function NotificationsDropdownTourist() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
@@ -30,7 +30,7 @@ export function NotificationsDropdownTourGuide() {
   const checkUnseenNotifications = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:4000/tour-guide/unseen-notifications`,
+        `http://localhost:4000/tourist/unseen-notifications`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
@@ -45,7 +45,7 @@ export function NotificationsDropdownTourGuide() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://localhost:4000/tour-guide/notifications`,
+        `http://localhost:4000/tourist/notifications`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
@@ -66,7 +66,7 @@ export function NotificationsDropdownTourGuide() {
   const markNotificationsAsSeen = async () => {
     try {
       await axios.post(
-        `http://localhost:4000/tour-guide/mark-notifications-seen`,
+        `http://localhost:4000/tourist/mark-notifications-seen`,
         {},
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -156,7 +156,7 @@ export function NotificationsDropdownTourGuide() {
         <div className="p-3 border-t border-gray-200">
           <Button
             className="w-full bg-[#388A94] hover:bg-[#5D9297] text-white"
-            onClick={() => (window.location.href = "/tour-guide-notifications")}
+            onClick={() => (window.location.href = "/tourist-notifications")}
           >
             View All
           </Button>

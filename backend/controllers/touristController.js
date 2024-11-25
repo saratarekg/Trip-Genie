@@ -1974,7 +1974,81 @@ const getPromoCode = async (req, res) => {
   }
 };
 
+const getTouristNotifications = async (req, res) => {
+  try {
+    // Get seller ID from res.locals
+    const touristId = res.locals.user_id;
 
+    if (!touristId) {
+      return res.status(400).json({ message: "tourist ID is required" });
+    }
+
+    // Find the seller and get their notifications
+    const tourist = await Tourist.findById(touristId, "notifications");
+
+    if (!tourist) {
+      return res.status(404).json({ message: "tourist not found" });
+    }
+
+    // Sort notifications in descending order based on the 'date' field
+    const sortedNotifications = tourist.notifications.sort(
+      (a, b) => b.date - a.date
+    );
+
+    // Return the sorted notifications
+    return res.status(200).json({ notifications: sortedNotifications });
+  } catch (error) {
+    console.error("Error fetching notifications:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const markNotificationsAsSeen = async (req, res) => {
+  try {
+    // Find the seller by their ID and update the notifications in one operation
+    const result = await Tourist.updateOne(
+      { _id: res.locals.user_id }, // Find seller by user ID
+      {
+        $set: {
+          "notifications.$[elem].seen": true, // Set 'seen' to true for all unseen notifications
+        },
+      },
+      {
+        arrayFilters: [{ "elem.seen": false }], // Only update notifications where seen is false
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ message: "No unseen notifications found" });
+    }
+
+    res.json({ message: "All notifications marked as seen" });
+  } catch (error) {
+    console.error("Error marking notifications as seen:", error.message);
+    res.status(500).json({ message: "Error marking notifications as seen" });
+  }
+};
+
+const hasUnseenNotifications = async (req, res) => {
+  try {
+    // Find the seller by their ID
+    const tourist = await Tourist.findById(res.locals.user_id);
+
+    if (!tourist) {
+      return res.status(404).json({ message: "tourist not found" });
+    }
+
+    // Check if there are any unseen notifications
+    const hasUnseen = tourist.notifications.some(
+      (notification) => !notification.seen
+    );
+
+    res.json({ hasUnseen });
+  } catch (error) {
+    console.error("Error checking unseen notifications:", error.message);
+    res.status(500).json({ message: "Error checking unseen notifications" });
+  }
+};
 
 module.exports = {
   removeProductFromWishlist,
@@ -2024,5 +2098,8 @@ module.exports = {
   saveActivity,
   getSavedItineraries,
   saveItinerary,
+  getTouristNotifications,
+  markNotificationsAsSeen,
+  hasUnseenNotifications,
 
 };

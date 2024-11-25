@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Bell, Loader2 } from "lucide-react";
 
-export default function AdminNotifications() {
+export default function TouristNotifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,7 +17,7 @@ export default function AdminNotifications() {
       setLoading(true);
       setError(null);
       const response = await axios.get(
-        `http://localhost:4000/admin/notifications`,
+        `http://localhost:4000/tourist/notifications`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
@@ -57,7 +57,7 @@ export default function AdminNotifications() {
   const markNotificationsAsSeen = async () => {
     try {
       await axios.post(
-        `http://localhost:4000/admin/mark-notifications-seen`,
+        `http://localhost:4000/tourist/mark-notifications-seen`,
         {},
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -131,13 +131,13 @@ export default function AdminNotifications() {
                   <tr
                     key={index}
                     className={`
-                                            ${
-                                              index % 2 === 0
-                                                ? "bg-gray-200"
-                                                : "bg-gray-300"
-                                            }
-                                            hover:bg-gray-400 transition duration-300 ease-in-out
-                                        `}
+                                        ${
+                                          index % 2 === 0
+                                            ? "bg-gray-200"
+                                            : "bg-gray-300"
+                                        }
+                                        hover:bg-gray-400 transition duration-300 ease-in-out
+                                    `}
                   >
                     <td className="px-4 py-3 text-[#1A3B47] relative text-lg border-b border-gray-200">
                       <div
