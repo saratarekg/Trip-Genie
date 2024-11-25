@@ -139,6 +139,8 @@ const getAdminByID = async (req, res) => {
   }
 };
 
+
+
 const changePassword = async (req, res) => {
   try {
     const admin = await Admin.findById(res.locals.user_id);
@@ -238,6 +240,19 @@ const getAdminProfile = async (req, res) => {
     }
     res.status(200).json(admin);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getAdminInfo = async (req, res) => {
+  try {
+    const admin = await Admin.findById( res.locals.user_id);
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    res.status(200).json(admin);
+  } catch (error) {
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -640,4 +655,5 @@ module.exports = {
   deletePromoCode,
   updatePromoCode,
   getAdminNotifications,
+  getAdminInfo,
 };

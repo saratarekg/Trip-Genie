@@ -882,7 +882,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   onClick={() => handleSort("price")}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-2" />
-                  Price {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
+                  Sort by Price {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
                 </Button>
                 <Button
                   variant="outline"
@@ -891,7 +891,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   onClick={() => handleSort("rating")}
                 >
                   <ArrowUpDown className="w-4 h-4 mr-2" />
-                  Rating {sortBy === "rating" && (sortOrder === 1 ? "↑" : "↓")}
+                  Sort by Rating {sortBy === "rating" && (sortOrder === 1 ? "↑" : "↓")}
                 </Button>
                 </div>
               </div>

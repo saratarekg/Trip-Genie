@@ -33,6 +33,7 @@ const getTourGuideProfile = async (req, res) => {
   }
 };
 
+
 const updateTourGuide = async (req, res) => {
   try {
     const tourGuide1 = await TourGuide.findById(req.params.id).lean();

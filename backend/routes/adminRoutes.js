@@ -186,7 +186,6 @@ router.get("/sales-report", adminController.getSalesReport);
 router.get("/itineraries-report", adminController.getItinerariesReport);
 router.get("/activities-report", adminController.getActivitiesReport);
 
-
 router.post("/promo-code", adminController.addPromoCode);
 router.get("/promo-code", adminController.getPromoCodes);
 router.get("/promo-code/:id", adminController.getPromoCode);
@@ -197,5 +196,6 @@ router.get("/maxPriceActivities", activityController.getMaxPrice);
 router.get("/activities", activityController.getAllActivitiesAdmin);
 router.get("/activities/:id", activityController.getActivityById);
 
+router.get("/admin-info", adminController.getAdminInfo);
 
 module.exports = router;
