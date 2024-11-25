@@ -3,17 +3,11 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Trash2, Edit, CheckCircle, XCircle } from 'lucide-react';
-import {
-  ToastProvider,
-  ToastViewport,
-  Toast,
-  ToastTitle,
-  ToastDescription,
-  ToastClose,
-} from "@/components/ui/toast"; // Import Toast components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Trash2, Edit, Plus, CheckCircle, XCircle } from 'lucide-react';
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function TagsPage() {
   const [tags, setTags] = useState([]);
@@ -22,13 +16,9 @@ export function TagsPage() {
   const [editTagName, setEditTagName] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [tagToDelete, setTagToDelete] = useState(null);
-  const [message, setMessage] = useState('');
-  const [editErrorMessage, setEditErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [showCreateTag, setShowCreateTag] = useState(false);
-  const [isToastOpen, setIsToastOpen] = useState(false); // State for toast
-  const [toastMessage, setToastMessage] = useState(''); // State for toast message
-  const [toastType, setToastType] = useState(''); // State for toast type
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('');
 
   const fetchTags = async () => {
     try {
@@ -41,9 +31,7 @@ export function TagsPage() {
       setTags(response.data);
     } catch (error) {
       console.error('Error fetching Tags:', error);
-      setToastMessage('Error fetching Tags');
-      setToastType('error');
-      setIsToastOpen(true);
+      showToast('Error fetching Tags', 'error');
     }
   };
 
@@ -51,23 +39,13 @@ export function TagsPage() {
     fetchTags();
   }, []);
 
-  useEffect(() => {
-    if (isToastOpen) {
-      const timer = setTimeout(() => {
-        setIsToastOpen(false);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isToastOpen]);
-
-  const hideMessageAfterDelay = (setMessageFunction) => {
-    setTimeout(() => {
-      setMessageFunction('');
-    }, 3000);
+  const showToast = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
   };
 
   const createTag = async () => {
-    setMessage('');
     if (newTag) {
       try {
         const token = Cookies.get('jwt');
@@ -77,31 +55,17 @@ export function TagsPage() {
           },
         });
         setNewTag('');
-        setSuccessMessage('Tag created successfully!');
-        setToastMessage('Tag created successfully!');
-        setToastType('success');
-        setIsToastOpen(true); // Open toast
+        showToast('Tag created successfully!', 'success');
         fetchTags();
-        setShowCreateTag(false);
-        hideMessageAfterDelay(setSuccessMessage);
       } catch (error) {
-        setMessage('This tag already exists.');
-        setToastMessage('This tag already exists.');
-        setToastType('error');
-        setIsToastOpen(true);
-        hideMessageAfterDelay(setMessage);
+        showToast('This tag already exists.', 'error');
       }
     } else {
-      setMessage('Please enter a tag name.');
-      setToastMessage('Please enter a tag name.');
-      setToastType('error');
-      setIsToastOpen(true);
-      hideMessageAfterDelay(setMessage);
+      showToast('Please enter a tag name.', 'error');
     }
   };
 
   const updateTag = async () => {
-    setEditErrorMessage('');
     if (editTagName) {
       try {
         const token = Cookies.get('jwt');
@@ -110,32 +74,19 @@ export function TagsPage() {
             Authorization: `Bearer ${token}`,
           },
         });
-        setSuccessMessage('Tag updated successfully!');
-        setToastMessage('Tag updated successfully!');
-        setToastType('success');
-        setIsToastOpen(true);
+        showToast('Tag updated successfully!', 'success');
         setEditTagId(null);
         setEditTagName('');
         fetchTags();
-        hideMessageAfterDelay(setSuccessMessage);
       } catch (error) {
-        setEditErrorMessage('Tag name already exists');
-        setToastMessage('Tag name already exists');
-        setToastType('error');
-        setIsToastOpen(true);
-        hideMessageAfterDelay(setEditErrorMessage);
+        showToast('Tag name already exists', 'error');
       }
     } else {
-      setEditErrorMessage('Please provide a valid tag name.');
-      setToastMessage('Please provide a valid tag name.');
-      setToastType('error');
-      setIsToastOpen(true);
-      hideMessageAfterDelay(setEditErrorMessage);
+      showToast('Please provide a valid tag name.', 'error');
     }
   };
 
   const deleteTag = async (tagId) => {
-    setMessage('');
     try {
       const token = Cookies.get('jwt');
       await axios.delete(`http://localhost:4000/admin/tags/${tagId}`, {
@@ -143,19 +94,11 @@ export function TagsPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-      setSuccessMessage('Tag deleted successfully!');
-      setToastMessage('Tag deleted successfully!');
-      setToastType('success');
-      setIsToastOpen(true);
+      showToast('Tag deleted successfully!', 'success');
       fetchTags();
-      hideMessageAfterDelay(setSuccessMessage);
     } catch (error) {
       console.error('Error deleting tag:', error.response?.data || error.message);
-      setMessage('Error deleting tag');
-      setToastMessage('Error deleting tag');
-      setToastType('error');
-      setIsToastOpen(true);
-      hideMessageAfterDelay(setMessage);
+      showToast('Error deleting tag', 'error');
     }
   };
 
@@ -172,96 +115,101 @@ export function TagsPage() {
     }
   };
 
-  const handleCancel = () => {
-    setShowCreateTag(false);
-    setNewTag('');
-  };
-
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-8">
       <ToastProvider>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6">
-            {!showCreateTag ? (
+        <div className="max-w-6xl mx-auto">
+          
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 className="text-xl font-semibold text-[#1A3B47] mb-4">Create New Tag</h2>
+            <div className="flex space-x-4">
+              <Input
+                type="text"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                placeholder="Enter new tag name"
+                className="flex-grow bg-white text-[#1A3B47] border-[#B5D3D1]"
+              />
               <Button 
-                onClick={() => setShowCreateTag(true)} 
-                className="w-full bg-[#5D9297] hover:bg-[#388A94] text-white"
+                onClick={createTag} 
+                className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
               >
-                Create New Tag
+                <Plus className="mr-2 h-4 w-4" /> Add Tag
               </Button>
-            ) : (
-              <div className="space-y-4">
-                <Input
-                  type="text"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Enter new tag name"
-                  className="border-[#808080]"
-                />
-                <div className="flex space-x-2">
-                  <Button 
-                    onClick={createTag} 
-                    className="flex-1 bg-[#F88C33] hover:bg-orange-500 active:bg-[#2D6F77] 
-                    active:transform active:scale-95 text-white transition-all duration-200"
-                  >
-                    Add Tag
-                  </Button>
-                  <Button 
-                    onClick={handleCancel} 
-                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Changed gap-4 to gap-2 and added mb-2 */}
-            {tags.map((tag) => (
-              <div 
-                key={tag._id} 
-                className="bg-white border border-gray-300 p-4 rounded-lg hover:shadow-md flex items-center justify-between"
-              >
-                <div className="flex-1 flex items-center justify-between">
-                  <span className="text-[#003f66] font-medium">{tag.type}</span>
-                  <span className="text-gray-500 text-sm self-start text-right mr-8">
-                    {new Date(tag.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    onClick={() => {
-                      setEditTagId(tag._id);
-                      setEditTagName(tag.type);
-                    }}
-                    className="p-2 bg-[#B5D3D1] text-[#2D6F77] border border-[#2D6F77] 
-                    hover:bg-[#2D6F77] hover:text-white active:bg-[#1A3B47] 
-                    active:transform active:scale-95 transition-all duration-200"
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-[#1A3B47] mb-4">Existing Tags</h2>
+            <div className="overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Tag Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Created At
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Edit
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Delete
+                    </th>
+                  </tr>
+                </thead>
+                <AnimatePresence mode="wait">
+                  <motion.tbody
+                    key="table-body"
+                    className="bg-white divide-y divide-gray-200"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    onClick={() => handleDeleteClick(tag)}
-                    className="p-2 bg-red-100 text-red-500 hover:bg-red-200 hover:text-white transition duration-300 ease-in-out"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+                    {tags.map((tag, index) => (
+                      <motion.tr
+                        key={tag._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.2, delay: index * 0.05 }}
+                      >
+                        <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {tag.type}
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(tag.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                          <Button
+                            onClick={() => {
+                              setEditTagId(tag._id);
+                              setEditTagName(tag.type);
+                            }}
+                            className="p-2 bg-white text-[#1A3B47] hover:text-[#1A3B47]/70 hover:underline"
+                            size="icon"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                          <Button
+                            onClick={() => handleDeleteClick(tag)}
+                            className="p-2 bg-white text-red-600 hover:text-red-400 hover:underline"
+                            size="icon"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </motion.tbody>
+                </AnimatePresence>
+              </table>
+            </div>
           </div>
-
-          {/* {message && (
-            <div className="mt-4 p-4 bg-red-100 text-red-800 rounded">
-              {message}
-            </div>
-          )}
-          {successMessage && (
-            <div className="mt-4 p-4 bg-green-100 text-green-800 rounded">
-              {successMessage}
-            </div>
-          )} */}
         </div>
 
         <DeleteConfirmation
@@ -270,13 +218,11 @@ export function TagsPage() {
           itemType="tag"
           onConfirm={handleConfirmDelete}
         />
-
-        {/* Edit Tag Dialog */}
         {editTagId && (
           <Dialog open={!!editTagId} onOpenChange={() => setEditTagId(null)}>
             <DialogContent className="sm:max-w-[500px] p-6 bg-white shadow-lg rounded-lg">
               <DialogHeader>
-                <DialogTitle className="text-lg font-semibold text-[#003f66]">Edit Tag</DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-[#1A3B47]">Edit Tag</DialogTitle>
               </DialogHeader>
               <Input
                 type="text"
@@ -284,9 +230,6 @@ export function TagsPage() {
                 onChange={(e) => setEditTagName(e.target.value)}
                 className="border-[#808080] mb-2"
               />
-              {editErrorMessage && (
-                <p className="text-red-500 text-sm mb-2">{editErrorMessage}</p>
-              )}
               <DialogFooter className="sm:justify-start">
                 <Button
                   onClick={updateTag}
@@ -307,7 +250,6 @@ export function TagsPage() {
             </DialogContent>
           </Dialog>
         )}
-
         <ToastViewport />
         {isToastOpen && (
           <Toast
@@ -338,3 +280,4 @@ export function TagsPage() {
 }
 
 export default TagsPage;
+
