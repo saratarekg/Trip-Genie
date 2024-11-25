@@ -1,5 +1,4 @@
 const nodemailer = require("nodemailer");
-const promoCode = require("../models/promoCode");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -9,17 +8,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendBirthdayEmail = async (tourist) => {
-  let code = "";
-  if (tourist.fname) {
-    code = `${tourist.fname.toUpperCase()}${tourist.dateOfBirth.getFullYear()}`;
-  } else {
-    code = `${tourist.username.toUpperCase()}${tourist.dateOfBirth.getFullYear()}`;
-  }
+const sendBirthdayEmail = async (tourist, code) => {
   const mailOptions = {
     to: tourist.email,
     subject: "Happy Birthday from Trip Genie!",
-    html: `<h1>Happy Birthday, ${tourist.fname}! 🎉🎂🎈</h1>
+    html: `<h1>Happy Birthday, ${
+      tourist.fname ? tourist.fname : tourist.username
+    }! 🎉🎂🎈</h1>
         <p>Your wish is our command! Wishing you a magical day filled with happiness and a year filled with joy.</p>
         <p>As a special gift, here is your magical promo code which you can use on any booking or product:</p>
         <h3>Code: <strong>${code}</strong></h3>
@@ -32,18 +27,6 @@ const sendBirthdayEmail = async (tourist) => {
         <p>Best wishes,</p>
         <p>The Trip Genie Team</p>`,
   };
-
-  const promo = new promoCode({
-    code: code,
-    percentOff: 50,
-    usage_limit: 1,
-    dateRange: {
-      start: new Date(),
-      end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-    },
-  });
-
-  await promo.save();
 
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
