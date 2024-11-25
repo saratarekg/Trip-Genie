@@ -9,6 +9,7 @@ import { NotificationsDropdownSeller } from '@/components/SellerNotificationsDro
 import { NotificationsDropdownTourGuide } from '@/components/TourGuideNotificationsDropdown'
 import { NotificationsDropdownAdvertiser } from '@/components/AdvertiserNotificationsDropdown'
 import { NotificationsDropdownAdmin } from '@/components/AdminNotificationsDropdown'
+import { NotificationsDropdownTourist } from '@/components/TouristNotificationsDropdown'
 
 
 
@@ -70,7 +71,8 @@ export function NavbarComponent() {
   const [hasUnseenNotificationsTourGuide, setHasUnseenNotificationsTourGuide] = useState(false);
   const [hasUnseenNotificationsAdvertiser, setHasUnseenNotificationsAdvertiser] = useState(false);
   const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] = useState(false);
-  
+  const [hasUnseenNotificationsTourist, setHasUnseenNotificationsTourist] = useState(false);
+
 
   const [key, setKey] = useState(0);
   const location = useLocation();
@@ -113,7 +115,26 @@ export function NavbarComponent() {
     if (role === "admin") {
       checkUnseenNotificationsAdmin();
     }
+    if (role === "tourist") {
+      checkUnseenNotificationsTourist();
+    }
   }, [role]);
+
+  const checkUnseenNotificationsTourist = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/tourist/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsTourist(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsTourist(false);
+    }
+  };
 
   const checkUnseenNotificationsAdmin = async () => {
     try {
@@ -590,6 +611,7 @@ export function NavbarComponent() {
                 {role === "tour-guide" && <NotificationsDropdownTourGuide />}
                 {role === "advertiser" && <NotificationsDropdownAdvertiser />}
                 {role === "admin" && <NotificationsDropdownAdmin />}
+                {role === "tourist" && <NotificationsDropdownTourist />}
                 {role === "tourist" && (
                   <>
                     <div className="relative mr-2 mt-1">
