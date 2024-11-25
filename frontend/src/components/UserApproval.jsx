@@ -21,7 +21,7 @@ import {
   ToastDescription,
   ToastClose,
 } from "@/components/ui/toast";
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, User } from "lucide-react";
 
 export default function UserApproval() {
   const [advertisers, setAdvertisers] = useState([]);
@@ -33,8 +33,8 @@ export default function UserApproval() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState('');
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("");
 
   useEffect(() => {
     fetchAdvertisers();
@@ -180,36 +180,29 @@ export default function UserApproval() {
     }
   };
 
-  const renderUserCards = (users, role) =>
-    users.map((user) => (
+  const renderUserCards = (users, role, startIndex = 0) =>
+    users.map((user, index) => (
       <Card
         key={user._id}
         className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
       >
-        <CardHeader className="border-b bg-gray-50 py-2 sm:py-3 px-3 sm:px-4">
-          <CardTitle className="text-base sm:text-lg font-semibold text-[#003f66]">
-            {user.name}
-            <span className="text-[#5D9297] text-xs sm:text-sm ml-2">
-              ({role})
-            </span>
+        <CardHeader className="border-b bg-gray-50 py-2 px-3">
+          <CardTitle className="text-base font-semibold text-[#003f66] text-center">
+            User {startIndex + index + 1}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-3 sm:p-4 space-y-2 sm:space-y-3">
-          <div className="flex space-x-2">
-            <Button
-              onClick={() => handleConfirm("reject", user, role)}
-              className="flex-1 bg-red-500 hover:bg-red-600 active:bg-red-700 
-              active:transform active:scale-95 text-white transition-all duration-200"
-            >
-              Reject
-            </Button>
-            <Button
-              onClick={() => handleConfirm("approve", user, role)}
-              className="flex-1 text-sm sm:text-base bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] 
-              active:transform active:scale-95 text-white transition-all duration-200"
-            >
-              Accept
-            </Button>
+        <CardContent className="p-4 space-y-4">
+          <div className="flex items-center space-x-4">
+            <div className="w-16 h-16 rounded-full bg-[#5D9297] flex items-center justify-center flex-shrink-0 ">
+              <User size={32} className="text-white " />
+            </div>
+            <div className="w-px h-16 bg-gray-200"></div>
+            <div>
+              <h3 className="font-bold text-[#003f66] text-lg mb-1">
+                {user.name}
+              </h3>
+              <span className="text-[#5D9297] text-xs font-medium">{role}</span>
+            </div>
           </div>
 
           {user.files && (
@@ -217,9 +210,7 @@ export default function UserApproval() {
               {user.files.IDFilename && (
                 <Button
                   onClick={() => fetchFile(user.files.IDFilename)}
-                  className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
-                  hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
-                  active:transform active:scale-95 transition-all duration-200"
+                  className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
                   variant="outline"
                 >
                   View ID Document
@@ -230,9 +221,7 @@ export default function UserApproval() {
                   onClick={() =>
                     fetchFile(user.files.taxationRegistryCardFilename)
                   }
-                  className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
-                  hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
-                  active:transform active:scale-95 transition-all duration-200"
+                  className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
                   variant="outline"
                 >
                   View Taxation Registry Card
@@ -240,20 +229,34 @@ export default function UserApproval() {
               )}
               {user.files.certificatesFilenames &&
                 user.files.certificatesFilenames.length > 0 &&
-                user.files.certificatesFilenames.map((certificate, index) => (
-                  <Button
-                    key={index}
-                    onClick={() => fetchFile(certificate)}
-                    className="w-full !bg-white !text-[#2D6F77] border !border-[#2D6F77] 
-                    hover:!bg-[#2D6F77] hover:!text-white active:!bg-[#1A3B47] 
-                    active:transform active:scale-95 transition-all duration-200"
-                    variant="outline"
-                  >
-                    View Certificate {index + 1}
-                  </Button>
-                ))}
+                user.files.certificatesFilenames.map(
+                  (certificate, certIndex) => (
+                    <Button
+                      key={certIndex}
+                      onClick={() => fetchFile(certificate)}
+                      className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
+                      variant="outline"
+                    >
+                      View Certificate {certIndex + 1}
+                    </Button>
+                  )
+                )}
             </div>
           )}
+          <div className="flex space-x-2">
+            <Button
+              onClick={() => handleConfirm("reject", user, role)}
+              className="flex-1 bg-red-500 hover:bg-red-600 active:bg-red-700 active:transform active:scale-95 text-white transition-all duration-200 py-1 rounded-md text-sm"
+            >
+              Reject
+            </Button>
+            <Button
+              onClick={() => handleConfirm("approve", user, role)}
+              className="flex-1 text-sm bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200 py-1 rounded-md"
+            >
+              Accept
+            </Button>
+          </div>
         </CardContent>
       </Card>
     ));
@@ -283,10 +286,14 @@ export default function UserApproval() {
                   </p>
                 </div>
               ) : (
-                <div className="grid gap-3 sm:gap-4 grid-cols-1 lg:grid-cols-2 auto-rows-auto">
-                  {renderUserCards(advertisers, "advertiser")}
-                  {renderUserCards(sellers, "seller")}
-                  {renderUserCards(tourGuides, "tourGuide")}
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto">
+                  {renderUserCards(advertisers, "advertiser", 0)}
+                  {renderUserCards(sellers, "seller", advertisers.length)}
+                  {renderUserCards(
+                    tourGuides,
+                    "tourGuide",
+                    advertisers.length + sellers.length
+                  )}
                 </div>
               )}
             </div>
@@ -351,19 +358,19 @@ export default function UserApproval() {
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
             duration={2000}
-            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+            className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
           >
             <div className="flex items-center">
-              {toastType === 'success' ? (
+              {toastType === "success" ? (
                 <CheckCircle className="text-green-500 mr-2" />
               ) : (
                 <XCircle className="text-red-500 mr-2" />
               )}
               <div>
-                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-                <ToastDescription>
-                  {toastMessage}
-                </ToastDescription>
+                <ToastTitle>
+                  {toastType === "success" ? "Success" : "Error"}
+                </ToastTitle>
+                <ToastDescription>{toastMessage}</ToastDescription>
               </div>
             </div>
             <ToastClose />

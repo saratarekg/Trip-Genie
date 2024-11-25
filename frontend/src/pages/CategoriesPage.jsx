@@ -5,33 +5,22 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Trash2, Edit, CheckCircle, XCircle } from 'lucide-react';
-import {
-  ToastProvider,
-  ToastViewport,
-  Toast,
-  ToastTitle,
-  ToastDescription,
-  ToastClose,
-} from "@/components/ui/toast"; // Import Toast components
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Trash2, Edit, CheckCircle, XCircle, Plus } from 'lucide-react';
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
   const [updatedCategory, setUpdatedCategory] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
-  const [message, setMessage] = useState("");
-  const [editErrorMessage, setEditErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [showCreateCategory, setShowCreateCategory] = useState(false);
-  const [isToastOpen, setIsToastOpen] = useState(false); // State for toast
-  const [toastMessage, setToastMessage] = useState(''); // State for toast message
-  const [toastType, setToastType] = useState(''); // State for toast type
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('');
 
   const fetchCategories = async () => {
     try {
@@ -47,9 +36,7 @@ export default function CategoriesPage() {
       setCategories(response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
-      setToastMessage('Error fetching categories');
-      setToastType('error');
-      setIsToastOpen(true);
+      showToast('Error fetching categories', 'error');
     }
   };
 
@@ -57,23 +44,13 @@ export default function CategoriesPage() {
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    if (isToastOpen) {
-      const timer = setTimeout(() => {
-        setIsToastOpen(false);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isToastOpen]);
-
-  const hideMessageAfterDelay = (setMessageFunction) => {
-    setTimeout(() => {
-      setMessageFunction("");
-    }, 3000);
+  const showToast = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
   };
 
   const createCategory = async () => {
-    setMessage("");
     if (newCategory) {
       try {
         const token = Cookies.get("jwt");
@@ -87,31 +64,17 @@ export default function CategoriesPage() {
           }
         );
         setNewCategory("");
-        setSuccessMessage("Category created successfully!");
-        setToastMessage('Category created successfully!');
-        setToastType('success');
-        setIsToastOpen(true);
+        showToast('Category created successfully!', 'success');
         fetchCategories();
-        setShowCreateCategory(false);
-        hideMessageAfterDelay(setSuccessMessage);
       } catch (error) {
-        setMessage("This category already exists");
-        setToastMessage('This category already exists');
-        setToastType('error');
-        setIsToastOpen(true);
-        hideMessageAfterDelay(setMessage);
+        showToast('This category already exists', 'error');
       }
     } else {
-      setMessage("Please enter a category name.");
-      setToastMessage('Please enter a category name.');
-      setToastType('error');
-      setIsToastOpen(true);
-      hideMessageAfterDelay(setMessage);
+      showToast('Please enter a category name.', 'error');
     }
   };
 
   const handleUpdateCategory = async () => {
-    setEditErrorMessage("");
     if (updatedCategory) {
       try {
         const token = Cookies.get("jwt");
@@ -124,32 +87,19 @@ export default function CategoriesPage() {
             },
           }
         );
-        setUpdatedCategory("");
-        setSuccessMessage("Category updated successfully!");
-        setToastMessage('Category updated successfully!');
-        setToastType('success');
-        setIsToastOpen(true);
+        showToast('Category updated successfully!', 'success');
         setSelectedCategoryId(null);
+        setUpdatedCategory("");
         fetchCategories();
-        hideMessageAfterDelay(setSuccessMessage);
       } catch (error) {
-        setEditErrorMessage("Category name already exists");
-        setToastMessage('Category name already exists');
-        setToastType('error');
-        setIsToastOpen(true);
-        hideMessageAfterDelay(setEditErrorMessage);
+        showToast('Category name already exists', 'error');
       }
     } else {
-      setEditErrorMessage("Please enter a new category name.");
-      setToastMessage('Please enter a new category name.');
-      setToastType('error');
-      setIsToastOpen(true);
-      hideMessageAfterDelay(setEditErrorMessage);
+      showToast('Please enter a new category name.', 'error');
     }
   };
 
   const deleteCategory = async (categoryId) => {
-    setMessage("");
     try {
       const token = Cookies.get("jwt");
       await axios.delete(
@@ -160,19 +110,11 @@ export default function CategoriesPage() {
           },
         }
       );
-      setSuccessMessage("Category deleted successfully!");
-      setToastMessage('Category deleted successfully!');
-      setToastType('success');
-      setIsToastOpen(true);
+      showToast('Category deleted successfully!', 'success');
       fetchCategories();
-      hideMessageAfterDelay(setSuccessMessage);
     } catch (error) {
       console.error("Error deleting category:", error);
-      setMessage("Error deleting category");
-      setToastMessage('Error deleting category');
-      setToastType('error');
-      setIsToastOpen(true);
-      hideMessageAfterDelay(setMessage);
+      showToast('Error deleting category', 'error');
     }
   };
 
@@ -190,83 +132,102 @@ export default function CategoriesPage() {
   };
 
   const handleCancel = () => {
-    setShowCreateCategory(false);
     setNewCategory('');
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-8">
       <ToastProvider>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6">
-            {!showCreateCategory ? (
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 className="text-xl font-semibold text-[#1A3B47] mb-4">Create New Category</h2>
+            <div className="flex space-x-4">
+              <Input
+                type="text"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                placeholder="Enter new category name"
+                className="flex-grow bg-white text-[#1A3B47] border-[#B5D3D1]"
+              />
               <Button 
-                onClick={() => setShowCreateCategory(true)} 
-                className="w-full bg-[#5D9297] hover:bg-[#388A94] text-white"
+                onClick={createCategory} 
+                className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
               >
-                Create New Category
+                <Plus className="mr-2 h-4 w-4" /> Add Category
               </Button>
-            ) : (
-              <div className="space-y-4">
-                <Input
-                  type="text"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder="Enter new category name"
-                  className="border-[#808080]"
-                />
-                <div className="flex space-x-2">
-                  <Button 
-                    onClick={createCategory} 
-                    className="flex-1 bg-[#F88C33] hover:bg-orange-500 active:bg-[#2D6F77] 
-                    active:transform active:scale-95 text-white transition-all duration-200"
-                  >
-                    Add Category
-                  </Button>
-                  <Button 
-                    onClick={handleCancel} 
-                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {categories.map((category) => (
-              <div 
-                key={category._id} 
-                className="bg-white border border-gray-300 p-4 rounded-lg hover:shadow-md flex items-center justify-between"
-              >
-                <div className="flex-1 flex items-center justify-between">
-                  <span className="text-[#003f66] font-medium">{category.name}</span>
-                  <span className="text-gray-500 text-sm self-start text-right mr-8">
-                    {new Date(category.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    onClick={() => {
-                      setSelectedCategoryId(category._id);
-                      setUpdatedCategory(category.name);
-                    }}
-                    className="p-2 bg-[#B5D3D1] text-[#2D6F77] border border-[#2D6F77] 
-                    hover:bg-[#2D6F77] hover:text-white active:bg-[#1A3B47] 
-                    active:transform active:scale-95 transition-all duration-200"
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold text-[#1A3B47] mb-4">Existing Categories</h2>
+            <div className="overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Created At
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Edit
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Delete
+                    </th>
+                  </tr>
+                </thead>
+                <AnimatePresence mode="wait">
+                  <motion.tbody
+                    key="table-body"
+                    className="bg-white divide-y divide-gray-200"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    onClick={() => handleDeleteClick(category)}
-                    className="p-2 bg-red-100 text-red-500 hover:bg-red-200 hover:text-white transition duration-300 ease-in-out"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+                    {categories.map((category, index) => (
+                      <motion.tr
+                        key={category._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.2, delay: index * 0.05 }}
+                      >
+                        <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {category.name}
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(category.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                          <Button
+                            onClick={() => {
+                              setSelectedCategoryId(category._id);
+                              setUpdatedCategory(category.name);
+                            }}
+                            className="p-2 bg-white text-[#1A3B47] hover:text-[#1A3B47]/70 hover:underline"
+                            size="icon"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                          <Button
+                            onClick={() => handleDeleteClick(category)}
+                            className="p-2 bg-white text-red-600 hover:text-red-400 hover:underline"
+                            size="icon"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </motion.tbody>
+                </AnimatePresence>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -277,12 +238,11 @@ export default function CategoriesPage() {
           onConfirm={handleConfirmDelete}
         />
 
-        {/* Edit Category Dialog */}
         {selectedCategoryId && (
           <Dialog open={!!selectedCategoryId} onOpenChange={() => setSelectedCategoryId(null)}>
             <DialogContent className="sm:max-w-[500px] p-6 bg-white shadow-lg rounded-lg">
               <DialogHeader>
-                <DialogTitle className="text-lg font-semibold text-[#003f66]">Edit Category</DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-[#1A3B47]">Edit Category</DialogTitle>
               </DialogHeader>
               <Input
                 type="text"
@@ -290,9 +250,6 @@ export default function CategoriesPage() {
                 onChange={(e) => setUpdatedCategory(e.target.value)}
                 className="border-[#808080] mb-2"
               />
-              {editErrorMessage && (
-                <p className="text-red-500 text-sm mb-2">{editErrorMessage}</p>
-              )}
               <DialogFooter className="sm:justify-start">
                 <Button
                   onClick={handleUpdateCategory}
@@ -313,8 +270,7 @@ export default function CategoriesPage() {
             </DialogContent>
           </Dialog>
         )}
-
-        <ToastViewport className="fixed bottom-0 right-0 p-4" />
+        <ToastViewport className="fixed top-0 right-0 p-4" />
         {isToastOpen && (
           <Toast
             onOpenChange={setIsToastOpen}
