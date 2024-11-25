@@ -21,6 +21,7 @@ import ActivityReport from "@/components/ActivityReport.jsx";
 import UserStats from "@/components/UserStats.jsx";
 import AllActivitiesComponent from "./AllActivitiesAdmin.jsx";
 import SingleActivityAdmin from "./SingleActivityAdmin.jsx";
+import { Dashboard } from "../components/AdminDashboard.jsx";
 
 import logo from "../assets/images/TGlogo.svg";
 
@@ -141,6 +142,8 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
             <UserStats />
           ) : activeTab === 'single-activity-admin' ? (
             <SingleActivityAdmin />
+          ) : activeTab === 'dashboard' ? (
+            <Dashboard />
           ) : (
             <div className="p-4 bg-gray-100 rounded">
               Content for {activeTabDetails.title} goes here.

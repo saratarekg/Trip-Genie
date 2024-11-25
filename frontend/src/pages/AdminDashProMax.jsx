@@ -125,6 +125,7 @@ const getInitials = (name) => {
 };
 
 export function Dashboard() {
+  const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("activeTab") || "dashboard";
   });
@@ -134,6 +135,22 @@ export function Dashboard() {
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
   }, [activeTab]);
+
+  const checkUnseenNotificationsAdmin = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/admin/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotificationsAdmin(response.data.hasUnseen);
+    } catch (error) {
+      console.error('Error checking unseen notifications:', error);
+      // Silently fail but don't show the notification dot
+      setHasUnseenNotificationsAdmin(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAdminInfo = async () => {
@@ -151,6 +168,7 @@ export function Dashboard() {
     };
 
     fetchAdminInfo();
+    checkUnseenNotificationsAdmin();
   }, []);
 
   const handleToggleCollapse = (collapsed) => {
