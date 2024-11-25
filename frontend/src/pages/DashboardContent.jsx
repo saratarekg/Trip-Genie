@@ -18,6 +18,9 @@ import ProductReport from "../components/ProductReport.jsx";
 import ProductReportSeller from "../components/ProductReportSeller.jsx";
 import ItineraryReport from "../components/ItineraryReport.jsx";
 import ActivityReport from "@/components/ActivityReport.jsx";
+import UserStats from "@/components/UserStats.jsx";
+
+
 
 export function DashboardContent({ activeTab, tabs, setActiveTab }) {
   const [selectedComplaintId, setSelectedComplaintId] = useState(null);
@@ -127,6 +130,10 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
           <ItineraryReport />
         ) : activeTab === 'activity-reports' ? (
           <ActivityReport />
+        // ) : activeTab === 'seller-product-sales-report' ? (
+        //   <ProductReportSeller />
+        )  : activeTab === 'user-stats' ? (
+          <UserStats />
         ) : activeTab === 'seller-product-sales-report' ? (
           <ProductReportSeller />
         ) : (

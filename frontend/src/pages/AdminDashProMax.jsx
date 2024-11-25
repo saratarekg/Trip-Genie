@@ -101,6 +101,7 @@ const tabs = [
       { id: 'activity-reports', title: 'Activities Report' },
       { id: 'my-product-sales-report', title: 'My Products Report'},
       { id: 'seller-product-sales-report', title: 'Seller\'s Products Report' },
+      { id: 'user-stats', title: 'User Statistics' },
     ]
   },
 ];
