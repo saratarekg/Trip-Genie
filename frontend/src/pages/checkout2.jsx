@@ -165,7 +165,6 @@ export default function CheckoutPage() {
         const userData = response.data;
         const currencyId = userData.preferredCurrency;
         setSavedCards(userData.cards || []);
-        console.log("Saved addresses:", userData.shippingAddresses);
         setSavedAddresses(userData.shippingAddresses || []);
 
         const defaultAddress = userData.shippingAddresses?.find(
@@ -258,52 +257,67 @@ export default function CheckoutPage() {
       const deliveryType = searchParams.get("deliveryType");
       const deliveryTime = searchParams.get("deliveryTime");
       const shippingId = searchParams.get("shippingId");
-
+  
       await fetchUserInfo();
-
-      // get the shipping address using the shippingId in saved addresses
-
-      console.log("Saved addresses:", savedAddresses);
-
-      const address = savedAddresses.find((addr) => addr._id === shippingId);
-      console.log("Address:", address);
-
+  
+      let selectedAddress = null;
+  
+      if (shippingId) {
+        try {
+          const token = Cookies.get("jwt");
+          const response = await axios.get(
+            `http://localhost:4000/tourist/shippingAdds`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          const addresses = response.data.shippingAddresses;
+          setSavedAddresses(addresses); // Update saved addresses
+  
+          selectedAddress = addresses.find((addr) => addr._id === shippingId);
+          if (!selectedAddress) {
+            console.warn("Shipping address not found for given ID.");
+          }
+        } catch (error) {
+          console.error("Error fetching shipping address:", error);
+        }
+      }
+  
       console.log("Session ID:", sessionId);
-
+  
       if (sessionId && success === "true") {
         try {
           const response = await axios.get(
             `http://localhost:4000/check-payment-status?session_id=${sessionId}`
           );
-
+  
           console.log("Payment status response:", response.data);
-
+  
           if (response.data.status === "paid") {
             setPaySuccess(true);
             setDeliveryType(deliveryType);
             setDeliveryTime(deliveryTime);
-            setSelectedAddress(address);
             setPaymentMethod("credit_card");
-
+  
             console.log("Completing purchase...");
             await completePurchase({
-              address: address,
+              address: selectedAddress,
               deliveryType,
               deliveryTime,
               paymentMethod: "credit_card",
             });
-
-            console.log("Purchase completed.");
+  
           }
         } catch (error) {
           console.error("Error checking payment status:", error);
         }
       }
     };
-
+  
     checkPaymentStatus();
     fetchCart();
-  }, [searchParams, isAddressLoaded]);
+  }, [searchParams]);
+  
 
   const completePurchase = async (data) => {
     try {
@@ -327,8 +341,8 @@ export default function CheckoutPage() {
             data.paymentMethod === "credit_card"
               ? data.paymentMethod
               : paymentMethod,
-          shippingAddress: selectedAddress,
-          locationType: selectedAddress.locationType,
+          shippingAddress: data.address || selectedAddress,
+          locationType: data.address? data.address.locationType : selectedAddress.locationType,
           deliveryType:
             data.paymentMethod === "credit_card"
               ? data.deliveryType
@@ -345,6 +359,8 @@ export default function CheckoutPage() {
         const errorData = await response.json();
         throw new Error(errorData.message);
       }
+
+      console.log("Purchase completed successfully.");
 
       setPurchaseStatus("success");
       setIsStatusDialogOpen(true);

@@ -32,6 +32,7 @@ import Loader from "@/components/loader";
 import defaultImage from "../assets/images/default-image.jpg";
 import historicalPlaceImage from "../assets/images/hp.png";
 import HistoricalPlaceDetail from "@/components/HistoricalPlaceDetailAdmin"; // Import the detail component
+import { Pagination } from "@/components/ui/pagination2"
 
 const HistoricalPlaceCard = ({
   historicalPlace,

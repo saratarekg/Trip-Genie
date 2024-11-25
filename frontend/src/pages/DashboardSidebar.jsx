@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BarChart, Users, Gift, Activity, MessageSquare, Map, LogOut, Home, ChevronDown, Bell } from 'lucide-react';
+import { BarChart, Users, Gift, Activity, MessageSquare, Map, LogOut, Home, ChevronDown, Bell, Tag } from 'lucide-react';
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/TGlogo.svg";
@@ -29,7 +29,6 @@ const tabs = [
       { id: 'manage-products', title: 'All Products' },
       { id: 'archived-products', title: 'Archived Products' },
       { id: 'create-product', title: 'Create Product' },
-      { id: 'create-promo-code', title: 'Create Promo Code' },
     ]
   },
   { 
@@ -54,6 +53,11 @@ const tabs = [
     id: 'historical-places', 
     title: 'Historical Places', 
     icon: Map 
+  },
+  { 
+    id: 'create-promo-code', 
+    title: 'Create Promo Code', 
+    icon: Tag 
   },
   { 
     id: 'reports', 
