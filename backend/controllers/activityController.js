@@ -39,7 +39,6 @@ const getMaxPriceMy = async (req, res) => {
   }
 };
 
-
 const getAllActivitiesAdmin = async (req, res) => {
   try {
     const {
@@ -147,7 +146,7 @@ const getAllActivities = async (req, res) => {
       category,
       minRating
     );
-  
+
     const searchResult = await Activity.findByFields(searchBy);
 
     const searchResultIds = searchResult.map((activity) => activity._id);
@@ -224,7 +223,6 @@ const flagActivity = async (req, res) => {
       await Advertiser.findByIdAndUpdate(activity.advertiser._id, {
         $push: { notifications: notification },
       });
-
     }
 
     res.status(200).json({ message: "Activity flagged successfully" });
@@ -259,10 +257,7 @@ const getActivitiesByPreferences = async (req, res) => {
       minRating
     );
 
-    
-
     const searchResult = await Activity.findByFields(searchBy);
-
 
     const searchResultIds = searchResult.map((activity) => activity._id);
     const filterResultIds = filterResult.map((activity) => activity._id);
@@ -389,7 +384,6 @@ const createActivity = async (req, res) => {
 
   let imagesBuffer = [];
   try {
-   
     const pictures = req.files.map(
       (file) => `data:image/jpeg;base64,${file.buffer.toString("base64")}`
     );
@@ -448,13 +442,18 @@ const deleteActivity = async (req, res) => {
     }
 
     //remove activity from saved activities list for each tourist
-    const tourists = await Tourist.find({ "savedActivity.activity": req.params.id });
+    const tourists = await Tourist.find({
+      "savedActivity.activity": req.params.id,
+    });
     for (let i = 0; i < tourists.length; i++) {
       const index = tourists[i].savedActivity.findIndex(
-        item => item && item.activity && item.activity.toString() === req.params.id
+        (item) =>
+          item && item.activity && item.activity.toString() === req.params.id
       );
       tourists[i].savedActivity.splice(index, 1);
-      await Tourist.findByIdAndUpdate(tourists[i]._id, { savedActivity: tourists[i].savedActivity });
+      await Tourist.findByIdAndUpdate(tourists[i]._id, {
+        savedActivity: tourists[i].savedActivity,
+      });
     }
 
     //remove the images from cloudinary
@@ -528,7 +527,7 @@ const updateActivity = async (req, res) => {
       }
     });
 
-    await Activity.findByIdAndUpdate(
+    const newActivity = await Activity.findByIdAndUpdate(
       req.params.id,
       {
         name,
@@ -550,7 +549,24 @@ const updateActivity = async (req, res) => {
       }
     );
 
-    res.status(200).json(activity);
+    if (newActivity.isBookingOpen && activity.isBookingOpen === false) {
+      // Notify all tourists who have saved this activity that it is now available for booking
+      const tourists = await Tourist.find({
+        "savedActivity.activity": req.params.id,
+      });
+      for (let i = 0; i < tourists.length; i++) {
+        await Tourist.findByIdAndUpdate(tourists[i]._id, {
+          $push: {
+            notifications: {
+              body: `The activity "${activity.name}" is now available for booking`,
+              link: `/activity/${req.params.id}`,
+            },
+          },
+        });
+      }
+    }
+
+    res.status(200).json(newActivity);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

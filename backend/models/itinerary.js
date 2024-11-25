@@ -159,6 +159,10 @@ const itinerarySchema = new Schema(
         },
       },
     ],
+    isBookingOpen: {
+      type: Boolean,
+      default: true,
+    },
     isDeleted: {
       type: Boolean,
       required: true,

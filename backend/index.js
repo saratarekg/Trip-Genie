@@ -232,10 +232,24 @@ checkUpcomingEvents = async () => {
 
     // Send reminder emails to the tourists
     itineraries.forEach((itinerary) => {
+      Tourist.findByIdAndUpdate(itinerary.user._id, {
+        $push: {
+          notifications: {
+            body: `Your booked itinerary ${itinerary.itinerary.title} is starting in 2 days`,
+          },
+        },
+      });
       emailService.sendItineraryReminder(itinerary);
     });
 
     activities.forEach((activity) => {
+      Tourist.findByIdAndUpdate(activity.user._id, {
+        $push: {
+          notifications: {
+            body: `Your booked activity ${activity.activity.name} is starting in 2 days`,
+          },
+        },
+      });
       emailService.sendActivityReminder(activity);
     });
   } catch (error) {
