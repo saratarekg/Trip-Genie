@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import CartDropdown from "@/components/cartDropDown";
 import axios from 'axios'
+import { cartEvents } from "@/service/cartEvents";
 
 import { NotificationsDropdownSeller } from '@/components/SellerNotificationsDropdown'
 import { NotificationsDropdownTourGuide } from '@/components/TourGuideNotificationsDropdown'
@@ -87,6 +88,8 @@ export function NavbarComponent() {
     // Reset scroll position
     window.scrollTo(0, 0);
   }, [location]);
+
+
 
 
   const handleClickOutside = (event) => {
@@ -237,6 +240,21 @@ export function NavbarComponent() {
       console.error("Error fetching cart items:", error);
     }
   }, []);
+
+  useEffect(() => {
+    let interval;
+
+    // Start interval only on specific routes
+    if (location.pathname === "/all-products" || location.pathname.startsWith("/product")) {
+      fetchCartItems(); // Fetch immediately on mount
+      interval = setInterval(fetchCartItems, 1000); // Fetch every 3 seconds
+    }
+
+    // Cleanup interval when component unmounts or route changes
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [location.pathname, fetchCartItems]);
 
   const logOut = async () => {
     console.log("Logging out...");

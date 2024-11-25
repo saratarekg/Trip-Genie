@@ -90,6 +90,8 @@ app.post("/create-checkout-session", async (req, res) => {
   try {
     const { items, currency, deliveryInfo } = req.body;
 
+    console.log("Delivery Info:", deliveryInfo);
+
     // Calculate the total price of items
     const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
 
@@ -128,9 +130,10 @@ app.post("/create-checkout-session", async (req, res) => {
         req.headers.origin
       }/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}&deliveryType=${encodeURIComponent(
         deliveryInfo.type
-      )}&deliveryTime=${encodeURIComponent(deliveryInfo.time)}`,
+      )}&deliveryTime=${encodeURIComponent(deliveryInfo.time)}&shippingId=${encodeURIComponent(deliveryInfo.shippingId)}`,
       cancel_url: `http://localhost:3000/checkout2`,
       metadata: {
+        shippingId: deliveryInfo.shippingId,
         deliveryType: deliveryInfo.type,
         deliveryTime: deliveryInfo.time,
         deliveryPrice: deliveryInfo.deliveryPrice,

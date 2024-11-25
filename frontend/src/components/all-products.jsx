@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
+import { cartEvents } from "@/service/cartEvents";
+
 import axios from "axios";
 import {
   Search,
@@ -171,14 +173,6 @@ const ProductCard = ({
     window.location.href = "account/cart"; // Replace with your actual checkout URL
   };
 
-  useEffect(() => {
-    console.log("Wishlist items in ProductCard:", wishlistItems);
-    console.log("Current product:", product);
-    console.log(
-      "Is in wishlist:",
-      wishlistItems.some((item) => item.product._id === product._id)
-    );
-  }, [wishlistItems, product]);
 
   useEffect(() => {
     const isInWishlist = wishlistItems.some(
@@ -479,7 +473,10 @@ export function AllProducts() {
         if (response.ok) {
           const data = await response.json();
           setCartItems(data);
+         // cartEvents.emit("cartUpdated", data);
+
         }
+
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
@@ -612,13 +609,14 @@ export function AllProducts() {
       if (!response.ok) {
         throw new Error("Failed to add to cart");
       }
-
+      console.log(response);
       setAlertMessage({
         type: "success",
         message: "Product added to cart successfully!",
       });
       fetchCartItems();
     } catch (error) {
+      console.log(error);
       setAlertMessage({
         type: "error",
         message: "Error adding product to cart. Please try again.",
