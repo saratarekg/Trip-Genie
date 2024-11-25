@@ -477,7 +477,7 @@ const TourguideProfileCard = ({
 
 
 
-const ItineraryDetail = ({ id }) => {
+const ItineraryDetail = ({ id, onBack }) => {
   // const { id } = useParams();
   const [itinerary, setItinerary] = useState(null);
   const [activities, setActivities] = useState([]);
@@ -1168,7 +1168,7 @@ const ItineraryDetail = ({ id }) => {
   return (
     <div className="min-h-screen bg-gray-100">
       <Button
-        onClick={() => navigate('/all-itineraries')}
+      onClick={onBack}
         className="mb-4 bg-[#5D9297] text-white text-base"
       >
         <ChevronLeft className="w-5 h-5 mr-2" />
@@ -1578,15 +1578,16 @@ const ItineraryDetail = ({ id }) => {
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button
+              {/* <Button
                 variant="default"
                 onClick={() => {
                   setShowDeleteSuccess(false);
                   navigate("/all-itineraries");
                 }}
               >
+                <ChevronLeft className="w-5 h-5 mr-2" />
                 Back to All Itineraries
-              </Button>
+              </Button> */}
             </DialogFooter>
           </DialogContent>
         </Dialog>

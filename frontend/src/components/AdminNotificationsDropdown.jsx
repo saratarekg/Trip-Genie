@@ -89,8 +89,8 @@ export function NotificationsDropdownAdmin() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 relative">
-          <Bell className="h-7 w-7" />
+        <button className="text-[#1A3B47] hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 relative">
+          <Bell className="h-6 w-6" />
           {hasUnseenNotifications && (
             <span className="absolute top-1 right-2 block h-3 w-3 rounded-full bg-red-500" />
           )}

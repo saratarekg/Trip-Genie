@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import { BarChart, Users, Gift, Activity, MessageSquare, Map, LogOut, Home, ChevronDown, Bell } from 'lucide-react'; // Import Bell icon
+import { BarChart, Users, Gift, Activity, MessageSquare, Map, LogOut, Home, ChevronDown, Bell } from 'lucide-react';
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/TGlogo.svg";
 
 const tabs = [
-  { id: 'dashboard', title: 'Dashboard', icon: Home },
+  { 
+    id: 'dashboard', 
+    title: 'Dashboard', 
+    icon: Home 
+  },
   { 
     id: 'accounts', 
     title: 'Accounts', 
@@ -16,50 +20,67 @@ const tabs = [
       { id: 'add-admin-governor', title: 'Add Admin/Governor' },
     ]
   },
-  { id: 'complaints', title: 'Complaints', icon: MessageSquare },
   { 
-    id: 'product', 
-    title: 'Product', 
+    id: 'product-management', 
+    title: 'Product Management', 
     icon: Gift,
     subItems: [
       { id: 'my-products', title: 'My Products' },
-      { id: 'create-product', title: 'Create Product' },
+      { id: 'manage-products', title: 'All Products' },
       { id: 'archived-products', title: 'Archived Products' },
+      { id: 'create-product', title: 'Create Product' },
       { id: 'create-promo-code', title: 'Create Promo Code' },
-      { id: 'manage-products', title: 'Manage Products' },
     ]
   },
   { 
-    id: 'activities', 
-    title: 'Activities', 
+    id: 'activities-management', 
+    title: 'Activities Management', 
     icon: Activity,
     subItems: [
+      { id: 'manage-activities', title: 'All Activities' },
       { id: 'manage-categories', title: 'Manage Categories' },
       { id: 'manage-tags', title: 'Manage Tags' },
-      { id: 'manage-activities', title: 'Manage Activities' } // New sub-item
     ]
   },
-  { id: 'manage-itineraries', title: 'Manage Itineraries', icon: Map },
+  { 
+    id: 'itineraries', 
+    title: 'Itineraries', 
+    icon: Map,
+    subItems: [
+      { id: 'manage-itineraries', title: 'All Itineraries' },
+    ]
+  },
+  { 
+    id: 'historical-places', 
+    title: 'Historical Places', 
+    icon: Map 
+  },
   { 
     id: 'reports', 
-    title: 'Sales Reports', 
+    title: 'Reports', 
     icon: BarChart,
     subItems: [
       { id: 'itinerary-sales-report', title: 'Itineraries Report' },
       { id: 'activity-reports', title: 'Activities Report' },
-      { id: 'my-product-sales-report', title: 'My Products Report'},
-      { id: 'seller-product-sales-report', title: 'Seller\'s Products Report' },
+      { id: 'my-product-sales-report', title: 'My Products Report' },
+      { id: 'seller-product-sales-report', title: "Seller's Products Report" },
       { id: 'user-stats', title: 'User Statistics' },
     ]
   },
-  { id: 'historical-places', title: 'Historical Places', icon: Map },
+  { 
+    id: 'complaints', 
+    title: 'Complaints', 
+    icon: MessageSquare 
+  },
 ];
+
 
 export function DashboardSidebar({ 
   className, 
   defaultCollapsed = false,
   activeTab,
-  setActiveTab
+  setActiveTab,
+  onToggleCollapse
 }) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [openMenu, setOpenMenu] = useState(null);
@@ -67,6 +88,10 @@ export function DashboardSidebar({
 
   const toggleMenu = (menuId) => {
     setOpenMenu(openMenu === menuId ? null : menuId);
+  };
+
+  const getTransitionDelay = (index) => {
+    return `${index * 100}ms`;
   };
 
   const logOut = async () => {
@@ -88,87 +113,82 @@ export function DashboardSidebar({
     }
   };
 
+  const handleToggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+    onToggleCollapse(!isCollapsed);
+  };
+
   return (
     <div
-      className={`relative flex flex-col h-screen ${
+      className={`fixed left-0 top-0 h-screen flex flex-col bg-[#1A3B47] ${
         isCollapsed ? "w-16" : "w-64"
       } transition-all duration-300 ease-in-out ${className}`}
     >
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-[#1A3B47]/20 bg-[#1A3B47]">
-        {!isCollapsed && <img src={logo} alt="Logo" className="h-8 w-8 flex-grow" />}
-        <div className="flex items-center">
-          {!isCollapsed && (
-            <button className="text-white hover:bg-white/10 p-2 rounded-md">
-              <Bell className="h-6 w-6" />
-            </button>
-          )}
-          <button
-            className="text-white hover:bg-white/10 p-2 rounded-md"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-          >
-            <div className="flex flex-col items-center justify-center w-6 h-6">
-              <div className="w-4 h-0.5 bg-white mb-1"></div>
-              <div className="w-4 h-0.5 bg-white mb-1"></div>
-              <div className="w-4 h-0.5 bg-white"></div>
-            </div>
-            <span className="sr-only">Toggle sidebar</span>
-          </button>
-        </div>
+      <div className="flex items-center justify-between h-16 px-4 border-b border-[#1A3B47]/20">
+        {!isCollapsed && (
+          <img src={logo} alt="Logo" className="h-8 w-auto object-contain" />
+        )}
+        <button
+          className={`text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 ${
+            isCollapsed ? "w-full flex justify-center" : ""
+          }`}
+          onClick={handleToggleCollapse}
+        >
+          <div className="flex flex-col items-center justify-center w-6 h-6">
+            <div className="w-4 h-0.5 bg-white mb-1"></div>
+            <div className="w-4 h-0.5 bg-white mb-1"></div>
+            <div className="w-4 h-0.5 bg-white"></div>
+          </div>
+          <span className="sr-only">Toggle sidebar</span>
+        </button>
       </div>
 
       {/* Sidebar Content */}
-      <div className="flex-1 overflow-y-auto bg-[#1A3B47]">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-custom">
         <div className="p-2 space-y-1">
-          {isCollapsed && (
-            <button className="flex items-center w-full p-2 rounded-md text-white hover:bg-white/10">
-              <Bell className="h-5 w-5 mr-3" />
-              <span className="sr-only">Notifications</span>
-            </button>
-          )}
           {tabs.map((tab) => (
             <React.Fragment key={tab.id}>
               {tab.subItems ? (
                 <div>
                   <button
-                    className={`flex items-center w-full p-2 rounded-md transition-colors text-white hover:bg-white/10 ${
+                    className={`flex items-center w-full p-2 rounded-md transition-all duration-200 text-white hover:bg-white/10 ${
                       activeTab === tab.id ? "bg-white/20" : ""
                     }`}
                     onClick={() => toggleMenu(tab.id)}
                   >
-                    <tab.icon className="h-5 w-5 mr-3" />
+                    <tab.icon className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`} />
                     {!isCollapsed && (
                       <>
-                        <span className="flex-1 text-left">{tab.title}</span>
+                        <span className="flex-1 text-left truncate">{tab.title}</span>
                         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openMenu === tab.id ? "transform rotate-180" : ""}`} />
                       </>
                     )}
                   </button>
-                  {openMenu === tab.id && !isCollapsed && (
-                    <div className="pl-7 space-y-1">
-                      {tab.subItems.map((subItem) => (
-                        <button 
-                          key={subItem.id}
-                          className={`flex items-center w-full p-2 rounded-md text-white/70 hover:text-white hover:bg-white/10 ${
-                            activeTab === subItem.id ? "bg-white/20 text-white" : ""
-                          }`}
-                          onClick={() => setActiveTab(subItem.id)}
-                        >
-                          <span>{subItem.title}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <div className={`pl-7 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${openMenu === tab.id && !isCollapsed ? "max-h-96" : "max-h-0"}`}>
+                    {tab.subItems.map((subItem, index) => (
+                      <button 
+                        key={subItem.id}
+                        className={`flex items-center w-full p-2 rounded-md transition-all duration-500 ease-in-out text-white/70 hover:text-white hover:bg-white/10 ${
+                          activeTab === subItem.id ? "bg-white/20 text-white" : ""
+                        }`}
+                        style={{ transitionDelay: getTransitionDelay(index) }}
+                        onClick={() => setActiveTab(subItem.id)}
+                      >
+                        <span className="truncate">{subItem.title}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <button 
-                  className={`flex items-center w-full p-2 rounded-md transition-colors text-white hover:bg-white/10 ${
+                  className={`flex items-center w-full p-2 rounded-md transition-all duration-200 text-white hover:bg-white/10 ${
                     activeTab === tab.id ? "bg-white/20" : ""
                   }`}
                   onClick={() => setActiveTab(tab.id)}
                 >
-                  <tab.icon className="h-5 w-5 mr-3" />
-                  {!isCollapsed && <span>{tab.title}</span>}
+                  <tab.icon className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`} />
+                  {!isCollapsed && <span className="truncate">{tab.title}</span>}
                 </button>
               )}
             </React.Fragment>
@@ -177,15 +197,19 @@ export function DashboardSidebar({
       </div>
 
       {/* Sidebar Footer */}
-      <div className="border-t border-[#1A3B47]/20 p-4 bg-[#1A3B47]">
+      <div className="border-t border-[#1A3B47]/20 p-2">
+        <hr className="my-2 border-white" />
         <button
-          className="w-full flex items-center justify-start text-white hover:bg-white/10 p-2 rounded-md"
+          className={`w-full flex items-center justify-start text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 ${
+            isCollapsed ? "justify-center" : ""
+          }`}
           onClick={logOut}
         >
-          <LogOut className="h-5 w-5 mr-3" />
-          {!isCollapsed && <span>Logout</span>}
+          <LogOut className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`} />
+          {!isCollapsed && <span className="truncate">Logout</span>}
         </button>
       </div>
     </div>
   );
 }
+
