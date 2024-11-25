@@ -37,6 +37,7 @@ import  SellerNotifications  from "./pages/SellerNotifications.jsx";
 import  AdminNotifications  from "./pages/AdminNotifications.jsx";
 import  AdvertiserNotifications  from "./pages/AdvertiserNotifications.jsx";
 import  TourGuideNotifications  from "./pages/TourGuideNotifications.jsx";
+import  TouristNotifications  from "./pages/TouristNotifications.jsx";
 
 
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
@@ -437,6 +438,16 @@ function AppContent() {
                 allowedRoles={["advertiser"]}
               >
                 <AdvertiserNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tourist-notifications"
+            element={
+              <ProtectedRoute
+                allowedRoles={["tourist"]}
+              >
+                <TouristNotifications />
               </ProtectedRoute>
             }
           />

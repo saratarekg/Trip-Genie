@@ -20,6 +20,13 @@ router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
+router.get("/notifications", touristController.getTouristNotifications);
+
+router.get('/unseen-notifications',touristController.hasUnseenNotifications);
+
+// POST /seller/mark-notifications-seen
+router.post('/mark-notifications-seen', touristController.markNotificationsAsSeen);
+
 // router.get('/fill', currencyController.populateCurrencies);
 
 router.get("/currencies/code", touristController.getCurrencyCode);

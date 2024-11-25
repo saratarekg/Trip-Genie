@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
+import { ChevronDown, ChevronUp, ChevronRight, Edit2, Eye, ArrowLeft } from 'lucide-react'
 import { loadStripe } from "@stripe/stripe-js"
 import axios from "axios"
 import Cookies from "js-cookie"
@@ -37,6 +37,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -98,6 +99,7 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [selectedCard, setSelectedCard] = useState(null)
   const navigate = useNavigate()
+  const [isAddressDialogOpenDetail, setIsAddressDialogOpenDetail] = useState(false)
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState(null)
   const [addressDetails, setAddressDetails] = useState({
@@ -256,6 +258,7 @@ export default function CheckoutPage() {
   //       }
   //     }
   //   }
+
 
   //   checkPaymentStatus()
   //   fetchCart()
@@ -463,7 +466,7 @@ export default function CheckoutPage() {
           })
         }
 
-        setIsAddressDialogOpen(false)
+        setIsAddressDialogOpenDetail(false)
       }
     } catch (error) {
       console.error("Error adding new address:", error)
@@ -783,703 +786,425 @@ export default function CheckoutPage() {
     }
   }
 
+  const calculateEstimatedDeliveryDate = (deliveryType) => {
+    const today = new Date()
+    switch (deliveryType) {
+      case "Standard":
+        return addBusinessDays(today, 8)
+      case "Express":
+        return addBusinessDays(today, 3)
+      case "Next-Same":
+        return addDays(today, 1)
+      case "International":
+        return addBusinessDays(today, 21)
+      default:
+        return addBusinessDays(today, 8)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 pb-6">
+    <div className="min-h-screen bg-white">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
       </div>
-      <div className="max-w-7xl mx-auto pt-6">
-        <h1 className="text-4xl font-bold mb-8 text-[#1A3B47]">
-          Checkout
-        </h1>
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-2/3">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex items-center mb-8">
+          {/* <Button variant="link" className="text-[#1A3B47] flex items-center">
+            <ArrowLeft className="mr-2" />
+            Back to cart
+          </Button> */}
+          <h1 className="text-5xl font-bold ml-4 text-[#1A3B47]">Checkout</h1>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Checkout Form */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* User Info Section */}
+            <div className="bg-white p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-3xl font-bold text-gray-400">01</span>
+                <h2 className="text-2xl font-semibold">User Info</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>First Name</Label>
+                  <p className="mt-1">{form.watch("firstName")}</p>
+                </div>
+                <div>
+                  <Label>Last Name</Label>
+                  <p className="mt-1">{form.watch("lastName")}</p>
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <p className="mt-1">{form.watch("email")}</p>
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <p className="mt-1">{form.watch("phone")}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Delivery Address Section */}
+            <div className="bg-white p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-3xl font-bold text-gray-400">02</span>
+                <h2 className="text-2xl font-semibold">Delivery Address</h2>
+              </div>
+              {selectedAddress ? (
+                <div className="space-y-4">
+                  <div className="p-4 rounded-lg">
+                    <h3 className="font-medium">{selectedAddress.locationType}</h3>
+                    <p className="text-gray-600 mt-1">
+                      {selectedAddress.streetNumber} {selectedAddress.streetName},
+                      <br />
+                      {selectedAddress.city}, {selectedAddress.state} {selectedAddress.postalCode}
+                    </p>
+                    <div className="flex gap-4 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowSavedAddresses(true)}
+                        className="text-blue-600"
+                      >
+                        <Edit2 className="w-4 h-4 mr-2" />
+                        Change
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAddressDialogOpenDetail(true)}
+                        className="text-blue-600"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Details
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAddressDialogOpen(true)}
+                        className="text-blue-600"
+                      >
+                        Add New Address
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setIsAddressDialogOpen(true)}
+                  className="w-full"
+                >
+                  Add New Address
+                </Button>
+              )}
+            </div>
+
+            {/* Delivery Options Section */}
+            <div className="bg-white p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-3xl font-bold text-gray-400">03</span>
+                <h2 className="text-2xl font-semibold">Delivery Options</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-start gap-4 p-4 border rounded-lg">
+                  <Checkbox
+                    checked={form.watch("deliveryType") === "Standard"}
+                    onCheckedChange={() => handleDeliveryTypeChange("Standard")}
+                  />
+                  <div className="flex-1">
+                    <Label className="font-medium">Standard Delivery</Label>
+                    <p className="text-sm text-gray-500 mt-1">2–8 business days</p>
+                    <span className="text-gray-600">{formatPrice(2.99)}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 border rounded-lg">
+                  <Checkbox
+                    checked={form.watch("deliveryType") === "Express"}
+                    onCheckedChange={() => handleDeliveryTypeChange("Express")}
+                  />
+                  <div className="flex-1">
+                    <Label className="font-medium">Express Delivery</Label>
+                    <p className="text-sm text-gray-500 mt-1">1–3 business days</p>
+                    <span className="text-gray-600">{formatPrice(4.99)}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 border rounded-lg">
+                  <Checkbox
+                    checked={form.watch("deliveryType") === "Next-Same"}
+                    onCheckedChange={() => handleDeliveryTypeChange("Next-Same")}
+                  />
+                  <div className="flex-1">
+                    <Label className="font-medium">Next Day Delivery</Label>
+                    <p className="text-sm text-gray-500 mt-1">Next business day</p>
+                    <span className="text-gray-600">{formatPrice(6.99)}</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 p-4 border rounded-lg">
+                  <Checkbox
+                    checked={form.watch("deliveryType") === "International"}
+                    onCheckedChange={() => handleDeliveryTypeChange("International")}
+                  />
+                  <div className="flex-1">
+                    <Label className="font-medium">International Shipping</Label>
+                    <p className="text-sm text-gray-500 mt-1">7–21 business days</p>
+                    <span className="text-gray-600">{formatPrice(14.99)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+  <Label className="font-medium mb-2 block">Delivery Time</Label>
+  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div className="flex items-center gap-2 p-2 border rounded-lg">
+      <Checkbox id="morning" />
+      <div>
+        <Label htmlFor="morning" className="text-sm font-medium">
+          Morning
+        </Label>
+        <p className="text-xs text-gray-500">8am - 12pm</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 p-2 border rounded-lg">
+      <Checkbox id="afternoon" />
+      <div>
+        <Label htmlFor="afternoon" className="text-sm font-medium">
+          Afternoon
+        </Label>
+        <p className="text-xs text-gray-500">12pm - 4pm</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 p-2 border rounded-lg">
+      <Checkbox id="evening" />
+      <div>
+        <Label htmlFor="evening" className="text-sm font-medium">
+          Evening
+        </Label>
+        <p className="text-xs text-gray-500">4pm - 8pm</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 p-2 border rounded-lg">
+      <Checkbox id="night" />
+      <div>
+        <Label htmlFor="night" className="text-sm font-medium">
+          Night
+        </Label>
+        <p className="text-xs text-gray-500">8pm - 10pm</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+            </div>
+
+            {/* Payment Method Section */}
+            <div className="bg-white p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-3xl font-bold text-gray-400">04</span>
+                <h2 className="text-2xl font-semibold">Payment Method</h2>
+              </div>
+              <RadioGroup
+                defaultValue={form.watch("paymentMethod")}
+                onValueChange={(value) => form.setValue("paymentMethod", value)}
+                className="space-y-4"
               >
-                <Card className="bg-white">
-                  <CardContent className="p-6">
-                    {/* Personal Details Section */}
-                    <div className="mb-6">
-                      <div
-                        className="flex justify-between items-center cursor-pointer"
-                        onClick={() => toggleSection("personal")}
-                      >
-                        <h2 className="text-2xl font-bold text-[#1A3B47]">
-                          Personal Details
-                        </h2>
-                        {activeSection === "personal" ? (
-                          <ChevronUp />
-                        ) : (
-                          <ChevronDown />
-                        )}
-                      </div>
-                      {activeSection === "personal" && (
-                        <div className="mt-4 grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>First Name</Label>
-                            <p>{form.watch("firstName")}</p>
-                          </div>
-                          <div>
-                            <Label>Last Name</Label>
-                            <p>{form.watch("lastName")}</p>
-                          </div>
-                          <div>
-                            <Label>Email</Label>
-                            <p>{form.watch("email")}</p>
-                          </div>
-                          <div>
-                            <Label>Mobile</Label>
-                            <p>{form.watch("phone")}</p>
-                          </div>
-                          <Button
-                            type="button"
-                            onClick={() => handleNextSection("personal")}
-                            className="col-span-2 mt-4 bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
-                          >
-                            Next
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Address Section */}
-                    <div className="mb-6">
-                      <div
-                        className="flex justify-between items-center cursor-pointer"
-                        onClick={() => toggleSection("address")}
-                      >
-                        <h2 className="text-2xl font-bold text-[#1A3B47]">
-                          Delivery Address
-                        </h2>
-                        {activeSection === "address" ? (
-                          <ChevronUp />
-                        ) : (
-                          <ChevronDown />
-                        )}
-                      </div>
-                      {activeSection === "address" && (
-                        <div className="mt-4">
-                          {savedAddresses.length > 0 && (
-                            <div className="mb-4">
-                              <div className="text-xl font-bold mb-2">
-                                {selectedAddress?.locationType}
-                              </div>
-                              <h4 className="font-semibold text-md mb-1">
-                                {`${selectedAddress?.streetNumber} ${selectedAddress?.streetName}, ${selectedAddress?.city}`}
-                              </h4>
-                              <div className="flex items-center justify-end">
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    setShowSavedAddresses(true)
-                                  }}
-                                  className="text-[#388A94] hover:underline mr-4"
-                                >
-                                  Change
-                                </button>
-                                <Popover>
-                                  <PopoverTrigger>
-                                    <ChevronRight className="cursor-pointer" />
-                                  </PopoverTrigger>
-                                  <PopoverContent className="p-4">
-                                    <h4 className="font-bold mb-2">
-                                      {selectedAddress?.locationType}
-                                    </h4>
-                                    <p>
-                                      {selectedAddress?.streetNumber}{" "}
-                                      {selectedAddress?.streetName}
-                                    </p>
-                                    <p>
-                                      {selectedAddress?.city},{" "}
-                                      {selectedAddress?.state}{" "}
-                                      {selectedAddress?.postalCode}
-                                    </p>
-                                    <p>{selectedAddress?.country}</p>
-                                  </PopoverContent>
-                                </Popover>
-                              </div>
-                            </div>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault()
-                              setIsAddressDialogOpen(true)
-                            }}
-                            className="text-[#388A94] hover:underline"
-                          >
-                            Add New
-                          </button>
-
-                          <Dialog
-                            open={isAddressDialogOpen}
-                            onOpenChange={setIsAddressDialogOpen}
-                          >
-                            <DialogContent className="max-h-[80vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>Add New Address</DialogTitle>
-                              </DialogHeader>
-                              <ShippingAddress
-                                onSubmit={handleAddNewAddress}
-                                onCancel={() => (
-                                  setIsAddressDialogOpen(false), fetchUserInfo()
-                                )}
-                              />
-                            </DialogContent>
-                          </Dialog>
-
-                          {showSavedAddresses && (
-                            <Dialog
-                              open={showSavedAddresses}
-                              onOpenChange={setShowSavedAddresses}
-                            >
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Saved Addresses</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                  {savedAddresses.map((address, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md"
-                                      onClick={() => {
-                                        setSelectedAddress(address)
-                                        Object.keys(address).forEach((key) => {
-                                          if (key !== "default") {
-                                            form.setValue(key, address[key])
-                                          }
-                                        })
-                                        setShowSavedAddresses(false)
-                                      }}
-                                    >
-                                      <div>
-                                        <p className="font-semibold">
-                                          {address.locationType}
-                                        </p>
-                                        <p>{`${address.streetNumber} ${address.streetName}, ${address.city}`}</p>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-
-                          <div className="flex justify-end mt-4">
-                            <Button
-                              type="button"
-                              onClick={() => handleNextSection("address")}
-                              className="bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
-                            >
-                              Next
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Payment Section */}
-                    <div className="mb-6">
-                      <div
-                        className="flex justify-between items-center cursor-pointer"
-                        onClick={() => toggleSection("payment")}
-                      >
-                        <h2 className="text-2xl font-bold text-[#1A3B47]">
-                          Payment
-                        </h2>
-                        {activeSection === "payment" ? (
-                          <ChevronUp />
-                        ) : (
-                          <ChevronDown />
-                        )}
-                      </div>
-                      {activeSection === "payment" && (
-                        <div className="mt-4">
-                          <RadioGroup
-                            defaultValue={form.watch("paymentMethod")}
-                            onValueChange={(value) =>
-                              form.setValue("paymentMethod", value)
-                            }
-                          >
-                            {savedCards.length > 0 && (
-                              <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100">
-                                <RadioGroupItem
-                                  value="credit_card"
-                                  id="credit_card"
-                                />
-                                <Label htmlFor="credit_card">
-                                  {selectedCard?.cardType} (**** **** ****{" "}
-                                  {selectedCard?.cardNumber.slice(-4)})
-                                </Label>
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    setShowSavedCards(true)
-                                  }}
-                                  className="text-[#388A94] hover:underline ml-auto"
-                                >
-                                  Change
-                                </button>
-                              </div>
-                            )}
-                            <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100">
-                              <RadioGroupItem
-                                value="cash_on_delivery"
-                                id="cash_on_delivery"
-                              />
-                              <Label htmlFor="cash_on_delivery">
-                                Cash on Delivery
-                              </Label>
-                            </div>
-                            <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100">
-                              <RadioGroupItem value="wallet" id="wallet" />
-                              <Label htmlFor="wallet">Wallet</Label>
-                            </div>
-                          </RadioGroup>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault()
-                              setShowAddCardForm(true)
-                            }}
-                            className="text-[#388A94] hover:underline mt-4"
-                          >
-                            Add New Card
-                          </button>
-
-                          {showSavedCards && (
-                            <Dialog
-                              open={showSavedCards}
-                              onOpenChange={setShowSavedCards}
-                            >
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Saved Cards</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                  {savedCards.map((card, index) => (
-                                    <div
-                                      key={index}
-                                      className="flex justify-between items-center cursor-pointer hover:bg-gray-100 p-2 rounded-md"
-                                      onClick={() => {
-                                        setSelectedCard(card)
-                                        form.setValue(
-                                          "paymentMethod",
-                                          card.cardType === "Credit Card"
-                                            ? "credit_card"
-                                            : "debit_card"
-                                        )
-                                        form.setValue(
-                                          "selectedCard",
-                                          card.cardNumber
-                                        )
-                                        setShowSavedCards(false)
-                                      }}
-                                    >
-                                      <div>
-                                        <p className="font-semibold">
-                                          {card.cardType}
-                                        </p>
-                                        <p>
-                                          **** **** ****{" "}
-                                          {card.cardNumber.slice(-4)}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-
-                          {showAddCardForm && (
-                            <form
-                              onSubmit={handleAddNewCard}
-                              className="mt-4 border border-gray-300 rounded-md p-4 bg-white"
-                            >
-                              <h3 className="text-lg font-semibold mb-4">
-                                Add New Card
-                              </h3>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="col-span-2">
-                                  <Label htmlFor="cardNumber">
-                                    Card Number
-                                  </Label>
-                                  <Input
-                                    id="cardNumber"
-                                    name="cardNumber"
-                                    value={cardDetails.cardNumber}
-                                    onChange={handleCardInputChange}
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="expiryDate">
-                                    Expiry Date
-                                  </Label>
-                                  <Input
-                                    id="expiryDate"
-                                    name="expiryDate"
-                                    value={cardDetails.expiryDate}
-                                    onChange={handleCardInputChange}
-                                    placeholder="MM/YY"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="cvv">CVV</Label>
-                                  <Input
-                                    id="cvv"
-                                    name="cvv"
-                                    value={cardDetails.cvv}
-                                    onChange={handleCardInputChange}
-                                  />
-                                </div>
-                                <div className="col-span-2">
-                                  <Label htmlFor="holderName">
-                                    Card Holder Name
-                                  </Label>
-                                  <Input
-                                    id="holderName"
-                                    name="holderName"
-                                    value={cardDetails.holderName}
-                                    onChange={handleCardInputChange}
-                                  />
-                                </div>
-                                <div className="col-span-2">
-                                  <Label htmlFor="cardType">Card Type</Label>
-                                  <Select
-                                    name="cardType"
-                                    value={cardDetails.cardType}
-                                    onValueChange={(value) =>
-                                      handleCardInputChange({
-                                        target: { name: "cardType", value },
-                                      })
-                                    }
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select card type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Credit Card">
-                                        Credit Card
-                                      </SelectItem>
-                                      <SelectItem value="Debit Card">
-                                        Debit Card
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                              <div className="flex justify-end mt-4">
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setShowAddCardForm(false)
-                                    resetCardDetails()
-                                  }}
-                                  className="mr-2"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button type="submit" disabled={isLoading}>
-                                  {isLoading ? "Processing..." : "Add Card"}
-                                </Button>
-                              </div>
-                            </form>
-                          )}
-                          <div className="flex justify-end mt-4">
-                            <Button
-                              type="button"
-                              onClick={() => handleNextSection("payment")}
-                              className="bg-[#B5D3D1] hover:bg-[#5D9297] text-[#1A3B47]"
-                            >
-                              Next
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Delivery Section */}
-                    <div className="mb-6">
-                      <div
-                        className="flex justify-between items-center cursor-pointer"
-                        onClick={() => toggleSection("delivery")}
-                      >
-                        <h2 className="text-2xl font-bold text-[#1A3B47]">
-                          Delivery
-                        </h2>
-                        {activeSection === "delivery" ? (
-                          <ChevronUp />
-                        ) : (
-                          <ChevronDown />
-                        )}
-                      </div>
-                      {activeSection === "delivery" && (
-                        <div className="mt-4">
-                          <FormField
-                            control={form.control}
-                            name="deliveryType"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Delivery Type</FormLabel>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={handleDeliveryTypeChange}
-                                    defaultValue={field.value}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select delivery type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="Standard">
-                                        Standard Shipping (2–8 business days) -{" "}
-                                        {formatPrice(2.99)}
-                                      </SelectItem>
-                                      <SelectItem value="Express">
-                                        Express Shipping (1–3 business days) -{" "}
-                                        {formatPrice(4.99)}
-                                      </SelectItem>
-                                      <SelectItem value="Next-Same">
-                                        Next-Day/Same-Day Shipping -{" "}
-                                        {formatPrice(6.99)}
-                                      </SelectItem>
-                                      <SelectItem value="International">
-                                        International Shipping (7–21 business
-                                        days) - {formatPrice(14.99)}
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          {estimatedDeliveryDate && (
-                            <div className="mt-4">
-                              <Label>Estimated Delivery Date</Label>
-                              <p className="text-sm text-gray-600">
-                                {format(estimatedDeliveryDate, "MMMM d, yyyy")}
-                              </p>
-                            </div>
-                          )}
-                          <FormField
-                            control={form.control}
-                            name="deliveryTime"
-                            render={({ field }) => (
-                              <FormItem className="mt-4">
-                                <FormLabel>Delivery Time</FormLabel>
-                                <FormControl>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select time" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="morning">
-                                        Morning (8 AM - 12 PM)
-                                      </SelectItem>
-                                      <SelectItem value="afternoon">
-                                        Afternoon (12 PM - 4 PM)
-                                      </SelectItem>
-                                      <SelectItem value="evening">
-                                        Evening (4 PM - 8 PM)
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <Button
-                      type="submit"
-                      className="w-full bg-[#1A3B47] hover:bg-[#388A94]"
-                    >
-                      Complete Purchase
-                    </Button>
-                  </CardContent>
-                </Card>
-              </form>
-            </Form>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                  <RadioGroupItem value="wallet" id="wallet" />
+                  <Label htmlFor="wallet">Wallet</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                  <RadioGroupItem value="cash_on_delivery" id="cash_on_delivery" />
+                  <Label htmlFor="cash_on_delivery">Cash on Delivery</Label>
+                </div>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                  <RadioGroupItem value="credit_card" id="credit_card" />
+                  <Label htmlFor="credit_card">Credit/Debit Card</Label>
+                </div>
+              </RadioGroup>
+            </div>
           </div>
 
           {/* Order Summary */}
-          <div className="w-full md:w-1/3">
-            <Card className="bg-white">
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold text-[#1A3B47] mb-4">
-                  Order Summary
-                </h2>
-                <div className="space-y-4">
-                  {cartItems.map((item, index) => (
-                    <TooltipProvider key={index}>
-                      <div className="flex justify-between">
-                        <Tooltip>
-                          <TooltipTrigger
-                            onClick={() =>
-                              navigate(`/product/${item?.product?._id}`)
-                            }
-                            className="text-black cursor-pointer hover:underline"
-                          >
-                            {item?.product?.name} x {item?.quantity}
-                          </TooltipTrigger>
-                          <TooltipContent className="w-48 p-2 text-sm whitespace-normal">
-                            <p>
-                              {item?.product?.description?.slice(0, 70)}
-                              {item?.product?.description?.length > 70
-                                ? "..."
-                                : ""}
-                            </p>
-                            <div className="flex items-center pt-1">
-                              <FaStar className="text-yellow-500" />
-                              <span className="ml-1">
-                                {item?.product?.rating.toFixed(1) || "N/A"}
-                              </span>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                        <span>{formatPrice(item?.totalPrice)}</span>
-                      </div>
-                    </TooltipProvider>
-                  ))}
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between font-bold">
-                      <span>Subtotal</span>
-                      <span>{formatPrice(totalAmount)}</span>
+          <div className="lg:col-span-1">
+            <div className="bg-gray-100 p-6">
+              <h2 className="text-2xl font-bold mb-4">Order Summary ({cartItems.length})</h2>
+              <div className="space-y-4">
+                {cartItems.map((item, index) => (
+                  <div key={index} className="flex justify-between">
+                    <div>
+                      <p className="font-medium">{item?.product?.name} x {item?.quantity}</p>
                     </div>
+                    <span>{formatPrice(item?.totalPrice)}</span>
                   </div>
+                ))}
+                <div className="border-t pt-4">
                   <div className="flex justify-between">
-                    <span>Delivery</span>
-                    <span>
-                      {formatPrice(
-                        form.watch("deliveryType") === "Express"
-                          ? 4.99
-                          : form.watch("deliveryType") === "Next-Same"
-                          ? 6.99
-                          : form.watch("deliveryType") === "International"
-                          ? 14.99
-                          : 2.99
-                      )}
-                    </span>
+                    <span>Subtotal</span>
+                    <span>{formatPrice(totalAmount)}</span>
                   </div>
-                  {/* Promo Code Section */}
-                  <div className="border-t pt-4">
-                    <h3 className="text-lg font-semibold mb-2">Promo Code</h3>
-                    <form
-                      onSubmit={handlePromoSubmit}
-                      className="flex items-center space-x-2"
-                    >
-                      <Input
-                        type="text"
-                        placeholder="Enter promo code"
-                        value={promoCode}
-                        onChange={(e) => setPromoCode(e.target.value)}
-                        className="flex-grow"
-                      />
-                      <Button type="submit">Apply</Button>
-                    </form>
-                    {promoError && (
-                      <p className="text-red-500 mt-2">{promoError}</p>
-                    )}
-                    {promoDetails && (
-                      <div className="mt-4 p-4 bg-green-100 rounded-md">
-                        <p className="text-green-700">
-                          Promo code applied: {promoDetails.percentOff}% off
-                        </p>
-                        <p className="text-sm text-green-600 mt-1">
-                          Valid until:{" "}
-                          {format(
-                            new Date(promoDetails.dateRange.end),
-                            "MMMM d, yyyy"
-                          )}
-                        </p>
-                      </div>
-                    )}
+                  <div className="flex justify-between mt-2">
+                    <span>Delivery</span>
+                    <span>{formatPrice(
+                      form.watch("deliveryType") === "Express"
+                        ? 4.99
+                        : form.watch("deliveryType") === "Next-Same"
+                        ? 6.99
+                        : form.watch("deliveryType") === "International"
+                        ? 14.99
+                        : 2.99
+                    )}</span>
                   </div>
                   {promoDetails && (
-                    <div className="flex justify-between text-green-600">
+                    <div className="flex justify-between mt-2 text-green-600">
                       <span>Discount</span>
                       <span>-{formatPrice(discountAmount)}</span>
                     </div>
                   )}
-                  {estimatedDeliveryDate && (
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>Estimated Delivery Date</span>
-                      <span>
-                        {format(estimatedDeliveryDate, "MMMM d, yyyy")}
-                      </span>
-                    </div>
-                  )}
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between font-bold">
-                      <span>Total</span>
-                      <span>
-                        {formatPrice(
-                          (promoDetails ? discountedTotal : totalAmount) +
-                            (form.watch("deliveryType") === "Express"
-                              ? 4.99
-                              : form.watch("deliveryType") === "Next-Same"
-                              ? 6.99
-                              : form.watch("deliveryType") === "International"
-                              ? 14.99
-                              : 2.99)
-                        )}
-                      </span>
-                    </div>
+                  <div className="flex justify-between mt-4 text-lg font-bold">
+                    <span>Total</span>
+                    <span>{formatPrice(
+                      (promoDetails ? discountedTotal : totalAmount) +
+                      (form.watch("deliveryType") === "Express"
+                        ? 4.99
+                        : form.watch("deliveryType") === "Next-Same"
+                        ? 6.99
+                        : form.watch("deliveryType") === "International"
+                        ? 14.99
+                        : 2.99)
+                    )}</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="mt-6">
+                <p className="font-medium">Estimated Delivery Date:</p>
+                <p>{format(calculateEstimatedDeliveryDate(form.watch("deliveryType")), 'MMMM dd, yyyy')}</p>
+              </div>
+              <div className="mt-2">
+                <p className="font-medium">Delivering to:</p>
+                <p>{selectedAddress?.city}</p>
+              </div>
+              <div className="mt-6">
+                <form onSubmit={handlePromoSubmit} className="flex gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Enter promo code"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                  />
+                  <Button type="submit" variant="outline">Apply</
+Button>
+                </form>
+                {promoError && <p className="text-red-500 mt-2">{promoError}</p>}
+                {promoDetails && (
+                  <p className="text-green-600 mt-2">Promo code applied successfully!</p>
+                )}
+              </div>
+              <Button 
+                className="w-full mt-6" 
+                size="lg"
+                onClick={form.handleSubmit(onSubmit)}
+              >
+                Complete Purchase
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+      {/* Address Dialog */}
+      <Dialog open={isAddressDialogOpenDetail} onOpenChange={setIsAddressDialogOpenDetail}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Address Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 p-4 bg-[#F4F4F4] rounded-b-lg">
+            <p><strong className="text-[#1A3B47]">Street:</strong> {selectedAddress?.streetName} {selectedAddress?.streetNumber}</p>
+            {selectedAddress?.floorUnit && <p><strong className="text-[#1A3B47]">Floor/Unit:</strong> {selectedAddress.floorUnit}</p>}
+            <p><strong className="text-[#1A3B47]">City:</strong> {selectedAddress?.city}</p>
+            <p><strong className="text-[#1A3B47]">State:</strong> {selectedAddress?.state}</p>
+            <p><strong className="text-[#1A3B47]">Country:</strong> {selectedAddress?.country}</p>
+            <p><strong className="text-[#1A3B47]">Postal Code:</strong> {selectedAddress?.postalCode}</p>
+            {selectedAddress?.landmark && <p><strong className="text-[#1A3B47]">Landmark:</strong> {selectedAddress.landmark}</p>}
+            <p><strong className="text-[#1A3B47]">Location Type:</strong> {selectedAddress?.locationType}</p>
+          </div>
+          
+<DialogFooter>
+            <Button onClick={() => setIsAddressDialogOpenDetail(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Saved Addresses Dialog */}
+      <Dialog open={showSavedAddresses} onOpenChange={setShowSavedAddresses}>
+      <DialogContent className="sm:max-w-[425px] dialog-content">
+      <div className="space-y-4 overflow-y-auto max-h-[520px]">
+                  <DialogHeader>
+            <DialogTitle>Saved Addresses</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4  overflow-y-auto">
+            {savedAddresses.map((address, index) => (
+              <div key={index} className="p-4 border rounded-lg">
+                <h3 className="font-medium">{address.locationType}</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {address.streetNumber} {address.streetName},
+                  <br />
+                  {address.city}, {address.state} {address.postalCode}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedAddress(address)
+                    Object.keys(address).forEach((key) => {
+                      if (key !== "default") {
+                        form.setValue(key, address[key])
+                      }
+                    })
+                    setShowSavedAddresses(false)
+                  }}
+                  className="mt-2"
+                >
+                  Select
+                </Button>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowSavedAddresses(false)}>Close</Button>
+          </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Status Dialog */}
       <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {purchaseStatus === "success"
-                ? "Purchase Successful!"
-                : "Purchase Failed"}
+              {purchaseStatus === "success" ? "Purchase Successful" : "Purchase Failed"}
             </DialogTitle>
           </DialogHeader>
           <p>
             {purchaseStatus === "success"
-              ? "Your order has been placed successfully. Thank you for your purchase!"
-              : "There was an error processing your purchase. Please try again or contact support."}
+              ? "Your purchase has been completed successfully."
+              : "There was an error processing your purchase. Please try again."}
           </p>
           <DialogFooter>
-            <Button
-              onClick={() => {
-                setIsStatusDialogOpen(false)
-                navigate("/")
-              }}
-              className="bg-[#5D9297] hover:bg-[#388A94]"
-            >
-              Go to Home
-            </Button>
-
-            <Button
-              onClick={() => {
-                setIsStatusDialogOpen(false)
-                navigate("/all-products")
-              }}
-              className="bg-[#1A3B47] hover:bg-[#388A94]"
-            >
-              Continue Shopping
-            </Button>
+            <Button onClick={() => setIsStatusDialogOpen(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
+<DialogContent className="sm:max-w-[425px]">
+  <DialogHeader>
+    <DialogTitle>Add New Address</DialogTitle>
+  </DialogHeader>
+  <ShippingAddress
+    onSubmit={handleAddNewAddress}
+    onCancel={() => setIsAddressDialogOpen(false)}
+  />
+</DialogContent>
+</Dialog>
     </div>
   )
 }
+
