@@ -74,6 +74,7 @@ import { MyComplaintsComponent } from "@/components/myComplaints";
 import { AdvertiserProfileComponent } from "@/components/AdvertiserProfileComponent";
 import { SellerProfileComponent } from "@/components/SellerProfileComponent";
 import { TourGuideProfileComponent } from "@/components/tourGuideProfile";
+import Savedactivites from "@/components/Savedactivites";
 
 // Sub-components
 const AccountInfo = ({ user }) => {
@@ -921,6 +922,8 @@ export default function AccountManagement() {
         return <RedeemPoints user={user} onRedeemPoints={handleRedeemPoints} />;
       case "security":
         return <PasswordChanger />;
+      case "SavedActivities":
+        return <Savedactivites />;
       case "preferences":
         return <Preferences user={user} />;
       case "add-card":
@@ -958,6 +961,20 @@ export default function AccountManagement() {
   };
 
   const menuStructure = {
+    "Saved": [
+      {
+        name: "Saved Activities",
+        icon: Bookmark,
+        tab: "SavedActivities",
+        roles: ["tourist"],
+      },
+      {
+        name: "Saved Itineraries",
+        icon: Bookmark,
+        tab: "SavedItineraries",
+        roles: ["tourist"],
+      },
+    ],
     "Upcoming Bookings": [
       {
         name: "Activities",

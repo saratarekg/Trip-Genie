@@ -56,7 +56,9 @@ const ActivityCard = ({
 
   useEffect(() => {
     if (savedActivities && savedActivities.length > 0) {
-      setIsSaved(savedActivities.some(savedActivity => savedActivity.activity.toString() === activity._id.toString()));
+      console.log(savedActivities);
+      console.log(activity._id);
+      setIsSaved(savedActivities.some(savedActivity => savedActivity._id === activity._id.toString()));
       
     }
     console.log(isSaved);
