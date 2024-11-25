@@ -684,13 +684,13 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       <div className="grid grid-cols-12 gap-6">
         {/* Merged Profile Picture and Info Card - 8 columns */}
         <Card className="col-span-7">
-  <CardContent className="py-4">
-    <div className="flex">
+  <CardContent className="py-6">
+  <div className="flex items-center justify-center">
       {/* Profile Picture Section */}
-      <div className="w-1/3 pr-4">
-        <div className="relative">
+      <div className="w-1/3 flex flex-col items-center">
+        <div className="relative mb-4">
           <button
-            className="w-24 h-24 mx-auto bg-gray-200 rounded-full overflow-hidden flex items-center justify-center"
+            className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center"
             onClick={toggleDropdown}
             disabled={!selectedImage && !isEditing}
           >
@@ -712,11 +712,11 @@ const response = await axios.get("http://localhost:4000/tourist/", {
             )}
           </button>
           {isDropdownOpen && (
-            <div className="absolute top-full mt-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
+            <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
               <ul className="py-2">
                 {selectedImage && (
                   <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-center"
                     onClick={() => {
                       setIsImageViewerOpen(true);
                       setDropdownOpen(false);
@@ -727,7 +727,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
                 )}
                 {isEditing && (
                   <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-center"
                     onClick={handleUpdateClick}
                   >
                     Update
@@ -735,7 +735,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
                 )}
                 {isEditing && selectedImage && (
                   <li
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500 text-center"
                     onClick={() => {
                       setSelectedImage(null);
                       setDropdownOpen(false);
@@ -748,7 +748,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
             </div>
           )}
         </div>
-        <div className="mt-3 text-center">
+        <div className="text-center mb-4">
           <div className="flex items-center justify-center gap-2">
             <h2 className="text-xl font-bold">{tourist.username}</h2>
             <div
@@ -760,38 +760,33 @@ const response = await axios.get("http://localhost:4000/tourist/", {
           <p className="text-sm text-gray-500 mt-1">{tourist.email}</p>
         </div>
         {isEditing ? (
-          <>
-           <div className="mt-4 flex flex-col space-y-2 w-full">
-  <Button
-    onClick={handleUpdate}
-    className="w-full  bg-[#388A94] hover:bg-[#2e6b77]"
-  >
-    Update
-  </Button>
-  <Button
-    onClick={handleDiscard}
-    variant="outline"
-    className="w-full"
-  >
-    Cancel
-  </Button>
-</div>
-
-          </>
-        ) : (
-          <div className="mt-4 flex justify-end w-full">
+          <div className="flex flex-col space-y-2 w-full max-w-[200px]">
             <Button
-              onClick={() => setIsEditing(true)}
-              className="w-full bg-[#1A3B47]"
+              onClick={handleUpdate}
+              className="w-full bg-[#388A94] hover:bg-[#2e6b77]"
             >
-              Edit Profile
+              Update
+            </Button>
+            <Button
+              onClick={handleDiscard}
+              variant="outline"
+              className="w-full"
+            >
+              Cancel
             </Button>
           </div>
+        ) : (
+          <Button
+            onClick={() => setIsEditing(true)}
+            className="w-full max-w-[200px] bg-[#1A3B47]"
+          >
+            Edit Profile
+          </Button>
         )}
       </div>
 
       {/* Vertical Separator */}
-      <div className="border-r border-gray-200 mx-4"></div>
+      <div className="border-r border-gray-200 h-[300px] mx-8"></div>
 
       {/* Profile Info Section */}
       <div className="w-2/3 pl-4 space-y-4">
