@@ -99,11 +99,15 @@ const tabs = [
       { id: 'my-products', title: 'My Products' },
       { id: 'create-product', title: 'Create Product' },
       { id: 'archived-products', title: 'Archived Products' },
-      { id: 'create-promo-code', title: 'Create Promo Code' },
       { id: 'manage-products', title: 'Manage Products' },
     ]
   },
   { id: 'historical-places', title: 'Historical Places', icon: 'Map' },
+  { 
+    id: 'create-promo-code', 
+    title: 'Create Promo Code', 
+    icon: 'Tag' 
+  },
   { 
     id: 'reports', 
     title: 'Sales Reports', 
@@ -231,7 +235,7 @@ export function Dashboard() {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          <NotificationsDropdownAdmin />
+          <NotificationsDropdownAdmin setActiveTab={setActiveTab} />
         </div>
       </div>
       <div className="flex bg-gray-100">

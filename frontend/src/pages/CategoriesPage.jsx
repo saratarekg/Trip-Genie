@@ -140,7 +140,7 @@ export default function CategoriesPage() {
       <ToastProvider>
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-semibold text-[#1A3B47] mb-4">Create New Category</h2>
+            <h2 className="text-xl font-bold text-[#1A3B47]">Create New Category</h2>
             <div className="flex space-x-4">
               <Input
                 type="text"
@@ -159,7 +159,7 @@ export default function CategoriesPage() {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-[#1A3B47] mb-4">Existing Categories</h2>
+            <h2 className="text-xl font-bold text-[#1A3B47]">Existing Categories</h2>
             <div className="overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">

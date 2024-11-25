@@ -161,7 +161,7 @@ export function Dashboard() {
         </div>
       </CardContent>
     </Card>
-    <Card className="h-[calc(100vh-16rem)]">
+    <Card className="h-[calc(100vh-16rem)]" id="notifications-card">
       <CardHeader>
         <CardTitle>Notifications</CardTitle>
       </CardHeader>

@@ -11,7 +11,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -22,6 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export default function UserStats() {
   const [stats, setStats] = useState(null);
@@ -37,6 +46,8 @@ export default function UserStats() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [selectedUserType, setSelectedUserType] = useState("total");
 
   // Fetch all-time stats
   useEffect(() => {
@@ -130,14 +141,17 @@ export default function UserStats() {
 
   const fetchFilteredStats = async () => {
     try {
+      setIsFiltering(true);
       const token = Cookies.get("jwt");
       const response = await axios.get(
         `http://localhost:4000/admin/users-report?month=${filters.month}&year=${filters.year}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setFilteredStats(response.data);
+      setIsFiltering(false);
     } catch (err) {
       console.error("Error fetching filtered stats:", err);
+      setIsFiltering(false);
     }
   };
 
@@ -164,51 +178,105 @@ export default function UserStats() {
     { type: "Admins", count: filteredStats?.admin || 0 },
   ];
 
+  const userTypes = [
+    "total",
+    "tourist",
+    "tourGuide",
+    "seller",
+    "advertiser",
+    "governor",
+    "admin",
+  ];
+
+  const selectedUserCount = stats?.[selectedUserType] || 0;
+  const totalUsers = stats?.total || 0;
+  const fillPercentage = totalUsers
+    ? (selectedUserCount / totalUsers) * 100
+    : 0;
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="grid gap-4 md:grid-cols-12 mb-4">
           {/* Total Users Card */}
-          <Card className="md:col-span-3">
-            <CardHeader className="p-3">
+          <Card className="md:col-span-3 flex flex-col justify-center items-center">
+            <CardHeader className="p-3 w-full">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
                   Total Users
                 </CardTitle>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
+                    >
+                      <span className="mr-1">
+                        {selectedUserType.charAt(0).toUpperCase() +
+                          selectedUserType.slice(1)}
+                      </span>
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[100px]">
+                    {userTypes.map((type) => (
+                      <DropdownMenuItem
+                        key={type}
+                        onSelect={() => setSelectedUserType(type)}
+                      >
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardHeader>
-            <CardContent className="p-3">
-              <div className="text-center">
-                <span className="text-3xl font-bold text-[#1A3B47]">
-                  {stats?.total || 0}
-                </span>
-                <p className="text-sm text-[#5D9297] mt-1">Total Users</p>
+            <CardContent className="p-3 flex flex-col justify-center items-center w-full">
+              <div className="relative flex items-center justify-center w-32 h-32">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="#E6DCCF"
+                    strokeWidth="10"
+                  />
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="#1A3B47"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray="283"
+                    strokeDashoffset="283"
+                    initial={{ strokeDashoffset: 283 }}
+                    animate={{
+                      strokeDashoffset: 283 - (283 * fillPercentage) / 100,
+                    }}
+                    transition={{
+                      duration: 1,
+                      ease: "easeInOut",
+                    }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-lg font-bold text-[#1A3B47]">
+                    {selectedUserCount}
+                  </span>
+                  <span className="text-sm text-[#5D9297]">
+                    {selectedUserType.charAt(0).toUpperCase() +
+                      selectedUserType.slice(1)}
+                  </span>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div className="text-center">
-                  <span className="text-lg font-semibold text-[#1A3B47]">
-                    {stats?.tourist || 0}
-                  </span>
-                  <p className="text-xs text-[#5D9297]">Tourists</p>
-                </div>
-                <div className="text-center">
-                  <span className="text-lg font-semibold text-[#1A3B47]">
-                    {stats?.tourGuide || 0}
-                  </span>
-                  <p className="text-xs text-[#5D9297]">Tour Guides</p>
-                </div>
-                <div className="text-center">
-                  <span className="text-lg font-semibold text-[#1A3B47]">
-                    {stats?.seller || 0}
-                  </span>
-                  <p className="text-xs text-[#5D9297]">Sellers</p>
-                </div>
-                <div className="text-center">
-                  <span className="text-lg font-semibold text-[#1A3B47]">
-                    {stats?.advertiser || 0}
-                  </span>
-                  <p className="text-xs text-[#5D9297]">Advertisers</p>
-                </div>
+              <div className="text-center mt-4">
+                <p className="text-base text-[#5D9297]">
+                  {fillPercentage.toFixed(1)}% of total
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -222,24 +290,29 @@ export default function UserStats() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold text-[#5D9297]">
-                    {monthlyStats.currentMonth?.total || 0}
-                  </span>
-                  <span
-                    className={`flex items-center text-sm font-semibold px-2 py-1 rounded-full ${
-                      monthlyChange >= 0
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {monthlyChange >= 0 ? (
-                      <TrendingUp className="mr-1 h-4 w-4" />
-                    ) : (
-                      <TrendingDown className="mr-1 h-4 w-4" />
-                    )}
-                    {Math.abs(monthlyChange).toFixed(1)}%
-                  </span>
+                <div className="flex flex-col items-start -mt-4">
+                  <p className="text-sm text-gray-500">Users</p>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center">
+                      <span className="text-2xl font-bold text-[#5D9297]">
+                        {monthlyStats.currentMonth?.total || 0}
+                      </span>
+                      <span
+                        className={`ml-12 flex items-center text-sm font-semibold px-2 py-1 rounded-full ${
+                          monthlyChange >= 0
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {monthlyChange >= 0 ? (
+                          <TrendingUp className="mr-1 h-4 w-4" />
+                        ) : (
+                          <TrendingDown className="mr-1 h-4 w-4" />
+                        )}
+                        {Math.abs(monthlyChange).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -250,9 +323,12 @@ export default function UserStats() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <span className="text-2xl font-bold text-[#5D9297]">
-                  {monthlyStats.lastMonth?.total || 0}
-                </span>
+                <div className="flex flex-col items-start -mt-4">
+                  <p className="text-sm text-gray-500">Users</p>
+                  <span className="text-2xl font-bold text-[#5D9297]">
+                    {monthlyStats.lastMonth?.total || 0}
+                  </span>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -358,7 +434,7 @@ export default function UserStats() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
+            <div className="overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -373,26 +449,43 @@ export default function UserStats() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {tableData.map((item) => (
-                    <tr key={item.type}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {item.type}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.count}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {filteredStats?.total
-                          ? ((item.count / filteredStats.total) * 100).toFixed(
-                              1
-                            )
-                          : 0}
-                        %
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+                <AnimatePresence mode="wait">
+                  {!isFiltering && (
+                    <motion.tbody
+                      key="table-body"
+                      className="bg-white divide-y divide-gray-200"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {tableData.map((item, index) => (
+                        <motion.tr
+                          key={item.type}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.2, delay: index * 0.05 }}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {item.type}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {item.count}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {filteredStats?.total
+                              ? ((item.count / filteredStats.total) * 100).toFixed(
+                                  1
+                                )
+                              : 0}
+                            %
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </motion.tbody>
+                  )}
+                </AnimatePresence>
               </table>
             </div>
           </CardContent>
