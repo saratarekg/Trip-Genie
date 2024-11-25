@@ -97,7 +97,8 @@ const touristSchema = new Schema(
     },
     cart: [
       {
-        product: { // Reference to Product
+        product: {
+          // Reference to Product
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
@@ -108,26 +109,29 @@ const touristSchema = new Schema(
     ],
     savedActivity: [
       {
-        activity: { // Reference to Product
+        activity: {
+          // Reference to Product
           type: mongoose.Schema.Types.ObjectId,
           ref: "Activity",
           required: true,
-        }
+        },
       },
     ],
     savedItinerary: [
       {
-        itinerary: { // Reference to Product
+        itinerary: {
+          // Reference to Product
           type: mongoose.Schema.Types.ObjectId,
           ref: "Itinerary",
           required: true,
-        }
+        },
       },
     ],
-    currentPromoCode: {  // One promo code for the entire cart (instead of for each item)
+    currentPromoCode: {
+      // One promo code for the entire cart (instead of for each item)
       type: mongoose.Schema.Types.ObjectId,
       ref: "PromoCode",
-      default: null,  // Default is null if no promo code is applied
+      default: null, // Default is null if no promo code is applied
     },
     wishlist: [
       {
@@ -285,16 +289,36 @@ const touristSchema = new Schema(
         },
       },
     ],
-    history: [{
-      timestamp: { type: Date, default: Date.now },
-      transactionType: { 
-        type: String, 
-        enum: ['payment', 'deposit'],  // Specifies the type of transaction
-        required: true 
+    history: [
+      {
+        timestamp: { type: Date, default: Date.now },
+        transactionType: {
+          type: String,
+          enum: ["payment", "deposit"], // Specifies the type of transaction
+          required: true,
+        },
+        amount: Number, // The amount involved in the transaction
+        details: String,
       },
-      amount: Number,  // The amount involved in the transaction
-      details: String, 
-    }],
+    ],
+    notifications: [
+      {
+        body: {
+          type: String,
+        },
+        link: {
+          type: String,
+        },
+        date: {
+          type: Date,
+          default: Date.now,
+        },
+        seen: {
+          type: Boolean,
+          default: false,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -332,7 +356,6 @@ touristSchema.pre("save", async function (next) {
 //   }
 //   next();
 // });
-
 
 touristSchema.statics.login = async function (username, password) {
   let tourist = await this.findOne({ username });
