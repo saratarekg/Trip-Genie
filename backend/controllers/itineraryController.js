@@ -574,7 +574,7 @@ const updateItinerary = async (req, res) => {
         await Tourist.findByIdAndUpdate(tourists[i]._id, {
           $push: {
             notifications: {
-              body: `The itinerary "${newItinerary.title}" is now open for booking`,
+              body: `The itinerary <b>${newItinerary.title}</b> is now open for booking`,
               link: `/itinerary/${newItinerary._id}`,
             },
           },
