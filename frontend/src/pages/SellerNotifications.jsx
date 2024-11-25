@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Bell, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function SellerNotifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchNotifications();
@@ -136,8 +138,9 @@ export default function SellerNotifications() {
                                             ? "bg-gray-200"
                                             : "bg-gray-300"
                                         }
-                                        hover:bg-gray-400 transition duration-300 ease-in-out
+                                        hover:bg-gray-400 transition duration-300 ease-in-out cursor-pointer
                                     `}
+                                    onClick={() => navigate(notification.link)}
                   >
                     <td className="px-4 py-3 text-[#1A3B47] relative text-lg border-b border-gray-200">
                       <div

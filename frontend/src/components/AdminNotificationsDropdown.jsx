@@ -3,6 +3,7 @@ import { Bell, Loader2, X } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
@@ -14,6 +15,7 @@ export function NotificationsDropdownAdmin() {
   const [loading, setLoading] = useState(false);
   const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkUnseenNotifications();
@@ -98,8 +100,8 @@ export function NotificationsDropdownAdmin() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <button className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 relative">
-          <Bell className="h-7 w-7" />
+        <button className="text-[#1A3B47] hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 relative">
+          <Bell className="h-6 w-6" />
           {hasUnseenNotifications && (
             <span className="absolute top-1 right-2 block h-3 w-3 rounded-full bg-red-500" />
           )}
@@ -133,7 +135,8 @@ export function NotificationsDropdownAdmin() {
               {notifications.map((notification, index) => (
                 <li
                   key={index}
-                  className="p-4 hover:bg-gray-50 transition-colors relative"
+                  className="p-4 hover:bg-gray-50 transition-colors relative cursor-pointer"
+                  onClick={() => navigate(notification.link)}
                 >
                   {!notification.seen && (
                     <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">

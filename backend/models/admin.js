@@ -34,6 +34,9 @@ const adminSchema = new Schema(
         body: {
           type: String,
         },
+        link: {
+          type: String,
+        },
         date: {
           type: Date,
           default: Date.now,

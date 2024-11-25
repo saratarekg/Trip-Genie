@@ -37,6 +37,7 @@ import {
   Phone,
   User,
   StarHalf,
+  ChevronLeft,
   DollarSign,
   Package,
   CheckCircle,
@@ -1482,6 +1483,7 @@ const ProductDetail = ({id, onBack}) => {
                 }
               }}
             >
+              <ChevronLeft className="w-5 h-5 mr-2" />
               {product.isArchived
                 ? "Back to all archived products"
                 : "Back to all products"}
@@ -1546,6 +1548,7 @@ const ProductDetail = ({id, onBack}) => {
           </DialogHeader>
           <DialogFooter>
             <Button variant="default" onClick={() => navigate("/all-products")}>
+            <ChevronLeft className="w-5 h-5 mr-2" />
               Back to All Products
             </Button>
           </DialogFooter>

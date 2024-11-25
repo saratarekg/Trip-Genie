@@ -8,12 +8,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useNavigate } from "react-router-dom";
 
 export function NotificationsDropdownSeller() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     checkUnseenNotifications();
@@ -133,7 +136,8 @@ export function NotificationsDropdownSeller() {
               {notifications.map((notification, index) => (
                 <li
                   key={index}
-                  className="p-4 hover:bg-gray-50 transition-colors relative"
+                  className="p-4 hover:bg-gray-50 transition-colors relative cursor-pointer"
+                  onClick={() => navigate(notification.link)}
                 >
                   {!notification.seen && (
                     <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">

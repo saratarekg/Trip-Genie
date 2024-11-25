@@ -215,7 +215,7 @@ const ItineraryReport = () => {
 ;
 
   return (
-    <div className="p-6 bg-[#E6DCCF]/10 min-h-screen">
+    <div className="p-6 bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="grid gap-4 md:grid-cols-12 mb-4">
           {/* Total Revenue */}
