@@ -32,6 +32,7 @@ import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
 
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./pages/SignUp.jsx";
+import TourGuideItineraryReport from "./pages/TourGuideReport.jsx";
 
 import  SellerNotifications  from "./pages/SellerNotifications.jsx";
 import  AdminNotifications  from "./pages/AdminNotifications.jsx";
@@ -438,6 +439,16 @@ function AppContent() {
                 allowedRoles={["advertiser"]}
               >
                 <AdvertiserNotifications />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tourguide-report"
+            element={
+              <ProtectedRoute
+                allowedRoles={["tour-guide"]}
+              >
+                <TourGuideItineraryReport />
               </ProtectedRoute>
             }
           />
