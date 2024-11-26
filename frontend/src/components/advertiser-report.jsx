@@ -423,10 +423,8 @@ const AdvertiserReport = () => {
           </div>
 
           {/* Sales Analytics Card */}
-          <Card
-            className="m
-d:col-span-6"
-          >
+
+          <Card className="md:col-span-6">
             <CardHeader className="p-3 mb-2">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
@@ -459,7 +457,7 @@ d:col-span-6"
               </div>
             </CardHeader>
             <CardContent className="pl-0">
-              <div className="h-[200px]">
+              <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={graphData}
