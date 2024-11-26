@@ -15,6 +15,7 @@ const apiRoutes = require("./routes/apiRoutes");
 const JobStatus = require("./models/JobStatus");
 const purchaseController = require("./controllers/purchaseController");
 const emailService = require("./services/emailService");
+const promoCode = require("./models/promoCode");
 
 const Tourist = require("./models/tourist");
 
@@ -130,7 +131,9 @@ app.post("/create-checkout-session", async (req, res) => {
         req.headers.origin
       }/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}&deliveryType=${encodeURIComponent(
         deliveryInfo.type
-      )}&deliveryTime=${encodeURIComponent(deliveryInfo.time)}&shippingId=${encodeURIComponent(deliveryInfo.shippingId)}`,
+      )}&deliveryTime=${encodeURIComponent(
+        deliveryInfo.time
+      )}&shippingId=${encodeURIComponent(deliveryInfo.shippingId)}`,
       cancel_url: `http://localhost:3000/checkout2`,
       metadata: {
         shippingId: deliveryInfo.shippingId,
@@ -209,7 +212,7 @@ const checkBirthdays = async () => {
   }
 };
 
-checkUpcomingEvents = async () => {
+const checkUpcomingEvents = async () => {
   try {
     const today = new Date();
     const twoDays = new Date();
@@ -278,9 +281,46 @@ const sendBirthdayCards = async () => {
     });
 
     // Send birthday emails to the filtered tourists
-    birthdayTourists.forEach((tourist) => {
-      emailService.sendBirthdayEmail(tourist);
-    });
+    for (const tourist of birthdayTourists) {
+      let code = "";
+      //get the current year
+      const currentDate = new Date();
+      if (tourist.fname) {
+        code = `${tourist.fname.toUpperCase()}${currentDate.getFullYear()}`;
+      } else {
+        code = `${tourist.username.toUpperCase()}${currentDate.getFullYear()}`;
+      }
+      await Tourist.findByIdAndUpdate(tourist._id.toString(), {
+        $push: {
+          notifications: {
+            body: `<h1>Happy Birthday, ${
+              tourist.fname ? tourist.fname : tourist.username
+            }! 🎉🎂🎈</h1>
+            <p>Wishing you a magical day filled with happiness and a year filled with joy.</p>
+            <p>As a special gift, here is your magical promo code which you can use on any booking or product:</p>
+            <h3>Code: <strong>${code}</strong></h3>
+            <h3>Discount: <strong>50%</strong></h3>
+            <h3>Usage Limit: <strong>1</strong></h3>
+            <h3>Valid Until: <strong>${new Date(
+              new Date().setFullYear(new Date().getFullYear() + 1)
+            ).toDateString()}</strong></h3>`,
+          },
+        },
+      });
+      emailService.sendBirthdayEmail(tourist, code);
+
+      const promo = new promoCode({
+        code: code,
+        percentOff: 50,
+        usage_limit: 1,
+        dateRange: {
+          start: new Date(),
+          end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+        },
+      });
+
+      await promo.save();
+    }
   } catch (error) {
     console.error("Error sending birthday cards:", error);
   }

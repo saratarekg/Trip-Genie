@@ -9,8 +9,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
-export function NotificationsDropdownAdmin() {
+export function NotificationsDropdownAdmin({ setActiveTab }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
@@ -97,6 +99,20 @@ export function NotificationsDropdownAdmin() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const handleViewAll = () => {
+    setIsOpen(false);
+    setActiveTab("dashboard");
+    setTimeout(() => {
+      const notificationsCard = document.getElementById("notifications-card");
+      if (notificationsCard) {
+        notificationsCard.classList.add("highlight");
+        setTimeout(() => {
+          notificationsCard.classList.remove("highlight");
+        }, 2000);
+      }
+    }, 300);
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -108,20 +124,19 @@ export function NotificationsDropdownAdmin() {
           <span className="sr-only">Notifications</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 bg-white" align="end">
+      <PopoverContent className="w-80 p-0 bg-white shadow-lg rounded-md scrollbar-custom" align="end">
         <div className="flex items-center justify-between border-b border-gray-200 p-4">
           <h2 className="text-lg font-semibold text-[#1A3B47]">
             Notifications
           </h2>
           <button
-            onClick={() => setIsOpen(false)}
-            className="text-gray-400 hover:text-gray-500"
+            className="text-[#388A94] hover:text-[#B5D3D1] hover:underline text-sm"
+            onClick={handleViewAll}
           >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Close</span>
+            View All
           </button>
         </div>
-        <div className="max-h-[300px] overflow-y-auto">
+        <div className="max-h-[300px] overflow-y-auto scrollbar-custom">
           {loading ? (
             <div className="flex items-center justify-center p-4">
               <Loader2 className="h-6 w-6 animate-spin text-[#388A94]" />
@@ -135,7 +150,7 @@ export function NotificationsDropdownAdmin() {
               {notifications.map((notification, index) => (
                 <li
                   key={index}
-                  className="p-4 hover:bg-gray-50 transition-colors relative cursor-pointer"
+                  className="p-3 hover:bg-gray-50 transition-colors relative cursor-pointer"
                   onClick={() => navigate(notification.link)}
                 >
                   {!notification.seen && (
@@ -143,7 +158,7 @@ export function NotificationsDropdownAdmin() {
                       New
                     </span>
                   )}
-                  <p className="text-[#1A3B47] mb-1 pr-16">
+                  <p className="text-sm text-[#1A3B47] mb-1 pr-16">
                     <div
                       dangerouslySetInnerHTML={{ __html: notification.body }}
                     ></div>
@@ -155,14 +170,6 @@ export function NotificationsDropdownAdmin() {
               ))}
             </ul>
           )}
-        </div>
-        <div className="p-3 border-t border-gray-200">
-          <Button
-            className="w-full bg-[#388A94] hover:bg-[#5D9297] text-white"
-            onClick={() => (window.location.href = "/admin-notifications")}
-          >
-            View All
-          </Button>
         </div>
       </PopoverContent>
     </Popover>

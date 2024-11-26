@@ -99,11 +99,15 @@ const tabs = [
       { id: 'my-products', title: 'My Products' },
       { id: 'create-product', title: 'Create Product' },
       { id: 'archived-products', title: 'Archived Products' },
-      { id: 'create-promo-code', title: 'Create Promo Code' },
       { id: 'manage-products', title: 'Manage Products' },
     ]
   },
   { id: 'historical-places', title: 'Historical Places', icon: 'Map' },
+  { 
+    id: 'create-promo-code', 
+    title: 'Create Promo Code', 
+    icon: 'Tag' 
+  },
   { 
     id: 'reports', 
     title: 'Sales Reports', 
@@ -231,7 +235,7 @@ export function Dashboard() {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          <NotificationsDropdownAdmin />
+          <NotificationsDropdownAdmin setActiveTab={setActiveTab} />
         </div>
       </div>
       <div className="flex bg-gray-100">
@@ -244,9 +248,9 @@ export function Dashboard() {
           <main className="flex-1 overflow-y-auto transition-all duration-1000 ease-in-out transform">
             <DashboardContent activeTab={activeTab} tabs={tabs} setActiveTab={setActiveTab} />
           </main>
-          <footer className="text-[#1A3B47] p-2 border-t border-gray-300">
+          <footer className="sticky text-[#1A3B47] p-2 border-t border-gray-300 bg-white">
             <div className="text-center">
-              © {new Date().getFullYear()} Trip Genie. All rights reserved.
+              © {new Date().getFullYear()} Trip Genie. All rights reserved .
             </div>
           </footer>
         </div>
