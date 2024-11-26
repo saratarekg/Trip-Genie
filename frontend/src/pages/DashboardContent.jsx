@@ -45,6 +45,10 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
     setSelectedProductId(null); // Reset selectedProductId when activeTab changes
   }, [activeTab]);
 
+  const handleReportClick = (reportId) => {
+    setActiveTab(reportId);
+  };
+
   const getActiveTabDetails = () => {
     for (const tab of tabs) {
       if (tab.id === activeTab) return tab;
