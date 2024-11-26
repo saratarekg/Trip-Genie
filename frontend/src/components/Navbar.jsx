@@ -358,8 +358,11 @@ export function NavbarComponent() {
                           Itinerary
                         </Link>
                       </div>
+
                     )}
                   </div>
+                  <NavLink to="/tourguide-report">Sales Report</NavLink>
+
                 </>
               )}
               {role === "seller" && (

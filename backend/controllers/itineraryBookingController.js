@@ -327,13 +327,27 @@ exports.getItinerariesReport = async (req, res) => {
         date: { $gte: startDate, $lt: endDate },
       }).populate("itinerary");
     } else if (month && year) {
+      console.log(month, year);
       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
       const endDate = new Date(parseInt(year), parseInt(month), 0);
+      // increment the end date by 1 to include the last day of the month
+      endDate.setDate(endDate.getDate() + 1);
+      // console.log(startDate, endDate);
       bookings = await ItineraryBooking.find({
         itinerary: { $in: itineraryIds },
-        date: { $gte: startDate, $lt: endDate },
+        date: { $gt: startDate, $lt: endDate },
       }).populate("itinerary");
-    } else {
+    } 
+    else if (year){
+      const startDate = new Date(parseInt(year), 0, 1);
+      const endDate = new Date(parseInt(year)+1, 0, 1);
+      console.log(startDate, endDate);
+      bookings = await ItineraryBooking.find({
+        itinerary: { $in: itineraryIds },
+        date: { $gt: startDate, $lte: endDate },
+      }).populate("itinerary");
+    }
+    else {
       bookings = await ItineraryBooking.find({
         itinerary: { $in: itineraryIds },
       }).populate("itinerary");
@@ -343,12 +357,14 @@ exports.getItinerariesReport = async (req, res) => {
     let totalTickets = 0;
 
     // Calculate total number of tickets for each itinerary
-    const itineraryReport = itineraries.map((itinerary) => {
+    let itineraryReport = itineraries.map((itinerary) => {
       const tickets = bookings.reduce((total, booking) => {
         return booking.itinerary._id.equals(itinerary._id)
           ? total + booking.numberOfTickets
           : total;
       }, 0);
+
+
 
       //Get the revenue for the itinerary
       const revenue = bookings.reduce((total, booking) => {
@@ -362,6 +378,8 @@ exports.getItinerariesReport = async (req, res) => {
 
       return { itinerary, tickets, revenue: revenue * 0.9 }; // Return itinerary report
     });
+
+    itineraryReport = itineraryReport.filter((report) => report.tickets > 0); // Filter out itineraries with no tickets
 
     totalRevenue *= 0.9;
     res.status(200).json({ itineraryReport, totalRevenue, totalTickets });
