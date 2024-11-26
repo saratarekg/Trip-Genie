@@ -666,6 +666,25 @@ const ItineraryDetail = () => {
     disliked: "",
     isAnonymous: false,
   });
+
+  const [tourist, setTourist] = useState(null);
+  
+  useEffect(() => {
+    const fetchTouristData = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTourist(response.data);
+      } catch (error) {
+        console.error("Error fetching tourist data:", error);
+      }
+    };
+
+    fetchTouristData();
+  }, []); 
+  
   const [showTourGuideReviewDialog, setShowTourGuideReviewDialog] =
     useState(false);
   const [userTourGuideReview, setUserTourGuideReview] = useState(null);
@@ -2117,6 +2136,17 @@ const ItineraryDetail = () => {
                 You have successfully booked {numberOfTickets} ticket(s) for{" "}
                 {itinerary.title}.
               </p>
+              <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Label className="text-right">Amount Paid:</Label>
+              <div>  {formatPrice(calculateTotalPrice())} </div>
+            </div>
+            { paymentType === "Wallet" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Label className="text-right">New Wallet Balance:</Label>
+                <div>{formatPrice(tourist.wallet - calculateTotalPrice())}</div>
+              </div>
+            )}</div>
             </div>
 
             <DialogFooter>

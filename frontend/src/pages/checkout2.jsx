@@ -116,6 +116,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [isAddressLoaded, setIsAddressLoaded] = useState(false);
   const paymentMethodRef = useRef(null);
+  const [tourist, setTourist] = useState(null);
 
   const form = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -171,6 +172,7 @@ export default function CheckoutPage() {
         const currencyId = userData.preferredCurrency;
         setSavedCards(userData.cards || []);
         setSavedAddresses(userData.shippingAddresses || []);
+        setTourist(userData);
 
         const defaultAddress = userData.shippingAddresses?.find(
           (addr) => addr.default
@@ -686,14 +688,14 @@ export default function CheckoutPage() {
     if (cartItems.length > 0) {
       if (userRole === "tourist" && userPreferredCurrency) {
         if (userPreferredCurrency._id === cartItems[0].product.currency) {
-          return `${userPreferredCurrency.symbol}${roundedPrice}`;
+          return `${userPreferredCurrency.symbol}${roundedPrice.toFixed(2)}`;
         } else {
           const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2);
           return `${userPreferredCurrency.symbol}${exchangedPrice}`;
         }
       } else {
         if (currencySymbol) {
-          return `${currencySymbol.symbol}${roundedPrice}`;
+          return `${currencySymbol.symbol}${roundedPrice.toFixed(2)}`;
         }
       }
     }
@@ -1305,43 +1307,55 @@ export default function CheckoutPage() {
       {/* Status Dialog */}
 
       <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader className="flex items-center gap-2">
-            {purchaseStatus === "success" ? (
-              <>
-                <CheckCircle className="w-6 h-6 text-green-500" />
-                <DialogTitle>Purchase Successful</DialogTitle>
-              </>
-            ) : (
-              <>
-                <XCircle className="w-6 h-6 text-red-500" />
-                <DialogTitle>Purchase Failed</DialogTitle>
-              </>
-            )}
-          </DialogHeader>
-          <p className="mt-2 text-gray-600">
-            {purchaseStatus === "success"
-              ? "Your purchase has been completed successfully."
-              : "There was an error processing your purchase. Please try again."}
-          </p>
-          <p className="text-red-500">{purchaseError}</p>
-          <DialogFooter className="mt-4 flex justify-between">
-  <Button 
-    onClick={() => navigate("/all-products")} 
-    className="bg-[#1A3B47] text-white hover:bg-[#388A94]"
-  >
-    Continue Shopping
-  </Button>
-  <Button 
-    onClick={() => navigate("/")} 
-    className="bg-gray-300 text-white hover:bg-gray-400"
-  >
-    Go to Home
-  </Button>
-</DialogFooter>
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader className="flex items-center gap-2">
+      {purchaseStatus === "success" ? (
+        <>
+          <CheckCircle className="w-6 h-6 text-green-500" />
+          <DialogTitle>Purchase Successful</DialogTitle>
+        </>
+      ) : (
+        <>
+          <XCircle className="w-6 h-6 text-red-500" />
+          <DialogTitle>Purchase Failed</DialogTitle>
+        </>
+      )}
+    </DialogHeader>
+    <p className="mt-2 text-gray-600">
+      {purchaseStatus === "success"
+        ? "Your purchase has been completed successfully."
+        : "There was an error processing your purchase. Please try again."}
+    </p>
+    {purchaseStatus === "success" && paymentMethod === "wallet" && (
+      <div className="mt-4 text-gray-600">
+        <p>
+          <strong>Amount Paid: </strong>{formatPrice(totalAmount)}
+        </p>
+        <p>
+          <strong>New Wallet Balance: </strong>{formatPrice(tourist.wallet)}
+        </p>
+      </div>
+    )}
+    {purchaseStatus !== "success" && (
+      <p className="text-red-500">{purchaseError}</p>
+    )}
+    <DialogFooter className="mt-4 flex justify-between">
+      <Button
+        onClick={() => navigate("/all-products")}
+        className="bg-[#1A3B47] text-white hover:bg-[#388A94]"
+      >
+        Continue Shopping
+      </Button>
+      <Button
+        onClick={() => navigate("/")}
+        className="bg-gray-300 text-white hover:bg-gray-400"
+      >
+        Go to Home
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
