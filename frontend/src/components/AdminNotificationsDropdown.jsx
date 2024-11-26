@@ -56,9 +56,9 @@ export function NotificationsDropdownAdmin({ setActiveTab }) {
       );
 
       if (Array.isArray(response.data)) {
-        setNotifications(response.data.slice(0, 5));
+        setNotifications(response.data.slice(0, 6));
       } else if (response.data && Array.isArray(response.data.notifications)) {
-        setNotifications(response.data.notifications.slice(0, 5));
+        setNotifications(response.data.notifications.slice(0, 6));
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);

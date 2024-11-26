@@ -38,7 +38,6 @@ export default function UserStats() {
     currentMonth: null,
     lastMonth: null,
   });
-  const [yearlyData, setYearlyData] = useState([]);
   const [filteredStats, setFilteredStats] = useState(null);
   const [filters, setFilters] = useState({
     month: (new Date().getMonth() + 1).toString(),
@@ -57,7 +56,6 @@ export default function UserStats() {
   // Fetch monthly stats and yearly data
   useEffect(() => {
     fetchMonthlyStats();
-    fetchYearlyData();
   }, []);
 
   // Fetch filtered stats when filters change
@@ -108,34 +106,6 @@ export default function UserStats() {
       });
     } catch (err) {
       setError(err.message);
-    }
-  };
-
-  const fetchYearlyData = async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const currentYear = new Date().getFullYear();
-      const monthlyData = [];
-
-      // Fetch data for each month of the current year
-      for (let month = 0; month < 12; month++) {
-        const response = await axios.get(
-          `http://localhost:4000/admin/users-report?month=${
-            month + 1
-          }&year=${currentYear}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        monthlyData.push({
-          month: format(new Date(currentYear, month), "MMM"),
-          users: response.data.total || 0,
-        });
-      }
-
-      setYearlyData(monthlyData);
-      setIsLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setIsLoading(false);
     }
   };
 
@@ -341,46 +311,7 @@ export default function UserStats() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={yearlyData}
-                    margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
-                  >
-                    <defs>
-                      <linearGradient
-                        id="colorUsers"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#B5D3D1"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#B5D3D1"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="users"
-                      stroke="#B5D3D1"
-                      fillOpacity={1}
-                      fill="url(#colorUsers)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+              <UserGrowthChart />
             </CardContent>
           </Card>
         </div>
@@ -491,6 +422,75 @@ export default function UserStats() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+export function UserGrowthChart() {
+  const [yearlyData, setYearlyData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchYearlyData();
+  }, []);
+
+  const fetchYearlyData = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const currentYear = new Date().getFullYear();
+      const monthlyData = [];
+
+      for (let month = 0; month < 12; month++) {
+        const response = await axios.get(
+          `http://localhost:4000/admin/users-report?month=${
+            month + 1
+          }&year=${currentYear}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        monthlyData.push({
+          month: format(new Date(currentYear, month), "MMM"),
+          users: response.data.total || 0,
+        });
+      }
+
+      setYearlyData(monthlyData);
+      setIsLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) return <div className="p-6 text-center">Loading...</div>;
+  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
+
+  return (
+    <div className="h-[200px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={yearlyData}
+          margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+        >
+          <defs>
+            <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#B5D3D1" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#B5D3D1" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="month" />
+          <YAxis />
+          <Tooltip />
+          <Area
+            type="monotone"
+            dataKey="users"
+            stroke="#B5D3D1"
+            fillOpacity={1}
+            fill="url(#colorUsers)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }

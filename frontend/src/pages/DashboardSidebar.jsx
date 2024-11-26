@@ -122,6 +122,13 @@ export function DashboardSidebar({
     onToggleCollapse(!isCollapsed);
   };
 
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId.startsWith('itinerary-sales-report') || tabId.startsWith('activity-reports') || tabId.startsWith('my-product-sales-report') || tabId.startsWith('seller-product-sales-report') || tabId.startsWith('user-stats')) {
+      setOpenMenu('reports');
+    }
+  };
+
   return (
     <div
       className={`fixed left-0 top-0 h-screen flex flex-col bg-[#1A3B47] ${
@@ -177,7 +184,7 @@ export function DashboardSidebar({
                           activeTab === subItem.id ? "bg-white/20 text-white" : ""
                         }`}
                         style={{ transitionDelay: getTransitionDelay(index) }}
-                        onClick={() => setActiveTab(subItem.id)}
+                        onClick={() => handleTabClick(subItem.id)}
                       >
                         <span className="truncate">{subItem.title}</span>
                       </button>
@@ -189,7 +196,7 @@ export function DashboardSidebar({
                   className={`flex items-center w-full p-2 rounded-md transition-all duration-200 text-white hover:bg-white/10 ${
                     activeTab === tab.id ? "bg-white/20" : ""
                   }`}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabClick(tab.id)}
                 >
                   <tab.icon className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`} />
                   {!isCollapsed && <span className="truncate">{tab.title}</span>}

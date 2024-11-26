@@ -197,6 +197,10 @@ export function Dashboard() {
     }
   };
 
+  const handleReportClick = (reportId) => {
+    setActiveTab(reportId);
+  };
+
   return (
     <div>
       <div className="text-[#1A3B47] p-2 border-b bg-gray-100 border-gray-300">
