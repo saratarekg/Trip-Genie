@@ -59,7 +59,7 @@ const ActivityCard = ({
       console.log(savedActivities);
       console.log(activity._id);
       setIsSaved(savedActivities.some(savedActivity => savedActivity._id === activity._id.toString()));
-      
+
     }
     console.log(isSaved);
   }, [savedActivities, activity._id]);
@@ -181,10 +181,12 @@ const ActivityCard = ({
             }}
           >
             <Bookmark
-              className={`w-6 h-6 ${isSaved ? "fill-yellow-400 stroke-black stroke-[1.5]" : "stroke-black"}`}
+              className={`w-6 h-6 ${isSaved ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]" : "stroke-black"
+                }`}
             />
           </Button>
         )}
+
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(activity._id)}>
         <CardTitle className="text-lg text-[#1A3B47]">{activity.name}</CardTitle>
@@ -343,7 +345,7 @@ export default function AllActivities() {
       type: "success",
       message: isSaved ? "Activity saved successfully!" : "Activity unsaved successfully!",
     });
-    
+
     // Clear the alert message after 3 seconds
     setTimeout(() => {
       setAlertMessage(null);
@@ -896,15 +898,15 @@ export default function AllActivities() {
                   )
                   .map((activity) => (
                     <ActivityCard
-                    key={activity._id}
-                    activity={activity}
-                    onSelect={handleActivitySelect}
-                    userInfo={userInfo}
-                    exchangeRates={exchangeRates}
-                    currencies={currencies}
-                    onDeleteConfirm={handleDeleteConfirm}
-                    savedActivities={savedActivities}
-                    onActivitySaved={handleActivitySaved}
+                      key={activity._id}
+                      activity={activity}
+                      onSelect={handleActivitySelect}
+                      userInfo={userInfo}
+                      exchangeRates={exchangeRates}
+                      currencies={currencies}
+                      onDeleteConfirm={handleDeleteConfirm}
+                      savedActivities={savedActivities}
+                      onActivitySaved={handleActivitySaved}
                     />
                   ))}
               </div>

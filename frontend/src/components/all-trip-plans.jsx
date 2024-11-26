@@ -222,21 +222,19 @@ const ItineraryCard = ({
         onClick={() => onSelect(itinerary._id)}
       >
         {/* Save Button for tourists */}
-        {userInfo.role === "tourist" && (
-          <button
-            className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-20 w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-0"
+        {userInfo?.role === "tourist" && (
+          <Button
+            className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-0"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent parent click handler
+              e.stopPropagation();
               handleSaveToggle();
             }}
-            aria-label="Save itinerary"
           >
             <Bookmark
-              className={`w-6 h-6 ${
-                isSaved ? "fill-yellow-400 stroke-black stroke-[1.5]" : "stroke-black"
-              }`}
+              className={`w-6 h-6 ${isSaved ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]" : "stroke-black"
+                }`}
             />
-          </button>
+          </Button>
         )}
     
         <div className="relative aspect-video overflow-hidden">
