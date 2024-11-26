@@ -75,6 +75,7 @@ import { AdvertiserProfileComponent } from "@/components/AdvertiserProfileCompon
 import { SellerProfileComponent } from "@/components/SellerProfileComponent";
 import { TourGuideProfileComponent } from "@/components/tourGuideProfile";
 import Savedactivites from "@/components/Savedactivites";
+import Saveditineraries from "@/components/Saveditineraries";
 
 // Sub-components
 const AccountInfo = ({ user }) => {
@@ -924,6 +925,9 @@ export default function AccountManagement() {
         return <PasswordChanger />;
       case "SavedActivities":
         return <Savedactivites />;
+      case "SavedItineraries":
+        return <Saveditineraries />;
+
       case "preferences":
         return <Preferences user={user} />;
       case "add-card":

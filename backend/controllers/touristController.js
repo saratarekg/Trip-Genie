@@ -1809,27 +1809,31 @@ const applyPromoCode = async (req, res) => {
 // Get saved itineraries
 const getSavedItineraries = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(res.locals.user_id);
-     
+    const tourist = await Tourist.findById(res.locals.user_id).populate('savedItinerary.itinerary');
+    
     if (!tourist) {
       return res.status(404).json({ message: 'Tourist not found' });
     }
 
-    // Safely access savedItineraries
-    const savedItineraries = tourist.savedItinerary || []; 
+    // Filter out any null itineraries and map to return only the itinerary data
+    const savedItineraries = tourist.savedItinerary
+      .filter(item => item.itinerary)
+      .map(item => item.itinerary);
+
     res.status(200).json(savedItineraries);
   } catch (error) {
     console.error('Error fetching saved itineraries:', error);
     res.status(500).json({ message: 'Error fetching saved itineraries', error: error.message });
   }
 };
+
   
 // Add or remove an itinerary from saved itineraries
 const saveItinerary = async (req, res) => {
   try {
     const { id } = req.params;
     const touristId = res.locals.user_id;
-   
+
     // Find the tourist and check if the itinerary is already saved
     const tourist = await Tourist.findById(touristId);
     if (!tourist) {
@@ -1841,17 +1845,19 @@ const saveItinerary = async (req, res) => {
     );
 
     if (itineraryIndex > -1) {
-      // Itinerary is already saved, so remove it using $pull
-      await Tourist.updateOne(
-        { _id: touristId },
-        { $pull: { savedItinerary: { itinerary: id } } }
+      // Itinerary is already saved, so remove it
+      await Tourist.findByIdAndUpdate(
+        touristId,
+        { $pull: { savedItinerary: { itinerary: id } } },
+        { new: true }
       );
       return res.status(200).json({ message: 'Itinerary removed from saved list', success: true });
     } else {
-      // Itinerary is not saved, so add it using $push
-      await Tourist.updateOne(
-        { _id: touristId },
-        { $push: { savedItinerary: { itinerary: id } } }
+      // Itinerary is not saved, so add it
+      await Tourist.findByIdAndUpdate(
+        touristId,
+        { $push: { savedItinerary: { itinerary: id } } },
+        { new: true }
       );
       return res.status(200).json({ message: 'Itinerary saved successfully', success: true });
     }
@@ -1860,6 +1866,7 @@ const saveItinerary = async (req, res) => {
     res.status(500).json({ message: 'Error saving/removing itinerary', error: error.message });
   }
 };
+
 
 // Get saved activities
 const getSavedActivities = async (req, res) => {

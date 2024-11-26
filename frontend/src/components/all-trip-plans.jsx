@@ -140,17 +140,14 @@ const ItineraryCard = ({
 
   
   useEffect(() => {
-    // Add null checks and ensure both values exist before comparison
-    if (savedItineraries && savedItineraries.length > 0 && itinerary && itinerary._id) {
-      setIsSaved(
-        savedItineraries.some(
-          (savedItinerary) => 
-            savedItinerary?.itinerary && 
-            savedItinerary.itinerary.toString() === itinerary._id.toString()
-        )
-      );
+    if (savedItineraries && savedItineraries.length > 0) {
+      console.log(savedItineraries);
+      console.log(itinerary._id);
+      setIsSaved(savedItineraries.some(savedItinerary => savedItinerary._id === itinerary._id.toString()));
     }
-  }, [savedItineraries, itinerary]);
+    console.log(isSaved);
+  }, [savedItineraries, itinerary._id]);
+  
 
 
   const handleSaveToggle = async () => {
