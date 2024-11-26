@@ -529,7 +529,7 @@ w-full border rounded-md p-2"
                     <option value="other">Other</option>
                   </select>
                 </div>
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <input
                     type="checkbox"
                     name="default"
@@ -545,7 +545,7 @@ w-full border rounded-md p-2"
                   <label className="text-sm font-medium text-gray-700">
                     Set as default
                   </label>
-                </div>
+                </div> */}
                 <div className="mt-6 flex justify-end space-x-4">
                   <Button
                     type="button"

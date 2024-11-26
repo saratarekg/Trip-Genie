@@ -401,7 +401,7 @@ const bookTransportation = async (req, res) => {
             history: {
               transactionType: "payment",
               amount: totalCost,
-              details: `Payment for transportation booking - ID: ${transportation._id}`,
+              details: `You’ve successfully booked Transportation ${transportation.vehicleType}`,
             },
           },
         },
@@ -536,7 +536,7 @@ const deleteBooking = async (req, res) => {
           history: {
             transactionType: "deposit",
             amount: refundAmount,
-            details: `Refund for cancelled transportation booking - ID: ${booking._id}`,
+            details: `Refunded for Cancelling: ${transportation.vehicleType}`,
           },
         },
       },
@@ -1516,7 +1516,6 @@ const addShippingAddress = async (req, res) => {
       default: isDefault,
     } = req.body;
 
- 
     if (!streetName || !streetNumber || !city || !state || !country) {
       return res
         .status(400)
@@ -1537,7 +1536,18 @@ const addShippingAddress = async (req, res) => {
       default: isDefault || false,
     };
 
-    // Step 1: Add the new address
+    // Fetch the current user's addresses
+    const user = await Tourist.findById(res.locals.user_id);
+    if (!user) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // If this is the first address, set it as default
+    if (user.shippingAddresses.length === 0) {
+      newAddress.default = true;
+    }
+
+    // Add the new address
     const result = await Tourist.findOneAndUpdate(
       { _id: res.locals.user_id },
       { $push: { shippingAddresses: newAddress } },
@@ -1545,10 +1555,10 @@ const addShippingAddress = async (req, res) => {
     );
 
     if (!result) {
-      return res.status(404).json({ message: "Tourist not found" });
+      return res.status(404).json({ message: "Failed to add address." });
     }
 
-    // Step 2: If the new address is set as default, unset other defaults
+    // If the new address is marked as default, unset others
     if (isDefault) {
       await Tourist.updateOne(
         { _id: res.locals.user_id },
@@ -1580,6 +1590,7 @@ const addShippingAddress = async (req, res) => {
       .json({ message: "An error occurred while adding the address" });
   }
 };
+
 
 const getAllShippingAddresses = async (req, res) => {
   try {

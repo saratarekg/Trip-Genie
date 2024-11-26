@@ -170,7 +170,7 @@ const ProductCard = ({
     onAddToCart(product);
     setIsPopupOpen(false);
     // Redirect to checkout page
-    window.location.href = "account/cart"; // Replace with your actual checkout URL
+    window.location.href = "/checkout2"; // Replace with your actual checkout URL
   };
 
 

@@ -21,7 +21,13 @@ import PhoneInput from "react-phone-input-2"
 import "react-phone-input-2/lib/style.css"
 import { parsePhoneNumberFromString } from "libphonenumber-js"
 import { Label } from "@/components/ui/label"
+import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const convertUrlToBase64 = async (url) => {
   const response = await fetch(url);
@@ -64,6 +70,8 @@ const phoneValidator = (value) => {
 };
 
 export function TouristProfileComponent() {
+  const navigate = useNavigate();
+
   const [tourist, setTourist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -649,6 +657,84 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       />
     );
   };
+
+  const [notifications, setNotifications] = useState([]);
+  const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    checkUnseenNotifications();
+    fetchNotifications();
+  }, []);
+
+
+  const checkUnseenNotifications = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4000/tourist/unseen-notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setHasUnseenNotifications(response.data.hasUnseen);
+    } catch (error) {
+      console.error("Error checking unseen notifications:", error);
+    }
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `http://localhost:4000/tourist/notifications`,
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+
+      if (Array.isArray(response.data)) {
+        setNotifications(response.data.slice(0, 5));
+      } else if (response.data && Array.isArray(response.data.notifications)) {
+        setNotifications(response.data.notifications.slice(0, 5));
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markNotificationsAsSeen = async () => {
+    try {
+      await axios.post(
+        `http://localhost:4000/tourist/mark-notifications-seen`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) => ({
+          ...notification,
+          seen: true,
+        }))
+      );
+      setHasUnseenNotifications(false);
+    } catch (error) {
+      console.error("Error marking notifications as seen:", error);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
   
   if (loading) {
     return (
@@ -1063,16 +1149,62 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
         {/* Notifications - 4 columns */}
         <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-500">You have no new notifications.</p>
-          </CardContent>
-        </Card>
+  <CardHeader>
+    <CardTitle className="flex items-center gap-2">
+      <Bell className="w-5 h-5" />
+      Notifications
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="flex flex-col">
+      {loading ? (
+        <div className="flex items-center justify-center p-4">
+          <Loader2 className="h-6 w-6 animate-spin text-[#388A94]" />
+        </div>
+      ) : notifications.length === 0 ? (
+        <p className="text-[#1A3B47] p-4 text-center">
+          No notifications at the moment.
+        </p>
+      ) : (
+        <ul className="divide-y divide-gray-200">
+          {notifications.slice(0, 2).map((notification, index) => (
+            <li
+              key={index}
+              className="p-4 hover:bg-gray-50 transition-colors relative cursor-pointer"
+              onClick={() => navigate(notification.link)}
+            >
+              {!notification.seen && (
+                <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
+                  New
+                </span>
+              )}
+            
+              <p className="text-[#1A3B47] text-sm mb-1 pr-16">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: notification.body.slice(0, 40) + '...', // Show first 50 characters
+                  }}
+                ></div>
+              </p>
+              <p className="text-xs text-gray-500">
+                {formatDate(notification.date)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="p-3 border-t border-gray-200">
+        <Button
+          className="w-full bg-[#388A94] hover:bg-[#5D9297] text-white"
+          onClick={() => (window.location.href = "/tourist-notifications")}
+        >
+          View All
+        </Button>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
 
        
       </div>

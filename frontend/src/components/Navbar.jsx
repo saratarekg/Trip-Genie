@@ -247,7 +247,7 @@ export function NavbarComponent() {
     // Start interval only on specific routes
     if (location.pathname === "/all-products" || location.pathname.startsWith("/product")) {
       fetchCartItems(); // Fetch immediately on mount
-      interval = setInterval(fetchCartItems, 1000); // Fetch every 3 seconds
+      interval = setInterval(fetchCartItems, 3000); // Fetch every 3 seconds
     }
 
     // Cleanup interval when component unmounts or route changes

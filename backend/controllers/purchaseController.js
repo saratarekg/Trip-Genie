@@ -91,7 +91,7 @@ exports.createPurchase = async (req, res) => {
             history: {
               transactionType: "payment",
               amount: totalPrice,
-              details: `Products order - Total: $${totalPrice}`,
+              details: `You paid for your order using your wallet`,
             },
           },
         },
@@ -424,7 +424,7 @@ exports.cancelPurchase = async (req, res) => {
         history: {
           transactionType: "deposit",
           amount: totalRefund,
-          details: `Cancelled Order - Total: $${totalRefund}`,
+          details: `Refunded for Cancelling your Order`,
         },
       }, }, // increment the wallet by totalRefund
       { new: true } // return the updated document

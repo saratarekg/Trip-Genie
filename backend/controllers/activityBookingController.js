@@ -69,13 +69,13 @@ exports.createBooking = async (req, res) => {
     };
     
     // Conditionally add wallet balance and history only for wallet payments
-    if (paymentType === 'wallet') {
+    if (paymentType === 'Wallet') {
       updateFields.wallet = walletBalance; // Update wallet balance
       updateFields.$push = {
         history: {
           transactionType: 'payment',
           amount: paymentAmount,
-          details: `Booked an Activity: ${activityExists.name} - ${numberOfTickets} tickets`,
+          details: `You’ve successfully booked activity ${activityExists.name}`,
         },
       };
     }
@@ -193,14 +193,19 @@ exports.updateBooking = async (req, res) => {
 exports.deleteBooking = async (req, res) => {
   try {
     // Step 1: Find the booking
-    const booking = await ActivityBooking.findById(req.params.id);
+    const booking = await ActivityBooking.findById(req.params.id).populate('activity'); // Populate the activity field
     if (!booking) {
       return res.status(400).json({ message: "Booking not found" });
     }
 
+    // Ensure the activity exists within the booking
+    if (!booking.activity) {
+      return res.status(400).json({ message: "Activity details not found for the booking" });
+    }
+
     // Step 2: Add the booking amount to the tourist's wallet
     const touristId = res.locals.user_id; // Assuming 'tourist' is a reference in the booking schema
-    const bookingAmount = booking.paymentAmount; // Assuming 'amount' is the field for booking cost
+    const bookingAmount = booking.paymentAmount; // Assuming 'paymentAmount' is the field for booking cost
 
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
@@ -210,7 +215,7 @@ exports.deleteBooking = async (req, res) => {
           history: {
             transactionType: 'deposit', // Mark it as a deposit
             amount: bookingAmount, // The amount refunded
-            details: `Refunded for Booking: Activity - ${booking.activity.name}, ${booking.numberOfTickets} tickets` // Details of the refund
+            details: `Refunded for Cancelling Activity: ${booking.activity.name}` // Details of the refund
           }
         }
       },
@@ -221,12 +226,8 @@ exports.deleteBooking = async (req, res) => {
       return res.status(400).json({ message: "Tourist not found" });
     }
 
-    
-
     // Step 3: Delete the booking after wallet update
-    const deletedBooking = await ActivityBooking.findByIdAndDelete(
-      req.params.id
-    );
+    const deletedBooking = await ActivityBooking.findByIdAndDelete(req.params.id);
     if (!deletedBooking) {
       return res.status(400).json({ message: "Booking not found" });
     }
@@ -239,6 +240,7 @@ exports.deleteBooking = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
 
 exports.getTouristBookings = async (req, res) => {
   try {
