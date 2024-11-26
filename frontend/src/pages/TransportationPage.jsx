@@ -263,7 +263,7 @@ setSelectedDate(null);
           response.data.message || "Failed to book transportation"
         );
       }
-      window.location.reload();
+      fetchTransportations();
     } catch (error) {
       console.error("Error booking transportation:", error);
       setBookingError(

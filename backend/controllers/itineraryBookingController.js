@@ -81,13 +81,18 @@ exports.createBooking = async (req, res) => {
     };
     
     // Conditionally add wallet balance and history only for wallet payments
-    if (paymentType === 'wallet') {
+    console.log(paymentType)
+
+    if (paymentType === 'Wallet') {
+      console.log("gowa el if")
+
       updateFields.wallet = walletBalance; // Update wallet balance
       updateFields.$push = {
         history: {
           transactionType: 'payment',
           amount: paymentAmount,
-          details: `Paid via Wallet: Booked Itinerary: ${itineraryExists.name} - ${numberOfTickets} tickets`,
+          details: `You’ve successfully booked Itinerary ${itineraryExists.title}`,
+
         },
       };
     }
@@ -209,6 +214,11 @@ exports.updateBooking = async (req, res) => {
 // Delete a booking by ID
 exports.deleteBooking = async (req, res) => {
   try {
+
+    const booking = await ItineraryBooking.findById(req.params.id).populate('itinerary'); // Populate the activity field
+    if (!booking) {
+      return res.status(400).json({ message: "Booking not found" });
+    }
     // Step 1: Find and delete the booking
     const deletedBooking = await ItineraryBooking.findByIdAndDelete(
       req.params.id
@@ -230,7 +240,7 @@ exports.deleteBooking = async (req, res) => {
           history: {
             transactionType: 'deposit',
             amount: bookingAmount,
-            details: `Refund for canceled itinerary booking: ${deletedBooking.itineraryName} - ${deletedBooking.numberOfTickets} tickets`,
+            details: `Refunded for Cancelling Itinerary ${booking.itinerary.title}`,
           }
         }
       },

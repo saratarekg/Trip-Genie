@@ -401,7 +401,7 @@ const bookTransportation = async (req, res) => {
             history: {
               transactionType: "payment",
               amount: totalCost,
-              details: `Payment for transportation booking - ID: ${transportation._id}`,
+              details: `You’ve successfully booked Transportation ${transportation.vehicleType}`,
             },
           },
         },
@@ -536,7 +536,7 @@ const deleteBooking = async (req, res) => {
           history: {
             transactionType: "deposit",
             amount: refundAmount,
-            details: `Refund for cancelled transportation booking - ID: ${booking._id}`,
+            details: `Refunded for Cancelling: ${transportation.vehicleType}`,
           },
         },
       },
