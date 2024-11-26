@@ -225,6 +225,32 @@ const ActivityDetail = () => {
     useState(false);
   const [seatsToBook, setSeatsToBook] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
+  const [tourist, setTourist] = useState(null);
+  
+  useEffect(() => {
+    const fetchTouristData = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTourist(response.data);
+      } catch (error) {
+        console.error("Error fetching tourist data:", error);
+      }
+    };
+
+    fetchTouristData();
+  }, []);
+
+  const formatWallet = (price) => {
+    fetchExchangeRate();
+    getCurrencySymbol();
+    if (tourist && exchangeRates && currencySymbol) {
+      const exchangedPrice = price * exchangeRates;
+      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+    }
+  };
 
   const handleTransportationBooking = async () => {
     if (!selectedTransportation) return;
@@ -1715,6 +1741,7 @@ const ActivityDetail = () => {
                   <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
                   {/* Title */}
                   <DialogTitle>Booking Successful</DialogTitle>
+                  
                 </div>
               </DialogHeader>
 
@@ -1723,6 +1750,17 @@ const ActivityDetail = () => {
                   You have successfully booked {numberOfTickets} ticket(s) for{" "}
                   {activity.name}.
                 </p>
+                <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Label className="text-right">Amount Paid:</Label>
+              <div>  {formatPrice(calculateTotalPrice())} </div>
+            </div>
+            { paymentType === "Wallet" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Label className="text-right">New Wallet Balance:</Label>
+                <div>{formatPrice(tourist.wallet - calculateTotalPrice())}</div>
+              </div>
+            )}</div>
               </div>
 
               <DialogFooter>

@@ -106,6 +106,23 @@ export default function TransportationPage() {
   const [filteredTransportations, setFilteredTransportations] = useState([]);
   const [exceededMax, setExceededMax] = useState(false);
   const transportationsPerPage = 6;
+  const [tourist, setTourist] = useState(null);
+  
+  useEffect(() => {
+    const fetchTouristData = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTourist(response.data);
+      } catch (error) {
+        console.error("Error fetching tourist data:", error);
+      }
+    };
+
+    fetchTouristData();
+  }, []);
   
 
   const form = useForm({
@@ -378,6 +395,10 @@ setSelectedDate(null);
       ...transportation,
       timeDeparture: new Date(transportation.timeDeparture),
     });
+  };
+
+  const handleEditClose = () => {
+    setEditingTransportation(null);
   };
 
   const DateTimePicker = ({ field }) => {
@@ -979,6 +1000,17 @@ setSelectedDate(null);
             )
           }
             </DialogHeader>
+            <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Label className="text-right">Amount Paid:</Label>
+              <div> {displayPrice(seatsToBook * selectedTransportation?.ticketCost)} </div>
+            </div>
+            { paymentMethod === "wallet" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Label className="text-right">New Wallet Balance:</Label>
+                <div>{displayPrice(tourist.wallet - (seatsToBook * selectedTransportation?.ticketCost))}</div>
+              </div>
+            )}</div>
            
             <DialogFooter>
               <Button onClick={() => setBookingError("")}>
