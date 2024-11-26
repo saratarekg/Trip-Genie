@@ -1150,16 +1150,17 @@ const response = await axios.get("http://localhost:4000/tourist/", {
         {/* Notifications - 4 columns */}
         <Card className="col-span-4 max-h-[350px] overflow-y-auto">
         <CardHeader className="flex ">
-  <CardTitle className=" ">
-    Notifications
-    <Button
+        <CardTitle className="flex justify-between items-center">
+  <span>Notifications</span>
+  <Button
     variant="ghost"
-    className="text-sm text-[#388A94] hover:bg-white hover:underline justify-end"
+    className="text-sm text-[#388A94] p-2"
     onClick={() => (window.location.href = "/tourist-notifications")}
   >
     View All
   </Button>
-  </CardTitle>
+</CardTitle>
+
   
 </CardHeader>
 
