@@ -1,4 +1,4 @@
-import React, { useEffect ,useState } from "react";
+import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import {
   BrowserRouter as Router,
@@ -33,13 +33,13 @@ import { ViewComplaintDetails } from "./components/ViewComplaintDetails.jsx";
 import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./pages/SignUp.jsx";
 import TourGuideItineraryReport from "./pages/TourGuideReport.jsx";
+import AdvertiserReport from "./components/advertiser-report.jsx";
 
-import  SellerNotifications  from "./pages/SellerNotifications.jsx";
-import  AdminNotifications  from "./pages/AdminNotifications.jsx";
-import  AdvertiserNotifications  from "./pages/AdvertiserNotifications.jsx";
-import  TourGuideNotifications  from "./pages/TourGuideNotifications.jsx";
-import  TouristNotifications  from "./pages/TouristNotifications.jsx";
-
+import SellerNotifications from "./pages/SellerNotifications.jsx";
+import AdminNotifications from "./pages/AdminNotifications.jsx";
+import AdvertiserNotifications from "./pages/AdvertiserNotifications.jsx";
+import TourGuideNotifications from "./pages/TourGuideNotifications.jsx";
+import TouristNotifications from "./pages/TouristNotifications.jsx";
 
 import { Dashboard } from "./pages/AdminDashProMax.jsx";
 import CreateHpPage from "./pages/CreateHpPage.jsx";
@@ -78,6 +78,7 @@ import TransportationPage from "./pages/TransportationPage.jsx";
 import MyHistoricalPlacesComponent from "./pages/myHP.jsx";
 import HotelSearch from "./components/hotel-search.jsx";
 import HotelDetails from "./pages/HotelDetails.jsx";
+import ActivityReport from "./components/ActivityReport.jsx";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -94,10 +95,10 @@ function AppContent() {
   const [navKey, setNavKey] = useState(0);
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/sign-up";
-    useEffect(() => {
-      // Increment the key to force a re-render of the Navbar
-      setNavKey(prevKey => prevKey + 1);
-    }, [location]);
+  useEffect(() => {
+    // Increment the key to force a re-render of the Navbar
+    setNavKey((prevKey) => prevKey + 1);
+  }, [location]);
 
   const role = Cookies.get("role");
 
@@ -125,14 +126,10 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-           <Route
+          <Route
             path="/orders"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "tourist",
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["tourist"]}>
                 <OrdersPage />
               </ProtectedRoute>
             }
@@ -226,7 +223,13 @@ function AppContent() {
             path="/activity"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest" , "admin"]}
+                allowedRoles={[
+                  "advertiser",
+                  "tour-guide",
+                  "tourist",
+                  "guest",
+                  "admin",
+                ]}
               >
                 <AllActivities />
               </ProtectedRoute>
@@ -266,6 +269,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tourism-governor"]}>
                 <UpdatehistoricalPlace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/advertiser-report"
+            element={
+              <ProtectedRoute allowedRoles={["advertiser"]}>
+                <AdvertiserReport />
               </ProtectedRoute>
             }
           />
@@ -415,9 +426,7 @@ function AppContent() {
           <Route
             path="/seller-notifications"
             element={
-              <ProtectedRoute
-                allowedRoles={["seller"]}
-              >
+              <ProtectedRoute allowedRoles={["seller"]}>
                 <SellerNotifications />
               </ProtectedRoute>
             }
@@ -425,9 +434,7 @@ function AppContent() {
           <Route
             path="/tour-guide-notifications"
             element={
-              <ProtectedRoute
-                allowedRoles={["tour-guide"]}
-              >
+              <ProtectedRoute allowedRoles={["tour-guide"]}>
                 <TourGuideNotifications />
               </ProtectedRoute>
             }
@@ -435,9 +442,7 @@ function AppContent() {
           <Route
             path="/advertiser-notifications"
             element={
-              <ProtectedRoute
-                allowedRoles={["advertiser"]}
-              >
+              <ProtectedRoute allowedRoles={["advertiser"]}>
                 <AdvertiserNotifications />
               </ProtectedRoute>
             }
@@ -453,7 +458,7 @@ function AppContent() {
             }
           />
           <Route
-            path="/tourist-notifications"
+            path="/tourguide-report"
             element={
               <ProtectedRoute
                 allowedRoles={["tourist"]}
@@ -465,9 +470,7 @@ function AppContent() {
           <Route
             path="/admin-notifications"
             element={
-              <ProtectedRoute
-                allowedRoles={["admin"]}
-              >
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminNotifications />
               </ProtectedRoute>
             }
@@ -528,7 +531,13 @@ function AppContent() {
             path="/activity/:id"
             element={
               <ProtectedRoute
-                allowedRoles={["advertiser", "tour-guide", "tourist", "guest", "admin"]}
+                allowedRoles={[
+                  "advertiser",
+                  "tour-guide",
+                  "tourist",
+                  "guest",
+                  "admin",
+                ]}
               >
                 <ActivityDetail />
               </ProtectedRoute>
