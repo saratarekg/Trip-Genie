@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -51,9 +51,6 @@ const AdvertiserReport = () => {
   });
   const [graphData, setGraphData] = useState([]);
   const [activityNames, setActivityNames] = useState([]);
-  const [filteredSales, setFilteredSales] = useState([]);
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
   const [isFiltering, setIsFiltering] = useState(false);
   const [error, setError] = useState(null);
 
@@ -91,13 +88,6 @@ const AdvertiserReport = () => {
             ),
           ];
           setActivityNames(uniqueActivityNames);
-
-          setTotalRevenue(response.data.totalRevenue || 0);
-          setSelectedPeriodRevenue(
-            calculatePeriodRevenue(response.data.activityReport, "all")
-          );
-
-          filterSalesData(response.data.activityReport);
         } else {
           setError("No sales data available");
         }
@@ -112,40 +102,24 @@ const AdvertiserReport = () => {
 
   useEffect(() => {
     if (salesReport && salesReport.activityReport) {
-      filterSalesData(salesReport.activityReport);
-      setSelectedPeriodRevenue(
-        calculatePeriodRevenue(salesReport.activityReport, selectedPeriod)
-      );
-    }
-  }, [filters, selectedPeriod, salesReport]);
-
-  useEffect(() => {
-    if (salesReport && salesReport.activityReport) {
       updateGraphData(salesReport.activityReport, graphPeriod);
     }
   }, [graphPeriod, salesReport]);
 
-  const filterSalesData = (salesData) => {
-    if (!Array.isArray(salesData)) {
-      console.error("Invalid sales data:", salesData);
-      return;
-    }
-    setIsFiltering(true);
-    setTimeout(() => {
-      const filtered = salesData.filter((item) => {
-        const itemDate = new Date(item.activity.createdAt);
-        return (
-          (!filters.activity || item.activity.name === filters.activity) &&
-          (!filters.year ||
-            itemDate.getFullYear() === parseInt(filters.year, 10)) &&
-          (!filters.month ||
-            itemDate.getMonth() + 1 === parseInt(filters.month, 10))
-        );
-      });
-      setFilteredSales(filtered);
-      setIsFiltering(false);
-    }, 300);
-  };
+  const filteredSales = useMemo(() => {
+    if (!salesReport || !salesReport.activityReport) return [];
+
+    return salesReport.activityReport.filter((item) => {
+      const itemDate = new Date(item.activity.timing);
+      return (
+        (!filters.activity || item.activity.name === filters.activity) &&
+        (!filters.year ||
+          itemDate.getFullYear() === parseInt(filters.year, 10)) &&
+        (!filters.month ||
+          itemDate.getMonth() + 1 === parseInt(filters.month, 10))
+      );
+    });
+  }, [salesReport, filters]);
 
   const updateGraphData = (salesData, period) => {
     if (!Array.isArray(salesData)) {
@@ -189,7 +163,7 @@ const AdvertiserReport = () => {
     }
 
     salesData.forEach((item) => {
-      const date = new Date(item.activity.createdAt);
+      const date = new Date(item.activity.timing);
       if (date >= startDate && date <= now) {
         const key = groupingFunction(date);
         const index = data.findIndex(
@@ -209,7 +183,7 @@ const AdvertiserReport = () => {
     if (!Array.isArray(salesData)) return 0;
     const now = new Date();
     return salesData.reduce((sum, item) => {
-      const saleDate = new Date(item.activity.createdAt);
+      const saleDate = new Date(item.activity.timing);
       switch (period) {
         case "today":
           return (
@@ -248,6 +222,15 @@ const AdvertiserReport = () => {
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
   if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
 
+  const totalRevenue = salesReport.totalRevenue || 0;
+  const selectedPeriodRevenue = calculatePeriodRevenue(
+    salesReport.activityReport || [],
+    selectedPeriod
+  );
+  const fillPercentage = totalRevenue
+    ? (selectedPeriodRevenue / totalRevenue) * 100
+    : 0;
+
   const thisMonthSales = calculatePeriodRevenue(
     salesReport.activityReport || [],
     "month"
@@ -255,7 +238,7 @@ const AdvertiserReport = () => {
   const lastMonthSales = (() => {
     const lastMonth = subMonths(new Date(), 1);
     return (salesReport.activityReport || []).reduce((sum, item) => {
-      const saleDate = new Date(item.activity.createdAt);
+      const saleDate = new Date(item.activity.timing);
       return (
         sum +
         (saleDate.getMonth() === lastMonth.getMonth() &&
@@ -271,9 +254,14 @@ const AdvertiserReport = () => {
       ? 100
       : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
-  const fillPercentage = totalRevenue
-    ? (selectedPeriodRevenue / totalRevenue) * 100
-    : 0;
+  const totalAttendance = filteredSales.reduce(
+    (sum, item) => sum + item.tickets,
+    0
+  );
+  const totalFilteredRevenue = filteredSales.reduce(
+    (sum, item) => sum + item.revenue,
+    0
+  );
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -359,7 +347,7 @@ const AdvertiserReport = () => {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-lg font-bold text-[#1A3B47]">
-                    ${selectedPeriodRevenue?.toFixed(2)}
+                    ${selectedPeriodRevenue.toFixed(2)}
                   </span>
                   <span className="text-sm text-[#5D9297]">
                     {selectedPeriod.charAt(0).toUpperCase() +
@@ -415,7 +403,6 @@ const AdvertiserReport = () => {
             </Card>
 
             {/* Monthly Sales - Last Month */}
-
             <Card>
               <CardHeader className="">
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
@@ -436,7 +423,10 @@ const AdvertiserReport = () => {
           </div>
 
           {/* Sales Analytics Card */}
-          <Card className="md:col-span-6">
+          <Card
+            className="m
+d:col-span-6"
+          >
             <CardHeader className="p-3 mb-2">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
@@ -650,6 +640,30 @@ const AdvertiserReport = () => {
                           </td>
                         </motion.tr>
                       ))}
+                      <motion.tr
+                        key="total-row"
+                        className="bg-gray-50 font-semibold"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{
+                          duration: 0.2,
+                          delay: filteredSales.length * 0.05,
+                        }}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          Total: {totalAttendance}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          -
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          Total: ${totalFilteredRevenue.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          -
+                        </td>
+                      </motion.tr>
                     </motion.tbody>
                   )}
                 </AnimatePresence>
