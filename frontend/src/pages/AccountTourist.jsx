@@ -76,6 +76,7 @@ import { SellerProfileComponent } from "@/components/SellerProfileComponent";
 import { TourGuideProfileComponent } from "@/components/tourGuideProfile";
 import Savedactivites from "@/components/Savedactivites";
 import Saveditineraries from "@/components/Saveditineraries";
+import ProductReportSeller from "../components/ProductReportSellerForSeller.jsx";
 
 // Sub-components
 const AccountInfo = ({ user }) => {
@@ -946,6 +947,8 @@ export default function AccountManagement() {
         return <CurrencyApp user={user} />;
       case "faqs":
         return <FAQs />;
+        case "sales-report-seller":
+          return <ProductReportSeller />;
       case "flight-bookings":
         return <ExternalFlightBookings user={user} />;
       case "hotel-bookings":
@@ -1087,6 +1090,14 @@ export default function AccountManagement() {
         icon: Trash2,
         tab: "delete-account",
         roles: ["tourist", "seller", "advertiser", "tour-guide"],
+      },
+    ],
+    "View Reports": [
+      {
+        name: "Sales Report",
+        icon: FileText,
+        tab: "sales-report-seller",
+        roles: ["seller"],
       },
     ],
     "Help and Support": [

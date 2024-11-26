@@ -364,11 +364,11 @@ const getSalesReport = async (req, res) => {
     const sellerProductsSales = productSales
       .filter(
         (sale) =>
-          sale.product.seller === res.locals.user_id &&
-          sale.product.isDeleted === false
+          sale.product.seller?.toString() === res.locals.user_id
       )
       .map((sale) => {
-        return { ...sale, revenueAfterCommission: sale.revenue * 0.9 };
+        const pureSale = sale.toObject();
+        return { ...pureSale, revenueAfterCommission: sale.revenue * 0.9 };
       });
     const totalSellerSalesRevenue = sellerProductsSales.reduce(
       (total, sale) => total + sale.revenue,
