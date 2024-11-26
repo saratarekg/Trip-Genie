@@ -954,6 +954,8 @@ export default function AccountManagement() {
   const handleTabClick = (tab) => {
     if (tab === "delete-account") {
       setShowDeleteAccount(true);
+    }else if (tab === "logout"){
+      handleLogoutClick();
     } else {
       setActiveTab(tab);
       navigate(`/account/${tab}`);
@@ -1128,25 +1130,35 @@ export default function AccountManagement() {
     //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     // ],
-    "LogOut": [
-      
-    ],
   
   };
 
   const LogoutPopup = ({ onConfirm, onCancel }) => {
     return (
-      <div className="popup">
-        {" "}
-        <div className="popup-content">
-          {" "}
-          <h3>Are you sure you want to log out?</h3>{" "}
-          <button onClick={onConfirm}>Yes</button>{" "}
-          <button onClick={onCancel}>No</button>{" "}
-        </div>{" "}
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Are you sure you want to log out?
+          </h3>
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-sm text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+            >
+              Log Out
+            </button>
+          </div>
+        </div>
       </div>
     );
   };
+  
 
   const [showPopup, setShowPopup] = useState(false);
 
@@ -1209,6 +1221,9 @@ export default function AccountManagement() {
         {showDeleteAccount && (
           <DeleteAccount onClose={() => setShowDeleteAccount(false)} />
         )}
+        {showPopup && (
+      <LogoutPopup onConfirm={handleConfirmLogout} onCancel={handleCancelLogout} />
+    )}
       </div>
     </div>
   );

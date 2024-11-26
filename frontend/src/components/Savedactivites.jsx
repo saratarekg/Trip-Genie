@@ -2,37 +2,19 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { ChevronLeft, ChevronRight, Star, Bookmark } from 'lucide-react';
+import { Star, Clock, MapPin, Calendar, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
 import Loader from "@/components/Loader";
 import defaultImage from "@/assets/images/default-image.jpg";
-import activityImage from "@/assets/images/sam.png";
 
-const renderStars = (rating) => (
-  <div className="flex items-center">
-    {[1, 2, 3, 4, 5].map((star) => (
-      <Star
-        key={star}
-        className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"}`}
-      />
-    ))}
-  </div>
-);
 
-const ActivityCard = ({ activity, onSelect, onActivityUnsaved }) => {
-  const [isSaved, setIsSaved] = useState(true);
 
-  const handleSaveToggle = async (e) => {
-    e.stopPropagation(); // Prevent card click navigation
+const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchangeRates }) => {
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+
+  const handleUnsave = async (e) => {
+    e.stopPropagation();
     try {
       const token = Cookies.get("jwt");
       const response = await axios.post(
@@ -41,7 +23,6 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.data.success) {
-        setIsSaved(false);
         onActivityUnsaved(activity._id);
       }
     } catch (error) {
@@ -49,60 +30,178 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved }) => {
     }
   };
 
+  const getFormattedPrice = (price) => {
+    if (!userInfo || !exchangeRates) return `$${price.toFixed(2)}`;
+
+    const baseRate = exchangeRates[activity.currency] || 1;
+    const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
+    const exchangedPrice = (price / baseRate) * targetRate;
+
+    return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+  };
+
   return (
     <Card
-      className="relative overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl"
+      className="group relative flex items-center gap-4 p-2 transition-all hover:shadow-lg cursor-pointer"
       onClick={() => onSelect(activity._id)}
     >
-      <CardHeader className="p-0">
-        <div className="relative aspect-video overflow-hidden">
-          <img
-            src={activity.pictures?.[0]?.url || defaultImage}
-            alt={activity.name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <Button
-          className="absolute top-2 right-2 p-2 bg-white text-primary rounded-full hover:bg-gray-100"
-          onClick={handleSaveToggle}
+      {/* Bookmark Icon on Top of Image with Tooltip */}
+      <div className="relative h-36 w-36 shrink-0  rounded-sm">
+        <img
+          src={activity.pictures?.[0]?.url || defaultImage}
+          alt={activity.name}
+          className="object-cover w-full h-full rounded-sm"
+        />
+        {/* Bookmark Icon on Top of Image with Tooltip */}
+        <div
+          className="absolute top-0 left-0 z-50"
+          onMouseEnter={() => setTooltipVisible(true)}
+          onMouseLeave={() => setTooltipVisible(false)}
         >
-          <Bookmark className={`w-6 h-6 ${isSaved ? "fill-yellow-400" : ""} stroke-black`} />
-        </Button>
-      </CardHeader>
-      <CardContent className="p-4">
-        <CardTitle className="text-lg text-[#1A3B47]">{activity.name}</CardTitle>
-        <p className="text-sm text-gray-500 mt-1">
-          {activity.location?.address || 'Location not available'}
-        </p>
-        <div className="mt-2 flex items-center">
-          {renderStars(activity.rating)}
-          <span className="ml-2 text-sm text-gray-600">
-            {activity.rating?.toFixed(1)}
-          </span>
+          <Bookmark
+            className="fill-[#388A94] text-[#388A94] hover:fill-[#2e6b77] hover:text-[#2e6b77]"
+            size={36}
+            onClick={handleUnsave}
+          />
+          {tooltipVisible && (
+            <div className="absolute bottom-10 left-0 bg-[#B5D3D1] font-semibold text-black text-xs px-2 py-1 rounded-lg">
+              Unsave?
+            </div>
+          )}
         </div>
-        <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-          {activity.description || 'No description available'}
-        </p>
-      </CardContent>
-      <CardFooter className="p-4">
-        <div className="flex justify-between w-full">
-          <span className="text-lg font-bold text-primary">
-            ${activity.price || 0}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {activity.duration || 0} hours
-          </span>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-1">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="font-semibold text-[#1A3B47]">{activity.name}</h3>
+            <div className="flex items-center text-sm text-[#5D9297] font-semibold pt-1">
+              <MapPin className="h-4 w-4 mr-1" />
+              <span>{activity.location?.address || "Location not available"}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-base">
+            <Star className="h-6 w-6 fill-[#F88C33] text-[#F88C33]" />
+            <span className="text-[#F88C33]">{activity.rating?.toFixed(1) || "0.0"}</span>
+          </div>
         </div>
-      </CardFooter>
+
+        <div className="flex items-center gap-4 text-sm text-[#5D9297]">
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4 text-[#5D9297]" />
+            <span>{activity.duration === 1 ? "1 hour" : `${activity.duration} hours`}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar className="h-4 w-4 text-[#5D9297]" />
+            <span>{new Date(activity.timing).toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        <div className="mt-2 flex items-center justify-between">
+          <div className="text-lg font-bold text-[#1A3B47]">
+            {getFormattedPrice(activity.price)}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="default"
+              className="bg-[#388A94] hover:bg-[#2e6b77]"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(activity._id);
+              }}
+            >
+              View
+            </Button>
+            <Button size="sm" variant="default" className="bg-gray-200 hover:bg-gray-300 text-black font-semibold" onClick={handleUnsave}>
+              Unsave
+            </Button>
+          </div>
+        </div>
+      </div>
     </Card>
   );
 };
+
 
 export default function SavedActivities() {
   const [savedActivities, setSavedActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [alertMessage, setAlertMessage] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
   const navigate = useNavigate();
+
+  const fetchExchangeRates = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/rates");
+      setExchangeRates(response.data.rates);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
+    }
+  }, []);
+
+  const fetchCurrencies = useCallback(async () => {
+    const role = Cookies.get("role");
+    if (role !== "tourist") return;
+    try {
+      const response = await axios.get(
+        "http://localhost:4000/tourist/currencies",
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
+      // Note: setCurrencies is not defined in the original code, so I've commented it out
+      // setCurrencies(response.data);
+    } catch (error) {
+      console.error("Error fetching currencies:", error);
+    }
+  }, []);
+
+  const fetchUserInfo = useCallback(async () => {
+    const role = Cookies.get("role") || "guest";
+    const token = Cookies.get("jwt");
+
+    if (role === "tourist") {
+      try {
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const currencyId = response.data.preferredCurrency;
+
+        const currencyResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data,
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        setUserInfo({ role });
+      }
+    } else {
+      if (token) {
+        const decodedToken = jwtDecode(token);
+        setUserInfo({
+          role,
+          userId: decodedToken.id,
+        });
+      } else {
+        setUserInfo({ role });
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUserInfo();
+    fetchExchangeRates();
+    fetchCurrencies();
+  }, [fetchUserInfo, fetchExchangeRates, fetchCurrencies]);
 
   const fetchSavedActivities = useCallback(async () => {
     try {
@@ -136,35 +235,31 @@ export default function SavedActivities() {
   };
 
   return (
-    <div className="bg-gray-100">
-      <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
-          <h1 className="text-5xl font-bold text-white">Saved Activities</h1>
-        </div>
-      </div>
+    <div className="bg-gray-100 min-h-screen">
       <div className="container mx-auto px-4 py-8">
         {isLoading ? (
           <Loader />
         ) : savedActivities.length === 0 ? (
           <div className="text-center py-8">No Activities Saved Yet!</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid gap-4 md:grid-cols-2">
             {savedActivities.map((activity) => (
               <ActivityCard
                 key={activity._id}
                 activity={activity}
                 onSelect={handleActivitySelect}
                 onActivityUnsaved={handleActivityUnsaved}
+                userInfo={userInfo}
+                exchangeRates={exchangeRates}
               />
             ))}
           </div>
         )}
       </div>
       {alertMessage && (
-        <Alert className="fixed bottom-4 right-4 w-96 bg-green-500 text-white">
-          <AlertTitle>Success</AlertTitle>
-          <AlertDescription>{alertMessage.message}</AlertDescription>
-        </Alert>
+        <div className="fixed bottom-4 right-4 p-4 bg-green-500 text-white rounded-lg shadow">
+          {alertMessage.message}
+        </div>
       )}
     </div>
   );
