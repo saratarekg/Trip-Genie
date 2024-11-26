@@ -264,7 +264,8 @@ const AdvertiserReport = () => {
   );
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="bg-gray-100 ">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10"></div>
       <div className="max-w-7xl mx-auto">
         <div className="grid gap-4 md:grid-cols-12 mb-4">
           {/* Total Revenue */}
