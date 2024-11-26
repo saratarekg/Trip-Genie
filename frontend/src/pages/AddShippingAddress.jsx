@@ -210,7 +210,7 @@ export default function ShippingAddresses() {
               {address.default && (
                 <Badge
                   variant="secondary"
-                  className="absolute top-4 right-4 bg-blue-100 text-blue-700 border border-blue-200"
+                  className="absolute top-4 right-4 bg-blue-100 hover:bg-blue-100 text-[#388A94]"
                 >
                   Default
                 </Badge>

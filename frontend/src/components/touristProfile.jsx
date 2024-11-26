@@ -1148,13 +1148,22 @@ const response = await axios.get("http://localhost:4000/tourist/", {
         </div>
 
         {/* Notifications - 4 columns */}
-        <Card className="col-span-4">
-  <CardHeader>
-    <CardTitle className="flex items-center gap-2">
-      <Bell className="w-5 h-5" />
-      Notifications
-    </CardTitle>
-  </CardHeader>
+        <Card className="col-span-4 max-h-[350px] overflow-y-auto">
+        <CardHeader className="flex ">
+        <CardTitle className="flex justify-between items-center">
+  <span>Notifications</span>
+  <Button
+    variant="ghost"
+    className="text-sm text-[#388A94] p-2"
+    onClick={() => (window.location.href = "/tourist-notifications")}
+  >
+    View All
+  </Button>
+</CardTitle>
+
+  
+</CardHeader>
+
   <CardContent>
     <div className="flex flex-col">
       {loading ? (
@@ -1167,10 +1176,10 @@ const response = await axios.get("http://localhost:4000/tourist/", {
         </p>
       ) : (
         <ul className="divide-y divide-gray-200">
-          {notifications.slice(0, 2).map((notification, index) => (
+          {notifications.slice(0, 10).map((notification, index) => (
             <li
               key={index}
-              className="p-4 hover:bg-gray-50 transition-colors relative cursor-pointer"
+              className="p-2 hover:bg-gray-50 transition-colors relative cursor-pointer flex flex-col gap-1"
               onClick={() => navigate(notification.link)}
             >
               {!notification.seen && (
@@ -1178,32 +1187,21 @@ const response = await axios.get("http://localhost:4000/tourist/", {
                   New
                 </span>
               )}
-            
-              <p className="text-[#1A3B47] text-sm mb-1 pr-16">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: notification.body.slice(0, 40) + '...', // Show first 50 characters
-                  }}
-                ></div>
-              </p>
-              <p className="text-xs text-gray-500">
-                {formatDate(notification.date)}
-              </p>
+              <div
+                className="text-[#1A3B47] text-sm truncate"
+                dangerouslySetInnerHTML={{
+                  __html: notification.body.slice(0, 30) + "...", // Show first 50 characters
+                }}
+              ></div>
+              <p className="text-xs text-gray-500">{formatDate(notification.date)}</p>
             </li>
           ))}
         </ul>
       )}
-      <div className="p-3 border-t border-gray-200">
-        <Button
-          className="w-full bg-[#388A94] hover:bg-[#5D9297] text-white"
-          onClick={() => (window.location.href = "/tourist-notifications")}
-        >
-          View All
-        </Button>
-      </div>
     </div>
   </CardContent>
 </Card>
+
 
 
        
