@@ -22,6 +22,7 @@ import UserStats from "@/components/UserStats.jsx";
 import AllActivitiesComponent from "./AllActivitiesAdmin.jsx";
 import SingleActivityAdmin from "./SingleActivityAdmin.jsx";
 import { Dashboard } from "../components/AdminDashboard.jsx";
+import { CreatePromoCode } from "../components/CreatePromoCode.jsx";
 
 import logo from "../assets/images/TGlogo.svg";
 
@@ -114,7 +115,7 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
               setSelectedProductId(id);
             }} />
           ) : activeTab === 'create-promo-code' ? (
-            <div className="p-4 bg-gray-100 rounded">Content for Create Promo Code goes here.</div>
+            <CreatePromoCode />
           ) : activeTab === 'manage-products' ? (
             <AllProducts onSelectProduct={(id) => {
               setPreviousTab(activeTab);
