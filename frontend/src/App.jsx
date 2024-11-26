@@ -458,7 +458,7 @@ function AppContent() {
             }
           />
           <Route
-            path="/tourguide-report"
+            path="/tourist-notifications"
             element={
               <ProtectedRoute
                 allowedRoles={["tourist"]}
