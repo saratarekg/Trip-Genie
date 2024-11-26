@@ -386,6 +386,7 @@ const transporter = nodemailer.createTransport({
 
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
+  console.log(email);
   try {
     const user =
       (await Tourist.findOne({ email })) ||
@@ -396,11 +397,11 @@ const forgotPassword = async (req, res) => {
       (await TourismGovernor.findOne({ email }));
 
     if (!user) {
-      return res.status(400).json({ message: "Email not found" });
+      return res.status(400).json({ message: "Please enter a valid email address." });
     }
 
     const otp = crypto.randomInt(100000, 999999).toString(); // Generate 6-digit OTP
-    const expiry = new Date(Date.now() + 600000); // 10 minutes from now
+    const expiry = new Date(Date.now() + 300000); // 5 minutes from now
     const newOTP = new OTP({ email, otp, expiry });
     await newOTP.save();
 
@@ -428,16 +429,16 @@ const verifyOtp = async (req, res) => {
       (await TourismGovernor.findOne({ email }));
 
     if (!user) {
-      return res.status(400).json({ message: "Email not found" });
+      return res.status(400).json({ message: "Please enter a valid email address." });
     }
 
     const existingOTP = await OTP.findOne({ email, otp });
     if (!existingOTP) {
-      return res.status(400).json({ message: "Incorrect OTP" });
+      return res.status(400).json({ message: "Incorrect OTP. Please try again." });
     }
 
     if (existingOTP.expiry < Date.now()) {
-      return res.status(400).json({ message: "OTP expired" });
+      return res.status(400).json({ message: "OTP expired. Please try again." });
     }
 
     await OTP.deleteOne({ email, otp });

@@ -15,6 +15,10 @@ const apiRoutes = require("./routes/apiRoutes");
 const JobStatus = require("./models/JobStatus");
 const purchaseController = require("./controllers/purchaseController");
 const emailService = require("./services/emailService");
+
+// Configure email service to ignore self-signed certificates
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 const promoCode = require("./models/promoCode");
 
 const Tourist = require("./models/tourist");
@@ -214,11 +218,11 @@ const checkBirthdays = async () => {
 
 const checkUpcomingEvents = async () => {
   try {
+    console.log("Starting check for upcoming events...");
     const today = new Date();
     const twoDays = new Date();
     twoDays.setDate(twoDays.getDate() + 2);
 
-    // Find itinerary bookings that are starting in 2 days from now
     const itineraries = await ItineraryBooking.find({
       date: {
         $gte: today,
@@ -236,8 +240,10 @@ const checkUpcomingEvents = async () => {
       return activityDate >= today && activityDate <= new Date(twoDays);
     });
 
-    // Send reminder emails to the tourists
+    console.log(`Found ${itineraries.length} itineraries and ${activities.length} activities starting in 2 days.`);
+
     for (itinerary of itineraries) {
+      console.log(`Sending reminder for itinerary: ${itinerary.itinerary.title}`);
       await Tourist.findByIdAndUpdate(itinerary.user._id.toString(), {
         $push: {
           notifications: {
@@ -250,6 +256,7 @@ const checkUpcomingEvents = async () => {
     }
 
     for (activity of activities) {
+      console.log(`Sending reminder for activity: ${activity.activity.name}`);
       await Tourist.findByIdAndUpdate(activity.user._id.toString(), {
         $push: {
           notifications: {
@@ -260,6 +267,8 @@ const checkUpcomingEvents = async () => {
       });
       emailService.sendActivityReminder(activity);
     }
+
+    console.log("Finished checking upcoming events.");
   } catch (error) {
     console.error("Error sending reminder emails:", error);
   }

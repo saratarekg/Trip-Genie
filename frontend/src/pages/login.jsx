@@ -2,17 +2,28 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import logInPicture from "../assets/images/logInPicture.jpg";
-import { EyeIcon, EyeOffIcon } from "@heroicons/react/outline";
+import { EyeIcon, EyeOffIcon, ArrowLeftIcon } from "@heroicons/react/outline";
 
 let role = null;
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState(""); // This holds either email or username
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isValid, setIsValid] = useState(false); // Keeps track of whether the input is valid
+  const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
+
+  // Separate error messages for each step
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
+  const [forgotPasswordErrorMessage, setForgotPasswordErrorMessage] = useState("");
+  const [otpErrorMessage, setOtpErrorMessage] = useState("");
+  const [resetPasswordErrorMessage, setResetPasswordErrorMessage] = useState("");
+
+  // New state variables for forgot password flow
+  const [forgotPasswordStep, setForgotPasswordStep] = useState(0);
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [newPassword, setNewPassword] = useState("");
 
   const logOut = async () => {
     console.log("Logging out...");
@@ -34,19 +45,17 @@ const Login = () => {
     }
   };
 
-  // Helper function to check if the input is a valid email
   const isValidEmail = (input) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(input);
   };
 
-  // Validate identifier (either email or username)
   const validateIdentifier = (input) => {
     if (isValidEmail(input) || input.length > 2) {
-      setErrorMessage(""); // Clear any error message
+      setLoginErrorMessage("");
       setIsValid(true);
     } else {
-      setErrorMessage(
+      setLoginErrorMessage(
         "Please enter a valid email or username (min 3 characters)."
       );
       setIsValid(false);
@@ -56,13 +65,11 @@ const Login = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Only proceed if input is valid
     if (!isValid) {
-      setErrorMessage("Please fix the errors before submitting.");
+      setLoginErrorMessage("Please fix the errors before submitting.");
       return;
     }
 
-    // Create the request body (determine if it's an email or username)
     const requestBody = {
       username: identifier,
       password,
@@ -75,7 +82,7 @@ const Login = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody), // Send only the non-empty fields
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
@@ -92,15 +99,211 @@ const Login = () => {
       } else {
         const errorData = await response.json();
 
-        // Check for the specific message from the backend
         if (errorData.message === "Your account is not accepted yet") {
-          setErrorMessage("Login failed. Your account is not accepted yet.");
+          setLoginErrorMessage("Login failed. Your account is not accepted yet.");
         } else {
-          setErrorMessage("Login failed. Please check your credentials.");
+          setLoginErrorMessage("Login failed. Please check your credentials.");
         }
       }
     } catch (error) {
-      setErrorMessage("An error occurred during login. Please try again.");
+      setLoginErrorMessage("An error occurred during login. Please try again.");
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setForgotPasswordErrorMessage(""); // Clear any previous error messages
+    if (!isValidEmail(email)) {
+      setForgotPasswordErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:4000/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        setForgotPasswordStep(2);
+        setForgotPasswordErrorMessage("");
+      } else {
+        const errorData = await response.json();
+        setForgotPasswordErrorMessage(errorData.message);
+      }
+    } catch (error) {
+      setForgotPasswordErrorMessage("An error occurred. Please try again.");
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    const otpString = otp.join("");
+    if (otpString.length !== 6) {
+      setOtpErrorMessage("Please enter a valid 6-digit OTP.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:4000/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: otpString }),
+      });
+
+      if (response.ok) {
+        setForgotPasswordStep(3);
+        setOtpErrorMessage("");
+      } else {
+        setOtpErrorMessage("Invalid OTP. Please try again.");
+      }
+    } catch (error) {
+      setOtpErrorMessage("An error occurred. Please try again.");
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (newPassword.length < 8) {
+      setResetPasswordErrorMessage("Password must be at least 8 characters long.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:4000/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password : newPassword}),
+      });
+
+      if (response.ok) {
+        setForgotPasswordStep(0);
+        setLoginErrorMessage("Password reset successfully. Please log in with your new password.");
+      } else {
+        setResetPasswordErrorMessage("Failed to reset password. Please try again.");
+      }
+    } catch (error) {
+      setResetPasswordErrorMessage("An error occurred. Please try again.");
+    }
+  };
+
+  const renderForgotPasswordStep = () => {
+    switch (forgotPasswordStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium text-gray-900">Reset Password</h3>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="Enter your email"
+                required
+              />
+              {forgotPasswordErrorMessage && (
+                <p className="text-sm text-red-600 mt-1">{forgotPasswordErrorMessage}</p>
+              )}
+            </div>
+            <p className="text-sm text-gray-600">
+              Enter the email associated with your account to receive a password reset code.
+            </p>
+            <button
+              onClick={handleForgotPassword}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5D9297] hover:bg-[#1A3B47] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+            >
+              Recover Password
+            </button>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium text-gray-900">Get Your Code</h3>
+            <div>
+              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
+                Enter OTP
+              </label>
+              <div className="flex justify-between mt-1">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => {
+                      const newOtp = [...otp];
+                      newOtp[index] = e.target.value;
+                      setOtp(newOtp);
+                      if (e.target.value && index < 5) {
+                        document.getElementById(`otp-${index + 1}`).focus();
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Backspace' && !otp[index] && index > 0) {
+                        const newOtp = [...otp];
+                        newOtp[index - 1] = '';
+                        setOtp(newOtp);
+                        document.getElementById(`otp-${index - 1}`).focus();
+                      }
+                    }}
+                    className="w-10 h-10 text-center border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                    id={`otp-${index}`}
+                  />
+                ))}
+              </div>
+              {otpErrorMessage && (
+                <p className="text-sm text-red-600 mt-1">{otpErrorMessage}</p>
+              )}
+            </div>
+            <p className="text-sm text-gray-600">
+              We've sent a 6-digit code to your email. Please enter it above to verify your account.
+            </p>
+            <button
+              onClick={handleVerifyOTP}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5D9297] hover:bg-[#1A3B47] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+            >
+              Verify OTP
+            </button>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="space-y-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Enter New Password</h3>
+            <div>
+              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                New Password
+              </label>
+              <input
+                id="newPassword"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                placeholder="Enter new password"
+                required
+              />
+              <p className="text-sm text-gray-600 mt-2">
+                Please enter a strong password that is at least 8 characters long and includes a mix of letters, numbers, and symbols.
+              </p>
+              {resetPasswordErrorMessage && (
+                <p className="text-sm text-red-600 mt-1">{resetPasswordErrorMessage}</p>
+              )}
+            </div>
+            <button
+              onClick={handleResetPassword}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5D9297] hover:bg-[#1A3B47] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+            >
+              Reset Password
+            </button>
+          </div>
+        );
+      default:
+        return null;
     }
   };
 
@@ -123,106 +326,126 @@ const Login = () => {
           </p>
         </div>
         <div className="w-full md:w-3/5 p-6 max-h-[70vh] overflow-y-auto">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label
-                htmlFor="identifier"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email/Username
-              </label>
-              <div className="mt-1">
-                <input
-                  id="identifier"
-                  name="identifier"
-                  type="text"
-                  autoComplete="identifier"
-                  placeholder="Email/Username"
-                  required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                  value={identifier}
-                  onChange={(e) => {
-                    setIdentifier(e.target.value);
-                    validateIdentifier(e.target.value); // Validate as the user types
-                  }}
-                />
+          {forgotPasswordStep === 0 ? (
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label
+                  htmlFor="identifier"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email/Username
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="identifier"
+                    name="identifier"
+                    type="text"
+                    autoComplete="identifier"
+                    placeholder="Email/Username"
+                    required
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                    value={identifier}
+                    onChange={(e) => {
+                      setIdentifier(e.target.value);
+                      validateIdentifier(e.target.value);
+                    }}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="Password"
-                  required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                {password.length > 0 && (
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="Password"
+                    required
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {password.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 focus:outline-none"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  )}
+                </div>
+                <div className="mt-1 flex justify-end">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 focus:outline-none"
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
+                    onClick={() => setForgotPasswordStep(1)}
+                    className="text-sm font-medium text-[#5D9297] hover:text-[#B5D3D1]"
                   >
-                    {showPassword ? (
-                      <EyeOffIcon className="h-5 w-5" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5" />
-                    )}
+                    Forgot password?
                   </button>
+                </div>
+                {loginErrorMessage && (
+                  <p className="text-sm text-red-600 mt-1">{loginErrorMessage}</p>
                 )}
               </div>
-            </div>
 
-            {errorMessage && (
-              <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
-            )}
-
-            <div className="flex flex-col items-center justify-between">
-              <button
-                type="submit"
-                className={`w-full flex justify-center mb-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5D9297] text-white hover:bg-[#1A3B47] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 ${
-                  !isValid ? "cursor-not-allowed hover:bg-[#5D9297]" : ""
-                }`}
-                disabled={!isValid} // Disable button if input is invalid
-              >
-                Log in
-              </button>
-              <p className="text-gray-600">
-                Don't have an account?{" "}
-                <Link
-                  to="/sign-up"
-                  className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
+              <div className="flex flex-col items-center justify-between">
+                <button
+                  type="submit"
+                  className={`w-full flex justify-center mb-2 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5D9297] text-white hover:bg-[#1A3B47] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 ${
+                    !isValid ? "cursor-not-allowed hover:bg-[#5D9297]" : ""
+                  }`}
+                  disabled={!isValid}
                 >
-                  Sign up now!
-                </Link>
-              </p>
-
+                  Log in
+                </button>
+                <p className="text-gray-600">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/sign-up"
+                    className="font-medium text-[#5D9297] hover:text-[#B5D3D1]"
+                  >
+                    Sign up now!
+                  </Link>
+                </p>
+                <button
+                  className="w-full flex justify-center px-4 rounded-md font-medium text-[#5D9297] hover:text-[#B5D3D1]"
+                  onClick={() => {
+                    console.log("Logging out...");
+                    logOut();
+                    navigate("/");
+                  }}
+                >
+                  Continue as guest
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-6">
+              {renderForgotPasswordStep()}
               <button
-                className="w-full flex justify-center px-4 rounded-md font-medium text-[#5D9297] hover:text-[#B5D3D1]"
-                onClick={() => {
-                  console.log("Logging out...");
-                  logOut();
-                  navigate("/");
-                }}
+                onClick={() => setForgotPasswordStep(forgotPasswordStep - 1)}
+                className="flex items-center text-sm font-medium text-[#5D9297] hover:text-[#B5D3D1] hover:underline focus:outline-none"
               >
-                Continue as guest
+                <ArrowLeftIcon className="h-4 w-4 mr-1" />
+                Back
               </button>
             </div>
-          </form>
+          )}
         </div>
       </div>
     </div>
@@ -230,3 +453,4 @@ const Login = () => {
 };
 
 export { Login as default, role };
+
