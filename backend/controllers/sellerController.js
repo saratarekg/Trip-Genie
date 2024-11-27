@@ -353,13 +353,16 @@ const getSalesReport = async (req, res) => {
     if (product) {
       query.product = product;
     }
-    if (month && year) {
-      query.month = parseInt(month);
+    if (year) {
       query.year = parseInt(year);
-      if (day) {
-        query.day = parseInt(day);
+      if (month) {
+        query.month = parseInt(month);
+        if (day) {
+          query.day = parseInt(day);
+        }
       }
     }
+
     const productSales = await ProductSales.find(query).populate("product");
     const sellerProductsSales = productSales
       .filter(

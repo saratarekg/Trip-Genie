@@ -305,9 +305,87 @@ exports.getTouristAttendedItineraries = async (req, res) => {
   }
 };
 
+// exports.getItinerariesReport = async (req, res) => {
+//   try {
+//     const { startDate, endDate, month, year } = req.query;
+//     let selectedItineraries = req.query.selectedItineraries;
+//     const tourGuideId = res.locals.user_id; // Get the user's ID from response locals
+//     const itineraries = await Itinerary.find({ tourGuide: tourGuideId }); // Fetch all itineraries
+//     let itineraryIds = itineraries.map((itinerary) => itinerary._id); // Extract itinerary IDs
+//     if (selectedItineraries) {
+//       selectedItineraries = selectedItineraries.split(",");
+//       itineraryIds = itineraryIds.filter((itineraryId) =>
+//         selectedItineraries.includes(itineraryId.toString())
+//       );
+//     }
+
+//     let bookings;
+//     if (startDate && endDate) {
+//       bookings = await ItineraryBooking.find({
+//         itinerary: { $in: itineraryIds },
+//         createdAt: { $gte: startDate, $lt: endDate },
+//       }).populate("itinerary");
+//     } else if (month && year) {
+//       console.log(month, year);
+//       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+//       const endDate = new Date(parseInt(year), parseInt(month), 0);
+//       // increment the end date by 1 to include the last day of the month
+//       endDate.setDate(endDate.getDate() + 1);
+//       // console.log(startDate, endDate);
+//       bookings = await ItineraryBooking.find({
+//         itinerary: { $in: itineraryIds },
+//         date: { $gt: startDate, $lt: endDate },
+//       }).populate("itinerary");
+//     } else if (year) {
+//       const startDate = new Date(parseInt(year), 0, 1);
+//       const endDate = new Date(parseInt(year) + 1, 0, 1);
+//       console.log(startDate, endDate);
+//       bookings = await ItineraryBooking.find({
+//         itinerary: { $in: itineraryIds },
+//         createdAt: { $gt: startDate, $lte: endDate },
+//       }).populate("itinerary");
+//     } else {
+//       bookings = await ItineraryBooking.find({
+//         itinerary: { $in: itineraryIds },
+//       }).populate("itinerary");
+//     }
+
+//     let totalRevenue = 0;
+//     let totalTickets = 0;
+
+//     // Calculate total number of tickets for each itinerary
+//     let itineraryReport = itineraries.map((itinerary) => {
+//       const tickets = bookings.reduce((total, booking) => {
+//         return booking.itinerary._id.equals(itinerary._id)
+//           ? total + booking.numberOfTickets
+//           : total;
+//       }, 0);
+
+//       //Get the revenue for the itinerary
+//       const revenue = bookings.reduce((total, booking) => {
+//         return booking.itinerary._id.equals(itinerary._id)
+//           ? total + booking.paymentAmount
+//           : total;
+//       }, 0);
+
+//       totalRevenue += revenue;
+//       totalTickets += tickets;
+
+//       return { itinerary, tickets, revenue: revenue * 0.9 }; // Return itinerary report
+//     });
+
+//     itineraryReport = itineraryReport.filter((report) => report.tickets > 0); // Filter out itineraries with no tickets
+
+//     totalRevenue *= 0.9;
+//     res.status(200).json({ itineraryReport, totalRevenue, totalTickets });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message }); // Handle errors
+//   }
+// };
+
 exports.getItinerariesReport = async (req, res) => {
   try {
-    const { startDate, endDate, month, year } = req.query;
+    const { day, month, year } = req.query;
     let selectedItineraries = req.query.selectedItineraries;
     const tourGuideId = res.locals.user_id; // Get the user's ID from response locals
     const itineraries = await Itinerary.find({ tourGuide: tourGuideId }); // Fetch all itineraries
@@ -319,36 +397,32 @@ exports.getItinerariesReport = async (req, res) => {
       );
     }
 
-    let bookings;
-    if (startDate && endDate) {
-      bookings = await ItineraryBooking.find({
-        itinerary: { $in: itineraryIds },
-        createdAt: { $gte: startDate, $lt: endDate },
-      }).populate("itinerary");
+    const query = {};
+    query.itinerary = { $in: itineraryIds };
+
+    if (day && month && year) {
+      const startDate = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day)
+      );
+      const endDate = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day) + 1
+      );
+      query.createdAt = { $gte: startDate, $lt: endDate };
     } else if (month && year) {
-      console.log(month, year);
       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const endDate = new Date(parseInt(year), parseInt(month), 0);
-      // increment the end date by 1 to include the last day of the month
-      endDate.setDate(endDate.getDate() + 1);
-      // console.log(startDate, endDate);
-      bookings = await ItineraryBooking.find({
-        itinerary: { $in: itineraryIds },
-        date: { $gt: startDate, $lt: endDate },
-      }).populate("itinerary");
+      const endDate = new Date(parseInt(year), parseInt(month), 1);
+      query.createdAt = { $gte: startDate, $lt: endDate };
     } else if (year) {
       const startDate = new Date(parseInt(year), 0, 1);
       const endDate = new Date(parseInt(year) + 1, 0, 1);
-      console.log(startDate, endDate);
-      bookings = await ItineraryBooking.find({
-        itinerary: { $in: itineraryIds },
-        createdAt: { $gt: startDate, $lte: endDate },
-      }).populate("itinerary");
-    } else {
-      bookings = await ItineraryBooking.find({
-        itinerary: { $in: itineraryIds },
-      }).populate("itinerary");
+      query.createdAt = { $gte: startDate, $lt: endDate };
     }
+
+    const bookings = await ItineraryBooking.find(query).populate("itinerary");
 
     let totalRevenue = 0;
     let totalTickets = 0;

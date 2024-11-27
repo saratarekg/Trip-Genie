@@ -287,11 +287,27 @@ const emailExists = async (email) => {
 
 const getUsersReport = async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { day, month, year } = req.query;
     let tourist, tourGuide, advertiser, seller, governor, admin;
-    if (month && year) {
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const endDate = new Date(parseInt(year), parseInt(month), 1);
+
+    let startDate = new Date();
+    let endDate = new Date();
+    if (day && month && year) {
+      startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      endDate = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day) + 1
+      );
+    } else if (month && year) {
+      startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      endDate = new Date(parseInt(year), parseInt(month), 1);
+    } else if (year) {
+      startDate = new Date(parseInt(year), 0, 1);
+      endDate = new Date(parseInt(year) + 1, 0, 1);
+    }
+
+    if (year) {
       tourist = await Tourist.countDocuments({
         createdAt: {
           $gte: startDate,
@@ -425,11 +441,13 @@ const getSalesReport = async (req, res) => {
     if (product) {
       query.product = product;
     }
-    if (month && year) {
-      query.month = parseInt(month);
+    if (year) {
       query.year = parseInt(year);
-      if (day) {
-        query.day = parseInt(day);
+      if (month) {
+        query.month = parseInt(month);
+        if (day) {
+          query.day = parseInt(day);
+        }
       }
     }
     const productSales = await ProductSales.find(query).populate("product");
@@ -471,15 +489,23 @@ const getSalesReport = async (req, res) => {
 
 const getItinerariesReport = async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { day, month, year } = req.query;
     const itineraries = await Itinerary.find(); // Fetch all itineraries
 
     const query = {};
-    if (month && year) {
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const endDate = new Date(parseInt(year), parseInt(month), 0);
-      query.createdAt = { $gte: startDate, $lt: endDate };
+    let startDate = new Date();
+    let endDate = new Date();
+    if (day && month && year) {
+      startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      endDate = new Date(parseInt(year), parseInt(month), parseInt(day) + 1);
+    } else if (month && year) {
+      startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      endDate = new Date(parseInt(year), parseInt(month), 0);
+    } else if (year) {
+      startDate = new Date(parseInt(year), 0, 1);
+      endDate = new Date(parseInt(year) + 1, 0, 1);
     }
+    query.createdAt = { $gte: startDate, $lt: endDate };
 
     const itineraryBookings = await ItineraryBooking.find(query).populate(
       "itinerary"
@@ -513,17 +539,26 @@ const getItinerariesReport = async (req, res) => {
 
 const getActivitiesReport = async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { day, month, year } = req.query;
     let query = {};
-    if (month && year) {
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const endDate = new Date(parseInt(year), parseInt(month), 0);
+    let startDate = new Date();
+    let endDate = new Date();
+    if (day && month && year) {
+      startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      endDate = new Date(parseInt(year), parseInt(month), parseInt(day) + 1);
+    } else if (month && year) {
+      startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      endDate = new Date(parseInt(year), parseInt(month), 0);
+    } else if (year) {
+      startDate = new Date(parseInt(year), 0, 1);
+      endDate = new Date(parseInt(year) + 1, 0, 1);
     }
+    query.createdAt = { $gte: startDate, $lt: endDate };
 
-    const activities = await Activity.find(query); // Fetch all activities
-    const activityBookings = await ActivityBooking.find({
-      createdAt: { $gte: startDate, $lt: endDate },
-    }).populate("activity");
+    const activities = await Activity.find(); // Fetch all activities
+    const activityBookings = await ActivityBooking.find(query).populate(
+      "activity"
+    );
 
     const activitiesSales = activities.map((activity) => {
       const totalRevenue = activityBookings.reduce((total, booking) => {

@@ -327,9 +327,77 @@ exports.getTouristAttendedBookings = async (req, res) => {
   }
 };
 
+// exports.getBookingsReport = async (req, res) => {
+//   try {
+//     const { startDate, endDate, month, year } = req.query; // Get the month from the query string
+//     let selectedActivities = req.query.selectedActivities; // Get the selected activities from the query string
+//     const advertiserId = res.locals.user_id; // Get the user's ID from response locals
+//     const activities = await Activity.find({ advertiser: advertiserId });
+//     let activityIds = activities.map((activity) => activity._id);
+//     if (selectedActivities) {
+//       selectedActivities = selectedActivities.split(",");
+//       activityIds = activityIds.filter((activityId) =>
+//         selectedActivities.includes(activityId.toString())
+//       );
+//     }
+
+//     let bookings;
+//     if (startDate && endDate) {
+//       bookings = await ActivityBooking.find({
+//         activity: { $in: activityIds },
+//         createdAt: { $gte: startDate, $lte: endDate },
+//       }).populate("activity");
+//     } else if (month && year) {
+//       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+//       const endDate = new Date(parseInt(year), parseInt(month), 0);
+//       bookings = await ActivityBooking.find({
+//         activity: { $in: activityIds },
+//         createdAt: { $gte: startDate, $lte: endDate },
+//       }).populate("activity");
+//     } else {
+//       bookings = await ActivityBooking.find({
+//         activity: { $in: activityIds },
+//       }).populate("activity");
+//     }
+
+//     let totalRevenue = 0;
+//     let totalTickets = 0;
+
+//     // Calculate total number of tickets for each activity
+//     const activityReport = activities.map((activity) => {
+//       const tickets = bookings.reduce((total, booking) => {
+//         return booking.activity._id.toString() === activity._id.toString()
+//           ? total + booking.numberOfTickets
+//           : total;
+//       }, 0);
+
+//       // Calculate total revenue for each activity
+//       const revenue = bookings.reduce((total, booking) => {
+//         return booking.activity._id.toString() === activity._id.toString()
+//           ? total + booking.paymentAmount
+//           : total;
+//       }, 0);
+
+//       totalRevenue += revenue; // Add revenue to total revenue
+//       totalTickets += tickets; // Add tickets to total tickets
+
+//       return {
+//         activity,
+//         tickets,
+//         revenue: revenue * 0.9, // 10% commission for the platform
+//       };
+//     });
+
+//     totalRevenue *= 0.9; // 10% commission for the platform
+//     res.status(200).json({ activityReport, totalRevenue, totalTickets });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message }); // Handle errors
+//   }
+// };
+
 exports.getBookingsReport = async (req, res) => {
   try {
-    const { startDate, endDate, month, year } = req.query; // Get the month from the query string
+    const { day, month, year } = req.query; // Get the month from the query string
     let selectedActivities = req.query.selectedActivities; // Get the selected activities from the query string
     const advertiserId = res.locals.user_id; // Get the user's ID from response locals
     const activities = await Activity.find({ advertiser: advertiserId });
@@ -341,24 +409,30 @@ exports.getBookingsReport = async (req, res) => {
       );
     }
 
-    let bookings;
-    if (startDate && endDate) {
-      bookings = await ActivityBooking.find({
-        activity: { $in: activityIds },
-        createdAt: { $gte: startDate, $lte: endDate },
-      }).populate("activity");
+    const query = { activity: { $in: activityIds } };
+    if (day && month && year) {
+      const startDate = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day)
+      );
+      const endDate = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day) + 1
+      );
+      query.createdAt = { $gte: startDate, $lt: endDate };
     } else if (month && year) {
       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const endDate = new Date(parseInt(year), parseInt(month), 0);
-      bookings = await ActivityBooking.find({
-        activity: { $in: activityIds },
-        createdAt: { $gte: startDate, $lte: endDate },
-      }).populate("activity");
-    } else {
-      bookings = await ActivityBooking.find({
-        activity: { $in: activityIds },
-      }).populate("activity");
+      const endDate = new Date(parseInt(year), parseInt(month), 1);
+      query.createdAt = { $gte: startDate, $lt: endDate };
+    } else if (year) {
+      const startDate = new Date(parseInt(year), 0, 1);
+      const endDate = new Date(parseInt(year) + 1, 0, 1);
+      query.createdAt = { $gte: startDate, $lt: endDate };
     }
+
+    const bookings = await ActivityBooking.find(query).populate("activity");
 
     let totalRevenue = 0;
     let totalTickets = 0;
