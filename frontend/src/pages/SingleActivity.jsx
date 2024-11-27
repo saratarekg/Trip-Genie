@@ -834,8 +834,6 @@ const ActivityDetail = () => {
 
   useEffect(() => {
     if (savedActivities && savedActivities.length > 0) {
-      console.log(savedActivities);
-      console.log(activity._id);
       setIsSaved(savedActivities.some(savedActivity => savedActivity._id === activity._id.toString()));
 
     }

@@ -155,6 +155,38 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
+app.post("/create-booking-session", async (req, res) => {
+  try {
+    const { items, currency, quantity } = req.body;
+
+    // Calculate the total price of items
+    const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: items.map((item) => ({
+        price_data: {
+          currency: currency,
+          product_data: {
+            name: item.product.name,
+          },
+          unit_amount: Math.round(item.totalPrice * 100),
+        },
+        quantity: item.quantity,
+      })),
+      mode: "payment",
+      success_url: `${req.headers.origin}/successPage?success=true&session_id={CHECKOUT_SESSION_ID}&quantity=${quantity}`,
+      cancel_url: `${req.headers.origin}`,
+    });
+
+    console.log("Checkout session created:", session.id);
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error("Error creating checkout session:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get("/check-payment-status", async (req, res) => {
   const { session_id } = req.query;
 
