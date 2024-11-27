@@ -10,6 +10,7 @@ import {
   addMonths,
   addYears,
   startOfYear,
+  getDaysInMonth,
 } from "date-fns";
 import {
   Area,
@@ -46,6 +47,7 @@ const AdvertiserReport = () => {
   const [graphPeriod, setGraphPeriod] = useState("week");
   const [filters, setFilters] = useState({
     activity: "",
+    day: "",
     month: "",
     year: "",
   });
@@ -113,10 +115,10 @@ const AdvertiserReport = () => {
       const itemDate = new Date(item.activity.timing);
       return (
         (!filters.activity || item.activity.name === filters.activity) &&
-        (!filters.year ||
-          itemDate.getFullYear() === parseInt(filters.year, 10)) &&
+        (!filters.day || itemDate.getDate() === parseInt(filters.day, 10)) &&
         (!filters.month ||
-          itemDate.getMonth() + 1 === parseInt(filters.month, 10))
+          itemDate.getMonth() + 1 === parseInt(filters.month, 10)) &&
+        (!filters.year || itemDate.getFullYear() === parseInt(filters.year, 10))
       );
     });
   }, [salesReport, filters]);
@@ -216,7 +218,7 @@ const AdvertiserReport = () => {
   };
 
   const resetFilters = () => {
-    setFilters({ activity: "", month: "", year: "" });
+    setFilters({ activity: "", day: "", month: "", year: "" });
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
@@ -264,10 +266,10 @@ const AdvertiserReport = () => {
   );
 
   return (
-    <div className="bg-gray-100 ">
+    <div className="bg-gray-100 min-h-screen">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10"></div>
-      <div className="max-w-7xl mx-auto">
-        <div className="grid gap-4 md:grid-cols-12 mb-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid gap-4 md:grid-cols-12 mb-8">
           {/* Total Revenue */}
           <Card className="md:col-span-3 flex flex-col justify-center items-center">
             <CardHeader className="p-3 w-full">
@@ -424,7 +426,6 @@ const AdvertiserReport = () => {
           </div>
 
           {/* Sales Analytics Card */}
-
           <Card className="md:col-span-6">
             <CardHeader className="p-3 mb-2">
               <div className="flex justify-between items-center">
@@ -549,10 +550,46 @@ const AdvertiserReport = () => {
                 </SelectContent>
               </Select>
               <Select
+                value={filters.day}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, day: value }))
+                }
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Select day" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filters.month}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, month: value }))
+                }
+                // disabled={!filters.day}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {format(new Date(2024, i), "MMMM")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
                 value={filters.year}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, year: value, month: "" }))
+                  setFilters((prev) => ({ ...prev, year: value }))
                 }
+                // disabled={filters.day && !filters.month}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Select year" />
@@ -568,26 +605,8 @@ const AdvertiserReport = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Select
-                value={filters.month}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, month: value }))
-                }
-                disabled={!filters.year}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i + 1} value={(i + 1).toString()}>
-                      {format(new Date(2024, i), "MMMM")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
-            <div className="overflow-hidden">
+            <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
