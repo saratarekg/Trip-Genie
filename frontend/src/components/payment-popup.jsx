@@ -14,7 +14,7 @@ const PaymentPopup = ({
   onWalletPayment,
   stripeKey,
   onConfirm,
-  initialTickets,
+  initialTickets = 1,
   maxTickets = 15,
   priceOne,
   currency
@@ -44,7 +44,7 @@ const PaymentPopup = ({
             items: items.map(item => ({
               product: { name: item.name },
               quantity: numberOfTickets,
-              totalPrice: (item.price * numberOfTickets) / 100, // Convert back to dollars
+              totalPrice: (item.price) / 100, // divide by 100 again
             })),
             currency: currency.toLowerCase(),
           }),

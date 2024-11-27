@@ -1748,14 +1748,13 @@ const ActivityDetail = () => {
             isOpen={showPaymentPopup}
             onClose={() => setShowPaymentPopup(false)}
             title={`Book Activity: ${activity.name}`}
-            items={[{ name: activity.name, price: (formatPriceInt(calculateTotalPrice()) * 100) }]} // Convert price to cents
+            items={[{ name: activity.name, price: ((calculateTotalPrice() * exchangeRates) * 100) }]} // Convert price to cents
             onWalletPayment={() =>
               handlePaymentConfirm("Wallet", numberOfTickets)
             }
             stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
             onConfirm={handlePaymentConfirm}
-            initialTickets={numberOfTickets}
-            priceOne={calculateTotalPrice()}
+            priceOne={(calculateTotalPrice() * exchangeRates).toFixed(2)}
             currency={userPreferredCurrency.code} 
           />
         )}
