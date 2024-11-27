@@ -236,6 +236,9 @@ export default function SavedActivities() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
+       <h1 className="text-3xl font-bold mb-2">Saved Activities</h1>
+    <p className="text-sm text-gray-500 mb-2">Activities / Saved</p>
+    
       <div className="container mx-auto px-4 py-8">
         {isLoading ? (
           <Loader />

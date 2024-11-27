@@ -615,6 +615,7 @@ export function AllProducts() {
         message: "Product added to cart successfully!",
       });
       fetchCartItems();
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.log(error);
       setAlertMessage({

@@ -107,6 +107,7 @@ export default function TransportationPage() {
   const [exceededMax, setExceededMax] = useState(false);
   const transportationsPerPage = 6;
   const [tourist, setTourist] = useState(null);
+  const [closing, setClosing] = useState(false);
   
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -212,6 +213,9 @@ setSelectedDate(null);
     const termsCar = "PREMIUM SEDAN";
     const termsBus = "SUPER DELUX AIR BUS";
     const termsMicrobus = "LUXURY MINI BUS";
+
+    const today = new Date(); // Get the current date
+    today.setHours(0, 0, 0, 0);
     
     const filtered = transportations.filter((t) => {
       const matchesSearchTerm =
@@ -225,9 +229,16 @@ setSelectedDate(null);
       const matchesFrom = selectedFrom === "all" || t.from === selectedFrom;
       const matchesTo = selectedTo === "all" || t.to === selectedTo;
   
-      const matchesDate = !selectedDate ||
-        format(new Date(t.timeDeparture), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
-  
+      const departureDate = new Date(t.timeDeparture);
+    departureDate.setHours(0, 0, 0, 0); // Reset time to compare only the date part
+
+    const matchesDate =
+      !selectedDate ||
+      (departureDate >= today &&
+        format(departureDate, "yyyy-MM-dd") >=
+          format(selectedDate, "yyyy-MM-dd"));
+
+          
       return matchesSearchTerm && matchesFrom && matchesTo && matchesDate;
     });
     // You might want to do something with the filtered results here
@@ -783,46 +794,49 @@ setSelectedDate(null);
                     </FormControl>
                   </FormItem>
                 )} />
-                <FormField
-                  control={form.control}
-                  name="remainingSeats"
-                  render={({ field }) => {
-                    const maxSeats = getMaxSeats(form.getValues("vehicleType"));
-                    const value = +field.value;
+               <FormField
+  control={form.control}
+  name="remainingSeats"
+  render={({ field }) => {
+    const maxSeats = getMaxSeats(form.getValues("vehicleType"));
+    const value = +field.value;
 
-                    // Check if the value exceeds maxSeats
-                    const isExceedingMax = value > maxSeats;
+    // Check if the value exceeds maxSeats
+    const isExceedingMax = value > maxSeats;
 
-                    return (
-                      <FormItem>
-                        <FormLabel>Remaining Seats</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="Remaining seats"
-                            {...field}
-                            onChange={(e) => {
-                              const inputValue = +e.target.value;
-                              // Update the value only if it's less than or equal to maxSeats
-                              if (inputValue <= maxSeats) {
-                                field.onChange(inputValue);
-                              } else {
-                                // Update to maxSeats value if the user tries to exceed it
-                                field.onChange(maxSeats);
-                              }
-                            }}
-                            max={maxSeats}
-                          />
-                        </FormControl>
-                        {isExceedingMax && (
-                          <p className="text-red-500 text-sm mt-1">
-                            Max {maxSeats} seats allowed.
-                          </p>
-                        )}
-                      </FormItem>
-                    );
-                  }}
-                />
+    return (
+      <FormItem>
+        <FormLabel>Remaining Seats</FormLabel>
+        <FormControl>
+          <Input
+            type="number"
+            placeholder="Remaining seats"
+            {...field}
+            onChange={(e) => {
+              // Remove leading zeros and update the value
+              const inputValue = e.target.value.replace(/^0+/, ""); // Remove leading zeros
+              field.onChange(inputValue ? +inputValue : ""); // Handle empty input
+            }}
+            onBlur={() => {
+              // Adjust the value to maxSeats if it exceeds on blur
+              if (value > maxSeats) {
+                field.onChange(maxSeats);
+              }
+            }}
+            max={maxSeats}
+          />
+        </FormControl>
+        {isExceedingMax && (
+          <p className="text-red-500 text-sm mt-1">
+            Max {maxSeats} seats allowed.
+          </p>
+        )}
+      </FormItem>
+    );
+  }}
+/>
+
+
 
 
                 <Button type="submit" className="bg-[#1A3B47]">Update Transportation</Button>
@@ -974,51 +988,68 @@ setSelectedDate(null);
         </Dialog>
 
         <Dialog
-          open={!(bookingError==="")}
-          onOpenChange={setBookingError}
-        >
-          <DialogContent>
-            <DialogHeader>
-            <div className="py-4">
-            {bookingError}
-            </div>
-            { 
-            bookingError !== "Transportation booking successful" ? (
-              <DialogTitle>
-                <div className="flex items-center">
-                  <XCircle className="w-6 h-6 text-red-500 mr-2" />
-                  Failed to book transportation
-                </div>
-              </DialogTitle>
-            ) : (
-              <DialogTitle>
-                <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-                  Transportation booking successful
-                </div>
-              </DialogTitle>
-            )
-          }
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Label className="text-right">Amount Paid:</Label>
-              <div> {displayPrice(seatsToBook * selectedTransportation?.ticketCost)} </div>
-            </div>
-            { paymentMethod === "wallet" && (
-              <div className="grid grid-cols-2 gap-4">
-                <Label className="text-right">New Wallet Balance:</Label>
-                <div>{displayPrice(tourist.wallet - (seatsToBook * selectedTransportation?.ticketCost))}</div>
-              </div>
-            )}</div>
-           
-            <DialogFooter>
-              <Button onClick={() => setBookingError("")}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+  open={!(bookingError === "") && !closing}
+  onOpenChange={(isOpen) => {
+    if (!isOpen) {
+      setClosing(true); // Start closing
+      setTimeout(() => {
+        setBookingError(""); // Clear error
+        setClosing(false); // Reset closing state
+      }, 300); // Matches transition duration of the Dialog (adjust if necessary)
+    }
+  }}
+>
+  <DialogContent>
+    <DialogHeader>
+      {bookingError !== "Transportation booking successful" ? (
+        <DialogTitle>
+          <div className="flex items-center">
+            <XCircle className="w-6 h-6 text-red-500 mr-2" />
+            Failed to book transportation
+          </div>
+        </DialogTitle>
+      ) : (
+        <DialogTitle>
+          <div className="flex items-center">
+            <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+            Transportation booking successful
+          </div>
+        </DialogTitle>
+      )}
+    </DialogHeader>
+    <div className="grid gap-4 py-4">
+      <div className="grid grid-cols-2 gap-4">
+        <Label className="text-right">Amount Paid:</Label>
+        <div>
+          {displayPrice(seatsToBook * selectedTransportation?.ticketCost)}
+        </div>
+      </div>
+      {paymentMethod === "wallet" && (
+        <div className="grid grid-cols-2 gap-4">
+          <Label className="text-right">New Wallet Balance:</Label>
+          <div>
+            {displayPrice(
+              tourist.wallet - seatsToBook * selectedTransportation?.ticketCost
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+    <DialogFooter>
+      <Button
+        onClick={() => {
+          setClosing(true); // Start closing
+          setTimeout(() => {
+            setBookingError(""); // Clear error
+            setClosing(false); // Reset closing state
+          }, 300); // Matches transition duration
+        }}
+      >
+        Close
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
       </div>
     </div>
   );

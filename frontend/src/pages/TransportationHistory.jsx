@@ -241,10 +241,11 @@ const formatPrice = (price, type) => {
   return (
     <div>
       <Toaster />
-      <h1 className="text-3xl font-bold mb-8">My Transportation History</h1>
+      <h1 className="text-3xl font-bold mb-2">My Transportation History</h1>
+    <p className="text-sm text-gray-500 mb-2">Transportation / Attended</p>
+    
       <Card>
         <CardHeader>
-          <CardTitle>Past Trips</CardTitle>
           <CardDescription>Your completed transportation bookings</CardDescription>
         </CardHeader>
         <CardContent>

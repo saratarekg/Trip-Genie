@@ -220,19 +220,21 @@ const ShoppingCart = () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
-    if (role === 'tourist') {
+
       try {
         const token = Cookies.get("jwt");
         const response = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` }
         });
         const currencyId = response.data.preferredCurrency;
-        setCurrentPromoCode(response.data.currentPromoCode.code || '');
+        console.log("userperfeered", currencyId);
+        setCurrentPromoCode(response.data.currentPromoCode || '');
 
         const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setUserPreferredCurrency(response2.data);
+        console.log("hereeeeeeeeeeeeeeeeeeeeeeeee",response2.data)
 
         if (response.data.currentPromoCode) {
           setPromoCode(response.data.currentPromoCode.code);
@@ -241,7 +243,7 @@ const ShoppingCart = () => {
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
-    }
+    
   }, []);
 
 
@@ -269,6 +271,7 @@ const ShoppingCart = () => {
         const data = await response.json();
         setCartItems(data);
       }
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error("Error fetching cart items:", error);
     }
@@ -276,6 +279,7 @@ const ShoppingCart = () => {
 
   
   const formatPrice = useCallback((price, productCurrency) => {
+    console.log(userPreferredCurrency);
     if (userRole === 'tourist' && userPreferredCurrency) {
       const baseRate = exchangeRates[productCurrency] || 1;
       const targetRate = exchangeRates[userPreferredCurrency.code] || 1;
@@ -318,6 +322,7 @@ const ShoppingCart = () => {
 
       if (emptyCartResponse.ok) {
         console.log("Cart emptied successfully.");
+        window.dispatchEvent(new Event('cartUpdated'));
       } else {
         console.error("Failed to empty the cart.");
         throw new Error("Failed to empty the cart");
@@ -346,6 +351,7 @@ const ShoppingCart = () => {
           cartItems.filter((item) => item.product._id !== productId)
         );
         openSuccessPopup("Item removed successfully!");
+        window.dispatchEvent(new Event('cartUpdated'));
       }
     } catch (error) {
       console.error("Error removing item:", error);
@@ -392,6 +398,8 @@ const ShoppingCart = () => {
             )
           );
         }, 500);
+        window.dispatchEvent(new Event('cartUpdated'));
+
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
@@ -634,7 +642,7 @@ const ShoppingCart = () => {
                 placeholder={currentPromoCode || "Enter promo code"}
                 className="flex-grow"
               />
-              <Button type="submit" className="ml-2" disabled={!promoCode.trim()}>
+              <Button type="submit" className="ml-2 bg-[#388A94] hover:bg-[#2e6b77]" disabled={!promoCode.trim()}>
                 Apply
               </Button>
             </div>

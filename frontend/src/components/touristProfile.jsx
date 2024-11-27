@@ -4,8 +4,7 @@ import React, { useState, useEffect, useCallback } from "react"
 import axios from "axios"
 import Flag from 'react-world-flags'
 import Cookies from "js-cookie"
-import { format, isToday, isThisWeek, isThisMonth, isThisYear } from 'date-fns'
-import { Activity, ShoppingCart, Plane, Calendar, Wallet, Award, Bell, ShoppingBasket, Bus, Map, User } from 'lucide-react'
+import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear, parseISO } from 'date-fns';import { Activity, ShoppingCart, Plane, Hotel, Calendar, Wallet, Award, Bell, ShoppingBasket, Bus, Map, User, Car } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -42,27 +41,73 @@ const convertUrlToBase64 = async (url) => {
 const getTransactionIcon = (details) => {
   if (details.toLowerCase().includes('activity')) return <Activity className="w-6 h-6" />;
   if (details.toLowerCase().includes('itinerary')) return <Map  className="w-6 h-6" />;
-  if (details.toLowerCase().includes('transportation')) return <Bus className="w-6 h-6" />;
+  if (details.toLowerCase().includes('bus')) return <Bus className="w-6 h-6" />;
+  if (details.toLowerCase().includes('car')) return <Car className="w-6 h-6" />;
   if (details.toLowerCase().includes('order')) return <ShoppingBasket  className="w-6 h-6" />;
+  if (details.toLowerCase().includes('flight')) return <Plane  className="w-6 h-6" />;
+  if (details.toLowerCase().includes('hotel')) return <Hotel  className="w-6 h-6" />;
+
   return <Wallet className="w-6 h-6" />;
 };
 
 const groupTransactionsByDate = (transactions) => {
-  const grouped = {};
-  transactions.forEach(transaction => {
-    const date = new Date(transaction.timestamp);
-    let key;
-    if (isToday(date)) key = 'Today';
-    else if (isThisWeek(date)) key = 'This Week';
-    else if (isThisMonth(date)) key = 'This Month';
-    else if (isThisYear(date)) key = 'This Year';
-    else key = format(date, 'MMMM yyyy');
+  const grouped = {
+    Today: { transactions: [], total: 0, sign: "" },
+    Yesterday: { transactions: [], total: 0, sign: "" },
+    'This Week': { transactions: [], total: 0, sign: "" },
+    'This Month': { transactions: [], total: 0, sign: "" },
+    Earlier: {}
+  };
 
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(transaction);
+  transactions.forEach(transaction => {
+    const date = parseISO(transaction.timestamp);
+    const amount = transaction.transactionType === "deposit" ? transaction.amount : -transaction.amount;
+    const absAmount = Math.abs(amount); // Use the absolute value for total
+    const sign = amount >= 0 ? "positive" : "negative"; // Set the sign based on the transaction type
+
+    if (isToday(date)) {
+      grouped.Today.transactions.push(transaction);
+      grouped.Today.total += absAmount;
+      grouped.Today.sign = sign; // Set the sign for Today
+    } else if (isYesterday(date)) {
+      grouped.Yesterday.transactions.push(transaction);
+      grouped.Yesterday.total += absAmount;
+      grouped.Yesterday.sign = sign; // Set the sign for Yesterday
+    } else if (isThisWeek(date)) {
+      grouped['This Week'].transactions.push(transaction);
+      grouped['This Week'].total += absAmount;
+      grouped['This Week'].sign = sign; // Set the sign for This Week
+    } else if (isThisMonth(date)) {
+      grouped['This Month'].transactions.push(transaction);
+      grouped['This Month'].total += absAmount;
+      grouped['This Month'].sign = sign; // Set the sign for This Month
+    } else {
+      const monthYear = format(date, 'MMMM yyyy');
+      if (!grouped.Earlier[monthYear]) {
+        grouped.Earlier[monthYear] = { transactions: [], total: 0, sign: "" };
+      }
+      grouped.Earlier[monthYear].transactions.push(transaction);
+      grouped.Earlier[monthYear].total += absAmount;
+      grouped.Earlier[monthYear].sign = sign; // Set the sign for Earlier
+    }
   });
+
+  // Sort transactions within each group
+  Object.keys(grouped).forEach(key => {
+    if (Array.isArray(grouped[key].transactions)) {
+      grouped[key].transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    } else if (typeof grouped[key] === 'object') {
+      Object.keys(grouped[key]).forEach(subKey => {
+        grouped[key][subKey].transactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      });
+    }
+  });
+
   return grouped;
 };
+
+
+
 
 const phoneValidator = (value) => {
   const phoneNumber = parsePhoneNumberFromString("+" + value);
@@ -120,31 +165,33 @@ export function TouristProfileComponent() {
     return `${currencyInfo ? currencyInfo.symbol : ""}${amount.toFixed(2)}`;
   }, [currencies]);
 
-  useEffect(() => {
-    const fetchTouristProfile = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const role = getUserRole();
-        const api = `http://localhost:4000/${role}`;
-        const response = await axios.get(api, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        response.data.mobile = response.data.mobile.slice(1);
-        setTourist(response.data);
-        setEditedTourist(response.data);
-        setSelectedImage(response.data.profilePicture);
+  const fetchTouristProfile = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const api = `http://localhost:4000/${role}`;
+      const response = await axios.get(api, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      response.data.mobile = response.data.mobile.slice(1);
+      setTourist(response.data);
+      setEditedTourist(response.data);
+      setSelectedImage(response.data.profilePicture);
 
-        if (response.data.profilePicture && response.data.profilePicture.url) {
-          convertUrlToBase64(response.data.profilePicture.url).then((res) => {
-            setBase64Image(res);
-          });
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      if (response.data.profilePicture && response.data.profilePicture.url) {
+        convertUrlToBase64(response.data.profilePicture.url).then((res) => {
+          setBase64Image(res);
+        });
       }
-    };
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+   
 
     fetchTouristProfile();
   }, []);
@@ -447,7 +494,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     };
   
     return (
-      <Card className="w-full">
+      <Card className="w-full h-[275px]">
         <CardHeader>
           <CardTitle>Redeem Loyalty Points</CardTitle>
           <CardDescription>Convert your loyalty points into wallet balance.</CardDescription>
@@ -578,7 +625,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     };
   
     return (
-      <Card className="w-full">
+      <Card className="w-full h-[275px] overflow-y-auto">
         <CardHeader>
           <CardTitle>Preferred Currency</CardTitle>
           <CardDescription>
@@ -666,6 +713,8 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     checkUnseenNotifications();
     fetchNotifications();
   }, []);
+
+  
 
 
   const checkUnseenNotifications = async () => {
@@ -763,10 +812,10 @@ const response = await axios.get("http://localhost:4000/tourist/", {
   }
 
   return (
-    <div className="container mx-auto px-4">
+    <div >
     <h1 className="text-3xl font-bold mb-2">My Account</h1>
     <p className="text-sm text-gray-500 mb-6">Settings / Account</p>
-    
+    <div className="container mx-auto px-4">
       <div className="grid grid-cols-12 gap-6">
         {/* Merged Profile Picture and Info Card - 8 columns */}
         <Card className="col-span-7">
@@ -834,48 +883,60 @@ const response = await axios.get("http://localhost:4000/tourist/", {
             </div>
           )}
         </div>
-        <div className="text-center mb-4">
+        <div className="text-center mb-2">
           <div className="flex items-center justify-center gap-2">
             <h2 className="text-xl font-bold">{tourist.username}</h2>
             <div
               className={`w-7 h-7 flex items-center justify-center rounded-full ${getBadgeColor()}`}
             >
-              <Award className="w-4 h-4 text-white" />
+              <Award className="w-4 h-4 text-white items-center" />
             </div>
           </div>
           <p className="text-sm text-gray-500 mt-1">{tourist.email}</p>
         </div>
+        <Separator/>
         {isEditing ? (
-          <div className="flex flex-col space-y-2 w-full max-w-[200px]">
+          <div className="flex flex-col w-full max-w-[200px] ">
             <Button
               onClick={handleUpdate}
-              className="w-full bg-[#388A94] hover:bg-[#2e6b77]"
+              className="w-full mt-2 bg-[#388A94] hover:bg-[#2e6b77]"
             >
               Update
             </Button>
             <Button
               onClick={handleDiscard}
               variant="outline"
-              className="w-full"
+              className="w-full mt-2 hover:bg-gray-200 bg-gray-100"
             >
               Cancel
             </Button>
           </div>
         ) : (
-          <Button
-            onClick={() => setIsEditing(true)}
-            className="w-full max-w-[200px] bg-[#1A3B47]"
-          >
-            Edit Profile
-          </Button>
+          <>
+      <Button
+  variant="outline"
+  onClick={() => setIsEditing(true)}
+  className="w-full mt-2 text-sm hover:bg-gray-200 bg-gray-100"
+>
+  Edit Profile
+</Button>
+
+
+          {/* <Button
+          //onClick={}
+          className=" p-2 mr-2 w-full mt-2 bg-[#1A3B47]"
+        >
+          Edit Profile
+        </Button> */}
+        </>
         )}
       </div>
 
       {/* Vertical Separator */}
-      <div className="border-r border-gray-200 h-[300px] mx-8"></div>
+      <div className="border-r border-gray-200 h-[260px] mx-2"></div>
 
       {/* Profile Info Section */}
-      <div className="w-2/3 pl-4 space-y-4">
+      <div className="w-2/3 pl-4 space-y-3">
         {/* Row 1 */}
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -941,10 +1002,10 @@ const response = await axios.get("http://localhost:4000/tourist/", {
           </div>
         </div>
 
-        <Separator />
+        <Separator/>
 
         {/* Row 3 */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 ">
   {/* Nationality field spans two columns */}
   <div className="col-span-2">
     <p className="text-xs text-gray-500">Nationality</p>
@@ -1004,7 +1065,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 </div>
 
 {/* Separator */}
-<Separator className="my-4" />
+<Separator />
 
 {/* Row 4 (Phone Number and Register Date) */}
 <div className="grid grid-cols-3 gap-4">
@@ -1061,111 +1122,156 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
 
          {/* Shipping Addresses - 4 columns */}
-         <div className="col-span-5">
-          <ShippingAddress addresses={tourist.shippingAddresses} />
+         <div className="col-span-5 ">
+          <ShippingAddress addresses={tourist.shippingAddresses} fetch={fetchTouristProfile} />
         </div>
 
         {/* Tabs Section - spans 8 columns */}
         <div className="col-span-8">
-          <Tabs defaultValue="wallet" onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="wallet">View Wallet Balance</TabsTrigger>
-              <TabsTrigger value="currency">Change Currency</TabsTrigger>
-              <TabsTrigger value="points">Redeem Points</TabsTrigger>
-            </TabsList>
-            <TabsContent value="wallet">
-  <Card>
-    <CardContent className="pt-6">
-      {/* Current Balance */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-lg">Current Balance</span>
-        </div>
-        <span className="text-xl font-bold">
-          {formatWallet(tourist.wallet)}
-        </span>
-      </div>
+  <Tabs defaultValue="wallet" onValueChange={setActiveTab} className="w-full">
+    <TabsList className="grid w-full grid-cols-3">
+      <TabsTrigger value="wallet">View Wallet Balance</TabsTrigger>
+      <TabsTrigger value="currency">Change Currency</TabsTrigger>
+      <TabsTrigger value="points">Redeem Points</TabsTrigger>
+    </TabsList>
 
-      {/* Wallet History */}
-      <div className="mt-2 overflow-y-auto max-h-[200px]">
-  <h3 className="text-lg font-semibold mb-2">Wallet History</h3>
-  {tourist.history && Array.isArray(tourist.history) && tourist.history.length > 0 ? (
-    <div className="space-y-4">
-      {Object.entries(groupTransactionsByDate(tourist.history)).map(([date, transactions]) => (
-        <div key={date}>
-          <h4 className="text-md font-semibold mb-2">{date}</h4>
-          <ul className="">
-            {transactions.map((entry, index) => (
-              <li key={index} className="flex justify-between items-center pl-4 pr-4 pb-3 pt-3 bg-white rounded-md">
-                <div className="flex items-center gap-3">
-                  <div className="bg-gray-100 rounded-full p-2">
-                    {getTransactionIcon(entry.details)}
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">
-                      {entry.details || "Transaction"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                    {format(new Date(entry.timestamp), 'dd,MM,yyyy HH:mm')}
-                    </p>
-                  </div>
-                </div>
-                <div
-                  className={`text-sm font-bold ${
-                    entry.transactionType === "deposit"
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }`}
-                >
-                  {entry.transactionType === "deposit" ? "+" : "-"}
-                  {formatCurrency(convertCurrency(entry.amount, "USD", currencyCode), tourist.preferredCurrency)}                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-sm text-gray-500">
-      {tourist.history && Array.isArray(tourist.history)
-        ? "No transactions found"
-        : "Wallet history not available"}
-    </p>
-  )}
+    <TabsContent value="wallet">
+      <Card>
+        <CardContent className="pt-6">
+          {/* Current Balance */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-xl">Current Balance</span>
+            </div>
+            <span className="text-xl font-bold">
+              {formatWallet(tourist.wallet)}
+            </span>
+          </div>
+
+          {/* Wallet History */}
+          <div className="mt-2 overflow-y-auto max-h-[173px]">
+            <h3 className="text-lg font-semibold mb-2">Wallet History</h3>
+            {tourist.history && Array.isArray(tourist.history) && tourist.history.length > 0 ? (
+              <div className="space-y-4">
+                {Object.entries(groupTransactionsByDate(tourist.history)).map(([dateGroup, groupData]) => {
+                  if (dateGroup === 'Earlier') {
+                    return Object.entries(groupData).map(([monthYear, monthData]) => (
+                      monthData.transactions.length > 0 && (
+                        <div key={monthYear}>
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="text-md font-semibold text-gray-400">{monthYear}</h4>
+                            <span className="text-sm text-gray-500">
+                              {monthData.sign === "positive" ? "+" : "-"}
+                              {formatCurrency(convertCurrency(monthData.total, "USD", currencyCode), tourist.preferredCurrency)}
+                            </span>
+                          </div>
+                          <ul className="space-y-2">
+                            {monthData.transactions.map((entry, index) => (
+                              <li key={index} className="flex justify-between items-center pl-4 pr-4 pb-3 pt-3 bg-white rounded-md shadow-sm">
+                                <div className="flex items-center gap-3">
+                                  <div className="bg-gray-100 rounded-full p-2">
+                                    {getTransactionIcon(entry.details)}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-sm">
+                                      {entry.details || "Transaction"}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                      {format(parseISO(entry.timestamp), 'dd MMM yyyy HH:mm')}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div
+                                  className={`text-sm font-bold ${entry.transactionType === "deposit" ? "text-green-500" : "text-red-500"}`}
+                                >
+                                  {entry.transactionType === "deposit" ? "+" : "-"}
+                                  {formatCurrency(convertCurrency(entry.amount, "USD", currencyCode), tourist.preferredCurrency)}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                    ));
+                  } else {
+                    return groupData.transactions.length > 0 && (
+                      <div key={dateGroup}>
+                        <div className="flex justify-between items-center mb-2">
+                          <h4 className="text-md font-semibold text-gray-400">{dateGroup}</h4>
+                          <span className="text-sm text-gray-500">
+                            {groupData.sign === "positive" ? "+" : "-"}
+                            {formatCurrency(convertCurrency(groupData.total, "USD", currencyCode), tourist.preferredCurrency)}
+                          </span>
+                        </div>
+                        <ul className="space-y-2">
+                          {groupData.transactions.map((entry, index) => (
+                            <li key={index} className="flex justify-between items-center pl-4 pr-4 pb-3 pt-3 bg-white rounded-md ">
+                              <div className="flex items-center gap-3">
+                                <div className="bg-[#E6DCCF] rounded-full p-2">
+                                  {getTransactionIcon(entry.details)}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-sm">
+                                    {entry.details || "Transaction"}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {format(parseISO(entry.timestamp), 'dd MMM yyyy HH:mm')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div
+                                className={`text-sm font-bold ${entry.transactionType === "deposit" ? "text-green-500" : "text-red-500"}`}
+                              >
+                                {entry.transactionType === "deposit" ? "+" : "-"}
+                                {formatCurrency(convertCurrency(entry.amount, "USD", currencyCode), tourist.preferredCurrency)}
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">
+                {tourist.history && Array.isArray(tourist.history)
+                  ? "No transactions found"
+                  : "Wallet history not available"}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </TabsContent>
+
+    <TabsContent value="currency">
+      <CurrencyApp user={tourist} />
+    </TabsContent>
+
+    <TabsContent value="points">
+      <RedeemPoints user={tourist} onRedeemPoints={handleRedeemPoints} />
+    </TabsContent>
+  </Tabs>
 </div>
 
-    </CardContent>
-  </Card>
-</TabsContent>
-
-            <TabsContent value="currency">
-              <CurrencyApp user={tourist} />
-            </TabsContent>
-            <TabsContent value="points">
-              <RedeemPoints user={tourist} onRedeemPoints={handleRedeemPoints} />
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Notifications - 4 columns */}
-        <Card className="col-span-4 max-h-[350px] overflow-y-auto">
-        <CardHeader className="flex ">
-        <CardTitle className="flex justify-between items-center">
-  <span>Notifications</span>
-  <Button
-    variant="ghost"
-    className="text-sm text-[#388A94] p-2"
-    onClick={() => (window.location.href = "/tourist-notifications")}
-  >
-    View All
-  </Button>
-</CardTitle>
-
-  
-</CardHeader>
+{/* Notifications - 4 columns */}
+<Card className="col-span-4">
+  <CardHeader className="flex">
+    <CardTitle className="flex justify-between items-center">
+      <span>Notifications</span>
+      <Button
+        variant="ghost"
+        className="text-sm text-[#388A94] p-2"
+        onClick={() => (window.location.href = "/tourist-notifications")}
+      >
+        View All
+      </Button>
+    </CardTitle>
+  </CardHeader>
 
   <CardContent>
-    <div className="flex flex-col">
+    <div className="flex flex-col max-h-[200px] overflow-y-auto">
       {loading ? (
         <div className="flex items-center justify-center p-4">
           <Loader2 className="h-6 w-6 animate-spin text-[#388A94]" />
@@ -1180,7 +1286,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
             <li
               key={index}
               className="p-2 hover:bg-gray-50 transition-colors relative cursor-pointer flex flex-col gap-1"
-              onClick={() => navigate(notification.link)}
+              onClick={() => {markNotificationsAsSeen(),navigate(notification.link)}}
             >
               {!notification.seen && (
                 <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
@@ -1201,6 +1307,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     </div>
   </CardContent>
 </Card>
+
 
 
 
@@ -1233,6 +1340,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
         isImageViewer={true}
         imageUrl={selectedImage?.url || selectedImage}
       />
+    </div>
     </div>
   )
 }

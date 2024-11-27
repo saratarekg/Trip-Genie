@@ -165,11 +165,12 @@ export default function UpcomingTransportation() {
   if (error) return <div>{error}</div>
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Transportation Bookings</h1>
+    <div className="container mx-auto px-4">
+      <h1 className="text-3xl font-bold mb-2">My Transportation Bookings</h1>
+    <p className="text-sm text-gray-500 mb-2">Transportation / Upcoming</p>
+    
       <Card>
         <CardHeader>
-          <CardTitle>Upcoming Trips</CardTitle>
           <CardDescription>Your scheduled transportation</CardDescription>
         </CardHeader>
         <CardContent>

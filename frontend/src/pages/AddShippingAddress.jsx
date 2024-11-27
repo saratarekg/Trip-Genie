@@ -24,7 +24,9 @@ import {
   Map,
 } from "lucide-react";
 
-export default function ShippingAddresses() {
+export default function ShippingAddresses({ 
+  fetch 
+}) {
   const [addresses, setAddresses] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentAddressId, setCurrentAddressId] = useState(null);
@@ -122,6 +124,7 @@ export default function ShippingAddresses() {
       console.error("Error saving address:", error);
     } finally {
       setIsLoading(false);
+      fetch();
     }
   };
 
@@ -134,6 +137,7 @@ export default function ShippingAddresses() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchAddresses();
+      fetch();
     } catch (error) {
       console.error("Error setting default address:", error);
     }
@@ -156,6 +160,7 @@ export default function ShippingAddresses() {
       );
       fetchAddresses();
       setIsDeleteConfirmOpen(false);
+      fetch();
     } catch (error) {
       console.error("Error deleting address:", error);
     }
@@ -187,7 +192,7 @@ export default function ShippingAddresses() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto bg-white border rounded-lg shadow-md p-6">
+    <div className="max-w-3xl mx-auto bg-white border rounded-lg shadow-sm p-6">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-800">Shipping Addresses</h2>
         <Button
@@ -200,7 +205,7 @@ export default function ShippingAddresses() {
         </Button>
       </div>
 
-      <div className="border rounded-md bg-gray-50 p-2 max-h-[250px] overflow-y-auto">
+      <div className="border rounded-md bg-gray-50 p-2 h-[200px] overflow-y-auto">
         {addresses.length > 0 ? (
           addresses.map((address) => (
             <div

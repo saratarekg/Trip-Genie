@@ -222,6 +222,8 @@ export function NavbarComponent() {
     fetchCartItems();
   }, []);
 
+  
+
   const fetchCartItems = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
@@ -242,19 +244,17 @@ export function NavbarComponent() {
   }, []);
 
   useEffect(() => {
-    let interval;
+    fetchCartItems();
 
-    // Start interval only on specific routes
-    if (location.pathname === "/all-products" || location.pathname.startsWith("/product")) {
-      fetchCartItems(); // Fetch immediately on mount
-      interval = setInterval(fetchCartItems, 3000); // Fetch every 3 seconds
-    }
+    // Set up event listener for cart updates
+    window.addEventListener('cartUpdated', fetchCartItems);
 
-    // Cleanup interval when component unmounts or route changes
+    // Clean up the event listener
     return () => {
-      if (interval) clearInterval(interval);
+      window.removeEventListener('cartUpdated', fetchCartItems);
     };
-  }, [location.pathname, fetchCartItems]);
+  }, [fetchCartItems]);
+
 
   const logOut = async () => {
     console.log("Logging out...");
@@ -652,6 +652,9 @@ export function NavbarComponent() {
                         setIsCartOpen={setIsCartOpen}
                         isCartOpen={isCartOpen}
                         onClose={() => setIsCartOpen(false)}
+                        fetchCartItems = {fetchCartItems}
+                        cartItems={cartItems}
+                        setCartItems={setCartItems}
                       />
                     </div>
 

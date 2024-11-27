@@ -297,6 +297,61 @@ const bookFlight = async (req, res) => {
   }
 };
 
+const cancelFlightBooking = async (req, res) => {
+  const { id } = req.params; // ID of the flight booking to cancel
+  const touristID = res.locals.user_id;
+
+  try {
+    // Find the flight booking by ID
+    const booking = await TouristFlight.findById(id);
+
+    if (!booking) {
+      return res.status(400).json({ message: "Booking not found" });
+    }
+
+    // Ensure the booking belongs to the user
+    if (booking.touristID.toString() !== touristID) {
+      return res.status(403).json({ message: "Unauthorized action" });
+    }
+
+    const refundAmount = booking.price * booking.numberOfTickets; // Calculate total refund amount
+
+    // Update the tourist's wallet with the refund
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      touristID,
+      { $inc: { wallet: refundAmount } }, // Increment wallet by the refund amount
+      { new: true, runValidators: true }
+    );
+
+    // Log the refund transaction in the tourist's history
+    await Tourist.findByIdAndUpdate(
+      touristID,
+      {
+        $push: {
+          history: {
+            transactionType: "deposit",
+            amount: refundAmount,
+            details: `Refunded for Cancelling Flight: ${booking.from} to ${booking.to}`,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    // Remove the flight booking from the database
+    await TouristFlight.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: "Flight booking canceled successfully and refund issued",
+      updatedWallet: updatedTourist.wallet,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
 const getMyFlights = async (req, res) => {
   const touristID = res.locals.user_id;
 
@@ -347,6 +402,61 @@ const bookHotel = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+const cancelHotelBooking = async (req, res) => {
+  const { id } = req.params; // ID of the booking to be canceled
+  const touristID = res.locals.user_id;
+
+  try {
+    // Find the booking by ID
+    const booking = await TouristHotel.findById(id);
+
+    if (!booking) {
+      return res.status(400).json({ message: "Booking not found" });
+    }
+
+    // Ensure the booking belongs to the user
+    if (booking.touristID.toString() !== touristID) {
+      return res.status(403).json({ message: "Unauthorized action" });
+    }
+
+    const refundAmount = booking.price; // Refund amount is the price of the booking
+
+    // Update the tourist's wallet with the refund
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      touristID,
+      { $inc: { wallet: refundAmount } }, // Increment wallet by refundAmount
+      { new: true, runValidators: true }
+    );
+
+    // Log the refund transaction in the tourist's history
+    await Tourist.findByIdAndUpdate(
+      touristID,
+      {
+        $push: {
+          history: {
+            transactionType: "deposit",
+            amount: refundAmount,
+            details: `Refunded for Canceling Hotel Booking: ${booking.hotelName}`,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    // Remove the booking from the database
+    await TouristHotel.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: "Hotel booking canceled successfully and refund issued",
+      updatedWallet: updatedTourist.wallet,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 const getMyHotels = async (req, res) => {
   const touristID = res.locals.user_id;
@@ -2111,7 +2221,9 @@ module.exports = {
   getPreviousBookings,
   deleteBooking,
   bookFlight,
+  cancelFlightBooking,
   bookHotel,
+  cancelHotelBooking,
   getMyFlights,
   getMyHotels,
   addAllToCart,

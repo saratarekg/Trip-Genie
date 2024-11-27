@@ -384,15 +384,15 @@ export default function Component() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Upcoming Activities</h1>
-      <div>
+    <div className="container mx-auto px-4 ">
+             <h1 className="text-3xl font-bold mb-2">My Upcoming Activities</h1>
+    <p className="text-sm text-gray-500 mb-2">Activities / Upcoming</p>
+          <div>
         {" "}
 
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Upcoming Activities</CardTitle>
               <CardDescription>
                 Click on an activity to view details
               </CardDescription>
