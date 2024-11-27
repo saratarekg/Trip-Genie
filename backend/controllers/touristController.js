@@ -74,7 +74,6 @@ const updateTourist = async (req, res) => {
       picture = null;
       if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
-    
       }
     } else if (profilePicture.public_id === undefined) {
       const result = await cloudinary.uploader.upload(profilePicture, {
@@ -82,7 +81,6 @@ const updateTourist = async (req, res) => {
       });
       if (tourist1.profilePicture !== null) {
         await cloudinary.uploader.destroy(tourist1.profilePicture.public_id);
-        
       }
       picture = {
         public_id: result.public_id,
@@ -189,10 +187,11 @@ const updatePreferences = async (req, res) => {
 const updateTouristProfile = async (req, res) => {
   try {
     const tourist1 = await Tourist.findById(res.locals.user_id).lean();
-    
+
     let picture = tourist1.profilePicture;
-  
-    const { nationality, mobile, jobOrStudent, profilePicture, fname, lname } = req.body;
+
+    const { nationality, mobile, jobOrStudent, profilePicture, fname, lname } =
+      req.body;
     let { email, username } = req.body;
     email = email.toLowerCase();
     username = username.toLowerCase();
@@ -231,7 +230,7 @@ const updateTouristProfile = async (req, res) => {
         jobOrStudent,
         profilePicture: picture,
         fname,
-        lname
+        lname,
       },
       { new: true }
     )
@@ -351,7 +350,6 @@ const cancelFlightBooking = async (req, res) => {
   }
 };
 
-
 const getMyFlights = async (req, res) => {
   const touristID = res.locals.user_id;
 
@@ -457,7 +455,6 @@ const cancelHotelBooking = async (req, res) => {
   }
 };
 
-
 const getMyHotels = async (req, res) => {
   const touristID = res.locals.user_id;
 
@@ -546,7 +543,6 @@ const bookTransportation = async (req, res) => {
   }
 };
 
-
 const getUpcomingBookings = async (req, res) => {
   const touristID = res.locals.user_id;
 
@@ -614,13 +610,17 @@ const deleteBooking = async (req, res) => {
 
     // Ensure the booking belongs to the authenticated tourist
     if (booking.touristID.toString() !== touristID) {
-      return res.status(403).json({ message: "Unauthorized: Cannot delete others' bookings" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized: Cannot delete others' bookings" });
     }
 
     const transportation = booking.transportationID;
 
     if (!transportation) {
-      return res.status(404).json({ message: "Associated transportation not found" });
+      return res
+        .status(404)
+        .json({ message: "Associated transportation not found" });
     }
 
     // Step 2: Calculate the refund amount and update the tourist's wallet
@@ -668,10 +668,11 @@ const deleteBooking = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting booking:", error);
-    res.status(500).json({ message: "Failed to delete booking", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to delete booking", error: error.message });
   }
 };
-
 
 const emailExists = async (email) => {
   if (await Tourist.findOne({ email })) {
@@ -699,7 +700,6 @@ const usernameExists = async (username) => {
   ) {
     return true;
   } else {
-    
     return false;
   }
 };
@@ -885,7 +885,7 @@ const getCart = async (req, res) => {
 
     // Find the tourist by their user ID
     const tourist = await Tourist.findById(userId)
-      .populate("cart.product") 
+      .populate("cart.product")
       .populate("currentPromoCode")
       .exec();
 
@@ -911,7 +911,6 @@ const removeItemFromCart = async (req, res) => {
 
   try {
     // Debug: Log incoming request data
-  
 
     // Find the tourist and update the cart by removing the product
     const user = await Tourist.findByIdAndUpdate(
@@ -973,7 +972,6 @@ const updateCartProductQuantity = async (req, res) => {
   try {
     // Validate that the new quantity is greater than 0
     if (newQuantity <= 0) {
-   
       return res
         .status(400)
         .json({ message: "Quantity must be greater than 0" });
@@ -992,12 +990,10 @@ const updateCartProductQuantity = async (req, res) => {
     );
 
     if (!user) {
-
       return res.status(400).json({ message: "User not found" });
     }
 
     const cartItem = user.cart.find((item) => {
-
       return item.product._id.toString() === productId.toString();
     });
 
@@ -1028,7 +1024,6 @@ const removeProductFromWishlist = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-
     // Now, proceed to remove the product from the wishlist
     const updatedUser = await Tourist.findByIdAndUpdate(
       userId,
@@ -1041,8 +1036,6 @@ const removeProductFromWishlist = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ message: "Failed to update user" });
     }
-
- 
 
     res.status(200).json({
       message: "Product removed from wishlist",
@@ -1304,7 +1297,7 @@ const deleteAccount = async (req, res) => {
     if (tourist.profilePicture !== null) {
       await cloudinary.uploader.destroy(tourist.profilePicture.public_id);
     }
- 
+
     await TourGuide.updateMany(
       { "comments.tourist": res.locals.user_id }, // Match documents where a comment has the matching tourist
       { $pull: { comments: { tourist: res.locals.user_id } } } // Pull the comment where the tourist matches
@@ -1701,7 +1694,6 @@ const addShippingAddress = async (req, res) => {
   }
 };
 
-
 const getAllShippingAddresses = async (req, res) => {
   try {
     const tourist = await Tourist.findById(res.locals.user_id).select(
@@ -1853,7 +1845,7 @@ const updateShippingAddress = async (req, res) => {
         { _id: res.locals.user_id },
         {
           $set: {
-            "shippingAddresses.$[elem].default": false
+            "shippingAddresses.$[elem].default": false,
           },
         },
         {
@@ -1894,7 +1886,6 @@ const updateShippingAddress = async (req, res) => {
   }
 };
 
-
 const applyPromoCode = async (req, res) => {
   const { promoCode } = req.body;
 
@@ -1919,25 +1910,29 @@ const applyPromoCode = async (req, res) => {
 // Get saved itineraries
 const getSavedItineraries = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(res.locals.user_id).populate('savedItinerary.itinerary');
-    
+    const tourist = await Tourist.findById(res.locals.user_id).populate(
+      "savedItinerary.itinerary"
+    );
+
     if (!tourist) {
-      return res.status(404).json({ message: 'Tourist not found' });
+      return res.status(404).json({ message: "Tourist not found" });
     }
 
     // Filter out any null itineraries and map to return only the itinerary data
     const savedItineraries = tourist.savedItinerary
-      .filter(item => item.itinerary)
-      .map(item => item.itinerary);
+      .filter((item) => item.itinerary)
+      .map((item) => item.itinerary);
 
     res.status(200).json(savedItineraries);
   } catch (error) {
-    console.error('Error fetching saved itineraries:', error);
-    res.status(500).json({ message: 'Error fetching saved itineraries', error: error.message });
+    console.error("Error fetching saved itineraries:", error);
+    res.status(500).json({
+      message: "Error fetching saved itineraries",
+      error: error.message,
+    });
   }
 };
 
-  
 // Add or remove an itinerary from saved itineraries
 const saveItinerary = async (req, res) => {
   try {
@@ -1947,11 +1942,11 @@ const saveItinerary = async (req, res) => {
     // Find the tourist and check if the itinerary is already saved
     const tourist = await Tourist.findById(touristId);
     if (!tourist) {
-      return res.status(404).json({ message: 'Tourist not found' });
+      return res.status(404).json({ message: "Tourist not found" });
     }
 
     const itineraryIndex = tourist.savedItinerary.findIndex(
-      item => item && item.itinerary && item.itinerary.toString() === id
+      (item) => item && item.itinerary && item.itinerary.toString() === id
     );
 
     if (itineraryIndex > -1) {
@@ -1961,7 +1956,9 @@ const saveItinerary = async (req, res) => {
         { $pull: { savedItinerary: { itinerary: id } } },
         { new: true }
       );
-      return res.status(200).json({ message: 'Itinerary removed from saved list', success: true });
+      return res
+        .status(200)
+        .json({ message: "Itinerary removed from saved list", success: true });
     } else {
       // Itinerary is not saved, so add it
       await Tourist.findByIdAndUpdate(
@@ -1969,33 +1966,42 @@ const saveItinerary = async (req, res) => {
         { $push: { savedItinerary: { itinerary: id } } },
         { new: true }
       );
-      return res.status(200).json({ message: 'Itinerary saved successfully', success: true });
+      return res
+        .status(200)
+        .json({ message: "Itinerary saved successfully", success: true });
     }
   } catch (error) {
-    console.error('Error saving/removing itinerary:', error);
-    res.status(500).json({ message: 'Error saving/removing itinerary', error: error.message });
+    console.error("Error saving/removing itinerary:", error);
+    res.status(500).json({
+      message: "Error saving/removing itinerary",
+      error: error.message,
+    });
   }
 };
-
 
 // Get saved activities
 const getSavedActivities = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(res.locals.user_id).populate('savedActivity.activity');
-     
+    const tourist = await Tourist.findById(res.locals.user_id).populate(
+      "savedActivity.activity"
+    );
+
     if (!tourist) {
-      return res.status(404).json({ message: 'Tourist not found' });
+      return res.status(404).json({ message: "Tourist not found" });
     }
 
     // Filter out any null activities and map to return only the activity data
     const savedActivities = tourist.savedActivity
-      .filter(item => item.activity)
-      .map(item => item.activity);
+      .filter((item) => item.activity)
+      .map((item) => item.activity);
 
     res.status(200).json(savedActivities);
   } catch (error) {
-    console.error('Error fetching saved activities:', error);
-    res.status(500).json({ message: 'Error fetching saved activities', error: error.message });
+    console.error("Error fetching saved activities:", error);
+    res.status(500).json({
+      message: "Error fetching saved activities",
+      error: error.message,
+    });
   }
 };
 
@@ -2008,11 +2014,11 @@ const saveActivity = async (req, res) => {
     // Find the tourist and check if the activity is already saved
     const tourist = await Tourist.findById(touristId);
     if (!tourist) {
-      return res.status(404).json({ message: 'Tourist not found' });
+      return res.status(404).json({ message: "Tourist not found" });
     }
 
     const activityIndex = tourist.savedActivity.findIndex(
-      item => item && item.activity && item.activity.toString() === id
+      (item) => item && item.activity && item.activity.toString() === id
     );
 
     if (activityIndex > -1) {
@@ -2022,7 +2028,9 @@ const saveActivity = async (req, res) => {
         { $pull: { savedActivity: { activity: id } } },
         { new: true }
       );
-      return res.status(200).json({ message: 'Activity removed from saved list', success: true });
+      return res
+        .status(200)
+        .json({ message: "Activity removed from saved list", success: true });
     } else {
       // Activity is not saved, so add it
       await Tourist.findByIdAndUpdate(
@@ -2030,28 +2038,27 @@ const saveActivity = async (req, res) => {
         { $push: { savedActivity: { activity: id } } },
         { new: true }
       );
-      return res.status(200).json({ message: 'Activity saved successfully', success: true });
+      return res
+        .status(200)
+        .json({ message: "Activity saved successfully", success: true });
     }
   } catch (error) {
-    console.error('Error saving/removing activity:', error);
-    res.status(500).json({ message: 'Error saving/removing activity', error: error.message });
+    console.error("Error saving/removing activity:", error);
+    res.status(500).json({
+      message: "Error saving/removing activity",
+      error: error.message,
+    });
   }
 };
-
-
-
-
 
 // Controller function to retrieve a promo code using a POST request with the promo code in the body
 const getPromoCode = async (req, res) => {
   const { code } = req.body;
-  const  touristId  = res.locals.user_id; // Assuming the tourist's ID is in `req.user` from authentication middleware
-  
+  const touristId = res.locals.user_id; // Assuming the tourist's ID is in `req.user` from authentication middleware
 
   try {
     // Check if code is provided in the request body
     if (!code) {
-      
       return res.status(400).json({ message: "Promo code is required." });
     }
 
@@ -2063,31 +2070,30 @@ const getPromoCode = async (req, res) => {
 
     // Log the result of the database query
     if (!promo) {
-    
       return res.status(404).json({ message: "Promo code not found." });
     }
- 
 
     const currentDate = new Date();
     const startDate = new Date(promo.dateRange.start);
     const endDate = new Date(promo.dateRange.end);
 
-    
-
-    if ((promo.timesUsed <= promo.usage_limit) && (currentDate >= startDate || currentDate <= endDate) && (promo.status == 'active')) {
+    if (
+      promo.timesUsed <= promo.usage_limit &&
+      (currentDate >= startDate || currentDate <= endDate) &&
+      promo.status == "active"
+    ) {
       const tourist = await Tourist.findByIdAndUpdate(
         touristId, // The ID of the tourist to find
         { $set: { currentPromoCode: promo._id } }, // The update operation (sets the new promo code)
         { new: true } // This option ensures that the returned document is the updated one
       );
-      
+
       if (!tourist) {
         return res.status(404).json({ message: "Tourist not found." });
       }
     }
 
     // Save the promo code in the tourist's profile
-   
 
     // Return promo code details along with a success message
     return res.status(200).json({
@@ -2101,7 +2107,7 @@ const getPromoCode = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error retrieving promo code:", error);  // Log any error that occurs
+    console.error("Error retrieving promo code:", error); // Log any error that occurs
     return res.status(500).json({
       message: "An error occurred while retrieving the promo code.",
     });
@@ -2184,6 +2190,47 @@ const hasUnseenNotifications = async (req, res) => {
   }
 };
 
+const getVisitedPages = async (req, res) => {
+  try {
+    const tourist = await Tourist.findById(res.locals.user_id).select(
+      "visitedPages"
+    );
+
+    if (!tourist) {
+      return res.status(400).json({ message: "Tourist not found" });
+    }
+
+    const visitedPages = tourist.visitedPages || [];
+
+    return res.status(200).json({ visitedPages });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "An error occurred while retrieving visited pages" });
+  }
+};
+
+const updateVisitedPages = async (req, res) => {
+  try {
+    const { visitedPages } = req.body;
+    const tourist = await Tourist.findByIdAndUpdate(
+      res.locals.user_id,
+      {
+        $addToSet: { visitedPages: visitedPages },
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({ visitedPages: tourist.visitedPages });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "An error occurred while updating visited pages" });
+  }
+};
+
 module.exports = {
   removeProductFromWishlist,
   moveProductToCart,
@@ -2237,5 +2284,6 @@ module.exports = {
   getTouristNotifications,
   markNotificationsAsSeen,
   hasUnseenNotifications,
-
+  getVisitedPages,
+  updateVisitedPages,
 };

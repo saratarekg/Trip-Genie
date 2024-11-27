@@ -319,6 +319,11 @@ const touristSchema = new Schema(
         },
       },
     ],
+    visitedPages: [
+      {
+        type: String,
+      },
+    ],
   },
   { timestamps: true }
 );

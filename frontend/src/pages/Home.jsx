@@ -229,7 +229,11 @@ export default function Home() {
 
       <div className="mx-auto px-4 py-16">
         {(role === "guest" || role === "tourist") && (
-          <UserGuide onStepChange={handleStepChange} steps={homeSteps} />
+          <UserGuide
+            onStepChange={handleStepChange}
+            steps={homeSteps}
+            pageName="home"
+          />
         )}
         {renderContent()}
       </div>

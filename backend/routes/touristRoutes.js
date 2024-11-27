@@ -15,17 +15,19 @@ const transportationController = require("../controllers/transportationControlle
 
 const router = express.Router();
 
-
 router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
 router.get("/notifications", touristController.getTouristNotifications);
 
-router.get('/unseen-notifications',touristController.hasUnseenNotifications);
+router.get("/unseen-notifications", touristController.hasUnseenNotifications);
 
 // POST /seller/mark-notifications-seen
-router.post('/mark-notifications-seen', touristController.markNotificationsAsSeen);
+router.post(
+  "/mark-notifications-seen",
+  touristController.markNotificationsAsSeen
+);
 
 // router.get('/fill', currencyController.populateCurrencies);
 
@@ -242,9 +244,11 @@ router.post("/promo-code", touristController.applyPromoCode);
 
 router.post("/get/promo-code", touristController.getPromoCode);
 
+router.get("/saved-activities", touristController.getSavedActivities);
+router.get("/saved-itineraries", touristController.getSavedItineraries);
+router.post("/save-activity/:id", touristController.saveActivity);
+router.post("/save-itinerary/:id", touristController.saveItinerary);
 
-router.get('/saved-activities', touristController.getSavedActivities);
-router.get('/saved-itineraries', touristController.getSavedItineraries);
-router.post('/save-activity/:id', touristController.saveActivity);
-router.post('/save-itinerary/:id', touristController.saveItinerary);
+router.get("/visited-pages", touristController.getVisitedPages);
+router.post("/visited-pages", touristController.updateVisitedPages);
 module.exports = router;

@@ -13,7 +13,6 @@ import UpdateItinerary from "./components/UpdateItinerary.jsx";
 import UpdateProduct from "./components/UpdateProduts.jsx";
 import UpdatehistoricalPlace from "./components/UpdateHP.jsx";
 import ProductDetail from "./components/ProductDetail.jsx";
-
 import ShoppingCart from "./components/touristCart.jsx";
 import WishlistPage from "./components/touristWishlist.jsx";
 // import TouristPurchases from "./components/touristPurchases.jsx";
@@ -450,9 +449,7 @@ function AppContent() {
           <Route
             path="/tourguide-report"
             element={
-              <ProtectedRoute
-                allowedRoles={["tour-guide"]}
-              >
+              <ProtectedRoute allowedRoles={["tour-guide"]}>
                 <TourGuideItineraryReport />
               </ProtectedRoute>
             }
@@ -460,9 +457,7 @@ function AppContent() {
           <Route
             path="/tourist-notifications"
             element={
-              <ProtectedRoute
-                allowedRoles={["tourist"]}
-              >
+              <ProtectedRoute allowedRoles={["tourist"]}>
                 <TouristNotifications />
               </ProtectedRoute>
             }

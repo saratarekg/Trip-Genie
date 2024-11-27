@@ -1,11 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Joyride, { STATUS } from "react-joyride";
 import { Button } from "@/components/ui/button";
 import { HelpCircle } from "lucide-react";
+import Cookies from "js-cookie";
+import axios from "axios";
 
-export const UserGuide = ({ steps, onStepChange }) => {
+export const UserGuide = ({ steps, onStepChange, pageName }) => {
   const [runTour, setRunTour] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+
+  // Check if the page is visited
+  useEffect(() => {
+    const checkAndTriggerTour = async () => {
+      let visitedPages = [];
+      const token = Cookies.get("jwt");
+
+      if (token) {
+        // Fetch visited pages from the backend
+        const response = await axios.get(
+          "http://localhost:4000/tourist/visited-pages",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        visitedPages = response.data.visitedPages;
+      } else {
+        // For guests, retrieve from local storage
+        const storedPages = localStorage.getItem("visitedPages");
+        visitedPages = storedPages ? JSON.parse(storedPages) : [];
+      }
+
+      if (!visitedPages.includes(pageName)) {
+        setRunTour(true); // Start the Joyride
+        visitedPages.push(pageName);
+
+        // Update visited pages
+        if (token) {
+          await axios.post(
+            `http://localhost:4000/tourist/visited-pages`,
+            {
+              visitedPages,
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        } else {
+          localStorage.setItem("visitedPages", JSON.stringify(visitedPages));
+        }
+      }
+    };
+
+    checkAndTriggerTour();
+  }, [pageName]);
 
   const handleJoyrideCallback = (data) => {
     const { status, index, type } = data;
