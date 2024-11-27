@@ -66,20 +66,25 @@ const TourGuideItineraryReport = () => {
     setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
-      const { itineraryId, startDate, endDate, month, year } = filters;
+      // const { itineraryId, startDate, endDate, month, year } = filters;
+      const { itineraryId, month, year,day } = filters;
+
       const queryParams = new URLSearchParams();
-      console.log("filters", filters);
+      // console.log("filters", filters);
       if (itineraryId) queryParams.append("selectedItineraries", itineraryId);
-      if (startDate)
-        queryParams.append("startDate", new Date(startDate).toISOString());
-      if (endDate)
-        queryParams.append("endDate", new Date(endDate).toISOString());
-      if (!startDate && !endDate && month) {
-        if (month) queryParams.append("month", month);
-      }
-      if (!startDate && !endDate && year) {
-        if (year) queryParams.append("year", year);
-      }
+      // if (startDate)
+      //   queryParams.append("startDate", new Date(startDate).toISOString());
+      // if (endDate)
+      //   queryParams.append("endDate", new Date(endDate).toISOString());
+      // if (!startDate && !endDate && month) {
+      //   if (month) queryParams.append("month", month);
+      // }
+      // if (!startDate && !endDate && year) {
+      //   if (year) queryParams.append("year", year);
+      // }
+      if (year) queryParams.append("year", year);
+      if (month) queryParams.append("month", month);
+      if (day) queryParams.append("day", day);
 
       const response = await axios.get(
         `http://localhost:4000/tour-guide/itineraries-report?${queryParams.toString()}`,
@@ -482,7 +487,7 @@ const TourGuideItineraryReport = () => {
                 </div>
               </CardHeader>
               <CardContent className="pl-0">
-                <div className="h-[350px]">
+                <div className="h-[200px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                       data={graphData}
@@ -572,7 +577,7 @@ const TourGuideItineraryReport = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="flex flex-col w-full sm:w-auto">
+                {/* <div className="flex flex-col w-full sm:w-auto">
                   <Label
                     htmlFor="startDate"
                     className="text-sm text-gray-500 mb-1"
@@ -591,8 +596,8 @@ const TourGuideItineraryReport = () => {
                     }
                     className="w-full sm:w-[200px]"
                   />
-                </div>
-                <div className="flex flex-col w-full sm:w-auto">
+                </div> */}
+                {/* <div className="flex flex-col w-full sm:w-auto">
                   <Label
                     htmlFor="endDate"
                     className="text-sm text-gray-500 mb-1"
@@ -611,7 +616,7 @@ const TourGuideItineraryReport = () => {
                     }
                     className="w-full sm:w-[200px]"
                   />
-                </div>
+                </div> */}
                 <Select
                   value={filters.year}
                   onValueChange={(value) =>
@@ -638,7 +643,9 @@ const TourGuideItineraryReport = () => {
                   onValueChange={(value) =>
                     setFilters((prev) => ({ ...prev, month: value }))
                   }
-                  disabled={isDateRangeSelected || !filters.year}
+                  // disabled={isDateRangeSelected || !filters.year}
+                 disabled={ !filters.year}
+
                 >
                   <SelectTrigger className="w-full mt-4 sm:w-[200px]">
                     <SelectValue placeholder="Select month" />
@@ -652,6 +659,25 @@ const TourGuideItineraryReport = () => {
                       )
                     )}
                   </SelectContent>
+                </Select>
+                <Select
+                  value={filters.day}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, day: value }))
+                  }
+                  disabled={ !filters.month}
+
+                >
+                  <SelectTrigger className="w-full mt-4 sm:w-[200px]">
+                    <SelectValue placeholder="Select day" />
+                  </SelectTrigger>
+                  <SelectContent>
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
                 </Select>
               </div>
               <div className="overflow-hidden">
