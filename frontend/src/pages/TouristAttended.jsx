@@ -120,14 +120,15 @@ export default function TouristAttendedActivities() {
   return (
     <div>
       <Toaster />
-      <h1 className="text-3xl font-bold mb-8">My Attended Activities</h1>
+      <h1 className="text-3xl font-bold mb-2">My Attended Activities</h1>
+    <p className="text-sm text-gray-500 mb-2">Activities / Attended</p>
+    
       <div >
 
 
         <div >
           <Card>
             <CardHeader>
-              <CardTitle>Attended Activities</CardTitle>
               <CardDescription>
                 Click on an activity to view details
               </CardDescription>

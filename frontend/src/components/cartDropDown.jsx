@@ -11,9 +11,12 @@ export default function CartDropdown({
   isOpen = false, 
   onClose, 
   isCartOpen,
-  setIsCartOpen
+  setIsCartOpen,
+  fetchCartItems,
+  cartItems,
+  setCartItems,
 }) {
-  const [cartItems, setCartItems] = useState([])
+  // const [cartItems, setCartItems] = useState([])
   const [exchangeRates, setExchangeRates] = useState({})
   const [currencies, setCurrencies] = useState([])
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null)
@@ -62,22 +65,22 @@ export default function CartDropdown({
     }
   }, [])
 
-  const fetchCartItems = useCallback(async () => {
-    try {
-      const token = Cookies.get("jwt")
-      const response = await fetch("http://localhost:4000/tourist/cart", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setCartItems(data)
-      }
-    } catch (error) {
-      console.error("Error fetching cart items:", error)
-    }
-  }, [])
+  // const fetchCartItems = useCallback(async () => {
+  //   try {
+  //     const token = Cookies.get("jwt")
+  //     const response = await fetch("http://localhost:4000/tourist/cart", {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+  //     if (response.ok) {
+  //       const data = await response.json()
+  //       setCartItems(data)
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching cart items:", error)
+  //   }
+  // }, [])
 
   const formatPrice = useCallback((price, productCurrency) => {
     if (userRole === 'tourist' && userPreferredCurrency) {
@@ -185,10 +188,10 @@ export default function CartDropdown({
         {item.product.name}
       </span>
       {/* Size Information */}
-      <p className="text-base text-black mt-1">One Size</p>
+      <p className="text-base text-gray-400 font-semibold mt-1">{formatPrice(item.product.price,item.product.currency)}</p>
     </div>
     <p className="font-semibold text-black text-xl">
-      {formatPrice(item.product.price, item.product.currency)}
+      {formatPrice((item.product.price*item.quantity), item.product.currency)}
     </p>
   </div>
 

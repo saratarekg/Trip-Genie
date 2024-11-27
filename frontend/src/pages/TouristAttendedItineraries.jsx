@@ -120,12 +120,12 @@ export default function TouristAttendedActivities() {
   return (
     <div>
       <Toaster />
-      <h1 className="text-3xl font-bold mb-8">My Attended Itineraries</h1>
+      <h1 className="text-3xl font-bold mb-2">My Attended Itineraries</h1>
+    <p className="text-sm text-gray-500 mb-2">Itineraries / Attended</p>
       <div>
         <div >
           <Card>
             <CardHeader>
-              <CardTitle>Attended Itineraries</CardTitle>
               <CardDescription>Your travel plans</CardDescription>
             </CardHeader>
             <CardContent>

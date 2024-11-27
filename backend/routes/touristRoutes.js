@@ -231,9 +231,11 @@ router.get(
 );
 
 router.post("/book-flight", touristController.bookFlight);
+router.post("/cancel-flight/:id", touristController.cancelFlightBooking);
 router.get("/my-flights", touristController.getMyFlights);
 
 router.post("/book-hotel", touristController.bookHotel);
+router.post("/cancel-hotel/:id", touristController.cancelHotelBooking);
 router.get("/my-hotels", touristController.getMyHotels);
 
 router.post("/promo-code", touristController.applyPromoCode);

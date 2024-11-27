@@ -98,7 +98,6 @@ export default function CheckoutPage() {
     cardType: "",
   });
   const [errors, setErrors] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [purchaseStatus, setPurchaseStatus] = useState(null);
   const [purchaseError, setPurchaseError] = useState(null);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
@@ -114,8 +113,13 @@ export default function CheckoutPage() {
   const [deliveryType, setDeliveryType] = useState("Standard");
   const [deliveryTime, setDeliveryTime] = useState("morning");
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [isAddressLoaded, setIsAddressLoaded] = useState(false);
   const paymentMethodRef = useRef(null);
+  const [tourist, setTourist] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAddressLoaded, setIsAddressLoaded] = useState(false);
+  const [isExchangeRateLoaded, setIsExchangeRateLoaded] = useState(false);
+  const [isCurrencySymbolLoaded, setIsCurrencySymbolLoaded] = useState(false);
+
 
   const form = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -147,15 +151,16 @@ export default function CheckoutPage() {
   }, [isAddressDialogOpen]);
 
   useEffect(() => {
-    const loadPrices = async () => {
-      setIsPriceLoading(true);
+    const loadData = async () => {
+      setIsLoading(true);
+      await fetchUserInfo();
       await fetchCart();
       await fetchExchangeRate();
       await getCurrencySymbol();
-      setIsPriceLoading(false);
+      setIsLoading(false);
     };
-    loadPrices();
-  }, [userPreferredCurrency]);
+    loadData();
+  }, [isAddressLoaded, isExchangeRateLoaded, isCurrencySymbolLoaded]);
 
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest";
@@ -171,6 +176,7 @@ export default function CheckoutPage() {
         const currencyId = userData.preferredCurrency;
         setSavedCards(userData.cards || []);
         setSavedAddresses(userData.shippingAddresses || []);
+        setTourist(userData);
 
         const defaultAddress = userData.shippingAddresses?.find(
           (addr) => addr.default
@@ -225,6 +231,7 @@ export default function CheckoutPage() {
         ) {
           await handlePromoSubmit({ preventDefault: () => {} });
         }
+        setIsAddressLoaded(true);
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
@@ -385,7 +392,7 @@ export default function CheckoutPage() {
 
       setPurchaseStatus("success");
       setIsStatusDialogOpen(true);
-      emptyCart();
+      
     } catch (error) {
       console.error("Error completing purchase:", error);
       setPurchaseStatus("error");
@@ -642,6 +649,7 @@ export default function CheckoutPage() {
       } else {
         console.error("Error in fetching exchange rate:", data.message);
       }
+      setIsExchangeRateLoaded(true);
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
     }
@@ -657,6 +665,7 @@ export default function CheckoutPage() {
         }
       );
       setCurrencySymbol(response.data);
+      setIsCurrencySymbolLoaded(true);
     } catch (error) {
       console.error("Error fetching currency symbol:", error);
     }
@@ -677,7 +686,7 @@ export default function CheckoutPage() {
   };
 
   const formatPrice = (price) => {
-    if (isPriceLoading) {
+    if (isLoading || !isAddressLoaded || !isExchangeRateLoaded || !isCurrencySymbolLoaded) {
       return (
         <div className="w-16 h-6 bg-gray-300 rounded-full animate-pulse"></div>
       );
@@ -686,18 +695,18 @@ export default function CheckoutPage() {
     if (cartItems.length > 0) {
       if (userRole === "tourist" && userPreferredCurrency) {
         if (userPreferredCurrency._id === cartItems[0].product.currency) {
-          return `${userPreferredCurrency.symbol}${roundedPrice}`;
+          return `${userPreferredCurrency.symbol}${roundedPrice.toFixed(2)}`;
         } else {
           const exchangedPrice = (roundedPrice * exchangeRates).toFixed(2);
           return `${userPreferredCurrency.symbol}${exchangedPrice}`;
         }
       } else {
         if (currencySymbol) {
-          return `${currencySymbol.symbol}${roundedPrice}`;
+          return `${currencySymbol.symbol}${roundedPrice.toFixed(2)}`;
         }
       }
     }
-    return `$${roundedPrice}`;
+    return `${roundedPrice}`;
   };
 
   const getDeliveryPrice = (deliveryType) => {
@@ -751,7 +760,7 @@ export default function CheckoutPage() {
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
       </div>
-      <div className="max-w-7xl mx-auto  py-8">
+      <div className="max-w-7xl mx-auto py-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] max-h-[500px] overflow-y-auto">
      
@@ -1304,44 +1313,73 @@ export default function CheckoutPage() {
 
       {/* Status Dialog */}
 
-      <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader className="flex items-center gap-2">
-            {purchaseStatus === "success" ? (
-              <>
-                <CheckCircle className="w-6 h-6 text-green-500" />
-                <DialogTitle>Purchase Successful</DialogTitle>
-              </>
-            ) : (
-              <>
-                <XCircle className="w-6 h-6 text-red-500" />
-                <DialogTitle>Purchase Failed</DialogTitle>
-              </>
-            )}
-          </DialogHeader>
-          <p className="mt-2 text-gray-600">
-            {purchaseStatus === "success"
-              ? "Your purchase has been completed successfully."
-              : "There was an error processing your purchase. Please try again."}
-          </p>
-          <p className="text-red-500">{purchaseError}</p>
-          <DialogFooter className="mt-4 flex justify-between">
-  <Button 
-    onClick={() => navigate("/all-products")} 
-    className="bg-[#1A3B47] text-white hover:bg-[#388A94]"
-  >
-    Continue Shopping
-  </Button>
-  <Button 
-    onClick={() => navigate("/")} 
-    className="bg-gray-300 text-white hover:bg-gray-400"
-  >
-    Go to Home
-  </Button>
-</DialogFooter>
+      <Dialog
+  open={isStatusDialogOpen}
+  onOpenChange={(open) => {
+    setIsStatusDialogOpen(open);
+    if (!open) {
+      // Call emptyCart when the dialog is closed
+      emptyCart();
+    }
+  }}
+>
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader className="flex items-center gap-2">
+      {purchaseStatus === "success" ? (
+        <>
+          <CheckCircle className="w-6 h-6 text-green-500" />
+          <DialogTitle>Purchase Successful</DialogTitle>
+        </>
+      ) : (
+        <>
+          <XCircle className="w-6 h-6 text-red-500" />
+          <DialogTitle>Purchase Failed</DialogTitle>
+        </>
+      )}
+    </DialogHeader>
+    <p className="mt-2 text-gray-600">
+      {purchaseStatus === "success"
+        ? "Your purchase has been completed successfully."
+        : "There was an error processing your purchase. Please try again."}
+    </p>
+    {purchaseStatus === "success" && paymentMethod === "wallet" && (
+      <div className="mt-4 text-gray-600">
+        <p>
+          <strong>Amount Paid: </strong>{formatPrice(totalAmount)}
+        </p>
+        <p>
+          <strong>New Wallet Balance: </strong>{formatPrice(tourist.wallet)}
+        </p>
+      </div>
+    )}
+    {purchaseStatus !== "success" && (
+      <p className="text-red-500">{purchaseError}</p>
+    )}
+    <DialogFooter className="mt-4 flex justify-between">
+      <Button
+        onClick={() => {
+          navigate("/all-products");
+          emptyCart();
+        }}
+        className="bg-[#1A3B47] text-white hover:bg-[#388A94]"
+      >
+        Continue Shopping
+      </Button>
 
-        </DialogContent>
-      </Dialog>
+      <Button
+        onClick={() => {
+          navigate("/");
+          emptyCart();
+        }}
+        className="bg-gray-300 text-white hover:bg-gray-400"
+      >
+        Go to Home
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
+
 
       <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">

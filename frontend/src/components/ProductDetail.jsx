@@ -685,6 +685,8 @@ const ProductDetail = () => {
       }
 
       setActionSuccess("Product added to cart successfully!");
+      window.dispatchEvent(new Event('cartUpdated'));
+
     } catch (error) {
       setActionError("Error adding product to cart. Please try again.");
     }

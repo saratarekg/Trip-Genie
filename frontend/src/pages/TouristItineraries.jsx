@@ -307,15 +307,16 @@ export default function Component() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Upcoming Itineraries</h1>
+    <div className="container mx-auto px-4 ">
+      <h1 className="text-3xl font-bold mb-2">My Upcoming Itineraries</h1>
+    <p className="text-sm text-gray-500 mb-2">Itineraries / Upcoming</p>
+    
       <div>
         {" "}
         {/* Updated grid layout */}
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Upcoming Itineraries</CardTitle>
               <CardDescription>Your travel plans</CardDescription>
             </CardHeader>
             <CardContent>

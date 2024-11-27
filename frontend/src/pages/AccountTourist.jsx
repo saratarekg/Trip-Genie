@@ -78,6 +78,16 @@ import Savedactivites from "@/components/Savedactivites";
 import Saveditineraries from "@/components/Saveditineraries";
 import ProductReportSeller from "../components/ProductReportSellerForSeller.jsx";
 
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
+
+
 // Sub-components
 const AccountInfo = ({ user }) => {
   switch (user.role) {
@@ -107,6 +117,8 @@ const AccountInfo = ({ user }) => {
   }
 };
 
+
+
 const ExternalFlightBookings = ({ user }) => {
   const [flights, setFlights] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,90 +127,171 @@ const ExternalFlightBookings = ({ user }) => {
     code: "USD",
     symbol: "$",
   });
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [toast, setToast] = useState(null); // Holds toast content and type
+
+  const fetchFlights = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const [flightsResponse, currencyResponse] = await Promise.all([
+        axios.get("http://localhost:4000/tourist/my-flights", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      setFlights(flightsResponse.data);
+
+      const currencyId = currencyResponse.data.preferredCurrency;
+      const currencyDetailsResponse = await axios.get(
+        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setPreferredCurrency(currencyDetailsResponse.data);
+
+      setIsLoading(false);
+    } catch (err) {
+      setError("Failed to fetch flight bookings or currency information");
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelFlight = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.post(
+        `http://localhost:4000/tourist/cancel-flight/${selectedFlight}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.status === 200) {
+        setToast({
+          type: "success",
+          title: "Success",
+          description: "Flight booking canceled successfully!",
+        });
+        setIsDialogOpen(false);
+        fetchFlights();
+      }
+    } catch (err) {
+      console.error(err);
+      setToast({
+        type: "error",
+        title: "Error",
+        description: "Failed to cancel the flight booking.",
+      });
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const [flightsResponse, currencyResponse] = await Promise.all([
-          axios.get("http://localhost:4000/tourist/my-flights", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("http://localhost:4000/tourist/", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
-        setFlights(flightsResponse.data);
-
-        const currencyId = currencyResponse.data.preferredCurrency;
-        const currencyDetailsResponse = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setPreferredCurrency(currencyDetailsResponse.data);
-
-        setIsLoading(false);
-      } catch (err) {
-        setError("Failed to fetch flight bookings or currency information");
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchFlights();
   }, []);
 
   if (isLoading) return <div>Loading flight bookings...</div>;
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Flight Bookings</h2>
-      {flights.map((flight, index) => (
-        <Card key={index}>
-          <CardHeader>
-            <CardTitle>
-              {flight.from} to {flight.to}
-            </CardTitle>
-            <CardDescription>
-              Departure: {new Date(flight.departureDate).toLocaleString()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Flight ID: {flight.flightID}</p>
+    <ToastProvider>
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Flight Bookings</h2>
+        {flights.map((flight, index) => (
+          <Card key={index}>
+            <CardHeader>
+              <CardTitle>
+                {flight.from} to {flight.to}
+              </CardTitle>
+              <CardDescription>
+                Departure: {new Date(flight.departureDate).toLocaleString()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Flight ID: {flight.flightID}</p>
+              <p>
+                Price: {preferredCurrency.symbol}
+                {flight.price}
+              </p>
+              <p>Number of Tickets: {flight.numberOfTickets}</p>
+              <p>Type: {flight.type}</p>
+              <p>Seat Type: {flight.seatType}</p>
+              <p>
+                Departure Date:{" "}
+                {new Date(flight.departureDate).toLocaleString()}
+              </p>
+              <p>
+                Arrival Date:{" "}
+                {new Date(flight.arrivalDate).toLocaleString()}
+              </p>
+
+              {flight.returnDepartureDate && (
+                <p>
+                  Return Departure:{" "}
+                  {new Date(flight.returnDepartureDate).toLocaleString()}
+                </p>
+              )}
+
+              {flight.returnArrivalDate && (
+                <p>
+                  Return Arrival:{" "}
+                  {new Date(flight.returnArrivalDate).toLocaleString()}
+                </p>
+              )}
+
+              {/* Cancel Button */}
+              <Button
+                variant="outline"
+                className="mt-2"
+                onClick={() => {
+                  setSelectedFlight(flight._id);
+                  setIsDialogOpen(true);
+                }}
+              >
+                Cancel Booking
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+
+        {/* Confirmation Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cancel Flight Booking</DialogTitle>
+            </DialogHeader>
             <p>
-              Price: {preferredCurrency.symbol}
-              {flight.price}
+              Are you sure you want to cancel this booking? This action cannot
+              be undone.
             </p>
-            <p>Number of Tickets: {flight.numberOfTickets}</p>
-            <p>Type: {flight.type}</p>
-            <p>Seat Type: {flight.seatType}</p>
-            <p>Flight Type: {flight.flightType}</p>
-            <p>Departure Date:  {new Date(flight.departureDate).toLocaleString()}</p>
-            <p>Arrival Date:  {new Date(flight.arrivalDate).toLocaleString()}</p>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleCancelFlight}>
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
-
-            {flight.returnDepartureDate && (
-              <p>
-                Return Departure:{" "}
-                {new Date(flight.returnDepartureDate).toLocaleString()}
-              </p>
-            )}
-
-            {flight.returnArrivalDate && (
-              <p>
-                Return Arrival:{" "}
-                {new Date(flight.returnArrivalDate).toLocaleString()}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+        {/* Toast Notification */}
+        {toast && (
+          <Toast>
+            <ToastTitle>{toast.title}</ToastTitle>
+            <ToastDescription>{toast.description}</ToastDescription>
+            <ToastClose onClick={() => setToast(null)} />
+          </Toast>
+        )}
+        <ToastViewport />
+      </div>
+    </ToastProvider>
   );
 };
+
 
 const ExternalHotelBookings = ({ user }) => {
   const [hotels, setHotels] = useState([]);
@@ -208,73 +301,151 @@ const ExternalHotelBookings = ({ user }) => {
     code: "USD",
     symbol: "$",
   });
+  const [selectedHotel, setSelectedHotel] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const fetchHotels = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const [hotelsResponse, currencyResponse] = await Promise.all([
+        axios.get("http://localhost:4000/tourist/my-hotels", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      setHotels(hotelsResponse.data);
+
+      const currencyId = currencyResponse.data.preferredCurrency;
+      const currencyDetailsResponse = await axios.get(
+        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setPreferredCurrency(currencyDetailsResponse.data);
+
+      setIsLoading(false);
+    } catch (err) {
+      setError("Failed to fetch hotel bookings or currency information");
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelHotel = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.post(
+        `http://localhost:4000/tourist/cancel-hotel/${selectedHotel}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.status === 200) {
+        setToast({
+          type: "success",
+          title: "Success",
+          description: "Hotel booking canceled successfully!",
+        });
+        setIsDialogOpen(false);
+        fetchHotels();
+      }
+    } catch (err) {
+      console.error(err);
+      setToast({
+        type: "error",
+        title: "Error",
+        description: "Failed to cancel the hotel booking.",
+      });
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const [hotelsResponse, currencyResponse] = await Promise.all([
-          axios.get("http://localhost:4000/tourist/my-hotels", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("http://localhost:4000/tourist/", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
-        setHotels(hotelsResponse.data);
-
-        const currencyId = currencyResponse.data.preferredCurrency;
-        const currencyDetailsResponse = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setPreferredCurrency(currencyDetailsResponse.data);
-
-        setIsLoading(false);
-      } catch (err) {
-        setError("Failed to fetch hotel bookings or currency information");
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+    fetchHotels();
   }, []);
 
   if (isLoading) return <div>Loading hotel bookings...</div>;
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold">Hotel Bookings</h2>
-      {hotels.map((hotel, index) => (
-        <Card key={index}>
-          <CardHeader>
-            <CardTitle>{hotel.hotelName}</CardTitle>
-            <CardDescription>
-              Check-in: {new Date(hotel.checkinDate).toLocaleDateString()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p>Hotel ID: {hotel.hotelID}</p>
+    <ToastProvider>
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Hotel Bookings</h2>
+        {hotels.map((hotel, index) => (
+          <Card key={index}>
+            <CardHeader>
+              <CardTitle>{hotel.hotelName}</CardTitle>
+              <CardDescription>
+                Check-in: {new Date(hotel.checkinDate).toLocaleDateString()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p>Hotel ID: {hotel.hotelID}</p>
+              <p>
+                Check-out: {new Date(hotel.checkoutDate).toLocaleDateString()}
+              </p>
+              <p>Number of Rooms: {hotel.numberOfRooms}</p>
+              <p>Room Name: {hotel.roomName}</p>
+              <p>
+                Price: {preferredCurrency.symbol}
+                {hotel.price}
+              </p>
+              <p>Number of Adults: {hotel.numberOfAdults}</p>
+
+              {/* Cancel Button */}
+              <Button
+                variant="outline"
+                className="mt-2"
+                onClick={() => {
+                  setSelectedHotel(hotel._id);
+                  setIsDialogOpen(true);
+                }}
+              >
+                Cancel Booking
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+
+        {/* Confirmation Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Cancel Hotel Booking</DialogTitle>
+            </DialogHeader>
             <p>
-              Check-out: {new Date(hotel.checkoutDate).toLocaleDateString()}
+              Are you sure you want to cancel this booking? This action cannot
+              be undone.
             </p>
-            <p>Number of Rooms: {hotel.numberOfRooms}</p>
-            <p>Room Name: {hotel.roomName}</p>
-            <p>
-              Price: {preferredCurrency.symbol}
-              {hotel.price}
-            </p>
-            <p>Number of Adults: {hotel.numberOfAdults}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleCancelHotel}>
+                Confirm
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Toast Notification */}
+        {toast && (
+          <Toast>
+            <ToastTitle>{toast.title}</ToastTitle>
+            <ToastDescription>{toast.description}</ToastDescription>
+            <ToastClose onClick={() => setToast(null)} />
+          </Toast>
+        )}
+        <ToastViewport />
+      </div>
+    </ToastProvider>
   );
 };
+
+
 
 const Upcoming = ({ user }) => {
   switch (user.role) {
@@ -970,55 +1141,59 @@ export default function AccountManagement() {
   };
 
   const menuStructure = {
-    "Saved": [
+    "Activities": [
       {
-        name: "Saved Activities",
+        name: "Saved",
         icon: Bookmark,
         tab: "SavedActivities",
         roles: ["tourist"],
       },
       {
-        name: "Saved Itineraries",
-        icon: Bookmark,
-        tab: "SavedItineraries",
-        roles: ["tourist"],
-      },
-    ],
-    "Upcoming Bookings": [
-      {
-        name: "Activities",
+        name: "Upcoming",
         icon: Calendar,
         tab: "upcomingActivities",
         roles: ["tourist"],
       },
+      
       {
-        name: "Itineraries",
+        name: "Attended",
+        icon: HistoryIcon,
+        tab: "history",
+        roles: ["tourist"],
+      },
+      
+    ],
+    "Itineraries": [
+      {
+        name: "Saved",
+        icon: Bookmark,
+        tab: "SavedItineraries",
+        roles: ["tourist"],
+      },
+      
+      {
+        name: "Upcoming",
         icon: Calendar,
         tab: "upcomingItineraries",
         roles: ["tourist"],
       },
       {
-        name: "Transportation",
-        icon: Car,
-        tab: "upcomingTransportation",
-        roles: ["tourist"],
-      },
-    ],
-    History: [
-      {
-        name: "Itineraries",
+        name: "Attended",
         icon: HistoryIcon,
         tab: "historyItineraries",
         roles: ["tourist"],
       },
+      
+    ],
+    "Transportation": [
       {
-        name: "Activities",
-        icon: HistoryIcon,
-        tab: "history",
+        name: "Upcoming",
+        icon: Car,
+        tab: "upcomingTransportation",
         roles: ["tourist"],
       },
       {
-        name: "Transportation",
+        name: "Attended",
         icon: HistoryIcon,
         tab: "historyTransportation",
         roles: ["tourist"],

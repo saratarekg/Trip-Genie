@@ -46,7 +46,7 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
       onClick={() => onSelect(activity._id)}
     >
       {/* Bookmark Icon on Top of Image with Tooltip */}
-      <div className="relative h-36 w-36 shrink-0  rounded-sm">
+      <div className="relative h-36 w-36 shrink-0  rounded-sm ">
         <img
           src={activity.pictures?.[0]?.url || defaultImage}
           alt={activity.name}
@@ -54,13 +54,13 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
         />
         {/* Bookmark Icon on Top of Image with Tooltip */}
         <div
-          className="absolute top-0 left-0 z-50"
+          className="absolute top-1 left-1 z-50 bg-white p-1 rounded-full"
           onMouseEnter={() => setTooltipVisible(true)}
           onMouseLeave={() => setTooltipVisible(false)}
         >
           <Bookmark
-            className="fill-[#388A94] text-[#388A94] hover:fill-[#2e6b77] hover:text-[#2e6b77]"
-            size={36}
+            className="fill-[#1A3B47] text-[#1A3B47] hover:fill-[#2e6b77] hover:text-[#2e6b77]"
+            size={25}
             onClick={handleUnsave}
           />
           {tooltipVisible && (
@@ -69,6 +69,7 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
             </div>
           )}
         </div>
+
       </div>
 
       <div className="flex flex-1 flex-col gap-1">
@@ -236,6 +237,9 @@ export default function SavedActivities() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
+       <h1 className="text-3xl font-bold mb-2">Saved Activities</h1>
+    <p className="text-sm text-gray-500 mb-2">Activities / Saved</p>
+    
       <div className="container mx-auto px-4 py-8">
         {isLoading ? (
           <Loader />

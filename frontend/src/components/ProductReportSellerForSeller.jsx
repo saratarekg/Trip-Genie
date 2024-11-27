@@ -446,6 +446,22 @@ font-bold text-[#1A3B47]">Sales Analytics</CardTitle>
                   ))}
                 </SelectContent>
               </Select>
+              <Select
+                value={filters.day}
+                onValueChange={(value) => setFilters(prev => ({ ...prev, day: value }))}
+                disabled={!filters.year || !filters.month}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Select day" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: filters.year && filters.month ? getDaysInMonth(new Date(parseInt(filters.year), parseInt(filters.month) - 1)) : 31 }, (_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {i + 1}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
