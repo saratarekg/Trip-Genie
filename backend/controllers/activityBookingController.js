@@ -30,7 +30,6 @@ exports.createBooking = async (req, res) => {
       }
 
       walletBalance = user.wallet - paymentAmount;
-
     }
 
     // Create a new booking
@@ -67,25 +66,24 @@ exports.createBooking = async (req, res) => {
       },
       loyaltyBadge: determineBadgeLevel(totalPoints), // Update loyalty badge based on total points
     };
-    
+
     // Conditionally add wallet balance and history only for wallet payments
-    if (paymentType === 'Wallet') {
+    if (paymentType === "Wallet") {
       updateFields.wallet = walletBalance; // Update wallet balance
       updateFields.$push = {
         history: {
-          transactionType: 'payment',
+          transactionType: "payment",
           amount: paymentAmount,
           details: `You’ve successfully booked activity ${activityExists.name}`,
         },
       };
     }
-    
+
     const updatedTourist = await Tourist.findByIdAndUpdate(
       userId,
       updateFields,
       { new: true, runValidators: true } // Ensure it returns the updated tourist
     );
-    
 
     if (!updatedTourist) {
       return res.status(404).json({ message: "Tourist not found" });
@@ -193,14 +191,18 @@ exports.updateBooking = async (req, res) => {
 exports.deleteBooking = async (req, res) => {
   try {
     // Step 1: Find the booking
-    const booking = await ActivityBooking.findById(req.params.id).populate('activity'); // Populate the activity field
+    const booking = await ActivityBooking.findById(req.params.id).populate(
+      "activity"
+    ); // Populate the activity field
     if (!booking) {
       return res.status(400).json({ message: "Booking not found" });
     }
 
     // Ensure the activity exists within the booking
     if (!booking.activity) {
-      return res.status(400).json({ message: "Activity details not found for the booking" });
+      return res
+        .status(400)
+        .json({ message: "Activity details not found for the booking" });
     }
 
     // Step 2: Add the booking amount to the tourist's wallet
@@ -209,15 +211,15 @@ exports.deleteBooking = async (req, res) => {
 
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
-      { 
+      {
         $inc: { wallet: bookingAmount }, // Increment the wallet balance by the booking amount (Refund)
         $push: {
           history: {
-            transactionType: 'deposit', // Mark it as a deposit
+            transactionType: "deposit", // Mark it as a deposit
             amount: bookingAmount, // The amount refunded
-            details: `Refunded for Cancelling Activity: ${booking.activity.name}` // Details of the refund
-          }
-        }
+            details: `Refunded for Cancelling Activity: ${booking.activity.name}`, // Details of the refund
+          },
+        },
       },
       { new: true, runValidators: true } // Return updated tourist and run validations
     );
@@ -227,7 +229,9 @@ exports.deleteBooking = async (req, res) => {
     }
 
     // Step 3: Delete the booking after wallet update
-    const deletedBooking = await ActivityBooking.findByIdAndDelete(req.params.id);
+    const deletedBooking = await ActivityBooking.findByIdAndDelete(
+      req.params.id
+    );
     if (!deletedBooking) {
       return res.status(400).json({ message: "Booking not found" });
     }
@@ -240,7 +244,6 @@ exports.deleteBooking = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
-
 
 exports.getTouristBookings = async (req, res) => {
   try {
@@ -329,25 +332,7 @@ exports.getBookingsReport = async (req, res) => {
     const { startDate, endDate, month, year } = req.query; // Get the month from the query string
     let selectedActivities = req.query.selectedActivities; // Get the selected activities from the query string
     const advertiserId = res.locals.user_id; // Get the user's ID from response locals
-    let activities = [];
-
-    let bookings;
-    if (startDate && endDate) {
-      activities = await Activity.find({
-        advertiser: advertiserId,
-        timing: { $gte: startDate, $lt: endDate },
-      });
-    } else if (month && year) {
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const endDate = new Date(parseInt(year), parseInt(month), 0);
-      activities = await Activity.find({
-        advertiser: advertiserId,
-        timing: { $gte: startDate, $lt: endDate },
-      });
-    } else {
-      activities = await Activity.find({ advertiser: advertiserId });
-    }
-
+    const activities = await Activity.find({ advertiser: advertiserId });
     let activityIds = activities.map((activity) => activity._id);
     if (selectedActivities) {
       selectedActivities = selectedActivities.split(",");
@@ -355,9 +340,25 @@ exports.getBookingsReport = async (req, res) => {
         selectedActivities.includes(activityId.toString())
       );
     }
-    bookings = await ActivityBooking.find({
-      activity: { $in: activityIds },
-    }).populate("activity");
+
+    let bookings;
+    if (startDate && endDate) {
+      bookings = await ActivityBooking.find({
+        activity: { $in: activityIds },
+        createdAt: { $gte: startDate, $lte: endDate },
+      }).populate("activity");
+    } else if (month && year) {
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0);
+      bookings = await ActivityBooking.find({
+        activity: { $in: activityIds },
+        createdAt: { $gte: startDate, $lte: endDate },
+      }).populate("activity");
+    } else {
+      bookings = await ActivityBooking.find({
+        activity: { $in: activityIds },
+      }).populate("activity");
+    }
 
     let totalRevenue = 0;
     let totalTickets = 0;

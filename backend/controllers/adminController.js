@@ -139,8 +139,6 @@ const getAdminByID = async (req, res) => {
   }
 };
 
-
-
 const changePassword = async (req, res) => {
   try {
     const admin = await Admin.findById(res.locals.user_id);
@@ -246,7 +244,7 @@ const getAdminProfile = async (req, res) => {
 
 const getAdminInfo = async (req, res) => {
   try {
-    const admin = await Admin.findById( res.locals.user_id);
+    const admin = await Admin.findById(res.locals.user_id);
     if (!admin) {
       return res.status(404).json({ message: "Admin not found" });
     }
@@ -480,7 +478,7 @@ const getItinerariesReport = async (req, res) => {
     if (month && year) {
       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
       const endDate = new Date(parseInt(year), parseInt(month), 0);
-      query.date = { $gte: startDate, $lt: endDate };
+      query.createdAt = { $gte: startDate, $lt: endDate };
     }
 
     const itineraryBookings = await ItineraryBooking.find(query).populate(
@@ -520,11 +518,12 @@ const getActivitiesReport = async (req, res) => {
     if (month && year) {
       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
       const endDate = new Date(parseInt(year), parseInt(month), 0);
-      query.timing = { $gte: startDate, $lt: endDate };
     }
 
     const activities = await Activity.find(query); // Fetch all activities
-    const activityBookings = await ActivityBooking.find().populate("activity");
+    const activityBookings = await ActivityBooking.find({
+      createdAt: { $gte: startDate, $lt: endDate },
+    }).populate("activity");
 
     const activitiesSales = activities.map((activity) => {
       const totalRevenue = activityBookings.reduce((total, booking) => {

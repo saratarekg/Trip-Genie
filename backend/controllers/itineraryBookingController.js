@@ -36,7 +36,6 @@ exports.createBooking = async (req, res) => {
       walletBalance -= paymentAmount;
 
       // Add a transaction to history for payment
-
     }
 
     // Step 3: Update itinerary's `isBooked` status
@@ -67,7 +66,10 @@ exports.createBooking = async (req, res) => {
     );
 
     // Step 5: Calculate loyalty points based on the user's badge level
-    const loyaltyPoints = calculateLoyaltyPoints(paymentAmount, user.loyaltyBadge);
+    const loyaltyPoints = calculateLoyaltyPoints(
+      paymentAmount,
+      user.loyaltyBadge
+    );
 
     // Calculate total points after adding new loyalty points
     const totalPoints = user.totalPoints + loyaltyPoints;
@@ -79,31 +81,28 @@ exports.createBooking = async (req, res) => {
       },
       loyaltyBadge: determineBadgeLevel(totalPoints), // Update loyalty badge based on total points
     };
-    
-    // Conditionally add wallet balance and history only for wallet payments
-    console.log(paymentType)
 
-    if (paymentType === 'Wallet') {
-      console.log("gowa el if")
+    // Conditionally add wallet balance and history only for wallet payments
+    console.log(paymentType);
+
+    if (paymentType === "Wallet") {
+      console.log("gowa el if");
 
       updateFields.wallet = walletBalance; // Update wallet balance
       updateFields.$push = {
         history: {
-          transactionType: 'payment',
+          transactionType: "payment",
           amount: paymentAmount,
           details: `You’ve successfully booked Itinerary ${itineraryExists.title}`,
-
         },
       };
     }
-    
+
     const updatedTourist = await Tourist.findByIdAndUpdate(
       userId,
       updateFields,
       { new: true, runValidators: true } // Ensure it returns the updated tourist
     );
-    
-  
 
     if (!updatedTourist) {
       return res.status(400).json({ message: "Tourist not found" });
@@ -122,7 +121,6 @@ exports.createBooking = async (req, res) => {
     });
   }
 };
-
 
 const calculateLoyaltyPoints = (paymentAmount, badgeLevel) => {
   let pointsMultiplier = 0;
@@ -214,8 +212,9 @@ exports.updateBooking = async (req, res) => {
 // Delete a booking by ID
 exports.deleteBooking = async (req, res) => {
   try {
-
-    const booking = await ItineraryBooking.findById(req.params.id).populate('itinerary'); // Populate the activity field
+    const booking = await ItineraryBooking.findById(req.params.id).populate(
+      "itinerary"
+    ); // Populate the activity field
     if (!booking) {
       return res.status(400).json({ message: "Booking not found" });
     }
@@ -236,13 +235,14 @@ exports.deleteBooking = async (req, res) => {
       touristId,
       {
         $inc: { wallet: bookingAmount }, // Increment the wallet balance by the booking amount (refund)
-        $push: { // Add the refund as a transaction to the history
+        $push: {
+          // Add the refund as a transaction to the history
           history: {
-            transactionType: 'deposit',
+            transactionType: "deposit",
             amount: bookingAmount,
             details: `Refunded for Cancelling Itinerary ${booking.itinerary.title}`,
-          }
-        }
+          },
+        },
       },
       { new: true, runValidators: true } // Ensure it returns the updated tourist and runs validators
     );
@@ -264,7 +264,6 @@ exports.deleteBooking = async (req, res) => {
     });
   }
 };
-
 
 exports.getTouristBookings = async (req, res) => {
   try {
@@ -324,14 +323,14 @@ exports.getItinerariesReport = async (req, res) => {
     if (startDate && endDate) {
       bookings = await ItineraryBooking.find({
         itinerary: { $in: itineraryIds },
-        date: { $gte: startDate, $lt: endDate },
+        createdAt: { $gte: startDate, $lt: endDate },
       }).populate("itinerary");
     } else if (month && year) {
       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
       const endDate = new Date(parseInt(year), parseInt(month), 0);
       bookings = await ItineraryBooking.find({
         itinerary: { $in: itineraryIds },
-        date: { $gte: startDate, $lt: endDate },
+        createdAt: { $gte: startDate, $lt: endDate },
       }).populate("itinerary");
     } else {
       bookings = await ItineraryBooking.find({
