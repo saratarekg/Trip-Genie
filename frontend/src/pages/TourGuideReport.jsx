@@ -1,36 +1,57 @@
-
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { format, subDays, subMonths, subYears, addDays, addMonths, addYears, startOfYear } from 'date-fns';
-import { Area, AreaChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Calendar, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import {
+  format,
+  subDays,
+  subMonths,
+  subYears,
+  addDays,
+  addMonths,
+  addYears,
+  startOfYear,
+} from "date-fns";
+import {
+  Area,
+  AreaChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { Calendar, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { DateRangePicker } from "@/components/ui/date-range-picker"
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const TourGuideItineraryReport = () => {
   const [reportData, setReportData] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState('all');
-  const [graphPeriod, setGraphPeriod] = useState('week');
+  const [selectedPeriod, setSelectedPeriod] = useState("all");
+  const [graphPeriod, setGraphPeriod] = useState("week");
   const [filters, setFilters] = useState({
-    itineraryId: '',
+    itineraryId: "",
     startDate: null,
     endDate: null,
-    month: '',
-    year: ''
+    month: "",
+    year: "",
   });
   const [graphData, setGraphData] = useState([]);
   const [itineraries, setItineraries] = useState([]);
@@ -44,21 +65,21 @@ const TourGuideItineraryReport = () => {
   const fetchItineraryReport = async () => {
     setIsLoading(true);
     try {
-      const token = Cookies.get('jwt');
+      const token = Cookies.get("jwt");
       const { itineraryId, startDate, endDate, month, year } = filters;
       const queryParams = new URLSearchParams();
       console.log("filters", filters);
-      if (itineraryId) queryParams.append('selectedItineraries', itineraryId);
-      if (startDate) queryParams.append('startDate', new Date(startDate).toISOString());
-      if (endDate) queryParams.append('endDate', new Date(endDate).toISOString());
-      if(!startDate && !endDate && month) {
-        if (month) queryParams.append('month', month);
-
+      if (itineraryId) queryParams.append("selectedItineraries", itineraryId);
+      if (startDate)
+        queryParams.append("startDate", new Date(startDate).toISOString());
+      if (endDate)
+        queryParams.append("endDate", new Date(endDate).toISOString());
+      if (!startDate && !endDate && month) {
+        if (month) queryParams.append("month", month);
       }
-        if(!startDate && !endDate && year) {
-        if (year) queryParams.append('year', year);
-        }
-
+      if (!startDate && !endDate && year) {
+        if (year) queryParams.append("year", year);
+      }
 
       const response = await axios.get(
         `http://localhost:4000/tour-guide/itineraries-report?${queryParams.toString()}`,
@@ -71,23 +92,29 @@ const TourGuideItineraryReport = () => {
       setReportData(response.data);
       if (response.data && response.data.itineraryReport) {
         updateGraphData(response.data.itineraryReport, graphPeriod);
-        
-        setItineraries(response.data.itineraryReport.map(item => ({
-          id: item.itinerary._id,
-          title: item.itinerary.title
-        })));
+
+        setItineraries(
+          response.data.itineraryReport.map((item) => ({
+            id: item.itinerary._id,
+            title: item.itinerary.title,
+          }))
+        );
 
         setTotalRevenue(response.data.totalRevenue || 0);
         setTotalTickets(response.data.totalTickets || 0);
-        setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.itineraryReport, selectedPeriod));
+        setSelectedPeriodRevenue(
+          calculatePeriodRevenue(response.data.itineraryReport, selectedPeriod)
+        );
 
         setFilteredReport(response.data.itineraryReport);
       } else {
-        setError('Invalid data structure received from the server: itineraryReport missing');
+        setError(
+          "Invalid data structure received from the server: itineraryReport missing"
+        );
       }
     } catch (error) {
-      console.error('Error fetching itinerary report:', error);
-      setError('Failed to fetch itinerary report. Please try again later.');
+      console.error("Error fetching itinerary report:", error);
+      setError("Failed to fetch itinerary report. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -105,56 +132,60 @@ const TourGuideItineraryReport = () => {
 
   useEffect(() => {
     if (reportData && reportData.itineraryReport) {
-      setSelectedPeriodRevenue(calculatePeriodRevenue(reportData.itineraryReport, selectedPeriod));
+      setSelectedPeriodRevenue(
+        calculatePeriodRevenue(reportData.itineraryReport, selectedPeriod)
+      );
     }
   }, [selectedPeriod, reportData]);
 
   const updateGraphData = (reportData, period) => {
     if (!Array.isArray(reportData)) {
-      console.error('Invalid report data:', reportData);
+      console.error("Invalid report data:", reportData);
       return;
     }
     const now = new Date();
     let startDate, dateFormat, groupingFunction, data;
 
     switch (period) {
-      case 'week':
+      case "week":
         startDate = subDays(now, 6);
-        dateFormat = 'EEE';
-        groupingFunction = (date) => format(date, 'yyyy-MM-dd');
+        dateFormat = "EEE";
+        groupingFunction = (date) => format(date, "yyyy-MM-dd");
         data = Array.from({ length: 7 }, (_, i) => ({
           date: format(addDays(startDate, i), dateFormat),
           tickets: 0,
-          revenue: 0
+          revenue: 0,
         }));
         break;
-      case 'year':
+      case "year":
         startDate = startOfYear(now);
-        dateFormat = 'MMM';
-        groupingFunction = (date) => format(date, 'yyyy-MM');
+        dateFormat = "MMM";
+        groupingFunction = (date) => format(date, "yyyy-MM");
         data = Array.from({ length: 12 }, (_, i) => ({
           date: format(addMonths(startDate, i), dateFormat),
           tickets: 0,
-          revenue: 0
+          revenue: 0,
         }));
         break;
-      case 'all':
+      case "all":
         startDate = subYears(now, 7);
-        dateFormat = 'yyyy';
-        groupingFunction = (date) => format(date, 'yyyy');
+        dateFormat = "yyyy";
+        groupingFunction = (date) => format(date, "yyyy");
         data = Array.from({ length: 8 }, (_, i) => ({
           date: format(addYears(startDate, i), dateFormat),
           tickets: 0,
-          revenue: 0
+          revenue: 0,
         }));
         break;
     }
 
-    reportData.forEach(item => {
+    reportData.forEach((item) => {
       const date = new Date(item.itinerary.createdAt);
       if (date >= startDate && date <= now) {
         const key = groupingFunction(date);
-        const index = data.findIndex(d => d.date === format(date, dateFormat));
+        const index = data.findIndex(
+          (d) => d.date === format(date, dateFormat)
+        );
         if (index !== -1) {
           data[index].tickets += item.tickets;
           data[index].revenue += item.revenue;
@@ -171,16 +202,30 @@ const TourGuideItineraryReport = () => {
     return reportData.reduce((sum, item) => {
       const saleDate = new Date(item.itinerary.createdAt);
       switch (period) {
-        case 'today':
-          return sum + (saleDate.toDateString() === now.toDateString() ? item.revenue : 0);
-        case 'week':
+        case "today":
+          return (
+            sum +
+            (saleDate.toDateString() === now.toDateString() ? item.revenue : 0)
+          );
+        case "week":
           const weekAgo = subDays(now, 7);
-          return sum + (saleDate >= weekAgo && saleDate <= now ? item.revenue : 0);
-        case 'month':
-          return sum + (saleDate.getMonth() === now.getMonth() && saleDate.getFullYear() === now.getFullYear() ? item.revenue : 0);
-        case 'year':
-          return sum + (saleDate.getFullYear() === now.getFullYear() ? item.revenue : 0);
-        case 'all':
+          return (
+            sum + (saleDate >= weekAgo && saleDate <= now ? item.revenue : 0)
+          );
+        case "month":
+          return (
+            sum +
+            (saleDate.getMonth() === now.getMonth() &&
+            saleDate.getFullYear() === now.getFullYear()
+              ? item.revenue
+              : 0)
+          );
+        case "year":
+          return (
+            sum +
+            (saleDate.getFullYear() === now.getFullYear() ? item.revenue : 0)
+          );
+        case "all":
         default:
           return sum + item.revenue;
       }
@@ -188,25 +233,46 @@ const TourGuideItineraryReport = () => {
   };
 
   const resetFilters = () => {
-    setFilters({ itineraryId: '', startDate: null, endDate: null, month: '', year: '' });
+    setFilters({
+      itineraryId: "",
+      startDate: null,
+      endDate: null,
+      month: "",
+      year: "",
+    });
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
   if (isLoading) return <div className="p-6 text-center">Loading...</div>;
 
-  const fillPercentage = totalRevenue ? (selectedPeriodRevenue / totalRevenue) * 100 : 0;
+  const fillPercentage = totalRevenue
+    ? (selectedPeriodRevenue / totalRevenue) * 100
+    : 0;
 
-  const thisMonthRevenue = calculatePeriodRevenue(reportData?.itineraryReport || [], 'month');
+  const thisMonthRevenue = calculatePeriodRevenue(
+    reportData?.itineraryReport || [],
+    "month"
+  );
   const lastMonthRevenue = (() => {
     const lastMonth = subMonths(new Date(), 1);
-    return reportData?.itineraryReport?.reduce((sum, item) => {
-      const saleDate = new Date(item.itinerary.createdAt);
-      return sum + (saleDate.getMonth() === lastMonth.getMonth() && 
-                   saleDate.getFullYear() === lastMonth.getFullYear() ? item.revenue : 0);
-    }, 0) || 0;
+    return (
+      reportData?.itineraryReport?.reduce((sum, item) => {
+        const saleDate = new Date(item.itinerary.createdAt);
+        return (
+          sum +
+          (saleDate.getMonth() === lastMonth.getMonth() &&
+          saleDate.getFullYear() === lastMonth.getFullYear()
+            ? item.revenue
+            : 0)
+        );
+      }, 0) || 0
+    );
   })();
 
-  const thisMonthChange = lastMonthRevenue === 0 ? 100 : ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+  const thisMonthChange =
+    lastMonthRevenue === 0
+      ? 100
+      : ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
 
   const isDateRangeSelected = filters.startDate || filters.endDate;
 
@@ -222,29 +288,65 @@ const TourGuideItineraryReport = () => {
             <Card className="md:col-span-3 flex flex-col justify-center items-center">
               <CardHeader className="p-3 w-full">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-bold text-[#1A3B47]">Total Revenue</CardTitle>
+                  <CardTitle className="text-lg font-bold text-[#1A3B47]">
+                    Total Revenue
+                  </CardTitle>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
+                      >
                         <Calendar className="h-3 w-3 mr-1" />
                         <span className="mr-1">{selectedPeriod}</span>
                         <ChevronDown className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[100px]">
-                      <DropdownMenuItem onSelect={() => setSelectedPeriod("today")}>Today</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setSelectedPeriod("week")}>This Week</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setSelectedPeriod("month")}>This Month</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setSelectedPeriod("year")}>This Year</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setSelectedPeriod("all")}>All Time</DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => setSelectedPeriod("today")}
+                      >
+                        Today
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => setSelectedPeriod("week")}
+                      >
+                        This Week
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => setSelectedPeriod("month")}
+                      >
+                        This Month
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => setSelectedPeriod("year")}
+                      >
+                        This Year
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() => setSelectedPeriod("all")}
+                      >
+                        All Time
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </CardHeader>
               <CardContent className="p-3 flex flex-col justify-center items-center w-full">
                 <div className="relative flex items-center justify-center w-32 h-32">
-                  <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="#E6DCCF" strokeWidth="10" />
+                  <svg
+                    className="w-full h-full -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      fill="none"
+                      stroke="#E6DCCF"
+                      strokeWidth="10"
+                    />
                     <motion.circle
                       cx="50"
                       cy="50"
@@ -266,16 +368,22 @@ const TourGuideItineraryReport = () => {
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-lg font-bold text-[#1A3B47]">${selectedPeriodRevenue?.toFixed(2)}</span>
-                    <span className="text-sm text-[#5D9297]">{selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)}</span>
+                    <span className="text-lg font-bold text-[#1A3B47]">
+                      ${selectedPeriodRevenue?.toFixed(2)}
+                    </span>
+                    <span className="text-sm text-[#5D9297]">
+                      {selectedPeriod.charAt(0).toUpperCase() +
+                        selectedPeriod.slice(1)}
+                    </span>
                   </div>
                 </div>
                 <div className="text-center mt-4">
                   <p className="text-base text-[#5D9297]">
-                    {(fillPercentage).toFixed(1)}% of total
+                    {fillPercentage.toFixed(1)}% of total
                   </p>
                   <p className="text-base font-semibold text-[#1A3B47]">
-                    {totalRevenue !== null && `Total Revenue: $${totalRevenue?.toFixed(2)}`}
+                    {totalRevenue !== null &&
+                      `Total Revenue: $${totalRevenue?.toFixed(2)}`}
                   </p>
                 </div>
               </CardContent>
@@ -285,17 +393,23 @@ const TourGuideItineraryReport = () => {
               {/* Monthly Revenue - This Month */}
               <Card>
                 <CardHeader className="flex justify-between">
-                  <CardTitle className="text-lg font-bold text-[#1A3B47]">This Month</CardTitle>
+                  <CardTitle className="text-lg font-bold text-[#1A3B47]">
+                    This Month
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="">
                   <div className="flex flex-col items-start -mt-4">
                     <p className="text-sm text-gray-500">Revenue</p>
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center">
-                        <span className="text-lg font-bold text-[#5D9297]">${thisMonthRevenue.toFixed(2)}</span>
+                        <span className="text-lg font-bold text-[#5D9297]">
+                          ${thisMonthRevenue.toFixed(2)}
+                        </span>
                         <motion.span
                           className={`ml-12 flex items-center text-xs font-semibold px-2 py-1 rounded-full ${
-                            thisMonthChange >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            thisMonthChange >= 0
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
                           }`}
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -317,26 +431,19 @@ const TourGuideItineraryReport = () => {
               {/* Monthly Revenue - Last Month */}
               <Card>
                 <CardHeader className="">
-                  <CardTitle className="text-lg font-bold text-[#1A3B47]">Last Month</CardTitle>
+                  <CardTitle className="text-lg font-bold text-[#1A3B47]">
+                    Last Month
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="">
                   <div className="flex flex-col items-start -mt-4">
                     <div>
                       <p className="text-sm text-gray-500">Revenue</p>
-                      <span className="text-lg font-bold text-[#5D9297]">${lastMonthRevenue.toFixed(2)}</span>
+                      <span className="text-lg font-bold text-[#5D9297]">
+                        ${lastMonthRevenue.toFixed(2)}
+                      </span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Total Sales */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold text-[#1A3B47]">Total Sales</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-[#5D9297]">{totalTickets}</div>
-                  <p className="text-sm text-gray-500">Total tickets sold</p>
                 </CardContent>
               </Card>
             </div>
@@ -345,19 +452,31 @@ const TourGuideItineraryReport = () => {
             <Card className="md:col-span-6">
               <CardHeader className="p-3 mb-2">
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg font-bold text-[#1A3B47]">Revenue Analytics</CardTitle>
+                  <CardTitle className="text-lg font-bold text-[#1A3B47]">
+                    Revenue Analytics
+                  </CardTitle>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
+                      >
                         <Calendar className="h-3 w-3 mr-1" />
                         <span className="mr-1">{graphPeriod}</span>
                         <ChevronDown className="h-3 w-3" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[100px]">
-                      <DropdownMenuItem onSelect={() => setGraphPeriod("week")}>This Week</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setGraphPeriod("year")}>This Year</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setGraphPeriod("all")}>All Time</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setGraphPeriod("week")}>
+                        This Week
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setGraphPeriod("year")}>
+                        This Year
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setGraphPeriod("all")}>
+                        All Time
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -370,9 +489,23 @@ const TourGuideItineraryReport = () => {
                       margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
                     >
                       <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#B5D3D1" stopOpacity={0.8} />
-                          <stop offset="95%" stopColor="#B5D3D1" stopOpacity={0} />
+                        <linearGradient
+                          id="colorRevenue"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#B5D3D1"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#B5D3D1"
+                            stopOpacity={0}
+                          />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -409,7 +542,9 @@ const TourGuideItineraryReport = () => {
           <Card>
             <CardHeader className="p-4">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-xl font-bold text-[#1A3B47]">Itinerary Report</CardTitle>
+                <CardTitle className="text-xl font-bold text-[#1A3B47]">
+                  Itinerary Report
+                </CardTitle>
                 <button
                   onClick={resetFilters}
                   className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
@@ -420,16 +555,17 @@ const TourGuideItineraryReport = () => {
             </CardHeader>
             <CardContent className="">
               <div className="flex flex-wrap gap-4 mb-4">
-                <Select 
+                <Select
                   value={filters.itineraryId}
-                  onValueChange={(value) => setFilters(prev => ({ ...prev, itineraryId: value }))}>
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, itineraryId: value }))
+                  }
+                >
                   <SelectTrigger className="w-full mt-4 sm:w-[200px]">
                     <SelectValue placeholder="Select itinerary" />
                   </SelectTrigger>
                   <SelectContent>
                     {itineraries.map((itinerary) => (
-                        // log the itinerary id
-                        console.log(itinerary),
                       <SelectItem key={itinerary.id} value={itinerary.id}>
                         {itinerary.title}
                       </SelectItem>
@@ -437,70 +573,108 @@ const TourGuideItineraryReport = () => {
                   </SelectContent>
                 </Select>
                 <div className="flex flex-col w-full sm:w-auto">
-                  <Label htmlFor="startDate" className="text-sm text-gray-500 mb-1">Start Date</Label>
+                  <Label
+                    htmlFor="startDate"
+                    className="text-sm text-gray-500 mb-1"
+                  >
+                    Start Date
+                  </Label>
                   <Input
                     id="startDate"
                     type="date"
-                    value={filters.startDate || ''}
-                    onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                    value={filters.startDate || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        startDate: e.target.value,
+                      }))
+                    }
                     className="w-full sm:w-[200px]"
                   />
                 </div>
                 <div className="flex flex-col w-full sm:w-auto">
-                  <Label htmlFor="endDate" className="text-sm text-gray-500 mb-1">End Date</Label>
+                  <Label
+                    htmlFor="endDate"
+                    className="text-sm text-gray-500 mb-1"
+                  >
+                    End Date
+                  </Label>
                   <Input
                     id="endDate"
                     type="date"
-                    value={filters.endDate || ''}
-                    onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                    value={filters.endDate || ""}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        endDate: e.target.value,
+                      }))
+                    }
                     className="w-full sm:w-[200px]"
                   />
                 </div>
-                <Select 
+                <Select
                   value={filters.year}
-                  onValueChange={(value) => setFilters(prev => ({ ...prev, year: value }))}
-                  disabled={isDateRangeSelected}>
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, year: value }))
+                  }
+                  disabled={isDateRangeSelected}
+                >
                   <SelectTrigger className="w-full mt-4 sm:w-[200px]">
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                    {Array.from(
+                      { length: 10 },
+                      (_, i) => new Date().getFullYear() - i
+                    ).map((year) => (
                       <SelectItem key={year} value={year.toString()}>
                         {year}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <Select 
+                <Select
                   value={filters.month}
-                  onValueChange={(value) => setFilters(prev => ({ ...prev, month: value }))}
-                  disabled={isDateRangeSelected || !filters.year}>
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, month: value }))
+                  }
+                  disabled={isDateRangeSelected || !filters.year}
+                >
                   <SelectTrigger className="w-full mt-4 sm:w-[200px]">
                     <SelectValue placeholder="Select month" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-                      <SelectItem key={month} value={month.toString()}>
-                        {format(new Date(2000, month - 1, 1), 'MMMM')}
-                      </SelectItem>
-                    ))}
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                      (month) => (
+                        <SelectItem key={month} value={month.toString()}>
+                          {format(new Date(2000, month - 1, 1), "MMMM")}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
-                
               </div>
               <div className="overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">No.</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Itinerary</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tickets Sold</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
+                        No.
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Itinerary
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tickets Sold
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Revenue
+                      </th>
                     </tr>
                   </thead>
                   <AnimatePresence mode="wait">
                     {!isLoading && (
-                      <motion.tbody 
+                      <motion.tbody
                         key="table-body"
                         className="bg-white divide-y divide-gray-200"
                         initial={{ opacity: 0 }}
@@ -509,21 +683,51 @@ const TourGuideItineraryReport = () => {
                         transition={{ duration: 0.3 }}
                       >
                         {filteredReport.map((item, index) => (
-                          <motion.tr 
+                          <motion.tr
                             key={index}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.2, delay: index * 0.05 }}
                           >
-                            <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.itinerary.title}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.tickets}</td>
+                            <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {index + 1}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {item.itinerary.title}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {item.tickets}
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               ${parseFloat(item.revenue).toFixed(2)}
                             </td>
                           </motion.tr>
                         ))}
+                        <motion.tr
+                          key="total-row"
+                          className="bg-gray-50 font-semibold"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{
+                            duration: 0.2,
+                            delay: filteredReport.length * 0.05,
+                          }}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Total
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            -
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {totalTickets}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ${totalRevenue.toFixed(2)}
+                          </td>
+                        </motion.tr>
                       </motion.tbody>
                     )}
                   </AnimatePresence>
@@ -538,4 +742,3 @@ const TourGuideItineraryReport = () => {
 };
 
 export default TourGuideItineraryReport;
-
