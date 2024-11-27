@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Loader from "./Loader.jsx";
 import { Button } from "@/components/ui/button";
+import { UserGuide } from "@/components/UserGuide";
 import * as jwtDecode from "jwt-decode";
 import {
   Dialog,
@@ -52,7 +53,9 @@ const DeleteConfirmationModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4 text-[#1A3B47]">Confirm Deletion</h2>
+        <h2 className="text-xl font-bold mb-4 text-[#1A3B47]">
+          Confirm Deletion
+        </h2>
         <p className="mb-6 text-[#1A3B47]">
           Are you sure you want to delete the itinerary "{itineraryTitle}"?
         </p>
@@ -138,17 +141,18 @@ const ItineraryCard = ({
     // }
   }, [userInfo.role, itinerary.currency]);
 
-  
   useEffect(() => {
     if (savedItineraries && savedItineraries.length > 0) {
       console.log(savedItineraries);
       console.log(itinerary._id);
-      setIsSaved(savedItineraries.some(savedItinerary => savedItinerary._id === itinerary._id.toString()));
+      setIsSaved(
+        savedItineraries.some(
+          (savedItinerary) => savedItinerary._id === itinerary._id.toString()
+        )
+      );
     }
     console.log(isSaved);
   }, [savedItineraries, itinerary._id]);
-  
-
 
   const handleSaveToggle = async () => {
     if (!itinerary || !itinerary._id) return; // Add guard clause
@@ -171,8 +175,6 @@ const ItineraryCard = ({
       console.error("Error toggling save itinerary:", error);
     }
   };
-
-
 
   useEffect(() => {
     if (
@@ -216,116 +218,121 @@ const ItineraryCard = ({
     ?.flatMap((activity) => activity.pictures ?? [])
     .find((picture) => picture?.url)?.url;
 
-    return (
-      <div
-        className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative"
-        onClick={() => onSelect(itinerary._id)}
-      >
-        {/* Save Button for tourists */}
-        {userInfo?.role === "tourist" && (
-          <Button
-            className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-0"
+  return (
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative itinerary-card"
+      onClick={() => onSelect(itinerary._id)}
+    >
+      {/* Save Button for tourists */}
+      {userInfo?.role === "tourist" && (
+        <button
+          className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-0"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent parent click handler
+            handleSaveToggle();
+          }}
+          aria-label="Save itinerary"
+        >
+          <Bookmark
+            className={`w-6 h-6 ${
+              isSaved
+                ? "fill-yellow-400 stroke-black stroke-[1.5]"
+                : "stroke-black"
+            }`}
+          />
+        </button>
+      )}
+
+      <div className="relative aspect-video overflow-hidden">
+        <img
+          src={firstAvailablePicture || defaultImage}
+          alt={itinerary.title}
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
+      </div>
+
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xl font-semibold text-[#1A3B47]">
+            {itinerary.title}
+          </h3>
+          {!itinerary.isActivated && (
+            <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
+              {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
+            </span>
+          )}
+        </div>
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-lg font-bold text-[#388A94]">
+            {formatPrice(itinerary.price)}
+          </span>
+          <span className="text-sm text-[#1A3B47]">{itinerary.language}</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {itinerary.activities?.flatMap((activity, index) => [
+            ...(activity.category
+              ?.filter((cat) => {
+                if (uniqueCategories.has(cat.name)) {
+                  return false;
+                }
+                uniqueCategories.add(cat.name);
+                return true;
+              })
+              .map((cat) => (
+                <span
+                  key={`cat-${index}-${cat.id || cat.name}`}
+                  className="bg-[#E6DCCF] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
+                >
+                  {cat.name}
+                </span>
+              )) || []),
+
+            ...(activity.tags
+              ?.filter((tag) => {
+                if (uniqueTags.has(tag.type)) {
+                  return false;
+                }
+                uniqueTags.add(tag.type);
+                return true;
+              })
+              .map((tag) => (
+                <span
+                  key={`tag-${index}-${tag.id || tag.type}`}
+                  className="bg-[#B5D3D1] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
+                >
+                  {tag.type}
+                </span>
+              )) || []),
+          ])}
+        </div>
+      </div>
+
+      {role === "tour-guide" && userId === itinerary.tourGuide._id && (
+        <div className="absolute top-2 right-2 flex space-x-2">
+          <button
+            className="p-2 bg-[#5D9297] text-white rounded-full hover:bg-[#388A94] transition-colors"
             onClick={(e) => {
               e.stopPropagation();
-              handleSaveToggle();
+              window.location.href = `/update-itinerary/${itinerary._id}`;
             }}
+            aria-label="Edit itinerary"
           >
-            <Bookmark
-              className={`w-6 h-6 ${isSaved ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]" : "stroke-black"
-                }`}
-            />
-          </Button>
-        )}
-    
-        <div className="relative aspect-video overflow-hidden">
-          <img
-            src={firstAvailablePicture || defaultImage}
-            alt={itinerary.title}
-            className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-          />
+            <Edit className="h-4 w-4" />
+          </button>
+          <button
+            className="p-2 bg-[#F88C33] text-white rounded-full hover:bg-[#E6DCCF] transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteConfirm(itinerary._id, itinerary.title);
+            }}
+            aria-label="Delete itinerary"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
-    
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xl font-semibold text-[#1A3B47]">{itinerary.title}</h3>
-            {!itinerary.isActivated && (
-              <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
-                {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
-              </span>
-            )}
-          </div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-lg font-bold text-[#388A94]">
-              {formatPrice(itinerary.price)}
-            </span>
-            <span className="text-sm text-[#1A3B47]">{itinerary.language}</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {itinerary.activities?.flatMap((activity, index) => [
-              ...(activity.category
-                ?.filter((cat) => {
-                  if (uniqueCategories.has(cat.name)) {
-                    return false;
-                  }
-                  uniqueCategories.add(cat.name);
-                  return true;
-                })
-                .map((cat) => (
-                  <span
-                    key={`cat-${index}-${cat.id || cat.name}`}
-                    className="bg-[#E6DCCF] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
-                  >
-                    {cat.name}
-                  </span>
-                )) || []),
-    
-              ...(activity.tags
-                ?.filter((tag) => {
-                  if (uniqueTags.has(tag.type)) {
-                    return false;
-                  }
-                  uniqueTags.add(tag.type);
-                  return true;
-                })
-                .map((tag) => (
-                  <span
-                    key={`tag-${index}-${tag.id || tag.type}`}
-                    className="bg-[#B5D3D1] text-[#1A3B47] text-xs px-2 py-1 rounded-full"
-                  >
-                    {tag.type}
-                  </span>
-                )) || []),
-            ])}
-          </div>
-        </div>
-    
-        {role === "tour-guide" && userId === itinerary.tourGuide._id && (
-          <div className="absolute top-2 right-2 flex space-x-2">
-            <button
-              className="p-2 bg-[#5D9297] text-white rounded-full hover:bg-[#388A94] transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.location.href = `/update-itinerary/${itinerary._id}`;
-              }}
-              aria-label="Edit itinerary"
-            >
-              <Edit className="h-4 w-4" />
-            </button>
-            <button
-              className="p-2 bg-[#F88C33] text-white rounded-full hover:bg-[#E6DCCF] transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteConfirm(itinerary._id, itinerary.title);
-              }}
-              aria-label="Delete itinerary"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-      </div>
-    );
-    
+      )}
+    </div>
+  );
 };
 
 export function AllItinerariesComponent() {
@@ -363,6 +370,26 @@ export function AllItinerariesComponent() {
   const [itineraryToDelete, setItineraryToDelete] = useState(null);
   const [savedItineraries, setSavedItineraries] = useState([]);
 
+  const itinerariesSteps = [
+    {
+      target: "body",
+      content:
+        "Welcome to our Itineraries page! Here you can find all the exciting trip plans we offer.",
+      placement: "center",
+    },
+    {
+      target: ".filter",
+      content:
+        "Use the filters to narrow down your search based on your preferences.",
+      placement: "right",
+    },
+    {
+      target: ".itinerary-card",
+      content:
+        "Each card represents a unique activity. Click on a card to learn more about it.",
+      placement: "bottom",
+    },
+  ];
   const navigate = useNavigate();
 
   const fetchUserInfo = useCallback(async () => {
@@ -411,17 +438,20 @@ export function AllItinerariesComponent() {
   };
 
   useEffect(() => {
-    if(!isPriceInitialized){
+    if (!isPriceInitialized) {
       fetchMaxPrice();
-      }
+    }
   }, [userInfo]);
   const fetchSavedItineraries = useCallback(async () => {
     if (userInfo?.role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/saved-itineraries", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://localhost:4000/tourist/saved-itineraries",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setSavedItineraries(response.data);
       } catch (error) {
         console.error("Error fetching saved itineraries:", error);
@@ -433,36 +463,40 @@ export function AllItinerariesComponent() {
     fetchSavedItineraries();
   }, [fetchSavedItineraries]);
 
-  const handleItinerarySaved = useCallback((itineraryId, isSaved) => {
-    setAlertMessage({
-      type: "success",
-      message: isSaved ? "Itinerary saved successfully!" : "Itinerary unsaved successfully!",
-    });
-    
-    // Clear the alert message after 2 seconds
-    setTimeout(() => {
-      setAlertMessage(null);
-    }, 2000);
+  const handleItinerarySaved = useCallback(
+    (itineraryId, isSaved) => {
+      setAlertMessage({
+        type: "success",
+        message: isSaved
+          ? "Itinerary saved successfully!"
+          : "Itinerary unsaved successfully!",
+      });
 
-    fetchSavedItineraries();
-  }, [fetchSavedItineraries]);
+      // Clear the alert message after 2 seconds
+      setTimeout(() => {
+        setAlertMessage(null);
+      }, 2000);
+
+      fetchSavedItineraries();
+    },
+    [fetchSavedItineraries]
+  );
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(`http://localhost:4000/${role}/max-price-itinerary`);
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          console.log("data: ",data);
-          setMaxPriceOfItinerary(data);
-          setMaxPrice(data);
-          setPriceRange([0, data]);
-          setIsPriceInitialized(true);
-          
-    };
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    console.log("data: ", data);
+    setMaxPriceOfItinerary(data);
+    setMaxPrice(data);
+    setPriceRange([0, data]);
+    setIsPriceInitialized(true);
+  };
 
   const handleSortByPreference = async () => {
     try {
@@ -649,7 +683,6 @@ export function AllItinerariesComponent() {
     }
   };
 
-
   useEffect(() => {
     fetchItineraries();
 
@@ -686,16 +719,12 @@ export function AllItinerariesComponent() {
   }, [priceRange, dateRange, selectedTypes, selectedLanguages, isBooked]);
 
   useEffect(() => {
-      if (sortBy || sortOrder || myItineraries) {
-        searchItineraries();
-      } else {
-        fetchItineraries();
-      }
-  }, [
-    sortBy,
-    sortOrder,
-    myItineraries,
-  ]);
+    if (sortBy || sortOrder || myItineraries) {
+      searchItineraries();
+    } else {
+      fetchItineraries();
+    }
+  }, [sortBy, sortOrder, myItineraries]);
 
   const handleSort = (attribute) => {
     setIsLoading(true);
@@ -828,241 +857,264 @@ export function AllItinerariesComponent() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-          </div>
+      <UserGuide steps={itinerariesSteps} />
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
       {isLoading ? (
         <Loader />
       ) : (
         <div className="container mx-auto px-4 py-8">
-           <div className=" px-4 sm:px-6 lg:px-8 mb-4">
+          <div className=" px-4 sm:px-6 lg:px-8 mb-4">
             <div className="max-w-7xl mx-auto">
               <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
                 All Trip Plans
               </h1>
             </div>
-          
-          <div className="flex gap-8 px-4 sm:px-6 lg:px-8 mb-4">
-            {/* Sidebar Filters */}
-            <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
-                <Button
-                  onClick={clearFilters}
-                  size="sm"
-                  className="text-[#1A3B47] hover:text-[#E6DCCF] bg-transparent border-none"
-                >
-                  Clear All
-                </Button>
-              </div>
-              
-              {/* Price Range Filter */}
-              <div className="mb-6">
-                <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
-                {isPriceInitialized && (
-                  <DualHandleSliderComponent
-                    min={0}
-                    max={maxPriceOfItinerary}
-                    symbol={getSymbol()}
-                    step={Math.max(1, Math.ceil((maxPriceOfItinerary * exchangeRateForFilter) / 100))}
-                    values={priceRange}
-                    exchangeRate={exchangeRateForFilter}
-                    middleColor="#5D9297"
-                    colorRing="#388A94"
-                    onChange={(values) => setPriceRange(values)}
-                  />
-                )}
-              </div>
 
-               {/* Date Range Input */}
-               <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
-              <div className="flex flex-col space-y-2">
-                <div>
-                  <label className="block text-sm font-medium text-[#1A3B47]">From:</label>
-                  <input
-                    type="date"
-                    value={dateRange.lower}
-                    onChange={handleLowerDateChange}
-                    className="w-full mt-1 border rounded-lg p-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#1A3B47]">To:</label>
-                  <input
-                    type="date"
-                    value={dateRange.upper}
-                    onChange={handleUpperDateChange}
-                    min={dateRange.lower}
-                    className="w-full mt-1 border rounded-lg p-2"
-                  />
-                </div>
-              </div>
-            </div>
-
-              {/* Type Filter */}
-              <div className="mb-6">
-                <h3 className="font-medium text-[#1A3B47] mb-2">Type</h3>
-                <ScrollArea className="h-[150px]">
-                  {typesOptions.map((type) => (
-                    <div key={type} className="flex items-center space-x-2 mb-2">
-                      <Checkbox
-                        id={`type-${type}`}
-                        checked={selectedTypes.includes(type)}
-                        onCheckedChange={(checked) => {
-                          setSelectedTypes((prev) =>
-                            checked
-                              ? [...prev, type]
-                              : prev.filter((t) => t !== type)
-                          );
-                        }}
-                      />
-                      <label
-                        htmlFor={`type-${type}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
-                      >
-                        {type}
-                      </label>
-                    </div>
-                  ))}
-                </ScrollArea>
-              </div>
-
-              {/* Language Filter */}
-              <div className="mb-6">
-                <h3 className="font-medium text-[#1A3B47] mb-2">Language</h3>
-                <ScrollArea className="h-[150px]">
-                  {languagesOptions.map((language) => (
-                    <div key={language} className="flex items-center space-x-2 mb-2">
-                      <Checkbox
-                        id={`language-${language}`}
-                        checked={selectedLanguages.includes(language)}
-                        onCheckedChange={(checked) => {
-                          setSelectedLanguages((prev) =>
-                            checked
-                              ? [...prev, language]
-                              : prev.filter((l) => l !== language)
-                          );
-                        }}
-                      />
-                      <label
-                        htmlFor={`language-${language}`}
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
-                      >
-                        {language}
-                      </label>
-                    </div>
-                  ))}
-                </ScrollArea>
-              </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="flex-1">
-              {/* Search and Filter Controls */}
-              <div className="mb-4">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="relative flex-grow">
-                    <input
-                      type="text"
-                      placeholder="Search itineraries..."
-                      className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
-                  </div>
-                  <span className="text-gray-500 text-sm whitespace-nowrap">
-                    ({itineraries.length} itineraries)
-                  </span>
-
+            <div className="flex gap-8 px-4 sm:px-6 lg:px-8 mb-4">
+              {/* Sidebar Filters */}
+              <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-[#1A3B47]">
+                    Filters
+                  </h2>
                   <Button
-                  variant="outline"
-                  size="sm"
-                  className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
-                  onClick={() => handleSort("price")}
-                >
-                  <ArrowUpDown className="w-4 h-4 mr-2" />
-                  Price {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
-                  onClick={() => handleSort("rating")}
-                >
-                  <ArrowUpDown className="w-4 h-4 mr-2" />
-                  Rating {sortBy === "rating" && (sortOrder === 1 ? "↑" : "↓")}
-                </Button>
+                    onClick={clearFilters}
+                    size="sm"
+                    className="text-[#1A3B47] hover:text-[#E6DCCF] bg-transparent border-none"
+                  >
+                    Clear All
+                  </Button>
+                </div>
+
+                {/* Price Range Filter */}
+                <div className="mb-6">
+                  <h3 className="font-medium text-[#1A3B47] mb-2">
+                    Price Range
+                  </h3>
+                  {isPriceInitialized && (
+                    <DualHandleSliderComponent
+                      min={0}
+                      max={maxPriceOfItinerary}
+                      symbol={getSymbol()}
+                      step={Math.max(
+                        1,
+                        Math.ceil(
+                          (maxPriceOfItinerary * exchangeRateForFilter) / 100
+                        )
+                      )}
+                      values={priceRange}
+                      exchangeRate={exchangeRateForFilter}
+                      middleColor="#5D9297"
+                      colorRing="#388A94"
+                      onChange={(values) => setPriceRange(values)}
+                    />
+                  )}
+                </div>
+                {/* Date Range Input */}
+                <div className="mb-6">
+                  <h3 className="font-medium text-[#1A3B47] mb-2">
+                    Date Range
+                  </h3>
+                  <div className="flex flex-col space-y-2">
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A3B47]">
+                        From:
+                      </label>
+                      <input
+                        type="date"
+                        value={dateRange.lower}
+                        onChange={handleLowerDateChange}
+                        className="w-full mt-1 border rounded-lg p-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-[#1A3B47]">
+                        To:
+                      </label>
+                      <input
+                        type="date"
+                        value={dateRange.upper}
+                        onChange={handleUpperDateChange}
+                        min={dateRange.lower}
+                        className="w-full mt-1 border rounded-lg p-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* Type Filter */}
+                <div className="mb-6">
+                  <h3 className="font-medium text-[#1A3B47] mb-2">Type</h3>
+                  <ScrollArea className="h-[150px]">
+                    {typesOptions.map((type) => (
+                      <div
+                        key={type}
+                        className="flex items-center space-x-2 mb-2"
+                      >
+                        <Checkbox
+                          id={`type-${type}`}
+                          checked={selectedTypes.includes(type)}
+                          onCheckedChange={(checked) => {
+                            setSelectedTypes((prev) =>
+                              checked
+                                ? [...prev, type]
+                                : prev.filter((t) => t !== type)
+                            );
+                          }}
+                        />
+                        <label
+                          htmlFor={`type-${type}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
+                        >
+                          {type}
+                        </label>
+                      </div>
+                    ))}
+                  </ScrollArea>
+                </div>
+                {/* Language Filter */}
+                <div className="mb-6">
+                  <h3 className="font-medium text-[#1A3B47] mb-2">Language</h3>
+                  <ScrollArea className="h-[150px]">
+                    {languagesOptions.map((language) => (
+                      <div
+                        key={language}
+                        className="flex items-center space-x-2 mb-2"
+                      >
+                        <Checkbox
+                          id={`language-${language}`}
+                          checked={selectedLanguages.includes(language)}
+                          onCheckedChange={(checked) => {
+                            setSelectedLanguages((prev) =>
+                              checked
+                                ? [...prev, language]
+                                : prev.filter((l) => l !== language)
+                            );
+                          }}
+                        />
+                        <label
+                          htmlFor={`language-${language}`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
+                        >
+                          {language}
+                        </label>
+                      </div>
+                    ))}
+                  </ScrollArea>
                 </div>
               </div>
-
-              {error && (
-                <div className="text-[#F88C33] text-center mb-4">{error}</div>
-              )}
-
-              {/* Itineraries Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {itineraries
-                  .slice((currentPage - 1) * tripsPerPage, currentPage * tripsPerPage)
-                  .map((itinerary) => (
-                    <ItineraryCard
-                      key={itinerary._id}
-                      itinerary={itinerary}
-                      onSelect={handleItinerarySelect}
-                      role={userInfo.role}
-                      userInfo={userInfo}
-                      canModify={canModify}
-                      setShowDeleteConfirm={setShowDeleteConfirm}
-                      setSelectedItinerary={setSelectedItinerary}
-                      onDeleteConfirm={handleDeleteConfirm}
-                      savedItineraries={savedItineraries}
-                      onItinerarySaved={handleItinerarySaved}
-                    />
-                  ))}
-              </div>
-
-              {/* Pagination */}
-              <div className="mt-8 flex justify-center items-center space-x-4">
-                <Button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  variant="outline"
-                  size="icon"
-                  className="text-[#1A3B47] border-[#1A3B47]"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm font-medium text-[#1A3B47]">
-                  Page {currentPage} of {Math.ceil(itineraries.length / tripsPerPage)}
-                </span>
-                <Button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === Math.ceil(itineraries.length / tripsPerPage)}
-                  variant="outline"
-                  size="icon"
-                  className="text-[#1A3B47] border-[#1A3B47]"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+              {/* Main Content */}
+              <div className="flex-1">
+                {/* Search and Filter Controls */}
+                <div className="mb-4">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="relative flex-grow">
+                      <input
+                        type="text"
+                        placeholder="Search itineraries..."
+                        className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+                    </div>
+                    <span className="text-gray-500 text-sm whitespace-nowrap">
+                      ({itineraries.length} itineraries)
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
+                      onClick={() => handleSort("price")}
+                    >
+                      <ArrowUpDown className="w-4 h-4 mr-2" />
+                      Price{" "}
+                      {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
+                      onClick={() => handleSort("rating")}
+                    >
+                      <ArrowUpDown className="w-4 h-4 mr-2" />
+                      Rating{" "}
+                      {sortBy === "rating" && (sortOrder === 1 ? "↑" : "↓")}
+                    </Button>
+                  </div>
+                </div>
+                {error && (
+                  <div className="text-[#F88C33] text-center mb-4">{error}</div>
+                )}
+                {/* Itineraries Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {itineraries
+                    .slice(
+                      (currentPage - 1) * tripsPerPage,
+                      currentPage * tripsPerPage
+                    )
+                    .map((itinerary) => (
+                      <ItineraryCard
+                        key={itinerary._id}
+                        itinerary={itinerary}
+                        onSelect={handleItinerarySelect}
+                        role={userInfo.role}
+                        userInfo={userInfo}
+                        canModify={canModify}
+                        setShowDeleteConfirm={setShowDeleteConfirm}
+                        setSelectedItinerary={setSelectedItinerary}
+                        onDeleteConfirm={handleDeleteConfirm}
+                        savedItineraries={savedItineraries}
+                        onItinerarySaved={handleItinerarySaved}
+                      />
+                    ))}
+                </div>
+                {/* Pagination */}
+                <div className="mt-8 flex justify-center items-center space-x-4">
+                  <Button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    variant="outline"
+                    size="icon"
+                    className="text-[#1A3B47] border-[#1A3B47]"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium text-[#1A3B47]">
+                    Page {currentPage} of{" "}
+                    {Math.ceil(itineraries.length / tripsPerPage)}
+                  </span>
+                  <Button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={
+                      currentPage ===
+                      Math.ceil(itineraries.length / tripsPerPage)
+                    }
+                    variant="outline"
+                    size="icon"
+                    className="text-[#1A3B47] border-[#1A3B47]"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
           </div>
         </div>
       )}
-
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
         itineraryTitle={itineraryToDelete?.title}
       />
-
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-[#1A3B47]">Delete Itinerary</DialogTitle>
+            <DialogTitle className="text-[#1A3B47]">
+              Delete Itinerary
+            </DialogTitle>
             <DialogDescription className="text-[#1A3B47]">
               Are you sure you want to delete this itinerary?
             </DialogDescription>
@@ -1075,13 +1127,16 @@ export function AllItinerariesComponent() {
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} className="bg-[#F88C33] text-white">
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="bg-[#F88C33] text-white"
+            >
               Delete
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
         <DialogContent>
           <DialogHeader>
@@ -1107,7 +1162,6 @@ export function AllItinerariesComponent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <Dialog
         open={deleteError !== null}
         onOpenChange={() => setDeleteError(null)}
@@ -1123,7 +1177,11 @@ export function AllItinerariesComponent() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="default" onClick={() => setDeleteError(null)} className="bg-[#E6DCCF] hover:bg-[#F88C33]">
+            <Button
+              variant="default"
+              onClick={() => setDeleteError(null)}
+              className="bg-[#E6DCCF] hover:bg-[#F88C33]"
+            >
               Close
             </Button>
           </DialogFooter>
@@ -1131,8 +1189,9 @@ export function AllItinerariesComponent() {
       </Dialog>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}

@@ -42,10 +42,12 @@ const NavLinkIcon = ({ to, children }) => (
   </Link>
 );
 
-const NavLink = ({ to, children }) => (
+const NavLink = ({ to, children, className }) => (
   <Link
     to={to}
-    className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium"
+    className={`text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium ${
+      className ? className : ""
+    }`}
     onClick={() => setIsCartOpen(false)}
   >
     {children}
@@ -222,8 +224,6 @@ export function NavbarComponent() {
     fetchCartItems();
   }, []);
 
-  
-
   const fetchCartItems = useCallback(async () => {
     try {
       const token = Cookies.get("jwt");
@@ -247,14 +247,13 @@ export function NavbarComponent() {
     fetchCartItems();
 
     // Set up event listener for cart updates
-    window.addEventListener('cartUpdated', fetchCartItems);
+    window.addEventListener("cartUpdated", fetchCartItems);
 
     // Clean up the event listener
     return () => {
-      window.removeEventListener('cartUpdated', fetchCartItems);
+      window.removeEventListener("cartUpdated", fetchCartItems);
     };
   }, [fetchCartItems]);
-
 
   const logOut = async () => {
     console.log("Logging out...");
@@ -355,11 +354,9 @@ export function NavbarComponent() {
                           Itinerary
                         </Link>
                       </div>
-
                     )}
                   </div>
                   <NavLink to="/tourguide-report">Sales Report</NavLink>
-
                 </>
               )}
               {role === "seller" && (
@@ -414,16 +411,28 @@ export function NavbarComponent() {
               )}
               {role === "tourist" && (
                 <>
-                  <NavLink to="/activity">Activities</NavLink>
-                  <NavLink to="/all-itineraries">Itineraries</NavLink>
-                  <NavLink to="/all-historical-places">
+                  <NavLink to="/activity" className="navbar-activities">
+                    Activities
+                  </NavLink>
+                  <NavLink to="/all-itineraries" className="navbar-itineraries">
+                    Itineraries
+                  </NavLink>
+                  <NavLink
+                    to="/all-historical-places"
+                    className="navbar-historical-places"
+                  >
                     Historical Places
                   </NavLink>
-                  <NavLink to="/all-products">Products</NavLink>
+                  <NavLink to="/all-products" className="navbar-products">
+                    Products
+                  </NavLink>
 
                   <div>
                     {/* Transportation Dropdown */}
-                    <div className="relative" ref={transportationRef}>
+                    <div
+                      className="relative navbar-transportation"
+                      ref={transportationRef}
+                    >
                       <button
                         onClick={() => (
                           toggleDropdown("transportation"), setIsCartOpen(false)
@@ -458,7 +467,9 @@ export function NavbarComponent() {
                     </div>
                   </div>
 
-                  <NavLink to="/hotels">Hotels</NavLink>
+                  <NavLink to="/hotels" className="navbar-hotels">
+                    Hotels
+                  </NavLink>
                 </>
               )}
               {role === "advertiser" && (
@@ -661,7 +672,7 @@ export function NavbarComponent() {
                         setIsCartOpen={setIsCartOpen}
                         isCartOpen={isCartOpen}
                         onClose={() => setIsCartOpen(false)}
-                        fetchCartItems = {fetchCartItems}
+                        fetchCartItems={fetchCartItems}
                         cartItems={cartItems}
                         setCartItems={setCartItems}
                       />
