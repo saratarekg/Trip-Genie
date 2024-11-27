@@ -3,17 +3,14 @@ import { useLocation, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import CartDropdown from "@/components/cartDropDown";
-import axios from 'axios'
+import axios from "axios";
 import { cartEvents } from "@/service/cartEvents";
 
-import { NotificationsDropdownSeller } from '@/components/SellerNotificationsDropdown'
-import { NotificationsDropdownTourGuide } from '@/components/TourGuideNotificationsDropdown'
-import { NotificationsDropdownAdvertiser } from '@/components/AdvertiserNotificationsDropdown'
-import { NotificationsDropdownAdmin } from '@/components/AdminNotificationsDropdown'
-import { NotificationsDropdownTourist } from '@/components/TouristNotificationsDropdown'
-
-
-
+import { NotificationsDropdownSeller } from "@/components/SellerNotificationsDropdown";
+import { NotificationsDropdownTourGuide } from "@/components/TourGuideNotificationsDropdown";
+import { NotificationsDropdownAdvertiser } from "@/components/AdvertiserNotificationsDropdown";
+import { NotificationsDropdownAdmin } from "@/components/AdminNotificationsDropdown";
+import { NotificationsDropdownTourist } from "@/components/TouristNotificationsDropdown";
 
 import logo from "../assets/images/TGlogo.svg";
 import {
@@ -68,19 +65,25 @@ export function NavbarComponent() {
   const transportationRef = useRef(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
-  const [hasUnseenNotificationsSeller, setHasUnseenNotificationsSeller] = useState(false);
-  const [hasUnseenNotificationsTourGuide, setHasUnseenNotificationsTourGuide] = useState(false);
-  const [hasUnseenNotificationsAdvertiser, setHasUnseenNotificationsAdvertiser] = useState(false);
-  const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] = useState(false);
-  const [hasUnseenNotificationsTourist, setHasUnseenNotificationsTourist] = useState(false);
-
+  const [hasUnseenNotificationsSeller, setHasUnseenNotificationsSeller] =
+    useState(false);
+  const [hasUnseenNotificationsTourGuide, setHasUnseenNotificationsTourGuide] =
+    useState(false);
+  const [
+    hasUnseenNotificationsAdvertiser,
+    setHasUnseenNotificationsAdvertiser,
+  ] = useState(false);
+  const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] =
+    useState(false);
+  const [hasUnseenNotificationsTourist, setHasUnseenNotificationsTourist] =
+    useState(false);
 
   const [key, setKey] = useState(0);
   const location = useLocation();
 
   useEffect(() => {
     // Increment the key to force a re-render of the Navbar
-    setKey(prevKey => prevKey + 1);
+    setKey((prevKey) => prevKey + 1);
 
     // Close any open dropdowns when the route changes
     setOpenDropdown(null);
@@ -88,9 +91,6 @@ export function NavbarComponent() {
     // Reset scroll position
     window.scrollTo(0, 0);
   }, [location]);
-
-
-
 
   const handleClickOutside = (event) => {
     if (
@@ -133,7 +133,7 @@ export function NavbarComponent() {
       );
       setHasUnseenNotificationsTourist(response.data.hasUnseen);
     } catch (error) {
-      console.error('Error checking unseen notifications:', error);
+      console.error("Error checking unseen notifications:", error);
       // Silently fail but don't show the notification dot
       setHasUnseenNotificationsTourist(false);
     }
@@ -149,7 +149,7 @@ export function NavbarComponent() {
       );
       setHasUnseenNotificationsAdmin(response.data.hasUnseen);
     } catch (error) {
-      console.error('Error checking unseen notifications:', error);
+      console.error("Error checking unseen notifications:", error);
       // Silently fail but don't show the notification dot
       setHasUnseenNotificationsAdmin(false);
     }
@@ -165,7 +165,7 @@ export function NavbarComponent() {
       );
       setHasUnseenNotificationsSeller(response.data.hasUnseen);
     } catch (error) {
-      console.error('Error checking unseen notifications:', error);
+      console.error("Error checking unseen notifications:", error);
       // Silently fail but don't show the notification dot
       setHasUnseenNotificationsSeller(false);
     }
@@ -180,7 +180,7 @@ export function NavbarComponent() {
       );
       setHasUnseenNotificationsTourGuide(response.data.hasUnseen);
     } catch (error) {
-      console.error('Error checking unseen notifications:', error);
+      console.error("Error checking unseen notifications:", error);
       // Silently fail but don't show the notification dot
       setHasUnseenNotificationsTourGuide(false);
     }
@@ -195,7 +195,7 @@ export function NavbarComponent() {
       );
       setHasUnseenNotificationsAdvertiser(response.data.hasUnseen);
     } catch (error) {
-      console.error('Error checking unseen notifications:', error);
+      console.error("Error checking unseen notifications:", error);
       // Silently fail but don't show the notification dot
       setHasUnseenNotificationsAdvertiser(false);
     }
@@ -286,15 +286,17 @@ export function NavbarComponent() {
   };
 
   return (
-    <nav key={key}
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${role === "admin"
-        ? isScrolled
-          ? "bg-black/50"
-          : "bg-[#1A3B47]"
-        : isScrolled
+    <nav
+      key={key}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        role === "admin"
+          ? isScrolled
+            ? "bg-black/50"
+            : "bg-[#1A3B47]"
+          : isScrolled
           ? "bg-black/50"
           : ""
-        }`}
+      }`}
       style={isScrolled ? { backdropFilter: "saturate(180%) blur(8px)" } : {}}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -353,8 +355,11 @@ export function NavbarComponent() {
                           Itinerary
                         </Link>
                       </div>
+
                     )}
                   </div>
+                  <NavLink to="/tourguide-report">Sales Report</NavLink>
+
                 </>
               )}
               {role === "seller" && (
@@ -498,6 +503,7 @@ export function NavbarComponent() {
                     )}
                   </div>
                   <NavLink to="/transportation">Transportation</NavLink>
+                  <NavLink to="/advertiser-report">Sales Report</NavLink>
                 </>
               )}
               {role === "admin" && (
@@ -555,7 +561,10 @@ export function NavbarComponent() {
                     Historical Places
                   </NavLink>
 
-                  <NavLink to="/activity" className="hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium">
+                  <NavLink
+                    to="/activity"
+                    className="hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium"
+                  >
                     Activities
                   </NavLink>
                 </div>
@@ -623,7 +632,7 @@ export function NavbarComponent() {
 
           {/* Login, Sign Up, Notifications, and Menu Button */}
           <div className="hidden md:flex items-center">
-            {role !== undefined && role !== "guest"  && (
+            {role !== undefined && role !== "guest" && (
               <>
                 {role === "seller" && <NotificationsDropdownSeller />}
                 {role === "tour-guide" && <NotificationsDropdownTourGuide />}

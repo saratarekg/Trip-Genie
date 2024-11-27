@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
 import {
   ToastProvider,
@@ -45,6 +46,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  Bookmark,
   XCircle,
   CheckCircle,
   ChevronLeft,
@@ -161,9 +163,8 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -204,6 +205,9 @@ const ActivityDetail = () => {
   const [isActivityBooked, setIsActivityBooked] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isAppropriate, setIsAppropriate] = useState(true);
+  const [savedActivities, setSavedActivities] = useState([]);
+  const [isSaved, setIsSaved] = useState(false);
+  const [alertMessage, setAlertMessage] = useState(null);
 
   const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
     useState(false);
@@ -310,7 +314,7 @@ const ActivityDetail = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   {transport.vehicleType === "Bus" ||
-                  transport.vehicleType === "Microbus" ? (
+                    transport.vehicleType === "Microbus" ? (
                     <Bus className="w-5 h-5 mr-2 text-blue-500" />
                   ) : (
                     <Car className="w-5 h-5 mr-2 text-green-500" />
@@ -625,6 +629,22 @@ const ActivityDetail = () => {
     }
   }, [id, userRole, currentUser]);
 
+  useEffect(() => {
+    const fetchSavedActivities = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist/saved-activities", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSavedActivities(response.data);
+      } catch (error) {
+        console.error("Error fetching saved activities:", error);
+      }
+    };
+
+    fetchSavedActivities();
+  }, []);
+
   const fetchExchangeRate = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -745,7 +765,7 @@ const ActivityDetail = () => {
       const additionalPrice =
         userBooking.paymentAmount +
         calculateDiscountedPrice(activity.price, activity.specialDiscount) *
-          additionalTickets;
+        additionalTickets;
 
       const response = await axios.put(
         `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
@@ -766,7 +786,7 @@ const ActivityDetail = () => {
       console.error("Error updating booking:", error);
       setBookingError(
         error.response?.data?.message ||
-          "An error occurred while updating the booking."
+        "An error occurred while updating the booking."
       );
     } finally {
       setIsBooking(false);
@@ -809,6 +829,46 @@ const ActivityDetail = () => {
       console.error("Error deleting activity:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (savedActivities && savedActivities.length > 0) {
+      console.log(savedActivities);
+      console.log(activity._id);
+      setIsSaved(savedActivities.some(savedActivity => savedActivity._id === activity._id.toString()));
+
+    }
+    console.log(isSaved);
+  }, [savedActivities]);
+
+  const handleSaveToggle = async (itemId) => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.post(
+        `http://localhost:4000/tourist/save-activity/${itemId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (response.data.success) {
+        // Update the saved state locally
+        setSavedActivities(prev =>
+          prev.some(item => item._id === itemId)
+            ? prev.filter(item => item._id !== itemId)
+            : [...prev, { _id: itemId }]
+        );
+        // Show success message
+        setAlertMessage({
+          type: "success",
+          message: response.data.message || "Activity saved/unsaved successfully!",
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling save activity:", error);
+      setAlertMessage({
+        type: "error",
+        message: "Error saving/unsaving activity. Please try again.",
+      });
     }
   };
 
@@ -1203,9 +1263,8 @@ const ActivityDetail = () => {
                       <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
                         {isExpanded
                           ? activity.description
-                          : `${activity.description.substring(0, 130)}${
-                              activity.description.length > 130 ? "..." : ""
-                            }`}
+                          : `${activity.description.substring(0, 130)}${activity.description.length > 130 ? "..." : ""
+                          }`}
                         {activity.description.length > 130 && (
                           <button
                             onClick={toggleExpanded}
@@ -1228,17 +1287,38 @@ const ActivityDetail = () => {
 
                           <Button
                             onClick={handleBookNowClick}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg ${
-                              activity.isBookingOpen
-                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                            }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg ${activity.isBookingOpen
+                              ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                              : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                              }`}
                             disabled={!activity.isBookingOpen}
                           >
                             {activity.isBookingOpen
                               ? "Book Now"
                               : "Booking Closed"}
                           </Button>
+
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSaveToggle(activity._id);
+                            }}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 ${isSaved
+                              ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                              : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                              }`}
+                          >
+                            <Bookmark
+                              className={`w-5 h-5 ${isSaved ? "stroke-white fill-[#1A3B47]" : "stroke-white"
+                                }`}
+                            />
+                            {isSaved ? "Unsave" : "Save"}
+                          </Button>
+
+
+
+
+
                         </>
                       )}
                       {canModify && (
@@ -1337,11 +1417,10 @@ const ActivityDetail = () => {
                       <>
                         <div className="mt-6 border-t border-gray-300 pt-4"></div>
                         <Button
-                          className={`w-full mx-auto text-white ${
-                            isAppropriate
-                              ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                              : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                          }`}
+                          className={`w-full mx-auto text-white ${isAppropriate
+                            ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                            : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                            }`}
                           onClick={handleOpenDialog}
                         >
                           {isAppropriate
@@ -1455,15 +1534,14 @@ const ActivityDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${
-                            (
-                              isRatingHovered
-                                ? quickRating >= star
-                                : quickRating >= star
-                            )
-                              ? "text-yellow-500 fill-current"
-                              : "text-gray-300"
-                          }`}
+                          className={`w-8 h-8 cursor-pointer ${(
+                            isRatingHovered
+                              ? quickRating >= star
+                              : quickRating >= star
+                          )
+                            ? "text-yellow-500 fill-current"
+                            : "text-gray-300"
+                            }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -2098,6 +2176,17 @@ const ActivityDetail = () => {
           </DialogContent>
         </Dialog>
       </div>
+      {alertMessage && (
+        <Alert
+          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
+        >
+          <AlertTitle>
+            {alertMessage.type === "success" ? "Success" : "Error"}
+          </AlertTitle>
+          <AlertDescription>{alertMessage.message}</AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 };
