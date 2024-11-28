@@ -906,9 +906,10 @@ const ActivityDetail = () => {
 
   useEffect(() => {
     if (savedActivities && savedActivities.length > 0) {
+      
       setIsSaved(
         savedActivities.some(
-          (savedActivity) => savedActivity._id === activity._id.toString()
+          (savedActivity) => savedActivity && savedActivity._id === activity._id.toString()
         )
       );
     }
@@ -1756,6 +1757,7 @@ const ActivityDetail = () => {
             onConfirm={handlePaymentConfirm}
             priceOne={(calculateTotalPrice() * exchangeRates).toFixed(2)}
             currency={userPreferredCurrency.code} 
+            returnLoc = {"http://localhost:3000/activity/" + id}
           />
         )}
 
