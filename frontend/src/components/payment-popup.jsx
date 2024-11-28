@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
-  Dialog, 
+  Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -83,7 +83,7 @@ const PaymentPopup = ({
       }
     }
     setIsProcessing(false);
-    onConfirm(paymentType, numberOfTickets);
+    onConfirm(paymentType, numberOfTickets); // Pass the number of tickets to the onConfirm function
   };
 
   return (

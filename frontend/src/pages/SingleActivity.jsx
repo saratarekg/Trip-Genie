@@ -417,7 +417,7 @@ const ActivityDetail = () => {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText("http://localhost:3000/activity/" + id);
     setIsToastOpen(true);
     setOpen(false);
   };
@@ -927,6 +927,7 @@ const ActivityDetail = () => {
         const data = await response.json();
         setShowPaymentPopup(false);
         setShowSuccessDialog(true);
+        setNumberOfTickets(numberOfTickets); // Update the number of tickets in the state
       }
     } catch (error) {
       console.error("Error booking activity:", error);
