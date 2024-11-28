@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Loader from "@/components/loader";
+import { UserGuide } from "@/components/UserGuide";
 import defaultImage from "../assets/images/default-image.jpg";
 import historicalPlaceImage from "../assets/images/hp.png";
 
@@ -121,7 +122,7 @@ const HistoricalPlaceCard = ({
   }, []);
 
   return (
-    <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+    <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer historicalPlace-card">
       <CardHeader className="p-0" onClick={() => onSelect(historicalPlace._id)}>
         <img
           src={historicalPlace.pictures?.[0]?.url || defaultImage}
@@ -425,6 +426,25 @@ export default function AllHistoricalPlacesComponent() {
     }
   };
 
+  const guideSteps = [
+    {
+      target: "body",
+      content: "Welcome to the Historical Places page! Here you can find a list of all the historical places available.",
+      placement: "center",
+    },
+    {
+      target: ".filter",
+      content:
+        "Use the filters to narrow down your search based on your preferences.",
+      placement: "right",
+    },
+    {
+      target: ".historicalPlace-card",
+      content: "Click on a historical place to view more details.",
+      placement: "bottom",
+    },
+  ];
+
   const handleSortByPreference = async () => {
     setIsSortedByPreference(!isSortedByPreference);
     if (!isSortedByPreference) {
@@ -438,6 +458,10 @@ export default function AllHistoricalPlacesComponent() {
 
   return (
     <div className="bg-gray-100">
+      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+           <UserGuide steps={guideSteps} pageName="itineraries" />
+        )}
+     
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
           <div className="flex-1">
@@ -469,7 +493,7 @@ export default function AllHistoricalPlacesComponent() {
       <div className="container mx-auto px-24 py-8 sm:px-12 lg:px-24">
         <div className="flex gap-8">
           {/* Sidebar Filters */}
-          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
+          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6 filter">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button

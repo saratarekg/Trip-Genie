@@ -370,7 +370,7 @@ export function AllItinerariesComponent() {
   const [itineraryToDelete, setItineraryToDelete] = useState(null);
   const [savedItineraries, setSavedItineraries] = useState([]);
 
-  const itinerariesSteps = [
+  const guideSteps = [
     {
       target: "body",
       content:
@@ -860,7 +860,7 @@ export function AllItinerariesComponent() {
   return (
     <div className="min-h-screen bg-gray-100">
        {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-           <UserGuide steps={itinerariesSteps} pageName="itineraries" />
+           <UserGuide steps={guideSteps} pageName="itineraries" />
         )}
      
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">

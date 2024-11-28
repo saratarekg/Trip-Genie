@@ -52,6 +52,8 @@ import DualHandleSliderComponent from "./dual-handle-slider";
 import LazyLoad from "react-lazyload";
 import productImage from "../assets/images/prod.png";
 import productImage2 from "../assets/images/products2.png";
+import { UserGuide } from "@/components/UserGuide";
+
 import { role } from "@/pages/login";
 
 const renderStars = (rating) => {
@@ -188,7 +190,7 @@ const ProductCard = ({
   }
 
   return (
-    <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+    <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer product-card">
       <CardHeader className="p-0" onClick={() => onSelect(product._id)}>
         <img
           src={product.pictures[0]?.url || defaultImage}
@@ -734,8 +736,31 @@ export function AllProducts() {
     }
   };
 
+  const guideSteps = [
+    {
+      target: "body",
+      content: "Welcome to the Products page! Here you can view all the products available for purchase.",
+      placement: "center",
+    },
+    {
+      target: ".filter",
+      content:
+        "Use the filters to narrow down your search based on your preferences.",
+      placement: "right",
+    },
+    {
+      target: ".product-card",
+      content:
+        "Each card represents a unique Product. Click on a card to learn more about it.",
+      placement: "bottom",
+    },
+  ];
+
   return (
     <div className="bg-gray-100">
+       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+           <UserGuide steps={guideSteps} pageName="Products" />
+        )}
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
           <div className="flex-1">
@@ -763,7 +788,7 @@ export function AllProducts() {
       </div>
       <div className=" py-8 sm:px-12 lg:px-12">
         <div className="flex gap-8">
-          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
+          <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6 filter">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button
