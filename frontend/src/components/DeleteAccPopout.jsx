@@ -149,9 +149,20 @@ export function DeleteAccount() {
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between mb-4">
                             <Avatar className="h-12 w-12 bg-[#B5D3D1]">
-                              <AvatarFallback className="text-[#1A3B47] font-semibold">
-                                {user.username?.charAt(0).toUpperCase() || "U"}
-                              </AvatarFallback>
+                              {user.profilePicture || user.logo ? (
+                                <img
+                                  src={
+                                    user.profilePicture?.url || user.logo?.url
+                                  }
+                                  alt={user.username}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <AvatarFallback className="text-[#1A3B47] font-semibold">
+                                  {user.username?.charAt(0).toUpperCase() ||
+                                    "U"}
+                                </AvatarFallback>
+                              )}
                             </Avatar>
                             <Button
                               variant="ghost"
