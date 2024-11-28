@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
-  Dialog,
+  Dialog, 
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -24,16 +24,16 @@ const PaymentPopup = ({
   maxTickets = 15,
   priceOne,
   currency,
-  returnLoc
+  returnLoc,
 }) => {
-  const [paymentType, setPaymentType] = useState("credit");
+  const [paymentType, setPaymentType] = useState("CreditCard");
   const [numberOfTickets, setNumberOfTickets] = useState(initialTickets);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [totalPrice, setTotalPrice] = useState(priceOne);
+  const [totalPrice, setTotalPrice] = useState(Number(priceOne));
 
   useEffect(() => {
-    setTotalPrice(priceOne * numberOfTickets);
-  }, [numberOfTickets]);
+    setTotalPrice(Number(priceOne) * numberOfTickets);
+  }, [numberOfTickets, priceOne]);
 
   const handleConfirm = async () => {
     setIsProcessing(true);
@@ -56,7 +56,8 @@ const PaymentPopup = ({
                 totalPrice: item.price / 100, // divide by 100 again
               })),
               currency: currency.toLowerCase(),
-              returnLocation: returnLoc 
+              returnLocation: returnLoc,
+              quantity: numberOfTickets,
             }),
           }
         );

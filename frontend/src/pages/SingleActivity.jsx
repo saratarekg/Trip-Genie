@@ -43,6 +43,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useSearchParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -79,7 +80,6 @@ import {
   Bus,
 } from "lucide-react";
 import PaymentPopup from "@/components/payment-popup";
-
 const ImageGallery = ({ pictures }) => {
   const [mainImage, setMainImage] = useState(pictures[0]?.url);
   const [startIndex, setStartIndex] = useState(0);
@@ -177,6 +177,7 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
 
 const ActivityDetail = () => {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -249,6 +250,40 @@ const ActivityDetail = () => {
 
     fetchTouristData();
   }, []);
+
+  useEffect(() => {
+    const handleBookingSuccess = async () => {
+      const success = searchParams.get("success");
+      const quantity = searchParams.get("quantity");
+      const sessionId = searchParams.get("session_id");
+
+
+      if (sessionId && success === "true" && activity) {
+        try {
+          const response = await axios.get(
+            `http://localhost:4000/check-payment-status?session_id=${sessionId}`
+          );
+
+          console.log("Payment status response:", response.data);
+
+          if (response.data.status === "paid") {
+            try {
+              await handlePaymentConfirm("CreditCard", parseInt(quantity));
+            } catch (error) {
+              console.error("Error handling booking success:", error);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking payment status:", error);
+        }
+      }
+
+    };
+  
+
+
+    handleBookingSuccess();
+  }, [searchParams, activity]);
 
   const formatWallet = (price) => {
     fetchExchangeRate();
@@ -715,7 +750,7 @@ const ActivityDetail = () => {
     }
   };
 
-  // format price that returns the activity price as an int 
+  // format price that returns the activity price as an int
 
   const formatPriceInt = (price) => {
     if (activity) {
@@ -903,13 +938,12 @@ const ActivityDetail = () => {
     }
   };
 
-
   useEffect(() => {
     if (savedActivities && savedActivities.length > 0) {
-      
       setIsSaved(
         savedActivities.some(
-          (savedActivity) => savedActivity && savedActivity._id === activity._id.toString()
+          (savedActivity) =>
+            savedActivity && savedActivity._id === activity._id.toString()
         )
       );
     }
@@ -1745,21 +1779,26 @@ const ActivityDetail = () => {
           </div>
 
           {userPreferredCurrency && userPreferredCurrency.code && (
-          <PaymentPopup
-            isOpen={showPaymentPopup}
-            onClose={() => setShowPaymentPopup(false)}
-            title={`Book Activity: ${activity.name}`}
-            items={[{ name: activity.name, price: ((calculateTotalPrice() * exchangeRates) * 100) }]} // Convert price to cents
-            onWalletPayment={() =>
-              handlePaymentConfirm("Wallet", numberOfTickets)
-            }
-            stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
-            onConfirm={handlePaymentConfirm}
-            priceOne={(calculateTotalPrice() * exchangeRates).toFixed(2)}
-            currency={userPreferredCurrency.code} 
-            returnLoc = {"http://localhost:3000/activity/" + id}
-          />
-        )}
+            <PaymentPopup
+              isOpen={showPaymentPopup}
+              onClose={() => setShowPaymentPopup(false)}
+              title={`Book Activity: ${activity.name}`}
+              items={[
+                {
+                  name: activity.name,
+                  price: calculateTotalPrice() * exchangeRates * 100,
+                },
+              ]} // Convert price to cents
+              onWalletPayment={() =>
+                handlePaymentConfirm("Wallet", numberOfTickets)
+              }
+              stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+              onConfirm={handlePaymentConfirm}
+              priceOne={(calculateTotalPrice() * exchangeRates).toFixed(2)}
+              currency={userPreferredCurrency.code}
+              returnLoc={"http://localhost:3000/activity/" + id}
+            />
+          )}
 
           <Dialog
             open={showUpdateBookingDialog}
