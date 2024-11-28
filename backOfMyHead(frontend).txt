@@ -68,6 +68,14 @@ have day title
 product key features and maybe like colours/sizes men el product
 
 
+all activities
+all itineraries
+all products 
+book hotel
+book transportation
+
+
+
 Orange: #F88C33
 Beige/Tan: #E6DCCF
 Light Aqua/Seafoam Green: #B5D3D1
