@@ -187,6 +187,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [quantityError, setQuantityError] = useState(false);
   const [showPurchaseConfirm, setShowPurchaseConfirm] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [deliveryDate, setDeliveryDate] = useState(null);
   const [deliveryTime, setDeliveryTime] = useState("");
@@ -661,6 +662,11 @@ const ProductDetail = () => {
     setQuantity(parseInt(value));
   };
 
+  const handleCheckoutNow = () => {
+    handleAddToCart();
+    window.location.href = "/checkout2"; // Replace with your actual checkout URL
+  };
+
   const handleAddToCart = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -686,6 +692,7 @@ const ProductDetail = () => {
 
       setActionSuccess("Product added to cart successfully!");
       window.dispatchEvent(new Event('cartUpdated'));
+      setIsPopupOpen(false);
 
     } catch (error) {
       setActionError("Error adding product to cart. Please try again.");
@@ -893,7 +900,7 @@ const ProductDetail = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         </div>
       </div>
-      <div className="container mx-auto px-4 py-8">
+      <div className=" mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <Card>
@@ -1281,7 +1288,7 @@ const ProductDetail = () => {
                         {product.quantity > 0 && (
                           <Button
                             className="w-full text-xl bg-[#388A94] hover:bg-[#2B6870] text-white font-bold py-2 flex items-center justify-center"
-                            onClick={() => setShowPurchaseConfirm(true)}
+                            onClick={() => setIsPopupOpen(true)}
                           >
                             {/* <Wallet className="w-5 h-5 mr-2" /> */}
                             Buy Now
@@ -1701,361 +1708,30 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showPurchaseConfirm} onOpenChange={setShowPurchaseConfirm}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold">
-              Confirm Purchase
-            </DialogTitle>
-          </DialogHeader>
+      <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-[#1A3B47] text-2xl">Choose an option</DialogTitle>
+            </DialogHeader>
+           
+            <div className="grid gap-4 py-4">
 
-          {/* Product Details Header */}
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Product Details</h2>
-            <div className="my-4">
-              <p className="text-xl font-semibold">{product.name}</p>
+<Button
+  className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
+  onClick={handleAddToCart}
+>
+  Add to Cart and Continue Shopping
+</Button>
+<Button
+  className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
+  onClick={handleCheckoutNow}
+>
+  Add to cart and Checkout Now
+</Button>
+
             </div>
-            <div className="my-4">
-              <label htmlFor="quantity" className="block text-lg font-medium">
-                Quantity
-              </label>
-              <input
-                type="number"
-                id="quantity"
-                value={quantity}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value > product.quantity) {
-                    setQuantityError(true); // Trigger error state
-                  } else {
-                    setQuantityError(false); // Clear error
-                    setQuantity(value);
-                  }
-                }}
-                className={`w-full mt-1 px-3 py-2 border rounded-md ${
-                  quantityError ? "border-red-500" : ""
-                }`}
-                min="1"
-                max={product.quantity}
-              />
-              {quantityError && (
-                <p className="text-red-500 text-sm mt-1">
-                  Unavailable amount, max is: {product.quantity}
-                </p>
-              )}
-              <p className="text-xl">
-                <br />
-                Price: {formatPrice(product.price * quantity)}
-              </p>
-            </div>
-          </div>
-
-          {/* Payment & Delivery Header */}
-          <div className="my-4">
-            <h2 className="text-2xl font-bold">Payment & Delivery</h2>
-
-            {/* Delivery Date Picker */}
-            <div className="my-4">
-              <label
-                htmlFor="deliveryDate"
-                className="block text-lg font-medium"
-              >
-                Delivery Date
-              </label>
-              <input
-                type="date"
-                id="deliveryDate"
-                value={deliveryDate}
-                onChange={(e) => setDeliveryDate(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
-              />
-            </div>
-
-            {/* Delivery Time Selector */}
-            <div className="my-4">
-              <label
-                htmlFor="deliveryTime"
-                className="block text-lg font-medium"
-              >
-                Delivery Time
-              </label>
-              <Select value={deliveryTime} onValueChange={setDeliveryTime}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select delivery time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="morning">
-                    Morning (8 AM - 12 PM)
-                  </SelectItem>
-                  <SelectItem value="midday">Midday (12 PM - 3 PM)</SelectItem>
-                  <SelectItem value="afternoon">
-                    Afternoon (3 PM - 6 PM)
-                  </SelectItem>
-                  <SelectItem value="night">Night (6 PM - 9 PM)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Delivery Type Selector */}
-            <div className="my-4">
-              <label
-                htmlFor="deliveryType"
-                className="block text-lg font-medium"
-              >
-                Delivery Type
-              </label>
-              <Select value={deliveryType} onValueChange={setDeliveryType}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select delivery type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Standard">
-                    Standard Shipping (5-7 days) - {formatPrice(2.99)}
-                  </SelectItem>
-                  <SelectItem value="Express">
-                    Express Shipping (2-3 days) - {formatPrice(4.99)}
-                  </SelectItem>
-                  <SelectItem value="Next-Same">
-                    Next/Same Day Shipping - {formatPrice(6.99)}
-                  </SelectItem>
-                  <SelectItem value="International">
-                    International Shipping - {formatPrice(14.99)}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Payment Method Selector */}
-            <div className="my-4">
-              <label
-                htmlFor="paymentMethod"
-                className="block text-lg font-medium"
-              >
-                Payment Method
-              </label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="credit_card">Credit Card</SelectItem>
-                  <SelectItem value="debit_card">Debit Card</SelectItem>
-                  <SelectItem value="cash_on_delivery">
-                    Cash on Delivery
-                  </SelectItem>
-                  <SelectItem value="wallet">Wallet</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-         
-    {/* Address Details Section */}
-    <div className="my-4">
-      <h2 className="text-2xl font-bold">Address Details</h2>
-
-      {/* Street Name */}
-      <div className="my-4">
-        <label htmlFor="streetName" className="block text-lg font-medium">
-          Street Name
-        </label>
-        <input
-          type="text"
-          id="streetName"
-          value={streetName}
-          onChange={handleStreetNameChange}
-          className="w-full mt-1 px-3 py-2 border rounded-md"
-          placeholder="Enter street name"
-        />
-      </div>
-
-      {/* Street Number */}
-      <div className="my-4">
-        <label htmlFor="streetNumber" className="block text-lg font-medium">
-          Street Number
-        </label>
-        <input
-          type="text"
-          id="streetNumber"
-          value={streetNumber}
-          onChange={handleStreetNumberChange}
-          className="w-full mt-1 px-3 py-2 border rounded-md"
-          placeholder="Enter street number"
-        />
-      </div>
-
-      {/* Floor/Unit */}
-      <div className="my-4">
-        <label htmlFor="floorUnit" className="block text-lg font-medium">
-          Floor/Unit
-        </label>
-        <input
-          type="text"
-          id="floorUnit"
-          value={floorUnit}
-          onChange={handleFloorUnitChange}
-          className="w-full mt-1 px-3 py-2 border rounded-md"
-          placeholder="Enter floor/unit (optional)"
-        />
-      </div>
-
-      {/* City */}
-      <div className="my-4">
-        <label htmlFor="city" className="block text-lg font-medium">
-          City
-        </label>
-        <input
-          type="text"
-          id="city"
-          value={city}
-          onChange={handleCityChange}
-          className="w-full mt-1 px-3 py-2 border rounded-md"
-          placeholder="Enter city"
-        />
-      </div>
-
-      {/* State */}
-      <div className="my-4">
-        <label htmlFor="state" className="block text-lg font-medium">
-          State/Province/Region
-        </label>
-        <input
-          type="text"
-          id="state"
-          value={state}
-          onChange={handleStateChange}
-          className="w-full mt-1 px-3 py-2 border rounded-md"
-          placeholder="Enter state"
-        />
-      </div>
-
-      {/* Postal Code */}
-      <div className="my-4">
-        <label htmlFor="postalCode" className="block text-lg font-medium">
-          Postal/ZIP Code
-        </label>
-        <input
-          type="text"
-          id="postalCode"
-          value={postalCode}
-          onChange={handlePostalCodeChange}
-          className="w-full mt-1 px-3 py-2 border rounded-md"
-          placeholder="Enter postal code (Optional)"
-        />
-      </div>
-
-      {/* Landmark / Additional Info */}
-      <div className="my-4">
-        <label htmlFor="landmark" className="block text-lg font-medium">
-          Landmark/Additional Info
-        </label>
-        <input
-          type="text"
-          id="landmark"
-          value={landmark}
-          onChange={handleLandmarkChange}
-          className="w-full mt-1 px-3 py-2 border rounded-md"
-          placeholder="Enter landmark or additional info (optional)"
-        />
-      </div>
-       {/* Location Type Selector */}
-       <div className="my-4">
-              <label
-                htmlFor="locationType"
-                className="block text-lg font-medium"
-              >
-                Location Type
-              </label>
-              <Select value={locationType} onValueChange={setLocationType}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select location type" />
-                </SelectTrigger>
-                <SelectContent
-                  style={{ maxHeight: "200px", overflowY: "auto" }}
-                >
-                  <SelectItem value="home">Home</SelectItem>
-                  <SelectItem value="work">Work</SelectItem>
-                  <SelectItem value="apartment">Apartment/Condo</SelectItem>
-                  <SelectItem value="friend_family">
-                    Friend/Family's Address
-                  </SelectItem>
-                  <SelectItem value="po_box">PO Box</SelectItem>
-                  <SelectItem value="office">Office/Business</SelectItem>
-                  <SelectItem value="pickup_point">Pickup Point</SelectItem>
-                  <SelectItem value="vacation">
-                    Vacation/Temporary Address
-                  </SelectItem>
-                  <SelectItem value="school">School/University</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          
-    </div>
-
-    {/* Display Location */}
-    <div className="my-4">
-      <h3 className="text-xl font-semibold">Full Location:</h3>
-      <p>{location}</p>
-    </div>
-
-              {/* Total Price Section */}
-              <div className="my-4 border-t border-gray-300 pt-4">
-            <h2 className="text-2xl font-bold">Total Price</h2>
-            <div className="flex justify-between mt-2">
-              <p className="text-lg">
-                {product.name} x {quantity}
-              </p>
-              <p className="text-lg">{formatPrice(product.price * quantity)}</p>
-            </div>
-            <div className="flex justify-between mt-2">
-              <p className="text-lg">Delivery Cost:</p>
-              <p className="text-lg">
-                {formatPrice(calculateDeliveryCost(deliveryType))}
-              </p>
-            </div>
-            <div className="flex justify-between mt-4 font-bold">
-              <p className="text-lg">Total Price:</p>
-              <p className="text-lg">
-                {formatPrice(
-                  product.price * quantity + calculateDeliveryCost(deliveryType)
-                )}
-              </p>
-            </div>
-          </div>
-
-    {/* Dialog Footer */}
-    <DialogFooter>
-      <Button
-      className="bg-gray-300 hover:bg-gray-400"
-        variant="outline"
-        onClick={() => {
-          setShowPurchaseConfirm(false);
-          resetFields();
-        }}
-      >
-        Cancel
-      </Button>
-      <Button
-      className="bg-[#1A3B47]"
-        onClick={() => {
-          handlePurchase(location);
-          setShowPurchaseConfirm(false);
-          resetFields();
-        }}
-        disabled={
-          !paymentMethod ||
-          !deliveryDate ||
-          !deliveryTime ||
-          !quantity ||
-          quantityError || // Disable submit if quantity exceeds max
-          !locationType // Location type is required
-        }      >
-        Checkout
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+          </DialogContent>
+        </Dialog>
 
 
 

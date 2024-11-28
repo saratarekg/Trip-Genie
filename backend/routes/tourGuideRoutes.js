@@ -32,6 +32,9 @@ router.get('/unseen-notifications',tourGuideController.hasUnseenNotifications);
 // POST /seller/mark-notifications-seen
 router.post('/mark-notifications-seen', tourGuideController.markNotificationsAsSeen);
 
+router.post('/notifications/markAsSeen/:notificationId', tourGuideController.markNotificationAsSeenForTourGuide);
+
+
 router.get("/max-price-itinerary", itineraryController.getMaxPrice);
 router.get("/max-price-itinerary-my", itineraryController.getMaxPriceMy);
 

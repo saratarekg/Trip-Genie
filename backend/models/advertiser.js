@@ -49,17 +49,63 @@ const advertiserSchema = new Schema(
       {
         body: {
           type: String,
+          required: true, // The main content of the notification
         },
         link: {
-          type: String,
+          type: String, // A URL or path for users to take action or view details
         },
         date: {
           type: Date,
-          default: Date.now,
+          default: Date.now, // Timestamp when the notification was created
         },
         seen: {
           type: Boolean,
-          default: false,
+          default: false, // Indicates if the user has seen the notification
+        },
+        tags: {
+          type: [String], // Array of strings to allow multiple tags
+          enum: [
+            "urgent", 
+            "personal", 
+            "informational", 
+            "promotional", 
+            "system", 
+            "birthday", 
+            "holiday", 
+            "special_offer", 
+            "reminder", 
+            "payment_due", 
+            "booking_update", 
+            "new_message", 
+            "feedback_request", 
+            "itinerary_change", 
+            "flight_update", 
+            "hotel_booking", 
+            "travel_alert", 
+            "success", 
+            "failure", 
+            "warning", 
+            "info", 
+            "product", // New tag
+            "activity" // New tag
+          ],
+          default: [], // Default to an empty array if no tags are provided
+        }
+        ,
+        
+        type: {
+          type: String,
+          enum: ["birthday", "payment", "alert", "offer", "reminder"], // The general category of the notification
+          required: true,
+        },
+        title: {
+          type: String,
+          required: true, // Short title or headline for the notification
+        },
+        priority: {
+          type: String,
+          enum: ["low", "medium", "high"], // Priority level of the notification
+          default: "medium",
         },
       },
     ],

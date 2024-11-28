@@ -14,6 +14,7 @@ router.get('/unseen-notifications',sellerController.hasUnseenNotifications);
 // POST /seller/mark-notifications-seen
 router.post('/mark-notifications-seen', sellerController.markNotificationsAsSeen);
 
+router.post('/notifications/markAsSeen/:notificationId', sellerController.markNotificationAsSeenForSeller);
 
 
 router.get("/getCurrency/:id", currencyController.getCurrencyById);

@@ -16,7 +16,6 @@ export default function CartDropdown({
   cartItems,
   setCartItems,
 }) {
-  // const [cartItems, setCartItems] = useState([])
   const [exchangeRates, setExchangeRates] = useState({})
   const [currencies, setCurrencies] = useState([])
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null)
@@ -64,23 +63,6 @@ export default function CartDropdown({
       }
     }
   }, [])
-
-  // const fetchCartItems = useCallback(async () => {
-  //   try {
-  //     const token = Cookies.get("jwt")
-  //     const response = await fetch("http://localhost:4000/tourist/cart", {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     })
-  //     if (response.ok) {
-  //       const data = await response.json()
-  //       setCartItems(data)
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching cart items:", error)
-  //   }
-  // }, [])
 
   const formatPrice = useCallback((price, productCurrency) => {
     if (userRole === 'tourist' && userPreferredCurrency) {
@@ -136,8 +118,6 @@ export default function CartDropdown({
       console.error("Error removing item:", error);
     }
   };
-  
- 
 
   useEffect(() => {
     fetchUserInfo()
@@ -150,25 +130,24 @@ export default function CartDropdown({
 
   return (
     <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg z-[100]">
+      <div className="relative w-full pt-2">
+        <div className="flex justify-between items-center mb-4 w-full border-b border-gray-300 px-4 py-2">
+          <h2 className="text-base font-semibold text-black">My Cart ({cartItems.length})</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">
+            ×
+          </button>
+        </div>
+      </div>
       
-        <div className="realtive w-full pt-2 ">
-      <div className="flex justify-between items-center mb-4 w-full border-b border-gray-300 px-4 py-2">
-  <h2 className="text-lg font-semibold text-black">My Cart ({cartItems.length})</h2>
-  <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
-    ×
-  </button>
-</div>
-</div>
-<div className="pr-4 pl-4 pb-4">
-        {/* Display "No products in cart" message if the cart is empty */}
+      <div className="pr-4 pl-4 pb-4 flex flex-col">
         {cartItems.length === 0 ? (
-    <p className="text-center text-gray-500">No products in cart</p>
+          <p className="text-center text-base text-gray-500">No products in cart</p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto max-h-[275px] flex-1">
             {cartItems.slice(0, 3).map((item, index) => (
               <div key={item.product._id} className={`flex items-center gap-4 p-2 ${index < cartItems.length - 1 ? 'border-b' : ''}`}>
                 <div 
-                  onClick={() => (navigate(`/product/${item.product._id}`), setIsCartOpen(false))} 
+                  onClick={() => {navigate(`/product/${item.product._id}`); setIsCartOpen(false)}} 
                   className="flex-shrink-0 cursor-pointer"
                 >
                   <img
@@ -179,51 +158,47 @@ export default function CartDropdown({
                 </div>
 
                 <div className="flex-1">
-  <div className="flex justify-between items-start">
-    <div>
-      <span 
-        onClick={() => (navigate(`/product/${item.product._id}`), setIsCartOpen(false))} 
-        className="font-semibold text-black text-xl cursor-pointer hover:underline"
-      >
-        {item.product.name}
-      </span>
-      {/* Size Information */}
-      <p className="text-base text-gray-400 font-semibold mt-1">{formatPrice(item.product.price,item.product.currency)}</p>
-    </div>
-    <p className="font-semibold text-black text-xl">
-      {formatPrice((item.product.price*item.quantity), item.product.currency)}
-    </p>
-  </div>
-
-
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span 
+                        onClick={() => {navigate(`/product/${item.product._id}`); setIsCartOpen(false)}} 
+                        className="font-semibold text-base text-black cursor-pointer hover:underline"
+                      >
+                        {item.product.name}
+                      </span>
+                      <p className="text-xs text-gray-400 font-semibold mt-1">{formatPrice(item.product.price, item.product.currency)}</p>
+                    </div>
+                    <p className="font-semibold text-lg text-black">
+                      {formatPrice(item.product.price * item.quantity, item.product.currency)}
+                    </p>
+                  </div>
 
                   <div className="flex justify-between items-center mt-2">
-                  <div className="flex items-center gap-2">
-  <div className="flex items-center justify-between w-24 h-8 border border-gray-300 rounded-md">
-    <Button
-      onClick={() => handleQuantityChange(item.product._id, Math.max(1, item.quantity - 1))}
-      variant="ghost"
-      size="icon"
-      className="h-7 w-7 text-black"
-      disabled={item.quantity <= 1}
-    >
-      <Minus className="h-4 w-4" />
-    </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between w-24 h-8 border border-gray-300 rounded-md">
+                        <Button
+                          onClick={() => handleQuantityChange(item.product._id, Math.max(1, item.quantity - 1))}
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-black"
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
 
-    <span className="text-center text-black w-8">{item.quantity}</span>
+                        <span className="text-center font-semibold text-black w-8 text-sm">{item.quantity}</span>
 
-    <Button
-      onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
-      variant="ghost"
-      size="icon"
-      className="h-7 w-7 text-black"
-      disabled={item.quantity >= item.product.quantity}
-    >
-      <Plus className="h-4 w-4" />
-    </Button>
-  </div>
-</div>
-
+                        <Button
+                          onClick={() => handleQuantityChange(item.product._id, item.quantity + 1)}
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-black"
+                          disabled={item.quantity >= item.product.quantity}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
 
                     <Button
                       onClick={() => handleRemoveItem(item.product._id)}
@@ -240,23 +215,22 @@ export default function CartDropdown({
           </div>
         )}
 
-{cartItems.length > 0 && (
-  <>
-    <div className="flex justify-between items-center w-full border-t border-gray-300 px-4 py-2 mb-4">
-      <Button
-        className="w-full mt-4 text-white text-lg font-semibold bg-[#1A3B47] hover:bg-[#14303A] transition duration-300 ease-in-out"
-        onClick={() => {
-          navigate('/touristCart')
-          setIsCartOpen(false)
-          onClose()
-        }}
-      >
-        View All
-      </Button>
-    </div>
-  </>
-)}
-
+        {cartItems.length > 0 && (
+          <div className="flex flex-col justify-between w-full mt-4 space-y-4">
+            <div className="flex justify-between items-center w-full border-t border-gray-300 px-4 py-2">
+              <Button
+                className="w-full text-white text-sm font-semibold bg-[#1A3B47] hover:bg-[#14303A] transition duration-300 ease-in-out"
+                onClick={() => {
+                  navigate('/touristCart')
+                  setIsCartOpen(false)
+                  onClose()
+                }}
+              >
+                View All
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

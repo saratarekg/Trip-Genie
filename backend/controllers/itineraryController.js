@@ -574,10 +574,14 @@ const updateItinerary = async (req, res) => {
         await Tourist.findByIdAndUpdate(tourists[i]._id, {
           $push: {
             notifications: {
-              body: `The itinerary <b>${newItinerary.title}</b> is now available for booking`,
+              tags: ["informational", "itinerary", "available"],
+              title: "Itinerary Now Available for Booking",
+              priority: "medium",
+              type: "informational",
+              body: `The itinerary <b>${newItinerary.title}</b> is now available for booking.`,
               link: `/itinerary/${newItinerary._id}`,
             },
-          },
+          },          
         });
       }
     }
@@ -617,11 +621,16 @@ const flagItinerary = async (req, res) => {
 
       // Add a notification to the advertiser's notifications array
       const notification = {
+        tags: ["alert", "itinerary", "inappropriate"],
+        title: "Itinerary Flagged as Inappropriate",
+        priority: "high",
+        type: "alert",
         body: `Your itinerary <b>${itinerary.title}</b> has been flagged as inappropriate by the admin.`,
         link: `/itinerary/${req.params.id}`,
         date: new Date(),
         seen: false,
       };
+      
 
       await TourGuide.findByIdAndUpdate(itinerary.tourGuide._id, {
         $push: { notifications: notification },

@@ -247,10 +247,15 @@ const checkUpcomingEvents = async () => {
       await Tourist.findByIdAndUpdate(itinerary.user._id.toString(), {
         $push: {
           notifications: {
-            body: `Your booked itinerary <b>${itinerary.itinerary.title}</b> is starting in 2 days`,
+            tags: ["reminder", "itinerary_change"], // Multiple tags for better classification
+            title: "Upcoming Itinerary Reminder",
+            priority: "high",
+            type: "reminder",
+            body: `Your booked itinerary <b>${itinerary.itinerary.title}</b> is starting in 2 days.`,
             link: `/itinerary/${itinerary.itinerary._id}`,
           },
         },
+        
       });
       emailService.sendItineraryReminder(itinerary);
     }
@@ -260,10 +265,16 @@ const checkUpcomingEvents = async () => {
       await Tourist.findByIdAndUpdate(activity.user._id.toString(), {
         $push: {
           notifications: {
-            body: `Your booked activity <b>${activity.activity.name}</b> is starting in 2 days`,
-            link: `/activity/${activity.activity._id}`,
+            tags: ["reminder", "activity"], // Multiple tags to classify this notification
+            title: "Upcoming Activity Reminder",
+            priority: "high", // High priority since it is time-sensitive
+            type: "reminder", // Indicates this is a reminder notification
+            body: `Your booked activity <b>${activity.activity.name}</b> is starting in 2 days.`,
+            link: `/activity/${activity.activity._id}`, // Directs the user to the activity details page
+
           },
         },
+        
       });
       emailService.sendActivityReminder(activity);
     }
@@ -302,6 +313,10 @@ const sendBirthdayCards = async () => {
       await Tourist.findByIdAndUpdate(tourist._id.toString(), {
         $push: {
           notifications: {
+            tags: ["personal", "birthday", "promotional"], // Multiple tags to classify this as personal, birthday-related, and promotional
+            title: "🎉 Happy Birthday! 🎂", // A short and celebratory title
+            priority: "medium", // Medium priority for a birthday notification
+            type: "birthday", // Specifies the type of notification
             body: `<h1>Happy Birthday, ${
               tourist.fname ? tourist.fname : tourist.username
             }! 🎉🎂🎈</h1>
@@ -313,8 +328,11 @@ const sendBirthdayCards = async () => {
             <h3>Valid Until: <strong>${new Date(
               new Date().setFullYear(new Date().getFullYear() + 1)
             ).toDateString()}</strong></h3>`,
+            link: `/promo/${code}`, // Directs to a page with promo details (optional customization)
+
           },
         },
+        
       });
       emailService.sendBirthdayEmail(tourist, code);
 

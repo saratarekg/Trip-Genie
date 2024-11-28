@@ -50,6 +50,11 @@ export default function OrdersPage() {
     fetchOrders()
   }, [])
 
+  useEffect(() => {
+    setCurrentPage(1) // Reset to first page when filter or search changes
+  }, [filter, searchQuery])
+
+
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest"
     setUserRole(role)
@@ -147,6 +152,7 @@ export default function OrdersPage() {
     return `${userPreferredCurrency.symbol}${(priceUSD * rate).toFixed(2)}`
   }
 
+
   const filteredOrders = orders.filter(order => {
     const searchLower = searchQuery.toLowerCase()
     const matchesFilter = filter === 'all' || order.status === filter
@@ -185,13 +191,14 @@ export default function OrdersPage() {
   const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder)
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage)
 
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         </div>
       </div>
-      <div className="container mx-auto p-6">
+      <div className=" mx-auto p-6">
       <Toaster />
       <h1 className="text-5xl font-bold mb-3 text-[#1A3B47]">Orders</h1>
         <div className="flex justify-between items-center mb-6">
@@ -219,15 +226,19 @@ export default function OrdersPage() {
 </div>
 
           
-          <div className="relative w-[350px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="    Search products, delivery type, or status..."
-              className="pl-9 border-[#B5D3D1]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+<div className="relative w-[350px]">
+  {/* Conditionally render the Search icon */}
+  {!searchQuery && (
+    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+  )}
+  <Input
+    placeholder="    Search products, delivery type, or status..."
+    className="pl-9 border-[#B5D3D1]"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+</div>
+
         </div>
 
         {filteredOrders.length === 0 ? (
@@ -282,7 +293,7 @@ export default function OrdersPage() {
                 {order.products.slice(0, 3).map((item, idx) => (
                   <div 
                     key={idx} 
-                    className="grid grid-cols-[1fr,auto,auto] gap-4 items-center cursor-pointer hover:bg-gray-100"
+                    className="grid grid-cols-[1fr,auto,auto] gap-4 items-center cursor-pointer hover:underline"
                     onClick={() => handleProductClick(item.product)}
                   >
                     <span className="text-base break-words">{item.product.name}</span>
@@ -290,15 +301,16 @@ export default function OrdersPage() {
                     <span className="text-sm text-right">{displayPrice(item.product.price * item.quantity)}</span>
                   </div>
                     ))}
-                    {order.products.length >= 3 && (
-                      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent flex items-end justify-center">
-                        {order.products.length > 3 && (
-                        <span className="text-sm text-[#388A94] font-medium">
-                          +{order.products.length - 3} more items
-                        </span>
-                        )}
-                      </div>
-                    )}
+                   {order.products.length >= 3 && (
+  <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white via-white/80 to-transparent flex items-end justify-center">
+    {order.products.length > 3 && (
+      <span className="text-sm text-[#388A94] font-medium">
+        +{order.products.length - 3} more items
+      </span>
+    )}
+  </div>
+)}
+
                   </div>
                 </CardContent>
                 
@@ -455,26 +467,27 @@ export default function OrdersPage() {
         )}
         
         {filteredOrders.length > 0 && (
-          <div className="flex justify-center mt-8 gap-2">
-            <Button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="bg-[#388A94] text-white hover:bg-[#2e6b77]"
-            >
-              Previous
-            </Button>
-            <span className="flex items-center px-4 py-2 bg-white rounded-md">
-              Page {currentPage} of {totalPages}
-            </span>
-            <Button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="bg-[#388A94] text-white hover:bg-[#2e6b77]"
-            >
-              Next
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-center mt-8 gap-2">
+          <Button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="bg-[#388A94] text-white hover:bg-[#2e6b77]"
+          >
+            Previous
+          </Button>
+          <span className="flex items-center px-4 py-2 bg-white rounded-md">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="bg-[#388A94] text-white hover:bg-[#2e6b77]"
+          >
+            Next
+          </Button>
+        </div>
+      )}
+
       </div>
 
       <Dialog open={cancelConfirmOpen} onOpenChange={setCancelConfirmOpen}>

@@ -215,11 +215,16 @@ const flagActivity = async (req, res) => {
 
       // Add a notification to the advertiser's notifications array
       const notification = {
+        tags: ["alert", "activity", "inappropriate"], // Classify this as an alert and activity-related
+        title: "Activity Flagged as Inappropriate", // A concise and clear title
+        priority: "high", // High priority due to its critical nature
+        type: "alert", // Indicates this is an alert notification
         body: `Your activity <b>${activity.name}</b> has been flagged as inappropriate by the admin.`,
-        link: `/activity/${req.params.id}`,
-        date: new Date(),
-        seen: false,
+        link: `/activity/${req.params.id}`, // Directs the user to the flagged activity's details
+        date: new Date(), // Timestamp for when the notification is created
+        seen: false, // Defaults to false to indicate it hasn't been viewed yet
       };
+      
 
       await Advertiser.findByIdAndUpdate(activity.advertiser._id, {
         $push: { notifications: notification },
@@ -559,10 +564,17 @@ const updateActivity = async (req, res) => {
         await Tourist.findByIdAndUpdate(tourists[i]._id, {
           $push: {
             notifications: {
-              body: `The activity <b>${activity.name}</b> is now available for booking`,
-              link: `/activity/${req.params.id}`,
+              tags: ["informational", "activity", "available"], // Tags to categorize the notification (informational and activity-related)
+              title: "Activity Now Available for Booking", // A concise and descriptive title
+              priority: "medium", // Medium priority since it's an update but not urgent
+              type: "informational", // Type is informational, as it's about availability
+              body: `The activity <b>${activity.name}</b> is now available for booking.`,
+              link: `/activity/${req.params.id}`, // Direct link to the activity page for booking
+              date: new Date(), // Timestamp when the notification is created
+              seen: false, // Default to false, indicating that the notification hasn't been seen yet
             },
           },
+          
         });
       }
     }

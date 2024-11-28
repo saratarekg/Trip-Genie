@@ -21,6 +21,8 @@ router.get('/unseen-notifications',advertiserController.hasUnseenNotifications);
 // POST /seller/mark-notifications-seen
 router.post('/mark-notifications-seen', advertiserController.markNotificationsAsSeen);
 
+router.post('/notifications/markAsSeen/:notificationId', advertiserController.markNotificationAsSeenForAdvertiser);
+
 router.post(
   "/activities",
   upload.array("pictures", 10),
