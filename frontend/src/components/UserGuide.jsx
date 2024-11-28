@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { HelpCircle } from "lucide-react";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { forceVisible } from "react-lazyload";
 
 export const UserGuide = ({ steps, onStepChange, pageName }) => {
   const [runTour, setRunTour] = useState(false);
@@ -55,7 +56,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
   }, [pageName]);
 
   const handleJoyrideCallback = (data) => {
-    const { status, index, type } = data;
+    const { status, index, type, action } = data;
 
     if (type === "step:before") {
       if (onStepChange) {
@@ -64,7 +65,11 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
     }
 
     if (type === "step:after") {
-      setStepIndex(index + 1);
+      if (action === "prev") {
+        setStepIndex(index - 1);
+      } else {
+        setStepIndex(index + 1);
+      }
     }
 
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
@@ -97,6 +102,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
         showSkipButton={true}
         showProgress={true}
         stepIndex={stepIndex}
+        callback={handleJoyrideCallback}
         styles={{
           options: {
             primaryColor: "#388A94",
@@ -112,6 +118,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
           },
           close: {
             display: "none", // Remove the close (X) button
+            visibility: "hidden",
           },
           buttonBack: {
             marginRight: 10, // Fix Back button alignment
@@ -119,7 +126,6 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
             pointerEvents: stepIndex === 0 ? "none" : "auto", // Make non-clickable on the first step
           },
         }}
-        callback={handleJoyrideCallback}
       />
     </>
   );
