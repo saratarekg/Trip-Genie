@@ -68,13 +68,17 @@ have day title
 product key features and maybe like colours/sizes men el product
 
 guidance pages:
-
 all activities(done)
 all itineraries(done)
 all products (done)
 historical places(done)
 book hotel
 book transportation
+single activity 
+single itinerary
+single product
+wishlist
+checkout
 
 
 
