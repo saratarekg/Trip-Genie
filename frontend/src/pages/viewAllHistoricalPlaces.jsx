@@ -459,7 +459,7 @@ export default function AllHistoricalPlacesComponent() {
   return (
     <div className="bg-gray-100">
       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-           <UserGuide steps={guideSteps} pageName="itineraries" />
+           <UserGuide steps={guideSteps} pageName="historicalPlaces" />
         )}
      
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
