@@ -429,10 +429,41 @@ const hasUnseenNotifications = async (req, res) => {
   }
 };
 
+const markNotificationAsSeenForAdvertiser = async (req, res) => {
+  try {
+    const notificationId = req.params.notificationId; // Get the notification ID from the request parameters
+
+    // Find the advertiser by their ID and update the specific notification by its ID
+    const result = await Advertiser.updateOne(
+      { 
+        _id: res.locals.user_id, // Find the advertiser by their user ID
+        "notifications._id": notificationId, // Match the specific notification by its ID
+        "notifications.seen": false // Ensure that the notification is unseen
+      },
+      {
+        $set: {
+          "notifications.$.seen": true, // Set 'seen' to true for the specific notification
+        },
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(400).json({ message: "Notification not found or already marked as seen" });
+    }
+
+    res.json({ message: "Notification marked as seen" });
+  } catch (error) {
+    console.error("Error marking notification as seen for advertiser:", error.message);
+    res.status(500).json({ message: "Error marking notification as seen for advertiser" });
+  }
+};
+
+
 module.exports = {
   deleteAdvertiserAccount,
   deleteAdvertiser,
   getAllAdvertisers,
+  markNotificationAsSeenForAdvertiser,
   getAdvertiserByID,
   updateAdvertiser,
   getAdvertiser,

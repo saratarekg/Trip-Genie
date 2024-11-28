@@ -26,6 +26,8 @@ router.get('/unseen-notifications',adminController.hasUnseenNotifications);
 // POST /seller/mark-notifications-seen
 router.post('/mark-notifications-seen', adminController.markNotificationsAsSeen);
 
+router.post('/notifications/markAsSeen/:notificationId', adminController.markNotificationAsSeen);
+
 
 router.get(
   "/historical-places",

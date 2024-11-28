@@ -761,7 +761,7 @@ export function AllProducts() {
           </div>
         </div>
       </div>
-      <div className="container mx-auto px-24 py-8 sm:px-12 lg:px-24">
+      <div className=" py-8 sm:px-12 lg:px-12">
         <div className="flex gap-8">
           <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">

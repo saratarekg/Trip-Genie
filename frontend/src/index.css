@@ -113,8 +113,12 @@ body{
 }
 
 .highlight {
-  animation: highlight 1s ease-in-out;
+  animation: highlight 1s ease-in-out infinite; /* Runs indefinitely */
 }
+
+
+
+
 
 input[type="checkbox"]:checked {
   background-color: #388A94;

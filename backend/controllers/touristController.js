@@ -2190,6 +2190,36 @@ const hasUnseenNotifications = async (req, res) => {
   }
 };
 
+const markNotificationAsSeenForTourist = async (req, res) => {
+  try {
+    const notificationId = req.params.notificationId; // Get the notification ID from the request parameters
+
+    // Find the tourist by their ID and update the specific notification by its ID
+    const result = await Tourist.updateOne(
+      { 
+        _id: res.locals.user_id, // Find the tourist by their user ID
+        "notifications._id": notificationId, // Match the specific notification by its ID
+        "notifications.seen": false // Ensure that the notification is unseen
+      },
+      {
+        $set: {
+          "notifications.$.seen": true, // Set 'seen' to true for the specific notification
+        },
+      }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ message: "Notification not found or already marked as seen" });
+    }
+
+    res.json({ message: "Notification marked as seen" });
+  } catch (error) {
+    console.error("Error marking notification as seen for tourist:", error.message);
+    res.status(500).json({ message: "Error marking notification as seen for tourist" });
+  }
+};
+
+
 const getVisitedPages = async (req, res) => {
   try {
     const tourist = await Tourist.findById(res.locals.user_id).select(
@@ -2284,6 +2314,7 @@ module.exports = {
   getTouristNotifications,
   markNotificationsAsSeen,
   hasUnseenNotifications,
+  markNotificationAsSeenForTourist,
   getVisitedPages,
   updateVisitedPages,
 };

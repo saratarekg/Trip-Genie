@@ -195,10 +195,15 @@ productSchema.post("findOneAndUpdate", async function (doc) {
         {
           $push: {
             notifications: {
-              body: `Product <b>${doc.name}</b> is out of stock`,
+              tags: ["alert", "product", "out_of_stock"],
+              title: "Product Out of Stock",
+              priority: "high",
+              type: "alert",
+              body: `Product <b>${doc.name}</b> is out of stock.`,
               link: `/product/${doc._id}`,
             },
           },
+          
         }
       );
 
@@ -216,11 +221,15 @@ productSchema.post("findOneAndUpdate", async function (doc) {
         {
           $push: {
             notifications: {
-              body: `Product <b>${doc.name}</b> is out of stock`,
+              tags: ["informational", "warning"], // Valid tags based on the enum
+              title: "Product Out of Stock",
+              priority: "high",
+              type: "alert",
+              body: `Product <b>${doc.name}</b> is out of stock.`,
               link: `/product/${doc._id}`,
-
             },
           },
+          
         },
         { new: true }
       );

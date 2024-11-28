@@ -1044,10 +1044,10 @@ export default function CheckoutPage() {
 
             <button
   onClick={() => navigate("/TouristCart")}
-  className="flex items-center justify-center text-[#1A3B47] hover:text-[#388A94] transition-colors"
+  className="flex items-center mb-4 justify-center text-[#1A3B47] hover:text-[#388A94] transition-colors"
 >
-<ArrowLeft className="ml-6 mr-2" />
-  <p className="text-lg font-bold">Back to cart</p> {/* Added margin to separate text from the icon */}
+<ArrowLeft className="ml-6 mr-2 h-7 w-7 " />
+  <p className="text-2xl font-bold">Back to cart</p> {/* Added margin to separate text from the icon */}
   
 </button>
 

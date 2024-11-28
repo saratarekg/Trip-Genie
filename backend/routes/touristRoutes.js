@@ -23,6 +23,9 @@ router.get("/notifications", touristController.getTouristNotifications);
 
 router.get("/unseen-notifications", touristController.hasUnseenNotifications);
 
+router.post('/notifications/markAsSeen/:notificationId', touristController.markNotificationAsSeenForTourist);
+
+
 // POST /seller/mark-notifications-seen
 router.post(
   "/mark-notifications-seen",

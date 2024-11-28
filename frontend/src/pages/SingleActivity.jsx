@@ -78,6 +78,7 @@ import {
   Car,
   Bus,
 } from "lucide-react";
+import PaymentPopup from "@/components/payment-popup";
 
 const ImageGallery = ({ pictures }) => {
   const [mainImage, setMainImage] = useState(pictures[0]?.url);
@@ -163,8 +164,9 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -193,6 +195,7 @@ const ActivityDetail = () => {
   const [activityRating, setActivityRating] = useState(0);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [numberOfTickets, setNumberOfTickets] = useState(1);
   const [paymentType, setPaymentType] = useState("CreditCard");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
@@ -230,7 +233,7 @@ const ActivityDetail = () => {
   const [seatsToBook, setSeatsToBook] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
   const [tourist, setTourist] = useState(null);
-  
+
   useEffect(() => {
     const fetchTouristData = async () => {
       try {
@@ -314,7 +317,7 @@ const ActivityDetail = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   {transport.vehicleType === "Bus" ||
-                    transport.vehicleType === "Microbus" ? (
+                  transport.vehicleType === "Microbus" ? (
                     <Bus className="w-5 h-5 mr-2 text-blue-500" />
                   ) : (
                     <Car className="w-5 h-5 mr-2 text-green-500" />
@@ -401,7 +404,7 @@ const ActivityDetail = () => {
   };
 
   const handleBookNowClick = () => {
-    setShowBookingDialog(true);
+    setShowPaymentPopup(true);
     setBookingError("");
   };
 
@@ -633,9 +636,12 @@ const ActivityDetail = () => {
     const fetchSavedActivities = async () => {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/saved-activities", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://localhost:4000/tourist/saved-activities",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setSavedActivities(response.data);
       } catch (error) {
         console.error("Error fetching saved activities:", error);
@@ -709,6 +715,23 @@ const ActivityDetail = () => {
     }
   };
 
+  // format price that returns the activity price as an int 
+
+  const formatPriceInt = (price) => {
+    if (activity) {
+      if (userRole === "tourist" && userPreferredCurrency) {
+        if (userPreferredCurrency === activity.currency) {
+          const exchangedPrice = price * exchangeRates;
+          return exchangedPrice.toFixed(2);
+        }
+      } else {
+        if (currencySymbol) {
+          return price;
+        }
+      }
+    }
+  };
+
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
@@ -765,7 +788,7 @@ const ActivityDetail = () => {
       const additionalPrice =
         userBooking.paymentAmount +
         calculateDiscountedPrice(activity.price, activity.specialDiscount) *
-        additionalTickets;
+          additionalTickets;
 
       const response = await axios.put(
         `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
@@ -786,7 +809,7 @@ const ActivityDetail = () => {
       console.error("Error updating booking:", error);
       setBookingError(
         error.response?.data?.message ||
-        "An error occurred while updating the booking."
+          "An error occurred while updating the booking."
       );
     } finally {
       setIsBooking(false);
@@ -832,12 +855,62 @@ const ActivityDetail = () => {
     }
   };
 
+  const handlePaymentConfirm = async (paymentType, numberOfTickets) => {
+    setIsBooking(true);
+    setBookingError("");
+    try {
+      const token = Cookies.get("jwt");
+      const totalPrice = calculateTotalPrice(numberOfTickets);
+
+      const response = await fetch(
+        `http://localhost:4000/${userRole}/activityBooking`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            activity: id,
+            paymentType,
+            paymentAmount: totalPrice,
+            numberOfTickets,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.message === "Insufficient funds in wallet") {
+          setBookingError(
+            "Insufficient funds, please choose a different payment method or update your wallet."
+          );
+        } else {
+          throw new Error(errorData.message || "Failed to book activity");
+        }
+      } else {
+        const data = await response.json();
+        setShowPaymentPopup(false);
+        setShowSuccessDialog(true);
+      }
+    } catch (error) {
+      console.error("Error booking activity:", error);
+      setBookingError(
+        error.message || "An error occurred while booking. Please try again."
+      );
+    } finally {
+      setIsBooking(false);
+    }
+  };
+
+
   useEffect(() => {
     if (savedActivities && savedActivities.length > 0) {
-      console.log(savedActivities);
-      console.log(activity._id);
-      setIsSaved(savedActivities.some(savedActivity => savedActivity._id === activity._id.toString()));
-
+      setIsSaved(
+        savedActivities.some(
+          (savedActivity) => savedActivity._id === activity._id.toString()
+        )
+      );
     }
     console.log(isSaved);
   }, [savedActivities]);
@@ -852,15 +925,16 @@ const ActivityDetail = () => {
       );
       if (response.data.success) {
         // Update the saved state locally
-        setSavedActivities(prev =>
-          prev.some(item => item._id === itemId)
-            ? prev.filter(item => item._id !== itemId)
+        setSavedActivities((prev) =>
+          prev.some((item) => item._id === itemId)
+            ? prev.filter((item) => item._id !== itemId)
             : [...prev, { _id: itemId }]
         );
         // Show success message
         setAlertMessage({
           type: "success",
-          message: response.data.message || "Activity saved/unsaved successfully!",
+          message:
+            response.data.message || "Activity saved/unsaved successfully!",
         });
       }
     } catch (error) {
@@ -1263,8 +1337,9 @@ const ActivityDetail = () => {
                       <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
                         {isExpanded
                           ? activity.description
-                          : `${activity.description.substring(0, 130)}${activity.description.length > 130 ? "..." : ""
-                          }`}
+                          : `${activity.description.substring(0, 130)}${
+                              activity.description.length > 130 ? "..." : ""
+                            }`}
                         {activity.description.length > 130 && (
                           <button
                             onClick={toggleExpanded}
@@ -1287,10 +1362,11 @@ const ActivityDetail = () => {
 
                           <Button
                             onClick={handleBookNowClick}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg ${activity.isBookingOpen
-                              ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                              : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                              }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg ${
+                              activity.isBookingOpen
+                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                            }`}
                             disabled={!activity.isBookingOpen}
                           >
                             {activity.isBookingOpen
@@ -1303,22 +1379,21 @@ const ActivityDetail = () => {
                               e.stopPropagation();
                               handleSaveToggle(activity._id);
                             }}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 ${isSaved
-                              ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                              : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                              }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 ${
+                              isSaved
+                                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                            }`}
                           >
                             <Bookmark
-                              className={`w-5 h-5 ${isSaved ? "stroke-white fill-[#1A3B47]" : "stroke-white"
-                                }`}
+                              className={`w-5 h-5 ${
+                                isSaved
+                                  ? "stroke-white fill-[#1A3B47]"
+                                  : "stroke-white"
+                              }`}
                             />
                             {isSaved ? "Unsave" : "Save"}
                           </Button>
-
-
-
-
-
                         </>
                       )}
                       {canModify && (
@@ -1417,10 +1492,11 @@ const ActivityDetail = () => {
                       <>
                         <div className="mt-6 border-t border-gray-300 pt-4"></div>
                         <Button
-                          className={`w-full mx-auto text-white ${isAppropriate
-                            ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                            : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                            }`}
+                          className={`w-full mx-auto text-white ${
+                            isAppropriate
+                              ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                              : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                          }`}
                           onClick={handleOpenDialog}
                         >
                           {isAppropriate
@@ -1534,14 +1610,15 @@ const ActivityDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${(
-                            isRatingHovered
-                              ? quickRating >= star
-                              : quickRating >= star
-                          )
-                            ? "text-yellow-500 fill-current"
-                            : "text-gray-300"
-                            }`}
+                          className={`w-8 h-8 cursor-pointer ${
+                            (
+                              isRatingHovered
+                                ? quickRating >= star
+                                : quickRating >= star
+                            )
+                              ? "text-yellow-500 fill-current"
+                              : "text-gray-300"
+                          }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -1666,70 +1743,21 @@ const ActivityDetail = () => {
             </div>
           </div>
 
-          <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Book Activity: {activity.name}</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="tickets" className="text-right">
-                    Tickets
-                  </Label>
-                  <Input
-                    id="tickets"
-                    type="number"
-                    value={numberOfTickets}
-                    onChange={(e) =>
-                      setNumberOfTickets(Math.max(1, parseInt(e.target.value)))
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Total Price</Label>
-                  <div className="col-span-3">
-                    {formatPrice(calculateTotalPrice())}
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Payment Type</Label>
-                  <RadioGroup
-                    value={paymentType}
-                    onValueChange={setPaymentType}
-                    className="col-span-3"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="CreditCard" id="CreditCard" />
-                      <Label htmlFor="CreditCard">Credit Card</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="DebitCard" id="DebitCard" />
-                      <Label htmlFor="DebitCard">Debit Card</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Wallet" id="Wallet" />
-                      <Label htmlFor="Wallet">Wallet</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                {bookingError && (
-                  <div className="text-red-500 text-sm">{bookingError}</div>
-                )}
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={() => setShowBookingDialog(false)}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleBooking} disabled={isBooking}>
-                  {isBooking ? "Booking..." : "Confirm Booking"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          {userPreferredCurrency && userPreferredCurrency.code && (
+          <PaymentPopup
+            isOpen={showPaymentPopup}
+            onClose={() => setShowPaymentPopup(false)}
+            title={`Book Activity: ${activity.name}`}
+            items={[{ name: activity.name, price: ((calculateTotalPrice() * exchangeRates) * 100) }]} // Convert price to cents
+            onWalletPayment={() =>
+              handlePaymentConfirm("Wallet", numberOfTickets)
+            }
+            stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+            onConfirm={handlePaymentConfirm}
+            priceOne={(calculateTotalPrice() * exchangeRates).toFixed(2)}
+            currency={userPreferredCurrency.code} 
+          />
+        )}
 
           <Dialog
             open={showUpdateBookingDialog}
@@ -1819,7 +1847,6 @@ const ActivityDetail = () => {
                   <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
                   {/* Title */}
                   <DialogTitle>Booking Successful</DialogTitle>
-                  
                 </div>
               </DialogHeader>
 
@@ -1829,16 +1856,19 @@ const ActivityDetail = () => {
                   {activity.name}.
                 </p>
                 <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Label className="text-right">Amount Paid:</Label>
-              <div>  {formatPrice(calculateTotalPrice())} </div>
-            </div>
-            { paymentType === "Wallet" && (
-              <div className="grid grid-cols-2 gap-4">
-                <Label className="text-right">New Wallet Balance:</Label>
-                <div>{formatPrice(tourist.wallet - calculateTotalPrice())}</div>
-              </div>
-            )}</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Label className="text-right">Amount Paid:</Label>
+                    <div> {formatPrice(calculateTotalPrice())} </div>
+                  </div>
+                  {paymentType === "Wallet" && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <Label className="text-right">New Wallet Balance:</Label>
+                      <div>
+                        {formatPrice(tourist.wallet - calculateTotalPrice())}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <DialogFooter>
@@ -2133,7 +2163,7 @@ const ActivityDetail = () => {
                     <Label htmlFor="debitCard">Debit Card</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="wallet" id="wallet" />
+                    <RadioGroupItem value="Wallet" id="wallet" />
                     <Label htmlFor="wallet">Wallet</Label>
                   </div>
                 </RadioGroup>
@@ -2178,8 +2208,9 @@ const ActivityDetail = () => {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}

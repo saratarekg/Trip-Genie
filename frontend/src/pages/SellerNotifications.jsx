@@ -24,6 +24,7 @@ export default function SellerNotifications() {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
       );
+      console.log(response);
 
       if (Array.isArray(response.data)) {
         setNotifications(response.data);
