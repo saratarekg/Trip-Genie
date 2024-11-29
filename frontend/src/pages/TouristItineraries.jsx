@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import {
@@ -75,6 +76,9 @@ export default function Component() {
   const [exchangeRateItinerary, setExchangeRateItinerary] = useState({});
   const [exchangeRateActivity, setExchangeRateActivity] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
+  const [tourist, setTourist] = useState(null);
+
+
 
   const fetchUserInfo = async () => {
     if (userRole === "tourist") {
@@ -91,6 +95,7 @@ export default function Component() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        setTourist(response.data);
         setUserPreferredCurrency(response2.data);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -160,7 +165,7 @@ export default function Component() {
 
       setCurrencySymbol(response.data);
     } catch (error) {
-      console.error("Error fetching currensy symbol:", error);
+      console.error("Error fetching currency symbol:", error);
     }
   };
 
@@ -187,6 +192,66 @@ export default function Component() {
       }
     }
   };
+
+
+  const [exchangeRates, setExchangeRates] = useState({});
+
+  const formatWallet = (price) => {
+    if (!tourist || !tourist.wallet) {
+      console.log("Tourist or wallet not available.");
+      return "Wallet not available";
+    }
+  
+    if ( !currencySymbol) {
+      console.log(" currency symbol not available.");
+      
+    }
+
+    if (!exchangeRateItinerary) {
+      console.log("Exchange rate not available.");
+      
+    }
+  
+    const exchangedPrice = price * exchangeRateItinerary;
+    exchangedPrice.toFixed(2);
+    return `${userPreferredCurrency.symbol}${exchangedPrice}`;
+  };
+  
+
+  // const fetchExchangeRate = async () => {
+  //   try {
+  //     const token = Cookies.get("jwt");
+  //     const response = await fetch(
+  //       `http://localhost:4000/${userRole}/populate`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json", // Ensure content type is set to JSON
+  //         },
+  //         body: JSON.stringify({
+  //           base: itinerary.currency, // Sending base currency ID
+  //           target: userPreferredCurrency._id, // Sending target currency ID
+  //         }),
+  //       }
+  //     );
+  //     // Parse the response JSON
+  //     const data = await response.json();
+
+  //     if (response.ok) {
+  //       setExchangeRates(data.conversion_rate);
+  //     } else {
+  //       // Handle possible errors
+  //       console.error("Error in fetching exchange rate:", data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching exchange rate:", error);
+  //   }
+  // };
+
+ 
+
+
 
 
 
@@ -225,15 +290,16 @@ export default function Component() {
     }
   };
 
+
   const confirmDelete = async () => {
     if (!selectedBooking) return;
-
+  
     const bookingType = selectedBooking.activity ? "activity" : "itinerary";
     const bookingDate = new Date(selectedBooking[bookingType].timing);
     const now = new Date();
     const hoursDifference =
       (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-
+  
     if (hoursDifference < 48) {
       showNotification(
         "Bookings can only be cancelled 48 hours or more before the event starts.",
@@ -242,32 +308,80 @@ export default function Component() {
       setIsDeleteDialogOpen(false);
       return;
     }
-
+  
     try {
-      await axios.delete(
+      console.log("Initiating cancellation request for:", selectedBooking);
+  
+      const response = await axios.delete(
         `http://localhost:4000/${userRole}/${bookingType}Booking/${selectedBooking._id}`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
       );
-
+  
+      console.log("Cancellation response:", response);
+  
+      // Verify success response status
+      if (response.status !== 200 && response.status !== 204) {
+        throw new Error(
+          `Unexpected response status: ${response.status} - ${response.statusText}`
+        );
+      }
+  
       // Fetch updated data after successful deletion
       await fetchUpdatedData();
+  
+      // Calculate refund and updated wallet balance
+      const totalPrice = selectedBooking.paymentAmount; // Ensure paymentAmount is available and numeric
+      const formattedTotalPrice = formatPrice(totalPrice);
+      const newWalletBalance =
+        selectedBooking.paymentType === "Wallet"
+          ? tourist.wallet + totalPrice
+          : tourist.wallet;
 
+          console.log("total price", formatPrice(totalPrice));
+          console.log("wallet updated",formatWallet(tourist.wallet.toFixed(2)));
+  
+      // Update wallet balance if necessary
+      if (selectedBooking.paymentType === "Wallet") {
+        tourist.wallet = newWalletBalance;
+      }
+  
+      // Display success notification with refund details
       showNotification(
-        "Your booking has been successfully cancelled.",
+        <>
+          <p>Your booking has been successfully cancelled.</p>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Label className="text-right">Amount Refunded:</Label>
+              <div>{formattedTotalPrice}</div>
+            </div>
+            {selectedBooking.paymentType === "Wallet" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Label className="text-right">New Wallet Balance:</Label>
+                <div>{  formatWallet(newWalletBalance.toFixed(2))}</div>
+              </div>
+            )}
+          </div>
+        </>,
         "success"
       );
     } catch (error) {
-      console.error("Error deleting booking:", error);
+      console.error("Error during cancellation:", error);
+  
+      // Display error notification with detailed message
       showNotification(
         "An error occurred while cancelling your booking. Please try again.",
         "error"
       );
+    } finally {
+      // Ensure the dialog always closes
+      setIsDeleteDialogOpen(false);
     }
-
-    setIsDeleteDialogOpen(false);
   };
+  
+  
+  
 
   useEffect(() => {
     const role = Cookies.get("role") || "guest";
@@ -495,35 +609,30 @@ export default function Component() {
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={isNotificationDialogOpen}
-        onOpenChange={setIsNotificationDialogOpen}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Notification</DialogTitle>
-          </DialogHeader>
-          {/* Dynamic Icon */}
-          <div className="flex items-center gap-2">
-            {notificationIconType === "error" && (
-              <XCircle className="w-6 h-6 text-red-500" />
-            )}
-            {notificationIconType === "success" && (
-              <CheckCircle className="w-6 h-6 text-green-500" />
-            )}
-            {notificationIconType === "warning" && (
-              <AlertCircle className="w-6 h-6 text-yellow-500" />
-            )}
-            {/* Notification Message */}
-            <p>{notificationMessage}</p>
-          </div>
-          <DialogFooter>
-            <Button onClick={() => setIsNotificationDialogOpen(false)}>
-              OK
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <Dialog open={isNotificationDialogOpen} onOpenChange={setIsNotificationDialogOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Notification</DialogTitle>
+    </DialogHeader>
+    <div className="flex items-center gap-2">
+      {notificationIconType === "error" && (
+        <XCircle className="w-6 h-6 text-red-500" />
+      )}
+      {notificationIconType === "success" && (
+        <CheckCircle className="w-6 h-6 text-green-500" />
+      )}
+      {notificationIconType === "warning" && (
+        <AlertCircle className="w-6 h-6 text-yellow-500" />
+      )}
+      {/* Render dynamic message */}
+      <div>{notificationMessage}</div>
+    </div>
+    <DialogFooter>
+      <Button onClick={() => setIsNotificationDialogOpen(false)}>OK</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
     </div>
   );
 }

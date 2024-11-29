@@ -10,7 +10,6 @@ import {
   addMonths,
   addYears,
   startOfYear,
-  getDaysInMonth,
 } from "date-fns";
 import {
   Area,
@@ -40,6 +39,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const AdvertiserReport = () => {
   const [salesReport, setSalesReport] = useState(null);
@@ -52,8 +53,8 @@ const AdvertiserReport = () => {
     year: "",
   });
   const [graphData, setGraphData] = useState([]);
-  const [activityNames, setActivityNames] = useState([]);
-  const [isFiltering, setIsFiltering] = useState(false);
+  const [activities, setActivities] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const getUserRole = () => {
@@ -63,44 +64,68 @@ const AdvertiserReport = () => {
   };
 
   useEffect(() => {
-    const fetchSalesReport = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const role = getUserRole();
-        const response = await axios.get(
-          `http://localhost:4000/${role}/activities-report`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        setSalesReport(response.data);
-
-        if (
-          response.data.activityReport &&
-          response.data.activityReport.length > 0
-        ) {
-          updateGraphData(response.data.activityReport, graphPeriod);
-
-          const uniqueActivityNames = [
-            ...new Set(
-              response.data.activityReport.map((item) => item.activity.name)
-            ),
-          ];
-          setActivityNames(uniqueActivityNames);
-        } else {
-          setError("No sales data available");
-        }
-      } catch (error) {
-        console.error("Error fetching sales report:", error);
-        setError("Failed to fetch sales report. Please try again later.");
-      }
-    };
-
     fetchSalesReport();
-  }, []);
+    fetchMyActivities();
+  }, [filters]);
+
+  const fetchMyActivities = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        `http://localhost:4000/advertiser/activities-report`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setActivities(
+        response.data.activityReport.map((activity) => ({
+          id: activity.activity._id,
+          name: activity.activity.name,
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching sales report:", error);
+      setError("Failed to fetch activities. Please try again later.");
+    }
+  };
+
+  const fetchSalesReport = async () => {
+    setIsLoading(true);
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const { activity, day, month, year } = filters;
+      const queryParams = new URLSearchParams();
+      if (activity) queryParams.append("selectedActivities", activity);
+      if (year) queryParams.append("year", year);
+      if (month) queryParams.append("month", month);
+      if (day) queryParams.append("day", day);
+
+      const response = await axios.get(
+        `http://localhost:4000/advertiser/activities-report?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setSalesReport(response.data);
+
+      if (response.data.activityReport) {
+        updateGraphData(response.data.activityReport, graphPeriod);
+      } else {
+        setError("No sales data available");
+      }
+    } catch (error) {
+      console.error("Error fetching sales report:", error);
+      setError("Failed to fetch sales report. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (salesReport && salesReport.activityReport) {
@@ -110,18 +135,8 @@ const AdvertiserReport = () => {
 
   const filteredSales = useMemo(() => {
     if (!salesReport || !salesReport.activityReport) return [];
-
-    return salesReport.activityReport.filter((item) => {
-      const itemDate = new Date(item.activity.timing);
-      return (
-        (!filters.activity || item.activity.name === filters.activity) &&
-        (!filters.day || itemDate.getDate() === parseInt(filters.day, 10)) &&
-        (!filters.month ||
-          itemDate.getMonth() + 1 === parseInt(filters.month, 10)) &&
-        (!filters.year || itemDate.getFullYear() === parseInt(filters.year, 10))
-      );
-    });
-  }, [salesReport, filters]);
+    return salesReport.activityReport;
+  }, [salesReport]);
 
   const updateGraphData = (salesData, period) => {
     if (!Array.isArray(salesData)) {
@@ -542,44 +557,9 @@ const AdvertiserReport = () => {
                   <SelectValue placeholder="Select activity" />
                 </SelectTrigger>
                 <SelectContent>
-                  {activityNames.map((name, index) => (
-                    <SelectItem key={index} value={name}>
-                      {name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={filters.day}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, day: value }))
-                }
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Select day" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 31 }, (_, i) => (
-                    <SelectItem key={i + 1} value={(i + 1).toString()}>
-                      {i + 1}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                value={filters.month}
-                onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, month: value }))
-                }
-                // disabled={!filters.day}
-              >
-                <SelectTrigger className="w-full sm:w-[200px]">
-                  <SelectValue placeholder="Select month" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 12 }, (_, i) => (
-                    <SelectItem key={i + 1} value={(i + 1).toString()}>
-                      {format(new Date(2024, i), "MMMM")}
+                  {activities.map((activity) => (
+                    <SelectItem key={activity.id} value={activity.id}>
+                      {activity.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -589,7 +569,6 @@ const AdvertiserReport = () => {
                 onValueChange={(value) =>
                   setFilters((prev) => ({ ...prev, year: value }))
                 }
-                // disabled={filters.day && !filters.month}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Select year" />
@@ -601,6 +580,42 @@ const AdvertiserReport = () => {
                   ).map((year) => (
                     <SelectItem key={year} value={year.toString()}>
                       {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filters.month}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, month: value }))
+                }
+                disabled={!filters.year}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                    <SelectItem key={month} value={month.toString()}>
+                      {format(new Date(2000, month - 1, 1), "MMMM")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filters.day}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, day: value }))
+                }
+                disabled={!filters.month}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Select day" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 31 }, (_, i) => (
+                    <SelectItem key={i + 1} value={(i + 1).toString()}>
+                      {i + 1}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -620,70 +635,66 @@ const AdvertiserReport = () => {
                       Revenue
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
+                      Activity Date
                     </th>
                   </tr>
                 </thead>
                 <AnimatePresence mode="wait">
-                  {!isFiltering && (
-                    <motion.tbody
-                      key="table-body"
-                      className="bg-white divide-y divide-gray-200"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {filteredSales.map((item, index) => (
-                        <motion.tr
-                          key={index}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{ duration: 0.2, delay: index * 0.05 }}
-                        >
-                          <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {item.tickets}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.activity.name}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${parseFloat(item.revenue).toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(
-                              item.activity.timing
-                            ).toLocaleDateString()}
-                          </td>
-                        </motion.tr>
-                      ))}
+                  <motion.tbody
+                    key="table-body"
+                    className="bg-white divide-y divide-gray-200"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {filteredSales.map((item, index) => (
                       <motion.tr
-                        key="total-row"
-                        className="bg-gray-50 font-semibold"
+                        key={index}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{
-                          duration: 0.2,
-                          delay: filteredSales.length * 0.05,
-                        }}
+                        transition={{ duration: 0.2, delay: index * 0.05 }}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          Total: {totalAttendance}
+                        <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {item.tickets}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          -
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {item.activity.name}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          Total: ${totalFilteredRevenue.toFixed(2)}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          ${parseFloat(item.revenue).toFixed(2)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          -
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(item.activity.timing).toLocaleDateString()}
                         </td>
                       </motion.tr>
-                    </motion.tbody>
-                  )}
+                    ))}
+                    <motion.tr
+                      key="total-row"
+                      className="bg-gray-50 font-semibold"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{
+                        duration: 0.2,
+                        delay: filteredSales.length * 0.05,
+                      }}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        Total: {totalAttendance}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        -
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        Total: ${totalFilteredRevenue.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        -
+                      </td>
+                    </motion.tr>
+                  </motion.tbody>
                 </AnimatePresence>
               </table>
             </div>

@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import { format } from 'date-fns'
-import { Eye, Trash2, MapPin, Clock, Car, DollarSign, Armchair } from 'lucide-react'
+import { Eye, Trash2, MapPin, Clock, Car, DollarSign, Armchair ,CheckCircle} from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -37,9 +38,13 @@ export default function UpcomingTransportation() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
-
+  const [isNotificationDialogOpen, setIsNotificationDialogOpen] = 
+  useState(false);
+  const [notificationIconType, setNotificationIconType] = useState("");
+  const [notificationMessage, setNotificationMessage] = useState("");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRate, setExchangeRate] = useState({});
+  const [tourist, setTourist] = useState(null);
 
   const fetchUserInfo = async () => {
       try {
@@ -55,6 +60,7 @@ export default function UpcomingTransportation() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        setTourist(response.data);
         setUserPreferredCurrency(response2.data);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -94,6 +100,7 @@ export default function UpcomingTransportation() {
   };
 
 
+
   useEffect(() => {
     if (selectedBooking) {
         if (
@@ -115,6 +122,20 @@ export default function UpcomingTransportation() {
           return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
         }
       }
+  };
+
+
+  const formatWallet = (price) => {
+    if (!tourist || !tourist.wallet) {
+      console.log("Tourist or wallet not available.");
+      return "Wallet not available";
+    }
+  
+    
+  
+    const exchangedPrice = price * exchangeRate;
+    exchangedPrice.toFixed(2);
+    return `${userPreferredCurrency.symbol}${exchangedPrice}`;
   };
 
   useEffect(() => {
@@ -139,6 +160,12 @@ export default function UpcomingTransportation() {
     setIsViewDialogOpen(true)
   }
 
+  const showNotification = (message, iconType) => {
+    setNotificationMessage(message);
+    setNotificationIconType(iconType);
+    setIsNotificationDialogOpen(true);
+  };
+
   const handleDeleteBooking = (booking) => {
     setSelectedBooking(booking)
     setIsDeleteDialogOpen(true)
@@ -153,7 +180,43 @@ export default function UpcomingTransportation() {
       })
       setBookings(bookings.filter((booking) => booking._id !== selectedBooking._id));
       setIsDeleteDialogOpen(false);
-      window.location.reload();
+      const totalPrice = selectedBooking.totalCost; // Ensure paymentAmount is available and numeric
+      const formattedTotalPrice = formatPrice(totalPrice);
+      const newWalletBalance =
+        selectedBooking.paymentMethod === "wallet"
+          ? tourist.wallet + totalPrice
+          : tourist.wallet;
+      const newwallet = tourist.wallet + totalPrice;
+
+          console.log("total price", formatPrice(selectedBooking.totalCost));
+          console.log("wallet updated",formatWallet(tourist.wallet + totalPrice));
+          console.log("paymentype", selectedBooking.paymentMethod);
+  
+      // Update wallet balance if necessary
+      if (selectedBooking.paymentMethod === "wallet") {
+        tourist.wallet = newWalletBalance;
+      }
+  
+      // Display success notification with refund details
+      showNotification(
+        <>
+          <p>Your booking has been successfully cancelled.</p>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Label className="text-right">Amount Refunded:</Label>
+              <div>{formattedTotalPrice}</div>
+            </div>
+            {selectedBooking.paymentMethod === "wallet" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Label className="text-right">New Wallet Balance:</Label>
+                <div>{  formatWallet(newwallet.toFixed(2))}</div>
+              </div>
+            )}
+          </div>
+        </>,
+        "success"
+      );
+     // window.location.reload();
       // You might want to show a success notification here
     } catch (error) {
       console.error('Error deleting booking:', error)
@@ -256,6 +319,36 @@ export default function UpcomingTransportation() {
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
               Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isNotificationDialogOpen}
+        onOpenChange={setIsNotificationDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Notification</DialogTitle>
+          </DialogHeader>
+          {/* Dynamic Icon */}
+          <div className="flex items-center gap-2">
+            {notificationIconType === "error" && (
+              <XCircle className="w-6 h-6 text-red-500" />
+            )}
+            {notificationIconType === "success" && (
+              <CheckCircle className="w-6 h-6 text-green-500" />
+            )}
+            {notificationIconType === "warning" && (
+              <AlertCircle className="w-6 h-6 text-yellow-500" />
+            )}
+            {/* Notification Message */}
+            <p>{notificationMessage}</p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsNotificationDialogOpen(false)}>
+              OK
             </Button>
           </DialogFooter>
         </DialogContent>
