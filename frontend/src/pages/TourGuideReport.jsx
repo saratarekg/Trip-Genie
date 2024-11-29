@@ -62,12 +62,34 @@ const TourGuideItineraryReport = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const fetchMyItineraries = async () => {
+    try {
+      const token = Cookies.get("jwt");
+
+      const response = await axios.get(
+        `http://localhost:4000/tour-guide/itineraries-report`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setItineraries(
+        response.data.itineraryReport.map((itinerary) => ({
+          id: itinerary.itinerary._id,
+          title: itinerary.itinerary.title,
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching itineraries:", error);
+      setError("Failed to fetch itineraries. Please try again later.");
+    }
+  };
   const fetchItineraryReport = async () => {
-    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       // const { itineraryId, startDate, endDate, month, year } = filters;
-      const { itineraryId, month, year,day } = filters;
+      const { itineraryId, month, year, day } = filters;
 
       const queryParams = new URLSearchParams();
       // console.log("filters", filters);
@@ -98,13 +120,6 @@ const TourGuideItineraryReport = () => {
       if (response.data && response.data.itineraryReport) {
         updateGraphData(response.data.itineraryReport, graphPeriod);
 
-        setItineraries(
-          response.data.itineraryReport.map((item) => ({
-            id: item.itinerary._id,
-            title: item.itinerary.title,
-          }))
-        );
-
         setTotalRevenue(response.data.totalRevenue || 0);
         setTotalTickets(response.data.totalTickets || 0);
         setSelectedPeriodRevenue(
@@ -120,13 +135,12 @@ const TourGuideItineraryReport = () => {
     } catch (error) {
       console.error("Error fetching itinerary report:", error);
       setError("Failed to fetch itinerary report. Please try again later.");
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchItineraryReport();
+    fetchMyItineraries();
   }, [filters]);
 
   useEffect(() => {
@@ -644,8 +658,7 @@ const TourGuideItineraryReport = () => {
                     setFilters((prev) => ({ ...prev, month: value }))
                   }
                   // disabled={isDateRangeSelected || !filters.year}
-                 disabled={ !filters.year}
-
+                  disabled={!filters.year}
                 >
                   <SelectTrigger className="w-full mt-4 sm:w-[200px]">
                     <SelectValue placeholder="Select month" />
@@ -665,19 +678,18 @@ const TourGuideItineraryReport = () => {
                   onValueChange={(value) =>
                     setFilters((prev) => ({ ...prev, day: value }))
                   }
-                  disabled={ !filters.month}
-
+                  disabled={!filters.month}
                 >
                   <SelectTrigger className="w-full mt-4 sm:w-[200px]">
                     <SelectValue placeholder="Select day" />
                   </SelectTrigger>
                   <SelectContent>
-                  {Array.from({ length: 31 }, (_, i) => (
-                    <SelectItem key={i + 1} value={(i + 1).toString()}>
-                      {i + 1}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                    {Array.from({ length: 31 }, (_, i) => (
+                      <SelectItem key={i + 1} value={(i + 1).toString()}>
+                        {i + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div className="overflow-hidden">
