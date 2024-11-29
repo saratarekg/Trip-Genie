@@ -941,7 +941,7 @@ const ActivityDetail = () => {
   };
 
   useEffect(() => {
-    if (savedActivities && savedActivities.length > 0) {
+    if (savedActivities && savedActivities.length > 0 && activity) {
       setIsSaved(
         savedActivities.some(
           (savedActivity) =>
@@ -950,7 +950,7 @@ const ActivityDetail = () => {
       );
     }
     console.log(isSaved);
-  }, [savedActivities]);
+  }, [savedActivities, activity]);
 
   const handleSaveToggle = async (itemId) => {
     try {
