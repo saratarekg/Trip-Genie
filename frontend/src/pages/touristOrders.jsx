@@ -97,7 +97,7 @@ export default function OrdersPage() {
       console.log("Order canceled:", response.data);
       console.log("order  refunded:", selectedOrder.totalPrice);
       console.log("order with wallet refunded:", tourist.wallet+(selectedOrder.totalPrice));
-
+      fetchOrders()
       // Assuming response.data contains the order products and payment details
       const formattedTotalPrice = displayPrice(selectedOrder.totalPrice);  // Assuming response contains total price
       const newwallet = tourist.wallet+(selectedOrder.totalPrice);  // Assuming response contains the updated wallet balance
