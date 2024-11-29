@@ -1527,8 +1527,9 @@ const ItineraryDetail = () => {
           </h1>
         </div>
       </div>
+      
 
-      <div className="container mx-auto px-4 py-8">
+      <div className=" mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="lg:w-3/4">
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">

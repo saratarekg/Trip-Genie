@@ -203,6 +203,9 @@ productSchema.post("findOneAndUpdate", async function (doc) {
               link: `/product/${doc._id}`,
             },
           },
+          $set: {
+            hasUnseenNotifications: true, // Set the hasUnseen flag to true
+          },
           
         }
       );
@@ -228,6 +231,9 @@ productSchema.post("findOneAndUpdate", async function (doc) {
               body: `Product <b>${doc.name}</b> is out of stock.`,
               link: `/product/${doc._id}`,
             },
+          },
+          $set: {
+            hasUnseenNotifications: true, // Set the hasUnseen flag to true
           },
           
         },

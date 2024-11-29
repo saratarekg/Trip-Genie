@@ -93,6 +93,8 @@ const adminSchema = new Schema(
         },
       },
     ],
+    hasUnseenNotifications: { type: Boolean, default: true },
+
   },
   { timestamps: true }
 );

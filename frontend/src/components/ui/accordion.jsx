@@ -18,15 +18,22 @@ const AccordionTrigger = React.forwardRef(({ className, children, ...props }, re
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
+        "flex flex-1 items-center justify-between py-4 font-medium transition-all",
+        "hover:no-underline no-underline decoration-transparent", // Remove underline for all states
+        "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-300", // Accessibility focus outline
+        "[&[data-state=open]>svg]:rotate-180", // Rotate icon for open state
+        "[&:hover]:decoration-transparent [&:hover]:text-current", // Transparent decoration and no hover artifacts
         className
       )}
-      {...props}>
+      {...props}
+    >
       {children}
       <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))
+
+
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
 
 const AccordionContent = React.forwardRef(({ className, children, ...props }, ref) => (

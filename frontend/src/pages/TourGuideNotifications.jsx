@@ -1,60 +1,86 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { Bell, Loader2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+'use client'
 
-export default function TouGuideNotifications() {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+import { useState, useEffect } from "react"
+import { Bell, Gift, CreditCard, AlertCircle, CheckCheck, AlarmCheck, Loader2, Search, Filter, ChevronDown, X, Calendar as CalendarIcon } from 'lucide-react'
+import axios from "axios"
+import Cookies from "js-cookie"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useNavigate } from "react-router-dom"
+import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
+import { 
+  Tooltip, 
+  TooltipTrigger, 
+  TooltipContent, 
+  TooltipProvider 
+} from "@/components/ui/tooltip"
+import { Badge } from "@/components/ui/badge"
+import { format } from "date-fns"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+export default function NotificationsPage() {
+  const [notifications, setNotifications] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState("general")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedPriorities, setSelectedPriorities] = useState([])
+  const [selectedTags, setSelectedTags] = useState([])
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [visibleNotifications, setVisibleNotifications] = useState(10)
+  const [activeAccordion, setActiveAccordion] = useState(null);
+  const navigate = useNavigate()
 
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    fetchNotifications()
+  }, [])
 
   const fetchNotifications = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
       const response = await axios.get(
         `http://localhost:4000/tour-guide/notifications`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
-      );
+      )
 
       if (Array.isArray(response.data)) {
-        setNotifications(response.data);
+        setNotifications(response.data)
       } else if (response.data && Array.isArray(response.data.notifications)) {
-        setNotifications(response.data.notifications);
+        setNotifications(response.data.notifications)
       } else {
-        setError("Unexpected data format received from server.");
-        return;
+        setError("Unexpected data format received from server.")
       }
-
-      // Mark notifications as seen after successfully fetching them
-      await markNotificationsAsSeen();
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      console.error("Error fetching notifications:", error)
       if (!error.response) {
-        setError(
-          "Cannot connect to server. Please check if the server is running."
-        );
+        setError("Cannot connect to server. Please check if the server is running.")
       } else if (error.response.status === 400) {
-        setNotifications([]);
+        setNotifications([])
       } else {
-        setError(
-          `Server error: ${
-            error.response?.data?.message || "Unknown error occurred"
-          }`
-        );
+        setError(`Server error: ${error.response?.data?.message || "Unknown error occurred"}`)
       }
     } finally {
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false)
+      }, 1000)
     }
-  };
+  }
 
   const markNotificationsAsSeen = async () => {
     try {
@@ -64,104 +90,566 @@ export default function TouGuideNotifications() {
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
-      );
+      )
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) => ({
+          ...notification,
+          seen: true,
+        }))
+      )
     } catch (error) {
-      console.error("Error marking notifications as seen:", error);
-      // Optionally, you can set an error state here if you want to show this error to the user
+      console.error("Error marking notifications as seen:", error)
     }
-  };
+  }
+
+  const markNotificationAsSeen = async (notificationId) => {
+    try {
+      await axios.post(
+        `http://localhost:4000/tour-guide/notifications/markAsSeen/${notificationId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      )
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification._id === notificationId
+            ? { ...notification, seen: true }
+            : notification
+        )
+      )
+    } catch (error) {
+      console.error("Error marking notification as seen:", error)
+    }
+  }
 
   const formatDate = (dateString) => {
-    const options = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInSeconds = Math.floor((now - date) / 1000)
 
-  if (loading) {
+    if (diffInSeconds < 60) {
+      return 'Just now'
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60)
+      return `${minutes} min${minutes > 1 ? 's' : ''} ago`
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600)
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400)
+      return `${days} day${days > 1 ? 's' : ''} ago`
+    } else {
+      const options = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }
+      return date.toLocaleDateString(undefined, options)
+    }
+  }
+
+  const renderNotificationBody = (body, notification) => {
+    const regex = /<b>(.*?)<\/b>/g
+    const parts = body.split(regex)
+
+    return parts.map((part, index) => {
+      if (index % 2 === 1) {
+        return (
+          <Tooltip key={index}>
+            <TooltipTrigger asChild>
+              <span
+                className="font-bold cursor-pointer text-[#1A3B47] hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  markNotificationAsSeen(notification._id)
+                  navigate(notification.link)
+                }}
+              >
+                {part}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent
+              style={{
+                backgroundColor: '#1A3B47',
+                color: 'white',
+                textAlign: 'center',
+                padding: '8px',
+                borderRadius: '8px',
+              }}
+            >
+              {`Show details for ${part}`}
+            </TooltipContent>
+          </Tooltip>
+        )
+      }
+      return part
+    })
+  }
+
+  const getFilteredNotifications = () => {
+    let filtered = notifications
+
+    // Tab filter
+    switch (activeTab) {
+      case "reminders":
+        filtered = filtered.filter(n => n.tags.includes("reminder"))
+        break
+      case "personal":
+        filtered = filtered.filter(n => n.tags.some(tag => ["birthday", "personal"].includes(tag)))
+        break
+      case "general":
+        break
+    }
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(n => 
+        (n.title?.toLowerCase().includes(query) || n.body?.toLowerCase().includes(query))
+      )
+    }
+
+    // Priority filter
+    if (selectedPriorities.length > 0) {
+      filtered = filtered.filter(n => selectedPriorities.includes(n.priority))
+    }
+
+    // Tags filter
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(n => 
+        n.tags?.some(tag => selectedTags.includes(tag))
+      )
+    }
+
+    // Date filter
+    if (selectedDate) {
+      filtered = filtered.filter(n => {
+        const notificationDate = new Date(n.date)
+        return notificationDate >= selectedDate
+      })
+    }
+
+    return filtered.slice(0, visibleNotifications)
+  }
+
+  const getTotalCounts = () => {
+    const counts = {
+      reminders: 0,
+      personal: 0,
+      general: notifications.length,
+    }
+  
+    counts.reminders = notifications.filter(n => n.tags.includes("reminder")).length
+    counts.personal = notifications.filter(n =>
+      n.tags.some(tag => ["birthday", "personal"].includes(tag))
+    ).length
+  
+    return counts
+  }
+
+  const getCounts = () => {
+    return {
+      reminders: notifications.filter(n => !n.seen && n.tags.includes("reminder")).length,
+      personal: notifications.filter(n => !n.seen && n.tags.some(tag => ["birthday", "personal"].includes(tag))).length,
+      general: notifications.filter(n => !n.seen).length
+    }
+  }
+
+  const getNotificationIcon = (type) => {
+    const iconProps = {
+      birthday: { icon: CalendarIcon, color: "text-purple-500", bg: "bg-purple-100" },
+      payment: { icon: CreditCard, color: "text-green-500", bg: "bg-green-100" },
+      alert: { icon: AlertCircle, color: "text-red-500", bg: "bg-red-100" },
+      offer: { icon: Gift, color: "text-blue-500", bg: "bg-blue-100" },
+      reminder: { icon: AlarmCheck, color: "text-amber-500", bg: "bg-amber-100" },
+    }[type] || { icon: Bell, color: "text-gray-500", bg: "bg-gray-100" }
+  
+    const Icon = iconProps.icon
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#E6DCCF]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#388A94]" />
+      <div className={cn("p-2 rounded-full flex items-center justify-center", iconProps.bg)}>
+        <Icon className={cn("h-5 w-5", iconProps.color)} />
       </div>
-    );
+    )
+  }
+
+  const getAllTags = () => {
+    const tags = new Set()
+    notifications.forEach(n => n.tags?.forEach(tag => tags.add(tag)))
+    return Array.from(tags)
+  }
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-500'
+      case 'medium':
+        return 'bg-orange-500'
+      default:
+        return 'bg-white'
+    }
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#E6DCCF]">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <p className="text-[#1A3B47] bg-[#B5D3D1] p-4 rounded-lg shadow">
           {error}
         </p>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-      </div>
+    <TooltipProvider>
+      <div className="bg-white min-h-screen">
+        <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-3xl font-bold text-[#1A3B47] mb-6">Notifications</h1>
+          
+          <div className="flex gap-6">
+            {/* Filters Sidebar */}
+            <div className="w-64 flex-shrink-0">
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                <h2 className="font-semibold mb-4 flex items-center gap-2 text-[#1A3B47]">
+                  <Filter className="h-4 w-4" />
+                  Filters
+                </h2>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-4xl mb-8 font-bold flex items-center text-[#1A3B47]">
-          <Bell className="mr-2 w-8 h-8" />
-          Notifications
-        </h1>
-        {notifications.length === 0 ? (
-          <p className="text-[#1A3B47] bg-gray-100 p-4 rounded-lg shadow text-center">
-            No notifications at the moment.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px] border-collapse border border-gray-200 shadow-sm rounded-lg">
-              <thead>
-                <tr className="bg-gray-100 text-[#1A3B47]">
-                  <th className="px-6 py-3 text-left text-2xl border-b border-gray-200">
-                    Notification
-                  </th>
-                  <th className="px-6 py-3 text-left text-2xl border-b border-gray-200">
-                    Date
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {notifications.map((notification, index) => (
-                  <tr
-                    key={index}
-                    className={`
-                                            ${
-                                              index % 2 === 0
-                                                ? "bg-gray-200"
-                                                : "bg-gray-300"
-                                            }
-                                            hover:bg-gray-400 transition duration-300 ease-in-out cursor-pointer
-                                        `}
-                                        onClick={() => navigate(notification.link)}
+                <div className="space-y-4">
+                  {/* Priority Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-[#1A3B47]">Priority</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['high', 'medium', 'low'].map((priority) => (
+                        <Button
+                          key={priority}
+                          variant={selectedPriorities.includes(priority) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setSelectedPriorities((prev) =>
+                              prev.includes(priority)
+                                ? prev.filter((p) => p !== priority)
+                                : [...prev, priority]
+                            )
+                          }}
+                          className={cn(
+                            "capitalize",
+                            selectedPriorities.includes(priority) ? "bg-[#388A94] text-white" : "text-[#1A3B47]"
+                          )}
+                        >
+                          {priority}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tags Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-[#1A3B47]">Tags</label>
+                    <div className="flex flex-wrap gap-2">
+                      {getAllTags().map((tag) => (
+                        <Button
+                          key={tag}
+                          variant={selectedTags.includes(tag) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTags((prev) =>
+                              prev.includes(tag)
+                                ? prev.filter((t) => t !== tag)
+                                : [...prev, tag]
+                            )
+                          }}
+                          className={cn(
+                            selectedTags.includes(tag) ? "bg-[#388A94] text-white" : "text-[#1A3B47]"
+                          )}
+                        >
+                          {tag}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Date Filter */}
+                  <div>
+                    <label className="text-sm font-medium mb-2 block text-[#1A3B47]">From Date</label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !selectedDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={setSelectedDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1">
+              {/* Search and Actions Row */}
+              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
+                <div className="flex items-center justify-between gap-4">
+                  {/* Tabs */}
+                  <Tabs value={activeTab} onValueChange={setActiveTab} >
+  <TabsList className="grid grid-cols-3 bg-white">
+    {/* General Tab */}
+    <TabsTrigger
+      value="general"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'general'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'border-gray-300 text-gray-500 bg-white'
+      }`}
+    >
+      General
+      {getCounts().general > 0 && (
+        <span
+          className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
+            activeTab === 'general' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+          }`}
+        >
+          {getCounts().general}
+        </span>
+      )}
+    </TabsTrigger>
+
+    {/* Personal Tab */}
+    <TabsTrigger
+      value="personal"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'personal'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'border-gray-300 text-gray-500 bg-white'
+      }`}
+    >
+      Personal
+      {getCounts().personal > 0 && (
+        <span
+          className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
+            activeTab === 'personal' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+          }`}
+        >
+          {getCounts().personal}
+        </span>
+      )}
+    </TabsTrigger>
+
+    {/* Reminders Tab */}
+    <TabsTrigger
+      value="reminders"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'reminders'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'border-gray-300 text-gray-500 bg-white'
+      }`}
+    >
+      Reminders
+      {getCounts().reminders > 0 && (
+        <span
+          className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
+            activeTab === 'reminders' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+          }`}
+        >
+          {getCounts().reminders}
+        </span>
+      )}
+    </TabsTrigger>
+  </TabsList>
+</Tabs>
+
+
+                  {/* Search Bar */}
+                  <div className="relative flex-1">
+                    {!searchQuery && (     
+                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          )}
+                    <Input
+                      placeholder="    Search notifications..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+
+                  {/* Mark All As Read Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-sm text-white bg-[#388A94] hover:bg-[#2e6b77] whitespace-nowrap"
+                    onClick={markNotificationsAsSeen}
                   >
-                    <td className="px-6 py-4 text-[#1A3B47] text-lg border-b border-gray-200">
-                      <div
-                        dangerouslySetInnerHTML={{ __html: notification.body }}
-                      ></div>
-                    </td>
-                    <td className="px-6 py-4 text-[#1A3B47] text-lg border-b border-gray-200">
-                      {formatDate(notification.date)}
-                      {!notification.seen && (
-                        <span className="ml-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
-                          New
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    <CheckCheck className="mr-2 h-4 w-4" />
+                    Mark all as read
+                  </Button>
+                </div>
+                <div className="mt-4 space-y-2">
+                {loading ? (
+                  [1, 2, 3].map((i) => (
+                    <div key={i} className="flex gap-4 p-4 animate-pulse bg-gray-200">
+                      <div className="w-12 h-12 bg-gray-300 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <div className="w-full h-4 bg-gray-300 rounded-md" />
+                        <div className="w-3/4 h-4 bg-gray-300 rounded-md" />
+                      </div>
+                    </div>
+                  ))
+                ) : getFilteredNotifications().length === 0 ? (
+                  <div className="bg-white p-8 text-center border-t border-gray-200">
+                    <p className="text-gray-500">No notifications match your filters</p>
+                  </div>
+                ) : (
+                  <>
+<Accordion type="single" collapsible className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+  {getFilteredNotifications().map((notification, index) => (
+    <AccordionItem value={notification._id} key={notification._id}>
+      <AccordionTrigger
+        onClick={() => {
+          markNotificationAsSeen(notification._id);
+          setActiveAccordion((prev) =>
+            prev === notification._id ? null : notification._id
+          );
+        }}
+        className={cn(
+          "flex items-center gap-4 p-4",
+          index !== 0 && "border-t border-gray-200",
+          !notification.seen && "bg-gray-50",
+          "no-underline hover:underline hover:decoration-transparent"
         )}
+      >
+        {/* Notification Icon */}
+        <div className="relative flex items-center">
+          <div
+            className={cn(
+              "transition-transform duration-200 ease-in-out",
+              notification._id === activeAccordion ? "scale-125" : "scale-100"
+            )}
+          >
+            {getNotificationIcon(notification.type)}
+          </div>
+          {/* Unseen Notification Dot */}
+          {!notification.seen && (
+            <div className="absolute bottom-0 left-7 h-3 w-3 rounded-full bg-[#5D9297]" />
+          )}
+        </div>
+
+        {/* Title and Preview */}
+        <div className="flex-1 text-left">
+          <p
+            className={cn(
+              "font-medium text-[#1A3B47] transition-all duration-200 ease-in-out",
+              notification._id === activeAccordion ? "text-lg font-bold" : "text-base"
+            )}
+          >
+            {notification.title || renderNotificationBody(notification.body, notification)}
+          </p>
+          {/* Preview Text */}
+          {notification._id !== activeAccordion ? (
+  <p className="text-sm text-gray-500 mt-1">
+    {notification.body.substring(0, 20)}...
+  </p>
+) : (
+  <p className="text-sm text-white mt-1">
+    {notification.body.substring(0, 20)}...
+  </p>
+)}
+
+        </div>
+
+        {/* Date */}
+        <p className="text-xs text-gray-400">{formatDate(notification.date)}</p>
+
+        <div
+  className={cn(
+    "flex items-center justify-center rounded-full transition-all duration-200 ease-in-out",
+    getPriorityColor(notification.priority), // Apply color based on priority
+    notification._id === activeAccordion
+      ? "w-auto px-3 py-1 text-xs font-medium text-white border-none scale-100"
+      : "w-3 h-3 scale-1"
+  )}
+>
+  {/* Show "Important!" for high priority, "Medium" for medium priority, and nothing for low priority */}
+  {notification._id === activeAccordion && (
+    <>
+      {notification.priority === "high" && (
+        <span className="text-xs text-white">Important!</span> // High priority
+      )}
+      {notification.priority === "medium" && (
+        <span className="text-xs text-white">Medium Priority</span> // Medium priority
+      )}
+      {/* No text for low priority */}
+    </>
+  )}
+</div>
+      </AccordionTrigger>
+
+      <AccordionContent className="p-4 bg-gray-50">
+        {/* Full Body */}
+        <div className="text-sm text-[#1A3B47]">
+          {renderNotificationBody(notification.body, notification)}
+        </div>
+        {/* Tags */}
+        <div className="mt-2 flex items-center gap-2">
+          {notification.tags?.map((tag, index) => (
+            <Badge
+              key={index}
+              variant="secondary"
+              className="bg-[#B5D3D1] text-[#1A3B47] hover:bg-[#B5D3D1] hover:text-[#1A3B47]"
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  ))}
+</Accordion>
+{visibleNotifications < getTotalCounts()[activeTab] && (
+  <div className="p-4 flex justify-center border-t border-gray-200">
+    <span
+      className="text-[#388A94] cursor-pointer hover:text-[#2e6b77] hover:underline"
+      onClick={() => setVisibleNotifications((prev) => prev + 15)}
+    >
+      Load more notifications...
+    </span>
+  </div>
+)}
+
+  </>
+
+
+
+                )}
+              
+              </div>
+              </div>
+
+             
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    </TooltipProvider>
+  )
 }
+

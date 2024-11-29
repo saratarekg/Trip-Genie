@@ -19,14 +19,12 @@ const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const router = express.Router();
+// Routes for Admin Notifications
 router.get("/notifications", adminController.getAdminNotifications);
-
-router.get('/unseen-notifications',adminController.hasUnseenNotifications);
-
-// POST /seller/mark-notifications-seen
-router.post('/mark-notifications-seen', adminController.markNotificationsAsSeen);
-
-router.post('/notifications/markAsSeen/:notificationId', adminController.markNotificationAsSeen);
+router.get("/unseen-notifications", adminController.hasUnseenNotifications);
+router.post('/notifications/markAsSeen/:id', adminController.markNotificationAsSeen);
+router.post("/mark-notifications-seen", adminController.markNotificationsAsSeen);
+router.post("/mark-dropdown-opened", adminController.markDropdownAsOpened); // Added new route for dropdown
 
 
 router.get(

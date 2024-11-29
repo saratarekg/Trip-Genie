@@ -580,7 +580,10 @@ const updateItinerary = async (req, res) => {
               type: "informational",
               body: `The itinerary <b>${newItinerary.title}</b> is now available for booking.`,
               link: `/itinerary/${newItinerary._id}`,
-            },
+            }, 
+          },
+          $set: {
+            hasUnseenNotifications: true, // Set the hasUnseen flag to true
           },          
         });
       }
@@ -634,6 +637,9 @@ const flagItinerary = async (req, res) => {
 
       await TourGuide.findByIdAndUpdate(itinerary.tourGuide._id, {
         $push: { notifications: notification },
+        $set: {
+          hasUnseenNotifications: true, // Set the hasUnseen flag to true
+        },
       });
     }
 

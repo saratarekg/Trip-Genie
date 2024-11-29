@@ -287,6 +287,9 @@ const checkUpcomingEvents = async () => {
             link: `/itinerary/${itinerary.itinerary._id}`,
           },
         },
+        $set: {
+          hasUnseenNotifications: true, // Set the hasUnseen flag to true
+        },
         
       });
       emailService.sendItineraryReminder(itinerary);
@@ -306,12 +309,16 @@ const checkUpcomingEvents = async () => {
 
           },
         },
+        $set: {
+          hasUnseenNotifications: true, // Set the hasUnseen flag to true
+        },
         
       });
       emailService.sendActivityReminder(activity);
     }
 
     console.log("Finished checking upcoming events.");
+    
   } catch (error) {
     console.error("Error sending reminder emails:", error);
   }
@@ -363,6 +370,9 @@ const sendBirthdayCards = async () => {
             link: `/promo/${code}`, // Directs to a page with promo details (optional customization)
 
           },
+        },
+        $set: {
+          hasUnseenNotifications: true, // Set the hasUnseen flag to true
         },
         
       });

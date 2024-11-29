@@ -19,18 +19,13 @@ router.post("/populate", currencyController.getExchangeRate);
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
+// Routes for Tourist Notifications
 router.get("/notifications", touristController.getTouristNotifications);
-
 router.get("/unseen-notifications", touristController.hasUnseenNotifications);
+router.post('/notifications/markAsSeen/:id', touristController.markNotificationAsSeenForTourist);
+router.post('/mark-dropdown-opened', touristController.markDropdownAsOpened);
+router.post("/mark-notifications-seen", touristController.markNotificationsAsSeen);
 
-router.post('/notifications/markAsSeen/:notificationId', touristController.markNotificationAsSeenForTourist);
-
-
-// POST /seller/mark-notifications-seen
-router.post(
-  "/mark-notifications-seen",
-  touristController.markNotificationsAsSeen
-);
 
 // router.get('/fill', currencyController.populateCurrencies);
 

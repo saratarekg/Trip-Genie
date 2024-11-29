@@ -25,14 +25,12 @@ router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/maxPriceActivities", activityController.getMaxPrice);
 router.get("/currencies", currencyController.getSupportedCurrencies);
 
+// Routes for TourGuide Notifications
 router.get("/notifications", tourGuideController.getTourGuideNotifications);
-
-router.get('/unseen-notifications',tourGuideController.hasUnseenNotifications);
-
-// POST /seller/mark-notifications-seen
-router.post('/mark-notifications-seen', tourGuideController.markNotificationsAsSeen);
-
-router.post('/notifications/markAsSeen/:notificationId', tourGuideController.markNotificationAsSeenForTourGuide);
+router.get("/unseen-notifications", tourGuideController.hasUnseenNotifications);
+router.post('/mark-notifications-seen"', tourGuideController.markNotificationsAsSeen);
+router.post('/notifications/markAsSeen/:id', tourGuideController.markNotificationAsSeenForTourGuide);
+router.post("/mark-dropdown-opened", tourGuideController.markDropdownAsOpened); // Mark dropdown opened route
 
 
 router.get("/max-price-itinerary", itineraryController.getMaxPrice);

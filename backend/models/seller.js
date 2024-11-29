@@ -124,6 +124,8 @@ const sellerSchema = new mongoose.Schema({
       },
     },
   ],
+  hasUnseenNotifications: { type: Boolean, default: true },
+
 });
 
 sellerSchema.pre("save", async function (next) {

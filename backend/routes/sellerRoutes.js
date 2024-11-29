@@ -7,14 +7,14 @@ const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
 const currencyController = require("../controllers/currencyController");
+
+
+// Routes for Seller Notifications
 router.get("/notifications", sellerController.getSellerNotifications);
-
-router.get('/unseen-notifications',sellerController.hasUnseenNotifications);
-
-// POST /seller/mark-notifications-seen
+router.get("/unseen-notifications", sellerController.hasUnseenNotifications);
 router.post('/mark-notifications-seen', sellerController.markNotificationsAsSeen);
-
-router.post('/notifications/markAsSeen/:notificationId', sellerController.markNotificationAsSeenForSeller);
+router.post('/notifications/markAsSeen/:id', sellerController.markNotificationAsSeenForSeller);
+router.post("/mark-dropdown-opened", sellerController.markDropdownAsOpened); // Mark dropdown opened route
 
 
 router.get("/getCurrency/:id", currencyController.getCurrencyById);

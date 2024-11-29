@@ -391,90 +391,97 @@ const getSalesReport = async (req, res) => {
 
 const getSellerNotifications = async (req, res) => {
   try {
-    // Get seller ID from res.locals
-    const sellerId = res.locals.user_id;
+    const sellerId = res.locals.user_id;  // Get seller ID from res.locals
 
     if (!sellerId) {
       return res.status(400).json({ message: "Seller ID is required" });
     }
 
     // Find the seller and get their notifications
-    const seller = await Seller.findById(sellerId, "notifications");
+    const seller = await Seller.findById(sellerId, "notifications hasUnseenNotifications");
 
     if (!seller) {
       return res.status(404).json({ message: "Seller not found" });
     }
 
     // Sort notifications in descending order based on the 'date' field
-    const sortedNotifications = seller.notifications.sort(
-      (a, b) => b.date - a.date
-    );
+    const sortedNotifications = seller.notifications.sort((a, b) => b.date - a.date);
 
-    // Return the sorted notifications
-    return res.status(200).json({ notifications: sortedNotifications });
+    return res.status(200).json({
+      success: true,
+      notifications: sortedNotifications,
+      hasUnseenNotifications: seller.hasUnseenNotifications,
+    });
   } catch (error) {
     console.error("Error fetching notifications:", error.message);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
 const markNotificationsAsSeen = async (req, res) => {
   try {
-    // Find the seller by their ID and update the notifications in one operation
+    const sellerId = res.locals.user_id;  // Get seller ID from res.locals
+
     const result = await Seller.updateOne(
-      { _id: res.locals.user_id }, // Find seller by user ID
+      { _id: sellerId }, // Find seller by user ID
       {
         $set: {
-          "notifications.$[elem].seen": true, // Set 'seen' to true for all unseen notifications
+          'notifications.$[elem].seen': true, // Set 'seen' to true for all unseen notifications
         },
       },
       {
-        arrayFilters: [{ "elem.seen": false }], // Only update notifications where seen is false
+        arrayFilters: [{ 'elem.seen': false }], // Only update notifications where seen is false
       }
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ message: "No unseen notifications found" });
+      return res.status(404).json({ message: 'No unseen notifications found' });
     }
 
-    res.json({ message: "All notifications marked as seen" });
+    // Set 'hasUnseenNotifications' to false after marking all notifications as seen
+    await Seller.updateOne(
+      { _id: sellerId },
+      {
+        $set: {
+          hasUnseenNotifications: false, // Update the hasUnseenNotifications flag
+        },
+      }
+    );
+
+    res.json({ success: true, message: 'All notifications marked as seen' });
   } catch (error) {
     console.error("Error marking notifications as seen:", error.message);
-    res.status(500).json({ message: "Error marking notifications as seen" });
+    res.status(500).json({ success: false, message: 'Error marking notifications as seen' });
   }
 };
 
 const hasUnseenNotifications = async (req, res) => {
   try {
-    // Find the seller by their ID
-    const seller = await Seller.findById(res.locals.user_id);
+    const sellerId = res.locals.user_id;  // Get seller ID from res.locals
+
+    const seller = await Seller.findById(sellerId, "hasUnseenNotifications");
 
     if (!seller) {
-      return res.status(404).json({ message: "Seller not found" });
+      return res.status(404).json({ message: 'Seller not found' });
     }
 
-    // Check if there are any unseen notifications
-    const hasUnseen = seller.notifications.some(
-      (notification) => !notification.seen
-    );
-
-    res.json({ hasUnseen });
+    res.json({ success: true, hasUnseen: seller.hasUnseenNotifications });
   } catch (error) {
     console.error("Error checking unseen notifications:", error.message);
-    res.status(500).json({ message: "Error checking unseen notifications" });
+    res.status(500).json({ success: false, message: 'Error checking unseen notifications' });
   }
 };
 
 const markNotificationAsSeenForSeller = async (req, res) => {
   try {
-    const notificationId = req.params.notificationId; // Get the notification ID from the request parameters
+    const sellerId = res.locals.user_id;  // Get seller ID from res.locals
+    const notificationId = req.params.id; // Get the notification ID from the request parameters
 
-    // Find the seller by their ID and update the specific notification by its ID
     const result = await Seller.updateOne(
       { 
-        _id: res.locals.user_id, // Find the seller by their user ID
-        "notifications._id": notificationId, // Match the specific notification by its ID
-        "notifications.seen": false // Ensure that the notification is unseen
+        _id: sellerId, 
+        "notifications._id": notificationId, 
+        "notifications.seen": false 
       },
       {
         $set: {
@@ -487,10 +494,45 @@ const markNotificationAsSeenForSeller = async (req, res) => {
       return res.status(400).json({ message: "Notification not found or already marked as seen" });
     }
 
-    res.json({ message: "Notification marked as seen" });
+    const seller = await Seller.findById(sellerId);
+    const hasUnseenNotifications = seller.notifications.some(notification => !notification.seen);
+
+    if (!hasUnseenNotifications) {
+      await Seller.updateOne(
+        { _id: sellerId },
+        {
+          $set: {
+            hasUnseenNotifications: false, 
+          },
+        }
+      );
+    }
+
+    res.json({ success: true, message: "Notification marked as seen" });
   } catch (error) {
     console.error("Error marking notification as seen for seller:", error.message);
-    res.status(500).json({ message: "Error marking notification as seen for seller" });
+    res.status(500).json({ success: false, message: "Error marking notification as seen for seller" });
+  }
+};
+
+// Mark the dropdown as opened (set hasUnseenNotifications to false)
+const markDropdownAsOpened = async (req, res) => {
+  try {
+    const sellerId = res.locals.user_id;  // Get seller ID from res.locals
+
+    const result = await Seller.updateOne(
+      { _id: sellerId },
+      { $set: { hasUnseenNotifications: false } }
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ success: false, message: "Seller not found or already updated" });
+    }
+
+    res.json({ success: true, message: "Dropdown marked as opened" });
+  } catch (error) {
+    console.error("Error marking dropdown as opened:", error.message);
+    res.status(500).json({ success: false, message: "Error marking dropdown as opened" });
   }
 };
 
@@ -502,6 +544,7 @@ module.exports = {
   getAllSellers,
   getSellerByID,
   markNotificationAsSeenForSeller,
+  markDropdownAsOpened,
   updateSeller,
   getSeller,
   changePassword,

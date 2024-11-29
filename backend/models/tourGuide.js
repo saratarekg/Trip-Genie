@@ -154,6 +154,7 @@ const tourGuideSchema = new Schema(
         },
       },
     ],
+    hasUnseenNotifications: { type: Boolean, default: true },
     files: {
       IDFilename: {
         type: String,

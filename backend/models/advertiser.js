@@ -109,6 +109,7 @@ const advertiserSchema = new Schema(
         },
       },
     ],
+    hasUnseenNotifications: { type: Boolean, default: true },
     logo: {
       public_id: { type: String },
       url: { type: String },

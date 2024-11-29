@@ -213,21 +213,23 @@ const flagActivity = async (req, res) => {
     if (appropriate === false) {
       await emailService.sendActivityFlaggedEmail(activity);
 
-      // Add a notification to the advertiser's notifications array
       const notification = {
-        tags: ["alert", "activity", "inappropriate"], // Classify this as an alert and activity-related
-        title: "Activity Flagged as Inappropriate", // A concise and clear title
-        priority: "high", // High priority due to its critical nature
-        type: "alert", // Indicates this is an alert notification
+        tags: ["alert", "activity", "inappropriate"], 
+        title: "Activity Flagged as Inappropriate",
+        priority: "high", 
+        type: "alert", 
         body: `Your activity <b>${activity.name}</b> has been flagged as inappropriate by the admin.`,
         link: `/activity/${req.params.id}`, // Directs the user to the flagged activity's details
-        date: new Date(), // Timestamp for when the notification is created
+        date: new Date(), 
         seen: false, // Defaults to false to indicate it hasn't been viewed yet
       };
       
 
       await Advertiser.findByIdAndUpdate(activity.advertiser._id, {
         $push: { notifications: notification },
+        $set: {
+          hasUnseenNotifications: true, // Set the hasUnseen flag to true
+        },
       });
     }
 
@@ -573,6 +575,9 @@ const updateActivity = async (req, res) => {
               date: new Date(), // Timestamp when the notification is created
               seen: false, // Default to false, indicating that the notification hasn't been seen yet
             },
+          },
+          $set: {
+            hasUnseenNotifications: true, // Set the hasUnseen flag to true
           },
           
         });

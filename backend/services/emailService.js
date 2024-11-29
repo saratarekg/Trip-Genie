@@ -75,7 +75,7 @@ const sendActivityReminder = async (activity) => {
       activity.save();
     }
   });
-};
+}; 
 
 const sendActivityBookingConfirmationEmail = async (
   email,

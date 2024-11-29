@@ -364,7 +364,8 @@ const touristSchema = new Schema(
           default: "medium",
         },
       },
-    ],
+    ],  
+    hasUnseenNotifications: { type: Boolean, default: true },
     visitedPages: [
       {
         type: String,

@@ -17,6 +17,7 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: "Activity not found" });
     }
 
+    
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
