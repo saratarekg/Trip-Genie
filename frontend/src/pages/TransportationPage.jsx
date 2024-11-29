@@ -51,6 +51,8 @@ import {
 } from "@/components/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { UserGuide } from "@/components/UserGuide";
+
 
 const formSchema = z.object({
   from: z.string().min(1, "From location is required"),
@@ -108,7 +110,8 @@ export default function TransportationPage() {
   const transportationsPerPage = 6;
   const [tourist, setTourist] = useState(null);
   const [closing, setClosing] = useState(false);
-  
+
+
   useEffect(() => {
     const fetchTouristData = async () => {
       try {
@@ -124,7 +127,7 @@ export default function TransportationPage() {
 
     fetchTouristData();
   }, []);
-  
+
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -201,10 +204,10 @@ export default function TransportationPage() {
   };
 
   const handleClear = useCallback(() => {
-setSearchTerm("");
-setSelectedFrom("all");
-setSelectedTo("all");
-setSelectedDate(null);
+    setSearchTerm("");
+    setSelectedFrom("all");
+    setSelectedTo("all");
+    setSelectedDate(null);
 
   }, []);
 
@@ -216,7 +219,7 @@ setSelectedDate(null);
 
     const today = new Date(); // Get the current date
     today.setHours(0, 0, 0, 0);
-    
+
     const filtered = transportations.filter((t) => {
       const matchesSearchTerm =
         t.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -225,20 +228,20 @@ setSelectedDate(null);
         (t.vehicleType.toLowerCase() === 'car' && termsCar.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (t.vehicleType.toLowerCase() === 'bus' && termsBus.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (t.vehicleType.toLowerCase() === 'microbus' && termsMicrobus.toLowerCase().includes(searchTerm.toLowerCase()));
-  
+
       const matchesFrom = selectedFrom === "all" || t.from === selectedFrom;
       const matchesTo = selectedTo === "all" || t.to === selectedTo;
-  
-      const departureDate = new Date(t.timeDeparture);
-    departureDate.setHours(0, 0, 0, 0); // Reset time to compare only the date part
 
-    const matchesDate =
-      !selectedDate ||
-      (departureDate >= today &&
-        format(departureDate, "yyyy-MM-dd") >=
+      const departureDate = new Date(t.timeDeparture);
+      departureDate.setHours(0, 0, 0, 0); // Reset time to compare only the date part
+
+      const matchesDate =
+        !selectedDate ||
+        (departureDate >= today &&
+          format(departureDate, "yyyy-MM-dd") >=
           format(selectedDate, "yyyy-MM-dd"));
 
-          
+
       return matchesSearchTerm && matchesFrom && matchesTo && matchesDate;
     });
     // You might want to do something with the filtered results here
@@ -316,10 +319,10 @@ setSelectedDate(null);
       const response = await axios.post(`http://localhost:4000/${role}/transportations`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       setTransportations([...transportations, response.data]);
       setFilteredTransportations([...filteredTransportations, response.data]);
-      
+
       form.reset({
         from: "",
         to: "",
@@ -329,7 +332,7 @@ setSelectedDate(null);
         estimatedDuration: 0,
         remainingSeats: 0,
       });
-      
+
       setIsAddDialogOpen(false);
     } catch (error) {
       console.error("Error adding transportation:", error);
@@ -348,8 +351,8 @@ setSelectedDate(null);
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      
-      const updatedTransportations = transportations.map(t => 
+
+      const updatedTransportations = transportations.map(t =>
         t._id === editingTransportation._id ? response.data : t
       );
       setTransportations(updatedTransportations);
@@ -368,6 +371,31 @@ setSelectedDate(null);
       console.error("Error editing transportation:", error);
     }
   };
+
+  const guideSteps = [
+    {
+      target: "body",
+      content: "Welcome to the Transportation Management page! This page allows you to choose appropriate transportation trips.",
+      placement: "center",
+    },
+      {
+        target: ".narrowing-down",
+        content: "Use this section to narrow down the trips according to diffent aspects such as departure location and arrival location.",
+        placement: "bottom",
+      },
+      {
+      target: ".transportation-card",
+      content:
+        "Each card represents a unique trip with its details.",
+      placement: "bottom",
+    },
+    {
+      target: ".book-now-button",
+      content:
+        "Click here to book the selected trip. Don't forget to choose the number of seats you need and the payment method before confirming the booking!",
+      placement: "bottom",
+    },
+  ];
 
   const handleDelete = async (id) => {
     try {
@@ -436,14 +464,14 @@ setSelectedDate(null);
     };
 
     return (
-      <div className="flex flex-col space-y-2">
+      <div className="flex flex-col space-y-2 ">
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant={"outline"}
               className={cn(
                 "w-full justify-start text-left font-normal",
-                !date && "text-muted-foreground"
+                !date && "text-muted-foreground "
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
@@ -474,6 +502,10 @@ setSelectedDate(null);
 
   return (
     <div className="bg-gray-100">
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="itineraries" />
+      )}
+
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         </div>
@@ -481,20 +513,20 @@ setSelectedDate(null);
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-6 text-[#1A3B47]">Transportation Management</h1>
 
-        <div className="mb-6 flex flex-wrap gap-4">
+        <div className="mb-6 flex flex-wrap gap-4 narrowing-down">
           <Input
             type="text"
             placeholder="Search transportations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-xs"
+            className="max-w-xs search"
           />
           <Select value={selectedFrom} onValueChange={setSelectedFrom}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="From" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">From</SelectItem>
               {fromLocations.map((location) => (
                 <SelectItem key={location} value={location}>
                   {location}
@@ -507,7 +539,7 @@ setSelectedDate(null);
               <SelectValue placeholder="To" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="all">To</SelectItem>
               {toLocations.map((location) => (
                 <SelectItem key={location} value={location}>
                   {location}
@@ -544,10 +576,10 @@ setSelectedDate(null);
             <Search className="mr-2 h-4 w-4" />
             Search
           </Button> */}
-<Button 
-  onClick={handleClear} 
-  className="bg-white text-[#5D9297] hover:text-black !important"
->            Clear
+          <Button
+            onClick={handleClear}
+            className="bg-white text-[#5D9297] hover:text-black !important"
+          >            Clear
           </Button>
           {userRole === "advertiser" && (
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -561,7 +593,7 @@ setSelectedDate(null);
                   <DialogTitle>Add New Transportation</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleAdd)} className="space-y-8">
+                  <form onSubmit={form.handleSubmit(handleAdd)} className="space-y-8 ">
                     <FormField
                       control={form.control}
                       name="from"
@@ -593,12 +625,12 @@ setSelectedDate(null);
                         <FormItem>
                           <FormLabel>Vehicle Type</FormLabel>
                           <Select
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        form.setValue("remainingSeats", getMaxSeats(value));
-                      }}
-                      defaultValue={field.value}
-                    >                            <FormControl>
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              form.setValue("remainingSeats", getMaxSeats(value));
+                            }}
+                            defaultValue={field.value}
+                          >                            <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select vehicle type" />
                               </SelectTrigger>
@@ -630,20 +662,20 @@ setSelectedDate(null);
                       )}
                     />
                     <FormField
-  control={form.control}
-  name="timeDeparture"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Departure Time</FormLabel>
-      <FormControl>
-        <DateTimePicker
-          field={field}
-          disablePastminDate={new Date().setDate(new Date().getDate() + 1)} // Setting minimum date to tomorrow
-        />
-      </FormControl>
-    </FormItem>
-  )}
-/>
+                      control={form.control}
+                      name="timeDeparture"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Departure Time</FormLabel>
+                          <FormControl>
+                            <DateTimePicker
+                              field={field}
+                              disablePastminDate={new Date().setDate(new Date().getDate() + 1)} // Setting minimum date to tomorrow
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={form.control}
@@ -693,161 +725,161 @@ setSelectedDate(null);
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-  {currentTransportations.map((transportation) => (
-    <div key={transportation._id}>
-      <TransportationCard
-        transportation={transportation}
-        userRole={userRole}
-        onEdit={handleEditClick}
-        onDelete={handleDelete}
-        onBook={() => {
-          setSelectedTransportation(transportation);
-          setShowTransportationBookingDialog(true);
-        }}
-        displayPrice={displayPrice}
-      />
+          {currentTransportations.map((transportation) => (
+            <div key={transportation._id}>
+              <TransportationCard
+                transportation={transportation}
+                userRole={userRole}
+                onEdit={handleEditClick}
+                onDelete={handleDelete}
+                onBook={() => {
+                  setSelectedTransportation(transportation);
+                  setShowTransportationBookingDialog(true);
+                }}
+                displayPrice={displayPrice}
+              />
 
-      {/* Dialog for editing transportation */}
-      <Dialog
-        open={editingTransportation === transportation}
-        onOpenChange={(open) => {
-          if (!open) handleEditClose();
-        }}
-      >
-       
-        {editingTransportation === transportation && (
-          <DialogContent className="max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Edit Transportation</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleEdit)} className="space-y-8">
-                <FormField control={form.control} name="from" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>From</FormLabel>
-                    <FormControl>
-                      <Input placeholder="From location" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="to" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>To</FormLabel>
-                    <FormControl>
-                      <Input placeholder="To location" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )} />
-                <FormField
-                        control={form.control}
-                        name="vehicleType"
-                        render={({ field }) => (
+              {/* Dialog for editing transportation */}
+              <Dialog
+                open={editingTransportation === transportation}
+                onOpenChange={(open) => {
+                  if (!open) handleEditClose();
+                }}
+              >
+
+                {editingTransportation === transportation && (
+                  <DialogContent className="max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Edit Transportation</DialogTitle>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(handleEdit)} className="space-y-8">
+                        <FormField control={form.control} name="from" render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Vehicle Type</FormLabel>
-                            <Select
-                              onValueChange={(value) => {
-                                field.onChange(value);
-                                form.setValue("remainingSeats", getMaxSeats(value));
-                              }}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select vehicle type" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="Bus">Bus</SelectItem>
-                                <SelectItem value="Car">Car</SelectItem>
-                                <SelectItem value="Microbus">Microbus</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <FormLabel>From</FormLabel>
+                            <FormControl>
+                              <Input placeholder="From location" {...field} />
+                            </FormControl>
                           </FormItem>
-                        )}
-                      />
-                <FormField control={form.control} name="ticketCost" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ticket Cost</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="Ticket cost" {...field} onChange={(e) => field.onChange(+e.target.value)} />
-                    </FormControl>
-                  </FormItem>
-                )} />
-              <FormField control={form.control} name="timeDeparture" render={({ field }) => (
-  <FormItem>
-    <FormLabel>Departure Time</FormLabel>
-    <FormControl>
-      <DateTimePicker
-        field={field}
-        disablePast
-        minDate={new Date().setDate(new Date().getDate() + 1)} // Setting minimum date to tomorrow
-      />
-    </FormControl>
-  </FormItem>
-)} />
+                        )} />
+                        <FormField control={form.control} name="to" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>To</FormLabel>
+                            <FormControl>
+                              <Input placeholder="To location" {...field} />
+                            </FormControl>
+                          </FormItem>
+                        )} />
+                        <FormField
+                          control={form.control}
+                          name="vehicleType"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Vehicle Type</FormLabel>
+                              <Select
+                                onValueChange={(value) => {
+                                  field.onChange(value);
+                                  form.setValue("remainingSeats", getMaxSeats(value));
+                                }}
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select vehicle type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="Bus">Bus</SelectItem>
+                                  <SelectItem value="Car">Car</SelectItem>
+                                  <SelectItem value="Microbus">Microbus</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField control={form.control} name="ticketCost" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Ticket Cost</FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="Ticket cost" {...field} onChange={(e) => field.onChange(+e.target.value)} />
+                            </FormControl>
+                          </FormItem>
+                        )} />
+                        <FormField control={form.control} name="timeDeparture" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Departure Time</FormLabel>
+                            <FormControl>
+                              <DateTimePicker
+                                field={field}
+                                disablePast
+                                minDate={new Date().setDate(new Date().getDate() + 1)} // Setting minimum date to tomorrow
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )} />
 
-                <FormField control={form.control} name="estimatedDuration" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Estimated Duration (minutes)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="Estimated duration" {...field} onChange={(e) => field.onChange(+e.target.value)} />
-                    </FormControl>
-                  </FormItem>
-                )} />
-               <FormField
-  control={form.control}
-  name="remainingSeats"
-  render={({ field }) => {
-    const maxSeats = getMaxSeats(form.getValues("vehicleType"));
-    const value = +field.value;
+                        <FormField control={form.control} name="estimatedDuration" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Estimated Duration (minutes)</FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="Estimated duration" {...field} onChange={(e) => field.onChange(+e.target.value)} />
+                            </FormControl>
+                          </FormItem>
+                        )} />
+                        <FormField
+                          control={form.control}
+                          name="remainingSeats"
+                          render={({ field }) => {
+                            const maxSeats = getMaxSeats(form.getValues("vehicleType"));
+                            const value = +field.value;
 
-    // Check if the value exceeds maxSeats
-    const isExceedingMax = value > maxSeats;
+                            // Check if the value exceeds maxSeats
+                            const isExceedingMax = value > maxSeats;
 
-    return (
-      <FormItem>
-        <FormLabel>Remaining Seats</FormLabel>
-        <FormControl>
-          <Input
-            type="number"
-            placeholder="Remaining seats"
-            {...field}
-            onChange={(e) => {
-              // Remove leading zeros and update the value
-              const inputValue = e.target.value.replace(/^0+/, ""); // Remove leading zeros
-              field.onChange(inputValue ? +inputValue : ""); // Handle empty input
-            }}
-            onBlur={() => {
-              // Adjust the value to maxSeats if it exceeds on blur
-              if (value > maxSeats) {
-                field.onChange(maxSeats);
-              }
-            }}
-            max={maxSeats}
-          />
-        </FormControl>
-        {isExceedingMax && (
-          <p className="text-red-500 text-sm mt-1">
-            Max {maxSeats} seats allowed.
-          </p>
-        )}
-      </FormItem>
-    );
-  }}
-/>
-
-
+                            return (
+                              <FormItem>
+                                <FormLabel>Remaining Seats</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="Remaining seats"
+                                    {...field}
+                                    onChange={(e) => {
+                                      // Remove leading zeros and update the value
+                                      const inputValue = e.target.value.replace(/^0+/, ""); // Remove leading zeros
+                                      field.onChange(inputValue ? +inputValue : ""); // Handle empty input
+                                    }}
+                                    onBlur={() => {
+                                      // Adjust the value to maxSeats if it exceeds on blur
+                                      if (value > maxSeats) {
+                                        field.onChange(maxSeats);
+                                      }
+                                    }}
+                                    max={maxSeats}
+                                  />
+                                </FormControl>
+                                {isExceedingMax && (
+                                  <p className="text-red-500 text-sm mt-1">
+                                    Max {maxSeats} seats allowed.
+                                  </p>
+                                )}
+                              </FormItem>
+                            );
+                          }}
+                        />
 
 
-                <Button type="submit" className="bg-[#1A3B47]">Update Transportation</Button>
-              </form>
-            </Form>
-          </DialogContent>
-        )}
-      </Dialog>
-    </div>
-  ))}
-</div>
+
+
+                        <Button type="submit" className="bg-[#1A3B47]">Update Transportation</Button>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                )}
+              </Dialog>
+            </div>
+          ))}
+        </div>
 
 
         <div className="mt-6 flex justify-center items-center space-x-4">
@@ -860,12 +892,12 @@ setSelectedDate(null);
             <ChevronLeft className="h-4 w-4" />
           </Button>
           {sortedTransportations.length > 0 ? (
-  <span className="text-[#1A3B47]">
-    Page {currentPage} of {Math.ceil(sortedTransportations.length / transportationsPerPage)}
-  </span>
-) : (
-  <span className="text-[#1A3B47]">No transportations available</span>
-)}
+            <span className="text-[#1A3B47]">
+              Page {currentPage} of {Math.ceil(sortedTransportations.length / transportationsPerPage)}
+            </span>
+          ) : (
+            <span className="text-[#1A3B47]">No transportations available</span>
+          )}
 
           <Button
             onClick={() => handlePageChange(currentPage + 1)}
@@ -877,87 +909,87 @@ setSelectedDate(null);
           </Button>
         </div>
 
-      <Dialog
-        open={showTransportationBookingDialog}
-        onOpenChange={setShowTransportationBookingDialog}
-      >
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Book Transportation</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-  <Label htmlFor="seats" className="text-right">
-    Seats
-  </Label>
-  <Input
-    id="seats"
-    type="number"
-    className="col-span-3"
-    value={seatsToBook}
-    onChange={(e) => {
-      const value = parseInt(e.target.value);
-      const maxSeats = selectedTransportation?.remainingSeats || 0;
+        <Dialog
+          open={showTransportationBookingDialog}
+          onOpenChange={setShowTransportationBookingDialog}
+        >
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Book Transportation</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="seats" className="text-right">
+                  Seats
+                </Label>
+                <Input
+                  id="seats"
+                  type="number"
+                  className="col-span-3"
+                  value={seatsToBook}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    const maxSeats = selectedTransportation?.remainingSeats || 0;
 
-      if (value > maxSeats) {
-        setExceededMax(true); // show error message
-      } else {
-        setExceededMax(false); // hide error message
-      }
+                    if (value > maxSeats) {
+                      setExceededMax(true); // show error message
+                    } else {
+                      setExceededMax(false); // hide error message
+                    }
 
-      // Set seats within allowed range
-      setSeatsToBook(Math.max(0, Math.min(value, maxSeats)));
-    }}
-    min="0"
-    max={selectedTransportation?.remainingSeats}
-  />
-  {exceededMax && (
-    <p className="text-red-600 text-xs col-span-4">
-      Max seats is {selectedTransportation?.remainingSeats}.
-    </p>
-  )}
-</div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Total Price</Label>
-              <div className="col-span-3">
-                {displayPrice(seatsToBook * selectedTransportation?.ticketCost)}
+                    // Set seats within allowed range
+                    setSeatsToBook(Math.max(0, Math.min(value, maxSeats)));
+                  }}
+                  min="0"
+                  max={selectedTransportation?.remainingSeats}
+                />
+                {exceededMax && (
+                  <p className="text-red-600 text-xs col-span-4">
+                    Max seats is {selectedTransportation?.remainingSeats}.
+                  </p>
+                )}
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Total Price</Label>
+                <div className="col-span-3">
+                  {displayPrice(seatsToBook * selectedTransportation?.ticketCost)}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Payment</Label>
+                <RadioGroup
+                  defaultValue="creditCard"
+                  className="col-span-3"
+                  onValueChange={setPaymentMethod}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="creditCard" id="creditCard" />
+                    <Label htmlFor="creditCard">Credit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="debitCard" id="debitCard" />
+                    <Label htmlFor="debitCard">Debit Card</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="wallet" id="wallet" />
+                    <Label htmlFor="wallet">Wallet</Label>
+                  </div>
+                </RadioGroup>
               </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right">Payment</Label>
-              <RadioGroup
-                defaultValue="creditCard"
-                className="col-span-3"
-                onValueChange={setPaymentMethod}
+            <DialogFooter>
+              <Button
+                onClick={() => setShowTransportationBookingDialog(false)}
+                variant="outline"
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="creditCard" id="creditCard" />
-                  <Label htmlFor="creditCard">Credit Card</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="debitCard" id="debitCard" />
-                  <Label htmlFor="debitCard">Debit Card</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="wallet" id="wallet" />
-                  <Label htmlFor="wallet">Wallet</Label>
-                </div>
-              </RadioGroup>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={() => setShowTransportationBookingDialog(false)}
-              variant="outline"
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleTransportationBooking} disabled={isBooking}>
-              {isBooking ? "Booking..." : "Confirm Booking"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                Cancel
+              </Button>
+              <Button onClick={handleTransportationBooking} disabled={isBooking}>
+                {isBooking ? "Booking..." : "Confirm Booking"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <Dialog
           open={showTransportationSuccessDialog}
@@ -988,68 +1020,68 @@ setSelectedDate(null);
         </Dialog>
 
         <Dialog
-  open={!(bookingError === "") && !closing}
-  onOpenChange={(isOpen) => {
-    if (!isOpen) {
-      setClosing(true); // Start closing
-      setTimeout(() => {
-        setBookingError(""); // Clear error
-        setClosing(false); // Reset closing state
-      }, 300); // Matches transition duration of the Dialog (adjust if necessary)
-    }
-  }}
->
-  <DialogContent>
-    <DialogHeader>
-      {bookingError !== "Transportation booking successful" ? (
-        <DialogTitle>
-          <div className="flex items-center">
-            <XCircle className="w-6 h-6 text-red-500 mr-2" />
-            Failed to book transportation
-          </div>
-        </DialogTitle>
-      ) : (
-        <DialogTitle>
-          <div className="flex items-center">
-            <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-            Transportation booking successful
-          </div>
-        </DialogTitle>
-      )}
-    </DialogHeader>
-    <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-2 gap-4">
-        <Label className="text-right">Amount Paid:</Label>
-        <div>
-          {displayPrice(seatsToBook * selectedTransportation?.ticketCost)}
-        </div>
-      </div>
-      {paymentMethod === "wallet" && (
-        <div className="grid grid-cols-2 gap-4">
-          <Label className="text-right">New Wallet Balance:</Label>
-          <div>
-            {displayPrice(
-              tourist.wallet - seatsToBook * selectedTransportation?.ticketCost
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-    <DialogFooter>
-      <Button
-        onClick={() => {
-          setClosing(true); // Start closing
-          setTimeout(() => {
-            setBookingError(""); // Clear error
-            setClosing(false); // Reset closing state
-          }, 300); // Matches transition duration
-        }}
-      >
-        Close
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+          open={!(bookingError === "") && !closing}
+          onOpenChange={(isOpen) => {
+            if (!isOpen) {
+              setClosing(true); // Start closing
+              setTimeout(() => {
+                setBookingError(""); // Clear error
+                setClosing(false); // Reset closing state
+              }, 300); // Matches transition duration of the Dialog (adjust if necessary)
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              {bookingError !== "Transportation booking successful" ? (
+                <DialogTitle>
+                  <div className="flex items-center">
+                    <XCircle className="w-6 h-6 text-red-500 mr-2" />
+                    Failed to book transportation
+                  </div>
+                </DialogTitle>
+              ) : (
+                <DialogTitle>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                    Transportation booking successful
+                  </div>
+                </DialogTitle>
+              )}
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Label className="text-right">Amount Paid:</Label>
+                <div>
+                  {displayPrice(seatsToBook * selectedTransportation?.ticketCost)}
+                </div>
+              </div>
+              {paymentMethod === "wallet" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <Label className="text-right">New Wallet Balance:</Label>
+                  <div>
+                    {displayPrice(
+                      tourist.wallet - seatsToBook * selectedTransportation?.ticketCost
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={() => {
+                  setClosing(true); // Start closing
+                  setTimeout(() => {
+                    setBookingError(""); // Clear error
+                    setClosing(false); // Reset closing state
+                  }, 300); // Matches transition duration
+                }}
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

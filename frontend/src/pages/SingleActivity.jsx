@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { UserGuide } from "@/components/UserGuide";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
 import {
@@ -43,6 +45,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useSearchParams } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -79,7 +82,6 @@ import {
   Bus,
 } from "lucide-react";
 import PaymentPopup from "@/components/payment-popup";
-
 const ImageGallery = ({ pictures }) => {
   const [mainImage, setMainImage] = useState(pictures[0]?.url);
   const [startIndex, setStartIndex] = useState(0);
@@ -164,9 +166,8 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -177,6 +178,7 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
 
 const ActivityDetail = () => {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -250,6 +252,40 @@ const ActivityDetail = () => {
     fetchTouristData();
   }, []);
 
+  useEffect(() => {
+    const handleBookingSuccess = async () => {
+      const success = searchParams.get("success");
+      const quantity = searchParams.get("quantity");
+      const sessionId = searchParams.get("session_id");
+
+
+      if (sessionId && success === "true" && activity) {
+        try {
+          const response = await axios.get(
+            `http://localhost:4000/check-payment-status?session_id=${sessionId}`
+          );
+
+          console.log("Payment status response:", response.data);
+
+          if (response.data.status === "paid") {
+            try {
+              await handlePaymentConfirm("CreditCard", parseInt(quantity));
+            } catch (error) {
+              console.error("Error handling booking success:", error);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking payment status:", error);
+        }
+      }
+
+    };
+
+
+
+    handleBookingSuccess();
+  }, [searchParams, activity]);
+
   const formatWallet = (price) => {
     fetchExchangeRate();
     getCurrencySymbol();
@@ -317,7 +353,7 @@ const ActivityDetail = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   {transport.vehicleType === "Bus" ||
-                  transport.vehicleType === "Microbus" ? (
+                    transport.vehicleType === "Microbus" ? (
                     <Bus className="w-5 h-5 mr-2 text-blue-500" />
                   ) : (
                     <Car className="w-5 h-5 mr-2 text-green-500" />
@@ -382,7 +418,7 @@ const ActivityDetail = () => {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText("http://localhost:3000/activity/" + id);
     setIsToastOpen(true);
     setOpen(false);
   };
@@ -715,7 +751,7 @@ const ActivityDetail = () => {
     }
   };
 
-  // format price that returns the activity price as an int 
+  // format price that returns the activity price as an int
 
   const formatPriceInt = (price) => {
     if (activity) {
@@ -788,7 +824,7 @@ const ActivityDetail = () => {
       const additionalPrice =
         userBooking.paymentAmount +
         calculateDiscountedPrice(activity.price, activity.specialDiscount) *
-          additionalTickets;
+        additionalTickets;
 
       const response = await axios.put(
         `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
@@ -809,7 +845,7 @@ const ActivityDetail = () => {
       console.error("Error updating booking:", error);
       setBookingError(
         error.response?.data?.message ||
-          "An error occurred while updating the booking."
+        "An error occurred while updating the booking."
       );
     } finally {
       setIsBooking(false);
@@ -892,6 +928,7 @@ const ActivityDetail = () => {
         const data = await response.json();
         setShowPaymentPopup(false);
         setShowSuccessDialog(true);
+        setNumberOfTickets(numberOfTickets); // Update the number of tickets in the state
       }
     } catch (error) {
       console.error("Error booking activity:", error);
@@ -903,17 +940,17 @@ const ActivityDetail = () => {
     }
   };
 
-
   useEffect(() => {
-    if (savedActivities && savedActivities.length > 0) {
+    if (savedActivities && savedActivities.length > 0 && activity) {
       setIsSaved(
         savedActivities.some(
-          (savedActivity) => savedActivity._id === activity._id.toString()
+          (savedActivity) =>
+            savedActivity && savedActivity._id === activity._id.toString()
         )
       );
     }
     console.log(isSaved);
-  }, [savedActivities]);
+  }, [savedActivities, activity]);
 
   const handleSaveToggle = async (itemId) => {
     try {
@@ -930,12 +967,17 @@ const ActivityDetail = () => {
             ? prev.filter((item) => item._id !== itemId)
             : [...prev, { _id: itemId }]
         );
+  
         // Show success message
         setAlertMessage({
           type: "success",
-          message:
-            response.data.message || "Activity saved/unsaved successfully!",
+          message: response.data.message || "Activity saved/unsaved successfully!",
         });
+  
+        // Hide alert after 2 seconds
+        setTimeout(() => {
+          setAlertMessage(null);
+        }, 2000);
       }
     } catch (error) {
       console.error("Error toggling save activity:", error);
@@ -943,8 +985,14 @@ const ActivityDetail = () => {
         type: "error",
         message: "Error saving/unsaving activity. Please try again.",
       });
+  
+      // Hide alert after 2 seconds
+      setTimeout(() => {
+        setAlertMessage(null);
+      }, 2000);
     }
   };
+  
 
   const getTotalRatings = () => {
     return activity?.comments?.length || 0;
@@ -1039,6 +1087,34 @@ const ActivityDetail = () => {
       console.error("Error submitting rating:", error);
     }
   };
+  const guideSteps = [
+    {
+      target: "body",
+      content: "Now you can explore the details of this activity, including its timing, cost, and available options. Press next for more information or to make a booking!",
+      placement: "center",
+    },
+    {
+      target: ".ActivityDetail",
+      content: "This section provides a detailed overview of the activity, including its name, timing, price, and location.",
+      placement: "left",
+    },
+    {
+      target: ".bookNow",
+      content: "Click here to be able to book this activity and proceed to the payment process.",
+      placement: "left",
+    },
+    {
+      target: ".Save",
+      content:( <> Click here to save this activity for later viewing or booking in your saved activities list.<br />Tip:<br />You can view your saved activities anytime! Simply click the hamburger menu on the top right corner → My Account → Activities → Saved
+      </>), 
+      placement: "left",
+    },
+    {
+      target: ".AdvertiserDetail",
+      content: "Here you can find information about the advertiser that published this activity, including their name and contact information.",
+      placement: "left",
+    },
+  ];
 
   const handleAddReview = async () => {
     try {
@@ -1131,6 +1207,9 @@ const ActivityDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="singleActivity" />
+      )}
       <div
         style={{
           backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.7), rgba(93, 146, 151, 0.5)), url(${activity.pictures[0]?.url})`,
@@ -1261,93 +1340,94 @@ const ActivityDetail = () => {
                 <div className="flex-1 bg-white shadow-md rounded-lg p-4">
                   <div>
                     <div className="space-y-4">
-                      <div className="">
-                        <h1 className="text-3xl font-bold">{activity.name}</h1>
-                      </div>
-                      {(userRole === "advertiser" || userRole === "admin") &&
-                        !activity.isBookingOpen && (
-                          <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
-                            Booking is currently closed.
-                          </div>
-                        )}
-                      <div className="flex items-center">
-                        {/* Rating Badge */}
-                        <div className="flex items-center px-3 py-1 rounded-full">
-                          <StarRating
-                            rating={activity.rating}
-                            readOnly={true}
-                          />
+                      <div className="ActivityDetail">
+                        <div className="">
+                          <h1 className="text-3xl font-bold">{activity.name}</h1>
                         </div>
-
-                        {/* Rating Count outside the badge */}
-                        <span className="text-sm font-normal ml-2">
-                          {activity.comments
-                            ? `(${activity.comments.length})`
-                            : "(0)"}
-                        </span>
-                      </div>
-                      <div className="flex items-start">
-                        <div>
-                          <div className="bg-red-600 text-white text-sm font-bold px-3 py-2 rounded mb-2 inline-block">
-                            Limited time deal
+                        {(userRole === "advertiser" || userRole === "admin") &&
+                          !activity.isBookingOpen && (
+                            <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
+                              Booking is currently closed.
+                            </div>
+                          )}
+                        <div className="flex items-center">
+                          {/* Rating Badge */}
+                          <div className="flex items-center px-3 py-1 rounded-full">
+                            <StarRating
+                              rating={activity.rating}
+                              readOnly={true}
+                            />
                           </div>
 
-                          <div className="flex flex-col items-start">
-                            <div className="flex items-baseline">
-                              <span className="text-4xl font-bold text-gray-900">
-                                {formatPrice(
-                                  calculateDiscountedPrice(
-                                    activity.price,
-                                    activity.specialDiscount
-                                  )
-                                )}
-                              </span>
-                              <span className="ml-3 text-xl font-semibold text-red-600">
-                                -{activity.specialDiscount}% Discount
-                              </span>
+                          {/* Rating Count outside the badge */}
+                          <span className="text-sm font-normal ml-2">
+                            {activity.comments
+                              ? `(${activity.comments.length})`
+                              : "(0)"}
+                          </span>
+                        </div>
+                        <div className="flex items-start">
+                          <div>
+                            <div className="bg-red-600 text-white text-sm font-bold px-3 py-2 rounded mb-2 inline-block">
+                              Limited time deal
                             </div>
-                            <div className="text-2xl text-gray-500 line-through mt-2">
-                              {formatPrice(activity.price)}
+
+                            <div className="flex flex-col items-start">
+                              <div className="flex items-baseline">
+                                <span className="text-4xl font-bold text-gray-900">
+                                  {formatPrice(
+                                    calculateDiscountedPrice(
+                                      activity.price,
+                                      activity.specialDiscount
+                                    )
+                                  )}
+                                </span>
+                                <span className="ml-3 text-xl font-semibold text-red-600">
+                                  -{activity.specialDiscount}% Discount
+                                </span>
+                              </div>
+                              <div className="text-2xl text-gray-500 line-through mt-2">
+                                {formatPrice(activity.price)}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center">
-                        <MapPin className="w-5 h-5 mr-2 text-orange-500" />
-                        <span className="text-gray-700">
-                          Location: {activity.location.address}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className="w-5 h-5 mr-2 text-orange-500" />
-                        <span className="text-gray-700">
-                          Date: {new Date(activity.timing).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock className="w-5 h-5 mr-2 text-orange-500" />
-                        <span className="text-gray-700">
-                          Time:{" "}
-                          {new Date(activity.timing).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
-                        {isExpanded
-                          ? activity.description
-                          : `${activity.description.substring(0, 130)}${
-                              activity.description.length > 130 ? "..." : ""
+                        <div className="flex items-center">
+                          <MapPin className="w-5 h-5 mr-2 text-orange-500" />
+                          <span className="text-gray-700">
+                            Location: {activity.location.address}
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <Calendar className="w-5 h-5 mr-2 text-orange-500" />
+                          <span className="text-gray-700">
+                            Date: {new Date(activity.timing).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <Clock className="w-5 h-5 mr-2 text-orange-500" />
+                          <span className="text-gray-700">
+                            Time:{" "}
+                            {new Date(activity.timing).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
+                          {isExpanded
+                            ? activity.description
+                            : `${activity.description.substring(0, 130)}${activity.description.length > 130 ? "..." : ""
                             }`}
-                        {activity.description.length > 130 && (
-                          <button
-                            onClick={toggleExpanded}
-                            className="text-blue-500 hover:underline ml-2"
-                          >
-                            {isExpanded ? "View Less" : "View More"}
-                          </button>
-                        )}
+                          {activity.description.length > 130 && (
+                            <button
+                              onClick={toggleExpanded}
+                              className="text-blue-500 hover:underline ml-2"
+                            >
+                              {isExpanded ? "View Less" : "View More"}
+                            </button>
+                          )}
+                        </div>
                       </div>
                       {userRole === "tourist" && !isActivityPassed() && (
                         <>
@@ -1362,11 +1442,10 @@ const ActivityDetail = () => {
 
                           <Button
                             onClick={handleBookNowClick}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg ${
-                              activity.isBookingOpen
-                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                            }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${activity.isBookingOpen
+                              ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                              : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                              }`}
                             disabled={!activity.isBookingOpen}
                           >
                             {activity.isBookingOpen
@@ -1379,18 +1458,16 @@ const ActivityDetail = () => {
                               e.stopPropagation();
                               handleSaveToggle(activity._id);
                             }}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 ${
-                              isSaved
-                                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                            }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
+                              ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                              : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                              }`}
                           >
                             <Bookmark
-                              className={`w-5 h-5 ${
-                                isSaved
-                                  ? "stroke-white fill-[#1A3B47]"
-                                  : "stroke-white"
-                              }`}
+                              className={`w-5 h-5 ${isSaved
+                                ? "stroke-white fill-[#1A3B47]"
+                                : "stroke-white"
+                                }`}
                             />
                             {isSaved ? "Unsave" : "Save"}
                           </Button>
@@ -1419,125 +1496,119 @@ const ActivityDetail = () => {
                     </div>
                   </div>
 
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <span className="text-3xl font-bold -ml-2 ">
-                        Advertiser Profile
-                      </span>
-                      <Badge
-                        variant="secondary"
-                        className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
-                      >
-                        Verified Advertiser
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center">
-                      <Avatar className="h-16 w-16">
-                        <AvatarImage
-                          src={advertiserProfile.logo}
-                          alt={advertiserProfile.username}
-                        />
-                        <AvatarFallback>
-                          <User className="h-8 w-8" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="ml-4">
-                        <h3 className="text-2xl font-bold text-[#1A3B47]">
-                          {advertiserProfile.username}
-                        </h3>
-                        <div className="flex items-center text-sm text-gray-500 mt-1">
-                          <span className="font-semibold text-xs">
-                            95% Positive
-                          </span>
-                          <span className="mx-2">|</span>
-                          <span className="font-semibold text-xs">
-                            754 Bookings
-                          </span>
-                        </div>
-                        <div className="flex items-center mt-2">
-                          <StarRating rating={5} />
-                        </div>
-                      </div>
-                    </div>
-
-                    {showMore && (
-                      <div className="mt-4 space-y-2">
-                        <div className="flex items-center text-sm">
-                          <Mail className="h-5 w-5 mr-2 text-gray-500" />
-                          <span>{advertiserProfile.email}</span>
-                        </div>
-                        <div className="flex items-center text-sm">
-                          <Globe className="h-5 w-5 mr-2 text-gray-500" />
-                          <span>{advertiserProfile.website}</span>
-                        </div>
-                        <div className="flex items-center text-sm">
-                          <Phone className="h-5 w-5 mr-2 text-gray-500" />
-                          <span>{advertiserProfile.hotline}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="mt-4">
-                      <Button
-                        variant="link"
-                        className="w-full p-0 h-auto font-normal text-blue-500 hover:text-blue-700"
-                        onClick={() => setShowMore(!showMore)}
-                      >
-                        {showMore ? "Less Info" : "More Info"}
-                      </Button>
-                    </div>
-                    {userRole === "admin" && (
-                      <>
-                        <div className="mt-6 border-t border-gray-300 pt-4"></div>
-                        <Button
-                          className={`w-full mx-auto text-white ${
-                            isAppropriate
-                              ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                              : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                          }`}
-                          onClick={handleOpenDialog}
+                  <div className="AdvertiserDetail">
+                    <CardHeader>
+                      <div className="flex justify-between items-center">
+                        <span className="text-3xl font-bold -ml-2">Advertiser Profile</span>
+                        <Badge
+                          variant="secondary"
+                          className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
                         >
-                          {isAppropriate
-                            ? "Flag as Inappropriate"
-                            : "Flag as Appropriate"}
-                        </Button>
+                          Verified Advertiser
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center">
+                        <Avatar className="h-16 w-16">
+                          <AvatarImage
+                            src={advertiserProfile.logo}
+                            alt={advertiserProfile.username}
+                          />
+                          <AvatarFallback>
+                            <User className="h-8 w-8" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="ml-4">
+                          <h3 className="text-2xl font-bold text-[#1A3B47]">
+                            {advertiserProfile.username}
+                          </h3>
+                          <div className="flex items-center text-sm text-gray-500 mt-1">
+                            <span className="font-semibold text-xs">95% Positive</span>
+                            <span className="mx-2">|</span>
+                            <span className="font-semibold text-xs">754 Bookings</span>
+                          </div>
+                          <div className="flex items-center mt-2">
+                            <StarRating rating={5} />
+                          </div>
+                        </div>
+                      </div>
 
-                        {dialogOpen && (
-                          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                            <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                              <div className="mb-4">
-                                <h2 className="text-lg font-semibold">
-                                  Confirm Action
-                                </h2>
-                                <p className="text-gray-600 mt-2">
-                                  Are you sure you want to change the status of
-                                  this itinerary/event?
-                                </p>
-                              </div>
-                              <div className="flex justify-end space-x-4">
-                                <Button
-                                  variant="outlined"
-                                  onClick={handleCloseDialog}
-                                  className="border-gray-300"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button
-                                  color="secondary"
-                                  onClick={handleConfirmFlag}
-                                  className="bg-[#5D9297] hover:[#388A94] text-white"
-                                >
-                                  Confirm
-                                </Button>
+                      {showMore && (
+                        <div className="mt-4 space-y-2">
+                          <div className="flex items-center text-sm">
+                            <Mail className="h-5 w-5 mr-2 text-gray-500" />
+                            <span>{advertiserProfile.email}</span>
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <Globe className="h-5 w-5 mr-2 text-gray-500" />
+                            <span>{advertiserProfile.website}</span>
+                          </div>
+                          <div className="flex items-center text-sm">
+                            <Phone className="h-5 w-5 mr-2 text-gray-500" />
+                            <span>{advertiserProfile.hotline}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="mt-4">
+                        <Button
+                          variant="link"
+                          className="w-full p-0 h-auto font-normal text-blue-500 hover:text-blue-700"
+                          onClick={() => setShowMore(!showMore)}
+                        >
+                          {showMore ? "Less Info" : "More Info"}
+                        </Button>
+                      </div>
+
+                      {userRole === "admin" && (
+                        <>
+                          <div className="mt-6 border-t border-gray-300 pt-4"></div>
+                          <Button
+                            className={`w-full mx-auto text-white ${isAppropriate
+                                ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                                : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                              }`}
+                            onClick={handleOpenDialog}
+                          >
+                            {isAppropriate
+                              ? "Flag as Inappropriate"
+                              : "Flag as Appropriate"}
+                          </Button>
+
+                          {dialogOpen && (
+                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                              <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                                <div className="mb-4">
+                                  <h2 className="text-lg font-semibold">Confirm Action</h2>
+                                  <p className="text-gray-600 mt-2">
+                                    Are you sure you want to change the status of this
+                                    itinerary/event?
+                                  </p>
+                                </div>
+                                <div className="flex justify-end space-x-4">
+                                  <Button
+                                    variant="outlined"
+                                    onClick={handleCloseDialog}
+                                    className="border-gray-300"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    color="secondary"
+                                    onClick={handleConfirmFlag}
+                                    className="bg-[#5D9297] hover:[#388A94] text-white"
+                                  >
+                                    Confirm
+                                  </Button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </CardContent>
+                          )}
+                        </>
+                      )}
+                    </CardContent>
+                  </div>
                 </div>
 
                 {/* {userRole === 'tourist' && !isActivityPassed() && booked &&(
@@ -1610,15 +1681,14 @@ const ActivityDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${
-                            (
-                              isRatingHovered
-                                ? quickRating >= star
-                                : quickRating >= star
-                            )
-                              ? "text-yellow-500 fill-current"
-                              : "text-gray-300"
-                          }`}
+                          className={`w-8 h-8 cursor-pointer ${(
+                            isRatingHovered
+                              ? quickRating >= star
+                              : quickRating >= star
+                          )
+                            ? "text-yellow-500 fill-current"
+                            : "text-gray-300"
+                            }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -1744,20 +1814,26 @@ const ActivityDetail = () => {
           </div>
 
           {userPreferredCurrency && userPreferredCurrency.code && (
-          <PaymentPopup
-            isOpen={showPaymentPopup}
-            onClose={() => setShowPaymentPopup(false)}
-            title={`Book Activity: ${activity.name}`}
-            items={[{ name: activity.name, price: ((calculateTotalPrice() * exchangeRates) * 100) }]} // Convert price to cents
-            onWalletPayment={() =>
-              handlePaymentConfirm("Wallet", numberOfTickets)
-            }
-            stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
-            onConfirm={handlePaymentConfirm}
-            priceOne={(calculateTotalPrice() * exchangeRates).toFixed(2)}
-            currency={userPreferredCurrency.code} 
-          />
-        )}
+            <PaymentPopup
+              isOpen={showPaymentPopup}
+              onClose={() => setShowPaymentPopup(false)}
+              title={`Book Activity: ${activity.name}`}
+              items={[
+                {
+                  name: activity.name,
+                  price: calculateTotalPrice() * exchangeRates * 100,
+                },
+              ]} // Convert price to cents
+              onWalletPayment={() =>
+                handlePaymentConfirm("Wallet", numberOfTickets)
+              }
+              stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+              onConfirm={handlePaymentConfirm}
+              priceOne={(calculateTotalPrice() * exchangeRates).toFixed(2)}
+              currency={userPreferredCurrency.code}
+              returnLoc={"http://localhost:3000/activity/" + id}
+            />
+          )}
 
           <Dialog
             open={showUpdateBookingDialog}
@@ -2208,9 +2284,8 @@ const ActivityDetail = () => {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}

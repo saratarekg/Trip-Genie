@@ -64,7 +64,7 @@ export default function TransportationCard({
   };
 
   return (
-<div className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow">
+<div className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition-shadow transportation-card">
   <div className="flex items-center justify-between">
     <div className="flex flex-col items-start w-1/5">
       <span className="text-sm text-[#5D9297]">Departure</span>
@@ -110,7 +110,7 @@ export default function TransportationCard({
       {userRole === "tourist" && transportation.remainingSeats > 0 ? (
         <Button 
           onClick={() => onBook(transportation)} 
-          className="bg-[#F88C33] text-white px-4 py-2 rounded hover:bg-orange-500 transition-colors"
+          className="bg-[#F88C33] text-white px-4 py-2 rounded hover:bg-orange-500 transition-colors book-now-button"
         >
           Book Now
         </Button>

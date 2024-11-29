@@ -67,6 +67,20 @@ have day title
 
 product key features and maybe like colours/sizes men el product
 
+guidance pages:
+all activities(done)
+all itineraries(done)
+all products (done)
+historical places(done)
+book hotel
+book flight
+single activity(done)
+single itinerary(done)
+single product(done)
+wishlist
+checkout
+
+
 
 Orange: #F88C33
 Beige/Tan: #E6DCCF

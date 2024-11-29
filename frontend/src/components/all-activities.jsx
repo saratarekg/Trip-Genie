@@ -21,6 +21,7 @@ import Loader from "@/components/Loader";
 import defaultImage from "@/assets/images/default-image.jpg";
 import activityImage from "@/assets/images/sam.png";
 import DualHandleSliderComponent from "@/components/dual-handle-slider";
+import { UserGuide } from "@/components/UserGuide";
 
 const renderStars = (rating) => {
   return (
@@ -159,7 +160,7 @@ const ActivityCard = ({
   }
 
   return (
-    <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl">
+    <Card className="relative overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl activity-card">
       <CardHeader className="p-0" onClick={() => onSelect(activity._id)}>
         <div className="relative aspect-video overflow-hidden">
           <img
@@ -200,14 +201,6 @@ const ActivityCard = ({
         <p className="text-sm text-gray-600 mt-2 line-clamp-2">
           {activity.description}
         </p>
-        <div className="flex justify-between items-center mt-3">
-          <span className="text-lg font-bold text-primary">
-            {formatPrice(activity.price)}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {activity.duration} hours
-          </span>
-        </div>
         <p className="text-sm text-muted-foreground mt-2">
           {new Date(activity.timing)
             .toLocaleDateString("en-GB", {
@@ -667,6 +660,28 @@ export default function AllActivities() {
     dateRange,
   ]);
 
+
+  const guideSteps = [
+    {
+      target: "body",
+      content:
+        "Welcome to the activities page! Here you can find a list of all available activities.",
+      placement: "center",
+    },
+    {
+      target: ".filter",
+      content:
+        "Use the filters to narrow down your search based on your preferences.",
+      placement: "right",
+    },
+    {
+      target: ".activity-card",
+      content:
+        "Each card represents a unique activity. Click on a card to learn more about it.",
+      placement: "bottom",
+    },
+  ];
+
   const sortedActivities = useMemo(() => {
     const sorted = [...filteredActivities];
     if (sortBy === "price") {
@@ -679,6 +694,12 @@ export default function AllActivities() {
 
   return (
     <div className="bg-gray-100">
+       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+          <UserGuide
+            steps={guideSteps}
+            pageName="activities"
+          />
+        )}
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
           <div className="flex-1">
@@ -708,7 +729,7 @@ export default function AllActivities() {
       </div>
       <div className="container mx-auto px-4 py-8 lg:px-24">
         <div className="flex gap-8">
-          <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
+          <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
               <Button

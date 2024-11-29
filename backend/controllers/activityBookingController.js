@@ -439,7 +439,7 @@ exports.getBookingsReport = async (req, res) => {
     let totalTickets = 0;
 
     // Calculate total number of tickets for each activity
-    const activityReport = activities.map((activity) => {
+    let activityReport = activities.map((activity) => {
       const tickets = bookings.reduce((total, booking) => {
         return booking.activity._id.toString() === activity._id.toString()
           ? total + booking.numberOfTickets
@@ -464,6 +464,7 @@ exports.getBookingsReport = async (req, res) => {
     });
 
     totalRevenue *= 0.9; // 10% commission for the platform
+    activityReport = activityReport.filter((report) => report.tickets > 0);
     res.status(200).json({ activityReport, totalRevenue, totalTickets });
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors

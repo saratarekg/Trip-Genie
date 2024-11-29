@@ -157,7 +157,7 @@ app.post("/create-checkout-session", async (req, res) => {
 
 app.post("/create-booking-session", async (req, res) => {
   try {
-    const { items, currency, quantity } = req.body;
+    const { items, currency, quantity, returnLocation } = req.body;
 
     // Calculate the total price of items
     const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -175,8 +175,8 @@ app.post("/create-booking-session", async (req, res) => {
         quantity: item.quantity,
       })),
       mode: "payment",
-      success_url: `${req.headers.origin}/successPage?success=true&session_id={CHECKOUT_SESSION_ID}&quantity=${quantity}`,
-      cancel_url: `${req.headers.origin}`,
+      success_url: `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}&quantity=${quantity}`,
+      cancel_url: `${returnLocation}`,
     });
 
     console.log("Checkout session created:", session.id);

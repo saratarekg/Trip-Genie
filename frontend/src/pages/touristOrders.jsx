@@ -5,7 +5,7 @@ import { Search } from 'lucide-react'
 import { format, isValid } from 'date-fns'
 import axios from 'axios'
 import { Link } from 'react-router-dom';
-
+import { Label } from "@/components/ui/label";
 import Cookies from 'js-cookie'
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
@@ -38,6 +38,7 @@ export default function OrdersPage() {
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false)
   const [orderToCancel, setOrderToCancel] = useState(null)
   const ordersPerPage = 6
+  const [tourist, setTourist] = useState(null);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -73,7 +74,8 @@ export default function OrdersPage() {
             headers: { Authorization: `Bearer ${token}` },
           }
         )
-        setUserPreferredCurrency(response2.data)
+        setUserPreferredCurrency(response2.data);
+        setTourist(response.data);
       } catch (error) {
         console.error("Error fetching user profile:", error)
       }
@@ -92,13 +94,36 @@ export default function OrdersPage() {
       const response = await axios.put(`http://localhost:4000/tourist/cancelPurchase/${orderToCancel}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      console.log("Order canceled:", response.data)
+      console.log("Order canceled:", response.data);
+      console.log("order  refunded:", selectedOrder.totalPrice);
+      console.log("order with wallet refunded:", tourist.wallet+(selectedOrder.totalPrice));
       fetchOrders()
+      // Assuming response.data contains the order products and payment details
+      const formattedTotalPrice = displayPrice(selectedOrder.totalPrice);  // Assuming response contains total price
+      const newwallet = tourist.wallet+(selectedOrder.totalPrice);  // Assuming response contains the updated wallet balance
+    
+      // Show a success toast notification
       toast({
         title: "Order Cancelled",
-        description: "Your order has been successfully cancelled.",
+        description: (
+          <>
+            <p>Your order has been successfully cancelled.</p>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Label className="text-right">Amount Refunded:</Label>
+                <div>{formattedTotalPrice}</div>
+              </div>
+              {selectedOrder.paymentMethod === "wallet" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <Label className="text-right">New Wallet Balance:</Label>
+                  <div>{displayPrice(newwallet.toFixed(2))}</div>
+                </div>
+              )}
+            </div>
+          </>
+        ),
         duration: 3000,
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
