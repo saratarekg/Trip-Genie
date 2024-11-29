@@ -223,7 +223,7 @@ const ProductCard = ({
                 fontSize: "14px",
               }}
             >
-              Buy Now
+              Add to Cart
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
