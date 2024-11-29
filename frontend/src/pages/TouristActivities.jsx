@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { Label } from "@/components/ui/label";
 import {
   Calendar,
   ChevronRight,
@@ -68,7 +69,7 @@ export default function Component() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isNotificationDialogOpen, setIsNotificationDialogOpen] =
     useState(false);
-  const [notificationMessage, setNotificationMessage] = useState("");
+    const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationIconType, setNotificationIconType] = useState("");
   const navigate = useNavigate();
 
@@ -76,6 +77,7 @@ export default function Component() {
   const [exchangeRateItinerary, setExchangeRateItinerary] = useState({});
   const [exchangeRateActivity, setExchangeRateActivity] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
+  const [tourist, setTourist] = useState(null);
 
   const fetchUserInfo = async () => {
     if (userRole === "tourist") {
@@ -92,6 +94,7 @@ export default function Component() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+        setTourist(response.data);
         setUserPreferredCurrency(response2.data);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -259,6 +262,27 @@ export default function Component() {
     }
   };
 
+  const formatWallet = (price) => {
+    if (!tourist || !tourist.wallet) {
+      console.log("Tourist or wallet not available.");
+      return "Wallet not available";
+    }
+  
+    if ( !currencySymbol) {
+      console.log(" currency symbol not available.");
+      
+    }
+
+    if (!exchangeRateItinerary) {
+      console.log("Exchange rate not available.");
+      
+    }
+  
+    const exchangedPrice = price * exchangeRateActivity;
+    exchangedPrice.toFixed(2);
+    return `${userPreferredCurrency.symbol}${exchangedPrice}`;
+  };
+
   const handleActivityClick = (id) => {
     navigate(`/activity/${id}`);
   };
@@ -329,8 +353,38 @@ export default function Component() {
       // Fetch updated data after successful deletion
       await fetchUpdatedData();
 
+      const totalPrice = selectedBooking.paymentAmount; // Ensure paymentAmount is available and numeric
+      const formattedTotalPrice = formatPrice(totalPrice);
+      const newWalletBalance =
+        selectedBooking.paymentType === "Wallet"
+          ? tourist.wallet + totalPrice
+          : tourist.wallet;
+
+          console.log("total price", formatPrice(totalPrice));
+          console.log("wallet updated",formatWallet(tourist.wallet.toFixed(2)));
+  
+      // Update wallet balance if necessary
+      if (selectedBooking.paymentType === "Wallet") {
+        tourist.wallet = newWalletBalance;
+      }
+  
+      // Display success notification with refund details
       showNotification(
-        "Your booking has been successfully cancelled.",
+        <>
+          <p>Your booking has been successfully cancelled.</p>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Label className="text-right">Amount Refunded:</Label>
+              <div>{formattedTotalPrice}</div>
+            </div>
+            {selectedBooking.paymentType === "Wallet" && (
+              <div className="grid grid-cols-2 gap-4">
+                <Label className="text-right">New Wallet Balance:</Label>
+                <div>{  formatWallet(newWalletBalance.toFixed(2))}</div>
+              </div>
+            )}
+          </div>
+        </>,
         "success"
       );
     } catch (error) {
