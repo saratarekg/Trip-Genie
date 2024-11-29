@@ -1490,8 +1490,8 @@ const ItineraryDetail = () => {
     },
     {
       target: ".Save",
-      content: "Click here to save this itinerary for later viewing or booking in your saved itineraries list.Tip: You can view your saved activities anytime! Simply click Dropdown > My Account > Itineraries > Saved",
-
+      content:( <> Click here to save this itinerary for later viewing or booking in your saved itineraries list.<br />Tip:<br />You can view your saved itineraries anytime! Simply click the hamburger menu on the top right corner → My Account → Itineraries → Saved
+      </>), 
       placement: "left",
     },
     {

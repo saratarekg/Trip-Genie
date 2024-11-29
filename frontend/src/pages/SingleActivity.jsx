@@ -1090,12 +1090,12 @@ const ActivityDetail = () => {
   const guideSteps = [
     {
       target: "body",
-      content: "Now you can explore the details of this activity, including its details, cost, and available options. Press next for more information or to make a booking!",
+      content: "Now you can explore the details of this activity, including its timing, cost, and available options. Press next for more information or to make a booking!",
       placement: "center",
     },
     {
       target: ".ActivityDetail",
-      content: "This section provides a detailed overview of the activity, including its name, Price, and location.",
+      content: "This section provides a detailed overview of the activity, including its name, timing, price, and location.",
       placement: "left",
     },
     {
@@ -1105,8 +1105,8 @@ const ActivityDetail = () => {
     },
     {
       target: ".Save",
-      content: "Click here to save this activity for later viewing or booking in your saved activities list.Tip: You can view your saved activities anytime! Simply click Dropdown > My Account > Activities > Saved",
-
+      content:( <> Click here to save this activity for later viewing or booking in your saved activities list.<br />Tip:<br />You can view your saved activities anytime! Simply click the hamburger menu on the top right corner → My Account → Activities → Saved
+      </>), 
       placement: "left",
     },
     {
