@@ -850,6 +850,16 @@ const ProductDetail = () => {
       content: "This section provides an overview of the Product, including its price, availability and description.",
       placement: "left",
     },
+     // Conditionally add the addToCart step based on product.quantity
+  ...(product?.quantity > 0
+    ? [
+        {
+          target: ".addToCart",
+          content: "Click here to add the product to your cart.",
+          placement: "left",
+        },
+      ]
+    : []),
     {
       target: ".addToWishlist",
       content: (<> Click here to add to wishlist this product for later viewing or purchase.<br />Tip:<br />You can view your wishlist from the top right corner of the page</>),     placement: "left",
@@ -862,12 +872,7 @@ const ProductDetail = () => {
     {
       target: ".addReview",
       content: "Click here to add/edit a review for this product.",   
-      placement: "left",
-    },
-    {
-      target: ".addToCart",
-      content: (<>Click here to add this product to your cart and proceed with the purchase!<br />Tip:<br />You can view your cart from the top right corner of the page</>),     placement: "left",
-      placement: "left",
+      placement: "right",
     },
   ];
 
@@ -925,9 +930,6 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 ">
-      {(userRole === "guest" || userRole === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="singleProduct" />
-      )}
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         </div>
@@ -1287,11 +1289,12 @@ const ProductDetail = () => {
                       <Info className="w-5 h-5 mr-2" />
                       <p>Price includes VAT</p>
                     </div>
-                    {product.quantity <= 5 && product.quantity > 0 ? (
+                    {product.quantity <=5 ? (
+                      product.quantity !== 0 && ( 
                       <p className="text-red-600 font-semibold text-xl mb-4">
                         Only {product.quantity} left in stock! Buy now!
-                      </p>
-                    ) : (
+                      </p>)
+                    ):  (
                       <span className="text-green-600 text-lg font-semibold">
                         Still in stock!
                       </span>
@@ -2002,7 +2005,11 @@ const ProductDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="singleProduct" />
+      )}
     </div>
+
   );
 };
 
