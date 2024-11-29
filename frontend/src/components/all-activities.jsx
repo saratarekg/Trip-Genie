@@ -201,14 +201,6 @@ const ActivityCard = ({
         <p className="text-sm text-gray-600 mt-2 line-clamp-2">
           {activity.description}
         </p>
-        <div className="flex justify-between items-center mt-3">
-          <span className="text-lg font-bold text-primary">
-            {formatPrice(activity.price)}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {activity.duration} hours
-          </span>
-        </div>
         <p className="text-sm text-muted-foreground mt-2">
           {new Date(activity.timing)
             .toLocaleDateString("en-GB", {

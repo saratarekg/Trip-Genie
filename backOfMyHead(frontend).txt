@@ -74,8 +74,8 @@ all products (done)
 historical places(done)
 book hotel
 book transportation
-single activity 
-single itinerary
+single activity(done)
+single itinerary(done)
 single product
 wishlist
 checkout

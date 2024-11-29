@@ -225,22 +225,18 @@ const ItineraryCard = ({
     >
       {/* Save Button for tourists */}
       {userInfo?.role === "tourist" && (
-        <button
+        <Button
           className="absolute top-2 right-2 p-2.5 bg-white text-primary rounded-full hover:bg-gray-100 transition-colors z-10 w-10 h-10 flex items-center justify-center focus:outline-none focus:ring-0"
           onClick={(e) => {
-            e.stopPropagation(); // Prevent parent click handler
+            e.stopPropagation();
             handleSaveToggle();
           }}
-          aria-label="Save itinerary"
         >
           <Bookmark
-            className={`w-6 h-6 ${
-              isSaved
-                ? "fill-yellow-400 stroke-black stroke-[1.5]"
-                : "stroke-black"
-            }`}
+            className={`w-6 h-6 ${isSaved ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]" : "stroke-black"
+              }`}
           />
-        </button>
+        </Button>
       )}
 
       <div className="relative aspect-video overflow-hidden">
@@ -822,8 +818,7 @@ export function AllItinerariesComponent() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${getUserRole()}/itineraries/${
-          itineraryToDelete.id
+        `http://localhost:4000/${getUserRole()}/itineraries/${itineraryToDelete.id
         }`,
 
         {
@@ -855,14 +850,14 @@ export function AllItinerariesComponent() {
     }
   };
 
-  
+
 
   return (
     <div className="min-h-screen bg-gray-100">
-       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-           <UserGuide steps={guideSteps} pageName="itineraries" />
-        )}
-     
+      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="itineraries" />
+      )}
+
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
@@ -1195,9 +1190,8 @@ export function AllItinerariesComponent() {
       </Dialog>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}

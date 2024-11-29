@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import Loader from "./Loader";
 import Calendar from "react-calendar";
+import { UserGuide } from "@/components/UserGuide";
 import "react-calendar/dist/Calendar.css";
 import {
   Bookmark,
@@ -381,7 +382,7 @@ const TourguideProfileCard = ({
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader>
+      <CardHeader className="ItineraryDetail">
         <h1 className="text-3xl font-bold text-center">{itinerary.title}</h1>
         {(userRole === "tour-guide" || userRole === "admin") && !itinerary.isBookingOpen && (
           <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
@@ -395,8 +396,7 @@ const TourguideProfileCard = ({
             Prices include VAT
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
+
         <div className="mt-4">
           <div className="text-lg font-semibold">Pick-up Location:</div>
           <div className="text-md text-gray-700">{itinerary.pickUpLocation}</div>
@@ -413,6 +413,9 @@ const TourguideProfileCard = ({
           <div className="text-lg font-semibold">Accessibility:</div>
           <div className="text-md text-gray-700">{itinerary.accessibility ? "Yes" : "No"}</div>
         </div>
+      </CardHeader>
+      <CardContent>
+
         {userRole === "tour-guide" && canModify && (
           <div className="mt-3 space-y-3">
             <Button
@@ -453,7 +456,7 @@ const TourguideProfileCard = ({
 
             <Button
               onClick={handleBookNowClick}
-              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg ${itinerary.isBookingOpen
+              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${itinerary.isBookingOpen
                 ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
                 : "bg-gray-400 text-gray-700 cursor-not-allowed"
                 }`}
@@ -467,7 +470,7 @@ const TourguideProfileCard = ({
                 e.stopPropagation();
                 handleSaveToggle();
               }}
-              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 ${isSaved
+              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
                 ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
                 : "bg-[#388A94] hover:bg-[#2B6870] text-white"
                 }`}
@@ -479,82 +482,83 @@ const TourguideProfileCard = ({
             </Button>
           </>
         )}
+        <div className="tourGuideDetail">
+          <div className="mt-6 border-t border-gray-300 pt-4">
+            <div className="flex justify-between items-center">
+              <span className="text-3xl font-bold">Tour Guide</span>
+              <Badge
+                variant="secondary"
+                className="px-2 py-1 text-xs font-medium rounded-full bg-[#5D9297] hover:bg-[#5D9297] text-white hover:text-white"
+              >
+                Verified Guide
+              </Badge>
+            </div>
+          </div>
 
-        <div className="mt-6 border-t border-gray-300 pt-4">
-          <div className="flex justify-between items-center">
-            <span className="text-3xl font-bold">Tour Guide</span>
-            <Badge
-              variant="secondary"
-              className="px-2 py-1 text-xs font-medium rounded-full bg-[#5D9297] hover:bg-[#5D9297] text-white hover:text-white"
+          <div className="mt-4 flex items-center">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={profile.avatarUrl} alt={profile.username} />
+              <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div className="ml-4">
+              <h3 className="text-2xl font-bold">{profile.username}</h3>
+              <div className="flex items-center text-sm text-gray-500 mt-1">
+                <span className="font-semibold text-xs">95% positive</span>
+                <span className="mx-2">|</span>
+                <span className="font-semibold text-xs">{profile.yearsOfExperience} years of experience</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center mt-2">
+            <span>
+              <StarRating rating={profile.rating} readOnly={true} />
+            </span>
+            <span className="ml-2 text-lg font-semibold">{profile.rating.toFixed(1)}</span>
+          </div>
+
+          {showMore && (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center text-sm">
+                <Mail className="h-5 w-5 mr-2 text-gray-500" />
+                <span>{profile.email}</span>
+              </div>
+              <div className="flex items-center text-sm">
+                <Phone className="h-5 w-5 mr-2 text-gray-500" />
+                <span>{profile.mobile}</span>
+              </div>
+              <div className="mt-2">
+                <h4 className="font-semibold mb-2">Languages</h4>
+                <div className="flex flex-wrap gap-2">
+                  {profile.languages.map((lang, index) => (
+                    <Badge key={index} variant="secondary">
+                      {lang}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-2">
+                <h4 className="font-semibold mb-2">Specialties</h4>
+                <div className="flex flex-wrap gap-2">
+                  {profile.specialties.map((specialty, index) => (
+                    <Badge key={index} variant="outline">
+                      {specialty}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <Button
+              variant="link"
+              className="w-full p-0 h-auto mb-2 font-normal text-[#5D9297] hover:[#388A94]"
+              onClick={() => setShowMore(!showMore)}
             >
-              Verified Guide
-            </Badge>
+              {showMore ? "Less Info" : "More Info"}
+            </Button>
           </div>
-        </div>
-
-        <div className="mt-4 flex items-center">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={profile.avatarUrl} alt={profile.username} />
-            <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div className="ml-4">
-            <h3 className="text-2xl font-bold">{profile.username}</h3>
-            <div className="flex items-center text-sm text-gray-500 mt-1">
-              <span className="font-semibold text-xs">95% positive</span>
-              <span className="mx-2">|</span>
-              <span className="font-semibold text-xs">{profile.yearsOfExperience} years of experience</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center mt-2">
-          <span>
-            <StarRating rating={profile.rating} readOnly={true} />
-          </span>
-          <span className="ml-2 text-lg font-semibold">{profile.rating.toFixed(1)}</span>
-        </div>
-
-        {showMore && (
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center text-sm">
-              <Mail className="h-5 w-5 mr-2 text-gray-500" />
-              <span>{profile.email}</span>
-            </div>
-            <div className="flex items-center text-sm">
-              <Phone className="h-5 w-5 mr-2 text-gray-500" />
-              <span>{profile.mobile}</span>
-            </div>
-            <div className="mt-2">
-              <h4 className="font-semibold mb-2">Languages</h4>
-              <div className="flex flex-wrap gap-2">
-                {profile.languages.map((lang, index) => (
-                  <Badge key={index} variant="secondary">
-                    {lang}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-            <div className="mt-2">
-              <h4 className="font-semibold mb-2">Specialties</h4>
-              <div className="flex flex-wrap gap-2">
-                {profile.specialties.map((specialty, index) => (
-                  <Badge key={index} variant="outline">
-                    {specialty}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-4">
-          <Button
-            variant="link"
-            className="w-full p-0 h-auto mb-2 font-normal text-[#5D9297] hover:[#388A94]"
-            onClick={() => setShowMore(!showMore)}
-          >
-            {showMore ? "Less Info" : "More Info"}
-          </Button>
         </div>
 
         {userRole === "tourist" && userBookings.some((booking) => booking.itinerary?._id === itinerary._id) && (
@@ -579,7 +583,7 @@ const TourguideProfileCard = ({
             </Button>
           </div>
         )}
-        <Button onClick={onReviewClick} className="w-full bg-[#1A3B47]">
+        <Button onClick={onReviewClick} className="w-full bg-[#1A3B47] tourGuieRating">
           See All Reviews
         </Button>
         {userRole === "admin" && (
@@ -1468,6 +1472,39 @@ const ItineraryDetail = () => {
       console.error("Error submitting itinerary rating:", error);
     }
   };
+  const guideSteps = [
+    {
+      target: "body",
+      content: "Now you can explore the details of this Itinerary, including its available dates, cost, and pictures. Press next for more information or to make a booking!",
+      placement: "center",
+    },
+    {
+      target: ".ItineraryDetail",
+      content: "This section provides a detailed overview of the itinerary, including its name, Price, and language.",
+      placement: "left",
+    },
+    {
+      target: ".bookNow",
+      content: "Click here to be able to book this itinerary and proceed to the payment process.",
+      placement: "left",
+    },
+    {
+      target: ".Save",
+      content:( <> Click here to save this itinerary for later viewing or booking in your saved itineraries list.<br />Tip:<br />You can view your saved itineraries anytime! Simply click the hamburger menu on the top right corner → My Account → Itineraries → Saved
+      </>), 
+      placement: "left",
+    },
+    {
+      target: ".tourGuideDetail",
+      content: "Here you can find information about the advertiser that published this Itinerary, including their name and contact information.",
+      placement: "left",
+    },
+    {
+      target: ".tourGuieRating",
+      content: "Here you can find the rating of the tour guide that published this Itinerary.",
+      placement: "left",
+    },
+  ];
 
   const handleActivityRating = async () => {
     try {
@@ -1512,6 +1549,9 @@ const ItineraryDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="singleActivity" />
+      )}
       <nav className="bg-[#1a202c] shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
