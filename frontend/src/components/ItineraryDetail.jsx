@@ -1550,7 +1550,7 @@ const ItineraryDetail = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {(userRole === "guest" || userRole === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="singleActivity" />
+        <UserGuide steps={guideSteps} pageName="singleItinerary" />
       )}
       <nav className="bg-[#1a202c] shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

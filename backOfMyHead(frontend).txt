@@ -72,11 +72,11 @@ all activities(done)
 all itineraries(done)
 all products (done)
 historical places(done)
-book hotel
-book transportation
+book hotel(sam inshallah)
+book flight(sam inshallah)
 single activity(done)
 single itinerary(done)
-single product
+single product(done)-small detail remaining
 wishlist
 checkout
 

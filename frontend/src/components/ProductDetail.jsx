@@ -15,6 +15,7 @@ import Loader from "../components/Loader";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
+import { UserGuide } from "@/components/UserGuide";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Card,
@@ -88,9 +89,8 @@ const StarRating = ({ rating, onRatingChange = null }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-5 h-5 ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          } ${onRatingChange ? "cursor-pointer" : ""}`}
+          className={`w-5 h-5 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            } ${onRatingChange ? "cursor-pointer" : ""}`}
           onClick={() => onRatingChange && onRatingChange(star)}
         />
       ))}
@@ -119,9 +119,8 @@ const ImageGallery = ({ pictures }) => {
           {pictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
-                startIndex === 0 ? 'bg-gray-400' : 'bg-black'
-              }`}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex === 0 ? 'bg-gray-400' : 'bg-black'
+                }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
@@ -143,9 +142,8 @@ const ImageGallery = ({ pictures }) => {
           {pictures.length > 5 && (
             <button
               onClick={handleNext}
-              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
-                startIndex >= pictures.length - 5 ? 'bg-gray-400' : 'bg-black'
-              }`}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= pictures.length - 5 ? 'bg-gray-400' : 'bg-black'
+                }`}
               disabled={startIndex >= pictures.length - 5}
               aria-label="Next images"
             >
@@ -412,46 +410,46 @@ const ProductDetail = () => {
       Postal Code: ${postalCode || ""} 
       ${landmark ? `, Landmark: ${landmark}` : ""}
     `.trim();
-    
+
     setLocation(fullLocation);
   };
-  
+
   // Handlers for each input that update both the field and the location
   const handleStreetNameChange = (e) => {
     setStreetName(e.target.value);
     updateLocation();
   };
-  
+
   const handleStreetNumberChange = (e) => {
     setStreetNumber(e.target.value);
     updateLocation();
   };
-  
+
   const handleFloorUnitChange = (e) => {
     setFloorUnit(e.target.value);
     updateLocation();
   };
-  
+
   const handleStateChange = (e) => {
     setState(e.target.value);
     updateLocation();
   };
-  
+
   const handleCityChange = (e) => {
     setCity(e.target.value);
     updateLocation();
   };
-  
+
   const handlePostalCodeChange = (e) => {
     setPostalCode(e.target.value);
     updateLocation();
   };
-  
+
   const handleLandmarkChange = (e) => {
     setLandmark(e.target.value);
     updateLocation();
   };
-  
+
 
   // Function to toggle between expanded and collapsed states
   const toggleExpansion = () => {
@@ -841,6 +839,37 @@ const ProductDetail = () => {
       setActionError("Error submitting rating. Please try again.");
     }
   };
+  const guideSteps = [
+    {
+      target: "body",
+      content: "Now you can explore the details of this product, including its seller, cost, and reviews. Press next for more information or to make a purchase!",
+      placement: "center",
+    },
+    {
+      target: ".Productdetail",
+      content: "This section provides an overview of the Product, including its price, availability and description.",
+      placement: "left",
+    },
+    {
+      target: ".addToWishlist",
+      content: (<> Click here to add to wishlist this product for later viewing or purchase.<br />Tip:<br />You can view your wishlist from the top right corner of the page</>),     placement: "left",
+    },
+    {
+      target: ".sellerDetails",
+      content: "Here you can find information about the seller of this product, including their name and ratings.",
+      placement: "left",
+    },
+    {
+      target: ".addReview",
+      content: "Click here to add/edit a review for this product.",   
+      placement: "left",
+    },
+    {
+      target: ".addToCart",
+      content: (<>Click here to add this product to your cart and proceed with the purchase!<br />Tip:<br />You can view your cart from the top right corner of the page</>),     placement: "left",
+      placement: "left",
+    },
+  ];
 
   const handleCommentSubmit = async () => {
     try {
@@ -896,6 +925,9 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 ">
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="singleProduct" />
+      )}
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         </div>
@@ -904,57 +936,57 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <Card>
-            <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-5xl font-bold">
-                {product.name}
-              </CardTitle>
-              <div>
-                <ToastProvider>
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="ml-auto">
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <div className="flex flex-col">
-                        <Button
-                          variant="ghost"
-                          onClick={handleCopyLink}
-                          className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
-                        >
-                          <Link className="mr-2 h-4 w-4" />
-                          Copy Link
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={handleEmailShare}
-                          className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
-                        >
-                          <Mail className="mr-2 h-4 w-4" />
-                          Share by Email
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-5xl font-bold">
+                    {product.name}
+                  </CardTitle>
+                  <div>
+                    <ToastProvider>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="sm" className="ml-auto">
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <div className="flex flex-col">
+                            <Button
+                              variant="ghost"
+                              onClick={handleCopyLink}
+                              className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
+                            >
+                              <Link className="mr-2 h-4 w-4" />
+                              Copy Link
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              onClick={handleEmailShare}
+                              className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
+                            >
+                              <Mail className="mr-2 h-4 w-4" />
+                              Share by Email
+                            </Button>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
 
-                  <ToastViewport />
+                      <ToastViewport />
 
-                  {isToastOpen && (
-                    <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
-                      <ToastTitle>Link Copied</ToastTitle>
-                      <ToastDescription>
-                        The link has been copied to your clipboard.
-                      </ToastDescription>
-                      <ToastClose />
-                    </Toast>
-                  )}
-                </ToastProvider>
-              </div>
-            </div>
-            <CardDescription className="flex items-center justify-end"></CardDescription>
-          </CardHeader>
+                      {isToastOpen && (
+                        <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
+                          <ToastTitle>Link Copied</ToastTitle>
+                          <ToastDescription>
+                            The link has been copied to your clipboard.
+                          </ToastDescription>
+                          <ToastClose />
+                        </Toast>
+                      )}
+                    </ToastProvider>
+                  </div>
+                </div>
+                <CardDescription className="flex items-center justify-end"></CardDescription>
+              </CardHeader>
 
               <CardContent>
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -1045,15 +1077,14 @@ const ProductDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${
-                            (
-                              isRatingHovered
-                                ? quickRating >= star
-                                : quickRating >= star
-                            )
-                              ? "text-[#F88C33] fill-current"
-                              : "text-gray-300"
-                          }`}
+                          className={`w-8 h-8 cursor-pointer ${(
+                            isRatingHovered
+                              ? quickRating >= star
+                              : quickRating >= star
+                          )
+                            ? "text-[#F88C33] fill-current"
+                            : "text-gray-300"
+                            }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -1068,7 +1099,7 @@ const ProductDetail = () => {
                 {hasPurchased && (
                   <div className="mt-4 space-y-2">
                     <Button
-                      className="w-full mb-4 bg-[#388A94] hover:bg-[#2e6b77]"
+                      className="w-full mb-4 bg-[#388A94] hover:bg-[#2e6b77] addReview"
                       onClick={() => setShowCommentDialog(true)}
                     >
                       {userReview ? "Edit Your Review" : "Write a Review"}
@@ -1126,43 +1157,43 @@ const ProductDetail = () => {
                       {Array.from({ length: 5 }, (_, index) => {
                         let ratingValue = 0;
                         if (product.rating) {
-                           ratingValue = Math.floor(product.rating);
-                         } 
-                          const isHalfStar =
-                            product.rating - ratingValue >= 0.5; // Check for half-star
+                          ratingValue = Math.floor(product.rating);
+                        }
+                        const isHalfStar =
+                          product.rating - ratingValue >= 0.5; // Check for half-star
 
-                          if (index < ratingValue) {
-                            // Full star
-                            return (
-                              <Star
-                                key={index}
-                                fill="#F88C33"
-                                strokeWidth={0}
-                                className="w-7 h-7"
-                              />
-                            );
-                          } else if (index === ratingValue && isHalfStar) {
-                            // Half star
-                            return (
-                              <StarHalf
-                                key={index}
-                                fill="#F88C33"
-                                strokeWidth={0}
-                                className="w-7 h-7"
-                              />
-                            );
-                          } else {
-                            // Empty star (if you have a separate empty Star component, use it here)
-                            return (
-                              <Star
-                                key={index}
-                                fill="#E5E7EB"
-                                strokeWidth={0}
-                                className="w-7 h-7"
-                              />
-                            );
-                          }
-                       
+                        if (index < ratingValue) {
+                          // Full star
+                          return (
+                            <Star
+                              key={index}
+                              fill="#F88C33"
+                              strokeWidth={0}
+                              className="w-7 h-7"
+                            />
+                          );
+                        } else if (index === ratingValue && isHalfStar) {
+                          // Half star
+                          return (
+                            <StarHalf
+                              key={index}
+                              fill="#F88C33"
+                              strokeWidth={0}
+                              className="w-7 h-7"
+                            />
+                          );
+                        } else {
+                          // Empty star (if you have a separate empty Star component, use it here)
+                          return (
+                            <Star
+                              key={index}
+                              fill="#E5E7EB"
+                              strokeWidth={0}
+                              className="w-7 h-7"
+                            />
+                          );
+                        }
+
                       })}
                       <span className="text-xl font-semibold text-black ml-2">
                         {product.rating ? product.rating.toFixed(1) : 0}
@@ -1190,7 +1221,7 @@ const ProductDetail = () => {
                         ) : product.quantity > 0 ? (
                           <>
                             {/* <Package className="w-6 h-6 mr-2 text-blue-500" /> */}
-                           
+
                           </>
                         ) : (
                           <div className="w-full">
@@ -1240,129 +1271,125 @@ const ProductDetail = () => {
                       ) : null}
                     </div>
 
-                    
-                    
+
+
+
+                  </div>
+
+                  <div className="Productdetail">
                     <div className="flex items-center">
                       {/* <DollarSign className="w-6 h-6 mr-2 text-green-500" /> */}
                       <span className="text-5xl font-bold text-[#1A3B47]">
                         {formatPrice(product.price)}
                       </span>
                     </div>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500 mb-2 mt-2">
-                    <Info className="w-5 h-5 mr-2" />
-                    <p>Price includes VAT</p>
-                  </div>
-                  {product.quantity <= 5 && product.quantity > 0 ? (
-  <p className="text-red-600 font-semibold text-xl mb-4">
-    Only {product.quantity} left in stock! Buy now!
-  </p>
-) : (
-  <span className="text-green-600 text-lg font-semibold">
-    Still in stock!
-  </span>
-)}
-
-                  <div>
-                    <p className="text-gray-700 inline break-words ">
-                      {isExpanded ||
-                      product.description.length <= characterLimit
-                        ? product.description
-                        : `${product.description.slice(0, characterLimit)}...`}
-
-                      {/* "View More / View Less" link placed inline */}
-                      {product.description.length > characterLimit && (
-                        <button
-                          className="text-[#5D9297] font-semibold inline ml-1 hover:underline "
-                          onClick={toggleExpansion}
-                        >
-                          {isExpanded ? "View Less" : "View More"}
-                        </button>
-                      )}
-                    </p>
-                  </div>
-                  <div className="space-y-4 mt-5">
-                    {userRole === "tourist" && (
-                      <div className="space-y-2">
-                        {/* Buy Now Button - Only if product quantity is greater than 0 */}
-                        {product.quantity > 0 && (
-                          <Button
-                            className="w-full text-xl bg-[#388A94] hover:bg-[#2B6870] text-white font-bold py-2 flex items-center justify-center"
-                            onClick={() => setIsPopupOpen(true)}
-                          >
-                            {/* <Wallet className="w-5 h-5 mr-2" /> */}
-                            Buy Now
-                          </Button>
-                        )}
-
-                        {/* Add to Cart Button - Only if product quantity is greater than 0 */}
-                        {product.quantity > 0 && (
-                          <Button
-                            variant="outline"
-                            className="w-full text-xl border-[#388A94] text-[#388A94] hover:bg-green-50 font-bold py-2 flex items-center justify-center"
-                            onClick={handleAddToCart}
-                          >
-                            <ShoppingCart className="w-5 h-5 mr-2" />
-                            Add to Cart
-                          </Button>
-                        )}
-
-                        {/* Add to Wishlist Button - Always visible */}
-                        <Button
-                          variant="secondary"
-                          className="w-full text-xl bg-[#1A3B47] hover:bg-[#152D38] text-white font-bold py-2 flex items-center justify-center"
-                          onClick={handleAddToWishlist}
-                        >
-                          <Heart className="w-5 h-5 mr-2" />
-                          Add to Wishlist
-                        </Button>
-                      </div>
+                    <div className="flex items-center text-sm text-gray-500 mb-2 mt-2">
+                      <Info className="w-5 h-5 mr-2" />
+                      <p>Price includes VAT</p>
+                    </div>
+                    {product.quantity <= 5 && product.quantity > 0 ? (
+                      <p className="text-red-600 font-semibold text-xl mb-4">
+                        Only {product.quantity} left in stock! Buy now!
+                      </p>
+                    ) : (
+                      <span className="text-green-600 text-lg font-semibold">
+                        Still in stock!
+                      </span>
                     )}
+                    <div>
+                      <p className="text-gray-700 inline break-words ">
+                        {isExpanded ||
+                          product.description.length <= characterLimit
+                          ? product.description
+                          : `${product.description.slice(0, characterLimit)}...`}
+
+                        {/* "View More / View Less" link placed inline */}
+                        {product.description.length > characterLimit && (
+                          <button
+                            className="text-[#5D9297] font-semibold inline ml-1 hover:underline "
+                            onClick={toggleExpansion}
+                          >
+                            {isExpanded ? "View Less" : "View More"}
+                          </button>
+                        )}
+                      </p>
+                    </div>
                   </div>
+
+
                   <div className="mt-8 space-y-4">
-              {(userRole === "admin" ||
-                (userRole === "seller" && canModify && product.seller)) && (
-                <Button
-                  className="w-full bg-[#1A3B47] text-xl  text-white"
-                  variant="default"
-                  onClick={handleUpdate}
-                >
-                  <Edit className="w-5 h-5 mr-2" /> Update Product
-                </Button>
-              )}
+                    {(userRole === "admin" ||
+                      (userRole === "seller" && canModify && product.seller)) && (
+                        <Button
+                          className="w-full bg-[#1A3B47] text-xl  text-white"
+                          variant="default"
+                          onClick={handleUpdate}
+                        >
+                          <Edit className="w-5 h-5 mr-2" /> Update Product
+                        </Button>
+                      )}
 
-              {((userRole === "admin" && product.seller == null) ||
-                (userRole === "seller" && canModify && product.seller)) && (
-                <Button
-                  
-                  variant={product.isArchived ? "outline" : "default"}
-                  className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78]"
-                  onClick={() => setShowArchiveConfirm(true)}
-                >
-                  {product.isArchived ? (
-                    <>
-                      <ArchiveX className="w-5 h-5 mr-2" /> Unarchive Product
-                    </>
-                  ) : (
-                    <>
-                      <Archive className="w-5 h-5 mr-2" /> Archive Product
-                    </>
-                  )}
-                </Button>
-              )}
+                    {((userRole === "admin" && product.seller == null) ||
+                      (userRole === "seller" && canModify && product.seller)) && (
+                        <Button
 
-              {(userRole === "admin" ||
-                (userRole === "seller" && canModify && product.seller)) && (
-                <Button
-                  className="w-full text-xl bg-red-500 hover:bg-red-600"
-                  variant="destructive"
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
-                  <Trash2 className="w-5 h-5 mr-2" /> Delete Product
-                </Button>
-              )}
-            </div>
+                          variant={product.isArchived ? "outline" : "default"}
+                          className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78]"
+                          onClick={() => setShowArchiveConfirm(true)}
+                        >
+                          {product.isArchived ? (
+                            <>
+                              <ArchiveX className="w-5 h-5 mr-2" /> Unarchive Product
+                            </>
+                          ) : (
+                            <>
+                              <Archive className="w-5 h-5 mr-2" /> Archive Product
+                            </>
+                          )}
+                        </Button>
+                      )}
+
+                    {(userRole === "admin" ||
+                      (userRole === "seller" && canModify && product.seller)) && (
+                        <Button
+                          className="w-full text-xl bg-red-500 hover:bg-red-600"
+                          variant="destructive"
+                          onClick={() => setShowDeleteConfirm(true)}
+                        >
+                          <Trash2 className="w-5 h-5 mr-2" /> Delete Product
+                        </Button>
+                      )}
+                  </div>
                 </CardContent>
+
+                <div className="space-y-4 mt-5 flex items-center justify-center px-4">
+                  {userRole === "tourist" && (
+                    <div className="space-y-2 w-full">
+
+                      {/* Add to Cart Button - Only if product quantity is greater than 0 */}
+                      {product.quantity > 0 && (
+                        <Button
+                          variant="outline"
+                          className="w-full text-xl border-[#388A94] text-[#388A94] hover:bg-green-50 font-bold py-2 flex items-center justify-center addToCart"
+                          onClick={handleAddToCart}
+                        >
+                          <ShoppingCart className="w-5 h-5 mr-2" />
+                          Add to Cart
+                        </Button>
+                      )}
+
+                      {/* Add to Wishlist Button - Always visible */}
+                      <Button
+                        variant="secondary"
+                        className="w-full text-xl bg-[#1A3B47] hover:bg-[#152D38] text-white font-bold py-2 flex items-center justify-center addToWishlist"
+                        onClick={handleAddToWishlist}
+                      >
+                        <Heart className="w-5 h-5 mr-2" />
+                        Add to Wishlist
+                      </Button>
+                    </div>
+                  )}
+                </div>
 
                 {/* Divider */}
                 <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-4"></div>
@@ -1504,7 +1531,7 @@ const ProductDetail = () => {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center">
+                      <div className="flex items-center sellerDetails">
                         <Avatar className="h-16 w-16">
                           <AvatarFallback>
                             <StoreIcon className="h-8 w-8" />
@@ -1562,7 +1589,7 @@ const ProductDetail = () => {
               </Card>
             </div>
 
-            
+
           </div>
         </div>
       </div>
@@ -1583,7 +1610,7 @@ const ProductDetail = () => {
             <Button
               variant="outline"
               onClick={() => setShowArchiveConfirm(false)}
-              className ="bg-gray-200 hover:bg-gray-300"
+              className="bg-gray-200 hover:bg-gray-300"
             >
               Cancel
             </Button>
@@ -1709,29 +1736,29 @@ const ProductDetail = () => {
       </Dialog>
 
       <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="text-[#1A3B47] text-2xl">Choose an option</DialogTitle>
-            </DialogHeader>
-           
-            <div className="grid gap-4 py-4">
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-[#1A3B47] text-2xl">Choose an option</DialogTitle>
+          </DialogHeader>
 
-<Button
-  className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
-  onClick={handleAddToCart}
->
-  Add to Cart and Continue Shopping
-</Button>
-<Button
-  className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
-  onClick={handleCheckoutNow}
->
-  Add to cart and Checkout Now
-</Button>
+          <div className="grid gap-4 py-4">
 
-            </div>
-          </DialogContent>
-        </Dialog>
+            <Button
+              className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
+              onClick={handleAddToCart}
+            >
+              Add to Cart and Continue Shopping
+            </Button>
+            <Button
+              className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
+              onClick={handleCheckoutNow}
+            >
+              Add to cart and Checkout Now
+            </Button>
+
+          </div>
+        </DialogContent>
+      </Dialog>
 
 
 
@@ -1807,7 +1834,7 @@ const ProductDetail = () => {
               onClick={() => {
                 setRating(userReview ? userReview.rating : 0);
                 setComment(userReview ? userReview.comment : "");
-                setIsAnonymous( userReview.username === "Anonymous" );
+                setIsAnonymous(userReview.username === "Anonymous");
                 setShowCommentDialog(false);
               }}
             >
@@ -1907,11 +1934,10 @@ const ProductDetail = () => {
               {/* Filter by Rating Buttons */}
               <div className="flex justify-center space-x-2 mb-4">
                 <button
-                  className={`px-3 py-2 rounded-md ${
-                    filteredRating === 0
-                      ? "bg-[#388A94] text-white"
-                      : "bg-gray-200"
-                  }`}
+                  className={`px-3 py-2 rounded-md ${filteredRating === 0
+                    ? "bg-[#388A94] text-white"
+                    : "bg-gray-200"
+                    }`}
                   onClick={() => handleFilterRating(0, product)}
                 >
                   All
@@ -1919,11 +1945,10 @@ const ProductDetail = () => {
                 {[5, 4, 3, 2, 1].map((star) => (
                   <button
                     key={star}
-                    className={`px-3 py-2 rounded-md ${
-                      filteredRating === star
-                        ? "bg-[#388A94] text-white"
-                        : "bg-gray-200"
-                    }`}
+                    className={`px-3 py-2 rounded-md ${filteredRating === star
+                      ? "bg-[#388A94] text-white"
+                      : "bg-gray-200"
+                      }`}
                     onClick={() => handleFilterRating(star, product)}
                   >
                     {star} Star{star > 1 ? "s" : ""}
@@ -1942,26 +1967,26 @@ const ProductDetail = () => {
                     <AvatarFallback>{review.user[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-      <div className="flex items-center justify-between">
-        <h4 className="text-lg font-semibold">{review.user}</h4>
-        <StarRating rating={review.rating} />
-      </div>
-      
-      {/* Show the first 50 characters of the comment and a "Show more" link */}
-      <p className="text-gray-600 mt-1">
-        {isExpandedComment ? review.comment : `${review.comment.slice(0, 100)}...`}
-      </p>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold">{review.user}</h4>
+                      <StarRating rating={review.rating} />
+                    </div>
 
-      {/* Only show "Show more" if the comment length exceeds 50 characters */}
-      {review.comment.length > 100 && (
-        <button 
-          onClick={handleToggleComment} 
-          className="text-blue-500 mt-2 hover:underline"
-        >
-          {isExpandedComment ? 'Show less' : 'Show more'}
-        </button>
-      )}
-    </div>
+                    {/* Show the first 50 characters of the comment and a "Show more" link */}
+                    <p className="text-gray-600 mt-1">
+                      {isExpandedComment ? review.comment : `${review.comment.slice(0, 100)}...`}
+                    </p>
+
+                    {/* Only show "Show more" if the comment length exceeds 50 characters */}
+                    {review.comment.length > 100 && (
+                      <button
+                        onClick={handleToggleComment}
+                        className="text-blue-500 mt-2 hover:underline"
+                      >
+                        {isExpandedComment ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))
             ) : (
@@ -1973,7 +1998,7 @@ const ProductDetail = () => {
 
           <DialogFooter>
             <Button className="bg-[#1A3B47]"
-            onClick={() => setShowAllReviews(false)}>Close</Button>
+              onClick={() => setShowAllReviews(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
