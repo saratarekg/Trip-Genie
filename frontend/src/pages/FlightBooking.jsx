@@ -309,13 +309,20 @@ function BookingPage() {
     {
       target: ".search",
       content: "Please enter your departure and arrival times, select the departure and arrival airports, and specify the type of ticket to proceed with your booking!",
-      placement: "top",
+      placement: "bottom",
+    },
+    {
+      target: ".searchButton",
+      content: 
+        "Click on the 'Search Flights' button to view the available flights based on your search criteria.",
+
+      placement: "left",
     },
     {
       target: ".seeDetails",
       content:
         "Click on the 'See Flight' button to view the details of the selected flight, Enter your personal data and to finally choose your payment method before confirming your flight booking!.",
-      placement: "top",
+      placement: "bottom",
     },
     
     
@@ -665,7 +672,7 @@ function BookingPage() {
                   <button
                     style={styles.button}
                     disabled={isLoading}
-                    className="bg-[#1A3B47] hover:bg-[#1A3B47] text-white font-semibold px-8"
+                    className="bg-[#1A3B47] hover:bg-[#1A3B47] text-white font-semibold px-8 searchButton"
                   >
                     {isLoading ? "Searching..." : "Search Flights"}
                   </button>
