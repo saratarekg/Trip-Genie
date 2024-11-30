@@ -166,8 +166,9 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -258,7 +259,6 @@ const ActivityDetail = () => {
       const quantity = searchParams.get("quantity");
       const sessionId = searchParams.get("session_id");
 
-
       if (sessionId && success === "true" && activity) {
         try {
           const response = await axios.get(
@@ -278,10 +278,7 @@ const ActivityDetail = () => {
           console.error("Error checking payment status:", error);
         }
       }
-
     };
-
-
 
     handleBookingSuccess();
   }, [searchParams, activity]);
@@ -353,7 +350,7 @@ const ActivityDetail = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   {transport.vehicleType === "Bus" ||
-                    transport.vehicleType === "Microbus" ? (
+                  transport.vehicleType === "Microbus" ? (
                     <Bus className="w-5 h-5 mr-2 text-blue-500" />
                   ) : (
                     <Car className="w-5 h-5 mr-2 text-green-500" />
@@ -824,7 +821,7 @@ const ActivityDetail = () => {
       const additionalPrice =
         userBooking.paymentAmount +
         calculateDiscountedPrice(activity.price, activity.specialDiscount) *
-        additionalTickets;
+          additionalTickets;
 
       const response = await axios.put(
         `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
@@ -845,7 +842,7 @@ const ActivityDetail = () => {
       console.error("Error updating booking:", error);
       setBookingError(
         error.response?.data?.message ||
-        "An error occurred while updating the booking."
+          "An error occurred while updating the booking."
       );
     } finally {
       setIsBooking(false);
@@ -967,13 +964,14 @@ const ActivityDetail = () => {
             ? prev.filter((item) => item._id !== itemId)
             : [...prev, { _id: itemId }]
         );
-  
+
         // Show success message
         setAlertMessage({
           type: "success",
-          message: response.data.message || "Activity saved/unsaved successfully!",
+          message:
+            response.data.message || "Activity saved/unsaved successfully!",
         });
-  
+
         // Hide alert after 2 seconds
         setTimeout(() => {
           setAlertMessage(null);
@@ -985,14 +983,13 @@ const ActivityDetail = () => {
         type: "error",
         message: "Error saving/unsaving activity. Please try again.",
       });
-  
+
       // Hide alert after 2 seconds
       setTimeout(() => {
         setAlertMessage(null);
       }, 2000);
     }
   };
-  
 
   const getTotalRatings = () => {
     return activity?.comments?.length || 0;
@@ -1017,6 +1014,18 @@ const ActivityDetail = () => {
       comments: [...(prevActivity.comments || []), newComment],
     }));
   };
+
+  const handleFinalOK = () => {
+    setShowSuccessDialog(false);
+    searchParams.delete("success");
+    searchParams.delete("quantity");
+    searchParams.delete("session_id");
+
+    const newUrl = `${window.location.pathname}`;
+
+    window.history.replaceState(null, '', newUrl);
+
+  }; 
 
   const handleActivityRating = async () => {
     try {
@@ -1090,28 +1099,42 @@ const ActivityDetail = () => {
   const guideSteps = [
     {
       target: "body",
-      content: "Now you can explore the details of this activity, including its timing, cost, and available options. Press next for more information or to make a booking!",
+      content:
+        "Now you can explore the details of this activity, including its timing, cost, and available options. Press next for more information or to make a booking!",
       placement: "center",
     },
     {
       target: ".ActivityDetail",
-      content: "This section provides a detailed overview of the activity, including its name, timing, price, and location.",
+      content:
+        "This section provides a detailed overview of the activity, including its name, timing, price, and location.",
       placement: "left",
     },
     {
       target: ".bookNow",
-      content: "Click here to be able to book this activity and proceed to the payment process.",
+      content:
+        "Click here to be able to book this activity and proceed to the payment process.",
       placement: "left",
     },
     {
       target: ".Save",
-      content:( <> Click here to save this activity for later viewing or booking in your saved activities list.<br />Tip:<br />You can view your saved activities anytime! Simply click the hamburger menu on the top right corner → My Account → Activities → Saved
-      </>), 
+      content: (
+        <>
+          {" "}
+          Click here to save this activity for later viewing or booking in your
+          saved activities list.
+          <br />
+          Tip:
+          <br />
+          You can view your saved activities anytime! Simply click the hamburger
+          menu on the top right corner → My Account → Activities → Saved
+        </>
+      ),
       placement: "left",
     },
     {
       target: ".AdvertiserDetail",
-      content: "Here you can find information about the advertiser that published this activity, including their name and contact information.",
+      content:
+        "Here you can find information about the advertiser that published this activity, including their name and contact information.",
       placement: "left",
     },
   ];
@@ -1340,7 +1363,9 @@ const ActivityDetail = () => {
                     <div className="space-y-4">
                       <div className="ActivityDetail">
                         <div className="">
-                          <h1 className="text-3xl font-bold">{activity.name}</h1>
+                          <h1 className="text-3xl font-bold">
+                            {activity.name}
+                          </h1>
                         </div>
                         {(userRole === "advertiser" || userRole === "admin") &&
                           !activity.isBookingOpen && (
@@ -1399,7 +1424,8 @@ const ActivityDetail = () => {
                         <div className="flex items-center">
                           <Calendar className="w-5 h-5 mr-2 text-orange-500" />
                           <span className="text-gray-700">
-                            Date: {new Date(activity.timing).toLocaleDateString()}
+                            Date:{" "}
+                            {new Date(activity.timing).toLocaleDateString()}
                           </span>
                         </div>
                         <div className="flex items-center">
@@ -1415,8 +1441,9 @@ const ActivityDetail = () => {
                         <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
                           {isExpanded
                             ? activity.description
-                            : `${activity.description.substring(0, 130)}${activity.description.length > 130 ? "..." : ""
-                            }`}
+                            : `${activity.description.substring(0, 130)}${
+                                activity.description.length > 130 ? "..." : ""
+                              }`}
                           {activity.description.length > 130 && (
                             <button
                               onClick={toggleExpanded}
@@ -1440,10 +1467,11 @@ const ActivityDetail = () => {
 
                           <Button
                             onClick={handleBookNowClick}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${activity.isBookingOpen
-                              ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                              : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                              }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
+                              activity.isBookingOpen
+                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                            }`}
                             disabled={!activity.isBookingOpen}
                           >
                             {activity.isBookingOpen
@@ -1456,16 +1484,18 @@ const ActivityDetail = () => {
                               e.stopPropagation();
                               handleSaveToggle(activity._id);
                             }}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
-                              ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                              : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                              }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${
+                              isSaved
+                                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                            }`}
                           >
                             <Bookmark
-                              className={`w-5 h-5 ${isSaved
-                                ? "stroke-white fill-[#1A3B47]"
-                                : "stroke-white"
-                                }`}
+                              className={`w-5 h-5 ${
+                                isSaved
+                                  ? "stroke-white fill-[#1A3B47]"
+                                  : "stroke-white"
+                              }`}
                             />
                             {isSaved ? "Unsave" : "Save"}
                           </Button>
@@ -1497,7 +1527,9 @@ const ActivityDetail = () => {
                   <div className="AdvertiserDetail">
                     <CardHeader>
                       <div className="flex justify-between items-center">
-                        <span className="text-3xl font-bold -ml-2">Advertiser Profile</span>
+                        <span className="text-3xl font-bold -ml-2">
+                          Advertiser Profile
+                        </span>
                         <Badge
                           variant="secondary"
                           className="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white hover:bg-blue-500 hover:text-white"
@@ -1522,9 +1554,13 @@ const ActivityDetail = () => {
                             {advertiserProfile.username}
                           </h3>
                           <div className="flex items-center text-sm text-gray-500 mt-1">
-                            <span className="font-semibold text-xs">95% Positive</span>
+                            <span className="font-semibold text-xs">
+                              95% Positive
+                            </span>
                             <span className="mx-2">|</span>
-                            <span className="font-semibold text-xs">754 Bookings</span>
+                            <span className="font-semibold text-xs">
+                              754 Bookings
+                            </span>
                           </div>
                           <div className="flex items-center mt-2">
                             <StarRating rating={5} />
@@ -1563,10 +1599,11 @@ const ActivityDetail = () => {
                         <>
                           <div className="mt-6 border-t border-gray-300 pt-4"></div>
                           <Button
-                            className={`w-full mx-auto text-white ${isAppropriate
+                            className={`w-full mx-auto text-white ${
+                              isAppropriate
                                 ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
                                 : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                              }`}
+                            }`}
                             onClick={handleOpenDialog}
                           >
                             {isAppropriate
@@ -1578,10 +1615,12 @@ const ActivityDetail = () => {
                             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                               <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
                                 <div className="mb-4">
-                                  <h2 className="text-lg font-semibold">Confirm Action</h2>
+                                  <h2 className="text-lg font-semibold">
+                                    Confirm Action
+                                  </h2>
                                   <p className="text-gray-600 mt-2">
-                                    Are you sure you want to change the status of this
-                                    itinerary/event?
+                                    Are you sure you want to change the status
+                                    of this itinerary/event?
                                   </p>
                                 </div>
                                 <div className="flex justify-end space-x-4">
@@ -1679,14 +1718,15 @@ const ActivityDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${(
-                            isRatingHovered
-                              ? quickRating >= star
-                              : quickRating >= star
-                          )
-                            ? "text-yellow-500 fill-current"
-                            : "text-gray-300"
-                            }`}
+                          className={`w-8 h-8 cursor-pointer ${
+                            (
+                              isRatingHovered
+                                ? quickRating >= star
+                                : quickRating >= star
+                            )
+                              ? "text-yellow-500 fill-current"
+                              : "text-gray-300"
+                          }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -1819,17 +1859,17 @@ const ActivityDetail = () => {
               items={[
                 {
                   name: activity.name,
-                  price: calculateTotalPrice() * exchangeRates * 100,
+                  price: (calculateDiscountedPrice(activity.price, activity.specialDiscount)) * exchangeRates * 100,
                 },
               ]} // Convert price to cents
-              onWalletPayment={() =>
-                handlePaymentConfirm("Wallet", numberOfTickets)
-              }
+              onWalletPayment={handlePaymentConfirm}
               stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
               onConfirm={handlePaymentConfirm}
-              priceOne={(calculateTotalPrice() * exchangeRates).toFixed(2)}
+              priceOne={(calculateDiscountedPrice(activity.price, activity.specialDiscount) * exchangeRates).toFixed(2)}
               currency={userPreferredCurrency.code}
+              symbol={userPreferredCurrency.symbol}
               returnLoc={"http://localhost:3000/activity/" + id}
+              error={bookingError}
             />
           )}
 
@@ -1946,7 +1986,7 @@ const ActivityDetail = () => {
               </div>
 
               <DialogFooter>
-                <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
+                <Button onClick={() => handleFinalOK()}>OK</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -2282,8 +2322,9 @@ const ActivityDetail = () => {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}

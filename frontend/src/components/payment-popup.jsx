@@ -25,6 +25,8 @@ const PaymentPopup = ({
   priceOne,
   currency,
   returnLoc,
+  symbol, 
+  error, 
 }) => {
   const [paymentType, setPaymentType] = useState("CreditCard");
   const [numberOfTickets, setNumberOfTickets] = useState(initialTickets);
@@ -37,8 +39,8 @@ const PaymentPopup = ({
 
   const handleConfirm = async () => {
     setIsProcessing(true);
-    if (paymentType === "wallet") {
-      onWalletPayment();
+    if (paymentType === "Wallet") {
+      onWalletPayment(paymentType, numberOfTickets);
     } else {
       try {
         const stripe = await loadStripe(stripeKey);
@@ -83,7 +85,8 @@ const PaymentPopup = ({
       }
     }
     setIsProcessing(false);
-    onConfirm(paymentType, numberOfTickets); // Pass the number of tickets to the onConfirm function
+    onConfirm(paymentType, numberOfTickets);
+
   };
 
   return (
@@ -114,7 +117,7 @@ const PaymentPopup = ({
           <div className="grid grid-cols-4 items-center gap-4">
             <Label className="text-right">Total Price</Label>
             <div className="col-span-3 font-medium">
-              {totalPrice} {currency}
+              {symbol}{totalPrice} 
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -129,13 +132,20 @@ const PaymentPopup = ({
                 <Label htmlFor="CreditCard">Credit Card/Debit Card</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="wallet" id="wallet" />
-                <Label htmlFor="wallet">Wallet</Label>
+                <RadioGroupItem value="Wallet" id="Wallet" />
+                <Label htmlFor="Wallet">Wallet</Label>
               </div>
             </RadioGroup>
+            {error && (
+            <div className="col-span-4 text-red-500 text-sm">{error}</div>
+          )}
           </div>
+
+
+
         </div>
         <DialogFooter>
+
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
