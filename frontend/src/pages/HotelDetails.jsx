@@ -572,7 +572,7 @@ export default function HotelDetails() {
       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
         <UserGuide
           steps={guideSteps}
-          pageName="hotel-booking"
+          pageName="hotel-details"
         />
       )}
     </div>

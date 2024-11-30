@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { UserGuide } from "@/components/UserGuide.jsx"
+
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -289,6 +291,36 @@ function BookingPage() {
     }
   };
 
+  const getUserRole = () => {
+    let role = Cookies.get("role");
+    if (!role) role = "guest";
+    return role;
+  };
+
+
+
+  const guideSteps = [
+    {
+      target: "body",
+      content:
+        "Welcome to the flight booking page! Here, you can search for flights, view flight details, and book your flight tickets.",
+      placement: "center",
+    },
+    {
+      target: ".search",
+      content: "Please enter your departure and arrival times, select the departure and arrival airports, and specify the type of ticket to proceed with your booking!",
+      placement: "top",
+    },
+    {
+      target: ".seeDetails",
+      content:
+        "Click on the 'See Flight' button to view the details of the selected flight, Enter your personal data and to finally choose your payment method before confirming your flight booking!.",
+      placement: "top",
+    },
+    
+    
+  ];
+
   async function refreshToken() {
     try {
       const API_KEY = import.meta.env.VITE_AMADEUS_API_KEY;
@@ -530,7 +562,7 @@ function BookingPage() {
           <h1 className="text-5xl font-bold text-[#1A3B47]">Flight Booking</h1>
           <div className="h-10"></div>
 
-          <div className="mx-auto mb-12">
+          <div className="mx-auto mb-12 search">
             <div style={styles.container}>
               <div style={styles.formContainer}>
                 <form
@@ -784,7 +816,7 @@ function BookingPage() {
                             {flight.price.total} {flight.price.currency}
                           </p>
                           <Button
-                            className="bg-[#388A94] hover:bg-[#1A3B47] text-white"
+                            className="bg-[#388A94] hover:bg-[#1A3B47] text-white seeDetails"
                             onClick={() => handleOpenDialog(flight)}
                           >
                             See Flight
@@ -995,7 +1027,7 @@ function BookingPage() {
                   )}
                 </div>
                 <Button
-                  className="mt-4 w-full bg-[#388A94] hover:bg-[#1A3B47] text-white"
+                  className="mt-4 w-full bg-[#388A94] hover:bg-[#1A3B47] text-white "
                   onClick={handleBookNow}
                   disabled={!isBookingFormValid()}
                 >
@@ -1029,6 +1061,12 @@ function BookingPage() {
           </DialogContent>
         </Dialog>
       </div>
+      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+        <UserGuide
+          steps={guideSteps}
+          pageName="flight"
+        />
+      )}
     </div>
   );
 }
