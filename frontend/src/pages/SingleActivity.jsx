@@ -1231,9 +1231,7 @@ const ActivityDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {(userRole === "guest" || userRole === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="singleActivity" />
-      )}
+      
       <div
         style={{
           backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.7), rgba(93, 146, 151, 0.5)), url(${activity.pictures[0]?.url})`,
@@ -2335,6 +2333,9 @@ const ActivityDetail = () => {
           </AlertTitle>
           <AlertDescription>{alertMessage.message}</AlertDescription>
         </Alert>
+      )}
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="singleActivity" />
       )}
     </div>
   );

@@ -758,9 +758,7 @@ export function AllProducts() {
 
   return (
     <div className="bg-gray-100">
-       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-           <UserGuide steps={guideSteps} pageName="Products" />
-        )}
+       
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
           <div className="flex-1">
@@ -1013,6 +1011,9 @@ export function AllProducts() {
           <AlertDescription>{alertMessage.message}</AlertDescription>
         </Alert>
       )}
+      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+           <UserGuide steps={guideSteps} pageName="Products" />
+        )}
     </div>
   );
 }

@@ -378,12 +378,12 @@ export default function TransportationPage() {
       content: "Welcome to the Transportation Management page! This page allows you to choose appropriate transportation trips.",
       placement: "center",
     },
-      {
-        target: ".narrowing-down",
-        content: "Use this section to narrow down the trips according to diffent aspects such as departure location and arrival location.",
-        placement: "bottom",
-      },
-      {
+    {
+      target: ".narrowing-down",
+      content: "Use this section to narrow down the trips according to diffent aspects such as departure location and arrival location.",
+      placement: "bottom",
+    },
+    {
       target: ".transportation-card",
       content:
         "Each card represents a unique trip with its details.",
@@ -502,9 +502,7 @@ export default function TransportationPage() {
 
   return (
     <div className="bg-gray-100">
-      {(userRole === "guest" || userRole === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="itineraries" />
-      )}
+
 
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1083,6 +1081,9 @@ export default function TransportationPage() {
           </DialogContent>
         </Dialog>
       </div>
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="itineraries" />
+      )}
     </div>
   );
 }

@@ -1554,8 +1554,8 @@ const ItineraryDetail = () => {
     },
     {
       target: ".Save",
-      content:( <> Click here to save this itinerary for later viewing or booking in your saved itineraries list.<br />Tip:<br />You can view your saved itineraries anytime! Simply click the hamburger menu on the top right corner → My Account → Itineraries → Saved
-      </>), 
+      content: (<> Click here to save this itinerary for later viewing or booking in your saved itineraries list.<br />Tip:<br />You can view your saved itineraries anytime! Simply click the hamburger menu on the top right corner → My Account → Itineraries → Saved
+      </>),
       placement: "left",
     },
     {
@@ -1565,9 +1565,21 @@ const ItineraryDetail = () => {
     },
     {
       target: ".tourGuieRating",
-      content: "Here you can find the rating of the tour guide that published this Itinerary.",
+      content: "Here you can find the reviews of the tour guide that published this Itinerary.",
       placement: "left",
     },
+    {
+      target: ".timeline",
+      content: "Here you can find the timeline of itinerary that is grouped by day",
+      placement: "right",
+    },
+    {
+      target: ".review",
+      content: "Here you can add/edit your reviews to this itinerary ",
+      placement: "right",
+    },
+    
+
   ];
 
   const handleActivityRating = async () => {
@@ -1613,9 +1625,7 @@ const ItineraryDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {(userRole === "guest" || userRole === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="singleItinerary" />
-      )}
+      
       <nav className="bg-[#1a202c] shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
@@ -1631,7 +1641,7 @@ const ItineraryDetail = () => {
           </h1>
         </div>
       </div>
-      
+
 
       <div className=" mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -1720,7 +1730,7 @@ const ItineraryDetail = () => {
                   )}
                 </div>
 
-                <div className="mt-8">
+                <div className="mt-8 timeline">
                   <h2 className="text-2xl font-semibold mb-4">Activities</h2>
                   <ActivityTimeline activities={itinerary.activities} />
                 </div>
@@ -1941,7 +1951,7 @@ const ItineraryDetail = () => {
             {userComment && (
               <Button
                 onClick={() => setShowEditReview(true)}
-                className="mt-4 mr-4 bg-[#5D9297] hover:[#B5D3D1] "
+                className="mt-4 mr-4 bg-[#5D9297] hover:[#B5D3D1] review "
               >
                 Edit Your Review
               </Button>
@@ -2402,6 +2412,9 @@ const ItineraryDetail = () => {
           </AlertTitle>
           <AlertDescription>{alertMessage.message}</AlertDescription>
         </Alert>
+      )}
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="singleItinerary" />
       )}
     </div>
   );
