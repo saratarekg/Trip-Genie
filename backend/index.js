@@ -90,7 +90,9 @@ app.use("/advertiser", requireAuth("advertiser"), advertiserRoutes);
 // get currency rates from the database currencyrates model with id 6726a0e0206edfcc2ef30c16
 app.get("/rates", currencyRateController.getExchangeRate);
 
-//stripe payment
+// =====================
+//  STRIPE PAYMENT
+// =====================
 app.post("/create-checkout-session", async (req, res) => {
   try {
     const { items, currency, deliveryInfo } = req.body;
@@ -105,6 +107,10 @@ app.post("/create-checkout-session", async (req, res) => {
 
     // Calculate the total price including delivery
     const totalAmount = itemsTotal + deliveryPrice;
+
+    if (!flightID || !from || !to || !departureDate || !arrivalDate || !price || !numberOfTickets || !currency || !returnLocation) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -157,7 +163,14 @@ app.post("/create-checkout-session", async (req, res) => {
 
 app.post("/create-booking-session", async (req, res) => {
   try {
-    const { items, currency, quantity, returnLocation, selectedDate, selectedTransportID } = req.body;
+    const {
+      items,
+      currency,
+      quantity,
+      returnLocation,
+      selectedDate,
+      selectedTransportID,
+    } = req.body;
 
     // Calculate the total price of items
     const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -198,6 +211,77 @@ app.get("/check-payment-status", async (req, res) => {
     res.status(500).json({ error: "Error retrieving payment status" });
   }
 });
+
+// create a flight checkout session
+
+
+app.post("/create-flight-checkout-session", async (req, res) => {
+  try {
+    const {
+      items,
+      currency,
+      returnLocation,
+      metadata: {
+        flightID,
+        from,
+        to,
+        departureDate,
+        arrivalDate,
+        price,
+        numberOfTickets,
+        type,
+        returnDepartureDate,
+        returnArrivalDate,
+        seatType,
+        flightType,
+        flightTypeReturn,
+      },
+    } = req.body;
+
+    // Calculate the total price of items
+    const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: items.map((item) => ({
+        price_data: {
+          currency: currency,
+          product_data: {
+            name: item.product.name,
+          },
+          unit_amount: Math.round(item.totalPrice * 100), // Stripe expects amount in cents
+        },
+        quantity: item.quantity,
+      })),
+      mode: "payment",
+      success_url: `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` +
+        `&flightID=${encodeURIComponent(flightID)}` +
+        `&from=${encodeURIComponent(from)}` +
+        `&to=${encodeURIComponent(to)}` +
+        `&departureDate=${encodeURIComponent(departureDate)}` +
+        `&arrivalDate=${encodeURIComponent(arrivalDate)}` +
+        `&price=${encodeURIComponent(price)}` +
+        `&numberOfTickets=${encodeURIComponent(numberOfTickets)}` +
+        `&type=${encodeURIComponent(type)}` +
+        `&returnDepartureDate=${encodeURIComponent(returnDepartureDate)}` +
+        `&returnArrivalDate=${encodeURIComponent(returnArrivalDate)}` +
+        `&seatType=${encodeURIComponent(seatType)}` +
+        `&flightType=${encodeURIComponent(flightType)}` +
+        `&flightTypeReturn=${encodeURIComponent(flightTypeReturn)}`,
+      cancel_url: `${returnLocation}`,
+    });
+
+    console.log("Flight checkout session created:", session.id);
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error("Error creating flight checkout session:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+// =====================
+// =====================
 
 app.post("/create-hotel-booking-session", async (req, res) => {
   try {
@@ -321,10 +405,14 @@ const checkUpcomingEvents = async () => {
       return activityDate >= today && activityDate <= new Date(twoDays);
     });
 
-    console.log(`Found ${itineraries.length} itineraries and ${activities.length} activities starting in 2 days.`);
+    console.log(
+      `Found ${itineraries.length} itineraries and ${activities.length} activities starting in 2 days.`
+    );
 
     for (itinerary of itineraries) {
-      console.log(`Sending reminder for itinerary: ${itinerary.itinerary.title}`);
+      console.log(
+        `Sending reminder for itinerary: ${itinerary.itinerary.title}`
+      );
       await Tourist.findByIdAndUpdate(itinerary.user._id.toString(), {
         $push: {
           notifications: {
@@ -339,7 +427,6 @@ const checkUpcomingEvents = async () => {
         $set: {
           hasUnseenNotifications: true, // Set the hasUnseen flag to true
         },
-        
       });
       emailService.sendItineraryReminder(itinerary);
     }
@@ -355,19 +442,16 @@ const checkUpcomingEvents = async () => {
             type: "reminder", // Indicates this is a reminder notification
             body: `Your booked activity <b>${activity.activity.name}</b> is starting in 2 days.`,
             link: `/activity/${activity.activity._id}`, // Directs the user to the activity details page
-
           },
         },
         $set: {
           hasUnseenNotifications: true, // Set the hasUnseen flag to true
         },
-        
       });
       emailService.sendActivityReminder(activity);
     }
 
     console.log("Finished checking upcoming events.");
-    
   } catch (error) {
     console.error("Error sending reminder emails:", error);
   }
@@ -417,13 +501,11 @@ const sendBirthdayCards = async () => {
               new Date().setFullYear(new Date().getFullYear() + 1)
             ).toDateString()}</strong></h3>`,
             link: `/promo/${code}`, // Directs to a page with promo details (optional customization)
-
           },
         },
         $set: {
           hasUnseenNotifications: true, // Set the hasUnseen flag to true
         },
-        
       });
       emailService.sendBirthdayEmail(tourist, code);
 
