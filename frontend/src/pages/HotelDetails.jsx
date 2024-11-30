@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
+import { UserGuide } from "@/components/UserGuide.jsx"
+
 import {
   Carousel,
   CarouselContent,
@@ -219,7 +221,7 @@ export default function HotelDetails() {
                   ...room,
                   ...(moreRoomInfo[index] || {}),
                 }))
-                .filter(room => 
+                .filter(room =>
                   (room.bed_configurations && room.bed_configurations.length > 0) &&
                   (room.facilities && room.facilities.length > 0)
                 );
@@ -262,6 +264,52 @@ export default function HotelDetails() {
     });
     setIsBookingConfirmationOpen(true);
   };
+
+  const getUserRole = () => {
+    let role = Cookies.get("role");
+    if (!role) role = "guest";
+    return role;
+  };
+
+
+
+  const guideSteps = [
+    {
+      target: "body",
+      content:
+        "Welcome to the hotel booking page! Here you can search for hotels and book rooms for your next trip.",
+      placement: "center",
+    },
+    {
+      target: ".hotelPictures",
+      content:
+        "Here you can see the pictures of the hotel. Click on the arrows to view more pictures.",
+      placement: "top",
+    },
+    {
+      target: ".hotelInfo",
+      content:
+        "This section contains information about the hotel, such as its address, city, country and review score.",
+      placement: "top",
+    },
+    {
+      target: ".Facilities",
+      content: "This section displays all of the facilities available at the hotel.",
+      placement: "top",
+    },
+    {
+      target: ".roomTypes",
+      content: 
+        "This section displays all the available room types at the hotel. Click on a room type to view more details and book a room.",
+      placement: "top",
+    },
+    {
+      target: ".booking",
+      content: 
+        "Click on the 'Book Now' button to book a room. You can also book an all-inclusive room by clicking on the 'Book All Inclusive' button. Do not forget to select the number of rooms you want to book!", 
+      placement: "top",
+    },
+  ];
 
   useEffect(() => {
     const handleBookingSuccess = async () => {
@@ -400,7 +448,7 @@ export default function HotelDetails() {
     }
 
     return (
-      <Card className="mt-6">
+      <Card className="mt-6 Facilities">
         <CardHeader>
           <CardTitle>Facilities</CardTitle>
         </CardHeader>
@@ -418,10 +466,10 @@ export default function HotelDetails() {
   };
 
   const renderRoomGroup = (roomName, rooms) => {
-    const validRooms = rooms.filter(room => 
-      room.bed_configurations && 
-      room.bed_configurations.length > 0 && 
-      room.facilities && 
+    const validRooms = rooms.filter(room =>
+      room.bed_configurations &&
+      room.bed_configurations.length > 0 &&
+      room.facilities &&
       room.facilities.length > 0
     );
 
@@ -499,7 +547,7 @@ export default function HotelDetails() {
                       </Badge>
                     ))}
                   </div>
-                  <div className="mt-4 space-x-2">
+                  <div className="mt-4 space-x-2 booking">
                     <Button onClick={() => handleBookRoom(room, false)}>Book Now</Button>
                     {room.allInclusivePrice && room.allInclusivePrice !== room.price && (
                       <Button onClick={() => handleBookRoom(room, true)}>Book All Inclusive</Button>
@@ -534,7 +582,7 @@ export default function HotelDetails() {
       <div className="container mx-auto p-4 mt-5">
         <h1 className="text-3xl font-bold mb-6">{hotelData.name}</h1>
         <div className="flex flex-col md:flex-row gap-6 mb-6">
-          <div className="md:w-1/2">
+          <div className="md:w-1/2 hotelPictures">
             <Carousel className="w-full max-w-xl">
               <CarouselContent>
                 {hotelPhotos.map((photo, index) => (
@@ -551,7 +599,7 @@ export default function HotelDetails() {
               <CarouselNext />
             </Carousel>
           </div>
-          <Card className="md:w-1/2">
+          <Card className="md:w-1/2 hotelInfo">
             <CardHeader>
               <CardTitle>Hotel Information</CardTitle>
             </CardHeader>
@@ -570,7 +618,7 @@ export default function HotelDetails() {
                   )
                 )}
                 <span className="ml-2">
-                  {hotelData.review_score/2} ({hotelData.review_nr} reviews)
+                  {hotelData.review_score / 2} ({hotelData.review_nr} reviews)
                 </span>
               </div>
               <p>{hotelData.description_translations?.en}</p>
@@ -599,17 +647,17 @@ export default function HotelDetails() {
         </div>
         {renderFacilities()} {/* Add this line to render the facilities section */}
 
-        <Card className="mt-6">
+        <Card className="mt-6 roomTypes">
           <CardHeader>
             <CardTitle>Room Types</CardTitle>
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible className="w-full">
               {Object.entries(groupedRooms)
-                .filter(([_, rooms]) => rooms.some(room => 
-                  room.bed_configurations && 
-                  room.bed_configurations.length > 0 && 
-                  room.facilities && 
+                .filter(([_, rooms]) => rooms.some(room =>
+                  room.bed_configurations &&
+                  room.bed_configurations.length > 0 &&
+                  room.facilities &&
                   room.facilities.length > 0
                 ))
                 .map(([roomName, rooms]) => renderRoomGroup(roomName, rooms))
@@ -712,6 +760,12 @@ export default function HotelDetails() {
           </Alert>
         )}
       </div>
+      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+        <UserGuide
+          steps={guideSteps}
+          pageName="hotel-details"
+        />
+      )}
     </div>
   );
 }

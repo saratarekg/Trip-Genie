@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {UserGuide} from "@/components/UserGuide.jsx"
 
 const API_KEY = import.meta.env.VITE_HOTELS_API_KEY2;
 
@@ -109,6 +110,29 @@ export default function HotelSearch() {
     }
   };
 
+  const getUserRole = () => {
+    let role = Cookies.get("role");
+    if (!role) role = "guest";
+    return role;
+  };
+
+
+
+  const guideSteps = [
+    {
+      target: "body",
+      content:
+        "Welcome to the hotel booking page! Here you can search for hotels and book rooms for your next trip.",
+      placement: "center",
+    },
+    {
+      target: ".search",
+      content:
+        (<> Enter the city or region you want to visit, along with the check-in, check-out dates and the number of adults.<br /><br />Press Search Hotels to find the most suitable hotels for you.</>),
+      placement: "top",
+    },
+  ];
+
   const handleCheckInDateChange = (date) => {
     setCheckInDate(date);
     setShowCheckInWarning(false);
@@ -131,7 +155,7 @@ export default function HotelSearch() {
       </div>
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-6">Hotel Search</h1>
-        <form onSubmit={handleSearch} className="space-y-4 mb-8">
+        <form onSubmit={handleSearch} className="space-y-4 mb-8 search">
           <Input
             type="text"
             placeholder="Enter destination"
@@ -227,9 +251,9 @@ export default function HotelSearch() {
 
         <div className="space-y-6">
           {hotels.map((hotel) => (
-            <Link 
-              to={`/hotels/${hotel.hotel_id}?checkinDate=${format(checkInDate, 'yyyy-MM-dd')}&checkoutDate=${format(checkOutDate, 'yyyy-MM-dd')}&adults=${adults}`} 
-              key={hotel.hotel_id} 
+            <Link
+              to={`/hotels/${hotel.hotel_id}?checkinDate=${format(checkInDate, 'yyyy-MM-dd')}&checkoutDate=${format(checkOutDate, 'yyyy-MM-dd')}&adults=${adults}`}
+              key={hotel.hotel_id}
               className="block"
             >
               <Card>
@@ -251,7 +275,7 @@ export default function HotelSearch() {
                           <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                         ))}
                         <span className="ml-2 text-sm text-gray-600">
-                          {hotel.review_score ? `${(hotel.review_score/2).toFixed(1)}` : 'No reviews yet'}
+                          {hotel.review_score ? `${(hotel.review_score / 2).toFixed(1)}` : 'No reviews yet'}
                         </span>
                       </div>
                       <p className="mt-2">{hotel.address}</p>
@@ -266,6 +290,12 @@ export default function HotelSearch() {
           ))}
         </div>
       </div>
+      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+        <UserGuide
+          steps={guideSteps}
+          pageName="hotel-search"
+        />
+      )}
     </div>
   );
 }

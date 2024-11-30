@@ -71,10 +71,11 @@ guidance pages:
 all activities(done)
 all itineraries(done)
 all products (done)
-transportation page- ele mesh flight(done)
+transportation page-ele mesh flight(done)
 historical places(done)
-book hotel
-book flight
+search hotel(done)
+hotel details(done)
+book flight(done)
 single activity(done)
 single itinerary(done)
 single product(done)

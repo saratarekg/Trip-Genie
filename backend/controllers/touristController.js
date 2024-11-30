@@ -250,6 +250,7 @@ const updateTouristProfile = async (req, res) => {
 
 const bookFlight = async (req, res) => {
   const {
+    paymentType,
     flightID,
     from,
     to,
@@ -268,6 +269,7 @@ const bookFlight = async (req, res) => {
 
   try {
     const booking = new TouristFlight({
+      paymentType, // Payment type: CreditCard, DebitCard, Wallet
       touristID,
       flightID,
       from,
@@ -283,6 +285,51 @@ const bookFlight = async (req, res) => {
       flightType,
       flightTypeReturn,
     });
+
+    const paymentAmount = price * numberOfTickets;
+
+    const user = await Tourist.findById(touristID);
+
+    if (!user) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    let walletBalance = 0;
+
+    // Check if payment type is "Wallet"
+    if (paymentType === "Wallet") {
+      if (user.wallet < paymentAmount) {
+        return res
+          .status(400)
+          .json({ message: "Insufficient funds in wallet" });
+      }
+
+      walletBalance = user.wallet - paymentAmount;
+    }
+
+    const updateFields = {};
+
+    if (paymentType === "Wallet") {
+      updateFields.wallet = walletBalance; // Update wallet balance
+      updateFields.$push = {
+        history: {
+          transactionType: "payment",
+          amount: paymentAmount,
+          details: `You’ve successfully booked a flight from ${from} to ${to}`,
+        },
+      };
+    }
+
+    // Perform the update
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      touristID,
+      updateFields,
+      { new: true, runValidators: true } // Ensure it returns the updated tourist
+    );
+
+    if (!updatedTourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
 
     const savedBooking = await booking.save();
 
@@ -2169,13 +2216,18 @@ const getTouristNotifications = async (req, res) => {
       return res.status(400).json({ message: "tourist ID is required" });
     }
 
-    const tourist = await Tourist.findById(touristId, "notifications hasUnseenNotifications");
+    const tourist = await Tourist.findById(
+      touristId,
+      "notifications hasUnseenNotifications"
+    );
 
     if (!tourist) {
       return res.status(404).json({ message: "tourist not found" });
     }
 
-    const sortedNotifications = tourist.notifications.sort((a, b) => b.date - a.date);
+    const sortedNotifications = tourist.notifications.sort(
+      (a, b) => b.date - a.date
+    );
 
     return res.status(200).json({
       notifications: sortedNotifications,
@@ -2197,7 +2249,9 @@ const markDropdownAsOpened = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ message: "Tourist not found or already updated" });
+      return res
+        .status(404)
+        .json({ message: "Tourist not found or already updated" });
     }
 
     res.json({ message: "Dropdown marked as opened" });
@@ -2206,7 +2260,6 @@ const markDropdownAsOpened = async (req, res) => {
     res.status(500).json({ message: "Error marking dropdown as opened" });
   }
 };
-
 
 const markNotificationsAsSeen = async (req, res) => {
   try {
@@ -2250,17 +2303,17 @@ const markNotificationAsSeenForTourist = async (req, res) => {
 
     // Find the tourist by their ID and update the specific notification by its ID
     const result = await Tourist.updateOne(
-      { 
+      {
         _id: res.locals.user_id, // Find the tourist by their user ID
         "notifications._id": notificationId, // Match the specific notification by its ID
-        "notifications.seen": false // Ensure that the notification is unseen
+        "notifications.seen": false, // Ensure that the notification is unseen
       },
       {
         $set: {
           "notifications.$.seen": true, // Set 'seen' to true for the specific notification
         },
       }
-    ); 
+    );
 
     if (result.modifiedCount === 0) {
       console.log("Notification not found or already marked as seen");
@@ -2268,7 +2321,9 @@ const markNotificationAsSeenForTourist = async (req, res) => {
 
     // Check if there are any other unseen notifications left
     const tourist = await Tourist.findOne({ _id: res.locals.user_id });
-    const hasUnseenNotifications = tourist.notifications.some(notification => notification.seen === false);
+    const hasUnseenNotifications = tourist.notifications.some(
+      (notification) => notification.seen === false
+    );
 
     if (!hasUnseenNotifications) {
       // If no unseen notifications exist, set 'hasUnseenNotifications' to false
@@ -2284,15 +2339,22 @@ const markNotificationAsSeenForTourist = async (req, res) => {
 
     res.json({ message: "Notification marked as seen" });
   } catch (error) {
-    console.error("Error marking notification as seen for tourist:", error.message);
-    res.status(500).json({ message: "Error marking notification as seen for tourist" });
+    console.error(
+      "Error marking notification as seen for tourist:",
+      error.message
+    );
+    res
+      .status(500)
+      .json({ message: "Error marking notification as seen for tourist" });
   }
 };
 
-
 const hasUnseenNotifications = async (req, res) => {
   try {
-    const tourist = await Tourist.findById(res.locals.user_id, "hasUnseenNotifications");
+    const tourist = await Tourist.findById(
+      res.locals.user_id,
+      "hasUnseenNotifications"
+    );
 
     if (!tourist) {
       return res.status(404).json({ message: "tourist not found" });
@@ -2304,7 +2366,6 @@ const hasUnseenNotifications = async (req, res) => {
     res.status(500).json({ message: "Error checking unseen notifications" });
   }
 };
-
 
 const getVisitedPages = async (req, res) => {
   try {
