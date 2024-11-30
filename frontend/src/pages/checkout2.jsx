@@ -1,4 +1,4 @@
-import { useState, useEffect ,useRef} from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowDown, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import axios from "axios";
@@ -6,6 +6,8 @@ import Cookies from "js-cookie";
 import { format, addDays, addBusinessDays, add } from "date-fns";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UserGuide } from "@/components/UserGuide";
+
 
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -146,8 +148,8 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if(!isAddressDialogOpen)
-    fetchUserInfo();
+    if (!isAddressDialogOpen)
+      fetchUserInfo();
   }, [isAddressDialogOpen]);
 
   useEffect(() => {
@@ -229,7 +231,7 @@ export default function CheckoutPage() {
           response.data.currentPromoCode &&
           response.data.currentPromoCode.code
         ) {
-          await handlePromoSubmit({ preventDefault: () => {} });
+          await handlePromoSubmit({ preventDefault: () => { } });
         }
         setIsAddressLoaded(true);
       } catch (error) {
@@ -269,11 +271,11 @@ export default function CheckoutPage() {
       const deliveryType = searchParams.get("deliveryType");
       const deliveryTime = searchParams.get("deliveryTime");
       const shippingId = searchParams.get("shippingId");
-  
+
       await fetchUserInfo();
-  
+
       let selectedAddress = null;
-  
+
       if (shippingId) {
         try {
           const token = Cookies.get("jwt");
@@ -285,7 +287,7 @@ export default function CheckoutPage() {
           );
           const addresses = response.data.shippingAddresses;
           setSavedAddresses(addresses); // Update saved addresses
-  
+
           selectedAddress = addresses.find((addr) => addr._id === shippingId);
           if (!selectedAddress) {
             console.warn("Shipping address not found for given ID.");
@@ -295,37 +297,37 @@ export default function CheckoutPage() {
         }
       }
 
-    let cartItemsNew = null;
-      try{
+      let cartItemsNew = null;
+      try {
         const token = Cookies.get("jwt");
         const response = await axios.get("http://localhost:4000/tourist/cart", {
           headers: { Authorization: `Bearer ${token}` },
         });
-         cartItemsNew = response.data;
-         console.log("cartitemsnew",cartItemsNew);
+        cartItemsNew = response.data;
+        console.log("cartitemsnew", cartItemsNew);
         setCartItems(response.data);
         calculateTotal(response.data);
-      } catch(error){
+      } catch (error) {
         console.log("Error fetching cart items");
       }
-      
-  
+
+
       console.log("Session ID:", sessionId);
-  
+
       if (sessionId && success === "true") {
         try {
           const response = await axios.get(
             `http://localhost:4000/check-payment-status?session_id=${sessionId}`
           );
-  
+
           console.log("Payment status response:", response.data);
-  
+
           if (response.data.status === "paid") {
             setPaySuccess(true);
             setDeliveryType(deliveryType);
             setDeliveryTime(deliveryTime);
             setPaymentMethod("credit_card");
-  
+
             console.log("Completing purchase...");
             await completePurchase({
               cartItemsNew,
@@ -334,18 +336,18 @@ export default function CheckoutPage() {
               deliveryTime,
               paymentMethod: "credit_card",
             });
-  
+
           }
         } catch (error) {
           console.error("Error checking payment status:", error);
         }
       }
     };
-  
+
     checkPaymentStatus();
     fetchCart();
   }, [searchParams]);
-  
+
 
   const completePurchase = async (data) => {
     try {
@@ -370,7 +372,7 @@ export default function CheckoutPage() {
               ? data.paymentMethod
               : paymentMethod,
           shippingAddress: data.address || selectedAddress,
-          locationType: data.address? data.address.locationType : selectedAddress.locationType,
+          locationType: data.address ? data.address.locationType : selectedAddress.locationType,
           deliveryType:
             data.paymentMethod === "credit_card"
               ? data.deliveryType
@@ -392,7 +394,7 @@ export default function CheckoutPage() {
 
       setPurchaseStatus("success");
       setIsStatusDialogOpen(true);
-      
+
     } catch (error) {
       console.error("Error completing purchase:", error);
       setPurchaseStatus("error");
@@ -523,8 +525,7 @@ export default function CheckoutPage() {
         const errorData = await response.json();
         console.error("Server response:", errorData);
         throw new Error(
-          `Failed to create checkout session: ${
-            errorData.error || response.statusText
+          `Failed to create checkout session: ${errorData.error || response.statusText
           }`
         );
       }
@@ -722,6 +723,44 @@ export default function CheckoutPage() {
     }
   };
 
+  const guideSteps = [
+    {
+      target: "body",
+      content: "You're just one step away from completing your order. Review your items and your delivery details to proceed to payment and confirm your purchase!",
+      placement: "center",
+    },
+    {
+      target: ".userInfo",
+      content: "Here you can find your personal information, including your name, email, and phone number.",
+      placement: "right",
+    },
+    {
+      target: ".deliveryOptions",
+      content: "Choose your delivery option based on how quickly you would like to receive your products. Choose from Standard, Express, Next Day, or International Shipping.",
+      placement: "right",
+    },
+    {
+      target: ".deliverTime",
+      content: "Select your preferred delivery time. Choose from Morning, Afternoon, Evening, or Night.",
+      placement: "right",
+    },
+    {
+      target: ".deliveryAddress",
+      content: "You can check your delievey adress from here and change it if needed!",
+      placement: "right",
+    },
+    {
+      target: ".payment",
+      content: "Choose your payment method. You can pay with a credit card, debit card, wallet, or cash on delivery.",
+      placement: "right",
+    },
+    {
+      target: ".completePurchase",
+      content: "Click here to complete your purchase and place your order!",
+      placement: "left",
+    },
+  ];
+
   const calculateDeliveryTime = (deliveryTime) => {
     switch (deliveryTime) {
       case "morning":
@@ -736,7 +775,7 @@ export default function CheckoutPage() {
         return "";
     }
   };
-  
+
   const calculateEstimatedDeliveryDate = (deliveryType) => {
     const today = new Date();
     switch (deliveryType) {
@@ -753,7 +792,7 @@ export default function CheckoutPage() {
     }
   };
 
-  
+
 
   return (
     <div className="">
@@ -761,15 +800,15 @@ export default function CheckoutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
       </div>
       <div className="max-w-7xl mx-auto py-8">
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] max-h-[500px] overflow-y-auto">
-     
+
           {/* Main Checkout Form */}
           <div className="space-y-8 pr-8">
-          <h1 className="text-5xl font-bold ml-5 text-[#1A3B47]">Checkout</h1>
+            <h1 className="text-5xl font-bold ml-5 text-[#1A3B47]">Checkout</h1>
 
             {/* User Info Section */}
-            <div className="bg-white pt-6 pr-6 pl-6 pb-4">
+            <div className="bg-white pt-6 pr-6 pl-6 pb-4 userInfo">
               <div className="flex items-center gap-4 mb-4">
                 <span className="text-3xl font-bold text-gray-400">01</span>
                 <h2 className="text-2xl font-semibold text-[#1A3B47]">
@@ -800,314 +839,314 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-             {/* Delivery Options Section */}
-             <div className="bg-white pr-6 pl-6 pb-4">
-  <div className="flex items-center gap-4 mb-4">
-    <span className="text-3xl font-bold text-gray-400">02</span>
-    <h2 className="text-2xl font-semibold text-[#1A3B47]">Delivery Options</h2>
-  </div>
-  <div className="grid grid-cols-2 gap-4">
-    <label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer bg-gray-100">
-      {/* Checkbox with peer class for styling when checked */}
-      <Checkbox
-        checked={deliveryType === "Standard"}
-        onCheckedChange={() => handleDeliveryTypeChange("Standard")}
-        className={`peer border-gray-400 cursor-pointer ${deliveryType === "Standard" ? 'bg-[#388A94] border-[#388A94]' : ''}`}
-        id="standard"
-      />
-      <div className="flex-1">
-        <Label className="font-medium text-[#1A3B47] text-base">Standard Delivery</Label>
-        <p className="text-sm text-gray-400 mt-1">2–8 business days</p>
-        <span className="text-[#1A3B47] font-semibold">{formatPrice(2.99)}</span>
-      </div>
-    </label>
+            {/* Delivery Options Section */}
+            <div className="bg-white pr-6 pl-6 pb-4">
+              <div className="flex items-center gap-4 mb-4">
+                <span className="text-3xl font-bold text-gray-400">02</span>
+                <h2 className="text-2xl font-semibold text-[#1A3B47]">Delivery Options</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4 deliveryOptions">
+                <label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer bg-gray-100">
+                  {/* Checkbox with peer class for styling when checked */}
+                  <Checkbox
+                    checked={deliveryType === "Standard"}
+                    onCheckedChange={() => handleDeliveryTypeChange("Standard")}
+                    className={`peer border-gray-400 cursor-pointer ${deliveryType === "Standard" ? 'bg-[#388A94] border-[#388A94]' : ''}`}
+                    id="standard"
+                  />
+                  <div className="flex-1">
+                    <Label className="font-medium text-[#1A3B47] text-base">Standard Delivery</Label>
+                    <p className="text-sm text-gray-400 mt-1">2–8 business days</p>
+                    <span className="text-[#1A3B47] font-semibold">{formatPrice(2.99)}</span>
+                  </div>
+                </label>
 
-    <label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer bg-gray-100">
-      <Checkbox
-        checked={deliveryType === "Express"}
-        onCheckedChange={() => handleDeliveryTypeChange("Express")}
-        className="peer border-gray-400 text-[#388A94] checked:border-[#388A94] checked:bg-[#388A94] cursor-pointer" 
-               id="express"
-      />
-      <div className="flex-1">
-        <Label className="font-medium text-[#1A3B47] text-base">Express Delivery</Label>
-        <p className="text-sm text-gray-400 mt-1">1–3 business days</p>
-        <span className="text-[#1A3B47] font-semibold">{formatPrice(4.99)}</span>
-      </div>
-    </label>
+                <label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer bg-gray-100">
+                  <Checkbox
+                    checked={deliveryType === "Express"}
+                    onCheckedChange={() => handleDeliveryTypeChange("Express")}
+                    className="peer border-gray-400 text-[#388A94] checked:border-[#388A94] checked:bg-[#388A94] cursor-pointer"
+                    id="express"
+                  />
+                  <div className="flex-1">
+                    <Label className="font-medium text-[#1A3B47] text-base">Express Delivery</Label>
+                    <p className="text-sm text-gray-400 mt-1">1–3 business days</p>
+                    <span className="text-[#1A3B47] font-semibold">{formatPrice(4.99)}</span>
+                  </div>
+                </label>
 
-    <label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer bg-gray-100">
-      <Checkbox
-        checked={deliveryType === "Next-Same"}
-        onCheckedChange={() => handleDeliveryTypeChange("Next-Same")}
-        className="peer border-gray-400 text-[#388A94] checked:border-[#388A94] checked:bg-[#388A94] cursor-pointer"    
-            id="next-same"
-      />
-      <div className="flex-1">
-        <Label className="font-medium text-[#1A3B47] text-base">Next Day Delivery</Label>
-        <p className="text-sm text-gray-400 mt-1">Next business day</p>
-        <span className="text-[#1A3B47] font-semibold">{formatPrice(6.99)}</span>
-      </div>
-    </label>
+                <label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer bg-gray-100">
+                  <Checkbox
+                    checked={deliveryType === "Next-Same"}
+                    onCheckedChange={() => handleDeliveryTypeChange("Next-Same")}
+                    className="peer border-gray-400 text-[#388A94] checked:border-[#388A94] checked:bg-[#388A94] cursor-pointer"
+                    id="next-same"
+                  />
+                  <div className="flex-1">
+                    <Label className="font-medium text-[#1A3B47] text-base">Next Day Delivery</Label>
+                    <p className="text-sm text-gray-400 mt-1">Next business day</p>
+                    <span className="text-[#1A3B47] font-semibold">{formatPrice(6.99)}</span>
+                  </div>
+                </label>
 
-    <label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer bg-gray-100">
-      <Checkbox
-        checked={deliveryType === "International"}
-        onCheckedChange={() => handleDeliveryTypeChange("International")}
-        className="peer border-gray-400 text-[#388A94] checked:border-[#388A94] checked:bg-[#388A94] cursor-pointer"    
-            id="international"
-      />
-      <div className="flex-1">
-        <Label className="font-medium text-[#1A3B47] text-base">International Shipping</Label>
-        <p className="text-sm text-gray-400 mt-1">7–21 business days</p>
-        <span className="text-[#1A3B47] font-semibold">{formatPrice(14.99)}</span>
-      </div>
-    </label>
-  </div>
-  <div className="mt-4">
-  <Label className="font-medium text-base mb-4 block text-[#1A3B47]">Delivery Time</Label>
-  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-    
-    {/* Morning */}
-    <label htmlFor="morning" className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer bg-gray-100">
-      <RadioGroup value={deliveryTime} onValueChange={setDeliveryTime}>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="morning" id="morning" className="border-gray-400 text-[#388A94]" />
-          <div>
-            <Label htmlFor="morning" className="text-base font-medium text-[#1A3B47]">Morning</Label>
-            <p className="text-sm text-[#388A94]">8am - 12pm</p>
-          </div>
-        </div>
-      </RadioGroup>
-    </label>
+                <label className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer bg-gray-100">
+                  <Checkbox
+                    checked={deliveryType === "International"}
+                    onCheckedChange={() => handleDeliveryTypeChange("International")}
+                    className="peer border-gray-400 text-[#388A94] checked:border-[#388A94] checked:bg-[#388A94] cursor-pointer"
+                    id="international"
+                  />
+                  <div className="flex-1">
+                    <Label className="font-medium text-[#1A3B47] text-base">International Shipping</Label>
+                    <p className="text-sm text-gray-400 mt-1">7–21 business days</p>
+                    <span className="text-[#1A3B47] font-semibold">{formatPrice(14.99)}</span>
+                  </div>
+                </label>
+              </div>
+              <div className="mt-4 deliverTime">
+                <Label className="font-medium text-base mb-4 block text-[#1A3B47]">Delivery Time</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
 
-    {/* Afternoon */}
-    <label htmlFor="afternoon" className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer bg-gray-100">
-      <RadioGroup value={deliveryTime} onValueChange={setDeliveryTime}>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="afternoon" id="afternoon" className="border-gray-400 text-[#388A94]" />
-          <div>
-            <Label htmlFor="afternoon" className="text-base font-medium text-[#1A3B47]">Afternoon</Label>
-            <p className="text-sm text-[#388A94]">12pm - 4pm</p>
-          </div>
-        </div>
-      </RadioGroup>
-    </label>
+                  {/* Morning */}
+                  <label htmlFor="morning" className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer bg-gray-100">
+                    <RadioGroup value={deliveryTime} onValueChange={setDeliveryTime}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="morning" id="morning" className="border-gray-400 text-[#388A94]" />
+                        <div>
+                          <Label htmlFor="morning" className="text-base font-medium text-[#1A3B47]">Morning</Label>
+                          <p className="text-sm text-[#388A94]">8am - 12pm</p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </label>
 
-    {/* Evening */}
-    <label htmlFor="evening" className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer bg-gray-100">
-      <RadioGroup value={deliveryTime} onValueChange={setDeliveryTime}>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="evening" id="evening" className="border-gray-400 text-[#388A94]" />
-          <div>
-            <Label htmlFor="evening" className="text-base font-medium text-[#1A3B47]">Evening</Label>
-            <p className="text-sm text-[#388A94]">4pm - 8pm</p>
-          </div>
-        </div>
-      </RadioGroup>
-    </label>
+                  {/* Afternoon */}
+                  <label htmlFor="afternoon" className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer bg-gray-100">
+                    <RadioGroup value={deliveryTime} onValueChange={setDeliveryTime}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="afternoon" id="afternoon" className="border-gray-400 text-[#388A94]" />
+                        <div>
+                          <Label htmlFor="afternoon" className="text-base font-medium text-[#1A3B47]">Afternoon</Label>
+                          <p className="text-sm text-[#388A94]">12pm - 4pm</p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </label>
 
-    {/* Night */}
-    <label htmlFor="night" className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer bg-gray-100">
-      <RadioGroup value={deliveryTime} onValueChange={setDeliveryTime}>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="night" id="night" className="border-gray-400 text-[#388A94]" />
-          <div>
-            <Label htmlFor="night" className="text-base font-medium text-[#1A3B47]">Night</Label>
-            <p className="text-sm text-[#388A94]">8pm - 10pm</p>
-          </div>
-        </div>
-      </RadioGroup>
-    </label>
+                  {/* Evening */}
+                  <label htmlFor="evening" className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer bg-gray-100">
+                    <RadioGroup value={deliveryTime} onValueChange={setDeliveryTime}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="evening" id="evening" className="border-gray-400 text-[#388A94]" />
+                        <div>
+                          <Label htmlFor="evening" className="text-base font-medium text-[#1A3B47]">Evening</Label>
+                          <p className="text-sm text-[#388A94]">4pm - 8pm</p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </label>
 
-  </div>
-</div>
+                  {/* Night */}
+                  <label htmlFor="night" className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer bg-gray-100">
+                    <RadioGroup value={deliveryTime} onValueChange={setDeliveryTime}>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="night" id="night" className="border-gray-400 text-[#388A94]" />
+                        <div>
+                          <Label htmlFor="night" className="text-base font-medium text-[#1A3B47]">Night</Label>
+                          <p className="text-sm text-[#388A94]">8pm - 10pm</p>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </label>
 
-
+                </div>
               </div>
 
 
-           {/* Delivery Address Section */}
-           <div className="bg-white  pr-6 pl-6 pb-4 ">
-                <div className="flex items-center gap-4 mb-3">
-                  <span className="text-3xl font-bold text-gray-400">03</span>
-                  <h2 className="text-2xl font-semibold text-[#1A3B47]">Delivery Address</h2>
-                </div>
-                {selectedAddress ? (
-                  <div className="space-y-4">
-                    <div className="">
-                      <h3 className="font-bold text-lg text-[#1A3B47]">{selectedAddress.locationType}</h3>
-                      <p className="text-gray-500 mt-1">
-                        {selectedAddress.streetNumber} {selectedAddress.streetName},
-                        <br />
-                        {selectedAddress.city}, {selectedAddress.state} {selectedAddress.postalCode}
-                      </p>
-                      <div className="flex gap-2 mt-4 ml-0">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowSavedAddresses(true)}
-                          className="text-[#388A94] font-bold p-0 hover:bg-white"
-                        >
-                          Ship to a different address?
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsAddressDialogOpenDetail(true)}
-                          className="text-[#388A94] font-bold hover:bg-white"
-                        >
-                          View Details
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setIsAddressDialogOpen(true)}
-                          className="text-[#388A94] font-bold  hover:bg-white"
-                        >
-                          Add New Address
-                        </Button>
-                      </div>
+            </div>
+
+
+            {/* Delivery Address Section */}
+            <div className="bg-white  pr-6 pl-6 pb-4  deliveryAddress">
+              <div className="flex items-center gap-4 mb-3">
+                <span className="text-3xl font-bold text-gray-400">03</span>
+                <h2 className="text-2xl font-semibold text-[#1A3B47]">Delivery Address</h2>
+              </div>
+              {selectedAddress ? (
+                <div className="space-y-4">
+                  <div className="">
+                    <h3 className="font-bold text-lg text-[#1A3B47]">{selectedAddress.locationType}</h3>
+                    <p className="text-gray-500 mt-1">
+                      {selectedAddress.streetNumber} {selectedAddress.streetName},
+                      <br />
+                      {selectedAddress.city}, {selectedAddress.state} {selectedAddress.postalCode}
+                    </p>
+                    <div className="flex gap-2 mt-4 ml-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowSavedAddresses(true)}
+                        className="text-[#388A94] font-bold p-0 hover:bg-white"
+                      >
+                        Ship to a different address?
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsAddressDialogOpenDetail(true)}
+                        className="text-[#388A94] font-bold hover:bg-white"
+                      >
+                        View Details
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsAddressDialogOpen(true)}
+                        className="text-[#388A94] font-bold  hover:bg-white"
+                      >
+                        Add New Address
+                      </Button>
                     </div>
                   </div>
-                ) : (
-                  <Button
-                    onClick={() => setIsAddressDialogOpen(true)}
-                    className="w-full bg-[#1A3B47] text-white hover:bg-[#388A94]"
-                  >
-                    Add New Address
-                  </Button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => setIsAddressDialogOpen(true)}
+                  className="w-full bg-[#1A3B47] text-white hover:bg-[#388A94]"
+                >
+                  Add New Address
+                </Button>
+              )}
+            </div>
 
             {/* Payment Method Section */}
-            <div ref={paymentMethodRef} className="bg-white  pr-6 pl-6 pb-4">
-  <div className="flex items-center gap-4 mb-6">
-    <span className="text-3xl font-bold text-gray-400">04</span>
-    <h2 className="text-2xl font-semibold text-[#1A3B47]">Payment Method</h2>
-  </div>
+            <div ref={paymentMethodRef} className="bg-white  pr-6 pl-6 pb-4 payment">
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-3xl font-bold text-gray-400">04</span>
+                <h2 className="text-2xl font-semibold text-[#1A3B47]">Payment Method</h2>
+              </div>
 
-  <RadioGroup
-    value={paymentMethod}
-    onValueChange={setPaymentMethod}
-    className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-  >
-    {/* Wallet */}
-    <label htmlFor="wallet" className="flex items-center bg-gray-100 p-3 border rounded-lg cursor-pointer">
-      <RadioGroupItem
-        value="wallet"
-        id="wallet"
-        className="w-4 h-4 rounded-full border-[#5D9297] text-[#5D9297] checked:ring-[#5D9297] checked:bg-[#5D9297] focus:ring-1 focus:ring-[#5D9297]"
-      />
-      <div>
-        <Label htmlFor="wallet" className="text-base font-medium ml-4 text-[#1A3B47]">
-          Wallet
-        </Label>
-      </div>
-    </label>
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={setPaymentMethod}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+              >
+                {/* Wallet */}
+                <label htmlFor="wallet" className="flex items-center bg-gray-100 p-3 border rounded-lg cursor-pointer">
+                  <RadioGroupItem
+                    value="wallet"
+                    id="wallet"
+                    className="w-4 h-4 rounded-full border-[#5D9297] text-[#5D9297] checked:ring-[#5D9297] checked:bg-[#5D9297] focus:ring-1 focus:ring-[#5D9297]"
+                  />
+                  <div>
+                    <Label htmlFor="wallet" className="text-base font-medium ml-4 text-[#1A3B47]">
+                      Wallet
+                    </Label>
+                  </div>
+                </label>
 
-    {/* Cash on Delivery */}
-    <label htmlFor="cash_on_delivery" className="flex items-center bg-gray-100 p-3 border rounded-lg cursor-pointer">
-      <RadioGroupItem
-        value="cash_on_delivery"
-        id="cash_on_delivery"
-        className="w-4 h-4 rounded-full border-[#5D9297] text-[#5D9297] checked:ring-[#5D9297] checked:bg-[#5D9297] focus:ring-1 focus:ring-[#5D9297]"
-      />
-      <div>
-        <Label htmlFor="cash_on_delivery" className="text-base font-medium ml-4 text-[#1A3B47]">
-          Cash on Delivery
-        </Label>
-      </div>
-    </label>
+                {/* Cash on Delivery */}
+                <label htmlFor="cash_on_delivery" className="flex items-center bg-gray-100 p-3 border rounded-lg cursor-pointer">
+                  <RadioGroupItem
+                    value="cash_on_delivery"
+                    id="cash_on_delivery"
+                    className="w-4 h-4 rounded-full border-[#5D9297] text-[#5D9297] checked:ring-[#5D9297] checked:bg-[#5D9297] focus:ring-1 focus:ring-[#5D9297]"
+                  />
+                  <div>
+                    <Label htmlFor="cash_on_delivery" className="text-base font-medium ml-4 text-[#1A3B47]">
+                      Cash on Delivery
+                    </Label>
+                  </div>
+                </label>
 
-    {/* Credit Card */}
-    <label htmlFor="credit_card" className="flex items-center bg-gray-100 p-3 border rounded-lg cursor-pointer">
-      <RadioGroupItem
-        value="credit_card"
-        id="credit_card"
-        className="w-4 h-4 rounded-full border-[#5D9297] text-[#5D9297] checked:ring-[#5D9297] checked:bg-[#5D9297] focus:ring-1 focus:ring-[#5D9297]"
-      />
-      <div>
-        <Label htmlFor="credit_card" className="text-base font-medium ml-4 text-[#1A3B47]">
-          Credit/Debit Card
-        </Label>
-      </div>
-    </label>
-  </RadioGroup>
+                {/* Credit Card */}
+                <label htmlFor="credit_card" className="flex items-center bg-gray-100 p-3 border rounded-lg cursor-pointer">
+                  <RadioGroupItem
+                    value="credit_card"
+                    id="credit_card"
+                    className="w-4 h-4 rounded-full border-[#5D9297] text-[#5D9297] checked:ring-[#5D9297] checked:bg-[#5D9297] focus:ring-1 focus:ring-[#5D9297]"
+                  />
+                  <div>
+                    <Label htmlFor="credit_card" className="text-base font-medium ml-4 text-[#1A3B47]">
+                      Credit/Debit Card
+                    </Label>
+                  </div>
+                </label>
+              </RadioGroup>
 
-  {errors && !paymentMethod && (
-    <p className="text-red-500 text-sm mt-2">
-      Please select a payment method.
-    </p>
-  )}
-</div>
+              {errors && !paymentMethod && (
+                <p className="text-red-500 text-sm mt-2">
+                  Please select a payment method.
+                </p>
+              )}
+            </div>
 
             <button
-  onClick={() => navigate("/TouristCart")}
-  className="flex items-center mb-4 justify-center text-[#1A3B47] hover:text-[#388A94] transition-colors"
->
-<ArrowLeft className="ml-6 mr-2 h-7 w-7 " />
-  <p className="text-2xl font-bold">Back to cart</p> {/* Added margin to separate text from the icon */}
-  
-</button>
+              onClick={() => navigate("/TouristCart")}
+              className="flex items-center mb-4 justify-center text-[#1A3B47] hover:text-[#388A94] transition-colors"
+            >
+              <ArrowLeft className="ml-6 mr-2 h-7 w-7 " />
+              <p className="text-2xl font-bold">Back to cart</p> {/* Added margin to separate text from the icon */}
+
+            </button>
 
           </div>
 
           {/* Order Summary */}
-          <div className="bg-gray-100 min-h-full p-6 lg:sticky lg:top-0">
-  <h2 className="text-2xl font-bold mb-4 text-[#1A3B47]">
-    Order Summary ({cartItems.length})
-  </h2>
+          <div className="bg-gray-100 min-h-full p-6 lg:sticky lg:top-0 overview">
+            <h2 className="text-2xl font-bold mb-4 text-[#1A3B47]">
+              Order Summary ({cartItems.length})
+            </h2>
 
-  <div className="space-y-4">
-  {cartItems.map((item, index) => (
-  <div
-    key={index}
-    className={`flex justify-between ${index === cartItems.length - 1 ? 'pb-2' : ''}`}
-  >
-    <div>
-      <p className="font-medium text-[#1A3B47]">
-        {item?.product?.name} x {item?.quantity}
-      </p>
-    </div>
-    <span className="text-[#388A94] font-semibold">
-      {formatPrice(item?.totalPrice)}
-    </span>
-  </div>
-))}
+            <div className="space-y-4">
+              {cartItems.map((item, index) => (
+                <div
+                  key={index}
+                  className={`flex justify-between ${index === cartItems.length - 1 ? 'pb-2' : ''}`}
+                >
+                  <div>
+                    <p className="font-medium text-[#1A3B47]">
+                      {item?.product?.name} x {item?.quantity}
+                    </p>
+                  </div>
+                  <span className="text-[#388A94] font-semibold">
+                    {formatPrice(item?.totalPrice)}
+                  </span>
+                </div>
+              ))}
 
 
-    {/* Delivery Information Section */}
-    <div className="border-t pt-4">
-  <div className="mb-4">
-    <h3 className="text-lg font-semibold text-[#1A3B47] mb-2">Delivery Information</h3>
-    <div className="">
-      <p className="text-[#B0B0B0] text-sm font-semibold">Delivering to:</p>
-      {selectedAddress ? (
-       <>
-          <p className="text-[#388A94] font-bold text-lg mb-0">{selectedAddress?.locationType}</p> {/* Location Type in bold */}
-          <p className="text-[#1A3B47]">
-            {selectedAddress?.streetNumber} {selectedAddress?.streetName}, {selectedAddress?.city}, {selectedAddress?.state}
-          </p>
-          </>
-      ) : (
-        <p className="text-red-500">No address selected</p>
-      )}
-    </div>
-  </div>
+              {/* Delivery Information Section */}
+              <div className="border-t pt-4">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-[#1A3B47] mb-2">Delivery Information</h3>
+                  <div className="">
+                    <p className="text-[#B0B0B0] text-sm font-semibold">Delivering to:</p>
+                    {selectedAddress ? (
+                      <>
+                        <p className="text-[#388A94] font-bold text-lg mb-0">{selectedAddress?.locationType}</p> {/* Location Type in bold */}
+                        <p className="text-[#1A3B47]">
+                          {selectedAddress?.streetNumber} {selectedAddress?.streetName}, {selectedAddress?.city}, {selectedAddress?.state}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-red-500">No address selected</p>
+                    )}
+                  </div>
+                </div>
 
-  {/* Date & Time */}
-  <div className="mb-4">
-        <h3 className="text-sm text-[#B0B0B0] font-semibold">Date & Time</h3>
+                {/* Date & Time */}
+                <div className="mb-4">
+                  <h3 className="text-sm text-[#B0B0B0] font-semibold">Date & Time</h3>
 
-        {/* Estimated Delivery Date */}
-        <p className="text-[#1A3B47] font-semibold">
-          {calculateDeliveryTime(deliveryTime)}{" "}
-          {format(calculateEstimatedDeliveryDate(deliveryType), "eee, dd MMM yyyy")}
-        </p>
-      </div>
+                  {/* Estimated Delivery Date */}
+                  <p className="text-[#1A3B47] font-semibold">
+                    {calculateDeliveryTime(deliveryTime)}{" "}
+                    {format(calculateEstimatedDeliveryDate(deliveryType), "eee, dd MMM yyyy")}
+                  </p>
+                </div>
 
-      {/* <div>
+                {/* <div>
         <Label className="font-semibold text-lg text-[#1A3B47]">Name</Label>
         <p className="mt-1 text-[#388A94]">
           {form.watch("firstName")} {form.watch("lastName")}
@@ -1121,91 +1160,91 @@ export default function CheckoutPage() {
         <Label className="font-semibold text-lg text-[#1A3B47]">Phone Number</Label>
         <p className="mt-1 text-[#388A94]">{form.watch("phone")}</p>
       </div> */}
-    
-  
 
-  {/* Subtotal and Delivery Charges */}
-  <div className="flex justify-between border-t pt-4">
-    <span className="text-[#1A3B47]">Subtotal</span>
-    <span className="text-[#388A94] font-semibold">{formatPrice(totalAmount)}</span>
-  </div>
-  <div className="flex justify-between mt-2">
-    <span className="text-[#1A3B47]">Delivery</span>
-    <span className="text-[#388A94] font-semibold">
-      {formatPrice(
-        form.watch("deliveryType") === "Express"
-          ? 4.99
-          : form.watch("deliveryType") === "Next-Same"
-          ? 6.99
-          : form.watch("deliveryType") === "International"
-          ? 14.99
-          : 2.99
-      )}
-    </span>
-  </div>
-  {promoDetails && (
-    <div className="flex justify-between mt-2 text-green-600">
-      <span>Discount</span>
-      <span className="font-semibold">-{formatPrice(discountAmount)}</span>
-    </div>
-  )}
 
-  {/* Total */}
-  <div className="flex justify-between mt-4 text-xl font-bold">
-    <span className="text-[#1A3B47]">Total</span>
-    <span className="text-[#388A94]">
-      {formatPrice(
-        (promoDetails ? discountedTotal : totalAmount) +
-          (form.watch("deliveryType") === "Express"
-            ? 4.99
-            : form.watch("deliveryType") === "Next-Same"
-            ? 6.99
-            : form.watch("deliveryType") === "International"
-            ? 14.99
-            : 2.99)
-      )}
-    </span>
-  </div>
-</div>
 
-  </div>
+                {/* Subtotal and Delivery Charges */}
+                <div className="flex justify-between border-t pt-4">
+                  <span className="text-[#1A3B47]">Subtotal</span>
+                  <span className="text-[#388A94] font-semibold">{formatPrice(totalAmount)}</span>
+                </div>
+                <div className="flex justify-between mt-2">
+                  <span className="text-[#1A3B47]">Delivery</span>
+                  <span className="text-[#388A94] font-semibold">
+                    {formatPrice(
+                      form.watch("deliveryType") === "Express"
+                        ? 4.99
+                        : form.watch("deliveryType") === "Next-Same"
+                          ? 6.99
+                          : form.watch("deliveryType") === "International"
+                            ? 14.99
+                            : 2.99
+                    )}
+                  </span>
+                </div>
+                {promoDetails && (
+                  <div className="flex justify-between mt-2 text-green-600">
+                    <span>Discount</span>
+                    <span className="font-semibold">-{formatPrice(discountAmount)}</span>
+                  </div>
+                )}
 
- 
-  {/* Promo Code Section */}
-  <div className="mt-6">
-    <form onSubmit={handlePromoSubmit} className="flex gap-2">
-      <Input
-        type="text"
-        placeholder="Enter promo code"
-        value={promoCode}
-        onChange={(e) => setPromoCode(e.target.value)}
-        className="border-[#1A3B47]"
-      />
-      <Button
-        type="submit"
-        variant="outline"
-        className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white"
-      >
-        Apply
-      </Button>
-    </form>
-    {promoError && <p className="text-red-500 mt-2">{promoError}</p>}
-    {promoDetails && (
-      <p className="text-green-600 mt-2">
-        Promo code applied successfully!
-      </p>
-    )}
-  </div>
+                {/* Total */}
+                <div className="flex justify-between mt-4 text-xl font-bold">
+                  <span className="text-[#1A3B47]">Total</span>
+                  <span className="text-[#388A94]">
+                    {formatPrice(
+                      (promoDetails ? discountedTotal : totalAmount) +
+                      (form.watch("deliveryType") === "Express"
+                        ? 4.99
+                        : form.watch("deliveryType") === "Next-Same"
+                          ? 6.99
+                          : form.watch("deliveryType") === "International"
+                            ? 14.99
+                            : 2.99)
+                    )}
+                  </span>
+                </div>
+              </div>
 
-  {/* Complete Purchase Button */}
-  <Button
-    className="w-full mt-6 bg-[#1A3B47] text-white hover:bg-[#388A94]"
-    size="lg"
-    onClick={onSubmit}
-  >
-    Complete Purchase
-  </Button>
-</div>
+            </div>
+
+
+            {/* Promo Code Section */}
+            <div className="mt-6">
+              <form onSubmit={handlePromoSubmit} className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Enter promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  className="border-[#1A3B47]"
+                />
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white"
+                >
+                  Apply
+                </Button>
+              </form>
+              {promoError && <p className="text-red-500 mt-2">{promoError}</p>}
+              {promoDetails && (
+                <p className="text-green-600 mt-2">
+                  Promo code applied successfully!
+                </p>
+              )}
+            </div>
+
+            {/* Complete Purchase Button */}
+            <Button
+              className="w-full mt-6 bg-[#1A3B47] text-white hover:bg-[#388A94] completePurchase "
+              size="lg"
+              onClick={onSubmit}
+            >
+              Complete Purchase
+            </Button>
+          </div>
 
         </div>
       </div>
@@ -1314,70 +1353,70 @@ export default function CheckoutPage() {
       {/* Status Dialog */}
 
       <Dialog
-  open={isStatusDialogOpen}
-  onOpenChange={(open) => {
-    setIsStatusDialogOpen(open);
-    if (!open) {
-      // Call emptyCart when the dialog is closed
-      emptyCart();
-    }
-  }}
->
-  <DialogContent className="sm:max-w-[425px]">
-    <DialogHeader className="flex items-center gap-2">
-      {purchaseStatus === "success" ? (
-        <>
-          <CheckCircle className="w-6 h-6 text-green-500" />
-          <DialogTitle>Purchase Successful</DialogTitle>
-        </>
-      ) : (
-        <>
-          <XCircle className="w-6 h-6 text-red-500" />
-          <DialogTitle>Purchase Failed</DialogTitle>
-        </>
-      )}
-    </DialogHeader>
-    <p className="mt-2 text-gray-600">
-      {purchaseStatus === "success"
-        ? "Your purchase has been completed successfully."
-        : "There was an error processing your purchase. Please try again."}
-    </p>
-    {purchaseStatus === "success" && paymentMethod === "wallet" && (
-      <div className="mt-4 text-gray-600">
-        <p>
-          <strong>Amount Paid: </strong>{formatPrice(totalAmount)}
-        </p>
-        <p>
-          <strong>New Wallet Balance: </strong>{formatPrice(tourist.wallet)}
-        </p>
-      </div>
-    )}
-    {purchaseStatus !== "success" && (
-      <p className="text-red-500">{purchaseError}</p>
-    )}
-    <DialogFooter className="mt-4 flex justify-between">
-      <Button
-        onClick={() => {
-          navigate("/all-products");
-          emptyCart();
+        open={isStatusDialogOpen}
+        onOpenChange={(open) => {
+          setIsStatusDialogOpen(open);
+          if (!open) {
+            // Call emptyCart when the dialog is closed
+            emptyCart();
+          }
         }}
-        className="bg-[#1A3B47] text-white hover:bg-[#388A94]"
       >
-        Continue Shopping
-      </Button>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader className="flex items-center gap-2">
+            {purchaseStatus === "success" ? (
+              <>
+                <CheckCircle className="w-6 h-6 text-green-500" />
+                <DialogTitle>Purchase Successful</DialogTitle>
+              </>
+            ) : (
+              <>
+                <XCircle className="w-6 h-6 text-red-500" />
+                <DialogTitle>Purchase Failed</DialogTitle>
+              </>
+            )}
+          </DialogHeader>
+          <p className="mt-2 text-gray-600">
+            {purchaseStatus === "success"
+              ? "Your purchase has been completed successfully."
+              : "There was an error processing your purchase. Please try again."}
+          </p>
+          {purchaseStatus === "success" && paymentMethod === "wallet" && (
+            <div className="mt-4 text-gray-600">
+              <p>
+                <strong>Amount Paid: </strong>{formatPrice(totalAmount)}
+              </p>
+              <p>
+                <strong>New Wallet Balance: </strong>{formatPrice(tourist.wallet)}
+              </p>
+            </div>
+          )}
+          {purchaseStatus !== "success" && (
+            <p className="text-red-500">{purchaseError}</p>
+          )}
+          <DialogFooter className="mt-4 flex justify-between">
+            <Button
+              onClick={() => {
+                navigate("/all-products");
+                emptyCart();
+              }}
+              className="bg-[#1A3B47] text-white hover:bg-[#388A94]"
+            >
+              Continue Shopping
+            </Button>
 
-      <Button
-        onClick={() => {
-          navigate("/");
-          emptyCart();
-        }}
-        className="bg-gray-300 text-white hover:bg-gray-400"
-      >
-        Go to Home
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+            <Button
+              onClick={() => {
+                navigate("/");
+                emptyCart();
+              }}
+              className="bg-gray-300 text-white hover:bg-gray-400"
+            >
+              Go to Home
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
 
 
@@ -1389,6 +1428,9 @@ export default function CheckoutPage() {
           <ShippingAddress onCancel={() => setIsAddressDialogOpen(false)} />
         </DialogContent>
       </Dialog>
+      {(userRole === "guest" || userRole === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="Checkout" />
+      )}
     </div>
   );
 }

@@ -862,7 +862,7 @@ const ProductDetail = () => {
     : []),
     {
       target: ".addToWishlist",
-      content: (<> Click here to add to wishlist this product for later viewing or purchase.<br />Tip:<br />You can view your wishlist from the top right corner of the page</>),     placement: "left",
+      content: (<> Click here to add this product to your wishlist for later viewing or purchase.<br />Tip:<br />You can view your wishlist from the top right corner of the page</>),     placement: "left",
     },
     {
       target: ".sellerDetails",

@@ -854,9 +854,7 @@ export function AllItinerariesComponent() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-        <UserGuide steps={guideSteps} pageName="itineraries" />
-      )}
+      
 
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
@@ -1198,6 +1196,9 @@ export function AllItinerariesComponent() {
           </AlertTitle>
           <AlertDescription>{alertMessage.message}</AlertDescription>
         </Alert>
+      )}
+      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="itineraries" />
       )}
     </div>
   );

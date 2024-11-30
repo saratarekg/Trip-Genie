@@ -287,7 +287,7 @@ export default function AllHistoricalPlacesComponent() {
       const token = Cookies.get("jwt");
       const role = getUserRole();
       let url = `http://localhost:4000/${role}/historical-places`;
-      
+
       if (sortByPreference && role === "tourist") {
         const preferredResponse = await fetch(
           "http://localhost:4000/tourist/historical-places-preference",
@@ -458,10 +458,8 @@ export default function AllHistoricalPlacesComponent() {
 
   return (
     <div className="bg-gray-100">
-      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-           <UserGuide steps={guideSteps} pageName="historicalPlaces" />
-        )}
-     
+
+
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
           <div className="flex-1">
@@ -589,17 +587,15 @@ export default function AllHistoricalPlacesComponent() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`whitespace-nowrap rounded-full ${
-                      isSortedByPreference ? "bg-red-100" : ""
-                    }`}
+                    className={`whitespace-nowrap rounded-full ${isSortedByPreference ? "bg-red-100" : ""
+                      }`}
                     onClick={handleSortByPreference}
                   >
                     <Heart
-                      className={`w-4 h-4 mr-2 ${
-                        isSortedByPreference
+                      className={`w-4 h-4 mr-2 ${isSortedByPreference
                           ? "fill-current text-red-500"
                           : ""
-                      }`}
+                        }`}
                     />
                     Sort by Preference
                   </Button>
@@ -730,6 +726,9 @@ export default function AllHistoricalPlacesComponent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {(getUserRole() === "guest" || getUserRole() === "tourist") && (
+        <UserGuide steps={guideSteps} pageName="historicalPlaces" />
+      )}
     </div>
   );
 }
