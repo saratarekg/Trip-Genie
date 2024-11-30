@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import PaymentPopup from "@/components/payment-popup";
+import { useSearchParams } from "react-router-dom";
 import {
   Search,
   Plus,
@@ -110,6 +112,7 @@ export default function TransportationPage() {
   const transportationsPerPage = 6;
   const [tourist, setTourist] = useState(null);
   const [closing, setClosing] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
 
   useEffect(() => {
@@ -245,7 +248,6 @@ export default function TransportationPage() {
       return matchesSearchTerm && matchesFrom && matchesTo && matchesDate;
     });
     // You might want to do something with the filtered results here
-    console.log(filtered);
     setFilteredTransportations(filtered);
     setCurrentPage(1);
   }, [searchTerm, selectedFrom, selectedTo, selectedDate, transportations]);
@@ -261,9 +263,9 @@ export default function TransportationPage() {
   };
 
 
-  const handleTransportationBooking = async () => {
-    if (!selectedTransportation) return;
-
+  const handleTransportationBooking = async (paymentMethod, seatsToBook, date, selectedTransportID) => {
+    console.log(paymentMethod, seatsToBook, selectedTransportID);
+  
     setIsBooking(true);
     setBookingError("");
     try {
@@ -271,7 +273,7 @@ export default function TransportationPage() {
       const response = await axios.post(
         "http://localhost:4000/tourist/book-transportation",
         {
-          transportationID: selectedTransportation._id,
+          transportationID: selectedTransportID,
           seatsToBook: seatsToBook,
           paymentMethod: paymentMethod,
         },
@@ -279,22 +281,23 @@ export default function TransportationPage() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
+  
       if (response.data.message === "Transportation Booking successful") {
-        setShowTransportationSuccessDialog(true);
         const updatedTransportations = transportations.map((t) =>
           t._id === selectedTransportation._id
             ? { ...t, remainingSeats: response.data.remainingSeats }
             : t
         );
+  
         setTransportations(updatedTransportations);
         setFilteredTransportations(updatedTransportations);
+  
+        fetchTransportations();
       } else {
         setBookingError(
           response.data.message || "Failed to book transportation"
         );
       }
-      fetchTransportations();
     } catch (error) {
       console.error("Error booking transportation:", error);
       setBookingError(
@@ -303,8 +306,67 @@ export default function TransportationPage() {
     } finally {
       setIsBooking(false);
       setShowTransportationBookingDialog(false);
+  
+      // Pass the data directly when showing the dialog
+      setShowTransportationSuccessDialog({
+        open: true,
+        paymentMethod,
+        seatsToBook,
+        ticketCost: selectedTransportation?.ticketCost,
+        wallet: tourist?.wallet,
+      });
     }
   };
+  
+
+  useEffect(() => {
+    const handleBookingSuccess = async () => {
+      const success = searchParams.get("success");
+      const quantity = searchParams.get("quantity");
+      const selectedDateStr = searchParams.get("selectedDate");
+      const sessionId = searchParams.get("session_id"); 
+      const selectedTransportID = searchParams.get("selectedTransportID");     
+  
+      if (sessionId && success === "true" ) {
+        try {
+          const response = await axios.get(
+            `http://localhost:4000/check-payment-status?session_id=${sessionId}`
+          );
+  
+          console.log("Payment status response:", response.data);
+  
+          if (response.data.status === "paid") {
+  
+            // Now call handleBooking with the formatted date
+            try {
+              await handleTransportationBooking("creditCard", parseInt(quantity), selectedDateStr,selectedTransportID);
+            } catch (error) {
+              console.error("Error handling booking success:", error);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking payment status:", error);
+        }
+      }
+    };
+  
+    handleBookingSuccess();
+  }, [searchParams, selectedTransportation]);
+  
+
+  const handleFinalOK = () => {
+    setShowTransportationSuccessDialog(false);
+    searchParams.delete("success");
+    searchParams.delete("quantity");
+    searchParams.delete("selectedDate");
+    searchParams.delete("session_id");
+
+    const newUrl = `${window.location.pathname}`;
+
+    window.history.replaceState(null, '', newUrl);
+    setBookingError("");
+
+  }; 
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -907,179 +969,93 @@ export default function TransportationPage() {
           </Button>
         </div>
 
-        <Dialog
-          open={showTransportationBookingDialog}
-          onOpenChange={setShowTransportationBookingDialog}
-        >
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Book Transportation</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="seats" className="text-right">
-                  Seats
-                </Label>
-                <Input
-                  id="seats"
-                  type="number"
-                  className="col-span-3"
-                  value={seatsToBook}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value);
-                    const maxSeats = selectedTransportation?.remainingSeats || 0;
-
-                    if (value > maxSeats) {
-                      setExceededMax(true); // show error message
-                    } else {
-                      setExceededMax(false); // hide error message
-                    }
-
-                    // Set seats within allowed range
-                    setSeatsToBook(Math.max(0, Math.min(value, maxSeats)));
-                  }}
-                  min="0"
-                  max={selectedTransportation?.remainingSeats}
-                />
-                {exceededMax && (
-                  <p className="text-red-600 text-xs col-span-4">
-                    Max seats is {selectedTransportation?.remainingSeats}.
-                  </p>
+        { userPreferredCurrency && userPreferredCurrency.code && rates && selectedTransportation &&(
+          <>
+            <PaymentPopup
+              isOpen={showTransportationBookingDialog}
+              onClose={() => setShowTransportationBookingDialog(false)}
+              title={`Booking: ${selectedTransportation?.vehicleType} from ${selectedTransportation?.from} to ${selectedTransportation?.to}`}
+              items={[
+                {
+                  name: selectedTransportation?.vehicleType,
+                  price: selectedTransportation.ticketCost * (rates[userPreferredCurrency.code]) * 100,
+                },
+              ]} // Convert price to cents
+              onWalletPayment={handleTransportationBooking}
+              stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+              onConfirm={handleTransportationBooking}
+              priceOne={(selectedTransportation.ticketCost * (rates[userPreferredCurrency.code])).toFixed(2)}
+              currency={userPreferredCurrency.code}
+              symbol={userPreferredCurrency.symbol}
+              returnLoc={"http://localhost:3000/transportation"}
+              error={bookingError}
+              setError={setBookingError}
+              selectedTransportID={selectedTransportation._id}
+              transportationSeats={selectedTransportation.remainingSeats}
+             
+            />
+          </>
+        )}
+<Dialog
+  open={showTransportationSuccessDialog.open}
+  onOpenChange={(isOpen) =>
+    setShowTransportationSuccessDialog({ ...showTransportationSuccessDialog, open: isOpen })
+  }
+>
+  <DialogContent>
+    <DialogHeader>
+      {bookingError !== "Transportation booking successful" ? (
+        <DialogTitle>
+          <div className="flex items-center">
+            <XCircle className="w-6 h-6 text-red-500 mr-2" />
+            Failed to book transportation
+          </div>
+        </DialogTitle>
+      ) : (
+        <>
+          <DialogTitle>
+            <div className="flex items-center">
+              <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+              Transportation booking successful
+            </div>
+          </DialogTitle>
+          {showTransportationSuccessDialog.paymentMethod === "Wallet" && (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <Label className="text-right">You Paid:</Label>
+              <div>
+                {displayPrice(
+                  showTransportationSuccessDialog.seatsToBook *
+                    showTransportationSuccessDialog.ticketCost
                 )}
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Total Price</Label>
-                <div className="col-span-3">
-                  {displayPrice(seatsToBook * selectedTransportation?.ticketCost)}
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Payment</Label>
-                <RadioGroup
-                  defaultValue="creditCard"
-                  className="col-span-3"
-                  onValueChange={setPaymentMethod}
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="creditCard" id="creditCard" />
-                    <Label htmlFor="creditCard">Credit Card</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="debitCard" id="debitCard" />
-                    <Label htmlFor="debitCard">Debit Card</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="wallet" id="wallet" />
-                    <Label htmlFor="wallet">Wallet</Label>
-                  </div>
-                </RadioGroup>
+              <Label className="text-right">New Wallet Balance:</Label>
+              <div>
+                {displayPrice(
+                  showTransportationSuccessDialog.wallet -
+                    showTransportationSuccessDialog.seatsToBook *
+                      showTransportationSuccessDialog.ticketCost
+                )}
               </div>
             </div>
-            <DialogFooter>
-              <Button
-                onClick={() => setShowTransportationBookingDialog(false)}
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleTransportationBooking} disabled={isBooking}>
-                {isBooking ? "Booking..." : "Confirm Booking"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          )}
+          <div className="py-4">
+            <p>
+              You have successfully booked{" "}
+              {showTransportationSuccessDialog.seatsToBook} seat(s).
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleFinalOK}>Close</Button>
+          </DialogFooter>
+        </>
+      )}
+    </DialogHeader>
+  </DialogContent>
+</Dialog>
 
-        <Dialog
-          open={showTransportationSuccessDialog}
-          onOpenChange={setShowTransportationSuccessDialog}
-        >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-                  Transportation Booked Successfully
-                </div>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="py-4">
-              <p>
-                You have successfully booked {seatsToBook} seat(s) for the
-                transportation from {selectedTransportation?.from} to{" "}
-                {selectedTransportation?.to}.
-              </p>
-            </div>
-            <DialogFooter>
-              <Button onClick={() => setShowTransportationSuccessDialog(false)}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
-        <Dialog
-          open={!(bookingError === "") && !closing}
-          onOpenChange={(isOpen) => {
-            if (!isOpen) {
-              setClosing(true); // Start closing
-              setTimeout(() => {
-                setBookingError(""); // Clear error
-                setClosing(false); // Reset closing state
-              }, 300); // Matches transition duration of the Dialog (adjust if necessary)
-            }
-          }}
-        >
-          <DialogContent>
-            <DialogHeader>
-              {bookingError !== "Transportation booking successful" ? (
-                <DialogTitle>
-                  <div className="flex items-center">
-                    <XCircle className="w-6 h-6 text-red-500 mr-2" />
-                    Failed to book transportation
-                  </div>
-                </DialogTitle>
-              ) : (
-                <DialogTitle>
-                  <div className="flex items-center">
-                    <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-                    Transportation booking successful
-                  </div>
-                </DialogTitle>
-              )}
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <Label className="text-right">Amount Paid:</Label>
-                <div>
-                  {displayPrice(seatsToBook * selectedTransportation?.ticketCost)}
-                </div>
-              </div>
-              {paymentMethod === "wallet" && (
-                <div className="grid grid-cols-2 gap-4">
-                  <Label className="text-right">New Wallet Balance:</Label>
-                  <div>
-                    {displayPrice(
-                      tourist.wallet - seatsToBook * selectedTransportation?.ticketCost
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button
-                onClick={() => {
-                  setClosing(true); // Start closing
-                  setTimeout(() => {
-                    setBookingError(""); // Clear error
-                    setClosing(false); // Reset closing state
-                  }, 300); // Matches transition duration
-                }}
-              >
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+
+       
       </div>
       {(userRole === "guest" || userRole === "tourist") && (
         <UserGuide steps={guideSteps} pageName="itineraries" />

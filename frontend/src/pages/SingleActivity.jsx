@@ -888,7 +888,7 @@ const ActivityDetail = () => {
     }
   };
 
-  const handlePaymentConfirm = async (paymentType, numberOfTickets) => {
+  const handlePaymentConfirm = async (paymentType, numberOfTickets,date) => {
     setIsBooking(true);
     setBookingError("");
     try {
@@ -924,8 +924,10 @@ const ActivityDetail = () => {
       } else {
         const data = await response.json();
         setShowPaymentPopup(false);
+        setNumberOfTickets(numberOfTickets);
+        setPaymentType(paymentType); // Update the number of tickets in the state
         setShowSuccessDialog(true);
-        setNumberOfTickets(numberOfTickets); // Update the number of tickets in the state
+
       }
     } catch (error) {
       console.error("Error booking activity:", error);
@@ -1248,7 +1250,7 @@ const ActivityDetail = () => {
       </div>
 
       <div className="bg-gray-100">
-        <div className="container ">
+        <div className="mx-4 ">
           <div className="pt-4">
             <div className="flex flex-col md:flex-row gap-8">
               <div className="md:col-span-2">
@@ -1870,6 +1872,7 @@ const ActivityDetail = () => {
               symbol={userPreferredCurrency.symbol}
               returnLoc={"http://localhost:3000/activity/" + id}
               error={bookingError}
+              setError={setBookingError}
             />
           )}
 
