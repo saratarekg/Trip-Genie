@@ -240,6 +240,35 @@ app.post("/create-flight-checkout-session", async (req, res) => {
 
     // Calculate the total price of items
     const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
+    let successURL = ``; 
+    if (flightType === "Round Trip") {
+      successURL = `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` + 
+        `&flightID=${encodeURIComponent(flightID)}` +
+        `&from=${encodeURIComponent(from)}` +
+        `&to=${encodeURIComponent(to)}` +
+        `&departureDate=${encodeURIComponent(departureDate)}` +
+        `&arrivalDate=${encodeURIComponent(arrivalDate)}` +
+        `&price=${encodeURIComponent(price)}` +
+        `&numberOfTickets=${encodeURIComponent(numberOfTickets)}` +
+        `&type=${encodeURIComponent(type)}` +
+        `&returnDepartureDate=${encodeURIComponent(returnDepartureDate)}` +
+        `&returnArrivalDate=${encodeURIComponent(returnArrivalDate)}` +
+        `&seatType=${encodeURIComponent(seatType)}` +
+        `&flightType=${encodeURIComponent(flightType)}` +
+        `&flightTypeReturn=${encodeURIComponent(flightTypeReturn)}`;
+    } else {
+      successURL = `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` +
+        `&flightID=${encodeURIComponent(flightID)}` +
+        `&from=${encodeURIComponent(from)}` +
+        `&to=${encodeURIComponent(to)}` +
+        `&departureDate=${encodeURIComponent(departureDate)}` +
+        `&arrivalDate=${encodeURIComponent(arrivalDate)}` +
+        `&price=${encodeURIComponent(price)}` +
+        `&numberOfTickets=${encodeURIComponent(numberOfTickets)}` +
+        `&type=${encodeURIComponent(type)}` +
+        `&seatType=${encodeURIComponent(seatType)}` +
+        `&flightType=${encodeURIComponent(flightType)}`;
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -254,20 +283,7 @@ app.post("/create-flight-checkout-session", async (req, res) => {
         quantity: item.quantity,
       })),
       mode: "payment",
-      success_url: `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` +
-        `&flightID=${encodeURIComponent(flightID)}` +
-        `&from=${encodeURIComponent(from)}` +
-        `&to=${encodeURIComponent(to)}` +
-        `&departureDate=${encodeURIComponent(departureDate)}` +
-        `&arrivalDate=${encodeURIComponent(arrivalDate)}` +
-        `&price=${encodeURIComponent(price)}` +
-        `&numberOfTickets=${encodeURIComponent(numberOfTickets)}` +
-        `&type=${encodeURIComponent(type)}` +
-        `&returnDepartureDate=${encodeURIComponent(returnDepartureDate)}` +
-        `&returnArrivalDate=${encodeURIComponent(returnArrivalDate)}` +
-        `&seatType=${encodeURIComponent(seatType)}` +
-        `&flightType=${encodeURIComponent(flightType)}` +
-        `&flightTypeReturn=${encodeURIComponent(flightTypeReturn)}`,
+      success_url: successURL,
       cancel_url: `${returnLocation}`,
     });
 

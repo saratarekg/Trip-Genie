@@ -268,8 +268,8 @@ const bookFlight = async (req, res) => {
   const touristID = res.locals.user_id;
 
   try {
-    const booking = new TouristFlight({
-      paymentType, // Payment type: CreditCard, DebitCard, Wallet
+    const bookingData = {
+      paymentType, 
       touristID,
       flightID,
       from,
@@ -279,12 +279,16 @@ const bookFlight = async (req, res) => {
       price,
       numberOfTickets,
       type,
-      returnDepartureDate,
-      returnArrivalDate,
       seatType,
       flightType,
-      flightTypeReturn,
-    });
+    };
+
+    if (returnDepartureDate) bookingData.returnDepartureDate = returnDepartureDate;
+    if (returnArrivalDate) bookingData.returnArrivalDate = returnArrivalDate;
+    if (flightTypeReturn) bookingData.flightTypeReturn = flightTypeReturn;
+
+    const booking = new TouristFlight(bookingData);
+
 
     const paymentAmount = price * numberOfTickets;
 
