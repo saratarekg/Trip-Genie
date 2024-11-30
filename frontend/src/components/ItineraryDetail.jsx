@@ -1137,36 +1137,41 @@ const ItineraryDetail = () => {
       const sessionId = searchParams.get("session_id");
 
       console.log(success, sessionId);
-      
-  
-      if (sessionId && success === "true" ) {
+
+      if (sessionId && success === "true") {
         try {
           const response = await axios.get(
             `http://localhost:4000/check-payment-status?session_id=${sessionId}`
           );
-  
+
           console.log("Payment status response:", response.data);
-  
+
           if (response.data.status === "paid") {
-  
-            // Now call handleBooking with the formatted date
-            try {
-              await handleBooking("CreditCard", parseInt(quantity), selectedDateStr);
-            } catch (error) {
-              console.error("Error handling booking success:", error);
-            }
+            setShowSuccessDialog(true);
+            setNumberOfTickets(parseInt(quantity));
+            setPaymentType("CreditCard");
+            // Update any other necessary state here
           }
         } catch (error) {
           console.error("Error checking payment status:", error);
         }
       }
     };
-  
-    handleBookingSuccess();
-  }, [searchParams, itinerary]);
-  
 
-  const handleFinalOK = () => {
+    handleBookingSuccess();
+  }, [searchParams]);
+
+  const handleFinalOK = async () => {
+    if (searchParams.get("success") === "true") {
+      const quantity = searchParams.get("quantity");
+      const selectedDateStr = searchParams.get("selectedDate");
+      try {
+        await handleBooking("CreditCard", parseInt(quantity), selectedDateStr);
+      } catch (error) {
+        console.error("Error handling booking:", error);
+        // Handle the error appropriately
+      }
+    }
     setShowSuccessDialog(false);
     searchParams.delete("success");
     searchParams.delete("quantity");
@@ -1174,10 +1179,26 @@ const ItineraryDetail = () => {
     searchParams.delete("session_id");
 
     const newUrl = `${window.location.pathname}`;
-
     window.history.replaceState(null, '', newUrl);
 
-  }; 
+    if (showSuccessDialog) {
+      return (
+        <div>
+          <h1>Booking Successful!</h1>
+          <p>
+            You have booked {numberOfTickets} tickets with payment type{" "}
+            {paymentType}.
+          </p>
+          <button onClick={handleFinalOK}>OK</button>
+        </div>
+      );
+    } else {
+      return <div>Loading...</div>;
+    }
+  };
+
+ 
+
 
   const navigate = useNavigate();
 
