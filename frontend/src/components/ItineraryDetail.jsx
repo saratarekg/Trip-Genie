@@ -4,8 +4,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { useSearchParams } from "react-router-dom";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
+import PaymentPopup from "@/components/payment-popup";
 import {
   ToastProvider,
   ToastViewport,
@@ -200,6 +202,9 @@ const AvailableDatesSection = ({
   handleBookNowClick,
   selectedDate,
   setSelectedDate,
+  selectedItineraryDate,
+  setSelectedItineraryDate,
+  setShowBookingDialog,
 }) => {
   console.log(selectedDate);
   const dates = availableDates.map((dateInfo) => new Date(dateInfo.date));
@@ -223,7 +228,7 @@ const AvailableDatesSection = ({
       <h3 className="text-2xl font-semibold mb-2">Available Dates</h3>
       <p>Select a date and book now!</p>
       <Calendar
-        value={selectedDate}
+        value={selectedItineraryDate}
         tileDisabled={({ date }) =>
           !dates.some(
             (availableDate) =>
@@ -231,8 +236,8 @@ const AvailableDatesSection = ({
           )
         }
         onClickDay={(value) => {
-          setSelectedDate(value);
-          handleBookNowClick(value);
+          setSelectedItineraryDate(value);
+          setShowBookingDialog(true);
         }}
         minDetail="month"
         next2Label={null}
@@ -645,6 +650,7 @@ const TourguideProfileCard = ({
   );
 };
 const ItineraryDetail = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { id } = useParams();
   const [itinerary, setItinerary] = useState(null);
   const [activities, setActivities] = useState([]);
@@ -673,6 +679,7 @@ const ItineraryDetail = () => {
   const [itineraryRating, setItineraryRating] = useState(0);
   const [itineraryReview, setItineraryReview] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedItineraryDate, setSelectedItineraryDate] = useState(null);
   const [showFullComment, setShowFullComment] = useState(null);
   const [activityRating, setActivityRating] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -1067,7 +1074,8 @@ const ItineraryDetail = () => {
     setBookingError("");
   };
 
-  const handleBooking = async () => {
+  const handleBooking = async (paymentType,numberOfTickets,date) => {
+    console.log(paymentType,numberOfTickets,date);
     setIsBooking(true);
     setBookingError("");
     try {
@@ -1084,9 +1092,9 @@ const ItineraryDetail = () => {
           body: JSON.stringify({
             itinerary: id,
             paymentType,
-            paymentAmount: totalPrice,
+            paymentAmount: itinerary.price * numberOfTickets,
             numberOfTickets,
-            date: selectedDate,
+            date,
           }),
         }
       );
@@ -1103,7 +1111,11 @@ const ItineraryDetail = () => {
       } else {
         const data = await response.json();
         setShowBookingDialog(false);
+        setNumberOfTickets(numberOfTickets);
+        setPaymentType(paymentType);
         setShowSuccessDialog(true);
+         // Update the number of tickets in the state
+
       }
     } catch (error) {
       console.error("Error booking itinerary:", error);
@@ -1114,6 +1126,58 @@ const ItineraryDetail = () => {
       setIsBooking(false);
     }
   };
+
+
+  
+  useEffect(() => {
+    const handleBookingSuccess = async () => {
+      const success = searchParams.get("success");
+      const quantity = searchParams.get("quantity");
+      const selectedDateStr = searchParams.get("selectedDate");
+      const sessionId = searchParams.get("session_id");
+
+      console.log(success, sessionId);
+      
+  
+      if (sessionId && success === "true" ) {
+        try {
+          const response = await axios.get(
+            `http://localhost:4000/check-payment-status?session_id=${sessionId}`
+          );
+  
+          console.log("Payment status response:", response.data);
+  
+          if (response.data.status === "paid") {
+  
+            // Now call handleBooking with the formatted date
+            try {
+              await handleBooking("CreditCard", parseInt(quantity), selectedDateStr);
+            } catch (error) {
+              console.error("Error handling booking success:", error);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking payment status:", error);
+        }
+      }
+    };
+  
+    handleBookingSuccess();
+  }, [searchParams]);
+  
+
+  const handleFinalOK = () => {
+    setShowSuccessDialog(false);
+    searchParams.delete("success");
+    searchParams.delete("quantity");
+    searchParams.delete("selectedDate");
+    searchParams.delete("session_id");
+
+    const newUrl = `${window.location.pathname}`;
+
+    window.history.replaceState(null, '', newUrl);
+
+  }; 
 
   const navigate = useNavigate();
 
@@ -1630,6 +1694,9 @@ const ItineraryDetail = () => {
                   handleBookNowClick={handleBookNowClick}
                   selectedDate={selectedDate}
                   setSelectedDate={setSelectedDate}
+                  setSelectedItineraryDate={setSelectedItineraryDate}
+                  selectedItineraryDate={selectedItineraryDate}
+                  setShowBookingDialog={setShowBookingDialog}
                 />
 
                 <div className="flex flex-wrap gap-2 my-4">
@@ -2098,111 +2165,30 @@ const ItineraryDetail = () => {
           </DialogContent>
         </Dialog>
 
-        {userRole === "tourist" && (
+        {userRole === "tourist" &&  userPreferredCurrency && userPreferredCurrency.code && (
           <>
-            <Dialog
-              open={showBookingDialog}
-              onOpenChange={setShowBookingDialog}
-            >
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Book Itinerary: {itinerary.title}</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="date" className="text-right">
-                      Date
-                    </Label>
-                    <Select
-                      onValueChange={handleDateChange}
-                      value={selectedDate || undefined}
-                    >
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue>
-                          {selectedDate
-                            ? format(new Date(selectedDate), "MMMM d, yyyy")
-                            : "Select a date"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {itinerary.availableDates
-                          .filter(
-                            (dateInfo) =>
-                              new Date(dateInfo.date) >=
-                              new Date().setHours(0, 0, 0, 0)
-                          )
-                          .map((dateInfo, index) => (
-                            <SelectItem key={index} value={dateInfo.date}>
-                              {format(new Date(dateInfo.date), "MMMM d, yyyy")}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="tickets" className="text-right">
-                      Tickets
-                    </Label>
-                    <Input
-                      id="tickets"
-                      type="number"
-                      value={numberOfTickets}
-                      onChange={(e) =>
-                        setNumberOfTickets(
-                          Math.max(1, parseInt(e.target.value))
-                        )
-                      }
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Total Price</Label>
-                    <div className="col-span-3">
-                      {formatPrice(calculateTotalPrice())}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label className="text-right">Payment Type</Label>
-                    <RadioGroup
-                      value={paymentType}
-                      onValueChange={setPaymentType}
-                      className="col-span-3"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="CreditCard" id="CreditCard" />
-                        <Label htmlFor="CreditCard">Credit Card</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="DebitCard" id="DebitCard" />
-                        <Label htmlFor="DebitCard">Debit Card</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Wallet" id="Wallet" />
-                        <Label htmlFor="Wallet">Wallet</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  {bookingError && (
-                    <div className="text-red-500 text-sm">{bookingError}</div>
-                  )}
-                </div>
-                <DialogFooter>
-                  <Button
-                    onClick={() => setShowBookingDialog(false)}
-                    variant="outline"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleBooking}
-                    disabled={isBooking || !selectedDate}
-                  >
-                    {isBooking ? "Booking..." : "Confirm Booking"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <PaymentPopup
+              isOpen={showBookingDialog}
+              onClose={() => setShowBookingDialog(false)}
+              title={`Book Itinerary: ${itinerary.title}`}
+              items={[
+                {
+                  name: itinerary.title,
+                  price: itinerary.price * exchangeRates * 100,
+                },
+              ]} // Convert price to cents
+              onWalletPayment={handleBooking}
+              stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+              onConfirm={handleBooking}
+              priceOne={(itinerary.price * exchangeRates).toFixed(2)}
+              currency={userPreferredCurrency.code}
+              symbol={userPreferredCurrency.symbol}
+              returnLoc={"http://localhost:3000/itinerary/" + itinerary._id}
+              error={bookingError}
+              setError={setBookingError}
+              availableDates={itinerary.availableDates}
+              selectedItineraryDate={selectedItineraryDate}
+            />
           </>
         )}
 
@@ -2237,7 +2223,7 @@ const ItineraryDetail = () => {
             </div>
 
             <DialogFooter>
-              <Button onClick={() => setShowSuccessDialog(false)}>OK</Button>
+              <Button onClick={handleFinalOK}>OK</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
