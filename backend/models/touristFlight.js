@@ -7,6 +7,11 @@ const touristFlightSchema = new mongoose.Schema(
       ref: "Tourist",
       required: true,
     },
+    paymentType: {
+      type: String,
+      enum: ["CreditCard", "DebitCard", "Wallet"],
+      required: true,
+    },
     flightID: 
       {
         type: String,

@@ -179,7 +179,7 @@ const formatDate = (date) => {
 function BookingPage() {
   const [searchParams] = useSearchParams();
   const [from, setFrom] = useState(searchParams.get("from") || "CAI");
-  const [to, setTo] = useState(searchParams.get("to") || "CDG");
+  const [to, setTo] = useState(searchParams.get("to") || "DXB");
   const [numberOfSeats, setNumberOfSeats] = useState(1);
   const [seatType, setSeatType] = useState("Economy");
   const [departureDate, setDepartureDate] = useState(
@@ -207,15 +207,8 @@ function BookingPage() {
     useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const mainContentRef = useRef(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [holderName, setHolderName] = useState("");
-  const [cvv, setCvv] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("Wallet");
+  const [bookingError, setBookingError] = useState("");
 
   const itemsPerPage = 9;
 
@@ -242,44 +235,53 @@ function BookingPage() {
   const handleBookNow = async () => {
     try {
       const token = Cookies.get("jwt");
-      const response = await fetch("http://localhost:4000/tourist/book-flight", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          flightID: `${Math.random().toString(36).substr(2, 9)}`,
-          from: selectedFlight.itineraries[0].segments[0].departure.iataCode,
-          to: selectedFlight.itineraries[0].segments[
-            selectedFlight.itineraries[0].segments.length - 1
-          ].arrival.iataCode,
-          departureDate: selectedFlight.itineraries[0].segments[0].departure.at,
-          arrivalDate:
-            selectedFlight.itineraries[0].segments[
+      const response = await fetch(
+        "http://localhost:4000/tourist/book-flight",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            paymentType: paymentMethod,
+            flightID: `${Math.random().toString(36).substr(2, 9)}`,
+            from: selectedFlight.itineraries[0].segments[0].departure.iataCode,
+            to: selectedFlight.itineraries[0].segments[
               selectedFlight.itineraries[0].segments.length - 1
-            ].arrival.at,
-          price: parseFloat(selectedFlight.price.total),
-          numberOfTickets: numberOfSeats,
-          type: selectedFlight.itineraries[1] ? "Round Trip" : "One Way",
-          returnDepartureDate: selectedFlight.itineraries[1]
-            ? selectedFlight.itineraries[1].segments[0].departure.at
-            : undefined,
-          returnArrivalDate: selectedFlight.itineraries[1]
-            ? selectedFlight.itineraries[1].segments[
-                selectedFlight.itineraries[1].segments.length - 1
-              ].arrival.at
-            : undefined,
-          seatType: seatType,
-          flightType: selectedFlight.itineraries[0].segments[0].carrierCode + " " + selectedFlight.itineraries[0].segments[0].number,
-          flightTypeReturn: selectedFlight.itineraries[1]
-            ? selectedFlight.itineraries[1].segments[0].carrierCode
-            : undefined,
-        }),
-      });
+            ].arrival.iataCode,
+            departureDate:
+              selectedFlight.itineraries[0].segments[0].departure.at,
+            arrivalDate:
+              selectedFlight.itineraries[0].segments[
+                selectedFlight.itineraries[0].segments.length - 1
+              ].arrival.at,
+            price: parseFloat(selectedFlight.price.total),
+            numberOfTickets: numberOfSeats,
+            type: selectedFlight.itineraries[1] ? "Round Trip" : "One Way",
+            returnDepartureDate: selectedFlight.itineraries[1]
+              ? selectedFlight.itineraries[1].segments[0].departure.at
+              : undefined,
+            returnArrivalDate: selectedFlight.itineraries[1]
+              ? selectedFlight.itineraries[1].segments[
+                  selectedFlight.itineraries[1].segments.length - 1
+                ].arrival.at
+              : undefined,
+            seatType: seatType,
+            flightType:
+              selectedFlight.itineraries[0].segments[0].carrierCode +
+              " " +
+              selectedFlight.itineraries[0].segments[0].number,
+            flightTypeReturn: selectedFlight.itineraries[1]
+              ? selectedFlight.itineraries[1].segments[0].carrierCode
+              : undefined,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Booking failed");
+        setBookingError("Insufficient funds. Please try again.");
+        throw new Error("Failed to book the flight");
       }
 
       const data = await response.json();
@@ -287,7 +289,7 @@ function BookingPage() {
       setIsBookingConfirmationOpen(true);
     } catch (error) {
       console.error("Booking error:", error);
-      setError("Failed to book the flight. Please try again.");
+      setBookingError("Failed to book the flight. Please try again.");
     }
   };
 
@@ -513,7 +515,6 @@ function BookingPage() {
     if (mainContentRef.current) {
       mainContentRef.current.inert = false;
     }
-    resetBookingForm();
   };
 
   const handleCloseAllPopups = () => {
@@ -522,32 +523,6 @@ function BookingPage() {
     if (mainContentRef.current) {
       mainContentRef.current.inert = false;
     }
-    resetBookingForm();
-  };
-
-  const resetBookingForm = () => {
-    setFirstName("");
-    setLastName("");
-    setPhone("");
-    setEmail("");
-    setPaymentMethod("");
-    setCardNumber("");
-    setExpiryDate("");
-    setHolderName("");
-    setCvv("");
-  };
-
-  const isBookingFormValid = () => {
-    if (!firstName || !lastName || !phone || !email || !paymentMethod) {
-      return false;
-    }
-    if (
-      paymentMethod === "card" &&
-      (!cardNumber || !expiryDate || !holderName || !cvv)
-    ) {
-      return false;
-    }
-    return true;
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -942,32 +917,10 @@ function BookingPage() {
                 )}
                 <h4 className="font-semibold mt-4">Price Details</h4>
                 <p>
-                  Total: {selectedFlight.price.total}{" "}
+                  Total: {selectedFlight.price.total * numberOfSeats}{" "}
                   {selectedFlight.price.currency}
                 </p>
                 <div className="space-y-4 mt-4">
-                  <Input
-                    placeholder="First Name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Last Name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-
                   <Select
                     value={numberOfSeats.toString()}
                     onValueChange={(value) => setNumberOfSeats(parseInt(value))}
@@ -999,44 +952,35 @@ function BookingPage() {
                     onValueChange={setPaymentMethod}
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="wallet" id="wallet" />
-                      <Label htmlFor="wallet">Wallet</Label>
+                      <RadioGroupItem value="Wallet" id="Wallet" />
+                      <Label htmlFor="Wallet">Wallet</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="card" id="card" />
-                      <Label htmlFor="card">Credit/Debit Card</Label>
+                      <RadioGroupItem value="CreditCard" id="CreditCard" />
+                      <Label htmlFor="CreditCard">Credit/Debit Card</Label>
                     </div>
                   </RadioGroup>
-
-                  {paymentMethod === "card" && (
-                    <div className="space-y-4">
-                      <Input
-                        placeholder="Card Number"
-                        value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value)}
-                      />
-                      <Input
-                        placeholder="Expiry Date (YYYY-MM)"
-                        value={expiryDate}
-                        onChange={(e) => setExpiryDate(e.target.value)}
-                      />
-                      <Input
-                        placeholder="Card Holder Name"
-                        value={holderName}
-                        onChange={(e) => setHolderName(e.target.value)}
-                      />
-                      <Input
-                        placeholder="CVV"
-                        value={cvv}
-                        onChange={(e) => setCvv(e.target.value)}
-                      />
-                    </div>
-                  )}
                 </div>
+
+                {bookingError && (
+                  <Alert variant="destructive" className="mt-4">
+                    <div className="flex items-center space-x-3">
+                      <AlertCircle className="h-6 w-6 text-red-600" />
+                      <div className="flex flex-col space-y-1">
+                        <AlertTitle className="text-red-600 font-semibold text-lg">
+                          Error
+                        </AlertTitle>
+                        <AlertDescription className="text-red-700 text-sm">
+                          {bookingError}
+                        </AlertDescription>
+                      </div>
+                    </div>
+                  </Alert>
+                )}
+
                 <Button
                   className="mt-4 w-full bg-[#388A94] hover:bg-[#1A3B47] text-white "
                   onClick={handleBookNow}
-                  disabled={!isBookingFormValid()}
                 >
                   Book Now
                 </Button>
