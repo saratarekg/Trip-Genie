@@ -364,6 +364,7 @@ const getMyFlights = async (req, res) => {
 };
 
 const bookHotel = async (req, res) => {
+  const userId = res.locals.user_id; // Get the user's ID from response locals
   const {
     hotelID,
     hotelName,
@@ -373,8 +374,27 @@ const bookHotel = async (req, res) => {
     roomName,
     price,
     numberOfAdults,
+    paymentType, 
   } = req.body;
   const touristID = res.locals.user_id;
+
+  const user = await Tourist.findById(touristID);
+
+    if (!user) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+  let walletBalance = 0;
+    // Check if payment type is "Wallet"
+    if (paymentType === "Wallet") {
+      if (user.wallet < price) {
+        return res
+          .status(400)
+          .json({ message: `Insufficient funds in wallet: ${user.wallet}, but the price is: ${price}` });
+        }
+
+      walletBalance = user.wallet - price;
+    }
 
   try {
     const booking = new TouristHotel({
@@ -387,10 +407,37 @@ const bookHotel = async (req, res) => {
       roomName,
       price,
       numberOfAdults,
+      paymentType
     });
+
+
 
     const savedBooking = await booking.save();
 
+    const updateFields = {};
+
+// Conditionally add wallet balance and history only for wallet payments
+if (paymentType === "Wallet") {
+  updateFields.wallet = walletBalance; // Update wallet balance
+  updateFields.$push = {
+    history: {
+      transactionType: "payment",
+      amount: price,
+      details: `You’ve successfully booked Hotel Rooms in ${hotelName}`,
+    },
+  };
+} 
+
+// Perform the update
+const updatedTourist = await Tourist.findByIdAndUpdate(
+  userId,
+  updateFields,
+  { new: true, runValidators: true } // Ensure it returns the updated tourist
+);
+
+if (!updatedTourist) {
+  return res.status(404).json({ message: "Tourist not found" });
+}
     res.status(201).json({
       message: "Hotel booking successful",
       booking: savedBooking,

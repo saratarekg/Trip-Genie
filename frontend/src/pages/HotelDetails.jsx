@@ -7,6 +7,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import PaymentPopup from "@/components/payment-popup-hotel";
+
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Card,
   CardContent,
@@ -36,11 +39,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Cookies from "js-cookie";
+import axios from "axios";
 
 const API_KEY = import.meta.env.VITE_HOTELS_API_KEY2;
 
 export default function HotelDetails() {
   const { hotelId } = useParams();
+  const [paymentType, setPaymentType] = useState("CreditCard");
   const [searchParams] = useSearchParams();
   const [hotelData, setHotelData] = useState(null);
   const [hotelPhotos, setHotelPhotos] = useState([]);
@@ -54,7 +59,13 @@ export default function HotelDetails() {
   const [numberOfRooms, setNumberOfRooms] = useState(1);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState("");
+  const [bookingPopupError, setBookingPopupError] = useState("");
+
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
+  const [isSuccessWalletPopupOpen, setIsSuccessWalletPopupOpen] = useState(false);
+
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+
 
   const checkinDate = searchParams.get("checkinDate");
   const checkoutDate = searchParams.get("checkoutDate");
@@ -92,7 +103,37 @@ export default function HotelDetails() {
     };
 
     fetchCurrencyInfo();
+    
   }, []);
+
+  useEffect(()=>{
+    fetchUserInfo();
+},[])
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+
+    if (role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const currencyId = response.data.preferredCurrency;
+
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
 
   useEffect(() => {
     const fetchHotelDetails = async () => {
@@ -222,8 +263,90 @@ export default function HotelDetails() {
     setIsBookingConfirmationOpen(true);
   };
 
-  const handleConfirmBooking = async () => {
+  useEffect(() => {
+    const handleBookingSuccess = async () => {
+      const success = searchParams.get("success");
+      const quantity = searchParams.get("quantity");
+      const selectedDateStr = searchParams.get("selectedDate");
+      const sessionId = searchParams.get("session_id");
+  
+      // Extract additional parameters from the URL
+      const hotelID = searchParams.get("hotelID");
+      const roomName = searchParams.get("roomName");
+      const checkinDate = searchParams.get("checkinDate");
+      const checkoutDate = searchParams.get("checkoutDate");
+      const numberOfRooms = searchParams.get("numberOfRooms");
+      const numberOfAdults = searchParams.get("numberOfAdults");
+  
+      console.log(success, sessionId, hotelID, roomName, checkinDate, checkoutDate, numberOfRooms, numberOfAdults);
+  
+      if (sessionId && success === "true") {
+        try {
+          const response = await axios.get(
+            `http://localhost:4000/check-payment-status?session_id=${sessionId}`
+          );
+  
+          console.log("Payment status response:", response.data);
+  
+          if (response.data.status === "paid") {
+            setIsSuccessPopupOpen(true);
+            // Update any other necessary state here
+          }
+        } catch (error) {
+          console.error("Error checking payment status:", error);
+        }
+      }
+    };
+  
+    handleBookingSuccess();
+  }, [searchParams]);
+  
+
+  const handleFinalOK = async () => {
+    if (searchParams.get("success") === "true") {
+      const quantity = searchParams.get("quantity");
+      const selectedDateStr = searchParams.get("selectedDate");
+      const hotelID = searchParams.get("hotelID");
+      const roomName = searchParams.get("roomName");
+      const checkinDate = searchParams.get("checkinDate");
+      const checkoutDate = searchParams.get("checkoutDate");
+      const numberOfRooms = searchParams.get("numberOfRooms");
+      const numberOfAdults = searchParams.get("numberOfAdults");
+      const price = searchParams.get("price");
+  
+      try {
+        // Assuming handleBooking uses these parameters
+        await handleConfirmBooking("CreditCard", parseInt(quantity), selectedDateStr, hotelID, roomName, checkinDate, checkoutDate, numberOfRooms, numberOfAdults,price);
+      } catch (error) {
+        console.error("Error handling booking:", error);
+        // Handle the error appropriately
+      }
+    }
+  
+    setIsSuccessPopupOpen(false);
+  
+    // Clear search params from URL
+    searchParams.delete("success");
+    searchParams.delete("quantity");
+    searchParams.delete("selectedDate");
+    searchParams.delete("session_id");
+    searchParams.delete("hotelID");
+    searchParams.delete("roomName");
+    searchParams.delete("checkinDate");
+    searchParams.delete("checkoutDate");
+    searchParams.delete("numberOfRooms");
+    searchParams.delete("numberOfAdults");
+  
+    const newUrl = `${window.location.pathname}`;
+    window.history.replaceState(null, '', newUrl);
+  
+    
+  };
+  
+
+  const handleConfirmBooking = async (paymentType, quantity, date, hotelID, roomName, checkinDate, checkoutDate, numberOfRooms, numberOfAdults,price)=> {
     try {
+      console.log(paymentType, quantity, date, hotelID, roomName, checkinDate, checkoutDate, numberOfRooms, numberOfAdults,price);
       const token = Cookies.get("jwt");
       const response = await fetch("http://localhost:4000/tourist/book-hotel", {
         method: "POST",
@@ -232,32 +355,42 @@ export default function HotelDetails() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          hotelID: hotelId,
+          hotelID,
           hotelName: hotelData.name,
           checkinDate,
           checkoutDate,
           numberOfRooms,
-          roomName: selectedRoom.name,
-          price: selectedRoom.totalPrice * numberOfRooms,
+          roomName,
+          price,
           numberOfAdults,
+          paymentType,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Booking failed");
-      }
+        const errorData = await response.json();
+        if (errorData.message === "Insufficient funds in wallet") {
+          setBookingPopupError(
+            "Insufficient funds, please choose a different payment method or update your wallet."
+          );
+          return;
+        } else {
+          throw new Error(errorData.message || "Failed to book hotel");
+        }
+      } 
 
       const data = await response.json();
       console.log("Booking successful:", data);
       setBookingSuccess(true);
       setBookingError("");
       setIsSuccessPopupOpen(true);
+      setIsBookingConfirmationOpen(false);
     } catch (error) {
       console.error("Booking error:", error);
       setBookingError("Failed to book the hotel. Please try again.");
       setBookingSuccess(false);
-    } finally {
       setIsBookingConfirmationOpen(false);
+    } finally {
     }
   };
 
@@ -309,7 +442,7 @@ export default function HotelDetails() {
                     {room.price ? (
                       <div>
                         <span className="font-semibold text-xl">
-                          Price: {room.price} {currencyCode}
+                          Price: {room.price} {currencyCode} 
                         </span>
                         {room.allInclusivePrice && room.allInclusivePrice !== room.price && (
                           <div className="text-sm text-muted-foreground">
@@ -443,6 +576,26 @@ export default function HotelDetails() {
               <p>{hotelData.description_translations?.en}</p>
             </CardContent>
           </Card>
+          <PaymentPopup
+  isBookingConfirmationOpen={isBookingConfirmationOpen}
+  setIsBookingConfirmationOpen={setIsBookingConfirmationOpen}
+  selectedRoom={selectedRoom?.name}
+  price={selectedRoom?.totalPrice}
+  currencyCode={currencyCode}
+  currencySymbol={userPreferredCurrency?.symbol}
+  checkinDate={checkinDate}
+  checkoutDate={checkoutDate}
+  numberOfAdults={numberOfAdults}
+  hotelName={hotelData?.name}
+  stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+  hotelID={hotelId}
+  returnLocation={`http://localhost:3000/hotels/${hotelId}?checkinDate=${checkinDate}&checkoutDate=${checkoutDate}&adults=${numberOfAdults}`}
+  roomName={selectedRoom?.name}
+  maxRooms={10}
+  onWalletPayment={handleConfirmBooking}
+  onSuccess={setIsSuccessWalletPopupOpen}
+/>
+
         </div>
         {renderFacilities()} {/* Add this line to render the facilities section */}
 
@@ -464,7 +617,7 @@ export default function HotelDetails() {
             </Accordion>
           </CardContent>
         </Card>
-        <Dialog open={isBookingConfirmationOpen} onOpenChange={setIsBookingConfirmationOpen}>
+        {/* <Dialog open={isBookingConfirmationOpen} onOpenChange={setIsBookingConfirmationOpen}>
           <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Confirm Booking</DialogTitle>
@@ -494,6 +647,20 @@ export default function HotelDetails() {
                       ))}
                     </SelectContent>
                   </Select>
+                  <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Payment Type</Label>
+              <RadioGroup value={paymentType} onValueChange={setPaymentType} className="col-span-3">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="CreditCard" id="credit" />
+                  <Label htmlFor="CreditCard">Credit Card/Debit Card</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Wallet" id="Wallet" />
+                  <Label htmlFor="Wallet">Wallet</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            {bookingPopupError && <div className="text-red-500 text-sm mt-2">{bookingPopupError}</div>}
                 </div>
               </div>
             )}
@@ -502,7 +669,8 @@ export default function HotelDetails() {
               <Button onClick={handleConfirmBooking}>Confirm Booking</Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+        </Dialog> */}
+       
         <Dialog open={isSuccessPopupOpen} onOpenChange={setIsSuccessPopupOpen}>
           <DialogContent>
             <DialogHeader>
@@ -511,7 +679,30 @@ export default function HotelDetails() {
                 Your hotel room has been booked successfully.
               </DialogDescription>
             </DialogHeader>
-            <Button onClick={() => setIsSuccessPopupOpen(false)}>Close</Button>
+            <Button onClick={() => handleFinalOK()}>Close</Button>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isSuccessWalletPopupOpen} onOpenChange={setIsSuccessWalletPopupOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Booking Successful</DialogTitle>
+              <DialogDescription>
+                Your hotel room has been booked successfully.
+                {/* <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Label className="text-right">Amount Paid:</Label>
+                  <div>  {formatPrice(calculateTotalPrice())} </div>
+                </div>
+                {paymentType === "Wallet" && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <Label className="text-right">New Wallet Balance:</Label>
+                    <div>{formatPrice(tourist?.wallet - calculateTotalPrice())}</div>
+                  </div>
+                )}</div> */}
+              </DialogDescription>
+            </DialogHeader>
+            <Button onClick={() => setIsSuccessWalletPopupOpen(false)}>Close</Button>
           </DialogContent>
         </Dialog>
         {bookingError && (

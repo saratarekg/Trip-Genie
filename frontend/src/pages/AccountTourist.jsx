@@ -14,6 +14,8 @@ import {
   HistoryIcon,
   Calendar,
   HelpCircle,
+  CircleDot,
+  Clock,
   Eye,
   MessageSquare,
   LogOut,
@@ -196,6 +198,18 @@ const ExternalFlightBookings = ({ user }) => {
   if (isLoading) return <div>Loading flight bookings...</div>
   if (error) return <div>{error}</div>
 
+  const calculateDuration = (departureDate, arrivalDate) => {
+    const departure = new Date(departureDate);
+    const arrival = new Date(arrivalDate);
+  
+    const durationInMillis = arrival - departure; // Difference in milliseconds
+    const hours = Math.floor(durationInMillis / (1000 * 60 * 60)); // Convert to hours
+    const minutes = Math.floor((durationInMillis % (1000 * 60 * 60)) / (1000 * 60)); // Convert to minutes
+  
+    return `${hours}h ${minutes}m`;
+  };
+  
+
   return (
     <ToastProvider>
       <div className="max-w-7xl mx-auto space-y-6 p-4">
@@ -236,10 +250,9 @@ const ExternalFlightBookings = ({ user }) => {
                       <div className="w-full flex items-center gap-2">
                         <CircleDot className="h-4 w-4 text-blue-500 shrink-0" />
                         <div className="w-full border-t-2 border-dashed border-blue-500 relative">
-                          <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                            {/* Calculate duration */}
-                            2h 10m
-                          </span>
+                        <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
+                        {calculateDuration(flight.departureDate, flight.arrivalDate)} {/* Calculate duration */}
+                      </span>
                         </div>
                         <CircleDot className="h-4 w-4 text-blue-500 shrink-0" />
                       </div>

@@ -39,7 +39,12 @@ const touristHotelSchema = new mongoose.Schema(
     numberOfRooms : {
       type: Number,
       required: true,
-    }
+    },
+    paymentType: {
+      type: String,
+      enum: ["CreditCard", "DebitCard", "Wallet"],
+      required: true,
+    },
   },
   { timestamps: true }
 );

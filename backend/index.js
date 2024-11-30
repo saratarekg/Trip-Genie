@@ -199,6 +199,55 @@ app.get("/check-payment-status", async (req, res) => {
   }
 });
 
+app.post("/create-hotel-booking-session", async (req, res) => {
+  try {
+    const {
+      hotelID,
+      hotelName,
+      checkinDate,
+      checkoutDate,
+      numberOfRooms,
+      roomName,
+      price, // Total price already calculated (in the correct currency amount)
+      numberOfAdults,
+      paymentType,
+      currency,
+      returnLocation, // Can be used later for payment method-specific logic
+    } = req.body;
+
+    // Ensure price is in cents (Stripe requires the price in the smallest currency unit, e.g., cents)
+    const totalPrice = Math.round(price * 100); // Convert the total price to cents if it's in dollars
+
+    // Create a Stripe session for the hotel booking
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: currency, // Adjust to dynamic currency if needed
+            product_data: {
+              name: `${hotelName} - ${roomName}`, // Display hotel and room name in the checkout
+              description: `Booking for ${numberOfRooms} rooms, ${numberOfAdults} adults`,
+            },
+            unit_amount: totalPrice, // The total amount for the booking (in cents)
+          },
+          quantity: 1, // Only one booking (it already includes the full price)
+        },
+      ],
+      mode: "payment",
+      success_url: `${req.body.returnLocation}&success=true&session_id={CHECKOUT_SESSION_ID}&hotelID=${hotelID}&roomName=${encodeURIComponent(roomName)}&checkinDate=${encodeURIComponent(checkinDate)}&checkoutDate=${encodeURIComponent(checkoutDate)}&numberOfRooms=${numberOfRooms}&numberOfAdults=${numberOfAdults}&paymentType=${encodeURIComponent(paymentType)}&price=${encodeURIComponent(price)}`,
+      cancel_url: `${req.body.returnLocation}&cancel=true`,
+    });
+
+    console.log("Hotel booking checkout session created:", session.id);
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error("Error creating hotel booking checkout session:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // Check and update the exchange rates when the server starts
 const checkAndUpdateRatesOnStart = async () => {
   try {
