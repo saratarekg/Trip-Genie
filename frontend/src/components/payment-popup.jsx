@@ -37,6 +37,8 @@ const PaymentPopup = ({
   availableDates,
   selectedItineraryDate,
   setError,
+  selectedTransportID,
+  transportationSeats,
 }) => {
   const formatDate = (date) => {
     const localDate = new Date(date);
@@ -74,38 +76,50 @@ const PaymentPopup = ({
     const selectedDate = new Date(formattedDate.split("-").reverse().join("-")); // Convert to Date object
    
     if (paymentType === "Wallet") {
-      onWalletPayment(paymentType, numberOfTickets, selectedDate); // Pass the Date object here
+      onWalletPayment(paymentType, numberOfTickets, selectedDate, selectedTransportID); // Pass the Date object here
     } else {
       try {
         const stripe = await loadStripe(stripeKey);
         if (!stripe) throw new Error("Stripe failed to initialize");
-  
+      
+        const payload = {
+          items: items.map((item) => ({
+            product: { name: item.name },
+            quantity: numberOfTickets,
+            totalPrice: item.price / 100, // Divide by 100 again
+          })),
+          currency: currency.toLowerCase(),
+          returnLocation: returnLoc,
+          quantity: numberOfTickets,
+        };
+      
+        // Include the selectedDate only if there are available dates
+        if (availableDates && availableDates.length > 0) {
+          payload.selectedDate = selectedDate.toISOString(); // Pass the Date object as ISO string
+        }
+
+        if (selectedTransportID) {
+          payload.selectedTransportID = selectedTransportID // Pass the Date object as ISO string
+        }
+
+        
+      
         const response = await fetch("http://localhost:4000/create-booking-session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            items: items.map((item) => ({
-              product: { name: item.name },
-              quantity: numberOfTickets,
-              totalPrice: item.price / 100, // divide by 100 again
-            })),
-            currency: currency.toLowerCase(),
-            returnLocation: returnLoc,
-            quantity: numberOfTickets,
-            selectedDate: selectedDate.toISOString(), // Pass the Date object as ISO string
-          }),
+          body: JSON.stringify(payload),
         });
-  
+      
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
             `Failed to create checkout session: ${errorData.error || response.statusText}`
           );
         }
-  
+      
         const { id: sessionId } = await response.json();
         const result = await stripe.redirectToCheckout({ sessionId });
-  
+      
         if (result.error) {
           throw new Error(result.error.message);
         }
@@ -113,9 +127,7 @@ const PaymentPopup = ({
         console.error("Error in Stripe checkout:", error);
       }
     }
-    
     setIsProcessing(false);
-    onConfirm(paymentType, numberOfTickets, selectedDate); // Pass the Date object here
   };
   
 
@@ -152,16 +164,21 @@ const PaymentPopup = ({
               </Select>
             </div>
           )}
-          <div className="grid grid-cols-4 items-center gap-4">
+           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="tickets" className="text-right">
-              Tickets
+              {transportationSeats ? "Seats" : "Tickets"}
             </Label>
             <Input
               id="tickets"
               type="number"
               value={numberOfTickets}
               onChange={(e) =>
-                setNumberOfTickets(Math.min(maxTickets, Math.max(1, parseInt(e.target.value))))
+                setNumberOfTickets(
+                  Math.min(
+                    transportationSeats || maxTickets,
+                    Math.max(1, parseInt(e.target.value))
+                  )
+                )
               }
               className="col-span-3"
             />
@@ -197,7 +214,8 @@ const PaymentPopup = ({
           <Button variant="outline" onClick={() => { onClose(); setError(""); }}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={isProcessing} className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white">
+          <Button onClick={handleConfirm} disabled={isProcessing || (availableDates && availableDates.length > 0 && !formattedDate)}
+           className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white">
             {isProcessing ? "Processing..." : "Confirm Booking"}
           </Button>
         </DialogFooter>

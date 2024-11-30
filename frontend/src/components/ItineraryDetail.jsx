@@ -686,7 +686,7 @@ const ItineraryDetail = () => {
   const [isAppropriate, setIsAppropriate] = useState(true);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [numberOfTickets, setNumberOfTickets] = useState(1);
-  const [paymentType, setPaymentType] = useState("CreditCard");
+  const [paymentType, setPaymentType] = useState("Wallet");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState("");
@@ -1163,7 +1163,7 @@ const ItineraryDetail = () => {
     };
   
     handleBookingSuccess();
-  }, [searchParams]);
+  }, [searchParams, itinerary]);
   
 
   const handleFinalOK = () => {
@@ -2227,7 +2227,7 @@ const ItineraryDetail = () => {
                 {paymentType === "Wallet" && (
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">New Wallet Balance:</Label>
-                    <div>{formatPrice(tourist.wallet - calculateTotalPrice())}</div>
+                    <div>{formatPrice(tourist?.wallet - calculateTotalPrice())}</div>
                   </div>
                 )}</div>
             </div>

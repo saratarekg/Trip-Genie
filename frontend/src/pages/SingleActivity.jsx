@@ -924,9 +924,10 @@ const ActivityDetail = () => {
       } else {
         const data = await response.json();
         setShowPaymentPopup(false);
-        setShowSuccessDialog(true);
         setNumberOfTickets(numberOfTickets);
         setPaymentType(paymentType); // Update the number of tickets in the state
+        setShowSuccessDialog(true);
+
       }
     } catch (error) {
       console.error("Error booking activity:", error);
