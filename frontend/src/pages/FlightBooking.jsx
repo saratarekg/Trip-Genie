@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { UserGuide } from "@/components/UserGuide.jsx"
+import { UserGuide } from "@/components/UserGuide.jsx";
+import axios from "axios";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -37,6 +38,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
 import { useSearchParams } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { set } from "date-fns";
 
 const airports = [
   { code: "CAI", name: "Cairo International Airport", region: "Egypt" },
@@ -220,6 +223,10 @@ function BookingPage() {
     }
   }, [departureDate, returnDate]);
 
+  useEffect(() => {
+    handleBookNow();
+  }, [searchParams]);
+
   const renderLocationDisplay = (code) => {
     const location = airports.find((item) => item.code === code);
     return location ? (
@@ -232,8 +239,201 @@ function BookingPage() {
     ) : null;
   };
 
+  const handleCardPayment = async () => {
+    try {
+      // Initialize Stripe
+      const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+
+      const stripe = await loadStripe(stripeKey);
+      if (!stripe) {
+        setBookingError("Failed to initialize Stripe. Please try again.");
+        return;
+      }
+
+      // Create an items array with price in cents to send to Stripe
+      const items = [
+        {
+          product: {
+            name: `${
+              selectedFlight.itineraries[0].segments[0].departure.iataCode
+            } → ${
+              selectedFlight.itineraries[0].segments[
+                selectedFlight.itineraries[0].segments.length - 1
+              ].arrival.iataCode
+            }`,
+          },
+          quantity: numberOfSeats,
+          totalPrice: Math.round(parseFloat(selectedFlight.price.total)), // convert price to cents
+        },
+      ];
+
+      // Prepare metadata and other necessary details
+      const metadata = {
+        flightID: `${Math.random().toString(36).substr(2, 9)}`,
+        from: selectedFlight.itineraries[0].segments[0].departure.iataCode,
+        to: selectedFlight.itineraries[0].segments[
+          selectedFlight.itineraries[0].segments.length - 1
+        ].arrival.iataCode,
+        departureDate: selectedFlight.itineraries[0].segments[0].departure.at,
+        arrivalDate:
+          selectedFlight.itineraries[0].segments[
+            selectedFlight.itineraries[0].segments.length - 1
+          ].arrival.at,
+        price: parseFloat(selectedFlight.price.total),
+        numberOfTickets: numberOfSeats,
+        type: selectedFlight.itineraries[1] ? "Round Trip" : "One Way",
+        returnDepartureDate: selectedFlight.itineraries[1]
+          ? selectedFlight.itineraries[1].segments[0].departure.at
+          : undefined,
+        returnArrivalDate: selectedFlight.itineraries[1]
+          ? selectedFlight.itineraries[1].segments[
+              selectedFlight.itineraries[1].segments.length - 1
+            ].arrival.at
+          : undefined,
+        seatType: seatType,
+        flightType: `${selectedFlight.itineraries[0].segments[0].carrierCode} ${selectedFlight.itineraries[0].segments[0].number}`,
+        flightTypeReturn: selectedFlight.itineraries[1]
+          ? selectedFlight.itineraries[1].segments[0].carrierCode +
+            " " +
+            selectedFlight.itineraries[1].segments[0].number
+          : undefined,
+      };
+
+      // Make the request to create the checkout session
+      const response = await fetch(
+        "http://localhost:4000/create-flight-checkout-session",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            metadata,
+            items,
+            returnLocation: "http://localhost:3000/flights",
+            currency: currencyCode,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        setBookingError("Failed to create checkout session. Please try again.");
+        throw new Error("Failed to create checkout session");
+      }
+
+      // Get session ID from the response
+      const { id: sessionId } = await response.json();
+      console.log("Stripe session ID:", sessionId);
+
+      // Redirect to Stripe Checkout
+      const result = await stripe.redirectToCheckout({ sessionId });
+      if (result.error) {
+        setBookingError(result.error.message);
+        throw new Error(result.error.message);
+      }
+    } catch (error) {
+      console.error("Error in Stripe checkout:", error);
+    }
+  };
+
   const handleBookNow = async () => {
     try {
+      const success = searchParams.get("success");
+
+      if (success === "true") {
+        const sessionId = searchParams.get("session_id");
+        const flightID = searchParams.get("flightID");
+        const from = searchParams.get("from");
+        const to = searchParams.get("to");
+        const departureDate = searchParams.get("departureDate");
+        const arrivalDate = searchParams.get("arrivalDate");
+        const price = searchParams.get("price");
+        const numberOfTickets = searchParams.get("numberOfTickets");
+        const type = searchParams.get("type");
+        const returnDepartureDate = searchParams.get("returnDepartureDate");
+        const returnArrivalDate = searchParams.get("returnArrivalDate");
+        const seatType = searchParams.get("seatType");
+        const flightType = searchParams.get("flightType");
+        const flightTypeReturn = searchParams.get("flightTypeReturn");
+
+        console.log(flightID);
+
+        if (sessionId) {
+          try {
+            const response = await axios.get(
+              `http://localhost:4000/check-payment-status?session_id=${sessionId}`
+            );
+
+            console.log("Payment status response:", response.data);
+            if (response.data.status === "paid") {
+              const token = Cookies.get("jwt");
+              const response = await fetch(
+                "http://localhost:4000/tourist/book-flight",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    paymentType: "CreditCard",
+                    flightID: flightID,
+                    from: from,
+                    to: to,
+                    departureDate: departureDate,
+                    arrivalDate: arrivalDate,
+                    price: parseFloat(price),
+                    numberOfTickets: numberOfTickets,
+                    type: type,
+                    returnDepartureDate: returnDepartureDate? returnDepartureDate : undefined,
+                    returnArrivalDate: returnArrivalDate? returnArrivalDate : undefined,
+                    seatType: seatType,
+                    flightType: flightType,
+                    flightTypeReturn: flightTypeReturn? flightTypeReturn : undefined,
+                  }),
+                }
+              );
+
+              if (!response.ok) {
+                setBookingError("Booking Failed. Please try again.");
+                throw new Error("Failed to book the flight");
+              }
+
+              setIsBookingConfirmationOpen(true);
+
+              searchParams.delete("success");
+              searchParams.delete("session_id");
+              searchParams.delete("flightID");
+              searchParams.delete("from");
+              searchParams.delete("to");
+              searchParams.delete("departureDate");
+              searchParams.delete("arrivalDate");
+              searchParams.delete("price");
+              searchParams.delete("numberOfTickets");
+              searchParams.delete("type");
+              searchParams.delete("returnDepartureDate");
+              searchParams.delete("returnArrivalDate");
+              searchParams.delete("seatType");
+              searchParams.delete("flightType");
+              searchParams.delete("flightTypeReturn");
+
+              const newUrl = `${window.location.pathname}`;
+
+              window.history.replaceState(null, "", newUrl);
+            }
+          } catch (error) {
+            console.error("Error checking payment status:", error);
+          }
+        }
+
+        return;
+      }
+
+      if (paymentMethod === "CreditCard" && !success) {
+        handleCardPayment();
+        return;
+      }
+
       const token = Cookies.get("jwt");
       const response = await fetch(
         "http://localhost:4000/tourist/book-flight",
@@ -289,7 +489,6 @@ function BookingPage() {
       setIsBookingConfirmationOpen(true);
     } catch (error) {
       console.error("Booking error:", error);
-      setBookingError("Failed to book the flight. Please try again.");
     }
   };
 
@@ -298,8 +497,6 @@ function BookingPage() {
     if (!role) role = "guest";
     return role;
   };
-
-
 
   const guideSteps = [
     {
@@ -310,12 +507,13 @@ function BookingPage() {
     },
     {
       target: ".search",
-      content: "Please enter your departure and arrival times, select the departure and arrival airports, and specify the type of ticket to proceed with your booking!",
+      content:
+        "Please enter your departure and arrival times, select the departure and arrival airports, and specify the type of ticket to proceed with your booking!",
       placement: "bottom",
     },
     {
       target: ".searchButton",
-      content: 
+      content:
         "Click on the 'Search Flights' button to view the available flights based on your search criteria.",
 
       placement: "left",
@@ -326,8 +524,6 @@ function BookingPage() {
         "Click on the 'See Flight' button to view the details of the selected flight, Enter your personal data and to finally choose your payment method before confirming your flight booking!.",
       placement: "bottom",
     },
-    
-    
   ];
 
   async function refreshToken() {
@@ -512,6 +708,7 @@ function BookingPage() {
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
+    setBookingError("");
     if (mainContentRef.current) {
       mainContentRef.current.inert = false;
     }
@@ -1013,10 +1210,7 @@ function BookingPage() {
         </Dialog>
       </div>
       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-        <UserGuide
-          steps={guideSteps}
-          pageName="flight"
-        />
+        <UserGuide steps={guideSteps} pageName="flight" />
       )}
     </div>
   );
