@@ -56,7 +56,11 @@ const PaymentPopup = ({
     if (paymentType === "Wallet") {
       try {
         await onWalletPayment("Wallet", "10", "selectedDateStr", hotelID, roomName, checkinDate, checkoutDate, numberOfRooms, numberOfAdults,totalPrice);
-        onSuccess(true);
+        onSuccess({
+          open: true,
+          paymentMethod : "Wallet",
+          totalPrice,
+        });
       } catch (error) {
         setBookingPopupError(error.message);
       } finally {

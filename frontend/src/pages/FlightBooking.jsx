@@ -215,6 +215,24 @@ function BookingPage() {
   const [exchangeRates, setExchangeRates] = useState(null);
   const [currencies, setCurrencies] = useState([]);
 
+  const [tourist, setTourist] = useState(null);
+
+  useEffect(() => {
+    const fetchTouristData = async () => {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTourist(response.data);
+      } catch (error) {
+        console.error("Error fetching tourist data:", error);
+      }
+    };
+
+    fetchTouristData();
+  }, []);
+
   const itemsPerPage = 9;
 
   useEffect(() => {
@@ -403,8 +421,12 @@ function BookingPage() {
                 throw new Error("Failed to book the flight");
               }
 
-              setIsBookingConfirmationOpen(true);
-
+              setIsBookingConfirmationOpen({
+                open: true,
+                paymentMethod : "CreditCard",
+                price,
+                wallet: tourist?.wallet,
+              });
               searchParams.delete("success");
               searchParams.delete("session_id");
               searchParams.delete("flightID");
@@ -491,8 +513,13 @@ function BookingPage() {
 
       const data = await response.json();
       console.log("Booking successful:", data);
-      setIsBookingConfirmationOpen(true);
-    } catch (error) {
+      setIsBookingConfirmationOpen({
+        open: true,
+        paymentMethod ,
+        price :selectedFlight.price.total,
+        wallet: tourist?.wallet,
+      }); 
+       } catch (error) {
       console.error("Booking error:", error);
     }
   };
@@ -1244,6 +1271,24 @@ function BookingPage() {
                 Your flight has been booked successfully. You will receive a
                 confirmation email shortly.
               </DialogDescription>
+              {isBookingConfirmationOpen.paymentMethod === "Wallet" && (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <Label className="text-right">You Paid:</Label>
+              <div>
+               {isBookingConfirmationOpen.price}{currencyCode}
+              </div>
+              <Label className="text-right">New Wallet Balance:</Label>
+              <div>
+              {convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)-isBookingConfirmationOpen.price}{currencyCode}
+              </div>
+              <div>
+              {convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)}{currencyCode}
+              </div>
+              <div>
+              {isBookingConfirmationOpen.price}{currencyCode}
+              </div>
+            </div>
+          )}
             </DialogHeader>
             <DialogClose asChild>
               <Button

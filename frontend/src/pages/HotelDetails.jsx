@@ -77,6 +77,7 @@ export default function HotelDetails() {
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState(null);
   const [currencies, setCurrencies] = useState([]);
+  const [tourist, setTourist] = useState(null);
 
   const checkinDate = searchParams.get("checkinDate");
   const checkoutDate = searchParams.get("checkoutDate");
@@ -138,6 +139,7 @@ export default function HotelDetails() {
         const response = await axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setTourist(response.data);
         const currencyId = response.data.preferredCurrency;
 
         const response2 = await axios.get(
@@ -868,17 +870,16 @@ export default function HotelDetails() {
               <DialogTitle>Booking Successful</DialogTitle>
               <DialogDescription>
                 Your hotel room has been booked successfully.
-                {/* <div className="grid gap-4 py-4">
+                <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <Label className="text-right">Amount Paid:</Label>
-                  <div>  {formatPrice(calculateTotalPrice())} </div>
+                  <Label className="text-right">Amount Paid Via Wallet:</Label>
+                  <div>{isSuccessWalletPopupOpen.price}{currencyCode} </div>
                 </div>
-                {paymentType === "Wallet" && (
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">New Wallet Balance:</Label>
-                    <div>{formatPrice(tourist?.wallet - calculateTotalPrice())}</div>
+                    <div>{tourist?.wallet - isSuccessWalletPopupOpen.price}</div>
                   </div>
-                )}</div> */}
+                </div>
               </DialogDescription>
             </DialogHeader>
             <Button onClick={() => setIsSuccessWalletPopupOpen(false)}>
