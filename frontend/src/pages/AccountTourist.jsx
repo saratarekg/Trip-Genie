@@ -39,8 +39,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import Popup from "@/components/popup";
 import "@/styles/Popup.css";
-import Sidebar from '@/components/Sidebar';
-
+import Sidebar from "@/components/Sidebar";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -92,7 +91,6 @@ import {
   ToastClose,
 } from "@/components/ui/toast";
 
-
 // Sub-components
 const AccountInfo = ({ user }) => {
   switch (user.role) {
@@ -122,23 +120,21 @@ const AccountInfo = ({ user }) => {
   }
 };
 
-
-
 const ExternalFlightBookings = ({ user }) => {
-  const [flights, setFlights] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [flights, setFlights] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [preferredCurrency, setPreferredCurrency] = useState({
     code: "USD",
     symbol: "$",
-  })
-  const [selectedFlight, setSelectedFlight] = useState(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [toast, setToast] = useState(null)
+  });
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const fetchFlights = async () => {
     try {
-      const token = Cookies.get("jwt")
+      const token = Cookies.get("jwt");
       const [flightsResponse, currencyResponse] = await Promise.all([
         axios.get("http://localhost:4000/tourist/my-flights", {
           headers: { Authorization: `Bearer ${token}` },
@@ -146,170 +142,143 @@ const ExternalFlightBookings = ({ user }) => {
         axios.get("http://localhost:4000/tourist/", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-      ])
+      ]);
 
-      setFlights(flightsResponse.data)
+      setFlights(flightsResponse.data);
 
-      const currencyId = currencyResponse.data.preferredCurrency
+      const currencyId = currencyResponse.data.preferredCurrency;
       const currencyDetailsResponse = await axios.get(
         `http://localhost:4000/tourist/getCurrency/${currencyId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
-      )
-      setPreferredCurrency(currencyDetailsResponse.data)
+      );
+      setPreferredCurrency(currencyDetailsResponse.data);
 
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (err) {
-      setError("Failed to fetch flight bookings or currency information")
-      setIsLoading(false)
+      setError("Failed to fetch flight bookings or currency information");
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleCancelFlight = async () => {
     try {
-      const token = Cookies.get("jwt")
+      const token = Cookies.get("jwt");
       const response = await axios.post(
         `http://localhost:4000/tourist/cancel-flight/${selectedFlight}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
-      )
+      );
 
       if (response.status === 200) {
         setToast({
           type: "success",
           title: "Success",
           description: "Flight booking canceled successfully!",
-        })
-        setIsDialogOpen(false)
-        fetchFlights()
+        });
+        setIsDialogOpen(false);
+        fetchFlights();
       }
     } catch (err) {
-      console.error(err)
+      console.error(err);
       setToast({
         type: "error",
         title: "Error",
         description: "Failed to cancel the flight booking.",
-      })
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    fetchFlights()
-  }, [])
+    fetchFlights();
+  }, []);
 
-  if (isLoading) return <div>Loading flight bookings...</div>
-  if (error) return <div>{error}</div>
+  if (isLoading) return <div>Loading flight bookings...</div>;
+  if (error) return <div>{error}</div>;
 
   const calculateDuration = (departureDate, arrivalDate) => {
     const departure = new Date(departureDate);
     const arrival = new Date(arrivalDate);
-  
+
     const durationInMillis = arrival - departure; // Difference in milliseconds
     const hours = Math.floor(durationInMillis / (1000 * 60 * 60)); // Convert to hours
-    const minutes = Math.floor((durationInMillis % (1000 * 60 * 60)) / (1000 * 60)); // Convert to minutes
-  
+    const minutes = Math.floor(
+      (durationInMillis % (1000 * 60 * 60)) / (1000 * 60)
+    ); // Convert to minutes
+
     return `${hours}h ${minutes}m`;
   };
-  
 
   return (
     <ToastProvider>
       <div className="bg-gray-100 max-w-7xl gap-4 ">
-       <h1 className="text-3xl font-bold mb-2">Flight Bookings</h1>
-    <p className="text-sm text-gray-500 mb-2">External Bookings / Flight Bookings</p>
-    
+        <h1 className="text-3xl font-bold mb-2">Flight Bookings</h1>
+        <p className="text-sm text-gray-500 mb-2">
+          External Bookings / Flight Bookings
+        </p>
 
-    <div className="container mx-auto px-4 py-4">
-        {flights.map((flight, index) => (
-          <Card key={index} className="p-6 mb-4">
-            {/* Header */}
-            <div className="flex justify-between items-cente mb-6">
-            <div className="text-lg">
-  <span className="font-semibold text-[#1A3B47]">Flight Number</span>
-  <span className="text-base ml-1  text-[#5D9297]">{(flight.flightType)}{flight.flightID}</span>
-</div>
-
-
-              <span className="text-sm text-[#388A94] font-semibold bg-[#C6E0DD] px-3 py-1 rounded-full">
-                {flight.seatType}
-              </span>
-            </div>
-
-            <div className="flex">
-              {/* Left section (3/4) */}
-              <div
-    className={`w-3/4 pr-6 border-r flex flex-col ${!flight.returnDepartureDate ? 'justify-center' : ''}`}
-  >              {/* Outbound Flight */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <div className="text-sm text-gray-500">Depart</div>
-                      <div className="text-3xl font-bold text-[#1A3B47]">
-                        {new Date(flight.departureDate).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(flight.departureDate).toLocaleDateString()}
-                      </div>
-                      <div className="text-sm text-gray-500">{flight.from}</div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col items-center mx-4">
-                      <div className="w-full flex items-center gap-2">
-                        <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
-                        <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
-                        <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                        {calculateDuration(flight.departureDate, flight.arrivalDate)} {/* Calculate duration */}
-                      </span>
-                        </div>
-                        <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="text-sm text-gray-500">Arrive</div>
-                      <div className="text-3xl font-bold text-[#1A3B47]">
-                        {new Date(flight.arrivalDate).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(flight.arrivalDate).toLocaleDateString()}
-                      </div>
-                      <div className="text-sm text-gray-500">{flight.to}</div>
-                    </div>
-                  </div>
+        <div className="container mx-auto px-4 py-4">
+          {flights.map((flight, index) => (
+            <Card key={index} className="p-6 mb-4">
+              {/* Header */}
+              <div className="flex justify-between items-cente mb-6">
+                <div className="text-lg">
+                  <span className="font-semibold text-[#1A3B47]">
+                    Flight Number
+                  </span>
+                  <span className="text-base ml-1  text-[#5D9297]">
+                    {flight.flightType}
+                    {flight.flightID}
+                  </span>
                 </div>
 
-                {/* Return Flight if exists */}
-                {flight.returnDepartureDate && (
-                  <div className="pt-6 border-t">
+                <span className="text-sm text-[#388A94] font-semibold bg-[#C6E0DD] px-3 py-1 rounded-full">
+                  {flight.seatType}
+                </span>
+              </div>
+
+              <div className="flex">
+                {/* Left section (3/4) */}
+                <div
+                  className={`w-3/4 pr-6 border-r flex flex-col ${
+                    !flight.returnDepartureDate ? "justify-center" : ""
+                  }`}
+                >
+                  {" "}
+                  {/* Outbound Flight */}
+                  <div className="mb-6">
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="text-sm text-gray-500">Depart</div>
                         <div className="text-3xl font-bold text-[#1A3B47]">
-                          {new Date(flight.returnDepartureDate).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {new Date(flight.departureDate).toLocaleTimeString(
+                            [],
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {new Date(flight.returnDepartureDate).toLocaleDateString()}
+                          {new Date(flight.departureDate).toLocaleDateString()}
                         </div>
-                        <div className="text-sm text-gray-500">{flight.to}</div>
+                        <div className="text-sm text-gray-500">
+                          {flight.from}
+                        </div>
                       </div>
 
                       <div className="flex-1 flex flex-col items-center mx-4">
                         <div className="w-full flex items-center gap-2">
                           <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                           <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
-                          <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                        {calculateDuration(flight.returnDepartureDate, flight.returnArrivalDate)} {/* Calculate duration */}
-                      </span>
+                            <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
+                              {calculateDuration(
+                                flight.departureDate,
+                                flight.arrivalDate
+                              )}{" "}
+                              {/* Calculate duration */}
+                            </span>
                           </div>
                           <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                         </div>
@@ -318,117 +287,189 @@ const ExternalFlightBookings = ({ user }) => {
                       <div className="space-y-1">
                         <div className="text-sm text-gray-500">Arrive</div>
                         <div className="text-3xl font-bold text-[#1A3B47]">
-                          {new Date(flight.returnArrivalDate).toLocaleTimeString([], {
+                          {new Date(flight.arrivalDate).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {new Date(flight.returnArrivalDate).toLocaleDateString()}
+                          {new Date(flight.arrivalDate).toLocaleDateString()}
                         </div>
-                        <div className="text-sm text-gray-500">{flight.from}</div>
+                        <div className="text-sm text-gray-500">{flight.to}</div>
                       </div>
                     </div>
                   </div>
-                )}
+                  {/* Return Flight if exists */}
+                  {flight.returnDepartureDate && (
+                    <div className="pt-6 border-t">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="text-sm text-gray-500">Depart</div>
+                          <div className="text-3xl font-bold text-[#1A3B47]">
+                            {new Date(
+                              flight.returnDepartureDate
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {new Date(
+                              flight.returnDepartureDate
+                            ).toLocaleDateString()}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {flight.to}
+                          </div>
+                        </div>
 
-                {/* Important Notices */}
-                <div className="mt-6 space-y-2">
-                <div className="flex bg-gray-100 px-4 py-2 rounded-md">
-  {/* First section */}
-  <div className="flex items-center gap-2 text-sm text-gray-600">
-    <Ticket className="h-10 w-10" />
-    <span>Show e-tickets and passenger identities during check-in</span>
-  </div>
+                        <div className="flex-1 flex flex-col items-center mx-4">
+                          <div className="w-full flex items-center gap-2">
+                            <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                            <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
+                              <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
+                                {calculateDuration(
+                                  flight.returnDepartureDate,
+                                  flight.returnArrivalDate
+                                )}{" "}
+                                {/* Calculate duration */}
+                              </span>
+                            </div>
+                            <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                          </div>
+                        </div>
 
-  {/* Divider line */}
-  <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
+                        <div className="space-y-1">
+                          <div className="text-sm text-gray-500">Arrive</div>
+                          <div className="text-3xl font-bold text-[#1A3B47]">
+                            {new Date(
+                              flight.returnArrivalDate
+                            ).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {new Date(
+                              flight.returnArrivalDate
+                            ).toLocaleDateString()}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {flight.from}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {/* Important Notices */}
+                  <div className="mt-6 space-y-2">
+                    <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+                      {/* First section */}
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Ticket className="h-10 w-10" />
+                        <span>
+                          Show e-tickets and passenger identities during
+                          check-in
+                        </span>
+                      </div>
 
-  {/* Second section */}
-  <div className="flex items-center gap-2 text-sm text-gray-600">
-    <Clock className="h-10 w-10" />
-    <span>Please be at the boarding gate at least 30 minutes before boarding time</span>
-  </div>
-</div>
+                      {/* Divider line */}
+                      <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
 
+                      {/* Second section */}
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Clock className="h-10 w-10" />
+                        <span>
+                          Please be at the boarding gate at least 30 minutes
+                          before boarding time
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-</div>
-
+                {/* Right section (1/4) */}
+                <div className="w-1/4 pl-6 space-y-6">
+                  <div>
+                    <div className="text-sm text-gray-500">Name</div>
+                    <span className="text-[#1A3B47]">
+                      {user?.fname && user?.lname
+                        ? `${user.fname} ${user.lname}`
+                        : "Passenger Name"}
+                    </span>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Email</div>
+                    <div className="font-medium text-[#1A3B47]">
+                      {user?.email || "passenger@email.com"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Tickets Booked</div>
+                    <div className="font-medium text-[#1A3B47]">
+                      {flight.numberOfTickets}
+                    </div>
+                  </div>
+                  <div className="flex flex-col ap-2">
+                    <div className="text-sm text-gray-500">Price:</div>
+                    <div className="text-4xl font-bold text-[#1A3B47]">
+                      {preferredCurrency.symbol}
+                      {flight.price}
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full text-base bg-gray-200 text-[#388A94] hover:bg-gray-300"
+                    onClick={() => {
+                      setSelectedFlight(flight._id);
+                      setIsDialogOpen(true);
+                    }}
+                  >
+                    Cancel Booking
+                  </Button>
+                </div>
               </div>
+            </Card>
+          ))}
 
-              {/* Right section (1/4) */}
-              <div className="w-1/4 pl-6 space-y-6">
-                <div>
-                  <div className="text-sm text-gray-500">Name</div>
-                  <span className="text-[#1A3B47]">
-                  {user?.fname && user?.lname ? `${user.fname} ${user.lname}` : 'Passenger Name'}  
-                  </span>  
-                  </div>          
-                <div>
-                  <div className="text-sm text-gray-500">Email</div>
-                  <div className="font-medium text-[#1A3B47]">{user?.email || 'passenger@email.com'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Tickets Booked</div>
-                  <div className="font-medium text-[#1A3B47]">{flight.numberOfTickets}</div>
-                </div>
-                <div className="flex flex-col ap-2">
-                <div className="text-sm text-gray-500">Price:</div>
-                <div className="text-4xl font-bold text-[#1A3B47]">
-                  {preferredCurrency.symbol}{flight.price}
-                </div>
-              </div>
+          {/* Confirmation Dialog */}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Cancel Flight Booking</DialogTitle>
+              </DialogHeader>
+              <p>
+                Are you sure you want to cancel this booking? This action cannot
+                be undone.
+              </p>
+              <DialogFooter>
                 <Button
                   variant="outline"
-                  className="w-full text-base bg-gray-200 text-[#388A94] hover:bg-gray-300"
-                  onClick={() => {
-                    setSelectedFlight(flight._id)
-                    setIsDialogOpen(true)
-                  }}
+                  onClick={() => setIsDialogOpen(false)}
                 >
-                  Cancel Booking
+                  Cancel
                 </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
+                <Button variant="destructive" onClick={handleCancelFlight}>
+                  Confirm
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-        {/* Confirmation Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cancel Flight Booking</DialogTitle>
-            </DialogHeader>
-            <p>
-              Are you sure you want to cancel this booking? This action cannot be
-              undone.
-            </p>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleCancelFlight}>
-                Confirm
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Toast Notification */}
-        {toast && (
-          <Toast>
-            <ToastTitle>{toast.title}</ToastTitle>
-            <ToastDescription>{toast.description}</ToastDescription>
-            <ToastClose onClick={() => setToast(null)} />
-          </Toast>
-        )}
-        <ToastViewport />
-      </div>
+          {/* Toast Notification */}
+          {toast && (
+            <Toast>
+              <ToastTitle>{toast.title}</ToastTitle>
+              <ToastDescription>{toast.description}</ToastDescription>
+              <ToastClose onClick={() => setToast(null)} />
+            </Toast>
+          )}
+          <ToastViewport />
+        </div>
       </div>
     </ToastProvider>
-  )
-}
-
+  );
+};
 
 const ExternalHotelBookings = ({ user }) => {
   const [hotels, setHotels] = useState([]);
@@ -582,8 +623,6 @@ const ExternalHotelBookings = ({ user }) => {
   );
 };
 
-
-
 const Upcoming = ({ user }) => {
   switch (user.role) {
     case "tourist":
@@ -667,12 +706,9 @@ const UpcomingItineraries = ({ user }) => {
   if (user.role === "tourist") {
     return <TouristItineraries />;
   } else {
-    return (
-      <div>Upcomming Itineraries are not available for {user.role}</div>
-    );
+    return <div>Upcomming Itineraries are not available for {user.role}</div>;
   }
 };
-
 
 const HistoryTransportationBooking = ({ user }) => {
   if (user.role === "tourist") {
@@ -841,7 +877,9 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
         </p>
         <p className="text-lg font-medium text-gray-600">
           Loyalty Points:{" "}
-          <span className="text-blue-600">{(user.loyaltyPoints).toFixed(2)} points</span>
+          <span className="text-blue-600">
+            {user.loyaltyPoints.toFixed(2)} points
+          </span>
         </p>
       </div>
 
@@ -1135,10 +1173,6 @@ export default function AccountManagement() {
   const getUserRole = () => Cookies.get("role") || "guest";
   const role = getUserRole();
 
-
-
-
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -1218,11 +1252,11 @@ export default function AccountManagement() {
         return <Wishlist user={user} />;
       case "history":
         return <History user={user} />;
-        case "historyItineraries":
+      case "historyItineraries":
         return <HistoryItineraries user={user} />;
       case "upcomingActivities":
         return <Upcoming user={user} />;
-        case "upcomingItineraries":
+      case "upcomingItineraries":
         return <UpcomingItineraries user={user} />;
       case "upcomingTransportation":
         return <UpcommingTransportationBooking user={user} />;
@@ -1255,8 +1289,8 @@ export default function AccountManagement() {
         return <CurrencyApp user={user} />;
       case "faqs":
         return <FAQs />;
-        case "sales-report-seller":
-          return <ProductReportSeller />;
+      case "sales-report-seller":
+        return <ProductReportSeller />;
       case "flight-bookings":
         return <ExternalFlightBookings user={user} />;
       case "hotel-bookings":
@@ -1269,7 +1303,7 @@ export default function AccountManagement() {
   const handleTabClick = (tab) => {
     if (tab === "delete-account") {
       setShowDeleteAccount(true);
-    }else if (tab === "logout"){
+    } else if (tab === "logout") {
       handleLogoutClick();
     } else {
       setActiveTab(tab);
@@ -1278,7 +1312,7 @@ export default function AccountManagement() {
   };
 
   const menuStructure = {
-    "Activities": [
+    Activities: [
       {
         name: "Saved",
         icon: Bookmark,
@@ -1291,23 +1325,22 @@ export default function AccountManagement() {
         tab: "upcomingActivities",
         roles: ["tourist"],
       },
-      
+
       {
         name: "Attended",
         icon: HistoryIcon,
         tab: "history",
         roles: ["tourist"],
       },
-      
     ],
-    "Itineraries": [
+    Itineraries: [
       {
         name: "Saved",
         icon: Bookmark,
         tab: "SavedItineraries",
         roles: ["tourist"],
       },
-      
+
       {
         name: "Upcoming",
         icon: Calendar,
@@ -1320,9 +1353,8 @@ export default function AccountManagement() {
         tab: "historyItineraries",
         roles: ["tourist"],
       },
-      
     ],
-    "Transportation": [
+    Transportation: [
       {
         name: "Upcoming",
         icon: Car,
@@ -1457,7 +1489,6 @@ export default function AccountManagement() {
     //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     // ],
-  
   };
 
   const LogoutPopup = ({ onConfirm, onCancel }) => {
@@ -1485,7 +1516,6 @@ export default function AccountManagement() {
       </div>
     );
   };
-  
 
   const [showPopup, setShowPopup] = useState(false);
 
@@ -1526,8 +1556,7 @@ export default function AccountManagement() {
     setSidebarVisible(!sidebarVisible);
   };
 
-
-   return (
+  return (
     <div>
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
@@ -1540,19 +1569,19 @@ export default function AccountManagement() {
           onTabClick={handleTabClick}
         />
         <main className=" flex-1 p-8">
-          <div className="w-full mx-auto">
-            {renderContent()}
-          </div>
+          <div className="w-full mx-auto">{renderContent()}</div>
         </main>
-        
+
         {showDeleteAccount && (
           <DeleteAccount onClose={() => setShowDeleteAccount(false)} />
         )}
         {showPopup && (
-      <LogoutPopup onConfirm={handleConfirmLogout} onCancel={handleCancelLogout} />
-    )}
+          <LogoutPopup
+            onConfirm={handleConfirmLogout}
+            onCancel={handleCancelLogout}
+          />
+        )}
       </div>
     </div>
   );
 }
-
