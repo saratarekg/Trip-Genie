@@ -454,14 +454,14 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/tourist-notifications"
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
                 <TouristNotifications />
               </ProtectedRoute>
             }
-          />
+          /> */}
           <Route
             path="/admin-notifications"
             element={
