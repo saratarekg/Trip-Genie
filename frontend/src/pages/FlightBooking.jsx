@@ -212,6 +212,8 @@ function BookingPage() {
   const mainContentRef = useRef(null);
   const [paymentMethod, setPaymentMethod] = useState("Wallet");
   const [bookingError, setBookingError] = useState("");
+  const [exchangeRates, setExchangeRates] = useState(null);
+  const [currencies, setCurrencies] = useState([]);
 
   const itemsPerPage = 9;
 
@@ -266,6 +268,7 @@ function BookingPage() {
           totalPrice: Math.round(parseFloat(selectedFlight.price.total)), // convert price to cents
         },
       ];
+      const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total),currencyCode , "USD");
 
       // Prepare metadata and other necessary details
       const metadata = {
@@ -279,7 +282,7 @@ function BookingPage() {
           selectedFlight.itineraries[0].segments[
             selectedFlight.itineraries[0].segments.length - 1
           ].arrival.at,
-        price: parseFloat(selectedFlight.price.total),
+        price: convertedPrice,
         numberOfTickets: numberOfSeats,
         type: selectedFlight.itineraries[1] ? "Round Trip" : "One Way",
         returnDepartureDate: selectedFlight.itineraries[1]
@@ -367,6 +370,7 @@ function BookingPage() {
             console.log("Payment status response:", response.data);
             if (response.data.status === "paid") {
               const token = Cookies.get("jwt");
+              const convertedPrice = convertPrice(parseFloat(price), currencyCode, "USD");
               const response = await fetch(
                 "http://localhost:4000/tourist/book-flight",
                 {
@@ -382,7 +386,7 @@ function BookingPage() {
                     to: to,
                     departureDate: departureDate,
                     arrivalDate: arrivalDate,
-                    price: parseFloat(price),
+                    price: convertedPrice,
                     numberOfTickets: numberOfTickets,
                     type: type,
                     returnDepartureDate: returnDepartureDate? returnDepartureDate : undefined,
@@ -435,6 +439,7 @@ function BookingPage() {
       }
 
       const token = Cookies.get("jwt");
+      const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total), currencyCode, "USD");
       const response = await fetch(
         "http://localhost:4000/tourist/book-flight",
         {
@@ -456,7 +461,7 @@ function BookingPage() {
               selectedFlight.itineraries[0].segments[
                 selectedFlight.itineraries[0].segments.length - 1
               ].arrival.at,
-            price: parseFloat(selectedFlight.price.total),
+            price: convertedPrice,
             numberOfTickets: numberOfSeats,
             type: selectedFlight.itineraries[1] ? "Round Trip" : "One Way",
             returnDepartureDate: selectedFlight.itineraries[1]
@@ -496,6 +501,37 @@ function BookingPage() {
     let role = Cookies.get("role");
     if (!role) role = "guest";
     return role;
+  };
+
+  const fetchExchangeRates = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/rates');
+      if (!response.ok) {
+        throw new Error('Failed to fetch exchange rates');
+      }
+      const data = await response.json();
+      setExchangeRates(data.rates);
+    } catch (error) {
+      console.error('Error fetching exchange rates:', error);
+    }
+  };
+
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get('jwt');
+      const response = await fetch('http://localhost:4000/tourist/currencies', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch currencies');
+      }
+      const data = await response.json();
+      setCurrencies(data);
+    } catch (error) {
+      console.error('Error fetching currencies:', error);
+    }
   };
 
   const guideSteps = [
@@ -582,8 +618,19 @@ function BookingPage() {
   };
 
   useEffect(() => {
-    Promise.all([refreshToken(), getCurrencyCode()]);
+    Promise.all([refreshToken(), getCurrencyCode(), fetchExchangeRates(), fetchCurrencies()]);
   }, []);
+
+
+  // convert price that takes any currency and converts it to any currency using exchange rates
+  const convertPrice = (price, fromCurrency, toCurrency) => {
+    if (!exchangeRates || !fromCurrency || !toCurrency) {
+      return price;
+    }
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    return (price * toRate / fromRate).toFixed(2);
+  };
 
   const handleSearch = async () => {
     if (returnDate && new Date(returnDate) < new Date(departureDate)) {
