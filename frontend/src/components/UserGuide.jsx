@@ -103,6 +103,8 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
         showProgress={true}
         stepIndex={stepIndex}
         callback={handleJoyrideCallback}
+        scrollToFirstStep={true} // Scroll to the first target component
+        scrollOffset={100} // Adjust scrolling to align the target's top with the viewport
         styles={{
           options: {
             primaryColor: "#388A94",
