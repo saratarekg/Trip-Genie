@@ -14,9 +14,20 @@ import {
 import Loader from "../components/Loader";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
 import { UserGuide } from "@/components/UserGuide";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Card,
   CardContent,
@@ -89,15 +100,15 @@ const StarRating = ({ rating, onRatingChange = null }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-5 h-5 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            } ${onRatingChange ? "cursor-pointer" : ""}`}
+          className={`w-5 h-5 ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          } ${onRatingChange ? "cursor-pointer" : ""}`}
           onClick={() => onRatingChange && onRatingChange(star)}
         />
       ))}
     </div>
   );
 };
-
 
 const ImageGallery = ({ pictures }) => {
   const [mainImage, setMainImage] = useState(pictures[0]?.url);
@@ -119,8 +130,9 @@ const ImageGallery = ({ pictures }) => {
           {pictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex === 0 ? 'bg-gray-400' : 'bg-black'
-                }`}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex === 0 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
@@ -135,15 +147,16 @@ const ImageGallery = ({ pictures }) => {
                 alt={`Product image ${startIndex + index + 1}`}
                 className="w-full h-[20%] object-cover rounded-lg cursor-pointer"
                 onClick={() => setMainImage(pic.url)}
-                style={{ transition: 'transform 0.7s ease-in-out' }}
+                style={{ transition: "transform 0.7s ease-in-out" }}
               />
             ))}
           </div>
           {pictures.length > 5 && (
             <button
               onClick={handleNext}
-              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= pictures.length - 5 ? 'bg-gray-400' : 'bg-black'
-                }`}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex >= pictures.length - 5 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex >= pictures.length - 5}
               aria-label="Next images"
             >
@@ -166,8 +179,6 @@ const ImageGallery = ({ pictures }) => {
     </div>
   );
 };
-
-
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -254,10 +265,13 @@ const ProductDetail = () => {
     setOpen(false);
   };
 
-
   const handleEmailShare = () => {
-    const subject = encodeURIComponent(`Check out this product: ${product.name}`);
-    const body = encodeURIComponent(`I thought you might be interested in this product:\n\n${product.name}\n\n${window.location.href}`);
+    const subject = encodeURIComponent(
+      `Check out this product: ${product.name}`
+    );
+    const body = encodeURIComponent(
+      `I thought you might be interested in this product:\n\n${product.name}\n\n${window.location.href}`
+    );
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     setOpen(false); // Close the popover
   };
@@ -450,7 +464,6 @@ const ProductDetail = () => {
     updateLocation();
   };
 
-
   // Function to toggle between expanded and collapsed states
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);
@@ -511,7 +524,7 @@ const ProductDetail = () => {
           if (token) {
             const decodedToken = jwtDecode(token);
             const userReview = data.reviews.find(
-              (review) => review.tourist?._id === decodedToken.id,
+              (review) => review.tourist?._id === decodedToken.id
             );
             if (userReview) {
               console.log(userReview);
@@ -519,7 +532,9 @@ const ProductDetail = () => {
               setQuickRating(userReview.rating || 0);
               setRating(userReview.rating || 0);
               setComment(userReview.comment || "");
-              setIsAnonymous(!(userReview?.user === userReview.tourist.username));
+              setIsAnonymous(
+                !(userReview?.user === userReview.tourist.username)
+              );
             }
           }
         }
@@ -689,9 +704,8 @@ const ProductDetail = () => {
       }
 
       setActionSuccess("Product added to cart successfully!");
-      window.dispatchEvent(new Event('cartUpdated'));
+      window.dispatchEvent(new Event("cartUpdated"));
       setIsPopupOpen(false);
-
     } catch (error) {
       setActionError("Error adding product to cart. Please try again.");
     }
@@ -842,37 +856,51 @@ const ProductDetail = () => {
   const guideSteps = [
     {
       target: "body",
-      content: "Now you can explore the details of this product, including its seller, cost, and reviews. Press next for more information or to make a purchase!",
+      content:
+        "Now you can explore the details of this product, including its seller, cost, and reviews. Press next for more information or to make a purchase!",
       placement: "center",
     },
     {
       target: ".Productdetail",
-      content: "This section provides an overview of the Product, including its price, availability and description.",
+      content:
+        "This section provides an overview of the Product, including its price, availability and description.",
       placement: "left",
     },
-     // Conditionally add the addToCart step based on product.quantity
-  ...(product?.quantity > 0
-    ? [
-        {
-          target: ".addToCart",
-          content: "Click here to add the product to your cart.",
-          placement: "left",
-        },
-      ]
-    : []),
+    // Conditionally add the addToCart step based on product.quantity
+    ...(product?.quantity > 0
+      ? [
+          {
+            target: ".addToCart",
+            content: "Click here to add the product to your cart.",
+            placement: "left",
+          },
+        ]
+      : []),
     {
       target: ".addToWishlist",
-      content: (<> Click here to add this product to your wishlist for later viewing or purchase.<br />Tip:<br />You can view your wishlist from the top right corner of the page</>),     placement: "left",
+      content: (
+        <>
+          {" "}
+          Click here to add this product to your wishlist for later viewing or
+          purchase.
+          <br />
+          Tip:
+          <br />
+          You can view your wishlist from the top right corner of the page
+        </>
+      ),
+      placement: "left",
     },
     {
       target: ".sellerDetails",
-      content: "Here you can find information about the seller of this product, including their name and ratings.",
+      content:
+        "Here you can find information about the seller of this product, including their name and ratings.",
       placement: "left",
     },
     {
       target: ".addReview",
-      content: "Click here to add/edit a review for this product.",   
-      placement: "right",
+      content: "Click here to add/edit a review for this product.",
+      placement: "bottom",
     },
   ];
 
@@ -931,8 +959,7 @@ const ProductDetail = () => {
   return (
     <div className="min-h-screen bg-gray-100 ">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className=" mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -947,7 +974,11 @@ const ProductDetail = () => {
                     <ToastProvider>
                       <Popover open={open} onOpenChange={setOpen}>
                         <PopoverTrigger asChild>
-                          <Button variant="outline" size="sm" className="ml-auto">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="ml-auto"
+                          >
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </PopoverTrigger>
@@ -976,7 +1007,13 @@ const ProductDetail = () => {
                       <ToastViewport />
 
                       {isToastOpen && (
-                        <Toast onOpenChange={setIsToastOpen} open={isToastOpen} duration={3000}> {/* Auto close after 3 seconds */}
+                        <Toast
+                          onOpenChange={setIsToastOpen}
+                          open={isToastOpen}
+                          duration={3000}
+                        >
+                          {" "}
+                          {/* Auto close after 3 seconds */}
                           <ToastTitle>Link Copied</ToastTitle>
                           <ToastDescription>
                             The link has been copied to your clipboard.
@@ -1079,14 +1116,15 @@ const ProductDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${(
-                            isRatingHovered
-                              ? quickRating >= star
-                              : quickRating >= star
-                          )
-                            ? "text-[#F88C33] fill-current"
-                            : "text-gray-300"
-                            }`}
+                          className={`w-8 h-8 cursor-pointer ${
+                            (
+                              isRatingHovered
+                                ? quickRating >= star
+                                : quickRating >= star
+                            )
+                              ? "text-[#F88C33] fill-current"
+                              : "text-gray-300"
+                          }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -1161,8 +1199,7 @@ const ProductDetail = () => {
                         if (product.rating) {
                           ratingValue = Math.floor(product.rating);
                         }
-                        const isHalfStar =
-                          product.rating - ratingValue >= 0.5; // Check for half-star
+                        const isHalfStar = product.rating - ratingValue >= 0.5; // Check for half-star
 
                         if (index < ratingValue) {
                           // Full star
@@ -1195,7 +1232,6 @@ const ProductDetail = () => {
                             />
                           );
                         }
-
                       })}
                       <span className="text-xl font-semibold text-black ml-2">
                         {product.rating ? product.rating.toFixed(1) : 0}
@@ -1223,7 +1259,6 @@ const ProductDetail = () => {
                         ) : product.quantity > 0 ? (
                           <>
                             {/* <Package className="w-6 h-6 mr-2 text-blue-500" /> */}
-
                           </>
                         ) : (
                           <div className="w-full">
@@ -1272,10 +1307,6 @@ const ProductDetail = () => {
                         </>
                       ) : null}
                     </div>
-
-
-
-
                   </div>
 
                   <div className="Productdetail">
@@ -1289,12 +1320,13 @@ const ProductDetail = () => {
                       <Info className="w-5 h-5 mr-2" />
                       <p>Price includes VAT</p>
                     </div>
-                    {product.quantity <=5 ? (
-                      product.quantity !== 0 && ( 
-                      <p className="text-red-600 font-semibold text-xl mb-4">
-                        Only {product.quantity} left in stock! Buy now!
-                      </p>)
-                    ):  (
+                    {product.quantity <= 5 ? (
+                      product.quantity !== 0 && (
+                        <p className="text-red-600 font-semibold text-xl mb-4">
+                          Only {product.quantity} left in stock! Buy now!
+                        </p>
+                      )
+                    ) : (
                       <span className="text-green-600 text-lg font-semibold">
                         Still in stock!
                       </span>
@@ -1302,9 +1334,12 @@ const ProductDetail = () => {
                     <div>
                       <p className="text-gray-700 inline break-words ">
                         {isExpanded ||
-                          product.description.length <= characterLimit
+                        product.description.length <= characterLimit
                           ? product.description
-                          : `${product.description.slice(0, characterLimit)}...`}
+                          : `${product.description.slice(
+                              0,
+                              characterLimit
+                            )}...`}
 
                         {/* "View More / View Less" link placed inline */}
                         {product.description.length > characterLimit && (
@@ -1319,56 +1354,60 @@ const ProductDetail = () => {
                     </div>
                   </div>
 
-
                   <div className="mt-8 space-y-4">
                     {(userRole === "admin" ||
-                      (userRole === "seller" && canModify && product.seller)) && (
-                        <Button
-                          className="w-full bg-[#1A3B47] text-xl  text-white"
-                          variant="default"
-                          onClick={handleUpdate}
-                        >
-                          <Edit className="w-5 h-5 mr-2" /> Update Product
-                        </Button>
-                      )}
+                      (userRole === "seller" &&
+                        canModify &&
+                        product.seller)) && (
+                      <Button
+                        className="w-full bg-[#1A3B47] text-xl  text-white"
+                        variant="default"
+                        onClick={handleUpdate}
+                      >
+                        <Edit className="w-5 h-5 mr-2" /> Update Product
+                      </Button>
+                    )}
 
                     {((userRole === "admin" && product.seller == null) ||
-                      (userRole === "seller" && canModify && product.seller)) && (
-                        <Button
-
-                          variant={product.isArchived ? "outline" : "default"}
-                          className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78]"
-                          onClick={() => setShowArchiveConfirm(true)}
-                        >
-                          {product.isArchived ? (
-                            <>
-                              <ArchiveX className="w-5 h-5 mr-2" /> Unarchive Product
-                            </>
-                          ) : (
-                            <>
-                              <Archive className="w-5 h-5 mr-2" /> Archive Product
-                            </>
-                          )}
-                        </Button>
-                      )}
+                      (userRole === "seller" &&
+                        canModify &&
+                        product.seller)) && (
+                      <Button
+                        variant={product.isArchived ? "outline" : "default"}
+                        className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78]"
+                        onClick={() => setShowArchiveConfirm(true)}
+                      >
+                        {product.isArchived ? (
+                          <>
+                            <ArchiveX className="w-5 h-5 mr-2" /> Unarchive
+                            Product
+                          </>
+                        ) : (
+                          <>
+                            <Archive className="w-5 h-5 mr-2" /> Archive Product
+                          </>
+                        )}
+                      </Button>
+                    )}
 
                     {(userRole === "admin" ||
-                      (userRole === "seller" && canModify && product.seller)) && (
-                        <Button
-                          className="w-full text-xl bg-red-500 hover:bg-red-600"
-                          variant="destructive"
-                          onClick={() => setShowDeleteConfirm(true)}
-                        >
-                          <Trash2 className="w-5 h-5 mr-2" /> Delete Product
-                        </Button>
-                      )}
+                      (userRole === "seller" &&
+                        canModify &&
+                        product.seller)) && (
+                      <Button
+                        className="w-full text-xl bg-red-500 hover:bg-red-600"
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(true)}
+                      >
+                        <Trash2 className="w-5 h-5 mr-2" /> Delete Product
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
 
                 <div className="space-y-4 mt-5 flex items-center justify-center px-4">
                   {userRole === "tourist" && (
                     <div className="space-y-2 w-full">
-
                       {/* Add to Cart Button - Only if product quantity is greater than 0 */}
                       {product.quantity > 0 && (
                         <Button
@@ -1591,8 +1630,6 @@ const ProductDetail = () => {
                 )}
               </Card>
             </div>
-
-
           </div>
         </div>
       </div>
@@ -1617,7 +1654,11 @@ const ProductDetail = () => {
             >
               Cancel
             </Button>
-            <Button variant="default" onClick={handleArchive} className="bg-[#388A94] hover:bg-[#2d6e78]" >
+            <Button
+              variant="default"
+              onClick={handleArchive}
+              className="bg-[#388A94] hover:bg-[#2d6e78]"
+            >
               {product.isArchived ? "Unarchive" : "Archive"}
             </Button>
           </DialogFooter>
@@ -1741,11 +1782,12 @@ const ProductDetail = () => {
       <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="text-[#1A3B47] text-2xl">Choose an option</DialogTitle>
+            <DialogTitle className="text-[#1A3B47] text-2xl">
+              Choose an option
+            </DialogTitle>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
-
             <Button
               className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
               onClick={handleAddToCart}
@@ -1758,14 +1800,9 @@ const ProductDetail = () => {
             >
               Add to cart and Checkout Now
             </Button>
-
           </div>
         </DialogContent>
       </Dialog>
-
-
-
-
 
       <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
         <DialogContent>
@@ -1916,7 +1953,10 @@ const ProductDetail = () => {
                         product.rating % 1 >= 0.5
                       ) {
                         return (
-                          <StarHalf key={i} className="w-6 h-6 text-[#1A3B47]" />
+                          <StarHalf
+                            key={i}
+                            className="w-6 h-6 text-[#1A3B47]"
+                          />
                         );
                       } else {
                         return (
@@ -1937,10 +1977,11 @@ const ProductDetail = () => {
               {/* Filter by Rating Buttons */}
               <div className="flex justify-center space-x-2 mb-4">
                 <button
-                  className={`px-3 py-2 rounded-md ${filteredRating === 0
-                    ? "bg-[#388A94] text-white"
-                    : "bg-gray-200"
-                    }`}
+                  className={`px-3 py-2 rounded-md ${
+                    filteredRating === 0
+                      ? "bg-[#388A94] text-white"
+                      : "bg-gray-200"
+                  }`}
                   onClick={() => handleFilterRating(0, product)}
                 >
                   All
@@ -1948,10 +1989,11 @@ const ProductDetail = () => {
                 {[5, 4, 3, 2, 1].map((star) => (
                   <button
                     key={star}
-                    className={`px-3 py-2 rounded-md ${filteredRating === star
-                      ? "bg-[#388A94] text-white"
-                      : "bg-gray-200"
-                      }`}
+                    className={`px-3 py-2 rounded-md ${
+                      filteredRating === star
+                        ? "bg-[#388A94] text-white"
+                        : "bg-gray-200"
+                    }`}
                     onClick={() => handleFilterRating(star, product)}
                   >
                     {star} Star{star > 1 ? "s" : ""}
@@ -1977,7 +2019,9 @@ const ProductDetail = () => {
 
                     {/* Show the first 50 characters of the comment and a "Show more" link */}
                     <p className="text-gray-600 mt-1">
-                      {isExpandedComment ? review.comment : `${review.comment.slice(0, 100)}...`}
+                      {isExpandedComment
+                        ? review.comment
+                        : `${review.comment.slice(0, 100)}...`}
                     </p>
 
                     {/* Only show "Show more" if the comment length exceeds 50 characters */}
@@ -1986,7 +2030,7 @@ const ProductDetail = () => {
                         onClick={handleToggleComment}
                         className="text-blue-500 mt-2 hover:underline"
                       >
-                        {isExpandedComment ? 'Show less' : 'Show more'}
+                        {isExpandedComment ? "Show less" : "Show more"}
                       </button>
                     )}
                   </div>
@@ -2000,8 +2044,12 @@ const ProductDetail = () => {
           </div>
 
           <DialogFooter>
-            <Button className="bg-[#1A3B47]"
-              onClick={() => setShowAllReviews(false)}>Close</Button>
+            <Button
+              className="bg-[#1A3B47]"
+              onClick={() => setShowAllReviews(false)}
+            >
+              Close
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2009,7 +2057,6 @@ const ProductDetail = () => {
         <UserGuide steps={guideSteps} pageName="singleProduct" />
       )}
     </div>
-
   );
 };
 

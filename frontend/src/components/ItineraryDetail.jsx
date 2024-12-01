@@ -114,8 +114,9 @@ const ImageGallery = ({ activities }) => {
           {allPictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex === 0 ? "bg-gray-400" : "bg-black"
-                }`}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex === 0 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
@@ -137,10 +138,11 @@ const ImageGallery = ({ activities }) => {
           {allPictures.length > 5 && (
             <button
               onClick={handleNext}
-              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= allPictures.length - 5
-                ? "bg-gray-400"
-                : "bg-black"
-                }`}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex >= allPictures.length - 5
+                  ? "bg-gray-400"
+                  : "bg-black"
+              }`}
               disabled={startIndex >= allPictures.length - 5}
               aria-label="Next images"
             >
@@ -183,8 +185,9 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -334,10 +337,15 @@ const TourguideProfileCard = ({
     if (userRole === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/saved-itineraries", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const savedItinerariesIds = response.data.map(savedItinerary => savedItinerary._id);
+        const response = await axios.get(
+          "http://localhost:4000/tourist/saved-itineraries",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const savedItinerariesIds = response.data.map(
+          (savedItinerary) => savedItinerary._id
+        );
         setIsSaved(savedItinerariesIds.includes(itinerary._id));
       } catch (error) {
         console.error("Error fetching saved itineraries:", error);
@@ -368,7 +376,9 @@ const TourguideProfileCard = ({
         setIsSaved(newSavedState);
         setAlertMessage({
           type: "success",
-          message: newSavedState ? "Itinerary saved successfully!" : "Itinerary unsaved successfully!",
+          message: newSavedState
+            ? "Itinerary saved successfully!"
+            : "Itinerary unsaved successfully!",
         });
         fetchSavedItineraries();
       }
@@ -389,11 +399,12 @@ const TourguideProfileCard = ({
     <Card className="w-full max-w-md">
       <CardHeader className="ItineraryDetail">
         <h1 className="text-3xl font-bold text-center">{itinerary.title}</h1>
-        {(userRole === "tour-guide" || userRole === "admin") && !itinerary.isBookingOpen && (
-          <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
-            Booking is currently closed.
-          </div>
-        )}
+        {(userRole === "tour-guide" || userRole === "admin") &&
+          !itinerary.isBookingOpen && (
+            <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
+              Booking is currently closed.
+            </div>
+          )}
         <div className="mt-4 text-4xl font-semibold text-center">
           {formatPrice(itinerary.price)}
           <div className="text-sm text-gray-500 flex items-center justify-center mt-1">
@@ -404,11 +415,15 @@ const TourguideProfileCard = ({
 
         <div className="mt-4">
           <div className="text-lg font-semibold">Pick-up Location:</div>
-          <div className="text-md text-gray-700">{itinerary.pickUpLocation}</div>
+          <div className="text-md text-gray-700">
+            {itinerary.pickUpLocation}
+          </div>
         </div>
         <div className="mt-2">
           <div className="text-lg font-semibold">Drop-off Location:</div>
-          <div className="text-md text-gray-700">{itinerary.dropOffLocation}</div>
+          <div className="text-md text-gray-700">
+            {itinerary.dropOffLocation}
+          </div>
         </div>
         <div className="mt-4">
           <div className="text-lg font-semibold">Language:</div>
@@ -416,11 +431,12 @@ const TourguideProfileCard = ({
         </div>
         <div className="mt-2">
           <div className="text-lg font-semibold">Accessibility:</div>
-          <div className="text-md text-gray-700">{itinerary.accessibility ? "Yes" : "No"}</div>
+          <div className="text-md text-gray-700">
+            {itinerary.accessibility ? "Yes" : "No"}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-
         {userRole === "tour-guide" && canModify && (
           <div className="mt-3 space-y-3">
             <Button
@@ -442,8 +458,11 @@ const TourguideProfileCard = ({
             <Button
               onClick={() => handleActivationToggle()}
               variant={isActivated ? "destructive" : "default"}
-              className={`w-full flex items-center ${isActivated ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"
-                }`}
+              className={`w-full flex items-center ${
+                isActivated
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
             >
               {isActivated ? "Deactivate" : "Activate"}
             </Button>
@@ -455,35 +474,40 @@ const TourguideProfileCard = ({
 
             {!itinerary.isBookingOpen && (
               <div className="mb-3 p-3 bg-blue-50 text-blue-700 border border-blue-300 rounded-md shadow-sm text-center">
-                <strong>Save this activity</strong> to get notified when booking opens.
+                <strong>Save this activity</strong> to get notified when booking
+                opens.
               </div>
             )}
-
-            <Button
-              onClick={handleBookNowClick}
-              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${itinerary.isBookingOpen
-                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                }`}
-              disabled={!itinerary.isBookingOpen}
-            >
-              {itinerary.isBookingOpen ? "Book Now" : "Booking Closed"}
-            </Button>
 
             <Button
               onClick={(e) => {
                 e.stopPropagation();
                 handleSaveToggle();
               }}
-              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
-                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                }`}
+              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${
+                isSaved
+                  ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                  : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+              }`}
             >
               <Bookmark
-                className={`w-5 h-5 ${isSaved ? "stroke-white fill-[#1A3B47]" : "stroke-white"}`}
+                className={`w-5 h-5 ${
+                  isSaved ? "stroke-white fill-[#1A3B47]" : "stroke-white"
+                }`}
               />
               {isSaved ? "Unsave" : "Save"}
+            </Button>
+
+            <Button
+              onClick={handleBookNowClick}
+              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
+                itinerary.isBookingOpen
+                  ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                  : "bg-gray-400 text-gray-700 cursor-not-allowed"
+              }`}
+              disabled={!itinerary.isBookingOpen}
+            >
+              {itinerary.isBookingOpen ? "Book Now" : "Booking Closed"}
             </Button>
           </>
         )}
@@ -503,14 +527,18 @@ const TourguideProfileCard = ({
           <div className="mt-4 flex items-center">
             <Avatar className="h-16 w-16">
               <AvatarImage src={profile.avatarUrl} alt={profile.username} />
-              <AvatarFallback>{profile.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarFallback>
+                {profile.username.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <div className="ml-4">
               <h3 className="text-2xl font-bold">{profile.username}</h3>
               <div className="flex items-center text-sm text-gray-500 mt-1">
                 <span className="font-semibold text-xs">95% positive</span>
                 <span className="mx-2">|</span>
-                <span className="font-semibold text-xs">{profile.yearsOfExperience} years of experience</span>
+                <span className="font-semibold text-xs">
+                  {profile.yearsOfExperience} years of experience
+                </span>
               </div>
             </div>
           </div>
@@ -519,7 +547,9 @@ const TourguideProfileCard = ({
             <span>
               <StarRating rating={profile.rating} readOnly={true} />
             </span>
-            <span className="ml-2 text-lg font-semibold">{profile.rating.toFixed(1)}</span>
+            <span className="ml-2 text-lg font-semibold">
+              {profile.rating.toFixed(1)}
+            </span>
           </div>
 
           {showMore && (
@@ -566,39 +596,51 @@ const TourguideProfileCard = ({
           </div>
         </div>
 
-        {userRole === "tourist" && userBookings.some((booking) => booking.itinerary?._id === itinerary._id) && (
-          <div className="border-t pt-4 mt-4">
-            <div className="text-lg text-gray-600 font-semibold mb-2">Rate Tour Guide:</div>
-            <div className="text-sm text-gray-500 mb-2">Tap to Rate</div>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-8 h-8 cursor-pointer ${tourGuideRating >= star ? "text-yellow-500 fill-current" : "text-gray-300"
+        {userRole === "tourist" &&
+          userBookings.some(
+            (booking) => booking.itinerary?._id === itinerary._id
+          ) && (
+            <div className="border-t pt-4 mt-4">
+              <div className="text-lg text-gray-600 font-semibold mb-2">
+                Rate Tour Guide:
+              </div>
+              <div className="text-sm text-gray-500 mb-2">Tap to Rate</div>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-8 h-8 cursor-pointer ${
+                      tourGuideRating >= star
+                        ? "text-yellow-500 fill-current"
+                        : "text-gray-300"
                     }`}
-                  onClick={() => handleQuickTourGuideRating(star)}
-                />
-              ))}
+                    onClick={() => handleQuickTourGuideRating(star)}
+                  />
+                ))}
+              </div>
+              <Button
+                onClick={() => setShowTourGuideReviewDialog(true)}
+                className="w-full mt-4 mb-2 bg-[#5D9297]"
+              >
+                {userTourGuideReview ? "Edit Review" : "Write a Review"}
+              </Button>
             </div>
-            <Button
-              onClick={() => setShowTourGuideReviewDialog(true)}
-              className="w-full mt-4 mb-2 bg-[#5D9297]"
-            >
-              {userTourGuideReview ? "Edit Review" : "Write a Review"}
-            </Button>
-          </div>
-        )}
-        <Button onClick={onReviewClick} className="w-full bg-[#1A3B47] tourGuieRating">
+          )}
+        <Button
+          onClick={onReviewClick}
+          className="w-full bg-[#1A3B47] tourGuieRating"
+        >
           See All Reviews
         </Button>
         {userRole === "admin" && (
           <>
             <div className="mt-6 border-t border-gray-300 pt-4"></div>
             <Button
-              className={`w-full mx-auto text-white ${isAppropriate
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600"
-                }`}
+              className={`w-full mx-auto text-white ${
+                isAppropriate
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
               onClick={handleOpenDialog}
             >
               {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
@@ -610,7 +652,8 @@ const TourguideProfileCard = ({
                   <div className="mb-4">
                     <h2 className="text-lg font-semibold">Confirm Action</h2>
                     <p className="text-gray-600 mt-2">
-                      Are you sure you want to change the status of this itinerary/event?
+                      Are you sure you want to change the status of this
+                      itinerary/event?
                     </p>
                   </div>
                   <div className="flex justify-end space-x-4">
@@ -637,8 +680,9 @@ const TourguideProfileCard = ({
       </CardContent>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -1074,8 +1118,8 @@ const ItineraryDetail = () => {
     setBookingError("");
   };
 
-  const handleBooking = async (paymentType,numberOfTickets,date) => {
-    console.log(paymentType,numberOfTickets,date);
+  const handleBooking = async (paymentType, numberOfTickets, date) => {
+    console.log(paymentType, numberOfTickets, date);
     setIsBooking(true);
     setBookingError("");
     try {
@@ -1114,8 +1158,7 @@ const ItineraryDetail = () => {
         setNumberOfTickets(numberOfTickets);
         setPaymentType(paymentType);
         setShowSuccessDialog(true);
-         // Update the number of tickets in the state
-
+        // Update the number of tickets in the state
       }
     } catch (error) {
       console.error("Error booking itinerary:", error);
@@ -1127,8 +1170,6 @@ const ItineraryDetail = () => {
     }
   };
 
-
-  
   useEffect(() => {
     const handleBookingSuccess = async () => {
       const success = searchParams.get("success");
@@ -1179,7 +1220,7 @@ const ItineraryDetail = () => {
     searchParams.delete("session_id");
 
     const newUrl = `${window.location.pathname}`;
-    window.history.replaceState(null, '', newUrl);
+    window.history.replaceState(null, "", newUrl);
 
     if (showSuccessDialog) {
       return (
@@ -1196,9 +1237,6 @@ const ItineraryDetail = () => {
       return <div>Loading...</div>;
     }
   };
-
- 
-
 
   const navigate = useNavigate();
 
@@ -1284,13 +1322,13 @@ const ItineraryDetail = () => {
         const userBookingsFetch =
           userRole === "tourist"
             ? axios
-              .get(
-                `http://localhost:4000/${userRole}/touristItineraryAttendedBookings`,
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                }
-              )
-              .then((response) => response.data)
+                .get(
+                  `http://localhost:4000/${userRole}/touristItineraryAttendedBookings`,
+                  {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }
+                )
+                .then((response) => response.data)
             : Promise.resolve([]);
 
         const [data, userBookings] = await Promise.all([
@@ -1560,47 +1598,62 @@ const ItineraryDetail = () => {
   const guideSteps = [
     {
       target: "body",
-      content: "Now you can explore the details of this Itinerary, including its available dates, cost, and pictures. Press next for more information or to make a booking!",
+      content:
+        "Now you can explore the details of this Itinerary, including its available dates, cost, and pictures. Press next for more information or to make a booking!",
       placement: "center",
     },
     {
       target: ".ItineraryDetail",
-      content: "This section provides a detailed overview of the itinerary, including its name, Price, and language.",
-      placement: "left",
-    },
-    {
-      target: ".bookNow",
-      content: "Click here to be able to book this itinerary and proceed to the payment process.",
+      content:
+        "This section provides a detailed overview of the itinerary, including its name, Price, and language.",
       placement: "left",
     },
     {
       target: ".Save",
-      content: (<> Click here to save this itinerary for later viewing or booking in your saved itineraries list.<br />Tip:<br />You can view your saved itineraries anytime! Simply click the hamburger menu on the top right corner → My Account → Itineraries → Saved
-      </>),
+      content: (
+        <>
+          {" "}
+          Click here to save this itinerary for later viewing or booking in your
+          saved itineraries list.
+          <br />
+          Tip:
+          <br />
+          You can view your saved itineraries anytime! Simply click the
+          hamburger menu on the top right corner → My Account → Itineraries →
+          Saved
+        </>
+      ),
+      placement: "left",
+    },
+    {
+      target: ".bookNow",
+      content:
+        "Click here to be able to book this itinerary and proceed to the payment process.",
       placement: "left",
     },
     {
       target: ".tourGuideDetail",
-      content: "Here you can find information about the advertiser that published this Itinerary, including their name and contact information.",
+      content:
+        "Here you can find information about the advertiser that published this Itinerary, including their name and contact information.",
       placement: "left",
     },
     {
       target: ".tourGuieRating",
-      content: "Here you can find the reviews of the tour guide that published this Itinerary.",
+      content:
+        "Here you can find the reviews of the tour guide that published this Itinerary.",
       placement: "left",
     },
     {
       target: ".timeline",
-      content: "Here you can find the timeline of itinerary that is grouped by day",
-      placement: "right",
+      content:
+        "Here you can find the timeline of itinerary that is grouped by day",
+      placement: "bottom",
     },
     {
       target: ".review",
       content: "Here you can add/edit your reviews to this itinerary ",
       placement: "right",
     },
-    
-
   ];
 
   const handleActivityRating = async () => {
@@ -1646,7 +1699,6 @@ const ItineraryDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      
       <nav className="bg-[#1a202c] shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
@@ -1662,7 +1714,6 @@ const ItineraryDetail = () => {
           </h1>
         </div>
       </div>
-
 
       <div className=" mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -1734,19 +1785,19 @@ const ItineraryDetail = () => {
                   {itinerary.activities.map((activity, index) =>
                     activity.category
                       ? activity.category.map((cat, catIndex) => (
-                        <Badge key={catIndex} variant="secondary">
-                          {cat.name}
-                        </Badge>
-                      ))
+                          <Badge key={catIndex} variant="secondary">
+                            {cat.name}
+                          </Badge>
+                        ))
                       : null
                   )}
                   {itinerary.activities.map((activity, index) =>
                     activity.tags
                       ? activity.tags.map((tag, tagIndex) => (
-                        <Badge key={tagIndex} variant="outline">
-                          {tag.type}
-                        </Badge>
-                      ))
+                          <Badge key={tagIndex} variant="outline">
+                            {tag.type}
+                          </Badge>
+                        ))
                       : null
                   )}
                 </div>
@@ -1846,14 +1897,15 @@ const ItineraryDetail = () => {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-8 h-8 cursor-pointer ${(
-                          isRatingHovered
-                            ? quickRating >= star
-                            : quickRating >= star
-                        )
-                          ? "text-[#F88C33] fill-current"
-                          : "text-gray-300"
-                          }`}
+                        className={`w-8 h-8 cursor-pointer ${
+                          (
+                            isRatingHovered
+                              ? quickRating >= star
+                              : quickRating >= star
+                          )
+                            ? "text-[#F88C33] fill-current"
+                            : "text-gray-300"
+                        }`}
                         onMouseEnter={() => {
                           setIsRatingHovered(true);
                           setQuickRating(star);
@@ -1894,10 +1946,11 @@ const ItineraryDetail = () => {
                       .map((comment, index) => (
                         <Card
                           key={index}
-                          className={`w-[30%] ${comment.tourist === userId
-                            ? "bg-[#B5D3D1]"
-                            : "bg-gray-100"
-                            } shadow-none border-none p-4 rounded-lg`}
+                          className={`w-[30%] ${
+                            comment.tourist === userId
+                              ? "bg-[#B5D3D1]"
+                              : "bg-gray-100"
+                          } shadow-none border-none p-4 rounded-lg`}
                         >
                           <CardHeader className="flex items-start">
                             <div className="flex">
@@ -1994,8 +2047,9 @@ const ItineraryDetail = () => {
               {tourGuideProfile?.comments.map((review, index) => (
                 <Card
                   key={index}
-                  className={`mb-4 ${review.tourist === userId ? "bg-[#B5D3D1]" : ""
-                    }`} // Apply blue background if comment is from the logged-in user
+                  className={`mb-4 ${
+                    review.tourist === userId ? "bg-[#B5D3D1]" : ""
+                  }`} // Apply blue background if comment is from the logged-in user
                 >
                   <CardHeader>
                     <div className="flex justify-between items-center">
@@ -2196,32 +2250,34 @@ const ItineraryDetail = () => {
           </DialogContent>
         </Dialog>
 
-        {userRole === "tourist" &&  userPreferredCurrency && userPreferredCurrency.code && (
-          <>
-            <PaymentPopup
-              isOpen={showBookingDialog}
-              onClose={() => setShowBookingDialog(false)}
-              title={`Book Itinerary: ${itinerary.title}`}
-              items={[
-                {
-                  name: itinerary.title,
-                  price: itinerary.price * exchangeRates * 100,
-                },
-              ]} // Convert price to cents
-              onWalletPayment={handleBooking}
-              stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
-              onConfirm={handleBooking}
-              priceOne={(itinerary.price * exchangeRates).toFixed(2)}
-              currency={userPreferredCurrency.code}
-              symbol={userPreferredCurrency.symbol}
-              returnLoc={"http://localhost:3000/itinerary/" + itinerary._id}
-              error={bookingError}
-              setError={setBookingError}
-              availableDates={itinerary.availableDates}
-              selectedItineraryDate={selectedItineraryDate}
-            />
-          </>
-        )}
+        {userRole === "tourist" &&
+          userPreferredCurrency &&
+          userPreferredCurrency.code && (
+            <>
+              <PaymentPopup
+                isOpen={showBookingDialog}
+                onClose={() => setShowBookingDialog(false)}
+                title={`Book Itinerary: ${itinerary.title}`}
+                items={[
+                  {
+                    name: itinerary.title,
+                    price: itinerary.price * exchangeRates * 100,
+                  },
+                ]} // Convert price to cents
+                onWalletPayment={handleBooking}
+                stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+                onConfirm={handleBooking}
+                priceOne={(itinerary.price * exchangeRates).toFixed(2)}
+                currency={userPreferredCurrency.code}
+                symbol={userPreferredCurrency.symbol}
+                returnLoc={"http://localhost:3000/itinerary/" + itinerary._id}
+                error={bookingError}
+                setError={setBookingError}
+                availableDates={itinerary.availableDates}
+                selectedItineraryDate={selectedItineraryDate}
+              />
+            </>
+          )}
 
         <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
           <DialogContent className="sm:max-w-[425px]">
@@ -2243,14 +2299,17 @@ const ItineraryDetail = () => {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <Label className="text-right">Amount Paid:</Label>
-                  <div>  {formatPrice(calculateTotalPrice())} </div>
+                  <div> {formatPrice(calculateTotalPrice())} </div>
                 </div>
                 {paymentType === "Wallet" && (
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">New Wallet Balance:</Label>
-                    <div>{formatPrice(tourist?.wallet - calculateTotalPrice())}</div>
+                    <div>
+                      {formatPrice(tourist?.wallet - calculateTotalPrice())}
+                    </div>
                   </div>
-                )}</div>
+                )}
+              </div>
             </div>
 
             <DialogFooter>
@@ -2425,8 +2484,9 @@ const ItineraryDetail = () => {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}

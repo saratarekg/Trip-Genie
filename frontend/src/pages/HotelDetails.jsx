@@ -336,13 +336,13 @@ export default function HotelDetails() {
       target: ".hotelPictures",
       content:
         "Here you can see the pictures of the hotel. Click on the arrows to view more pictures.",
-      placement: "top",
+      placement: "bottom",
     },
     {
       target: ".hotelInfo",
       content:
         "This section contains information about the hotel, such as its address, city, country and review score.",
-      placement: "top",
+      placement: "bottom",
     },
     {
       target: ".Facilities",
