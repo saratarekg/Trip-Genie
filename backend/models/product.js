@@ -224,7 +224,7 @@ productSchema.post("findOneAndUpdate", async function (doc) {
         {
           $push: {
             notifications: {
-              tags: ["informational", "warning"], // Valid tags based on the enum
+              tags: ["informational", "warning","alert"], // Valid tags based on the enum
               title: "Product Out of Stock",
               priority: "high",
               type: "alert",

@@ -2310,7 +2310,6 @@ const markNotificationAsSeenForTourist = async (req, res) => {
       {
         _id: res.locals.user_id, // Find the tourist by their user ID
         "notifications._id": notificationId, // Match the specific notification by its ID
-        "notifications.seen": false, // Ensure that the notification is unseen
       },
       {
         $set: {

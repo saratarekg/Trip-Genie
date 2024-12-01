@@ -142,7 +142,6 @@ export function TouristProfileComponent() {
   const getUserRole = () => Cookies.get("role") || "guest";
 
   const convertCurrency = useCallback((amount, fromCurrency, toCurrency) => {
-    console.log(amount, fromCurrency, toCurrency, rates);
     if (typeof fromCurrency === "string" && typeof toCurrency === "string") {
       return (amount / rates[fromCurrency]) * rates[toCurrency];
     }
@@ -160,7 +159,6 @@ export function TouristProfileComponent() {
   }, [rates]);
 
   const formatCurrency = useCallback((amount, currency) => {
-    console.log(amount,currency);
     const currencyInfo = currencies.find((c) => c.code === currencyCode);
     return `${currencyInfo ? currencyInfo.symbol : ""}${amount.toFixed(2)}`;
   }, [currencies]);
@@ -553,7 +551,6 @@ const response = await axios.get("http://localhost:4000/tourist/", {
         );
 
         const preferredCurrencyCode = codeResponse.data;
-        console.log("Preferred Currency Code:", preferredCurrencyCode);
 
         const currencyResponse = await axios.get(
           `http://localhost:4000/tourist/getCurrency/${preferredCurrencyCode}`,
@@ -753,10 +750,10 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     }
   };
 
-  const markNotificationsAsSeen = async () => {
+  const markNotificationAsSeen = async (notificationID) => {
     try {
       await axios.post(
-        `http://localhost:4000/tourist/mark-notifications-seen`,
+        `http://localhost:4000/tourist/notifications/markAsSeen/${notificationID}`,
         {},
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
@@ -1263,7 +1260,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       <Button
         variant="ghost"
         className="text-sm text-[#388A94] p-2"
-        onClick={() => (window.location.href = "/tourist-notifications")}
+        onClick={() => (window.location.href = "/account/notifications")}
       >
         View All
       </Button>
@@ -1286,7 +1283,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
             <li
               key={index}
               className="p-2 hover:bg-gray-50 transition-colors relative cursor-pointer flex flex-col gap-1"
-              onClick={() => {markNotificationsAsSeen(),navigate(notification.link)}}
+              onClick={() => {markNotificationAsSeen(notification._id),navigate("/account/notifications")}}
             >
               {!notification.seen && (
                 <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">

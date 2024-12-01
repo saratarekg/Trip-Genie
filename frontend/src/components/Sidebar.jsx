@@ -23,7 +23,7 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
         <h2 className="text-3xl font-bold mb-6">My Account</h2>
         <ul className="space-y-1">
           {Object.entries(menuStructure).map(([category, items]) => {
-            const filteredItems = items.filter((item) => item.roles.includes(role));
+            const filteredItems = items.filter((item) => item?.roles?.includes(role));
             if (filteredItems.length === 0) return null;
 
             const isOpen = openCategory === category;

@@ -33,6 +33,7 @@ import {
   PlaneLanding,
   PlaneTakeoff,
   Ticket,
+  Bell,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -79,6 +80,10 @@ import { MyComplaintsComponent } from "@/components/myComplaints";
 import { AdvertiserProfileComponent } from "@/components/AdvertiserProfileComponent";
 import { SellerProfileComponent } from "@/components/SellerProfileComponent";
 import { TourGuideProfileComponent } from "@/components/tourGuideProfile";
+import  TGNotificationsPage from "@/pages/TourGuideNotifications.jsx";
+import  SellerNotificationsPage  from "@/pages/SellerNotifications.jsx";
+import  AdvertiserNotificationsPage  from "@/pages/AdvertiserNotifications.jsx";
+import  NotificationsPage  from "@/pages/TouristNotifications.jsx";
 import Savedactivites from "@/components/Savedactivites";
 import Saveditineraries from "@/components/Saveditineraries";
 import ProductReportSeller from "../components/ProductReportSellerForSeller.jsx";
@@ -108,6 +113,35 @@ const AccountInfo = ({ user }) => {
       return (
         <div>
           <h2 className="text-2xl font-bold mb-4">Account Information</h2>
+          <p>
+            <strong>Name:</strong> {user.username}
+          </p>
+          {/* make the user role not seperated by hyphen and first letter capital */}
+          <p>
+            <strong>Role:</strong>{" "}
+            {user.role.charAt(0).toUpperCase() +
+              user.role.slice(1).replace("-", " ")}
+          </p>
+        </div>
+      );
+  }
+};
+
+const Notifications = ({ user }) => {
+  console.log("heree");
+  switch (user.role) {
+    case "advertiser":
+      return <AdvertiserNotificationsPage />;
+    case "seller":
+      return <SellerNotificationsPage />;
+    case "tour-guide":
+      return <TGNotificationsPage />;
+    case "tourist":
+      return <NotificationsPage />;
+    default:
+      return (
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Notifications</h2>
           <p>
             <strong>Name:</strong> {user.username}
           </p>
@@ -1205,9 +1239,14 @@ export default function AccountManagement() {
     if (!user)
       return <div className="text-center">No user data available.</div>;
 
+    console.log(activeTab);
+    console.log("hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+
     switch (activeTab) {
       case "info":
         return <AccountInfo user={user} />;
+      case "notifications":
+        return <Notifications user={user} />;
       case "complain":
         return <Complaint />;
       case "my-complaints":
@@ -1373,6 +1412,17 @@ export default function AccountManagement() {
         tab: "preferences",
         roles: ["tourist"],
       },
+       {
+        name: "Notifications",
+        icon: Bell,
+        tab: "notifications",
+        roles: [
+          "tourist",
+          "seller",
+          "advertiser",
+          "tour-guide",
+        ],  
+          },
       // {
       //   name: "Points and Wallet",
       //   icon: Wallet,
@@ -1457,7 +1507,7 @@ export default function AccountManagement() {
     //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     // ],
-  
+
   };
 
   const LogoutPopup = ({ onConfirm, onCancel }) => {

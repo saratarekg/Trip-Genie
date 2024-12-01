@@ -568,7 +568,7 @@ const updateActivity = async (req, res) => {
             notifications: {
               tags: ["informational", "activity", "available"], // Tags to categorize the notification (informational and activity-related)
               title: "Activity Now Available for Booking", // A concise and descriptive title
-              priority: "medium", // Medium priority since it's an update but not urgent
+              priority: "low", // Medium priority since it's an update but not urgent
               type: "informational", // Type is informational, as it's about availability
               body: `The activity <b>${activity.name}</b> is now available for booking.`,
               link: `/activity/${req.params.id}`, // Direct link to the activity page for booking

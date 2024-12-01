@@ -71,6 +71,7 @@ const tabs = [
     ]
   },
   { id: 'complaints', title: 'Complaints', icon: 'MessageSquare' },
+  { id: 'notifications', title: 'Notifications', icon: 'Bell' },
   { 
     id: 'giftshop', 
     title: 'Gift Shop', 
@@ -239,7 +240,7 @@ export function Dashboard() {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          <NotificationsDropdownAdmin setActiveTab={setActiveTab} />
+          <NotificationsDropdownAdmin setActiveTabNav={setActiveTab} />
         </div>
       </div>
       <div className="flex bg-gray-100">

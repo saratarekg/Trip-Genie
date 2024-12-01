@@ -42,6 +42,8 @@ export default function NotificationsPage() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [visibleNotifications, setVisibleNotifications] = useState(10)
   const [activeAccordion, setActiveAccordion] = useState(null);
+  const [isFocused, setIsFocused] = useState(false);
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -304,16 +306,15 @@ export default function NotificationsPage() {
 
   return (
     <TooltipProvider>
-      <div className="bg-white min-h-screen">
-        <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
-        </div>
+      <div className=" min-h-screen">
+      <h1 className="text-3xl font-bold mb-2">Notifications</h1>
+        <p className="text-sm text-gray-500 mb-6">Settings / Notifications</p>
+          
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-[#1A3B47] mb-6">Notifications</h1>
-          
+
           <div className="flex gap-6">
-            {/* Filters Sidebar */}
+            {/* Filters Sidebar
             <div className="w-64 flex-shrink-0">
               <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                 <h2 className="font-semibold mb-4 flex items-center gap-2 text-[#1A3B47]">
@@ -322,7 +323,6 @@ export default function NotificationsPage() {
                 </h2>
 
                 <div className="space-y-4">
-                  {/* Priority Filter */}
                   <div>
                     <label className="text-sm font-medium mb-2 block text-[#1A3B47]">Priority</label>
                     <div className="flex flex-wrap gap-2">
@@ -349,7 +349,6 @@ export default function NotificationsPage() {
                     </div>
                   </div>
 
-                  {/* Tags Filter */}
                   <div>
                     <label className="text-sm font-medium mb-2 block text-[#1A3B47]">Tags</label>
                     <div className="flex flex-wrap gap-2">
@@ -375,7 +374,6 @@ export default function NotificationsPage() {
                     </div>
                   </div>
 
-                  {/* Date Filter */}
                   <div>
                     <label className="text-sm font-medium mb-2 block text-[#1A3B47]">From Date</label>
                     <Popover>
@@ -403,7 +401,7 @@ export default function NotificationsPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Main Content */}
             <div className="flex-1">
@@ -480,18 +478,19 @@ export default function NotificationsPage() {
 
 
                   {/* Search Bar */}
-                  <div className="relative flex-1">
-                    {!searchQuery && (     
-                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          )}
-                    <Input
-                      placeholder="    Search notifications..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-
+                  <div className="col-span-3 relative">
+  {!isFocused && !searchQuery && (
+    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+  )}
+  <Input
+    placeholder={!isFocused ? "    Search notifications..." : ""}
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    onFocus={() => setIsFocused(true)}
+    onBlur={() => setIsFocused(false)}
+    className="pl-10"
+  />
+</div>
                   {/* Mark All As Read Button */}
                   <Button
                     variant="outline"

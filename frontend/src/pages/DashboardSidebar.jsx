@@ -76,6 +76,11 @@ const tabs = [
     title: 'Complaints', 
     icon: MessageSquare 
   },
+  { 
+    id: 'notifications', 
+    title: 'Notifications', 
+    icon: Bell 
+  },
 ];
 
 

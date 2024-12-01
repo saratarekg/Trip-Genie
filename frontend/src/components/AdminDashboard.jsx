@@ -2,11 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CalendarDays, DollarSign, ShoppingCart, Users, BarChart, Activity, Gift, Map, Archive, Package, Compass, Landmark, Tag } from 'lucide-react'
+import { CalendarDays, DollarSign, ShoppingCart, Users, BarChart, Activity, Gift, Map, Archive, Package, Compass, Landmark, Tag, CalendarIcon, CreditCard, AlertCircle, AlarmCheck, Bell } from 'lucide-react'
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { cn } from "@/lib/utils"
+
 // import { UserGrowthChart } from "./UserStats";
 import {
   AreaChart,
@@ -88,15 +90,33 @@ function UserGrowthChart() {
   );
 }
 
-export function Dashboard() {
+export function Dashboard({
+  setActiveTab
+}) {
   const [notifications, setNotifications] = useState([]);
   const [adminInfo, setAdminInfo] = useState(null);
-  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     fetchNotifications();
     fetchAdminInfo();
   }, []);
+
+  const getNotificationIcon = (type) => {
+    const iconProps = {
+      birthday: { icon: CalendarIcon, color: "text-purple-500", bg: "bg-purple-100" },
+      payment: { icon: CreditCard, color: "text-green-500", bg: "bg-green-100" },
+      alert: { icon: AlertCircle, color: "text-red-500", bg: "bg-red-100" },
+      offer: { icon: Gift, color: "text-blue-500", bg: "bg-blue-100" },
+      reminder: { icon: AlarmCheck, color: "text-amber-500", bg: "bg-amber-100" },
+    }[type] || { icon: Bell, color: "text-gray-500", bg: "bg-gray-100" }
+  
+    const Icon = iconProps.icon
+    return (
+      <div className={cn("p-2 rounded-full flex items-center justify-center", iconProps.bg)}>
+        <Icon className={cn("h-4 w-4", iconProps.color)} />
+      </div>
+    )
+  }
 
   const fetchNotifications = async () => {
     try {
@@ -118,6 +138,27 @@ export function Dashboard() {
       console.error("Error fetching notifications:", error);
     }
   };
+
+  const markNotificationAsSeen = async (notificationId) => {
+    try {
+      await axios.post(
+        `http://localhost:4000/admin/notifications/markAsSeen/${notificationId}`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      )
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification._id === notificationId
+            ? { ...notification, seen: true }
+            : notification
+        )
+      )
+    } catch (error) {
+      console.error("Error marking notification as seen:", error)
+    }
+  }
 
   const fetchAdminInfo = async () => {
     try {
@@ -385,46 +426,70 @@ export function Dashboard() {
           </CardContent>
         </Card>
         <Card className="h-[calc(100vh-16rem)]" id="notifications-card">
-          <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[calc(100vh-22rem)]">
-              {notifications.length === 0 ? (
-                <p className="text-[#1A3B47] bg-gray-100 p-4 rounded-lg shadow text-center">
-                  No notifications at the moment.
+  <CardHeader className="flex">
+    <CardTitle className="flex justify-between items-center">
+      <span>Notifications</span>
+      <Button
+        variant="ghost"
+        className="text-sm text-[#388A94] p-2"
+        onClick={() => setActiveTab("notifications")}
+      >
+        View All
+      </Button>
+    </CardTitle>
+  </CardHeader>
+  <CardContent>
+    <ScrollArea className="h-[calc(100vh-22rem)]">
+      {notifications.length === 0 ? (
+        <p className="text-[#1A3B47] bg-gray-100 p-4 rounded-lg shadow text-center">
+          No notifications at the moment.
+        </p>
+      ) : (
+        <ul className="divide-y divide-gray-200">
+          {notifications.map((notification, index) => (
+            <li
+              key={index}
+              className="p-3 hover:bg-gray-50 transition-colors relative cursor-pointer flex items-center gap-2"
+              onClick={() => {
+                markNotificationAsSeen(notification._id);
+                setActiveTab("notifications");
+              }}
+            >
+              {/* Icon */}
+              {/* {getNotificationIcon(notification.type)} */}
+
+              {/* Notification Details */}
+              <div className="flex-1">
+                <p className="text-sm text-[#1A3B47] mb-1">
+                  <div
+                    dangerouslySetInnerHTML={{ __html: notification.body }}
+                  ></div>
                 </p>
-              ) : (
-                <ul className="divide-y divide-gray-200">
-                  {notifications.map((notification, index) => (
-                    <li
-                      key={index}
-                      className="p-3 hover:bg-gray-50 transition-colors relative cursor-pointer"
-                    >
-                      {!notification.seen && (
-                        <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
-                          New
-                        </span>
-                      )}
-                      <p className="text-sm text-[#1A3B47] mb-1 pr-4">
-                        <div dangerouslySetInnerHTML={{ __html: notification.body }}></div>
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(notification.date).toLocaleDateString(undefined, {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-xs text-gray-500">
+                  {new Date(notification.date).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+
+              {/* "New" Badge */}
+              {!notification.seen && (
+                <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
+                  New
+                </span>
               )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+            </li>
+          ))}
+        </ul>
+      )}
+    </ScrollArea>
+  </CardContent>
+</Card>
+
       </div>
     </div>
   );

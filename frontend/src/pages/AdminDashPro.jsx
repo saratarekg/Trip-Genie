@@ -16,6 +16,7 @@ import {
   UserCog,
   UserPlus,
   MessageSquare,
+  Bell,
   FolderPlus,
   Tags,
   Map,

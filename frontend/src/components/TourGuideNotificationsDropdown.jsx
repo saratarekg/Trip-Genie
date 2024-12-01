@@ -226,9 +226,9 @@ export function NotificationsDropdownTourGuide() {
         return notifications
           .filter(n => n.tags.includes("reminder"))
           .slice(0, visibleNotifications);  // Limit to visibleNotifications
-      case "personal":
+      case "alert":
         return notifications
-          .filter(n => n.tags.some(tag => ["birthday", "personal"].includes(tag)))
+          .filter(n => n.tags.some(tag => ["birthday", "alert"].includes(tag)))
           .slice(0, visibleNotifications);  // Limit to visibleNotifications
       case "general":
       default:
@@ -242,7 +242,7 @@ export function NotificationsDropdownTourGuide() {
   const getCounts = () => {
     return {
       reminders: notifications.filter(n => !n.seen && n.tags.includes("reminder")).length,
-      personal: notifications.filter(n => !n.seen && n.tags.some(tag => ["birthday", "personal"].includes(tag))).length,
+      alert: notifications.filter(n => !n.seen && n.tags.some(tag => ["birthday", "alert"].includes(tag))).length,
       general: notifications.filter(n => !n.seen).length
     };
   };
@@ -306,7 +306,7 @@ export function NotificationsDropdownTourGuide() {
           <Separator />
           <div className="flex items-center justify-between px-4 py-2 bg-white">
   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-    <TabsList className="grid w-full grid-cols-3 bg-white">
+    <TabsList className="grid w-full grid-cols-2 bg-white">
       <TabsTrigger
         value="general"
         className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${activeTab === 'general'
@@ -325,23 +325,23 @@ export function NotificationsDropdownTourGuide() {
         )}
       </TabsTrigger>
       <TabsTrigger
-        value="personal"
-        className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${activeTab === 'personal'
+        value="alert"
+        className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${activeTab === 'alert'
           ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 '
           : 'border-gray-300 text-gray-500 bg-white'
         }`}
       >
-        Personal
-        {getCounts().personal > 0 && (
+        Alerts
+        {getCounts().alert > 0 && (
           <span
-            className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${activeTab === 'personal' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+            className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${activeTab === 'alert' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
               }`}
           >
-            {getCounts().personal}
+            {getCounts().alert}
           </span>
         )}
       </TabsTrigger>
-      <TabsTrigger
+      {/* <TabsTrigger
         value="reminders"
         className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${activeTab === 'reminders'
           ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 '
@@ -357,7 +357,7 @@ export function NotificationsDropdownTourGuide() {
             {getCounts().reminders}
           </span>
         )}
-      </TabsTrigger>
+      </TabsTrigger> */}
     </TabsList>
   </Tabs>
 </div>
@@ -401,7 +401,7 @@ export function NotificationsDropdownTourGuide() {
                         'flex items-start gap-4 p-4 hover:bg-muted/50 cursor-pointer relative',
                         !notification.seen && 'bg-muted/30'
                       )}
-                      onClick={() => navigate('/tour-guide-notifications')}
+                      onClick={() => navigate('/account/notifications')}
                     >
                       {getNotificationIcon(notification.type)}
                       <div className="flex-1 space-y-1">
@@ -430,7 +430,7 @@ export function NotificationsDropdownTourGuide() {
                      )}
                     <span
                       className="text-[#388A94] cursor-pointer hover:underline"
-                      onClick={() => navigate('/tour-guide-notifications')}
+                      onClick={() => navigate('/account/notifications')}
                     >
                       Click here to view all.
                     </span>

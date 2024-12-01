@@ -430,7 +430,7 @@ export function NotificationsDropdownTourist() {
                      )}
                     <span
                       className="text-[#388A94] cursor-pointer hover:underline"
-                      onClick={() => navigate('/tourist-notifications')}
+                      onClick={() => navigate('/account/notifications')}
                     >
                       Click here to view all.
                     </span>

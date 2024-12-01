@@ -22,6 +22,7 @@ import UserStats from "@/components/UserStats.jsx";
 import AllActivitiesComponent from "./AllActivitiesAdmin.jsx";
 import SingleActivityAdmin from "./SingleActivityAdmin.jsx";
 import { Dashboard } from "../components/AdminDashboard.jsx";
+import NotificationsPage from "@/pages/AdminNotifications.jsx"
 import { CreatePromoCode } from "../components/CreatePromoCode.jsx";
 
 import logo from "../assets/images/TGlogo.svg";
@@ -148,7 +149,9 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
           ) : activeTab === 'single-activity-admin' ? (
             <SingleActivityAdmin />
           ) : activeTab === 'dashboard' ? (
-            <Dashboard />
+            <Dashboard setActiveTab={setActiveTab} />
+          ) : activeTab === 'notifications' ? (
+            <NotificationsPage />
           ) : (
             <div className="p-4 bg-gray-100 rounded">
               Content for {activeTabDetails.title} goes here.

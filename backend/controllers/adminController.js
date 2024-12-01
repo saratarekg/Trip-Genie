@@ -676,7 +676,6 @@ const markNotificationAsSeen = async (req, res) => {
       { 
         _id: res.locals.user_id, // Find the admin by their user ID
         "notifications._id": notificationId, // Match the specific notification by its ID
-        "notifications.seen": false // Ensure that the notification is unseen
       },
       {
         $set: {
@@ -686,8 +685,8 @@ const markNotificationAsSeen = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ success: false, message: "Notification not found or already marked as seen" });
-    }
+     return res.status(404).json({ success: false, message: "Notification not found or already marked as seen" });
+    } 
 
     // Check if there are any other unseen notifications left
     const admin = await Admin.findById(res.locals.user_id);

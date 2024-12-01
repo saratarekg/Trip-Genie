@@ -31,7 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export default function NotificationsPage() {
+export default function SellerNotificationsPage() {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -42,6 +42,8 @@ export default function NotificationsPage() {
   const [selectedDate, setSelectedDate] = useState(null)
   const [visibleNotifications, setVisibleNotifications] = useState(10)
   const [activeAccordion, setActiveAccordion] = useState(null);
+  const [isFocused, setIsFocused] = useState(false);
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -197,8 +199,8 @@ export default function NotificationsPage() {
       case "reminders":
         filtered = filtered.filter(n => n.tags.includes("reminder"))
         break
-      case "personal":
-        filtered = filtered.filter(n => n.tags.some(tag => ["birthday", "personal"].includes(tag)))
+      case "alert":
+        filtered = filtered.filter(n => n.tags.some(tag => ["warning", "alert"].includes(tag)))
         break
       case "general":
         break
@@ -238,13 +240,13 @@ export default function NotificationsPage() {
   const getTotalCounts = () => {
     const counts = {
       reminders: 0,
-      personal: 0,
+      alert: 0,
       general: notifications.length,
     }
   
     counts.reminders = notifications.filter(n => n.tags.includes("reminder")).length
-    counts.personal = notifications.filter(n =>
-      n.tags.some(tag => ["birthday", "personal"].includes(tag))
+    counts.alert = notifications.filter(n =>
+      n.tags.some(tag => ["warning", "alert"].includes(tag))
     ).length
   
     return counts
@@ -253,14 +255,14 @@ export default function NotificationsPage() {
   const getCounts = () => {
     return {
       reminders: notifications.filter(n => !n.seen && n.tags.includes("reminder")).length,
-      personal: notifications.filter(n => !n.seen && n.tags.some(tag => ["birthday", "personal"].includes(tag))).length,
+      alert: notifications.filter(n => !n.seen && n.tags.some(tag => ["warning", "alert"].includes(tag))).length,
       general: notifications.filter(n => !n.seen).length
     }
   }
 
   const getNotificationIcon = (type) => {
     const iconProps = {
-      birthday: { icon: CalendarIcon, color: "text-purple-500", bg: "bg-purple-100" },
+      warning: { icon: CalendarIcon, color: "text-purple-500", bg: "bg-purple-100" },
       payment: { icon: CreditCard, color: "text-green-500", bg: "bg-green-100" },
       alert: { icon: AlertCircle, color: "text-red-500", bg: "bg-red-100" },
       offer: { icon: Gift, color: "text-blue-500", bg: "bg-blue-100" },
@@ -304,205 +306,101 @@ export default function NotificationsPage() {
 
   return (
     <TooltipProvider>
-      <div className="bg-white min-h-screen">
-        <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" />
-        </div>
+     <div className=" min-h-screen">
+      <h1 className="text-3xl font-bold mb-2">Notifications</h1>
+        <p className="text-sm text-gray-500 mb-6">Settings / Notifications</p>
+          
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-[#1A3B47] mb-6">Notifications</h1>
           
           <div className="flex gap-6">
-            {/* Filters Sidebar */}
-            <div className="w-64 flex-shrink-0">
-              <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                <h2 className="font-semibold mb-4 flex items-center gap-2 text-[#1A3B47]">
-                  <Filter className="h-4 w-4" />
-                  Filters
-                </h2>
-
-                <div className="space-y-4">
-                  {/* Priority Filter */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block text-[#1A3B47]">Priority</label>
-                    <div className="flex flex-wrap gap-2">
-                      {['high', 'medium', 'low'].map((priority) => (
-                        <Button
-                          key={priority}
-                          variant={selectedPriorities.includes(priority) ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => {
-                            setSelectedPriorities((prev) =>
-                              prev.includes(priority)
-                                ? prev.filter((p) => p !== priority)
-                                : [...prev, priority]
-                            )
-                          }}
-                          className={cn(
-                            "capitalize",
-                            selectedPriorities.includes(priority) ? "bg-[#388A94] text-white" : "text-[#1A3B47]"
-                          )}
-                        >
-                          {priority}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Tags Filter */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block text-[#1A3B47]">Tags</label>
-                    <div className="flex flex-wrap gap-2">
-                      {getAllTags().map((tag) => (
-                        <Button
-                          key={tag}
-                          variant={selectedTags.includes(tag) ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => {
-                            setSelectedTags((prev) =>
-                              prev.includes(tag)
-                                ? prev.filter((t) => t !== tag)
-                                : [...prev, tag]
-                            )
-                          }}
-                          className={cn(
-                            selectedTags.includes(tag) ? "bg-[#388A94] text-white" : "text-[#1A3B47]"
-                          )}
-                        >
-                          {tag}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Date Filter */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block text-[#1A3B47]">From Date</label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !selectedDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={setSelectedDate}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-              </div>
-            </div>
+         
 
             {/* Main Content */}
             <div className="flex-1">
               {/* Search and Actions Row */}
               <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
-                <div className="flex items-center justify-between gap-4">
-                  {/* Tabs */}
-                  <Tabs value={activeTab} onValueChange={setActiveTab} >
-  <TabsList className="grid grid-cols-3 bg-white">
-    {/* General Tab */}
-    <TabsTrigger
-      value="general"
-      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
-        activeTab === 'general'
-          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
-          : 'border-gray-300 text-gray-500 bg-white'
-      }`}
-    >
-      General
-      {getCounts().general > 0 && (
-        <span
-          className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
-            activeTab === 'general' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+              <div className="grid grid-cols-9 items-center gap-4">
+  {/* Tabs */}
+  <div className="col-span-3">
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <TabsList className="grid grid-cols-2 bg-white">
+        {/* General Tab */}
+        <TabsTrigger
+          value="general"
+          className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+            activeTab === 'general'
+              ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+              : 'border-gray-300 text-gray-500 bg-white'
           }`}
         >
-          {getCounts().general}
-        </span>
-      )}
-    </TabsTrigger>
+          General
+          {getCounts().general > 0 && (
+            <span
+              className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
+                activeTab === 'general' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+              }`}
+            >
+              {getCounts().general}
+            </span>
+          )}
+        </TabsTrigger>
 
-    {/* Personal Tab */}
-    <TabsTrigger
-      value="personal"
-      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
-        activeTab === 'personal'
-          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
-          : 'border-gray-300 text-gray-500 bg-white'
-      }`}
-    >
-      Personal
-      {getCounts().personal > 0 && (
-        <span
-          className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
-            activeTab === 'personal' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+        {/* Alert Tab */}
+        <TabsTrigger
+          value="alert"
+          className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+            activeTab === 'alert'
+              ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+              : 'border-gray-300 text-gray-500 bg-white'
           }`}
         >
-          {getCounts().personal}
-        </span>
-      )}
-    </TabsTrigger>
+          Alerts
+          {getCounts().alert > 0 && (
+            <span
+              className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
+                activeTab === 'alert' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
+              }`}
+            >
+              {getCounts().alert}
+            </span>
+          )}
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+  </div>
 
-    {/* Reminders Tab */}
-    <TabsTrigger
-      value="reminders"
-      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
-        activeTab === 'reminders'
-          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
-          : 'border-gray-300 text-gray-500 bg-white'
-      }`}
+  {/* Search Bar */}
+  <div className="col-span-4 relative">
+  {!isFocused && !searchQuery && (
+    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+  )}
+  <Input
+    placeholder={!isFocused ? "    Search notifications..." : ""}
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    onFocus={() => setIsFocused(true)}
+    onBlur={() => setIsFocused(false)}
+    className="pl-10"
+  />
+</div>
+
+
+  {/* Mark All As Read Button */}
+  <div className="col-span-2">
+    <Button
+      variant="outline"
+      size="sm"
+      className="w-full text-sm text-white bg-[#388A94] hover:bg-[#2e6b77] whitespace-nowrap"
+      onClick={markNotificationsAsSeen}
     >
-      Reminders
-      {getCounts().reminders > 0 && (
-        <span
-          className={`ml-2 flex items-center justify-center h-5 w-5 text-xs font-semibold rounded-full ${
-            activeTab === 'reminders' ? 'bg-[#1A3B47] text-white' : 'bg-gray-300 text-gray-800'
-          }`}
-        >
-          {getCounts().reminders}
-        </span>
-      )}
-    </TabsTrigger>
-  </TabsList>
-</Tabs>
+      <CheckCheck className="mr-2 h-4 w-4" />
+      Mark all as read
+    </Button>
+  </div>
+</div>
 
 
-                  {/* Search Bar */}
-                  <div className="relative flex-1">
-                    {!searchQuery && (     
-                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                          )}
-                    <Input
-                      placeholder="    Search notifications..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-
-                  {/* Mark All As Read Button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-sm text-white bg-[#388A94] hover:bg-[#2e6b77] whitespace-nowrap"
-                    onClick={markNotificationsAsSeen}
-                  >
-                    <CheckCheck className="mr-2 h-4 w-4" />
-                    Mark all as read
-                  </Button>
-                </div>
                 <div className="mt-4 space-y-2">
                 {loading ? (
                   [1, 2, 3].map((i) => (
@@ -566,11 +464,10 @@ export default function NotificationsPage() {
           {/* Preview Text */}
           {notification._id !== activeAccordion ? (
   <p className="text-sm text-gray-500 mt-1">
-    {notification.body.substring(0, 20)}...
   </p>
 ) : (
   <p className="text-sm text-white mt-1">
-    {notification.body.substring(0, 20)}...
+    {notification.body}
   </p>
 )}
 
