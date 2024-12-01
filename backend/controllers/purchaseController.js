@@ -382,15 +382,18 @@ exports.cancelPurchase = async (req, res) => {
     if (purchase.promoCode) {
       totalRefund =
         totalRefund - ((totalRefund * promoDetails.percentOff) / 100 || 0);
-      //reduce the times used of the promo code
-      const promo = PromoCode.findByIdAndUpdate(
+    
+      // Reduce the times used of the promo code
+      const promo = await PromoCode.findByIdAndUpdate(
         purchase.promoCode,
         { $inc: { timesUsed: -1 } },
         { new: true, runValidators: true }
       );
-
-      promo.checkStatus();
+    
+      // Ensure the checkStatus() method is called on the updated promo document
+      promo.checkStatus();  // Now this works because `promo` is the updated document
     }
+    
 
     totalRefund += delPrice;
 

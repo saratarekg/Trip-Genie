@@ -14,8 +14,6 @@ import {
   HistoryIcon,
   Calendar,
   HelpCircle,
-  CircleDot,
-  Clock,
   Eye,
   MessageSquare,
   LogOut,
@@ -32,6 +30,9 @@ import {
   ChevronLeft,
   CircleDot,
   Clock,
+  PlaneLanding,
+  PlaneTakeoff,
+  Ticket,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -214,29 +215,37 @@ const ExternalFlightBookings = ({ user }) => {
 
   return (
     <ToastProvider>
-      <div className="max-w-7xl mx-auto space-y-6 p-4">
-        <h2 className="text-2xl font-bold">Flight Bookings</h2>
+      <div className="bg-gray-100 max-w-7xl gap-4 ">
+       <h1 className="text-3xl font-bold mb-2">Flight Bookings</h1>
+    <p className="text-sm text-gray-500 mb-2">External Bookings / Flight Bookings</p>
+    
+
+    <div className="container mx-auto px-4 py-4">
         {flights.map((flight, index) => (
-          <Card key={index} className="p-6">
+          <Card key={index} className="p-6 mb-4">
             {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <div className="text-xl font-semibold">
-                {preferredCurrency.symbol}{flight.price}
-              </div>
-              <span className="text-sm text-blue-500 bg-blue-50 px-3 py-1 rounded-full">
+            <div className="flex justify-between items-cente mb-6">
+            <div className="text-lg">
+  <span className="font-semibold text-[#1A3B47]">Flight Number</span>
+  <span className="text-base ml-1  text-[#5D9297]">{(flight.flightType)}{flight.flightID}</span>
+</div>
+
+
+              <span className="text-sm text-[#388A94] font-semibold bg-[#C6E0DD] px-3 py-1 rounded-full">
                 {flight.seatType}
               </span>
             </div>
 
             <div className="flex">
               {/* Left section (3/4) */}
-              <div className="w-3/4 pr-6 border-r">
-                {/* Outbound Flight */}
+              <div
+    className={`w-3/4 pr-6 border-r flex flex-col ${!flight.returnDepartureDate ? 'justify-center' : ''}`}
+  >              {/* Outbound Flight */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <div className="text-sm text-gray-500">Depart</div>
-                      <div className="text-3xl font-bold">
+                      <div className="text-3xl font-bold text-[#1A3B47]">
                         {new Date(flight.departureDate).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -250,19 +259,19 @@ const ExternalFlightBookings = ({ user }) => {
 
                     <div className="flex-1 flex flex-col items-center mx-4">
                       <div className="w-full flex items-center gap-2">
-                        <CircleDot className="h-4 w-4 text-blue-500 shrink-0" />
-                        <div className="w-full border-t-2 border-dashed border-blue-500 relative">
+                        <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                        <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
                         <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
                         {calculateDuration(flight.departureDate, flight.arrivalDate)} {/* Calculate duration */}
                       </span>
                         </div>
-                        <CircleDot className="h-4 w-4 text-blue-500 shrink-0" />
+                        <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                       </div>
                     </div>
 
                     <div className="space-y-1">
                       <div className="text-sm text-gray-500">Arrive</div>
-                      <div className="text-3xl font-bold">
+                      <div className="text-3xl font-bold text-[#1A3B47]">
                         {new Date(flight.arrivalDate).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -282,7 +291,7 @@ const ExternalFlightBookings = ({ user }) => {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="text-sm text-gray-500">Depart</div>
-                        <div className="text-3xl font-bold">
+                        <div className="text-3xl font-bold text-[#1A3B47]">
                           {new Date(flight.returnDepartureDate).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -296,19 +305,19 @@ const ExternalFlightBookings = ({ user }) => {
 
                       <div className="flex-1 flex flex-col items-center mx-4">
                         <div className="w-full flex items-center gap-2">
-                          <CircleDot className="h-4 w-4 text-blue-500 shrink-0" />
-                          <div className="w-full border-t-2 border-dashed border-blue-500 relative">
-                            <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                              2h 10m
-                            </span>
+                          <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                          <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
+                          <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
+                        {calculateDuration(flight.returnDepartureDate, flight.returnArrivalDate)} {/* Calculate duration */}
+                      </span>
                           </div>
-                          <CircleDot className="h-4 w-4 text-blue-500 shrink-0" />
+                          <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                         </div>
                       </div>
 
                       <div className="space-y-1">
                         <div className="text-sm text-gray-500">Arrive</div>
-                        <div className="text-3xl font-bold">
+                        <div className="text-3xl font-bold text-[#1A3B47]">
                           {new Date(flight.returnArrivalDate).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -325,44 +334,53 @@ const ExternalFlightBookings = ({ user }) => {
 
                 {/* Important Notices */}
                 <div className="mt-6 space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <User className="h-4 w-4" />
-                    <span>Show e-tickets and passenger identities during check-in</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Clock className="h-4 w-4" />
-                    <span>Please be at the boarding gate at least 30 minutes before boarding time</span>
-                  </div>
-                </div>
+                <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+  {/* First section */}
+  <div className="flex items-center gap-2 text-sm text-gray-600">
+    <Ticket className="h-10 w-10" />
+    <span>Show e-tickets and passenger identities during check-in</span>
+  </div>
+
+  {/* Divider line */}
+  <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
+
+  {/* Second section */}
+  <div className="flex items-center gap-2 text-sm text-gray-600">
+    <Clock className="h-10 w-10" />
+    <span>Please be at the boarding gate at least 30 minutes before boarding time</span>
+  </div>
+</div>
+
+
+</div>
+
               </div>
 
               {/* Right section (1/4) */}
               <div className="w-1/4 pl-6 space-y-6">
                 <div>
                   <div className="text-sm text-gray-500">Name</div>
-                  <div className="font-medium">{user?.name || 'Passenger Name'}</div>
-                </div>
+                  <span className="text-[#1A3B47]">
+                  {user?.fname && user?.lname ? `${user.fname} ${user.lname}` : 'Passenger Name'}  
+                  </span>  
+                  </div>          
                 <div>
                   <div className="text-sm text-gray-500">Email</div>
-                  <div className="font-medium">{user?.email || 'passenger@email.com'}</div>
+                  <div className="font-medium text-[#1A3B47]">{user?.email || 'passenger@email.com'}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-500">Flight Number</div>
-                  <div className="font-medium">{flight.flightID}</div>
+                  <div className="text-sm text-gray-500">Tickets Booked</div>
+                  <div className="font-medium text-[#1A3B47]">{flight.numberOfTickets}</div>
                 </div>
-                <div className="flex gap-8">
-                  <div>
-                    <div className="text-sm text-gray-500">Gate</div>
-                    <div className="text-2xl font-bold">A2</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Seat</div>
-                    <div className="text-2xl font-bold">24</div>
-                  </div>
+                <div className="flex flex-col ap-2">
+                <div className="text-sm text-gray-500">Price:</div>
+                <div className="text-4xl font-bold text-[#1A3B47]">
+                  {preferredCurrency.symbol}{flight.price}
                 </div>
+              </div>
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full text-base bg-gray-200 text-[#388A94] hover:bg-gray-300"
                   onClick={() => {
                     setSelectedFlight(flight._id)
                     setIsDialogOpen(true)
@@ -405,6 +423,7 @@ const ExternalFlightBookings = ({ user }) => {
           </Toast>
         )}
         <ToastViewport />
+      </div>
       </div>
     </ToastProvider>
   )
