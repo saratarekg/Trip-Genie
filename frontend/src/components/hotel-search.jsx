@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {UserGuide} from "@/components/UserGuide.jsx"
 
-const API_KEY = import.meta.env.VITE_HOTELS_API_KEY2;
+const API_KEY = import.meta.env.VITE_HOTELS_API_KEY3;
 
 function cn(...classes) {
   return classes.filter(Boolean).join(' ');

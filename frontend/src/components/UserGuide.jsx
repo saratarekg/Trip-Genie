@@ -5,6 +5,8 @@ import { HelpCircle } from "lucide-react";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { forceVisible } from "react-lazyload";
+import firstGenie from "@/assets/images/first-genie.png";
+import secondGenie from "@/assets/images/second-genie.png";
 
 export const UserGuide = ({ steps, onStepChange, pageName }) => {
   const [runTour, setRunTour] = useState(false);
@@ -102,29 +104,176 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
         showSkipButton={true}
         showProgress={true}
         stepIndex={stepIndex}
+        scrollToFirstStep={true} // Scroll to the first target component
+        scrollOffset={100}
         callback={handleJoyrideCallback}
-        styles={{
-          options: {
-            primaryColor: "#388A94",
-            textColor: "#1A3B47",
-            zIndex: 10000,
-          },
-          spotlight: {
-            borderRadius: "8px", // Make the spotlight smooth
-            transition: "all 0.3s ease-in-out", // Smooth spotlight transitions
-          },
-          tooltip: {
-            transition: "opacity 0.3s ease-in-out", // Smooth tooltip fade
-          },
-          close: {
-            display: "none", // Remove the close (X) button
-            visibility: "hidden",
-          },
-          buttonBack: {
-            marginRight: 10, // Fix Back button alignment
-            color: stepIndex === 0 ? "rgba(0, 0, 0, 0.3)" : "#388A94", // Disable on first step
-            pointerEvents: stepIndex === 0 ? "none" : "auto", // Make non-clickable on the first step
-          },
+        // styles={{
+        //   options: {
+        //     primaryColor: "#388A94",
+        //     textColor: "#1A3B47",
+        //     zIndex: 10000,
+        //   },
+        //   spotlight: {
+        //     borderRadius: "8px", // Make the spotlight smooth
+        //     transition: "all 0.3s ease-in-out", // Smooth spotlight transitions
+        //   },
+        //   tooltip: {
+        //     transition: "opacity 0.3s ease-in-out", // Smooth tooltip fade
+        //   },
+        //   close: {
+        //     display: "none", // Remove the close (X) button
+        //     visibility: "hidden",
+        //   },
+        //   buttonBack: {
+        //     marginRight: 10, // Fix Back button alignment
+        //     color: stepIndex === 0 ? "rgba(0, 0, 0, 0.3)" : "#388A94", // Disable on first step
+        //     pointerEvents: stepIndex === 0 ? "none" : "auto", // Make non-clickable on the first step
+        //   },
+        // }}
+        tooltipComponent={(props) => {
+          const {
+            backProps,
+            primaryProps,
+            skipProps,
+            step,
+            index,
+            isLastStep,
+          } = props;
+
+          const isEvenStep = index % 2 === 0;
+          const isPlacedLeft = step.placement === "left";
+          const isPlacedRight = step.placement === "right";
+          let genieOnLeft = isPlacedLeft || isEvenStep;
+          if (isPlacedRight) {
+            genieOnLeft = false;
+          }
+
+          return (
+            <div
+              style={{
+                position: "relative",
+                zIndex: 10000,
+              }}
+            >
+              {/* Tooltip Box */}
+              <div
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+                  padding: "20px",
+                  color: "#1A3B47",
+                  maxWidth: "400px",
+                  position: "relative",
+                  marginLeft: genieOnLeft ? "120px" : "0", // Adjust position to leave space for the character
+                  marginRight: genieOnLeft ? "0" : "120px", // Adjust position to leave space for the character
+                }}
+              >
+                {/* Tooltip Title */}
+                <h4
+                  style={{
+                    margin: "0 0 12px",
+                    fontSize: "18px",
+                    color: "#1A3B47",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {step.title}
+                </h4>
+                {/* Tooltip Content */}
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "16px",
+                    color: "#555",
+                    lineHeight: "1.5",
+                  }}
+                >
+                  {step.content}
+                </p>
+                {/* Button Layout */}
+                <div
+                  style={{
+                    marginTop: "16px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  {/* Back Button */}
+                  {index > 0 && (
+                    <button
+                      {...backProps}
+                      style={{
+                        padding: "8px 16px",
+                        border: "none",
+                        borderRadius: "4px",
+                        backgroundColor: "#fff",
+                        color: "#388A94",
+                        boxShadow: "inset 0 0 0 2px #388A94",
+                        cursor: "pointer",
+                        pointerEvents: index === 0 ? "none" : "auto",
+                      }}
+                    >
+                      Back
+                    </button>
+                  )}
+                  {/* Skip Button */}
+                  <button
+                    {...skipProps}
+                    style={{
+                      padding: "8px 16px",
+                      border: "none",
+                      borderRadius: "4px",
+                      backgroundColor: "#fff",
+                      color: "#ff3d00",
+                      marginLeft: "auto",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Skip
+                  </button>
+                  {/* Next/Finish Button */}
+                  <button
+                    {...primaryProps}
+                    style={{
+                      padding: "8px 16px",
+                      border: "none",
+                      borderRadius: "4px",
+                      backgroundColor: "#388A94",
+                      color: "#fff",
+                      cursor: "pointer",
+                      marginLeft: "12px",
+                    }}
+                  >
+                    {isLastStep ? "Finish" : "Next"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Character Image */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: genieOnLeft ? "-50px" : "auto", // Position the image outside the tooltip
+                  right: genieOnLeft ? "auto" : "-50px", // Position the image outside the tooltip
+                  top: "50%",
+                  transform: "translateY(-50%)", // Center the image vertically with the tooltip
+                }}
+              >
+                <img
+                  src={genieOnLeft ? firstGenie : secondGenie}
+                  alt="Character"
+                  style={{
+                    width: "160px",
+                    height: "160px",
+                    // borderRadius: "50%",
+                    // boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+                  }}
+                />
+              </div>
+            </div>
+          );
         }}
       />
     </>

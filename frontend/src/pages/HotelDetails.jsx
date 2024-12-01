@@ -49,7 +49,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Cookies from "js-cookie";
 import axios from "axios";
 
-const API_KEY = import.meta.env.VITE_HOTELS_API_KEY2;
+const API_KEY = import.meta.env.VITE_HOTELS_API_KEY3;
 
 export default function HotelDetails() {
   const { hotelId } = useParams();
@@ -62,8 +62,8 @@ export default function HotelDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currencyCode, setCurrencyCode] = useState("USD");
-  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
-    useState(false);
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] = useState(false);
+  const [price,setPrice]= useState(0);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [numberOfRooms, setNumberOfRooms] = useState(1);
   const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -338,13 +338,13 @@ export default function HotelDetails() {
       target: ".hotelPictures",
       content:
         "Here you can see the pictures of the hotel. Click on the arrows to view more pictures.",
-      placement: "top",
+      placement: "bottom",
     },
     {
       target: ".hotelInfo",
       content:
         "This section contains information about the hotel, such as its address, city, country and review score.",
-      placement: "top",
+      placement: "bottom",
     },
     {
       target: ".Facilities",
@@ -508,6 +508,9 @@ export default function HotelDetails() {
           paymentType,
         }),
       });
+
+      setPrice(price);
+      setPaymentType(paymentType);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -856,11 +859,25 @@ export default function HotelDetails() {
               <DialogTitle>Booking Successful</DialogTitle>
               <DialogDescription>
                 Your hotel room has been booked successfully.
+                {paymentType === "Wallet" && (
+                <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Label className="text-right">Amount Paid Via Wallet:</Label>
+                  <div>{price}{currencyCode} </div>
+                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Label className="text-right">New Wallet Balance:</Label>
+                    <div>{convertPrice(tourist?.wallet,"USD",currencyCode)-price}{currencyCode}</div>
+                  </div>
+                </div>
+                )}
               </DialogDescription>
             </DialogHeader>
             <Button onClick={() => handleFinalOK()}>Close</Button>
           </DialogContent>
         </Dialog>
+
+
         <Dialog
           open={isSuccessWalletPopupOpen}
           onOpenChange={setIsSuccessWalletPopupOpen}
@@ -873,11 +890,11 @@ export default function HotelDetails() {
                 <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                   <Label className="text-right">Amount Paid Via Wallet:</Label>
-                  <div>{isSuccessWalletPopupOpen.price}{currencyCode} </div>
+                  <div>{price}{currencyCode} </div>
                 </div>
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">New Wallet Balance:</Label>
-                    <div>{tourist?.wallet - isSuccessWalletPopupOpen.price}</div>
+                    <div>{convertPrice(tourist?.wallet,"USD",currencyCode)-price}{currencyCode}</div>
                   </div>
                 </div>
               </DialogDescription>

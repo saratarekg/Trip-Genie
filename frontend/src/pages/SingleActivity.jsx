@@ -888,7 +888,7 @@ const ActivityDetail = () => {
     }
   };
 
-  const handlePaymentConfirm = async (paymentType, numberOfTickets,date) => {
+  const handlePaymentConfirm = async (paymentType, numberOfTickets, date) => {
     setIsBooking(true);
     setBookingError("");
     try {
@@ -927,7 +927,6 @@ const ActivityDetail = () => {
         setNumberOfTickets(numberOfTickets);
         setPaymentType(paymentType); // Update the number of tickets in the state
         setShowSuccessDialog(true);
-
       }
     } catch (error) {
       console.error("Error booking activity:", error);
@@ -1025,9 +1024,8 @@ const ActivityDetail = () => {
 
     const newUrl = `${window.location.pathname}`;
 
-    window.history.replaceState(null, '', newUrl);
-
-  }; 
+    window.history.replaceState(null, "", newUrl);
+  };
 
   const handleActivityRating = async () => {
     try {
@@ -1112,12 +1110,6 @@ const ActivityDetail = () => {
       placement: "left",
     },
     {
-      target: ".bookNow",
-      content:
-        "Click here to be able to book this activity and proceed to the payment process.",
-      placement: "left",
-    },
-    {
       target: ".Save",
       content: (
         <>
@@ -1131,6 +1123,12 @@ const ActivityDetail = () => {
           menu on the top right corner → My Account → Activities → Saved
         </>
       ),
+      placement: "left",
+    },
+    {
+      target: ".bookNow",
+      content:
+        "Click here to be able to book this activity and proceed to the payment process.",
       placement: "left",
     },
     {
@@ -1232,7 +1230,6 @@ const ActivityDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      
       <div
         style={{
           backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.7), rgba(93, 146, 151, 0.5)), url(${activity.pictures[0]?.url})`,
@@ -1468,20 +1465,6 @@ const ActivityDetail = () => {
                           )}
 
                           <Button
-                            onClick={handleBookNowClick}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
-                              activity.isBookingOpen
-                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                            }`}
-                            disabled={!activity.isBookingOpen}
-                          >
-                            {activity.isBookingOpen
-                              ? "Book Now"
-                              : "Booking Closed"}
-                          </Button>
-
-                          <Button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSaveToggle(activity._id);
@@ -1500,6 +1483,20 @@ const ActivityDetail = () => {
                               }`}
                             />
                             {isSaved ? "Unsave" : "Save"}
+                          </Button>
+
+                          <Button
+                            onClick={handleBookNowClick}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
+                              activity.isBookingOpen
+                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                            }`}
+                            disabled={!activity.isBookingOpen}
+                          >
+                            {activity.isBookingOpen
+                              ? "Book Now"
+                              : "Booking Closed"}
                           </Button>
                         </>
                       )}
@@ -1861,13 +1858,24 @@ const ActivityDetail = () => {
               items={[
                 {
                   name: activity.name,
-                  price: (calculateDiscountedPrice(activity.price, activity.specialDiscount)) * exchangeRates * 100,
+                  price:
+                    calculateDiscountedPrice(
+                      activity.price,
+                      activity.specialDiscount
+                    ) *
+                    exchangeRates *
+                    100,
                 },
               ]} // Convert price to cents
               onWalletPayment={handlePaymentConfirm}
               stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
               onConfirm={handlePaymentConfirm}
-              priceOne={(calculateDiscountedPrice(activity.price, activity.specialDiscount) * exchangeRates).toFixed(2)}
+              priceOne={(
+                calculateDiscountedPrice(
+                  activity.price,
+                  activity.specialDiscount
+                ) * exchangeRates
+              ).toFixed(2)}
               currency={userPreferredCurrency.code}
               symbol={userPreferredCurrency.symbol}
               returnLoc={"http://localhost:3000/activity/" + id}
