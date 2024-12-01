@@ -46,31 +46,63 @@ const ProductReport = () => {
       try {
         const token = Cookies.get('jwt');
         const role = getUserRole();
-        const response = await axios.get(
-          `http://localhost:4000/${role}/sales-report`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const { day, month, year } = filters;
+        const url = new URL(`http://localhost:4000/${role}/sales-report`);
+        if (day) url.searchParams.append('day', day);
+        if (month) url.searchParams.append('month', month);
+        if (year) url.searchParams.append('year', year);
+
+        const response = await axios.get(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setSalesReport(response.data);
         updateGraphData(response.data.adminProductsSales, graphPeriod);
         
-        const uniqueProductNames = [...new Set(response.data.adminProductsSales.map(item => item.product.name))];
+        const uniqueProductNames = [...new Set(response.data.adminProductsSales
+          .filter(item => item.product && item.product.name)
+          .map(item => item.product.name))];
         setProductNames(uniqueProductNames);
 
         setTotalRevenue(response.data.totalAdminSalesRevenue);
         setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.adminProductsSales, 'all'));
 
-        filterSalesData(response.data.adminProductsSales);
+        // Apply product filter in frontend
+        const filteredData = filters.product
+          ? response.data.adminProductsSales.filter(item => item.product && item.product.name === filters.product)
+          : response.data.adminProductsSales;
+        setFilteredSales(filteredData);
       } catch (error) {
         console.error('Error fetching sales report:', error);
       }
     };
 
     fetchSalesReport();
-  }, []);
+  }, [filters.day, filters.month, filters.year, filters.product, graphPeriod]);
+
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value };
+    if (key === 'year') {
+      newFilters.month = '';
+      newFilters.day = '';
+    } else if (key === 'month') {
+      newFilters.day = '';
+    }
+    setFilters(newFilters);
+    const searchParams = new URLSearchParams();
+    ['day', 'month', 'year'].forEach(key => {
+      if (newFilters[key]) searchParams.append(key, newFilters[key]);
+    });
+    navigate(`/product-report?${searchParams.toString()}`);
+  };
+
+  const applyProductFilter = (productName) => {
+    const filteredData = productName
+      ? salesReport.adminProductsSales.filter(item => item.product && item.product.name === productName)
+      : salesReport.adminProductsSales;
+    setFilteredSales(filteredData);
+  };
 
   useEffect(() => {
     if (salesReport) {

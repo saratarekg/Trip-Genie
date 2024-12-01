@@ -195,95 +195,149 @@ export function Dashboard({
             <TabsTrigger value="reports">Reports</TabsTrigger>
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+              <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-sm font-medium text-[#1A3B47]">
                     Total Revenue
                   </CardTitle>
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <DollarSign className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">$45,231.89</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold text-[#388A94]">$45,231.89</div>
+                  <p className="text-xs text-[#1A3B47]">
                     +20.1% from last month
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-sm font-medium text-[#1A3B47]">
                     New Customers
                   </CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+2350</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold text-[#388A94]">+2350</div>
+                  <p className="text-xs text-[#1A3B47]">
                     +180.1% from last month
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Sales</CardTitle>
-                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium text-[#1A3B47]">Sales</CardTitle>
+                  <ShoppingCart className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+12,234</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold text-[#388A94]">+12,234</div>
+                  <p className="text-xs text-[#1A3B47]">
                     +19% from last month
                   </p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
+                  <CardTitle className="text-sm font-medium text-[#1A3B47]">
                     Active Now
                   </CardTitle>
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                  <CalendarDays className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">+573</div>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="text-2xl font-bold text-[#388A94]">+573</div>
+                  <p className="text-xs text-[#1A3B47]">
                     +201 since last hour
                   </p>
                 </CardContent>
               </Card>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <Card className="col-span-4">
+              <Card className="col-span-2">
                 <CardHeader>
-                  <CardTitle>Overview</CardTitle>
+                  <CardTitle className="text-[#1A3B47]">User Info</CardTitle>
+                </CardHeader>
+                <CardContent className="flex items-center space-x-4">
+                  <Avatar>
+                    <AvatarFallback className="bg-[#B5D3D1] text-[#1A3B47]">{getInitials(adminInfo?.username)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-medium text-[#1A3B47]">{adminInfo?.username || 'John Doe'}</h3>
+                    {adminInfo?.email && (
+                      <p className="text-sm text-[#5D9297]">{adminInfo.email}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+              <Card className="col-span-1">
+                <CardHeader>
+                  <CardTitle>User Statistcs Overview</CardTitle>
                 </CardHeader>
                 <CardContent className="pl-2">
                   <UserGrowthChart />
                 </CardContent>
               </Card>
-              <Card className="col-span-3">
-                <CardHeader>
-                  <CardTitle>Recent Sales</CardTitle>
-                  <CardDescription>
-                    You made 265 sales this month.
-                  </CardDescription>
+              <Card className="col-span-1 h-[300px]" id="notifications-card">
+                <CardHeader className="flex">
+                  <CardTitle className="flex justify-between items-center">
+                    <span>Notifications</span>
+                    <Button
+                      variant="ghost"
+                      className="text-sm text-[#388A94] p-2"
+                      onClick={() => setActiveTab("notifications")}
+                    >
+                      View All
+                    </Button>
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-8">
-                    {/* You can map through recent sales data here */}
-                    {[1, 2, 3].map((_, i) => (
-                      <div key={i} className="flex items-center">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            Customer {i + 1}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            customer{i + 1}@example.com
-                          </p>
-                        </div>
-                        <div className="ml-auto font-medium">+$129.00</div>
-                      </div>
-                    ))}
-                  </div>
+                  <ScrollArea className="h-[180px]">
+                    {notifications.length === 0 ? (
+                      <p className="text-[#1A3B47] bg-gray-100 p-4 rounded-lg shadow text-center">
+                        No notifications at the moment.
+                      </p>
+                    ) : (
+                      <ul className="divide-y divide-gray-200">
+                        {notifications.map((notification, index) => (
+                          <li
+                            key={index}
+                            className="p-3 hover:bg-gray-50 transition-colors relative cursor-pointer flex items-center gap-2"
+                            onClick={() => {
+                              markNotificationAsSeen(notification._id);
+                              setActiveTab("notifications");
+                            }}
+                          >
+                            {/* Icon */}
+                            {getNotificationIcon(notification.type)}
+
+                            {/* Notification Details */}
+                            <div className="ml-4 flex-1">
+                              <p className="text-sm text-[#1A3B47] mb-1">
+                                <div
+                                  dangerouslySetInnerHTML={{ __html: notification.body }}
+                                ></div>
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(notification.date).toLocaleDateString(undefined, {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            </div>
+
+                            {/* "New" Badge */}
+                            {!notification.seen && (
+                              <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
+                                New
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </ScrollArea>
                 </CardContent>
               </Card>
             </div>
@@ -299,27 +353,27 @@ export function Dashboard({
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   <button onClick={() => handleReportClick('manage-activities')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Activity className="h-12 w-12 mb-2" />
+                    <Activity className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>All Activities</span>
                   </button>
                   <button onClick={() => handleReportClick('manage-itineraries')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Compass className="h-12 w-12 mb-2" />
+                    <Compass className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>All Itineraries</span>
                   </button>
                   <button onClick={() => handleReportClick('manage-products')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Package className="h-12 w-12 mb-2" />
+                    <Package className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>All Products</span>
                   </button>
                   <button onClick={() => handleReportClick('my-products')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Gift className="h-12 w-12 mb-2" />
+                    <Gift className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>My Products</span>
                   </button>
                   <button onClick={() => handleReportClick('archived-products')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Archive className="h-12 w-12 mb-2" />
+                    <Archive className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Archived Products</span>
                   </button>
                   <button onClick={() => handleReportClick('historical-places')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Landmark className="h-12 w-12 mb-2" />
+                    <Landmark className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Historical Places</span>
                   </button>
                 </div>
@@ -337,35 +391,35 @@ export function Dashboard({
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <button onClick={() => handleReportClick('review-registration')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Users className="h-12 w-12 mb-2" />
+                    <Users className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Review Registration</span>
                   </button>
                   <button onClick={() => handleReportClick('manage-accounts')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Users className="h-12 w-12 mb-2" />
+                    <Users className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Accounts</span>
                   </button>
                   <button onClick={() => handleReportClick('add-admin-governor')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Users className="h-12 w-12 mb-2" />
+                    <Users className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Add Admin/Governor</span>
                   </button>
                   <button onClick={() => handleReportClick('manage-categories')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Tag className="h-12 w-12 mb-2" />
+                    <Tag className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Categories</span>
                   </button>
                   <button onClick={() => handleReportClick('manage-tags')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Tag className="h-12 w-12 mb-2" />
+                    <Tag className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Tags</span>
                   </button>
                   <button onClick={() => handleReportClick('create-promo-code')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Tag className="h-12 w-12 mb-2" />
+                    <Tag className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Create Promo Code</span>
                   </button>
                   <button onClick={() => handleReportClick('manage-activities')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Activity className="h-12 w-12 mb-2" />
+                    <Activity className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Activities</span>
                   </button>
                   <button onClick={() => handleReportClick('manage-itineraries')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Compass className="h-12 w-12 mb-2" />
+                    <Compass className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Itineraries</span>
                   </button>
                 </div>
@@ -383,23 +437,23 @@ export function Dashboard({
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
                   <button onClick={() => handleReportClick('itinerary-sales-report')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <BarChart className="h-12 w-12 mb-2" />
+                    <BarChart className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Itineraries Report</span>
                   </button>
                   <button onClick={() => handleReportClick('activity-reports')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Activity className="h-12 w-12 mb-2" />
+                    <Activity className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Activities Report</span>
                   </button>
                   <button onClick={() => handleReportClick('my-product-sales-report')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Gift className="h-12 w-12 mb-2" />
+                    <Gift className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>My Products Report</span>
                   </button>
                   <button onClick={() => handleReportClick('seller-product-sales-report')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <Users className="h-12 w-12 mb-2" />
+                    <Users className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Seller's Products Report</span>
                   </button>
                   <button onClick={() => handleReportClick('user-stats')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                    <BarChart className="h-12 w-12 mb-2" />
+                    <BarChart className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>User Statistics</span>
                   </button>
                 </div>
@@ -407,89 +461,6 @@ export function Dashboard({
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
-      <div className="w-80 p-4 space-y-4 overflow-y-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>User Info</CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center space-x-4">
-            <Avatar>
-              <AvatarFallback>{getInitials(adminInfo?.username)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h3 className="font-medium">{adminInfo?.username || 'John Doe'}</h3>
-              {adminInfo?.email && (
-                <p className="text-sm text-gray-500">{adminInfo.email}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="h-[calc(100vh-16rem)]" id="notifications-card">
-  <CardHeader className="flex">
-    <CardTitle className="flex justify-between items-center">
-      <span>Notifications</span>
-      <Button
-        variant="ghost"
-        className="text-sm text-[#388A94] p-2"
-        onClick={() => setActiveTab("notifications")}
-      >
-        View All
-      </Button>
-    </CardTitle>
-  </CardHeader>
-  <CardContent>
-    <ScrollArea className="h-[calc(100vh-22rem)]">
-      {notifications.length === 0 ? (
-        <p className="text-[#1A3B47] bg-gray-100 p-4 rounded-lg shadow text-center">
-          No notifications at the moment.
-        </p>
-      ) : (
-        <ul className="divide-y divide-gray-200">
-          {notifications.map((notification, index) => (
-            <li
-              key={index}
-              className="p-3 hover:bg-gray-50 transition-colors relative cursor-pointer flex items-center gap-2"
-              onClick={() => {
-                markNotificationAsSeen(notification._id);
-                setActiveTab("notifications");
-              }}
-            >
-              {/* Icon */}
-              {/* {getNotificationIcon(notification.type)} */}
-
-              {/* Notification Details */}
-              <div className="flex-1">
-                <p className="text-sm text-[#1A3B47] mb-1">
-                  <div
-                    dangerouslySetInnerHTML={{ __html: notification.body }}
-                  ></div>
-                </p>
-                <p className="text-xs text-gray-500">
-                  {new Date(notification.date).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-
-              {/* "New" Badge */}
-              {!notification.seen && (
-                <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
-                  New
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </ScrollArea>
-  </CardContent>
-</Card>
-
       </div>
     </div>
   );

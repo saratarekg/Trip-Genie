@@ -11,7 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu" 
 
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -41,79 +41,63 @@ const ActivityReport = () => {
     return role;
   };
 
-  useEffect(() => {
-    const fetchSalesReport = async () => {
-      try {
-        const token = Cookies.get('jwt');
-        const role = getUserRole();
-        const response = await axios.get(
-          `http://localhost:4000/${role}/activities-report`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setSalesReport(response.data);
-        if (response.data && response.data.activitiesSales) {
-          updateGraphData(response.data.activitiesSales, graphPeriod);
-          
-          const uniqueActivityNames = [...new Set(response.data.activitiesSales.map(item => item.activity.name))];
-          setActivityNames(uniqueActivityNames);
+  const fetchSalesReport = async (overrideFilters = filters) => {
+    try {
+      const token = Cookies.get('jwt');
+      const role = getUserRole();
+      const { day, month, year } = overrideFilters;
+      const url = new URL(`http://localhost:4000/${role}/activities-report`);
+      if (day) url.searchParams.append('day', day);
+      if (month) url.searchParams.append('month', month);
+      if (year) url.searchParams.append('year', year);
 
-          setTotalRevenue(response.data.totalActivitiesRevenue || 0);
-          setTotalAppRevenue(response.data.totalActivitiesAppRevenue || 0);
-          setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.activitiesSales, 'all'));
+      const response = await axios.get(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setSalesReport(response.data);
+      if (response.data && response.data.activitiesSales) {
+        updateGraphData(response.data.activitiesSales, graphPeriod);
+        
+        const uniqueActivityNames = [...new Set(response.data.activitiesSales
+          .filter(item => item.activity && item.activity.name)
+          .map(item => item.activity.name))];
+        setActivityNames(uniqueActivityNames);
 
-          filterSalesData(response.data.activitiesSales);
-        } else {
-          setError('Invalid data structure received from the server: activitiesSales missing');
-        }
-      } catch (error) {
-        console.error('Error fetching sales report:', error);
-        setError('Failed to fetch sales report. Please try again later.');
+        setTotalRevenue(response.data.totalActivitiesRevenue || 0);
+        setTotalAppRevenue(response.data.totalActivitiesAppRevenue || 0);
+        setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.activitiesSales, 'all'));
+
+        // Apply activity filter in frontend
+        const filteredData = filters.activity
+          ? response.data.activitiesSales.filter(item => item.activity && item.activity.name === filters.activity)
+          : response.data.activitiesSales;
+        setFilteredSales(filteredData.filter(item => item.totalRevenue > 0));
+      } else {
+        setError('Invalid data structure received from the server: activitiesSales missing');
       }
-    };
-
-    fetchSalesReport();
-  }, []);
+    } catch (error) {
+      console.error('Error fetching sales report:', error);
+      setError('Failed to fetch sales report. Please try again later.');
+    }
+  };
 
   useEffect(() => {
-    if (salesReport && salesReport.activitiesSales) {
-      filterSalesData(salesReport.activitiesSales);
+    fetchSalesReport();
+  }, [filters.day, filters.month, filters.year, filters.activity, graphPeriod]);
+
+  useEffect(() => {
+    if (salesReport) {
       setSelectedPeriodRevenue(calculatePeriodRevenue(salesReport.activitiesSales, selectedPeriod));
     }
-  }, [filters, selectedPeriod, salesReport]);
+  }, [selectedPeriod, salesReport]);
 
   useEffect(() => {
-    if (salesReport && salesReport.activitiesSales) {
+    if (salesReport) {
       updateGraphData(salesReport.activitiesSales, graphPeriod);
     }
   }, [graphPeriod, salesReport]);
-
-  const filterSalesData = (salesData) => {
-    if (!Array.isArray(salesData)) {
-      console.error('Invalid sales data:', salesData);
-      return;
-    }
-    setIsFiltering(true);
-    // console.log(filters.activity);
-    setTimeout(() => {
-      const filtered = salesData.filter(item => {
-        const itemDate = new Date(item.activity.createdAt);
-        // console.log(item.activity.name);
-        return (
-          (!filters.activity || item.activity.name === filters.activity) &&
-          (!filters.year || itemDate.getFullYear() === parseInt(filters.year, 10)) &&
-          (!filters.month || (itemDate.getMonth() + 1) === parseInt(filters.month, 10))
-        );
-      });
-      setFilteredSales(filtered);
-      
-    //   console.log(filtered);
-      setIsFiltering(false);
-    }, 300);
-  };
 
   const updateGraphData = (salesData, period) => {
     if (!Array.isArray(salesData)) {
@@ -196,6 +180,30 @@ const ActivityReport = () => {
 
   const resetFilters = () => {
     setFilters({ activity: '', month: '', year: '' });
+    fetchSalesReport({ activity: '', month: '', year: '' });
+  };
+
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value };
+    if (key === 'year') {
+      newFilters.month = '';
+      newFilters.day = '';
+    } else if (key === 'month') {
+      newFilters.day = '';
+    }
+    setFilters(newFilters);
+    const searchParams = new URLSearchParams();
+    ['day', 'month', 'year'].forEach(key => {
+      if (newFilters[key]) searchParams.append(key, newFilters[key]);
+    });
+    navigate(`/activity-report?${searchParams.toString()}`);
+  };
+
+  const applyActivityFilter = (activityName) => {
+    const filteredData = activityName
+      ? salesReport.activitiesSales.filter(item => item.activity && item.activity.name === activityName)
+      : salesReport.activitiesSales;
+    setFilteredSales(filteredData.filter(item => item.totalRevenue > 0));
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;

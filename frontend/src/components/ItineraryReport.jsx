@@ -46,14 +46,17 @@ const ItineraryReport = () => {
       try {
         const token = Cookies.get('jwt');
         const role = getUserRole();
-        const response = await axios.get(
-          `http://localhost:4000/${role}/itineraries-report`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const { itinerary, month, year } = filters;
+        const url = new URL(`http://localhost:4000/${role}/itineraries-report`);
+        if (itinerary) url.searchParams.append('itinerary', itinerary);
+        if (month) url.searchParams.append('month', month);
+        if (year) url.searchParams.append('year', year);
+
+        const response = await axios.get(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setSalesReport(response.data);
         if (response.data && response.data.itinerariesSales) {
           updateGraphData(response.data.itinerariesSales, graphPeriod);
@@ -65,7 +68,7 @@ const ItineraryReport = () => {
           setTotalAppRevenue(response.data.totalItinerariesAppRevenue || 0);
           setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.itinerariesSales, 'all'));
 
-          filterSalesData(response.data.itinerariesSales);
+          setFilteredSales(response.data.itinerariesSales); // Set filtered sales directly from API response
         } else {
           setError('Invalid data structure received from the server: itinerariesSales missing');
         }
@@ -76,42 +79,19 @@ const ItineraryReport = () => {
     };
 
     fetchSalesReport();
-  }, []);
+  }, [filters.day, filters.month, filters.year, filters.itinerary, graphPeriod]);
 
   useEffect(() => {
-    if (salesReport && salesReport.itinerariesSales) {
-      filterSalesData(salesReport.itinerariesSales);
+    if (salesReport) {
       setSelectedPeriodRevenue(calculatePeriodRevenue(salesReport.itinerariesSales, selectedPeriod));
     }
-  }, [filters, selectedPeriod, salesReport]);
+  }, [selectedPeriod, salesReport]);
 
   useEffect(() => {
-    if (salesReport && salesReport.itinerariesSales) {
+    if (salesReport) {
       updateGraphData(salesReport.itinerariesSales, graphPeriod);
     }
   }, [graphPeriod, salesReport]);
-
-  const filterSalesData = (salesData) => {
-    if (!Array.isArray(salesData)) {
-      console.error('Invalid sales data:', salesData);
-      return;
-    }
-    setIsFiltering(true);
-    // console.log(filters.year);
-    setTimeout(() => {
-      const filtered = salesData.filter(item => {
-        const itemDate = new Date(item.itinerary.createdAt);
-        return (
-          (!filters.itinerary || item.itinerary.title === filters.itinerary) &&
-          (!filters.year || itemDate.getFullYear() === parseInt(filters.year, 10)) &&
-          (!filters.month || (itemDate.getMonth() + 1) === parseInt(filters.month, 10))
-        );
-      });
-      setFilteredSales(filtered);
-      // console.log(filtered);
-      setIsFiltering(false);
-    }, 300);
-  };
 
   const updateGraphData = (salesData, period) => {
     if (!Array.isArray(salesData)) {
@@ -194,6 +174,29 @@ const ItineraryReport = () => {
 
   const resetFilters = () => {
     setFilters({ itinerary: '', month: '', year: '' });
+  };
+
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value };
+    if (key === 'year') {
+      newFilters.month = '';
+      newFilters.day = '';
+    } else if (key === 'month') {
+      newFilters.day = '';
+    }
+    setFilters(newFilters);
+    const searchParams = new URLSearchParams();
+    ['day', 'month', 'year'].forEach(key => {
+      if (newFilters[key]) searchParams.append(key, newFilters[key]);
+    });
+    navigate(`/itinerary-report?${searchParams.toString()}`);
+  };
+
+  const applyItineraryFilter = (itineraryName) => {
+    const filteredData = itineraryName
+      ? salesReport.itinerariesSales.filter(item => item.itinerary && item.itinerary.title === itineraryName)
+      : salesReport.itinerariesSales;
+    setFilteredSales(filteredData);
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;

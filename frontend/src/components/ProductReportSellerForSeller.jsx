@@ -19,6 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const ProductReport = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [salesReport, setSalesReport] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState('all');
   const [graphPeriod, setGraphPeriod] = useState('week');
@@ -43,18 +45,32 @@ const ProductReport = () => {
   };
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    setFilters(prev => ({
+      ...prev,
+      day: searchParams.get('day') || '',
+      month: searchParams.get('month') || '',
+      year: searchParams.get('year') || ''
+    }));
+  }, [location.search]);
+
+  useEffect(() => {
     const fetchSalesReport = async () => {
       try {
         const token = Cookies.get('jwt');
         const role = getUserRole();
-        const response = await axios.get(
-          `http://localhost:4000/${role}/sales-report`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const url = new URL(`http://localhost:4000/${role}/sales-report`);
+        
+        // Only add day, month, and year to URL params
+        ['day', 'month', 'year'].forEach(key => {
+          if (filters[key]) url.searchParams.append(key, filters[key]);
+        });
+
+        const response = await axios.get(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setSalesReport(response.data);
         updateGraphData(response.data.sellerProductsSales, graphPeriod);
         
@@ -67,44 +83,30 @@ const ProductReport = () => {
         setTotalRevenueAfterCommission(response.data.totalRevenueAfterCommission);
         setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.sellerProductsSales, 'all'));
 
-        filterSalesData(response.data.sellerProductsSales);
+        // Apply product filter in frontend
+        const filteredData = filters.product
+          ? response.data.sellerProductsSales.filter(item => item.product && item.product.name === filters.product)
+          : response.data.sellerProductsSales;
+        setFilteredSales(filteredData);
       } catch (error) {
         console.error('Error fetching sales report:', error);
       }
     };
 
     fetchSalesReport();
-  }, []);
+  }, [filters.day, filters.month, filters.year, filters.product, graphPeriod]);
 
   useEffect(() => {
     if (salesReport) {
-      filterSalesData(salesReport.sellerProductsSales);
       setSelectedPeriodRevenue(calculatePeriodRevenue(salesReport.sellerProductsSales, selectedPeriod));
     }
-  }, [filters, selectedPeriod, salesReport]);
+  }, [selectedPeriod, salesReport]);
 
   useEffect(() => {
     if (salesReport) {
       updateGraphData(salesReport.sellerProductsSales, graphPeriod);
     }
   }, [graphPeriod, salesReport]);
-
-  const filterSalesData = (salesData) => {
-    setIsFiltering(true);
-    setTimeout(() => {
-      const filtered = salesData.filter(item => {
-        const itemDate = new Date(item.product.createdAt);
-        return (
-          (!filters.product || (item.product && item.product.name === filters.product)) &&
-          (!filters.year || itemDate.getFullYear().toString() === filters.year) &&
-          (!filters.month || (itemDate.getMonth() + 1).toString() === filters.month) &&
-          (!filters.day || itemDate.getDate().toString() === filters.day)
-        );
-      });
-      setFilteredSales(filtered);
-      setIsFiltering(false);
-    }, 300);
-  };
 
   const updateGraphData = (salesData, period) => {
     const now = new Date();
@@ -163,7 +165,6 @@ const ProductReport = () => {
     const now = new Date();
     return salesData.reduce((sum, item) => {
       const saleDate = new Date(item.product.createdAt);
-      console.log(`Sale Date: ${saleDate}, Revenue: ${item.revenue}`);
       switch (period) {
         case 'today':
           return sum + (saleDate.toDateString() === now.toDateString() ? (item.revenueAfterCommission) : 0);
@@ -183,6 +184,30 @@ const ProductReport = () => {
 
   const resetFilters = () => {
     setFilters({ product: '', day: '', month: '', year: '' });
+    navigate('/product-report');
+  };
+
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value };
+    if (key === 'year') {
+      newFilters.month = '';
+      newFilters.day = '';
+    } else if (key === 'month') {
+      newFilters.day = '';
+    }
+    setFilters(newFilters);
+    const searchParams = new URLSearchParams();
+    ['day', 'month', 'year'].forEach(key => {
+      if (newFilters[key]) searchParams.append(key, newFilters[key]);
+    });
+    navigate(`/product-report?${searchParams.toString()}`);
+  };
+
+  const applyProductFilter = (productName) => {
+    const filteredData = productName
+      ? salesReport.sellerProductsSales.filter(item => item.product && item.product.name === productName)
+      : salesReport.sellerProductsSales;
+    setFilteredSales(filteredData);
   };
 
   if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
@@ -258,9 +283,6 @@ const ProductReport = () => {
                 </div>
               </div>
               <div className="text-center mt-4">
-                {/* <p className="text-base font-semibold text-[#1A3B47]">
-                  {totalRevenue !== null && `Total: $${totalRevenue.toFixed(2)}`}
-                </p> */}
                 <p className="text-base text-[#5D9297]">
                   {(fillPercentage).toFixed(1)}% of total
                 </p>
@@ -324,8 +346,7 @@ const ProductReport = () => {
           <Card className="md:col-span-6">
             <CardHeader className="p-3 mb-2">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg
-font-bold text-[#1A3B47]">Sales Analytics</CardTitle>
+                <CardTitle className="text-lg font-bold text-[#1A3B47]">Sales Analytics</CardTitle>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0">
@@ -402,7 +423,7 @@ font-bold text-[#1A3B47]">Sales Analytics</CardTitle>
             <div className="flex flex-wrap gap-4 mb-4">
               <Select 
                 value={filters.product}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, product: value }))}
+                onValueChange={(value) => handleFilterChange('product', value)}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Select product" />
@@ -417,7 +438,7 @@ font-bold text-[#1A3B47]">Sales Analytics</CardTitle>
               </Select>
               <Select 
                 value={filters.year}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, year: value, month: '', day: '' }))}
+                onValueChange={(value) => handleFilterChange('year', value)}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
                   <SelectValue placeholder="Select year" />
@@ -432,7 +453,7 @@ font-bold text-[#1A3B47]">Sales Analytics</CardTitle>
               </Select>
               <Select 
                 value={filters.month}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, month: value, day: '' }))}
+                onValueChange={(value) => handleFilterChange('month', value)}
                 disabled={!filters.year}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
@@ -448,7 +469,7 @@ font-bold text-[#1A3B47]">Sales Analytics</CardTitle>
               </Select>
               <Select
                 value={filters.day}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, day: value }))}
+                onValueChange={(value) => handleFilterChange('day', value)}
                 disabled={!filters.year || !filters.month}
               >
                 <SelectTrigger className="w-full sm:w-[200px]">

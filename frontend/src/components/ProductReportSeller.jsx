@@ -47,14 +47,17 @@ const ProductReport = () => {
       try {
         const token = Cookies.get('jwt');
         const role = getUserRole();
-        const response = await axios.get(
-          `http://localhost:4000/${role}/sales-report`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const { day, month, year } = filters;
+        const url = new URL(`http://localhost:4000/${role}/sales-report`);
+        if (day) url.searchParams.append('day', day);
+        if (month) url.searchParams.append('month', month);
+        if (year) url.searchParams.append('year', year);
+
+        const response = await axios.get(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setSalesReport(response.data);
         updateGraphData(response.data.sellerProductsSales, graphPeriod);
         
@@ -67,44 +70,30 @@ const ProductReport = () => {
         setAppTotalRevenue(response.data.totalSellerSalesRevenue);
         setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.sellerProductsSales, 'all'));
 
-        filterSalesData(response.data.sellerProductsSales);
+        // Apply product filter in frontend
+        const filteredData = filters.product
+          ? response.data.sellerProductsSales.filter(item => item.product && item.product.name === filters.product)
+          : response.data.sellerProductsSales;
+        setFilteredSales(filteredData);
       } catch (error) {
         console.error('Error fetching sales report:', error);
       }
     };
 
     fetchSalesReport();
-  }, []);
+  }, [filters.day, filters.month, filters.year, filters.product, graphPeriod]);
 
   useEffect(() => {
     if (salesReport) {
-      filterSalesData(salesReport.sellerProductsSales);
       setSelectedPeriodRevenue(calculatePeriodRevenue(salesReport.sellerProductsSales, selectedPeriod));
     }
-  }, [filters, selectedPeriod, salesReport]);
+  }, [selectedPeriod, salesReport]);
 
   useEffect(() => {
     if (salesReport) {
       updateGraphData(salesReport.sellerProductsSales, graphPeriod);
     }
   }, [graphPeriod, salesReport]);
-
-  const filterSalesData = (salesData) => {
-    setIsFiltering(true);
-    setTimeout(() => {
-      const filtered = salesData.filter(item => {
-        const itemDate = new Date(item.product.createdAt);
-        return (
-          (!filters.product || (item.product && item.product.name === filters.product)) &&
-          (!filters.year || itemDate.getFullYear().toString() === filters.year) &&
-          (!filters.month || (itemDate.getMonth() + 1).toString() === filters.month) &&
-          (!filters.day || itemDate.getDate().toString() === filters.day)
-        );
-      });
-      setFilteredSales(filtered);
-      setIsFiltering(false);
-    }, 300);
-  };
 
   const updateGraphData = (salesData, period) => {
     const now = new Date();
@@ -183,6 +172,29 @@ const ProductReport = () => {
 
   const resetFilters = () => {
     setFilters({ product: '', day: '', month: '', year: '' });
+  };
+
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value };
+    if (key === 'year') {
+      newFilters.month = '';
+      newFilters.day = '';
+    } else if (key === 'month') {
+      newFilters.day = '';
+    }
+    setFilters(newFilters);
+    const searchParams = new URLSearchParams();
+    ['day', 'month', 'year'].forEach(key => {
+      if (newFilters[key]) searchParams.append(key, newFilters[key]);
+    });
+    navigate(`/product-report?${searchParams.toString()}`);
+  };
+
+  const applyProductFilter = (productName) => {
+    const filteredData = productName
+      ? salesReport.sellerProductsSales.filter(item => item.product && item.product.name === productName)
+      : salesReport.sellerProductsSales;
+    setFilteredSales(filteredData);
   };
 
   if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
