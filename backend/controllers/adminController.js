@@ -450,6 +450,7 @@ const getSalesReport = async (req, res) => {
         }
       }
     }
+    query.sales = { $gt: 0 };
     const productSales = await ProductSales.find(query).populate("product");
     const adminProductsSales = productSales.filter(
       (sale) =>
@@ -470,7 +471,6 @@ const getSalesReport = async (req, res) => {
         return { ...plainSale, appRevenue: plainSale.revenue * 0.1 };
       });
 
-    console.log(sellerProductsSales);
     const totalSellerSalesRevenue = sellerProductsSales.reduce(
       (total, sale) => total + sale.appRevenue,
       0
@@ -505,12 +505,16 @@ const getItinerariesReport = async (req, res) => {
       startDate = new Date(parseInt(year), 0, 1);
       endDate = new Date(parseInt(year) + 1, 0, 1);
     }
-    query.createdAt = { $gte: startDate, $lt: endDate };
+    if (year) {
+      query.createdAt = { $gte: startDate, $lt: endDate };
+    }
 
     const itineraryBookings = await ItineraryBooking.find(query).populate(
       "itinerary"
     );
-    const itinerariesSales = itineraries.map((itinerary) => {
+
+    console.log(itineraryBookings);
+    let itinerariesSales = itineraries.map((itinerary) => {
       const totalRevenue = itineraryBookings.reduce((total, booking) => {
         return booking.itinerary._id.equals(itinerary._id)
           ? total + booking.paymentAmount
@@ -519,6 +523,11 @@ const getItinerariesReport = async (req, res) => {
       const appRevenue = totalRevenue * 0.1; // 10% of total revenue
       return { itinerary, totalRevenue, appRevenue };
     });
+
+    itinerariesSales = itinerariesSales.filter(
+      (report) => report.totalRevenue > 0
+    );
+
     const totalItinerariesRevenue = itinerariesSales.reduce(
       (total, sale) => total + sale.totalRevenue,
       0
@@ -553,14 +562,16 @@ const getActivitiesReport = async (req, res) => {
       startDate = new Date(parseInt(year), 0, 1);
       endDate = new Date(parseInt(year) + 1, 0, 1);
     }
-    query.createdAt = { $gte: startDate, $lt: endDate };
+    if (year) {
+      query.createdAt = { $gte: startDate, $lt: endDate };
+    }
 
     const activities = await Activity.find(); // Fetch all activities
     const activityBookings = await ActivityBooking.find(query).populate(
       "activity"
     );
 
-    const activitiesSales = activities.map((activity) => {
+    let activitiesSales = activities.map((activity) => {
       const totalRevenue = activityBookings.reduce((total, booking) => {
         return booking.activity && booking.activity.id == activity.id
           ? total + booking.paymentAmount
@@ -569,6 +580,10 @@ const getActivitiesReport = async (req, res) => {
       const appRevenue = totalRevenue * 0.1; // 10% of total revenue
       return { activity, totalRevenue, appRevenue };
     });
+
+    activitiesSales = activitiesSales.filter(
+      (report) => report.totalRevenue > 0
+    );
 
     const totalActivitiesRevenue = activitiesSales.reduce(
       (total, sale) => total + sale.totalRevenue,
@@ -597,13 +612,18 @@ const getAdminNotifications = async (req, res) => {
       return res.status(400).json({ message: "admin ID is required" });
     }
 
-    const admin = await Admin.findById(adminId, "notifications hasUnseenNotifications");
+    const admin = await Admin.findById(
+      adminId,
+      "notifications hasUnseenNotifications"
+    );
 
     if (!admin) {
       return res.status(404).json({ message: "Admin not found" });
     }
 
-    const sortedNotifications = admin.notifications.sort((a, b) => b.date - a.date);
+    const sortedNotifications = admin.notifications.sort(
+      (a, b) => b.date - a.date
+    );
 
     return res.status(200).json({
       success: true,
@@ -612,7 +632,9 @@ const getAdminNotifications = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching notifications:", error.message);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -632,7 +654,9 @@ const markNotificationsAsSeen = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ success: false, message: "No unseen notifications found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "No unseen notifications found" });
     }
 
     // Set 'hasUnseenNotifications' to false after marking all notifications as seen
@@ -648,22 +672,31 @@ const markNotificationsAsSeen = async (req, res) => {
     res.json({ success: true, message: "All notifications marked as seen" });
   } catch (error) {
     console.error("Error marking notifications as seen:", error.message);
-    res.status(500).json({ success: false, message: "Error marking notifications as seen" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error marking notifications as seen" });
   }
 };
 
 const hasUnseenNotifications = async (req, res) => {
   try {
-    const admin = await Admin.findById(res.locals.user_id, "hasUnseenNotifications");
+    const admin = await Admin.findById(
+      res.locals.user_id,
+      "hasUnseenNotifications"
+    );
 
     if (!admin) {
-      return res.status(404).json({ success: false, message: "Admin not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Admin not found" });
     }
 
     res.json({ success: true, hasUnseen: admin.hasUnseenNotifications });
   } catch (error) {
     console.error("Error checking unseen notifications:", error.message);
-    res.status(500).json({ success: false, message: "Error checking unseen notifications" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error checking unseen notifications" });
   }
 };
 
@@ -673,7 +706,7 @@ const markNotificationAsSeen = async (req, res) => {
 
     // Find the admin by their ID and update the specific notification by its ID
     const result = await Admin.updateOne(
-      { 
+      {
         _id: res.locals.user_id, // Find the admin by their user ID
         "notifications._id": notificationId, // Match the specific notification by its ID
       },
@@ -685,12 +718,17 @@ const markNotificationAsSeen = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-     return res.status(404).json({ success: false, message: "Notification not found or already marked as seen" });
-    } 
+      return res.status(404).json({
+        success: false,
+        message: "Notification not found or already marked as seen",
+      });
+    }
 
     // Check if there are any other unseen notifications left
     const admin = await Admin.findById(res.locals.user_id);
-    const hasUnseenNotifications = admin.notifications.some(notification => !notification.seen);
+    const hasUnseenNotifications = admin.notifications.some(
+      (notification) => !notification.seen
+    );
 
     if (!hasUnseenNotifications) {
       // If no unseen notifications exist, set 'hasUnseenNotifications' to false
@@ -707,7 +745,9 @@ const markNotificationAsSeen = async (req, res) => {
     res.json({ success: true, message: "Notification marked as seen" });
   } catch (error) {
     console.error("Error marking notification as seen:", error.message);
-    res.status(500).json({ success: false, message: "Error marking notification as seen" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error marking notification as seen" });
   }
 };
 
@@ -722,16 +762,20 @@ const markDropdownAsOpened = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ success: false, message: "Admin not found or already updated" });
+      return res.status(404).json({
+        success: false,
+        message: "Admin not found or already updated",
+      });
     }
 
     res.json({ success: true, message: "Dropdown marked as opened" });
   } catch (error) {
     console.error("Error marking dropdown as opened:", error.message);
-    res.status(500).json({ success: false, message: "Error marking dropdown as opened" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error marking dropdown as opened" });
   }
 };
-
 
 module.exports = {
   addAdmin,
