@@ -33,7 +33,6 @@ const getTourGuideProfile = async (req, res) => {
   }
 };
 
-
 const updateTourGuide = async (req, res) => {
   try {
     const tourGuide1 = await TourGuide.findById(req.params.id).lean();
@@ -226,8 +225,14 @@ const deleteTourGuideAccount = async (req, res) => {
     });
 
     if (bookedItineraries.length > 0) {
+      itineraries.forEach(async (itinerary) => {
+        await Itinerary.findByIdAndUpdate(itinerary._id, {
+          isBookingOpen: false,
+        });
+      });
       return res.status(400).json({
-        message: "You cannot delete your account because you have bookings",
+        message:
+          "You cannot delete your account because you have active bookings, your itineraries will be closed for new bookings",
       });
     }
 
@@ -287,7 +292,8 @@ const deleteTourGuide = async (req, res) => {
 
     if (bookedItineraries.length > 0) {
       return res.status(400).json({
-        message: "You cannot delete your account because you have bookings",
+        message:
+          "You cannot delete this account because is has active bookings",
       });
     }
 
@@ -619,14 +625,19 @@ const getTourGuideNotifications = async (req, res) => {
     }
 
     // Find the tour guide and get their notifications
-    const tourGuide = await TourGuide.findById(tourGuideId, "notifications hasUnseenNotifications");
+    const tourGuide = await TourGuide.findById(
+      tourGuideId,
+      "notifications hasUnseenNotifications"
+    );
 
     if (!tourGuide) {
       return res.status(404).json({ message: "TourGuide not found" });
     }
 
     // Sort notifications in descending order based on the 'date' field
-    const sortedNotifications = tourGuide.notifications.sort((a, b) => b.date - a.date);
+    const sortedNotifications = tourGuide.notifications.sort(
+      (a, b) => b.date - a.date
+    );
 
     // Return the sorted notifications along with the 'hasUnseenNotifications' flag
     return res.status(200).json({
@@ -636,23 +647,25 @@ const getTourGuideNotifications = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching notifications:", error.message);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
 const markNotificationsAsSeen = async (req, res) => {
   try {
-    const tourGuideId = res.locals.user_id;  // Get TourGuide ID from res.locals
+    const tourGuideId = res.locals.user_id; // Get TourGuide ID from res.locals
 
     const result = await TourGuide.updateOne(
       { _id: tourGuideId }, // Find TourGuide by user ID
       {
         $set: {
-          'notifications.$[elem].seen': true, // Set 'seen' to true for all unseen notifications
+          "notifications.$[elem].seen": true, // Set 'seen' to true for all unseen notifications
         },
       },
       {
-        arrayFilters: [{ 'elem.seen': false }], // Only update notifications where seen is false
+        arrayFilters: [{ "elem.seen": false }], // Only update notifications where seen is false
       }
     );
 
@@ -673,15 +686,20 @@ const markNotificationsAsSeen = async (req, res) => {
     res.json({ success: true, message: "All notifications marked as seen" });
   } catch (error) {
     console.error("Error marking notifications as seen:", error.message);
-    res.status(500).json({ success: false, message: "Error marking notifications as seen" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error marking notifications as seen" });
   }
 };
 
 const hasUnseenNotifications = async (req, res) => {
   try {
-    const tourGuideId = res.locals.user_id;  // Get TourGuide ID from res.locals
+    const tourGuideId = res.locals.user_id; // Get TourGuide ID from res.locals
 
-    const tourGuide = await TourGuide.findById(tourGuideId, "hasUnseenNotifications");
+    const tourGuide = await TourGuide.findById(
+      tourGuideId,
+      "hasUnseenNotifications"
+    );
 
     if (!tourGuide) {
       return res.status(404).json({ message: "TourGuide not found" });
@@ -690,20 +708,22 @@ const hasUnseenNotifications = async (req, res) => {
     res.json({ success: true, hasUnseen: tourGuide.hasUnseenNotifications });
   } catch (error) {
     console.error("Error checking unseen notifications:", error.message);
-    res.status(500).json({ success: false, message: "Error checking unseen notifications" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error checking unseen notifications" });
   }
 };
 
 const markNotificationAsSeenForTourGuide = async (req, res) => {
   try {
-    const tourGuideId = res.locals.user_id;  // Get TourGuide ID from res.locals
+    const tourGuideId = res.locals.user_id; // Get TourGuide ID from res.locals
     const notificationId = req.params.id; // Get the notification ID from the request parameters
 
     const result = await TourGuide.updateOne(
-      { 
-        _id: tourGuideId, 
-        "notifications._id": notificationId, 
-        "notifications.seen": false 
+      {
+        _id: tourGuideId,
+        "notifications._id": notificationId,
+        "notifications.seen": false,
       },
       {
         $set: {
@@ -713,11 +733,15 @@ const markNotificationAsSeenForTourGuide = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(400).json({ message: "Notification not found or already marked as seen" });
+      return res
+        .status(400)
+        .json({ message: "Notification not found or already marked as seen" });
     }
 
     const tourGuide = await TourGuide.findById(tourGuideId);
-    const hasUnseenNotifications = tourGuide.notifications.some(notification => !notification.seen);
+    const hasUnseenNotifications = tourGuide.notifications.some(
+      (notification) => !notification.seen
+    );
 
     if (!hasUnseenNotifications) {
       await TourGuide.updateOne(
@@ -732,15 +756,21 @@ const markNotificationAsSeenForTourGuide = async (req, res) => {
 
     res.json({ success: true, message: "Notification marked as seen" });
   } catch (error) {
-    console.error("Error marking notification as seen for tour guide:", error.message);
-    res.status(500).json({ success: false, message: "Error marking notification as seen for tour guide" });
+    console.error(
+      "Error marking notification as seen for tour guide:",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Error marking notification as seen for tour guide",
+    });
   }
 };
 
 // Mark the dropdown as opened (set hasUnseenNotifications to false)
 const markDropdownAsOpened = async (req, res) => {
   try {
-    const tourGuideId = res.locals.user_id;  // Get TourGuide ID from res.locals
+    const tourGuideId = res.locals.user_id; // Get TourGuide ID from res.locals
 
     const result = await TourGuide.updateOne(
       { _id: tourGuideId },
@@ -748,17 +778,20 @@ const markDropdownAsOpened = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ success: false, message: "TourGuide not found or already updated" });
+      return res.status(404).json({
+        success: false,
+        message: "TourGuide not found or already updated",
+      });
     }
 
     res.json({ success: true, message: "Dropdown marked as opened" });
   } catch (error) {
     console.error("Error marking dropdown as opened:", error.message);
-    res.status(500).json({ success: false, message: "Error marking dropdown as opened" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error marking dropdown as opened" });
   }
 };
-
-
 
 module.exports = {
   updateTourGuide,

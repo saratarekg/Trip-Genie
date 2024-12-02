@@ -27,8 +27,12 @@ const deleteAdvertiserAccount = async (req, res) => {
     });
 
     if (bookedActivities.length > 0) {
+      activities.forEach(async (activity) => {
+        await Activity.findByIdAndUpdate(activity._id, { isBookingOpen: true });
+      });
       return res.status(400).json({
-        message: "Advertiser has upcoming activities, can not delete account",
+        message:
+          "You cannot delete your account because you have active bookings, your activities will be closed for new bookings",
       });
     }
 
@@ -87,7 +91,8 @@ const deleteAdvertiser = async (req, res) => {
 
     if (bookedActivities.length > 0) {
       return res.status(400).json({
-        message: "Advertiser has upcoming activities, can not delete account",
+        message:
+          "You cannot delete this advertiser because they have active bookings",
       });
     }
 
@@ -359,19 +364,24 @@ const usernameExists = async (username) => {
 
 const getAdvertiserNotifications = async (req, res) => {
   try {
-    const advertiserId = res.locals.user_id;  // Get advertiser ID from res.locals
+    const advertiserId = res.locals.user_id; // Get advertiser ID from res.locals
 
     if (!advertiserId) {
       return res.status(400).json({ message: "Advertiser ID is required" });
     }
 
-    const advertiser = await Advertiser.findById(advertiserId, "notifications hasUnseenNotifications");
+    const advertiser = await Advertiser.findById(
+      advertiserId,
+      "notifications hasUnseenNotifications"
+    );
 
     if (!advertiser) {
       return res.status(404).json({ message: "Advertiser not found" });
     }
 
-    const sortedNotifications = advertiser.notifications.sort((a, b) => b.date - a.date);
+    const sortedNotifications = advertiser.notifications.sort(
+      (a, b) => b.date - a.date
+    );
 
     return res.status(200).json({
       success: true,
@@ -380,28 +390,30 @@ const getAdvertiserNotifications = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching notifications:", error.message);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
 const markNotificationsAsSeen = async (req, res) => {
   try {
-    const advertiserId = res.locals.user_id;  // Get advertiser ID from res.locals
+    const advertiserId = res.locals.user_id; // Get advertiser ID from res.locals
 
     const result = await Advertiser.updateOne(
       { _id: advertiserId }, // Find advertiser by user ID
       {
         $set: {
-          'notifications.$[elem].seen': true, // Set 'seen' to true for all unseen notifications
+          "notifications.$[elem].seen": true, // Set 'seen' to true for all unseen notifications
         },
       },
       {
-        arrayFilters: [{ 'elem.seen': false }], // Only update notifications where seen is false
+        arrayFilters: [{ "elem.seen": false }], // Only update notifications where seen is false
       }
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ message: 'No unseen notifications found' });
+      return res.status(404).json({ message: "No unseen notifications found" });
     }
 
     // Set 'hasUnseenNotifications' to false after marking all notifications as seen
@@ -414,40 +426,47 @@ const markNotificationsAsSeen = async (req, res) => {
       }
     );
 
-    res.json({ success: true, message: 'All notifications marked as seen' });
+    res.json({ success: true, message: "All notifications marked as seen" });
   } catch (error) {
     console.error("Error marking notifications as seen:", error.message);
-    res.status(500).json({ success: false, message: 'Error marking notifications as seen' });
+    res
+      .status(500)
+      .json({ success: false, message: "Error marking notifications as seen" });
   }
 };
 
 const hasUnseenNotifications = async (req, res) => {
   try {
-    const advertiserId = res.locals.user_id;  // Get advertiser ID from res.locals
+    const advertiserId = res.locals.user_id; // Get advertiser ID from res.locals
 
-    const advertiser = await Advertiser.findById(advertiserId, "hasUnseenNotifications");
+    const advertiser = await Advertiser.findById(
+      advertiserId,
+      "hasUnseenNotifications"
+    );
 
     if (!advertiser) {
-      return res.status(404).json({ message: 'Advertiser not found' });
+      return res.status(404).json({ message: "Advertiser not found" });
     }
 
     res.json({ success: true, hasUnseen: advertiser.hasUnseenNotifications });
   } catch (error) {
     console.error("Error checking unseen notifications:", error.message);
-    res.status(500).json({ success: false, message: 'Error checking unseen notifications' });
+    res
+      .status(500)
+      .json({ success: false, message: "Error checking unseen notifications" });
   }
 };
 
 const markNotificationAsSeenForAdvertiser = async (req, res) => {
   try {
-    const advertiserId = res.locals.user_id;  // Get advertiser ID from res.locals
+    const advertiserId = res.locals.user_id; // Get advertiser ID from res.locals
     const notificationId = req.params.id; // Get the notification ID from the request parameters
 
     const result = await Advertiser.updateOne(
-      { 
-        _id: advertiserId, 
-        "notifications._id": notificationId, 
-        "notifications.seen": false 
+      {
+        _id: advertiserId,
+        "notifications._id": notificationId,
+        "notifications.seen": false,
       },
       {
         $set: {
@@ -457,18 +476,22 @@ const markNotificationAsSeenForAdvertiser = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(400).json({ message: "Notification not found or already marked as seen" });
+      return res
+        .status(400)
+        .json({ message: "Notification not found or already marked as seen" });
     }
 
     const advertiser = await Advertiser.findById(advertiserId);
-    const hasUnseenNotifications = advertiser.notifications.some(notification => !notification.seen);
+    const hasUnseenNotifications = advertiser.notifications.some(
+      (notification) => !notification.seen
+    );
 
     if (!hasUnseenNotifications) {
       await Advertiser.updateOne(
         { _id: advertiserId },
         {
           $set: {
-            hasUnseenNotifications: false, 
+            hasUnseenNotifications: false,
           },
         }
       );
@@ -476,15 +499,21 @@ const markNotificationAsSeenForAdvertiser = async (req, res) => {
 
     res.json({ success: true, message: "Notification marked as seen" });
   } catch (error) {
-    console.error("Error marking notification as seen for advertiser:", error.message);
-    res.status(500).json({ success: false, message: "Error marking notification as seen for advertiser" });
+    console.error(
+      "Error marking notification as seen for advertiser:",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Error marking notification as seen for advertiser",
+    });
   }
 };
 
 // Mark the dropdown as opened (set hasUnseenNotifications to false)
 const markDropdownAsOpened = async (req, res) => {
   try {
-    const advertiserId = res.locals.user_id;  // Get advertiser ID from res.locals
+    const advertiserId = res.locals.user_id; // Get advertiser ID from res.locals
 
     const result = await Advertiser.updateOne(
       { _id: advertiserId },
@@ -492,18 +521,20 @@ const markDropdownAsOpened = async (req, res) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.status(404).json({ success: false, message: "Advertiser not found or already updated" });
+      return res.status(404).json({
+        success: false,
+        message: "Advertiser not found or already updated",
+      });
     }
 
     res.json({ success: true, message: "Dropdown marked as opened" });
   } catch (error) {
     console.error("Error marking dropdown as opened:", error.message);
-    res.status(500).json({ success: false, message: "Error marking dropdown as opened" });
+    res
+      .status(500)
+      .json({ success: false, message: "Error marking dropdown as opened" });
   }
 };
-
-
-
 
 module.exports = {
   deleteAdvertiserAccount,
@@ -520,5 +551,5 @@ module.exports = {
   hasUnseenNotifications,
   markNotificationsAsSeen,
   getAdvertiserNotifications,
-  markDropdownAsOpened
+  markDropdownAsOpened,
 };
