@@ -334,6 +334,9 @@ const emailExists = async (email) => {
     (await TourismGovernor.findOne({ email }))
   ) {
     console.log("email does not exist");
+    return true;
+  } else {
+    console.log("email does not exist");
     return false;
   }
 };
@@ -397,7 +400,9 @@ const forgotPassword = async (req, res) => {
       (await TourismGovernor.findOne({ email }));
 
     if (!user) {
-      return res.status(400).json({ message: "Please enter a valid email address." });
+      return res
+        .status(400)
+        .json({ message: "Please enter a valid email address." });
     }
 
     const otp = crypto.randomInt(100000, 999999).toString(); // Generate 6-digit OTP
@@ -429,16 +434,22 @@ const verifyOtp = async (req, res) => {
       (await TourismGovernor.findOne({ email }));
 
     if (!user) {
-      return res.status(400).json({ message: "Please enter a valid email address." });
+      return res
+        .status(400)
+        .json({ message: "Please enter a valid email address." });
     }
 
     const existingOTP = await OTP.findOne({ email, otp });
     if (!existingOTP) {
-      return res.status(400).json({ message: "Incorrect OTP. Please try again." });
+      return res
+        .status(400)
+        .json({ message: "Incorrect OTP. Please try again." });
     }
 
     if (existingOTP.expiry < Date.now()) {
-      return res.status(400).json({ message: "OTP expired. Please try again." });
+      return res
+        .status(400)
+        .json({ message: "OTP expired. Please try again." });
     }
 
     await OTP.deleteOne({ email, otp });
