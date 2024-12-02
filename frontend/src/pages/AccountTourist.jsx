@@ -95,6 +95,7 @@ import {
   ToastDescription,
   ToastClose,
 } from "@/components/ui/toast";
+import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 
 // Sub-components
 const AccountInfo = ({ user }) => {
@@ -166,8 +167,15 @@ const ExternalFlightBookings = ({ user }) => {
   });
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastType, setToastType] = useState('success');
+  const [toastMessage, setToastMessage] = useState('');
 
+  const showToast = (type, message) => {
+    setToastType(type);
+    setToastMessage(message);
+    setIsToastOpen(true);
+  };
   const fetchFlights = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -194,7 +202,7 @@ const ExternalFlightBookings = ({ user }) => {
       setIsLoading(false);
     } catch (err) {
       setError("Failed to fetch flight bookings or currency information");
-      setIsLoading(false);
+     setIsLoading(false);
     }
   };
 
@@ -208,21 +216,13 @@ const ExternalFlightBookings = ({ user }) => {
       );
 
       if (response.status === 200) {
-        setToast({
-          type: "success",
-          title: "Success",
-          description: "Flight booking canceled successfully!",
-        });
+        showToast("success","Flight booking canceled successfully!");
         setIsDialogOpen(false);
         fetchFlights();
       }
     } catch (err) {
       console.error(err);
-      setToast({
-        type: "error",
-        title: "Error",
-        description: "Failed to cancel the flight booking.",
-      });
+      showToast("error","Failed to cancel the flight booking.");
     }
   };
 
@@ -230,7 +230,6 @@ const ExternalFlightBookings = ({ user }) => {
     fetchFlights();
   }, []);
 
-  if (isLoading) return <div>Loading flight bookings...</div>;
   if (error) return <div>{error}</div>;
 
   const calculateDuration = (departureDate, arrivalDate) => {
@@ -255,7 +254,110 @@ const ExternalFlightBookings = ({ user }) => {
         </p>
 
         <div className="container mx-auto px-4 py-4">
-          {flights.map((flight, index) => (
+        {isLoading ? (
+      <div className="space-y-6">
+        {[...Array(3)].map((_, index) => (
+          <div key={index} className="animate-pulse">
+            <div className="bg-white p-6 mb-4 rounded-lg shadow-lg">
+              <div className="flex justify-between items-center mb-6">
+                <div className="w-32 h-5 bg-gray-200 rounded-md"></div> {/* Flight Number */}
+                <div className="w-20 h-6 bg-gray-200 rounded-md"></div> {/* Seat Type */}
+              </div>
+              <div className="flex">
+                {/* Left section (3/4) */}
+                <div className="w-3/4 pr-6 border-r flex flex-col">
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* Depart text */}
+                        <div className="w-32 h-6 bg-gray-200 rounded-md"></div> {/* Departure Time */}
+                        <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Departure Date */}
+                        <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* From Airport */}
+                      </div>
+
+                      <div className="flex-1 flex flex-col items-center mx-4">
+                        <div className="w-20 h-8 bg-white rounded-full"></div> {/* Plane Icon */}
+                        <div className="w-full border-t-2 border-dashed border-gray-300 mt-4"></div>
+                        <div className="w-20 h-8 bg-white rounded-full mt-4"></div> {/* Plane Icon */}
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* Arrive text */}
+                        <div className="w-32 h-6 bg-gray-200 rounded-md"></div> {/* Arrival Time */}
+                        <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Arrival Date */}
+                        <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* To Airport */}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Return Flight if exists */}
+                  {false && (
+                    <div className="pt-6 border-t">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* Depart text */}
+                          <div className="w-32 h-6 bg-gray-200 rounded-md"></div> {/* Departure Time */}
+                          <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Departure Date */}
+                          <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* From Airport */}
+                        </div>
+
+                        <div className="flex-1 flex flex-col items-center mx-4">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full"></div> {/* Plane Icon */}
+                          <div className="w-full border-t-2 border-dashed border-gray-300 mt-4"></div>
+                          <div className="w-10 h-10 bg-gray-200 rounded-full mt-4"></div> {/* Plane Icon */}
+                        </div>
+
+                        <div className="space-y-1">
+                          <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* Arrive text */}
+                          <div className="w-32 h-6 bg-gray-200 rounded-md"></div> {/* Arrival Time */}
+                          <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Arrival Date */}
+                          <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* To Airport */}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {/* Important Notices */}
+                  <div className="mt-6 space-y-2">
+                    <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div> {/* Icon */}
+                        <div className="w-48 h-3 bg-gray-200 rounded-md"></div> {/* Notice Text */}
+                      </div>
+
+                      <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
+
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div> {/* Icon */}
+                        <div className="w-48 h-3 bg-gray-200 rounded-md"></div> {/* Notice Text */}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right section (1/4) */}
+                <div className="w-1/4 pl-6 space-y-6">
+                  <div>
+                    <div className="w-32 h-3 bg-gray-200 rounded-md"></div> {/* Name */}
+                    <div className="w-24 h-3 bg-gray-200 rounded-md mt-2"></div> {/* Email */}
+                  </div>
+                  <div>
+                    <div className="w-32 h-3 bg-gray-200 rounded-md"></div> {/* Tickets Booked */}
+                    <div className="w-24 h-3 bg-gray-200 rounded-md mt-2"></div> {/* Price */}
+                  </div>
+                  <div className="w-full h-10 bg-gray-200 rounded-md"></div> {/* Cancel Button */}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : flights.length === 0 ? (
+      <div className="text-center space-y-4 py-12">
+        <h2 className="text-2xl font-semibold text-gray-600">No flight bookings yet</h2>
+        <p className="text-gray-500">Start booking your flights to see the world!</p>
+        <Button className="mt-4 bg-[#388A94] text-white">Start Booking</Button>
+      </div>
+    ) : (
+          flights.map((flight, index) => (
             <Card key={index} className="p-6 mb-4">
               {/* Header */}
               <div className="flex justify-between items-cente mb-6">
@@ -465,39 +567,42 @@ const ExternalFlightBookings = ({ user }) => {
                   </Button>
                 </div>
               </div>
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
+        
+          
 
           {/* Confirmation Dialog */}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Cancel Flight Booking</DialogTitle>
-              </DialogHeader>
-              <p>
-                Are you sure you want to cancel this booking? This action cannot
-                be undone.
-              </p>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button variant="destructive" onClick={handleCancelFlight}>
-                  Confirm
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <DeleteConfirmation
+            isOpen={isDialogOpen}
+            onClose={() => setIsDialogOpen(false)}
+            itemType="flight booking"
+            onConfirm={handleCancelFlight}
+          />
 
           {/* Toast Notification */}
-          {toast && (
-            <Toast>
-              <ToastTitle>{toast.title}</ToastTitle>
-              <ToastDescription>{toast.description}</ToastDescription>
-              <ToastClose onClick={() => setToast(null)} />
+          {isToastOpen && (
+            <Toast
+              onOpenChange={setIsToastOpen}
+              open={isToastOpen}
+              duration={5000}
+              className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+            >
+              <div className="flex items-center">
+                {toastType === 'success' ? (
+                  <CheckCircle className="text-green-500 mr-2" />
+                ) : (
+                  <XCircle className="text-red-500 mr-2" />
+                )}
+                <div>
+                  <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                  <ToastDescription>
+                    {toastMessage}
+                  </ToastDescription>
+                </div>
+              </div>
+              <ToastClose />
             </Toast>
           )}
           <ToastViewport />
@@ -517,7 +622,16 @@ const ExternalHotelBookings = ({ user }) => {
   });
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastType, setToastType] = useState('success');
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = (type, message) => {
+    setToastType(type);
+    setToastMessage(message);
+    setIsToastOpen(true);
+  };
+
 
   const fetchHotels = async () => {
     try {
@@ -559,21 +673,13 @@ const ExternalHotelBookings = ({ user }) => {
       );
 
       if (response.status === 200) {
-        setToast({
-          type: "success",
-          title: "Success",
-          description: "Hotel booking canceled successfully!",
-        });
+        showToast("success","Hotel booking canceled successfully!");
         setIsDialogOpen(false);
         fetchHotels();
       }
     } catch (err) {
       console.error(err);
-      setToast({
-        type: "error",
-        title: "Error",
-        description: "Failed to cancel the hotel booking.",
-      });
+      showToast("error","Failed to cancel the hotel booking.");
     }
   };
 
@@ -625,33 +731,36 @@ const ExternalHotelBookings = ({ user }) => {
         ))}
 
         {/* Confirmation Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Cancel Hotel Booking</DialogTitle>
-            </DialogHeader>
-            <p>
-              Are you sure you want to cancel this booking? This action cannot
-              be undone.
-            </p>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleCancelHotel}>
-                Confirm
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <DeleteConfirmation
+          isOpen={isDialogOpen}
+          onClose={() => setIsDialogOpen(false)}
+          itemType="hotel booking"
+          onConfirm={handleCancelHotel}
+        />
 
         {/* Toast Notification */}
-        {toast && (
-          <Toast>
-            <ToastTitle>{toast.title}</ToastTitle>
-            <ToastDescription>{toast.description}</ToastDescription>
-            <ToastClose onClick={() => setToast(null)} />
-          </Toast>
+        {isToastOpen && (
+          <Toast
+          onOpenChange={setIsToastOpen}
+          open={isToastOpen}
+          duration={5000}
+          className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+        >
+          <div className="flex items-center">
+            {toastType === 'success' ? (
+              <CheckCircle className="text-green-500 mr-2" />
+            ) : (
+              <XCircle className="text-red-500 mr-2" />
+            )}
+            <div>
+              <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+              <ToastDescription>
+                {toastMessage}
+              </ToastDescription>
+            </div>
+          </div>
+          <ToastClose />
+        </Toast>
         )}
         <ToastViewport />
       </div>
