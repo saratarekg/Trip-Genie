@@ -24,6 +24,7 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog"
+import TransportationCard from "@/components/transportationCardAttended";
 
 const fetchData = async (userRole, dataType) => {
   try {
@@ -43,6 +44,62 @@ const fetchData = async (userRole, dataType) => {
     throw error
   }
 }
+
+const TransportationCardSkeleton = () => {
+  return (
+    <div>
+    <h1 className="text-3xl font-bold mb-2">Upcoming Transportation</h1>
+    <p className="text-sm text-gray-500 mb-2">Transportation / Upcoming</p>
+
+    <div className="container mx-auto px-4 py-8">
+     
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {Array(4).fill().map((_, index) => (
+        <div
+          key={index}
+          className="bg-gray-200 rounded-lg shadow-sm border p-4 space-y-4 animate-pulse"
+        >
+          {/* Departure Section */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col items-start w-1/5">
+              <div className="h-4 w-16 bg-gray-300 rounded"></div>
+              <div className="h-6 w-24 bg-gray-300 rounded mt-2"></div>
+              <div className="flex items-center mt-2">
+                <div className="h-4 w-12 bg-gray-300 rounded"></div>
+              </div>
+            </div>
+
+            {/* Center Section (Date and Duration) */}
+            <div className="flex flex-col items-center justify-center w-3/5 relative">
+              <div className="absolute h-4 w-24 bg-gray-300 rounded top-1"></div>
+              <div className="absolute h-6 w-28 bg-gray-300 rounded -top-6"></div>
+            </div>
+
+            {/* Arrival Section */}
+            <div className="flex flex-col items-end w-1/5">
+              <div className="h-4 w-16 bg-gray-300 rounded"></div>
+              <div className="h-6 w-24 bg-gray-300 rounded mt-2"></div>
+              <div className="h-4 w-12 bg-gray-300 rounded mt-2"></div>
+            </div>
+          </div>
+
+          {/* Vehicle Type and Price Section */}
+          <div className="mt-4 flex justify-between items-center">
+            <div className="h-4 w-32 bg-gray-300 rounded text-center"></div>
+            <div className="flex items-center space-x-4">
+              <div className="h-6 w-16 bg-gray-300 rounded"></div>
+            </div>
+          </div>
+
+          {/* Skeleton for Dialog (Popup) Content */}
+         
+        </div>
+      ))}
+    </div>
+    </div>
+    </div>
+  );
+};
 
 const BookingDetails = ({ booking, isOpen, onClose, formatPrice }) => {
   if (!booking) return null;
@@ -114,6 +171,7 @@ export default function TouristTransportationHistory() {
   const { toast } = useToast()
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRate, setExchangeRate] = useState({});
+  const [tourist,setTourist] = useState(null);
 
   const fetchUserInfo = async () => {
     try {
@@ -122,6 +180,7 @@ export default function TouristTransportationHistory() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const currencyId = response.data.preferredCurrency;
+      setTourist(response.data);
 
       const response2 = await axios.get(
         `http://localhost:4000/tourist/getCurrency/${currencyId}`,
@@ -162,22 +221,30 @@ const fetchExchangeRate = async (booking) => {
       // Handle possible errors
       console.error("Error in fetching exchange rate:", data.message);
     }
+    
   } catch (error) {
     console.error("Error fetching exchange rate:", error);
+  }finally{
+    setIsLoading(false);
+
   }
 };
 
 
-useEffect(() => {
-  if (selectedBooking) {
-      if (
-        userPreferredCurrency &&
-        userPreferredCurrency !== "67140446ee157ee4f239d523"
-      ) {
-        fetchExchangeRate(selectedBooking);
-      }
-  }
-}, [userPreferredCurrency, selectedBooking]);
+  useEffect(() => {
+    if (
+      userPreferredCurrency &&
+      userPreferredCurrency !== "67140446ee157ee4f239d523"
+    ) {
+      fetchExchangeRate(selectedBooking);
+    }
+    else {
+
+      setIsLoading(false)
+
+    }
+
+  }, [userPreferredCurrency, selectedBooking]);
 
 const formatPrice = (price, type) => {
   if (selectedBooking && userPreferredCurrency ) {
@@ -216,7 +283,6 @@ const formatPrice = (price, type) => {
       } catch (err) {
         setError("An error occurred while fetching data")
       } finally {
-        setIsLoading(false);
       }
     }
 
@@ -224,7 +290,7 @@ const formatPrice = (price, type) => {
     fetchUserInfo();
   }, [])
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <div><TransportationCardSkeleton /></div>
   if (error) return <div>{error}</div>
 
   const noBookingsMessage = (
@@ -241,51 +307,39 @@ const formatPrice = (price, type) => {
   return (
     <div>
       <Toaster />
-      <h1 className="text-3xl font-bold mb-2">My Transportation History</h1>
+      <h1 className="text-3xl font-bold mb-2">Transportation History</h1>
     <p className="text-sm text-gray-500 mb-2">Transportation / Attended</p>
     
-      <Card>
-        <CardHeader>
-          <CardDescription>Your completed transportation bookings</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[400px]">
-            {transportations.length > 0
-              ? transportations.map((booking) => (
-                  <div key={booking._id} className="mb-4">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-left whitespace-normal"
-                      onClick={() => handleTransportationClick(booking)}
-                    >
-                      <div className="flex items-start">
-                        <MapPin className="mr-2 h-4 w-4" />
-                        <div>
-                          <span>{`${booking.transportationID.from} to ${booking.transportationID.to}`}</span>
-                          <div className="text-sm text-gray-500 mt-1">
-                            <span>
-                              {`${new Date(booking.transportationID.timeDeparture).toLocaleDateString()} - ${booking.transportationID.vehicleType}`}
-                            </span>
-                            <span className="block">
-                              {`${booking.seatsBooked} Ticket(s) - ${booking.transportationID.ticketCost} per ticket`}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Button>
-                    <Separator className="my-2" />
-                  </div>
-                ))
-              : noBookingsMessage}
-          </ScrollArea>
-        </CardContent>
-      </Card>
+    <div className="container mx-auto px-4 py-8">
+    
+    {transportations.length > 0 ? (
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {transportations.map((booking) => (
+      <div key={booking.id} >
+        <TransportationCard
+          booking={booking}
+          userRole={userRole}
+          displayPrice={formatPrice}
+          tourist={tourist}
+          setSelectedBooking={setSelectedBooking}
+          userPreferredCurrency={userPreferredCurrency}
+          exchangeRate={exchangeRate}
+        />
+      </div>
+    ))}
+  </div>
+) : (
+  noBookingsMessage
+)}
+
+       
       <BookingDetails 
         booking={selectedBooking} 
         isOpen={isDialogOpen}
         formatPrice={formatPrice}
         onClose={() => setIsDialogOpen(false)} 
       />
+    </div>
     </div>
   )
 }

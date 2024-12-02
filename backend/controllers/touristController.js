@@ -650,7 +650,7 @@ const getUpcomingBookings = async (req, res) => {
       .populate({
         path: "transportationID",
         match: { timeDeparture: { $gt: new Date() } }, // Only upcoming dates
-        select: "from to vehicleType ticketCost timeDeparture remainingSeats", // Select specific fields if needed
+        select: "from to vehicleType ticketCost timeDeparture remainingSeats estimatedDuration", // Select specific fields if needed
       })
       .exec();
 
@@ -666,6 +666,8 @@ const getUpcomingBookings = async (req, res) => {
   }
 };
 
+
+
 // Method to get all previous bookings for a tourist
 const getPreviousBookings = async (req, res) => {
   const touristID = res.locals.user_id;
@@ -676,7 +678,7 @@ const getPreviousBookings = async (req, res) => {
       .populate({
         path: "transportationID",
         match: { timeDeparture: { $lt: new Date() } }, // Only past dates
-        select: "from to vehicleType ticketCost timeDeparture remainingSeats", // Select specific fields if needed
+        select: "from to vehicleType ticketCost timeDeparture remainingSeats estimatedDuration", // Select specific fields if needed
       })
       .exec();
 
@@ -697,28 +699,27 @@ const deleteBooking = async (req, res) => {
   const touristID = res.locals.user_id; // Tourist ID from authenticated user context
 
   try {
+    console.log(`Attempting to delete booking with ID: ${id} for tourist: ${touristID}`);
+
     // Step 1: Find the booking with the associated transportation details
-    const booking = await TouristTransportation.findById(id).populate(
-      "transportationID"
-    );
+    const booking = await TouristTransportation.findById(id).populate("transportationID");
 
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+      console.log("Booking not found");
+      return res.status(400).json({ message: "Booking not found" });
     }
 
     // Ensure the booking belongs to the authenticated tourist
     if (booking.touristID.toString() !== touristID) {
-      return res
-        .status(403)
-        .json({ message: "Unauthorized: Cannot delete others' bookings" });
+      console.log("Unauthorized: Cannot delete others' bookings");
+      return res.status(403).json({ message: "Unauthorized: Cannot delete others' bookings" });
     }
 
     const transportation = booking.transportationID;
 
     if (!transportation) {
-      return res
-        .status(404)
-        .json({ message: "Associated transportation not found" });
+      console.log("Associated transportation not found");
+      return res.status(404).json({ message: "Associated transportation not found" });
     }
 
     // Step 2: Calculate the refund amount and update the tourist's wallet
@@ -726,6 +727,7 @@ const deleteBooking = async (req, res) => {
 
     const tourist = await Tourist.findById(touristID);
     if (!tourist) {
+      console.log("Tourist not found");
       return res.status(404).json({ message: "Tourist not found" });
     }
 
@@ -756,7 +758,13 @@ const deleteBooking = async (req, res) => {
     await transportation.save();
 
     // Step 4: Delete the booking
-    await TouristTransportation.findByIdAndDelete(id);
+    const deleteResult = await TouristTransportation.findByIdAndDelete(id);
+    if (!deleteResult) {
+      console.log("Failed to delete booking");
+      return res.status(500).json({ message: "Failed to delete booking" });
+    }
+
+    console.log(`Booking with ID: ${id} successfully deleted`);
 
     // Step 5: Respond with success
     res.status(200).json({
@@ -766,9 +774,7 @@ const deleteBooking = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting booking:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to delete booking", error: error.message });
+    res.status(500).json({ message: "Failed to delete booking", error: error.message });
   }
 };
 

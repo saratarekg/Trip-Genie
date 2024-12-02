@@ -22,7 +22,7 @@ export default function DeleteConfirmation({
         {/* <div className="border-t-4 border-red-500"></div>  */}
         <div className="p-6 space-y-6">
           <div className="flex items-center space-x-4">
-            <div className="w-32 h-16 bg-red-100 rounded-full flex items-center justify-center">
+            <div className="w-32 h-16 p-2 bg-red-100 rounded-full flex items-center justify-center">
               <Trash2 className="w-8 h-8 text-red-500" />
             </div>
             <div className="flex flex-col">

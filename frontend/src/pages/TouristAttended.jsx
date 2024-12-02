@@ -1,21 +1,181 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { Calendar, ChevronRight } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import ActivityDetail from "./SingleActivity";
+import Cookies from "js-cookie";
+import axios from "axios";
+import { Star, Clock, MapPin, Calendar, Eye, Info } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import Loader from "@/components/Loader";
+import defaultImage from "@/assets/images/default-image.jpg";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+
+const ActivityCard = ({ booking, onSelect, userInfo, exchangeRates }) => {
+  const activity = booking.activity;
+
+  const getFormattedPrice = (price) => {
+    if (!userInfo || !exchangeRates) return `$${price.toFixed(2)}`;
+
+    const baseRate = exchangeRates[activity.currency] || 1;
+    const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
+    const exchangedPrice = (price / baseRate) * targetRate;
+
+    return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+  };
+
+  return (
+    <Card
+      className="group relative flex items-center gap-4 p-2 transition-all hover:shadow-lg cursor-pointer"
+      onClick={() => onSelect(booking)}
+    >
+      <div className="relative h-36 w-36 shrink-0 rounded-sm">
+        <img
+          src={activity.pictures?.[0]?.url || defaultImage}
+          alt={activity.name}
+          className="object-cover w-full h-full rounded-sm"
+        />
+      </div>
+
+      <div className="flex flex-1 flex-col gap-1">
+        <div className="flex items-start justify-between">
+          <div>
+            <h3 className="font-semibold text-[#1A3B47]">{activity.name}</h3>
+            <div className="flex items-start text-sm text-[#5D9297] font-semibold pt-1">
+              <div className="flex-shrink-0 h-4 w-4 flex items-center justify-center mr-1">
+                <MapPin className="h-4 w-4" />
+              </div>
+              <span className="leading-tight">{activity.location?.address || "Location not available"}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-base">
+            <Star className="h-6 w-6 fill-[#F88C33] text-[#F88C33]" />
+            <span className="text-[#F88C33]">{activity.rating?.toFixed(1) || "0.0"}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 text-sm text-[#5D9297]">
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4 text-[#5D9297]" />
+            <span>{activity.duration === 1 ? "1 hour" : `${activity.duration} hours`}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar className="h-4 w-4 text-[#5D9297]" />
+            <span>{new Date(activity.timing).toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        <div className="mt-2 flex items-center justify-between">
+          <div className="text-xl font-bold text-[#1A3B47]">
+            {getFormattedPrice(booking.paymentAmount)}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="default"
+              className="bg-[#388A94] hover:bg-[#2e6b77]"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(booking);
+              }}
+            >
+              View Details
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+};
+const SkeletonCard = () => {
+  return (
+    <Card className="group relative flex items-center gap-4 p-2 transition-all hover:shadow-lg cursor-pointer">
+  <div className="relative h-36 w-36 shrink-0 rounded-sm bg-gray-300 animate-pulse" />
+  <div className="flex flex-1 flex-col gap-2"> {/* Reduced gap between elements */}
+    <div className="flex items-start justify-between">
+      <div className="w-3/4 h-6 bg-gray-300 rounded-sm animate-pulse mr-2" /> {/* Increased width for title */}
+      <div className="w-1/3 h-6 bg-gray-300 rounded-sm animate-pulse mr-2" /> {/* Increased width for other small section */}
+    </div>
+
+    <div className="flex items-center gap-2 text-sm text-[#5D9297]"> 
+  {/* Increased gap between elements */}
+  <div className="flex items-center gap-2">
+    <div className="h-4 w-4 p-2 bg-gray-300 rounded-full animate-pulse" />
+    <div className="w-4/5 pl-11 pr-11 pt-1 pb-1  h-5 bg-gray-300 rounded-sm animate-pulse" /> {/* Increased width */}
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="h-4 w-4 p-2 bg-gray-300 rounded-full animate-pulse" />
+    <div className="w-4/5 h-5 pl-11 pr-11 pt-1 pb-1 bg-gray-300 rounded-sm animate-pulse " /> {/* Increased width */}
+  </div>
+</div>
+
+
+
+    <div className="mt-2 flex items-center justify-between"> {/* Adjusted margin-top */}
+      <div className="w-3/4 h-6 bg-gray-300 rounded-sm mr-2 animate-pulse" /> {/* Increased width */}
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="default"
+          className="bg-[#388A94] text-[#388A94] hover:bg-[#2e6b77]"
+          disabled
+        >
+          View Details
+        </Button>
+      </div>
+    </div>
+  </div>
+</Card>
+
+  );
+};
+const SkeletonDialog = () => {
+  return (
+    <Dialog>
+    <DialogContent className="sm:max-w-[400px] bg-white rounded-lg shadow-lg p-4">
+      <DialogHeader>
+        <DialogTitle className="text-lg font-semibold text-[#1A3B47]">
+          <div className="w-2/3 h-6 bg-gray-300 rounded-sm animate-pulse" />
+          <div className="w-1/2 h-8 bg-gray-300 rounded-sm animate-pulse mt-2" />
+        </DialogTitle>
+      </DialogHeader>
+
+      <div className="border-t border-gray-200 pt-4">
+        {/* Name and Booking ID */}
+        <div className="flex justify-between items-center mb-3">
+          <div className="w-2/3 h-4 bg-gray-300 rounded-sm animate-pulse" />
+          <div className="w-1/4 h-4 bg-gray-300 rounded-sm animate-pulse" />
+        </div>
+
+        {/* Date & Time and Paid Via */}
+        <div className="flex justify-between items-center mb-3">
+          <div className="w-2/3 h-4 bg-gray-300 rounded-sm animate-pulse" />
+          <div className="w-1/3 h-4 bg-gray-300 rounded-sm animate-pulse" />
+        </div>
+
+        {/* Tickets and Total Price */}
+        <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
+          <div className="w-1/4 h-6 bg-gray-300 rounded-sm animate-pulse" />
+          <div className="w-1/4 h-6 bg-gray-300 rounded-sm animate-pulse" />
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 pt-4">
+        {/* Thank You Message */}
+        <div className="w-1/2 h-4 bg-gray-300 rounded-sm animate-pulse mb-4" />
+        {/* Reminder and Info */}
+        <div className="w-2/3 h-4 bg-gray-300 rounded-sm animate-pulse" />
+      </div>
+    </DialogContent>
+    </Dialog>
+  );
+};
 
 const fetchData = async (userRole, dataType) => {
   try {
@@ -38,45 +198,56 @@ const fetchData = async (userRole, dataType) => {
 export default function TouristAttendedActivities() {
   const [userRole, setUserRole] = useState(Cookies.get("role") || "guest");
   const [activities, setActivities] = useState([]);
-  const [itineraries, setItineraries] = useState([]);
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [selectedItinerary, setSelectedItinerary] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [exchangeRates, setExchangeRates] = useState({});
+  const [tourist,setTourist] = useState(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleActivityClick = (activity) => {
-    if (activity.isDeleted) {
-      return toast({
-        title: "Activity Unavailable",
-        description: "This activity no longer exists",
-        duration: 3000,
-      });
+  const fetchExchangeRates = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/rates");
+      setExchangeRates(response.data.rates);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
     }
-    navigate(`/activity/${activity._id}`);
-  };
-  // const handleItineraryClick = (itinerary) => {
-  //   if (itinerary.isDeleted) {
-  //     return toast({
-  //       title: "Itinerary Unavailable",
-  //       description: "This itinerary no longer exists",
-  //       duration: 3000,
-  //     });
-  //   }
-  //   navigate(`/itinerary/${itinerary._id}`);
-  // };
+  }, []);
 
-  const handleItineraryClick = (itinerary) => {
-    if (!itinerary) {
-      return toast({
-        title: "Itinerary Unavailable",
-        description: "This itinerary no longer exists",
-        duration: 3000,
-      });
+  const fetchUserInfo = useCallback(async () => {
+    const role = Cookies.get("role") || "guest";
+    const token = Cookies.get("jwt");
+
+    if (role === "tourist") {
+      try {
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const currencyId = response.data.preferredCurrency;
+        setTourist(response.data);
+
+        const currencyResponse = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        setUserInfo({
+          role,
+          preferredCurrency: currencyResponse.data,
+        });
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        setUserInfo({ role });
+      }
+    } else {
+      setUserInfo({ role });
     }
-    navigate(`/itinerary/${itinerary._id}`);
-  };
+  }, []);
 
   useEffect(() => {
     const role = Cookies.get("role") || "guest";
@@ -86,13 +257,12 @@ export default function TouristAttendedActivities() {
       setIsLoading(true);
       setError(null);
       try {
-        const [activitiesData, itinerariesData] = await Promise.all([
+        const [activitiesData] = await Promise.all([
           fetchData(role, "touristActivityAttendedBookings"),
-          fetchData(role, "touristItineraryAttendedBookings"),
         ]);
         setActivities(activitiesData);
-        console.log(activitiesData);
-        setItineraries(itinerariesData);
+        await fetchUserInfo();
+        await fetchExchangeRates();
       } catch (err) {
         setError("An error occurred while fetching data");
       } finally {
@@ -101,86 +271,159 @@ export default function TouristAttendedActivities() {
     };
 
     fetchAllData();
-  }, []);
+  }, [fetchUserInfo, fetchExchangeRates]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  const handleActivitySelect = (booking) => {
+    setSelectedBooking(booking);
+    setIsViewDialogOpen(true);
+  };
+
+  const getFormattedPrice = (price) => {
+    if (!userInfo || !exchangeRates) return `$${price.toFixed(2)}`;
+
+    const baseRate = exchangeRates[selectedBooking?.activity.currency] || 1;
+    const targetRate = exchangeRates[userInfo.preferredCurrency.code] || 1;
+    const exchangedPrice = (price / baseRate) * targetRate;
+
+    return `${userInfo.preferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="bg-gray-100 min-h-screen">
+        <h1 className="text-3xl font-bold mb-2">Attended Activities</h1>
+        <p className="text-sm text-gray-500 mb-2">Activities / Attended</p>
+  
+        <Toaster />
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Render Skeletons for Cards */}
+            {[...Array(4)].map((_, idx) => (
+              <SkeletonCard key={idx} />
+            ))}
+          </div>
+  
+          {/* Skeleton for Dialog */}
+          <SkeletonDialog />
+        </div>
+      </div>
+    );
+  };
+
+if (error) return <div>{error}</div>;
 
   const noBookingsMessage = (
     <div className="text-center py-8">
       <p className="text-xl font-semibold text-gray-600">
-        No bookings for you yet
+        No attended activities yet
       </p>
       <p className="text-gray-500 mt-2">
-        Start exploring and book your first activity!
+        Your attended activities will appear here once you've completed them.
       </p>
     </div>
   );
 
   return (
-    <div>
+    <div className="bg-gray-100 min-h-screen">
+              <h1 className="text-3xl font-bold mb-2">Attended Activities</h1>
+        <p className="text-sm text-gray-500 mb-2">Activities / Attended</p>
+        
       <Toaster />
-      <h1 className="text-3xl font-bold mb-2">My Attended Activities</h1>
-    <p className="text-sm text-gray-500 mb-2">Activities / Attended</p>
+      <div className="container mx-auto px-4 py-8">
+
+        {activities.length === 0 ? (
+          noBookingsMessage
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {activities.map((booking) => (
+              <ActivityCard
+                key={booking._id}
+                booking={booking}
+                onSelect={handleActivitySelect}
+                userInfo={userInfo}
+                exchangeRates={exchangeRates}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+  <DialogContent className="sm:max-w-[400px] bg-white rounded-lg shadow-lg p-4">
+    <DialogHeader>
+      <DialogTitle className="text-lg font-semibold text-[#1A3B47]">
+        <div>
+          Booking Receipt for
+        </div>
+        <div className="text-[#388A94] text-xl font-bold">
+          {selectedBooking?.activity.name}
+        </div>
+      </DialogTitle>
+    </DialogHeader>
+
+    <div className="border-t border-gray-200 pt-4">
+      {/* Name and Booking ID */}
+      <div className="flex justify-between items-center mb-3">
+        <div>
+          <p className="text-sm font-medium text-gray-400">Name</p>
+          <p className="text-[#1A3B47] font-semibold">{tourist?.fname || "John"} {tourist?.lname || "Doe"}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-medium text-gray-400">Booking ID</p>
+          <p className="text-[#1A3B47] font-semibold">
+  {selectedBooking?._id ? selectedBooking._id.substring(0, 10) : "AB123456"}
+</p>
+        </div>
+      </div>
+
+      {/* Date & Time and Paid Via */}
+      <div className="flex justify-between items-center mb-3">
+        <div>
+          <p className="text-sm font-medium text-gray-400">Date & Time</p>
+          <p className="text-[#1A3B47] font-semibold">
+            {new Date(selectedBooking?.activity.timing).toLocaleDateString()} at {new Date(selectedBooking?.activity.timing).toLocaleTimeString()}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-medium text-gray-400">Paid Via</p>
+          <p className="text-[#1A3B47] font-semibold">{selectedBooking?.paymentType || "Credit Card"}</p>
+        </div>
+      </div>
     
-      <div >
-
-
-        <div >
-          <Card>
-            <CardHeader>
-              <CardDescription>
-                Click on an activity to view details
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[400px]">
-                {activities.length > 0
-                  ? activities.map((booking) => (
-                      <div key={booking._id} className="mb-4">
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-left whitespace-normal"
-                          onClick={() => handleActivityClick(booking.activity)}
-                        >
-                          <div className="flex items-start">
-                            <ChevronRight className="mr-2 h-4 w-4" />
-                            <div>
-                              <span>{booking.activity.name}</span>
-                              <div className="text-sm text-gray-500 mt-1">
-                                <span>
-                                  {`${new Date(
-                                    booking.activity.timing.split("T")[0]
-                                  ).toLocaleDateString()} - ${
-                                    booking.numberOfTickets
-                                  } Ticket(s) Booked`}
-                                </span>
-
-                                <span className="block"></span>
-                              </div>
-                            </div>
-                          </div>
-                        </Button>
-                        <Separator className="my-2" />
-                      </div>
-                    ))
-                  : noBookingsMessage}
-              </ScrollArea>
-            </CardContent>
-          </Card>
-
-          {selectedActivity && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle>Activity Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ActivityDetail id1={selectedActivity._id} />
-              </CardContent>
-            </Card>
-          )}
+      {/* Tickets and Total Price */}
+      <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
+        <div>
+          <p className="text-sm font-medium text-gray-600">Tickets</p>
+          <p className="text-2xl font-bold text-[#1A3B47]">
+            {selectedBooking?.numberOfTickets || "1"}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-medium text-gray-600">Total Price</p>
+          <p className="text-2xl font-bold text-[#388A94]">
+            {getFormattedPrice(selectedBooking?.paymentAmount || 0)}
+          </p>
         </div>
       </div>
     </div>
+
+    <div className="border-t border-gray-200 pt-4">
+      {/* Thank You Message */}
+      <p className="text-center text-sm text-[#1A3B47] font-medium">
+      Thank you for joining the activity!
+      </p>
+      
+      {/* Reminder and Info */}
+      <div className="flex items-center justify-center text-xs text-gray-500 mt-2">
+        <span className="text-center">
+        We'd love to hear your thoughts! Please leave a review to help us improve.        </span>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
+
+
+    </div>
   );
 }
+

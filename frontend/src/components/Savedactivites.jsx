@@ -2,15 +2,23 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { Star, Clock, MapPin, Calendar, Bookmark } from "lucide-react";
+import { Star, Clock, MapPin, Calendar, Bookmark, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Loader from "@/components/Loader";
 import defaultImage from "@/assets/images/default-image.jpg";
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from "@/components/ui/toast";
 
 
 
-const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchangeRates }) => {
+const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchangeRates, showToast }) => {
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
   const handleUnsave = async (e) => {
@@ -26,7 +34,7 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
         onActivityUnsaved(activity._id);
       }
     } catch (error) {
-      console.error("Error unsaving activity:", error);
+      showToast('error', "An error occurred while unsaving your activity. Please try again.");
     }
   };
 
@@ -74,13 +82,15 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
 
       <div className="flex flex-1 flex-col gap-1">
         <div className="flex items-start justify-between">
-          <div>
-            <h3 className="font-semibold text-[#1A3B47]">{activity.name}</h3>
-            <div className="flex items-center text-sm text-[#5D9297] font-semibold pt-1">
-              <MapPin className="h-4 w-4 mr-1" />
-              <span>{activity.location?.address || "Location not available"}</span>
+        <div>
+          <h3 className="font-semibold text-[#1A3B47]">{activity.name}</h3>
+          <div className="flex items-start text-sm text-[#5D9297] font-semibold pt-1">
+            <div className="flex-shrink-0 h-4 w-4 flex items-center justify-center mr-1">
+              <MapPin className="h-4 w-4" />
             </div>
+            <span className="leading-tight">{activity.location?.address || "Location not available"}</span>
           </div>
+        </div>
           <div className="flex items-center gap-1 text-base">
             <Star className="h-6 w-6 fill-[#F88C33] text-[#F88C33]" />
             <span className="text-[#F88C33]">{activity.rating?.toFixed(1) || "0.0"}</span>
@@ -99,7 +109,7 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
         </div>
 
         <div className="mt-2 flex items-center justify-between">
-          <div className="text-lg font-bold text-[#1A3B47]">
+          <div className="text-xl font-bold text-[#1A3B47]">
             {getFormattedPrice(activity.price)}
           </div>
           <div className="flex gap-2">
@@ -124,6 +134,54 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
   );
 };
 
+const SkeletonCard = () => {
+  return (
+    <Card className="group relative flex items-center gap-4 p-2 transition-all hover:shadow-lg cursor-pointer">
+      <div className="relative h-36 w-36 shrink-0 rounded-sm bg-gray-300 animate-pulse" />
+      <div className="flex flex-1 flex-col gap-2"> {/* Reduced gap between elements */}
+        <div className="flex items-start justify-between">
+          <div className="w-3/4 h-6 bg-gray-300 rounded-sm animate-pulse mr-2" /> {/* Increased width for title */}
+          <div className="w-1/3 h-6 bg-gray-300 rounded-sm animate-pulse mr-2" /> {/* Increased width for other small section */}
+        </div>
+
+        <div className="flex items-center gap-2 text-sm text-[#5D9297]">
+          {/* Increased gap between elements */}
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 p-2 bg-gray-300 rounded-full animate-pulse" />
+            <div className="w-4/5 pl-11 pr-11 pt-1 pb-1 h-5 bg-gray-300 rounded-sm animate-pulse" /> {/* Increased width */}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 p-2 bg-gray-300 rounded-full animate-pulse" />
+            <div className="w-4/5 h-5 pl-11 pr-11 pt-1 pb-1 bg-gray-300 rounded-sm animate-pulse" /> {/* Increased width */}
+          </div>
+        </div>
+
+        <div className="mt-2 flex items-center justify-between"> {/* Adjusted margin-top */}
+          <div className="w-3/4 h-6 bg-gray-300 rounded-sm mr-2 animate-pulse" /> {/* Increased width */}
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="default"
+              className="bg-[#388A94] text-[#388A94] hover:bg-[#2e6b77]"
+              disabled
+            >
+              View Details
+            </Button>
+            <Button
+              size="sm"
+              variant="default"
+              className="bg-gray-300 text-gray-300 hover:bg-gray-300"
+              disabled
+            >
+              Add to Cart
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+};
+
 
 export default function SavedActivities() {
   const [savedActivities, setSavedActivities] = useState([]);
@@ -131,7 +189,16 @@ export default function SavedActivities() {
   const [alertMessage, setAlertMessage] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastType, setToastType] = useState('success');
+  const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
+
+  const showToast = (type, message) => {
+    setToastType(type);
+    setToastMessage(message);
+    setIsToastOpen(true);
+  };
 
   const fetchExchangeRates = useCallback(async () => {
     try {
@@ -228,21 +295,28 @@ export default function SavedActivities() {
 
   const handleActivityUnsaved = (activityId) => {
     setSavedActivities((prev) => prev.filter((activity) => activity._id !== activityId));
-    setAlertMessage({
-      type: "success",
-      message: "Activity removed from saved list successfully!",
-    });
+    showToast(
+       "success",
+      "Activity removed from saved list successfully!",
+    );
     setTimeout(() => setAlertMessage(null), 3000);
   };
 
   return (
+    <ToastProvider>
     <div className="bg-gray-100 min-h-screen">
        <h1 className="text-3xl font-bold mb-2">Saved Activities</h1>
     <p className="text-sm text-gray-500 mb-2">Activities / Saved</p>
     
       <div className="container mx-auto px-4 py-8">
         {isLoading ? (
-          <Loader />
+          <div className="grid gap-4 md:grid-cols-2">
+          {/* Render Skeletons for Cards */}
+          {[...Array(4)].map((_, idx) => (
+            <SkeletonCard key={idx} />
+          ))}
+        </div>
+
         ) : savedActivities.length === 0 ? (
           <div className="text-center py-8">No Activities Saved Yet!</div>
         ) : (
@@ -255,17 +329,39 @@ export default function SavedActivities() {
                 onActivityUnsaved={handleActivityUnsaved}
                 userInfo={userInfo}
                 exchangeRates={exchangeRates}
+                showToast={showToast}
               />
             ))}
           </div>
         )}
       </div>
-      {alertMessage && (
-        <div className="fixed bottom-4 right-4 p-4 bg-green-500 text-white rounded-lg shadow">
-          {alertMessage.message}
-        </div>
-      )}
-    </div>
+      <ToastViewport className="fixed top-0 right-0 p-4" />
+        {isToastOpen && (
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={5000}
+            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+          >
+            <div className="flex items-center">
+              {toastType === 'success' ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                <ToastDescription>
+                  {toastMessage}
+                </ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
+          </Toast>
+        )}
+      </div>
+    </ToastProvider>
+  
   );
 }
 

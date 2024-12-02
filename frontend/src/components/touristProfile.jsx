@@ -114,6 +114,211 @@ const phoneValidator = (value) => {
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
+const SkeletonLoader = () => {
+  return (
+    <div>
+      <h1 className="text-3xl font-bold mb-2">My Account</h1>
+      <p className="text-sm text-gray-500 mb-6">Settings / Account</p>
+      <div className="container mx-auto px-4">
+        <div className="animate-pulse">
+          <div className="grid grid-cols-12 gap-6">
+          <Card className="col-span-7">
+  <CardContent className="py-6">
+    <div className="flex items-center justify-center">
+      {/* Skeleton for Profile Picture Section */}
+      <div className="w-1/3 flex flex-col items-center">
+        <div className="relative mb-4">
+          <div className="w-24 h-24 bg-gray-200 rounded-full animate-pulse"></div>
+        </div>
+        <div className="text-center mb-2">
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-24 h-6 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="w-7 h-7 bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+          <p className="w-32 h-4 bg-gray-200 rounded-md animate-pulse mt-1"></p>
+        </div>
+        <Separator />
+        <div className="flex flex-col w-full max-w-[200px] ">
+          <div className="w-full h-10 bg-gray-200 rounded-md animate-pulse mt-2"></div>
+          <div className="w-full h-10 bg-gray-200 rounded-md animate-pulse mt-2"></div>
+        </div>
+      </div>
+
+      {/* Vertical Separator */}
+      <div className="border-r border-gray-200 h-[260px] mx-2"></div>
+
+      {/* Skeleton for Profile Info Section */}
+      <div className="w-2/3 pl-4 space-y-3">
+        {/* Row 1 */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <div className="w-16 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="w-32 h-6 bg-gray-200 rounded-md animate-pulse"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="w-16 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="w-32 h-6 bg-gray-200 rounded-md animate-pulse"></div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Row 2 */}
+        <div className="grid grid-cols-3 gap-4">
+        <div>
+  <div className="w-14 h-3 bg-gray-200 rounded-md animate-pulse"></div>
+  <div className="w-20 h-5 bg-gray-200 rounded-md animate-pulse mt-1"></div>
+</div>
+<div>
+  <div className="w-14 h-3 bg-gray-200 rounded-md animate-pulse"></div>
+  <div className="w-20 h-5 bg-gray-200 rounded-md animate-pulse mt-1"></div>
+</div>
+<div>
+  <div className="w-14 h-3 bg-gray-200 rounded-md animate-pulse"></div>
+  <div className="w-20 h-5 bg-gray-200 rounded-md animate-pulse mt-1"></div>
+</div>
+
+        </div>
+
+        <Separator />
+
+        {/* Row 3 */}
+        <div className="grid grid-cols-3 ">
+          {/* Nationality field spans two columns */}
+          <div className="col-span-2 space-y-2">
+            <div className="w-16 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="w-32 h-6 bg-gray-200 rounded-md animate-pulse"></div>
+          </div>
+
+          {/* Occupation field takes one column */}
+          <div>
+            <div className="w-16 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="w-24 h-6 bg-gray-200 rounded-md animate-pulse mt-1"></div>
+          </div>
+        </div>
+
+        {/* Separator */}
+        <Separator />
+
+        {/* Row 4 (Phone Number and Register Date) */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* Phone Number spans two columns */}
+          <div className="col-span-2 space-y-2">
+            <div className="w-16 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="w-full h-8 bg-gray-200 rounded-md animate-pulse mt-1"></div>
+          </div>
+
+          {/* Register Date */}
+          <div>
+            <div className="w-16 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="w-20 h-6 bg-gray-200 rounded-md animate-pulse mt-1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </CardContent>
+</Card>
+
+<div className="col-span-5 bg-white border rounded-lg shadow-sm p-6">
+  {/* Title Skeleton */}
+  <div className="mb-4 flex items-center justify-between animate-pulse">
+    <div className="w-32 h-4 bg-gray-200 rounded-md"></div> {/* Skeleton for Title */}
+    <div className="w-24 h-6 bg-gray-200 rounded-md"></div> {/* Skeleton for Button */}
+  </div>
+
+  {/* Scrollable Card Skeleton */}
+  <div className="space-y-4 h-[200px] overflow-y-auto">
+    {[...Array(4)].map((_, index) => (
+      <div
+        key={index}
+        className="bg-white rounded-lg mb-3 p-4 shadow-sm animate-pulse"
+      >
+        <div className="flex items-center mb-2">
+          <div className="w-6 h-6 bg-gray-200 rounded-full"></div> {/* Location icon skeleton */}
+          <div className="w-24 h-4 bg-gray-200 rounded-md ml-2"></div> {/* Location type skeleton */}
+        </div>
+        <div className="space-y-1">
+          <div className="w-32 h-4 bg-gray-200 rounded-md"></div> {/* Street skeleton */}
+          <div className="w-24 h-4 bg-gray-200 rounded-md"></div> {/* City, state, postal code skeleton */}
+          <div className="w-40 h-3 bg-gray-200 rounded-md"></div> {/* Landmark skeleton */}
+        </div>
+        <div className="flex items-center justify-between pt-3 mt-3 border-t border-gray-100">
+          <div className="flex space-x-3">
+            <div className="w-16 h-4 bg-gray-200 rounded-md"></div> {/* Edit button skeleton */}
+            <div className="w-16 h-4 bg-gray-200 rounded-md"></div> {/* Delete button skeleton */}
+          </div>
+          <div className="w-32 h-4 bg-gray-200 rounded-md"></div> {/* Set as Default button skeleton */}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+            <div className="col-span-8">
+
+      <Card>
+        <CardContent className="pt-6">
+          {/* Current Balance Skeleton */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <div className="w-24 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+            </div>
+            <div className="w-24 h-6 bg-gray-200 rounded-md animate-pulse"></div>
+          </div>
+
+          {/* Wallet History Skeleton */}
+          <div className="mt-2 overflow-y-auto ">
+            <h3 className="text-lg font-semibold mb-2">
+              <div className="w-28 h-4 bg-gray-200 rounded-md animate-pulse"></div>
+            </h3>
+            <div className="space-y-4">
+              {/* Skeleton for no transactions */}
+              <div className="space-y-2">
+                <div className="w-full h-12 bg-gray-200 rounded-md animate-pulse"></div>
+                <div className="w-full h-12 bg-gray-200 rounded-md animate-pulse"></div>
+                <div className="w-full h-12 bg-gray-200 rounded-md animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+   
+
+</div>
+
+<Card className="col-span-4">
+  <CardHeader className="flex">
+  <div className="w-full flex justify-between items-center animate-pulse">
+        <div className="w-32 h-4 bg-gray-200 rounded-md"></div> {/* Skeleton for Title */}
+        <div className="w-20 h-6 bg-gray-200 rounded-md"></div> {/* Skeleton for Button */}
+      </div>
+  </CardHeader>
+
+  <CardContent>
+    <div className="flex flex-col max-h-[180px] overflow-y-auto">
+        <div className="space-y-4 p-4">
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="flex items-center gap-4 animate-pulse">
+              <div className="w-8 h-8 bg-gray-200 rounded-full"></div> {/* Placeholder for profile image */}
+              <div className="flex flex-col gap-2">
+                <div className="w-40 h-4 bg-gray-200 rounded-md"></div> {/* Placeholder for notification body */}
+                <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Placeholder for notification timestamp */}
+              </div>
+            </div>
+          ))}
+        </div>
+     
+    </div>
+  </CardContent>
+</Card>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export function TouristProfileComponent() {
   const navigate = useNavigate();
 
@@ -782,12 +987,8 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
   
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-lg font-semibold">Loading profile...</p>
-      </div>
-    );
+  if (loading || !tourist) {
+    return <SkeletonLoader />;
   }
 
   if (error) {
@@ -798,15 +999,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     );
   }
 
-  if (!tourist) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-lg font-semibold">
-          No tourist profile information is available.
-        </p>
-      </div>
-    );
-  }
+
 
   return (
     <div >
@@ -1270,8 +1463,17 @@ const response = await axios.get("http://localhost:4000/tourist/", {
   <CardContent>
     <div className="flex flex-col max-h-[200px] overflow-y-auto">
       {loading ? (
-        <div className="flex items-center justify-center p-4">
-          <Loader2 className="h-6 w-6 animate-spin text-[#388A94]" />
+        // Skeleton Loader for Notifications
+        <div className="space-y-4 p-4">
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="flex items-center gap-4 animate-pulse">
+              <div className="w-8 h-8 bg-gray-200 rounded-full"></div> {/* Placeholder for profile image */}
+              <div className="flex flex-col gap-2">
+                <div className="w-40 h-4 bg-gray-200 rounded-md"></div> {/* Placeholder for notification body */}
+                <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Placeholder for notification timestamp */}
+              </div>
+            </div>
+          ))}
         </div>
       ) : notifications.length === 0 ? (
         <p className="text-[#1A3B47] p-4 text-center">
@@ -1283,7 +1485,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
             <li
               key={index}
               className="p-2 hover:bg-gray-50 transition-colors relative cursor-pointer flex flex-col gap-1"
-              onClick={() => {markNotificationAsSeen(notification._id),navigate("/account/notifications")}}
+              onClick={() => {markNotificationAsSeen(notification._id), navigate("/account/notifications")}}
             >
               {!notification.seen && (
                 <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
@@ -1293,7 +1495,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
               <div
                 className="text-[#1A3B47] text-sm truncate"
                 dangerouslySetInnerHTML={{
-                  __html: notification.body.slice(0, 30) + "...", // Show first 50 characters
+                  __html: notification.body.slice(0, 30) + "...", // Show first 30 characters
                 }}
               ></div>
               <p className="text-xs text-gray-500">{formatDate(notification.date)}</p>

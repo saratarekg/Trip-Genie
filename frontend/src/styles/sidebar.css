@@ -8,13 +8,13 @@
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
-  background-color: #388A94;
+  background: transparent;
   border-radius: 20px;
 }
 
 .sidebar-scroll {
   scrollbar-width: thin;
-  scrollbar-color: #388A94 transparent;
+  scrollbar-color: #1A3B47 transparent;
 }
 
 /* Initial state of the submenu items - hidden */
