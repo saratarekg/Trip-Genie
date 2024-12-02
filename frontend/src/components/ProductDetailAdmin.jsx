@@ -1308,7 +1308,7 @@ const ProductDetail = ({id, onBack}) => {
                     )}
                   </div>
                   <div className="mt-8 space-y-4">
-              {(userRole === "admin" ||
+              {(userRole === "admin" && product.seller == null ||
                 (userRole === "seller" && canModify && product.seller)) && (
                 <Button
                   className="w-full bg-[#1A3B47] text-xl  text-white"
