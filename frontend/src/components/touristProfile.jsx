@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react"
 import axios from "axios"
 import Flag from 'react-world-flags'
 import Cookies from "js-cookie"
-import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear, parseISO } from 'date-fns';import { Activity, ShoppingCart, Plane, Hotel, Calendar, Wallet, Award, Bell, ShoppingBasket, Bus, Map, User, Car } from 'lucide-react'
+import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear, parseISO } from 'date-fns';import { Activity, ShoppingCart, Plane, Hotel, Calendar, Wallet, Award, Bell, ShoppingBasket,CheckCircle, XCircle, Bus, Map, User, Car } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -27,6 +27,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import PasswordChanger from "@/components/Passwords";
+import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast";
 
 const convertUrlToBase64 = async (url) => {
   const response = await fetch(url);
@@ -117,8 +119,8 @@ const phoneValidator = (value) => {
 const SkeletonLoader = () => {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-2">My Account</h1>
-      <p className="text-sm text-gray-500 mb-6">Settings / Account</p>
+      <h1 className="text-3xl font-bold mb-2">Account</h1>
+      <p className="text-sm text-gray-500 mb-6">Settings and Privacy  / Account</p>
       <div className="container mx-auto px-4">
         <div className="animate-pulse">
           <div className="grid grid-cols-12 gap-6">
@@ -343,6 +345,15 @@ export function TouristProfileComponent() {
   const [rates, setRates] = useState({});
   const [currencies, setCurrencies] = useState([]);
   const [activeTab, setActiveTab] = useState("wallet");
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const handlePasswordChangeSuccess = (message) => {
+    setIsPasswordModalOpen(false);
+    setToastMessage(message);
+    setIsToastOpen(true);
+  };
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
@@ -539,7 +550,7 @@ export function TouristProfileComponent() {
   };
 
   const validateFields = () => {
-    const { email, mobile, nationality, jobOrStudent, fname, lname } = editedTourist;
+    const { email, mobile, nationality, jobOrStudent, fname, lname, username } = editedTourist;
     const messages = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -557,6 +568,7 @@ export function TouristProfileComponent() {
     if (!jobOrStudent) messages.jobOrStudent = "Occupation is required.";
     if (!fname) messages.fname = "First name is required.";
     if (!lname) messages.lname = "Last name is required.";
+    if (!username) messages.username = "Username is required.";
 
     setValidationMessages(messages);
     return Object.keys(messages).length === 0;
@@ -570,12 +582,15 @@ export function TouristProfileComponent() {
       finalTourist.mobile = "+" + editedTourist.mobile;
       finalTourist.fname = editedTourist.fname;
       finalTourist.lname = editedTourist.lname;
+      finalTourist.username=editedTourist.username;
+      finalTourist.email=editedTourist.email;
 
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const api = `http://localhost:4000/${role}`;
       finalTourist.profilePicture = selectedImage;
       setDropdownOpen(false);
+      console.log(finalTourist);
 
       const response = await axios.put(api, finalTourist, {
         headers: { Authorization: `Bearer ${token}` },
@@ -588,9 +603,12 @@ export function TouristProfileComponent() {
         setError("");
         setValidationMessages({});
       }
+      console.log(response.data);
     } catch (err) {
       if (err.response?.data?.message === "Email already exists") {
         setValidationMessages({ email: "Email already exists" });
+      } else if (err.response?.data?.message === "Username already exists") {
+        setValidationMessages({ username: "Username already exists" });
       } else {
         setError(err.message);
       }
@@ -1002,9 +1020,11 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
 
   return (
+    <ToastProvider>
     <div >
-    <h1 className="text-3xl font-bold mb-2">My Account</h1>
-    <p className="text-sm text-gray-500 mb-6">Settings / Account</p>
+      <h1 className="text-3xl font-bold mb-2">Account</h1>
+      <p className="text-sm text-gray-500 mb-6">Settings and Privacy  / Account</p>
+     
     <div className="container mx-auto px-4">
       <div className="grid grid-cols-12 gap-6">
         {/* Merged Profile Picture and Info Card - 8 columns */}
@@ -1074,16 +1094,48 @@ const response = await axios.get("http://localhost:4000/tourist/", {
           )}
         </div>
         <div className="text-center mb-2">
-          <div className="flex items-center justify-center gap-2">
-            <h2 className="text-xl font-bold">{tourist.username}</h2>
-            <div
-              className={`w-7 h-7 flex items-center justify-center rounded-full ${getBadgeColor()}`}
-            >
-              <Award className="w-4 h-4 text-white items-center" />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mt-1">{tourist.email}</p>
+  <div className="flex items-center justify-center gap-2">
+    {isEditing ? (
+      <div className="flex flex-col items-center">
+        <Input
+          type="text"
+          name="username"
+          value={editedTourist.username}
+          onChange={handleInputChange}
+          className={validationMessages.username ? "border-red-500" : ""}
+        />
+        {validationMessages.username && (
+          <p className="text-red-500 text-xs mt-1">{validationMessages.username}</p>
+        )}
+      </div>
+    ) : (
+      <>
+        <h2 className="text-xl font-bold">{tourist.username}</h2>
+        <div
+          className={`w-7 h-7 flex items-center justify-center rounded-full ${getBadgeColor()}`}
+        >
+          <Award className="w-4 h-4 text-white items-center" />
         </div>
+      </>
+    )}
+  </div>
+  {isEditing ? (
+    <div className="flex flex-col items-center mt-2">
+      <Input
+        type="email"
+        name="email"
+        value={editedTourist.email}
+        onChange={handleInputChange}
+        className={validationMessages.email ? "border-red-500" : ""}
+      />
+      {validationMessages.email && (
+        <p className="text-red-500 text-xs mt-1">{validationMessages.email}</p>
+      )}
+    </div>
+  ) : (
+    <p className="text-sm text-gray-500 mt-1">{tourist.email}</p>
+  )}
+</div>
         <Separator/>
         {isEditing ? (
           <div className="flex flex-col w-full max-w-[200px] ">
@@ -1112,12 +1164,12 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 </Button>
 
 
-          {/* <Button
-          //onClick={}
-          className=" p-2 mr-2 w-full mt-2 bg-[#1A3B47]"
-        >
-          Edit Profile
-        </Button> */}
+          <Button
+      onClick={() => setIsPasswordModalOpen(true)}
+      className="p-2 w-full mt-2 bg-[#1A3B47]"
+    >
+      Change Password
+    </Button>
         </>
         )}
       </div>
@@ -1152,14 +1204,14 @@ const response = await axios.get("http://localhost:4000/tourist/", {
             <p className="text-xs text-gray-500">Last Name</p>
             {isEditing ? (
               <div>
-              <Input
-                type="text"
-                name="lname"
-                value={editedTourist.lname}
-                onChange={handleInputChange}
-                className={validationMessages.lname ? "border-red-500" : ""}
-              />
-               {validationMessages.lname && (
+                <Input
+                  type="text"
+                  name="lname"
+                  value={editedTourist.lname}
+                  onChange={handleInputChange}
+                  className={validationMessages.lname ? "border-red-500" : ""}
+                />
+                {validationMessages.lname && (
                   <p className="text-red-500 text-xs mt-1">{validationMessages.lname}</p>
                 )}
               </div>
@@ -1169,7 +1221,6 @@ const response = await axios.get("http://localhost:4000/tourist/", {
           </div>
          
         </div>
-
         <Separator />
 
         {/* Row 2 */}
@@ -1539,8 +1590,30 @@ const response = await axios.get("http://localhost:4000/tourist/", {
         isImageViewer={true}
         imageUrl={selectedImage?.url || selectedImage}
       />
+      <Modal show={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)}>
+      <PasswordChanger onSuccess={handlePasswordChangeSuccess} />
+    </Modal>
+    {isToastOpen && (
+      <Toast
+        onOpenChange={setIsToastOpen}
+        open={isToastOpen}
+        duration={5000}
+        className="bg-green-100"
+      >
+        <div className="flex items-center">
+          <CheckCircle className="text-green-500 mr-2" />
+          <div>
+            <ToastTitle>Success</ToastTitle>
+            <ToastDescription>{toastMessage}</ToastDescription>
+          </div>
+        </div>
+        <ToastClose />
+      </Toast>
+    )}
+    <ToastViewport className="fixed top-0 right-0 p-4" />
     </div>
     </div>
+    </ToastProvider>
   )
 }
 

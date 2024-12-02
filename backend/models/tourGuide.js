@@ -141,11 +141,9 @@ const tourGuideSchema = new Schema(
         type: {
           type: String,
           enum: ["birthday", "payment", "alert", "offer", "reminder"], // The general category of the notification
-          required: true,
         },
         title: {
           type: String,
-          required: true, // Short title or headline for the notification
         },
         priority: {
           type: String,
@@ -154,7 +152,7 @@ const tourGuideSchema = new Schema(
         },
       },
     ],
-    hasUnseenNotifications: { type: Boolean, default: true },
+    hasUnseenNotifications: { type: Boolean, default: false },
     files: {
       IDFilename: {
         type: String,

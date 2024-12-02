@@ -6,12 +6,24 @@ import { EyeIcon, EyeOffIcon, ArrowLeftIcon } from "@heroicons/react/outline";
 
 let role = null;
 
+const getPasswordStrength = (password) => {
+  const strength = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    number: /\d/.test(password),
+  };
+
+  const fulfilled = Object.values(strength).filter(Boolean).length;
+  return { ...strength, fulfilled };
+};
+
 const Login = () => {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
+
 
   // Separate error messages for each step
   const [loginErrorMessage, setLoginErrorMessage] = useState("");
@@ -24,6 +36,21 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [newPassword, setNewPassword] = useState("");
+  const strength = getPasswordStrength(newPassword);
+
+
+
+  const getProgressBarColor = () => {
+    if (strength.fulfilled === 2) return "bg-[#F88C33]";
+    if (strength.fulfilled === 3) return "bg-[#5D9297]";
+    return "bg-red-500";
+  };
+
+  const getStrengthLabel = () => {
+    if (strength.fulfilled === 2) return "Could Be Stronger";
+    if (strength.fulfilled === 3) return "Strong Password";
+    return "Too Weak";
+  };
 
   const logOut = async () => {
     console.log("Logging out...");
@@ -287,9 +314,62 @@ const Login = () => {
                 placeholder="Enter new password"
                 required
               />
-              <p className="text-sm text-gray-600 mt-2">
-                Please enter a strong password that is at least 8 characters long and includes a mix of letters, numbers, and symbols.
-              </p>
+                <div className="flex items-center mt-2 space-x-2 w-full">
+  {/* Progress Bar */}
+  <div className="relative flex-grow h-2 bg-gray-200 rounded-full">
+    <div
+      className={`absolute h-2 rounded-full transition-all duration-300 ${newPassword.length === 0 ? 'bg-gray-300' : getProgressBarColor()}`}
+      style={{
+        width: `${newPassword.length === 0 ? 0 : Math.max((strength.fulfilled / 3), 1 / 3) * 100}%`
+      }}
+    ></div>
+  </div>
+
+  {/* Strength Label */}
+  {newPassword.length > 0 && (
+    <p className="text-sm font-medium text-gray-700 ml-2">
+      {getStrengthLabel()}
+    </p>
+  )}
+</div>
+<ul className="text-sm mt-4 space-y-1">
+              <li
+                className={`flex items-center ${strength.length ? "text-[#388A94]" : "text-gray-500"}`}
+              >
+                <span
+                  className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                    strength.length ? "bg-[#388A94] text-white" : "border-gray-500"
+                  }`}
+                >
+                  ✓
+                </span>
+                At least 8 characters
+              </li>
+              <li
+                className={`flex items-center ${strength.uppercase ? "text-[#388A94]" : "text-gray-500"}`}
+              >
+                <span
+                  className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                    strength.uppercase ? "bg-[#388A94] text-white" : "border-gray-500"
+                  }`}
+                >
+                  ✓
+                </span>
+                At least one uppercase letter
+              </li>
+              <li
+                className={`flex items-center ${strength.number ? "text-[#388A94]" : "text-gray-500"}`}
+              >
+                <span
+                  className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                    strength.number ? "bg-[#388A94] text-white" : "border-gray-500"
+                  }`}
+                >
+                  ✓
+                </span>
+                At least one number
+              </li>
+            </ul>
               {resetPasswordErrorMessage && (
                 <p className="text-sm text-red-600 mt-1">{resetPasswordErrorMessage}</p>
               )}
@@ -399,8 +479,17 @@ const Login = () => {
                   </button>
                 </div>
                 {loginErrorMessage && (
-                  <p className="text-sm text-red-600 mt-1">{loginErrorMessage}</p>
-                )}
+  <p
+    className={`text-sm mt-1 ${
+      loginErrorMessage === "Password reset successfully. Please log in with your new password."
+        ? "text-green-600"
+        : "text-red-600"
+    }`}
+  >
+    {loginErrorMessage}
+  </p>
+)}
+
               </div>
 
               <div className="flex flex-col items-center justify-between">

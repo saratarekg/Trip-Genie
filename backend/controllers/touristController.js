@@ -60,6 +60,9 @@ const updateTourist = async (req, res) => {
     const { nationality, mobile, jobOrStudent, profilePicture } = req.body; // Data to update
 
     let { email, username } = req.body;
+    console.log("hereweeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    console.log(email);
+    console.log(username);
     email = email.toLowerCase();
     username = username.toLowerCase();
 
@@ -193,6 +196,9 @@ const updateTouristProfile = async (req, res) => {
     const { nationality, mobile, jobOrStudent, profilePicture, fname, lname } =
       req.body;
     let { email, username } = req.body;
+    console.log("hereweeeeeeeeeeeeeeeeee");
+    console.log(email);
+    console.log(username);
     email = email.toLowerCase();
     username = username.toLowerCase();
 
@@ -231,6 +237,7 @@ const updateTouristProfile = async (req, res) => {
         profilePicture: picture,
         fname,
         lname,
+        username,
       },
       { new: true }
     )

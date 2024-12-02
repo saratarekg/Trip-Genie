@@ -111,11 +111,9 @@ const sellerSchema = new mongoose.Schema({
       type: {
         type: String,
         enum: ["birthday", "payment", "alert", "offer", "reminder"], // The general category of the notification
-        required: true,
       },
       title: {
         type: String,
-        required: true, // Short title or headline for the notification
       },
       priority: {
         type: String,
@@ -124,7 +122,7 @@ const sellerSchema = new mongoose.Schema({
       },
     },
   ],
-  hasUnseenNotifications: { type: Boolean, default: true },
+  hasUnseenNotifications: { type: Boolean, default: false },
 
 });
 
