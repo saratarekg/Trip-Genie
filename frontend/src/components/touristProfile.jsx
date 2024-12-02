@@ -671,8 +671,9 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       "USD",
       preferredCurrency
     );
-    const pointsValueInEGP = user.loyaltyPoints / 100;
-    const pointsValueInUSD = convertCurrency(pointsValueInEGP, "EGP", "USD");
+    const convertiblePoints = Math.floor(user.loyaltyPoints / 10000) * 10000;
+    const pointsValueInEGP = convertiblePoints / 100; // Since 10,000 points = 100 EGP
+        const pointsValueInUSD = convertCurrency(pointsValueInEGP, "EGP", "USD");
     const pointsValueInPreferredCurrency = convertCurrency(
       pointsValueInUSD,
       "USD",

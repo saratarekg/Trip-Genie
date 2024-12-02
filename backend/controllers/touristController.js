@@ -825,7 +825,8 @@ const redeemPoints = async (req, res) => {
     }
 
     // Redeem all loyalty points
-    const pointsToRedeem = tourist.loyaltyPoints;
+    // const pointsToRedeem = tourist.loyaltyPoints;
+    const pointsToRedeem =  Math.floor(tourist.loyaltyPoints / 10000) * 10000;
 
     // Calculate the redeemable cash based on all loyalty points
     const redeemableCash = pointsToRedeem / 100; // in EGP
@@ -835,7 +836,7 @@ const redeemPoints = async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       res.locals.user_id,
       {
-        $set: { loyaltyPoints: 0 },
+        $set: { loyaltyPoints: tourist.loyaltyPoints - pointsToRedeem },
         $inc: { wallet: updatedWalletinUSD },
       },
       { new: true } // Return the updated document
