@@ -1,6 +1,8 @@
 const ItineraryBooking = require("../models/itineraryBooking");
 const Itinerary = require("../models/itinerary");
 const Tourist = require("../models/tourist");
+const Currency = require("../models/currency");
+const CurrencyRates = require("../models/currencyRate");
 const emailService = require("../services/emailService");
 
 // Create a new itinerary booking
@@ -58,11 +60,19 @@ exports.createBooking = async (req, res) => {
     // Save the booking
     await newBooking.save();
 
+    const currency = (await Currency.findOne({
+      _id: user.preferredCurrency,
+    })) || { code: "USD" };
+    const rates = await CurrencyRates.findOne();
+    const exchangeRate = rates.rates.get(currency.code);
+    const paymentAmountExchanged = newBooking.paymentAmount * exchangeRate;
+
     // Send email confirmation
     await emailService.sendItineraryBookingConfirmationEmail(
       user.email,
       newBooking,
-      itineraryExists
+      itineraryExists,
+      paymentAmountExchanged
     );
 
     // Step 5: Calculate loyalty points based on the user's badge level

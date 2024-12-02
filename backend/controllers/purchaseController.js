@@ -3,6 +3,8 @@ const Purchase = require("../models/purchase"); // Assuming your Activity model 
 const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
 const productSales = require("../models/productSales");
 const PromoCode = require("../models/promoCode");
+const Currency = require("../models/currency");
+const CurrencyRates = require("../models/currencyRate");
 const emailService = require("../services/emailService");
 
 exports.createPurchase = async (req, res) => {
@@ -127,15 +129,25 @@ exports.createPurchase = async (req, res) => {
     // Save the purchase to the database
     await newPurchase.save();
 
+    const currency = (await Currency.findOne({
+      _id: tourist.preferredCurrency,
+    })) || { code: "USD" };
+    const rates = await CurrencyRates.findOne();
+    const exchangeRate = rates.rates.get(currency.code);
+
     const productsDetails = await Promise.all(
       products.map(async (item) => {
         const product = await Product.findById(item.product);
+        product.price = product.price * exchangeRate;
         return { product, quantity: item.quantity };
       })
     );
+    const exchangedPurchase = newPurchase;
+    exchangedPurchase.totalPrice = exchangedPurchase.totalPrice * exchangeRate;
+
     await emailService.sendPurchaseConfirmationEmail(
       tourist.email,
-      newPurchase,
+      exchangedPurchase,
       productsDetails
     );
 
@@ -382,18 +394,17 @@ exports.cancelPurchase = async (req, res) => {
     if (purchase.promoCode) {
       totalRefund =
         totalRefund - ((totalRefund * promoDetails.percentOff) / 100 || 0);
-    
+
       // Reduce the times used of the promo code
       const promo = await PromoCode.findByIdAndUpdate(
         purchase.promoCode,
         { $inc: { timesUsed: -1 } },
         { new: true, runValidators: true }
       );
-    
+
       // Ensure the checkStatus() method is called on the updated promo document
-      promo.checkStatus();  // Now this works because `promo` is the updated document
+      promo.checkStatus(); // Now this works because `promo` is the updated document
     }
-    
 
     totalRefund += delPrice;
 
@@ -422,19 +433,18 @@ exports.cancelPurchase = async (req, res) => {
     // Update the tourist's wallet balance by finding the tourist and adding the refund amount
     const updatedTourist = await Tourist.findByIdAndUpdate(
       touristId,
-      { $inc: { wallet: totalRefund }, 
-      $push: {
-        history: {
-          transactionType: "deposit",
-          amount: totalRefund,
-          details: `Refunded for Cancelling your Order`,
+      {
+        $inc: { wallet: totalRefund },
+        $push: {
+          history: {
+            transactionType: "deposit",
+            amount: totalRefund,
+            details: `Refunded for Cancelling your Order`,
+          },
         },
-      }, }, // increment the wallet by totalRefund
+      }, // increment the wallet by totalRefund
       { new: true } // return the updated document
     );
-
-  
-  
 
     if (!updatedTourist) {
       return res.status(400).json({ message: "Tourist not found" });
