@@ -98,6 +98,7 @@ import {
 } from "@/components/ui/toast";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 
+
 // Sub-components
 const AccountInfo = ({ user }) => {
   switch (user.role) {
@@ -1660,10 +1661,12 @@ export default function AccountManagement() {
     const path = location.pathname.split("/").pop();
     if (path === "account" || path === "") {
       setActiveTab("info");
+      setActiveTab(role === "tourism-governor" ? "faqs" : "info");
     } else {
       setActiveTab(path);
     }
   }, [location]);
+  }, [location, role]);
 
   const handleRedeemPoints = async () => {
     try {
@@ -1847,7 +1850,6 @@ export default function AccountManagement() {
           "advertiser",
           "tour-guide",
           "admin",
-          "tourism-governor",
         ],
       },
       {
