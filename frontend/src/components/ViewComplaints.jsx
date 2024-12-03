@@ -72,8 +72,8 @@ export function ViewComplaints({ onSelectComplaint }) {
   };
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen">
+      <div className="">
         <div>
           {error ? (
             <div className="text-red-500 p-4 rounded-md bg-red-50 mb-4">
@@ -201,7 +201,7 @@ export function ViewComplaints({ onSelectComplaint }) {
                               )}
                             </span>
                           </td>
-                          <td className="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
+                          <td className="px-6 py-2 whitespace-nowrap text-left text-sm font-medium">
                             <span
                               onClick={() => onSelectComplaint(complaint._id)}
                               className="text-[#B5D3D1] cursor-pointer hover:text-[#1A3B47] hover:underline"

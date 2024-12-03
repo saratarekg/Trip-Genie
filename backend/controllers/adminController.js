@@ -371,6 +371,11 @@ const getUsersReport = async (req, res) => {
 
 const addPromoCode = async (req, res) => {
   try {
+    const { code } = req.body;
+    const existingPromoCode = await PromoCode.findOne({ code });
+    if (existingPromoCode) {
+      return res.status(400).json({ message: "Promo code name already exists" });
+    }
     const promoCode = new PromoCode(req.body);
     await promoCode.save();
     res.status(201).json({ promoCode });

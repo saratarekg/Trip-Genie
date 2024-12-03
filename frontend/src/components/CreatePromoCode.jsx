@@ -49,13 +49,17 @@ const formSchema = z.object({
     .max(20, {
       message: "Code must not exceed 20 characters",
     }),
-  status: z.enum(["active", "inactive", "expired"]),
-  percentOff: z.number().min(0).max(100),
+  status: z.enum(["active", "inactive"]),
+  percentOff: z.number(),
   usage_limit: z.number().min(1),
   dateRange: z
     .object({
-      start: z.date(),
-      end: z.date(),
+      start: z.date().nullable().refine((date) => date !== null, {
+        message: "Please select a start date.",
+      }),
+      end: z.date().nullable().refine((date) => date !== null, {
+        message: "Please select an end date.",
+      }),
     })
     .refine((data) => data.end > data.start, {
       message: "End date must be after the start date.",
@@ -73,11 +77,11 @@ export function CreatePromoCode() {
     defaultValues: {
       code: "",
       status: "active",
-      percentOff: 1,
-      usage_limit: 1,
+      percentOff: 10,
+      usage_limit: 5,
       dateRange: {
-        start: new Date(),
-        end: new Date(),
+        start: null,
+        end: null,
       },
     },
   });
@@ -136,14 +140,14 @@ export function CreatePromoCode() {
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Promo Code</FormLabel>
+                    <FormLabel className="text-[#003f66]">Promo Code</FormLabel>
                     <FormControl>
                       <Input placeholder="HADWA20" {...field} className="w-full" />
                     </FormControl>
                     <FormDescription>
                       Enter a unique promo code (min 3 characters).
                     </FormDescription>
-                    <FormMessage />
+                    <FormMessage className="text-red-500" />
                   </FormItem>
                 )}
               />
@@ -152,7 +156,7 @@ export function CreatePromoCode() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel className="text-[#003f66]">Status</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -162,10 +166,9 @@ export function CreatePromoCode() {
                       <SelectContent>
                         <SelectItem value="active">Active</SelectItem>
                         <SelectItem value="inactive">Inactive</SelectItem>
-                        <SelectItem value="expired">Expired</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage className="text-red-500" />
                   </FormItem>
                 )}
               />
@@ -174,9 +177,9 @@ export function CreatePromoCode() {
               <FormField
                 control={form.control}
                 name="percentOff"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel>Percent Off</FormLabel>
+                    <FormLabel className="text-[#003f66]">Percent Off</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -184,14 +187,34 @@ export function CreatePromoCode() {
                         max={100}
                         placeholder="10"
                         {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          field.onChange(value);
+                          if (value < 1) {
+                            form.setError("percentOff", {
+                              type: "manual",
+                              message: "Percent off must be at least 1",
+                            });
+                          } else if (value > 100) {
+                            form.setError("percentOff", {
+                              type: "manual",
+                              message: "Percent off must be at most 100",
+                            });
+                          } else {
+                            form.clearErrors("percentOff");
+                          }
+                        }}
                         className="w-full"
                       />
                     </FormControl>
                     <FormDescription>
                       Enter a discount percentage (0-100).
                     </FormDescription>
-                    <FormMessage />
+                    {fieldState.error && (
+                      <FormMessage className="text-red-500">
+                        {fieldState.error.message}
+                      </FormMessage>
+                    )}
                   </FormItem>
                 )}
               />
@@ -200,7 +223,7 @@ export function CreatePromoCode() {
                 name="usage_limit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Usage Limit</FormLabel>
+                    <FormLabel className="text-[#003f66]">Usage Limit</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -214,7 +237,7 @@ export function CreatePromoCode() {
                     <FormDescription>
                       Enter the maximum number of times this code can be used.
                     </FormDescription>
-                    <FormMessage />
+                    <FormMessage className="text-red-500" />
                   </FormItem>
                 )}
               />
@@ -222,9 +245,9 @@ export function CreatePromoCode() {
             <FormField
               control={form.control}
               name="dateRange"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Date Range</FormLabel>
+                  <FormLabel className="text-[#003f66]">Date Range</FormLabel>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
@@ -251,6 +274,7 @@ export function CreatePromoCode() {
                             field.onChange({ ...field.value, start: date })
                           }
                           initialFocus
+                          disabled={(date) => date < new Date().setHours(0, 0, 0, 0) || (field.value.end && date > field.value.end)}
                         />
                       </PopoverContent>
                     </Popover>
@@ -280,6 +304,7 @@ export function CreatePromoCode() {
                             field.onChange({ ...field.value, end: date })
                           }
                           initialFocus
+                          disabled={(date) => date < new Date().setHours(0, 0, 0, 0) || (field.value.start && date <= field.value.start)}
                         />
                       </PopoverContent>
                     </Popover>
@@ -287,6 +312,9 @@ export function CreatePromoCode() {
                   <FormDescription>
                     Select the start and end dates for the promo code validity.
                   </FormDescription>
+                  {fieldState.error && (
+                    <p className="text-red-500 text-sm font-medium text-destructive">{"Start and end dates must be selected"}</p>
+                  )}
                 </FormItem>
               )}
             />

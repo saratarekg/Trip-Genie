@@ -30,7 +30,7 @@ export default function DeleteConfirmation({
                 Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
               </DialogTitle>
               <DialogDescription className="text-gray-500 text-left">
-                Are you sure you want to delete your {itemType}? If you delete your {itemType},
+                Are you sure you want to delete this {itemType}? If you delete this {itemType},
                you can not undo this action.
               </DialogDescription>
             </div>
