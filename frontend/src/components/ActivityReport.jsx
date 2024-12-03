@@ -65,8 +65,11 @@ const ActivityReport = () => {
           .map(item => item.activity.name))];
         setActivityNames(uniqueActivityNames);
 
-        setTotalRevenue(response.data.totalActivitiesRevenue || 0);
-        setTotalAppRevenue(response.data.totalActivitiesAppRevenue || 0);
+        // Set total revenue and total app revenue only once
+        if (!totalRevenue && !totalAppRevenue) {
+          setTotalRevenue(response.data.totalActivitiesRevenue || 0);
+          setTotalAppRevenue(response.data.totalActivitiesAppRevenue || 0);
+        }
         setSelectedPeriodRevenue(calculatePeriodRevenue(response.data.activitiesSales, 'all'));
 
         // Apply activity filter in frontend

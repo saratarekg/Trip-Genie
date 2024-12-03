@@ -112,6 +112,7 @@ export function DashboardSidebar({
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
+        setActiveTab('dashboard'); // Set active tab to dashboard
         navigate("/login");
         window.location.reload();
       } else {
