@@ -116,12 +116,13 @@ const phoneValidator = (value) => {
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
+
 const SkeletonLoader = () => {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-2">Account</h1>
-      <p className="text-sm text-gray-500 mb-6">Settings and Privacy  / Account</p>
-      <div className="container mx-auto px-4">
+      <p className="text-sm text-gray-500 mb-2">Settings and Privacy  / Account</p>
+      <div className="container mx-auto px-4 py-8 ">
         <div className="animate-pulse">
           <div className="grid grid-cols-12 gap-6">
           <Card className="col-span-7">
@@ -348,6 +349,13 @@ export function TouristProfileComponent() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+
+  const showToast = (message, type = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+  };
 
   const handlePasswordChangeSuccess = (message) => {
     setIsPasswordModalOpen(false);
@@ -716,7 +724,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     };
   
     return (
-      <Card className="w-full h-[275px]">
+      <Card className="w-full h-[275px] shadow-none border border-white">
         <CardHeader>
           <CardTitle>Redeem Loyalty Points</CardTitle>
           <CardDescription>Convert your loyalty points into wallet balance.</CardDescription>
@@ -846,7 +854,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     };
   
     return (
-      <Card className="w-full h-[275px] overflow-y-auto">
+      <Card className="w-full h-[275px] overflow-y-auto shadow-none border border-white">
         <CardHeader>
           <CardTitle>Preferred Currency</CardTitle>
           <CardDescription>
@@ -1022,11 +1030,11 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
   return (
     <ToastProvider>
-    <div >
+    <div>
       <h1 className="text-3xl font-bold mb-2">Account</h1>
-      <p className="text-sm text-gray-500 mb-6">Settings and Privacy  / Account</p>
+      <p className="text-sm text-gray-500 mb-2">Settings and Privacy  / Account</p>
      
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-12 gap-6">
         {/* Merged Profile Picture and Info Card - 8 columns */}
         <Card className="col-span-7">
@@ -1365,25 +1373,56 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
          {/* Shipping Addresses - 4 columns */}
          <div className="col-span-5 ">
-          <ShippingAddress addresses={tourist.shippingAddresses} fetch={fetchTouristProfile} />
+          <ShippingAddress addresses={tourist.shippingAddresses} fetch={fetchTouristProfile} showToast={showToast} />
         </div>
 
         {/* Tabs Section - spans 8 columns */}
         <div className="col-span-8">
-  <Tabs defaultValue="wallet" onValueChange={setActiveTab} className="w-full">
-    <TabsList className="grid w-full grid-cols-3">
-      <TabsTrigger value="wallet">View Wallet Balance</TabsTrigger>
-      <TabsTrigger value="currency">Change Currency</TabsTrigger>
-      <TabsTrigger value="points">Redeem Points</TabsTrigger>
-    </TabsList>
+        <Card>
+        <CardContent>
+  <Tabs defaultValue="wallet" onValueChange={setActiveTab} className="w-full bg-white">
+    <TabsList className="grid w-full grid-cols-3 bg-white pt-3">
+    <TabsTrigger
+      value="wallet"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'wallet'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'text-gray-500 bg-white'
+      }`}
+    >
+      View Wallet Balance
+      
+    </TabsTrigger>     
+    <TabsTrigger
+      value="currency"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'currency'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'border-gray-300 text-gray-500 bg-white'
+      }`}
+    >
+      Change Currency
+      
+    </TabsTrigger>      
+    <TabsTrigger
+      value="points"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'points'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'border-gray-300 text-gray-500 bg-white'
+      }`}
+    >
+      Redeem Points
+      
+    </TabsTrigger> </TabsList>
 
     <TabsContent value="wallet">
-      <Card>
+      <Card className="shadow-none border border-white">
         <CardContent className="pt-6">
           {/* Current Balance */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-xl">Current Balance</span>
+              <span className="font-bold text-xl">Current Balance</span>
             </div>
             <span className="text-xl font-bold">
               {formatWallet(tourist.wallet)}
@@ -1392,7 +1431,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
           {/* Wallet History */}
           <div className="mt-2 overflow-y-auto max-h-[173px]">
-            <h3 className="text-lg font-semibold mb-2">Wallet History</h3>
+            <h3 className="text-xl font-bold mb-2 text-[#1A3B47]">Wallet History</h3>
             {tourist.history && Array.isArray(tourist.history) && tourist.history.length > 0 ? (
               <div className="space-y-4">
                 {Object.entries(groupTransactionsByDate(tourist.history)).map(([dateGroup, groupData]) => {
@@ -1409,7 +1448,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
                           </div>
                           <ul className="space-y-2">
                             {monthData.transactions.map((entry, index) => (
-                              <li key={index} className="flex justify-between items-center pl-4 pr-4 pb-3 pt-3 bg-white rounded-md shadow-sm">
+                              <li key={index} className="flex justify-between items-center pl-4 pr-4 pb-3 pt-3 bg-white rounded-md">
                                 <div className="flex items-center gap-3">
                                   <div className="bg-gray-100 rounded-full p-2">
                                     {getTransactionIcon(entry.details)}
@@ -1495,6 +1534,8 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       <RedeemPoints user={tourist} onRedeemPoints={handleRedeemPoints} />
     </TabsContent>
   </Tabs>
+</CardContent>
+</Card>
 </div>
 
 {/* Notifications - 4 columns */}
@@ -1598,13 +1639,17 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       <Toast
         onOpenChange={setIsToastOpen}
         open={isToastOpen}
-        duration={5000}
-        className="bg-green-100"
+        duration={1500}
+        className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
       >
         <div className="flex items-center">
-          <CheckCircle className="text-green-500 mr-2" />
+          {toastType === 'success' ? (
+            <CheckCircle className="text-green-500 mr-2" />
+          ) : (
+            <XCircle className="text-red-500 mr-2" />
+          )}
           <div>
-            <ToastTitle>Success</ToastTitle>
+            <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
             <ToastDescription>{toastMessage}</ToastDescription>
           </div>
         </div>
@@ -1615,8 +1660,9 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     </div>
     </div>
     </ToastProvider>
-  )
-}
+  );
+};
+
 
 
 

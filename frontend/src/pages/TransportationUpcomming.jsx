@@ -145,8 +145,8 @@ const BookingDetails = ({ booking, isOpen, onClose, formatPrice, tourist, onDele
 const TransportationCardSkeleton = () => {
   return (
     <div>
-    <h1 className="text-3xl font-bold mb-2">Upcoming Transportation</h1>
-    <p className="text-sm text-gray-500 mb-2">Transportation / Upcoming</p>
+ <h1 className="text-3xl font-bold mb-2">Scheduled Transportation</h1>
+ <p className="text-sm text-gray-500 mb-2">Transportation / Upcoming</p>
 
     <div className="container mx-auto px-4 py-8">
      

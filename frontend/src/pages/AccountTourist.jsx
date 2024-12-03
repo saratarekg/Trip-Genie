@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Separator } from "@/components/ui/separator"
 import {
   ChevronRight,
   CreditCard,
@@ -170,12 +171,93 @@ const ExternalFlightBookings = ({ user }) => {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastType, setToastType] = useState('success');
   const [toastMessage, setToastMessage] = useState('');
+  const [exchangeRate, setExchangeRate] = useState(1);
+  const [tourist, setTourist] = useState(null);
+  const [currencyCode, setCurrencyCode] = useState("USD");
+  const [currencySymbol, setCurrencySymbol] = useState("$");
 
   const showToast = (type, message) => {
     setToastType(type);
     setToastMessage(message);
     setIsToastOpen(true);
   };
+
+
+  const formatWallet = (price) => {
+    fetchExchangeRate();
+    getCurrencySymbol();
+    if (tourist && exchangeRate && currencySymbol) {
+      const exchangedPrice = price * exchangeRate;
+      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+    }
+  };
+
+  const getUserRole = () => Cookies.get("role") || "guest";
+
+  const fetchTouristProfile = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const api = `http://localhost:4000/${role}`;
+      const response = await axios.get(api, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTourist(response.data);
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchTouristProfile();
+  }, []);
+
+  const fetchExchangeRate = useCallback(async () => {
+    if (tourist) {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch(`http://localhost:4000/tourist/populate`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            base: "67140446ee157ee4f239d523",
+            target: tourist.preferredCurrency,
+          }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setExchangeRate(data.conversion_rate);
+        } else {
+          console.error("Error in fetching exchange rate:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
+      }
+    }
+  }, [tourist]);
+
+  const getCurrencySymbol = useCallback(async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        `http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setCurrencyCode(response.data.code);
+      setCurrencySymbol(response.data.symbol);
+    } catch (error) {
+      console.error("Error fetching currency symbol:", error);
+    }
+  }, [tourist]);
+
+
   const fetchFlights = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -206,6 +288,7 @@ const ExternalFlightBookings = ({ user }) => {
     }
   };
 
+
   const handleCancelFlight = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -215,8 +298,14 @@ const ExternalFlightBookings = ({ user }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+
       if (response.status === 200) {
-        showToast("success","Flight booking canceled successfully!");
+        const refundedAmount = response.data.data.refundedAmount;
+        const newWalletBalance = response.data.data.newWalletBalance;
+        console.log(refundedAmount, newWalletBalance);
+        const refundConverted = formatWallet(refundedAmount);
+        const newWalletBalanceConverted = formatWallet(newWalletBalance);
+        showToast("success",`Booking cancelled. Refunded amount: ${refundConverted}. New wallet balance: ${newWalletBalanceConverted}`);
         setIsDialogOpen(false);
         fetchFlights();
       }
@@ -225,6 +314,7 @@ const ExternalFlightBookings = ({ user }) => {
       showToast("error","Failed to cancel the flight booking.");
     }
   };
+
 
   useEffect(() => {
     fetchFlights();
@@ -551,8 +641,7 @@ const ExternalFlightBookings = ({ user }) => {
                   <div className="flex flex-col ap-2">
                     <div className="text-sm text-gray-500">Price:</div>
                     <div className="text-4xl font-bold text-[#1A3B47]">
-                      {preferredCurrency.symbol}
-                      {flight.price}
+                      {formatWallet(flight.price)}
                     </div>
                   </div>
                   <Button
@@ -625,12 +714,163 @@ const ExternalHotelBookings = ({ user }) => {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastType, setToastType] = useState('success');
   const [toastMessage, setToastMessage] = useState('');
+  const [exchangeRate, setExchangeRate] = useState(1);
+  const [tourist, setTourist] = useState(null);
+  const [currencyCode, setCurrencyCode] = useState("USD");
+  const [currencySymbol, setCurrencySymbol] = useState("$");
+
+  const HotelBookingsSkeleton = () => {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Hotel Bookings</h1>
+        <p className="text-sm text-gray-500 mb-2">
+          External Bookings / Hotel Bookings
+        </p>
+  
+        <div className="container mx-auto px-4 py-6">
+          {/* Skeleton for two hotel booking cards */}
+          {Array(2)
+            .fill(null)
+            .map((_, index) => (
+              <div
+                key={index}
+                className="mb-6 border rounded-lg shadow-sm bg-white p-6 animate-pulse"
+              >
+                {/* Header Section */}
+                <div className="mb-6">
+                  <div className="h-6 bg-gray-300 rounded w-2/3 mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                </div>
+  
+                {/* Card Content */}
+                <div className="grid grid-cols-2 gap-10">
+                  {/* Left Side */}
+                  <div className="col-span-1 border-r-2 border-gray-300 pr-6 space-y-6">
+                    <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="h-4 bg-gray-300 rounded w-full"></div>
+                      <div className="h-4 bg-gray-300 rounded w-full"></div>
+                      <div className="h-4 bg-gray-300 rounded w-full"></div>
+                      <div className="h-4 bg-gray-300 rounded w-full"></div>
+                    </div>
+                  </div>
+  
+                  {/* Right Side */}
+                  <div className="col-span-1 space-y-6">
+                    <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                    <div className="flex items-center space-x-4">
+                      <div className="h-10 bg-gray-300 rounded w-1/4"></div>
+                      <div className="h-8 bg-gray-300 rounded w-1/6"></div>
+                    </div>
+                  </div>
+                </div>
+  
+                {/* Additional Info Section */}
+                <div className="mt-6 flex items-center bg-gray-100 px-4 py-4 rounded-md">
+                  {/* First Section */}
+                  <div className="flex items-center space-x-4">
+                    <div className="h-3 w-3 p-4 bg-gray-300 rounded-full"></div>
+                    <div className="h-6 w-48 bg-gray-300 rounded w-1/3"></div>
+                  </div>
+  
+                  <div className="border-l-2 border-gray-300 h-8 mx-6"></div>
+  
+                  {/* Second Section */}
+                  <div className="flex items-center space-x-4">
+                    <div className="h-3 w-3 p-4 bg-gray-300 rounded-full"></div>
+                    <div className="h-6 w-96 bg-gray-300 rounded w-1/3"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  };
+  
+  
 
   const showToast = (type, message) => {
     setToastType(type);
     setToastMessage(message);
     setIsToastOpen(true);
   };
+
+  const formatWallet = (price) => {
+    fetchExchangeRate();
+    getCurrencySymbol();
+    if (tourist && exchangeRate && currencySymbol) {
+      const exchangedPrice = price * exchangeRate;
+      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+    }
+  };
+
+  const getUserRole = () => Cookies.get("role") || "guest";
+
+  const fetchTouristProfile = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const api = `http://localhost:4000/${role}`;
+      const response = await axios.get(api, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setTourist(response.data);
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchTouristProfile();
+  }, []);
+
+  const fetchExchangeRate = useCallback(async () => {
+    if (tourist) {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await fetch(`http://localhost:4000/tourist/populate`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            base: "67140446ee157ee4f239d523",
+            target: tourist.preferredCurrency,
+          }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setExchangeRate(data.conversion_rate);
+        } else {
+          console.error("Error in fetching exchange rate:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
+      }
+    }
+  }, [tourist]);
+
+  const getCurrencySymbol = useCallback(async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        `http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setCurrencyCode(response.data.code);
+      setCurrencySymbol(response.data.symbol);
+    } catch (error) {
+      console.error("Error fetching currency symbol:", error);
+    }
+  }, [tourist]);
+
 
 
   const fetchHotels = async () => {
@@ -656,10 +896,10 @@ const ExternalHotelBookings = ({ user }) => {
       );
       setPreferredCurrency(currencyDetailsResponse.data);
 
-      setIsLoading(false);
+     setIsLoading(false);
     } catch (err) {
       setError("Failed to fetch hotel bookings or currency information");
-      setIsLoading(false);
+     setIsLoading(false);
     }
   };
 
@@ -673,7 +913,12 @@ const ExternalHotelBookings = ({ user }) => {
       );
 
       if (response.status === 200) {
-        showToast("success","Hotel booking canceled successfully!");
+        const refundedAmount = response.data.data.refundedAmount;
+        const newWalletBalance = response.data.data.newWalletBalance;
+        console.log(refundedAmount, newWalletBalance);
+        const refundConverted = formatWallet(refundedAmount);
+        const newWalletBalanceConverted = formatWallet(newWalletBalance);
+        showToast("success",`Booking cancelled. Refunded amount: ${refundConverted}. New wallet balance: ${newWalletBalanceConverted}`);
         setIsDialogOpen(false);
         fetchHotels();
       }
@@ -687,84 +932,151 @@ const ExternalHotelBookings = ({ user }) => {
     fetchHotels();
   }, []);
 
-  if (isLoading) return <div>Loading hotel bookings...</div>;
+  if (isLoading) return <div><HotelBookingsSkeleton/></div>;
   if (error) return <div>{error}</div>;
 
   return (
-    <ToastProvider>
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Hotel Bookings</h2>
-        {hotels.map((hotel, index) => (
-          <Card key={index}>
-            <CardHeader>
-              <CardTitle>{hotel.hotelName}</CardTitle>
-              <CardDescription>
-                Check-in: {new Date(hotel.checkinDate).toLocaleDateString()}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Hotel ID: {hotel.hotelID}</p>
-              <p>
-                Check-out: {new Date(hotel.checkoutDate).toLocaleDateString()}
-              </p>
-              <p>Number of Rooms: {hotel.numberOfRooms}</p>
-              <p>Room Name: {hotel.roomName}</p>
-              <p>
-                Price: {preferredCurrency.symbol}
-                {hotel.price}
-              </p>
-              <p>Number of Adults: {hotel.numberOfAdults}</p>
+<ToastProvider>
+  <div>
+    <h1 className="text-3xl font-bold mb-2">Hotel Bookings</h1>
+    <p className="text-sm text-gray-500 mb-2">
+      External Bookings / Hotel Bookings
+    </p>
 
-              {/* Cancel Button */}
-              <Button
-                variant="outline"
-                className="mt-2"
-                onClick={() => {
-                  setSelectedHotel(hotel._id);
-                  setIsDialogOpen(true);
-                }}
-              >
-                Cancel Booking
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-
-        {/* Confirmation Dialog */}
-        <DeleteConfirmation
-          isOpen={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
-          itemType="hotel booking"
-          onConfirm={handleCancelHotel}
-        />
-
-        {/* Toast Notification */}
-        {isToastOpen && (
-          <Toast
-          onOpenChange={setIsToastOpen}
-          open={isToastOpen}
-          duration={5000}
-          className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
-        >
-          <div className="flex items-center">
-            {toastType === 'success' ? (
-              <CheckCircle className="text-green-500 mr-2" />
-            ) : (
-              <XCircle className="text-red-500 mr-2" />
-            )}
-            <div>
-              <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-              <ToastDescription>
-                {toastMessage}
-              </ToastDescription>
-            </div>
-          </div>
-          <ToastClose />
-        </Toast>
-        )}
-        <ToastViewport />
+    <div className="container mx-auto px-4 py-4">
+      {hotels.map((hotel, index) => (
+    <Card key={index} className="mb-4">
+    <CardHeader>
+      <CardTitle className="text-[#1A3B47] font-bold">
+        Hotel Booking at {hotel.hotelName}
+      </CardTitle>
+      <CardDescription className="font-semibold">
+        Hotel ID: {hotel.hotelID}
+      </CardDescription>
+    </CardHeader>
+  
+    <CardContent className="grid grid-cols-2 gap-10">
+  {/* Vertical Separator */}
+  <div className="col-span-1 border-r-2 border-gray-300 ">
+    {/* Left Side Content */}
+    <div className="space-y-4">
+      <div className="flex items-center mt-4">
+        <p className="text-xl font-semibold text-[#1A3B47]">
+          {hotel.roomName} <span className="font-normal">x</span> {hotel.numberOfRooms}
+        </p>
       </div>
-    </ToastProvider>
+
+      {/* Info in 2 rows */}
+      <div className="grid grid-cols-2 gap-3">
+        <p className="text-gray-600">
+          Check-in on <span className="font-bold">{new Date(hotel.checkinDate).toLocaleDateString()}</span>
+        </p>
+        <p className="text-gray-600">
+          <span className="font-bold">{hotel.numberOfAdults}</span> <span className="font-normal">Adult(s)</span>
+        </p>
+        <p className="text-gray-600">
+          Check-out on <span className="font-bold">{new Date(hotel.checkoutDate).toLocaleDateString()}</span>
+        </p>
+        <p className="text-gray-600">
+  Paid Via <span className="font-bold">{hotel.paymentType || "Credit Card"}</span>
+</p>
+
+      </div>
+    </div>
+  </div>
+
+  {/* Right Side Content */}
+  <div className="col-span-1 space-y-6 pl-10">
+    <div className="text-gray-600">
+      <p className="font-normal">Name:</p>
+      <p className="font-bold">{tourist.fname} {tourist.lname}</p>
+    </div>
+    <div className="text-gray-600">
+      <p className="font-normal">Email:</p>
+      <p className="font-bold">{tourist.email}</p>
+    </div>
+
+    {/* Booking price with cancel button */}
+    <div className="flex items-center space-x-4">
+      <p className="text-4xl font-semibold">{formatWallet(hotel.price)}</p>
+      <button
+        onClick={() => {
+          setSelectedHotel(hotel._id);
+          setIsDialogOpen(true);
+        }}
+        className="px-4 py-2 bg-gray-200 text-[#388A94] hover:bg-gray-300 rounded-md focus:outline-none"
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</CardContent>
+
+    {/* Additional Info Section */}
+    <div className="space-y-2 p-4">
+      <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+        {/* First Section */}
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Ticket className="h-10 w-10" />
+          <span>Show your booking confirmation and ID during check-in</span>
+        </div>
+  
+        {/* Divider */}
+        <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
+  
+        {/* Second Section */}
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Clock className="h-10 w-10" />
+          <span>
+            Please check in at least 1 hour before your scheduled check-in time to ensure smooth processing and room availability.
+          </span>
+        </div>
+      </div>
+    </div>
+  </Card>
+  
+   
+      ))}
+
+      {/* Confirmation Dialog */}
+      <DeleteConfirmation
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        itemType="hotel booking"
+        onConfirm={handleCancelHotel}
+      />
+
+      {/* Toast Notification */}
+      {isToastOpen && (
+            <Toast
+              onOpenChange={setIsToastOpen}
+              open={isToastOpen}
+              duration={5000}
+              className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+            >
+              <div className="flex items-center">
+                {toastType === 'success' ? (
+                  <CheckCircle className="text-green-500 mr-2" />
+                ) : (
+                  <XCircle className="text-red-500 mr-2" />
+                )}
+                <div>
+                  <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                  <ToastDescription>
+                    {toastMessage}
+                  </ToastDescription>
+                </div>
+              </div>
+              <ToastClose />
+            </Toast>
+          )}
+      <ToastViewport />
+    </div>
+  </div>
+</ToastProvider>
+
+
+
   );
 };
 
@@ -1379,14 +1691,11 @@ export default function AccountManagement() {
   };
 
   const renderContent = () => {
-    if (isLoading) return <div className="text-center">Loading...</div>;
+   
     if (error)
       return <div className="text-center text-red-500">Error: {error}</div>;
     if (!user)
-      return <div className="text-center">No user data available.</div>;
-
-    console.log(activeTab);
-    console.log("hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+      return <div className="text-center"></div>;
 
     switch (activeTab) {
       case "info":
@@ -1614,7 +1923,7 @@ export default function AccountManagement() {
       //   roles: ["tourist"],
       // },
       {
-        name: "My Complaints",
+        name: "Complaints",
         icon: FileText,
         tab: "my-complaints",
         roles: ["tourist"],

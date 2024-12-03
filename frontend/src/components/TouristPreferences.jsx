@@ -14,6 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Range, getTrackBackground } from "react-range";
+import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast";
+
+import { CheckCircle, XCircle } from 'lucide-react';
 
 const schema = z.object({
   budget: z.number().min(0, "Budget must be a positive number").nullable(),
@@ -40,11 +43,11 @@ function DualHandleSliderComponent({
   values,
   exchangeRate,
   onChange,
-  middleColor = "#f97516",
-  colorRing = "orange",
+  middleColor = "#B5D3D1",
+  colorRing = "#5D9297",
 }) {
   return (
-    <div className="w-full px-4 py-8">
+    <div className="w-4/5 mx-auto px-4 py-3">
       <Range
         values={values}
         step={step}
@@ -78,10 +81,10 @@ function DualHandleSliderComponent({
             <div
               {...restProps}
               className={`w-5 h-5 transform translate-x-10 bg-white rounded-full shadow flex items-center justify-center ${
-                isDragged ? `ring-2 ring-${colorRing}-500` : ""
+                isDragged ? `ring-2 ring-[${colorRing}]` : ""
               }`}
             >
-              <div className={`w-2 h-2 bg-${colorRing}-500 rounded-full`} />
+              <div className={`w-2 h-2 bg-[${colorRing}] rounded-full`} />
             </div>
           );
         }}
@@ -100,6 +103,44 @@ function DualHandleSliderComponent({
   );
 }
 
+function SkeletonLoader() {
+  return (
+    <div className="">
+      <h1 className="text-3xl font-bold mb-2">Travel Preferences</h1>
+      <p className="text-sm text-gray-500 mb-6">Settings and Privacy / Preferences</p>
+      <div className="container mx-auto px-4 animate-pulse">
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <div className="h-5 bg-gray-300 rounded mb-2 w-1/4"></div>
+              <div className="h-3 bg-gray-300 rounded mb-4 w-full"></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="h-5 bg-gray-300 rounded mb-2 w-1/4"></div>
+                <div className="h-10 bg-gray-300 rounded mb-4 w-full"></div>
+              </div>
+              <div>
+                <div className="h-5 bg-gray-300 rounded mb-2 w-1/4"></div>
+                <div className="h-10 bg-gray-300 rounded mb-4 w-full"></div>
+              </div>
+              <div>
+                <div className="h-5 bg-gray-300 rounded mb-2 w-1/4"></div>
+                <div className="h-10 bg-gray-300 rounded mb-4 w-full"></div>
+              </div>
+              <div>
+                <div className="h-5 bg-gray-300 rounded mb-2 w-1/4"></div>
+                <div className="h-10 bg-gray-300 rounded mb-4 w-full"></div>
+              </div>
+            </div>
+          </div>
+          <div className="h-10 bg-gray-300 rounded w-1/4"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TravelPreferences() {
   const [preferences, setPreferences] = useState(null);
   const [options, setOptions] = useState({
@@ -113,6 +154,16 @@ export default function TravelPreferences() {
   const [sliderValues, setSliderValues] = useState([0, 1000]);
   const [exchangeRate, setExchangeRate] = useState(1);
   const [currencySymbol, setCurrencySymbol] = useState("$");
+
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+
+  const showToast = (message, type = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+  };
 
   const {
     control,
@@ -276,12 +327,10 @@ export default function TravelPreferences() {
         updatedData,
         { headers }
       );
-      setDialogMessage("Preferences updated successfully!");
-      setIsDialogOpen(true);
+      showToast("Preferences updated successfully", 'success');
     } catch (error) {
       console.error("Error updating preferences:", error);
-      setDialogMessage("Failed to update preferences. Please try again.");
-      setIsDialogOpen(true);
+      showToast("Failed to update preferences. Please try again.", 'error');
     }
   };
 
@@ -295,15 +344,17 @@ export default function TravelPreferences() {
     return null;
   }
 
-  if (!preferences) return <div>Loading...</div>;
+  if (!preferences) return <SkeletonLoader />;
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-4 text-left">Travel Preferences</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-4">
+    <ToastProvider>
+    <div>
+      <h1 className="text-3xl font-bold mb-2">Travel Preferences</h1>
+      <p className="text-sm text-gray-500 mb-6">Settings and Privacy  / Preferences</p>
+      <div className="container mx-auto px-4"> <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-4 ">
           <div>
-            <Label className="text-sm font-medium text-gray-600 mb-1">
+            <Label className="text-lg font-semibold text-[#1A3B47] mb-1">
               Price and Budget Range
             </Label>
             <DualHandleSliderComponent
@@ -316,98 +367,100 @@ export default function TravelPreferences() {
               onChange={handleSliderChange}
             />
           </div>
-          <Controller
-            name="categories"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <Label
-                  htmlFor="categories"
-                  className="text-sm font-medium text-gray-600 mb-1"
-                >
-                  Categories
-                </Label>
-                <Select
-                  {...field}
-                  isMulti
-                  options={options.categories}
-                  value={field.value || []}
-                  onChange={(newValue) => field.onChange(newValue)}
-                  className="mt-1"
-                />
-              </div>
-            )}
-          />
-          <Controller
-            name="tourLanguages"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <Label
-                  htmlFor="tourLanguages"
-                  className="text-sm font-medium text-gray-600 mb-1"
-                >
-                  Tour Languages
-                </Label>
-                <Select
-                  {...field}
-                  isMulti
-                  options={options.languages}
-                  value={field.value || []}
-                  onChange={(newValue) => field.onChange(newValue)}
-                  className="mt-1"
-                />
-              </div>
-            )}
-          />
-          <Controller
-            name="tourType"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <Label
-                  htmlFor="tourType"
-                  className="text-sm font-medium text-gray-600 mb-1"
-                >
-                  Tour Type
-                </Label>
-                <Select
-                  {...field}
-                  isMulti
-                  options={options.tourTypes}
-                  value={field.value || []}
-                  onChange={(newValue) => field.onChange(newValue)}
-                  className="mt-1"
-                />
-              </div>
-            )}
-          />
-          <Controller
-            name="historicalPlaceType"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <Label
-                  htmlFor="historicalPlaceType"
-                  className="text-sm font-medium text-gray-600 mb-1"
-                >
-                  Historical Place Type
-                </Label>
-                <Select
-                  {...field}
-                  isMulti
-                  options={options.historicalTypes}
-                  value={field.value || []}
-                  onChange={(newValue) => field.onChange(newValue)}
-                  className="mt-1"
-                />
-              </div>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <Controller
+              name="categories"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <Label
+                    htmlFor="categories"
+                    className="text-lg font-semibold text-[#1A3B47] mb-1"
+                  >
+                    Categories
+                  </Label>
+                  <Select
+                    {...field}
+                    isMulti
+                    options={options.categories}
+                    value={field.value || []}
+                    onChange={(newValue) => field.onChange(newValue)}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+            />
+            <Controller
+              name="tourLanguages"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <Label
+                    htmlFor="tourLanguages"
+                    className="text-lg font-semibold text-[#1A3B47] mb-1"
+                  >
+                    Tour Languages
+                  </Label>
+                  <Select
+                    {...field}
+                    isMulti
+                    options={options.languages}
+                    value={field.value || []}
+                    onChange={(newValue) => field.onChange(newValue)}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+            />
+            <Controller
+              name="tourType"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <Label
+                    htmlFor="tourType"
+                    className="text-lg font-semibold text-[#1A3B47] mb-1"
+                  >
+                    Tour Type
+                  </Label>
+                  <Select
+                    {...field}
+                    isMulti
+                    options={options.tourTypes}
+                    value={field.value || []}
+                    onChange={(newValue) => field.onChange(newValue)}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+            />
+            <Controller
+              name="historicalPlaceType"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <Label
+                    htmlFor="historicalPlaceType"
+                    className="text-lg font-semibold text-[#1A3B47] mb-1"
+                  >
+                    Historical Place Type
+                  </Label>
+                  <Select
+                    {...field}
+                    isMulti
+                    options={options.historicalTypes}
+                    value={field.value || []}
+                    onChange={(newValue) => field.onChange(newValue)}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+            />
+          </div>
         </div>
         <Button
           type="submit"
-          className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+          className=" bg-[#388A94] hover:bg-[#2e6b77] text-white"
         >
           Update Preferences
         </Button>
@@ -423,5 +476,32 @@ export default function TravelPreferences() {
         </DialogContent>
       </Dialog>
     </div>
+    {isToastOpen && (
+      <Toast
+        onOpenChange={setIsToastOpen}
+        open={isToastOpen}
+        duration={1500}
+        className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+      >
+        <div className="flex items-center">
+          {toastType === 'success' ? (
+            <CheckCircle className="text-green-500 mr-2" />
+          ) : (
+            <XCircle className="text-red-500 mr-2" />
+          )}
+          <div>
+            <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+            <ToastDescription>{toastMessage}</ToastDescription>
+          </div>
+          <ToastClose />
+        </div>
+       
+      </Toast>
+    )}
+    <ToastViewport className="fixed top-0 right-0 p-4" />
+    </div>
+    </ToastProvider>
+    
+
   );
 }

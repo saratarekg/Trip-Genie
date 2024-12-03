@@ -400,7 +400,10 @@ const cancelFlightBooking = async (req, res) => {
 
     res.status(200).json({
       message: "Flight booking canceled successfully and refund issued",
-      updatedWallet: updatedTourist.wallet,
+      data: {
+        refundedAmount: refundAmount,
+        newWalletBalance: updatedTourist.wallet
+      }
     });
   } catch (error) {
     console.error(error);
@@ -552,7 +555,10 @@ const cancelHotelBooking = async (req, res) => {
 
     res.status(200).json({
       message: "Hotel booking canceled successfully and refund issued",
-      updatedWallet: updatedTourist.wallet,
+      data: {
+        refundedAmount: refundAmount,
+        newWalletBalance: updatedTourist.wallet
+      }
     });
   } catch (error) {
     console.error(error);
@@ -564,7 +570,9 @@ const getMyHotels = async (req, res) => {
   const touristID = res.locals.user_id;
 
   try {
-    const hotels = await TouristHotel.find({ touristID });
+    // Populate the 'tourist' field (or the field name you have in the schema)
+    const hotels = await TouristHotel.find({ touristID })
+      .populate('touristID'); // Add this to populate the tourist details
 
     res.status(200).json(hotels);
   } catch (error) {
@@ -572,6 +580,7 @@ const getMyHotels = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const bookTransportation = async (req, res) => {
   const { transportationID, seatsToBook, paymentMethod } = req.body;

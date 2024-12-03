@@ -23,9 +23,11 @@ import {
   GraduationCap,
   Map,
 } from "lucide-react";
+import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 
 export default function ShippingAddresses({ 
-  fetch 
+  fetch,
+  showToast // Add showToast prop
 }) {
   const [addresses, setAddresses] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -110,6 +112,7 @@ export default function ShippingAddresses({
           addressDetails,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        showToast("Address updated successfully!", "success"); // Show success toast
       } else {
         // Add new address
         await axios.put(
@@ -117,11 +120,13 @@ export default function ShippingAddresses({
           addressDetails,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        showToast("Address added successfully!", "success"); // Show success toast
       }
       fetchAddresses();
       handleCloseModal();
     } catch (error) {
       console.error("Error saving address:", error);
+      showToast("Error saving address.", "error"); // Show error toast
     } finally {
       setIsLoading(false);
       fetch();
@@ -138,8 +143,10 @@ export default function ShippingAddresses({
       );
       fetchAddresses();
       fetch();
+      showToast("Address set as default successfully!", "success"); // Show success toast
     } catch (error) {
       console.error("Error setting default address:", error);
+      showToast("Error setting default address.", "error"); // Show error toast
     }
   };
 
@@ -161,8 +168,10 @@ export default function ShippingAddresses({
       fetchAddresses();
       setIsDeleteConfirmOpen(false);
       fetch();
+      showToast("Address deleted successfully!", "success"); // Show success toast
     } catch (error) {
       console.error("Error deleting address:", error);
+      showToast("Error deleting address.", "error"); // Show error toast
     }
   };
 
@@ -573,29 +582,12 @@ w-full border rounded-md p-2"
           </DialogContent>
         </Dialog>
       )}
-      {isDeleteConfirmOpen && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-800 bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-md shadow-lg max-w-sm w-full">
-            <h3 className="text-lg font-semibold mb-4">
-              Are you sure you want to delete this address?
-            </h3>
-            <div className="flex justify-between">
-              <button
-                onClick={closeDelete}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md"
-              >
-                No
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded-md"
-              >
-                Yes, Delete Address
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmation
+        isOpen={isDeleteConfirmOpen}
+        onClose={closeDelete}
+        itemType="address"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
