@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast";
 import Cookies from "js-cookie";
-import { CheckCircle, XCircle } from "lucide-react";  // Ensure these icons are available
+import { CheckCircle, XCircle, Lock } from "lucide-react";  // Ensure these icons are available
 
 const getPasswordStrength = (password) => {
   const strength = {
@@ -68,7 +68,7 @@ export default function PasswordChanger({ onSuccess }) {
       );
 
       if (response.status === 200) {
-        onSuccess('Your password has been successfully updated. Please use your new password for future logins.'); // Call the onSuccess prop with a message
+        onSuccess('Your password has been successfully updated.'); // Call the onSuccess prop with a message
         // Reset form fields
         setOldPassword("");
         setNewPassword("");
@@ -95,9 +95,20 @@ export default function PasswordChanger({ onSuccess }) {
   };
 
   return (
+    <div>
+    <div className="flex items-center space-x-2 mb-4">
+    <h1 className="ml-4 text-3xl font-bold mb-2 flex items-center space-x-2 text-left">
+  <span className="bg-gray-200 w-10 h-10 rounded-full flex items-center justify-center">
+    <span className="flex">
+      <Lock className="h-5 w-5 text-gray-600" />
+    </span>
+  </span>
+  <span>Change Password</span>
+</h1>
+
+  </div>
     <ToastProvider>
       <div>
-        <h1 className="text-3xl font-bold mb-2">Change Password</h1>
         <div className="container mx-auto px-4">
           <form onSubmit={handlePasswordChange} className="space-y-4 w-full max-w-lg mx-auto">
             <div className="space-y-2">
@@ -238,5 +249,6 @@ export default function PasswordChanger({ onSuccess }) {
         )}
       </div>
     </ToastProvider>
+    </div>
   );
 }
