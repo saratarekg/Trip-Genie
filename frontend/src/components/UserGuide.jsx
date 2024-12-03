@@ -145,6 +145,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
                   position: "relative",
                   marginLeft: genieOnLeft ? "120px" : "0", // Adjust position to leave space for the character
                   marginRight: genieOnLeft ? "0" : "120px", // Adjust position to leave space for the character
+                  className: "animate-genie shadow-lg",
                 }}
               >
                 {/* Step Number */}
@@ -262,9 +263,10 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
                   position: "absolute",
                   left: genieOnLeft ? "-50px" : "auto", // Position the image outside the tooltip
                   right: genieOnLeft ? "auto" : "-50px", // Position the image outside the tooltip
-                  top: "50%",
+                  top: "0%",
                   transform: "translateY(-50%)", // Center the image vertically with the tooltip
                 }}
+                className="animate-float"
               >
                 <img
                   src={genieOnLeft ? firstGenie : secondGenie}
