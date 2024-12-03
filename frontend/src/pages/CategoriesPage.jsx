@@ -21,9 +21,11 @@ export default function CategoriesPage() {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const fetchCategories = async () => {
     try {
+      setLoading(true);
       const token = Cookies.get("jwt");
       const response = await axios.get(
         "http://localhost:4000/admin/categories",
@@ -34,6 +36,7 @@ export default function CategoriesPage() {
         }
       );
       setCategories(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching categories:", error);
       showToast('Error fetching categories', 'error');
@@ -178,54 +181,75 @@ export default function CategoriesPage() {
                     </th>
                   </tr>
                 </thead>
-                <AnimatePresence mode="wait">
-                  <motion.tbody
-                    key="table-body"
-                    className="bg-white divide-y divide-gray-200"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    {categories.map((category, index) => (
-                      <motion.tr
-                        key={category._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.2, delay: index * 0.05 }}
-                      >
-                        <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {category.name}
+                {loading ? (
+                  <tbody>
+                    {[1, 2, 3].map((i) => (
+                      <tr key={i} className="animate-pulse bg-gray-100">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                          <div className="w-1/2 h-4 bg-gray-300 rounded" />
                         </td>
                         <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(category.createdAt).toLocaleDateString()}
+                          <div className="w-1/3 h-4 bg-gray-300 rounded" />
                         </td>
                         <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                          <Button
-                            onClick={() => {
-                              setSelectedCategoryId(category._id);
-                              setUpdatedCategory(category.name);
-                            }}
-                            className="p-2 bg-white text-[#1A3B47] hover:text-[#1A3B47]/70 hover:underline"
-                            size="icon"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          <div className="w-8 h-8 bg-gray-300 rounded-full" />
                         </td>
                         <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                          <Button
-                            onClick={() => handleDeleteClick(category)}
-                            className="p-2 bg-white text-red-600 hover:text-red-400 hover:underline"
-                            size="icon"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="w-8 h-8 bg-gray-300 rounded-full" />
                         </td>
-                      </motion.tr>
+                      </tr>
                     ))}
-                  </motion.tbody>
-                </AnimatePresence>
+                  </tbody>
+                ) : (
+                  <AnimatePresence mode="wait">
+                    <motion.tbody
+                      key="table-body"
+                      className="bg-white divide-y divide-gray-200"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {categories.map((category, index) => (
+                        <motion.tr
+                          key={category._id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.2, delay: index * 0.05 }}
+                        >
+                          <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {category.name}
+                          </td>
+                          <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(category.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                            <Button
+                              onClick={() => {
+                                setSelectedCategoryId(category._id);
+                                setUpdatedCategory(category.name);
+                              }}
+                              className="p-2 bg-white text-[#1A3B47] hover:text-[#1A3B47]/70 hover:underline"
+                              size="icon"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </td>
+                          <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                            <Button
+                              onClick={() => handleDeleteClick(category)}
+                              className="p-2 bg-white text-red-600 hover:text-red-400 hover:underline"
+                              size="icon"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </motion.tbody>
+                  </AnimatePresence>
+                )}
               </table>
             </div>
           </div>
@@ -270,28 +294,20 @@ export default function CategoriesPage() {
             </DialogContent>
           </Dialog>
         )}
+
         <ToastViewport className="fixed top-0 right-0 p-4" />
         {isToastOpen && (
           <Toast
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
-            duration={2000}
-            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+            className="bg-[#28A745] text-white p-4 mb-4 rounded-lg flex items-center"
           >
-            <div className="flex items-center">
-              {toastType === 'success' ? (
-                <CheckCircle className="text-green-500 mr-2" />
-              ) : (
-                <XCircle className="text-red-500 mr-2" />
-              )}
-              <div>
-                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-                <ToastDescription>
-                  {toastMessage}
-                </ToastDescription>
-              </div>
-            </div>
-            <ToastClose />
+            <CheckCircle className="h-5 w-5 mr-2" />
+            <ToastTitle>Success!</ToastTitle>
+            <ToastDescription>{toastMessage}</ToastDescription>
+            <ToastClose className="text-white ml-2">
+              <XCircle className="h-5 w-5" />
+            </ToastClose>
           </Toast>
         )}
       </ToastProvider>
