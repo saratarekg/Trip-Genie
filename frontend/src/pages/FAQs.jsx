@@ -70,7 +70,7 @@ const FAQ = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#E6DCCF]/10 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       
       {/* Conditionally render the blue top section */}
       {!isAccountFAQsPage && (

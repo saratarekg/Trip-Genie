@@ -69,6 +69,17 @@ const requiredDocuments = {
 
 // const formSchema = stage1Schema.merge(stage2Schema).merge(stage3Schema);
 
+const getPasswordStrength = (password) => {
+  const strength = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    number: /\d/.test(password),
+  };
+
+  const fulfilled = Object.values(strength).filter(Boolean).length;
+  return { ...strength, fulfilled };
+};
+
 export function SignupForm() {
   const [stage, setStage] = useState(1);
   const [formData, setFormData] = useState({});
@@ -279,6 +290,20 @@ export function SignupForm() {
         }
       }
     });
+
+  const getProgressBarColor = (password) => {
+    const strength = getPasswordStrength(password);
+    if (strength.fulfilled === 2) return "bg-[#F88C33]";
+    if (strength.fulfilled === 3) return "bg-[#5D9297]";
+    return "bg-red-500";
+  };
+
+  const getStrengthLabel = (password) => {
+    const strength = getPasswordStrength(password);
+    if (strength.fulfilled === 2) return "Could Be Stronger";
+    if (strength.fulfilled === 3) return "Strong Password";
+    return "Too Weak";
+  };
 
   const formRefs = {
     username: useRef(null),
@@ -755,6 +780,59 @@ export function SignupForm() {
                     <Input type="password" placeholder="Password" {...field} />
                   </FormControl>
                   <FormMessage />
+                  <div className="flex items-center mt-2 space-x-2 w-full">
+                    <div className="relative flex-grow h-2 bg-gray-200 rounded-full">
+                      <div
+                        className={`absolute h-2 rounded-full transition-all duration-300 ${watch("password").length === 0 ? 'bg-gray-300' : getProgressBarColor(watch("password"))}`}
+                        style={{
+                          width: `${watch("password").length === 0 ? 0 : Math.max((getPasswordStrength(watch("password")).fulfilled / 3), 1 / 3) * 100}%`
+                        }}
+                      ></div>
+                    </div>
+                    {watch("password").length > 0 && (
+                      <p className="text-sm font-medium text-gray-700 ml-2">
+                        {getStrengthLabel(watch("password"))}
+                      </p>
+                    )}
+                  </div>
+                  <ul className="text-sm mt-4 space-y-1">
+                    <li
+                      className={`flex items-center ${getPasswordStrength(watch("password")).length ? "text-[#388A94]" : "text-gray-500"}`}
+                    >
+                      <span
+                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                          getPasswordStrength(watch("password")).length ? "bg-[#388A94] text-white" : "border-gray-500"
+                        }`}
+                      >
+                        ✓
+                      </span>
+                      At least 8 characters
+                    </li>
+                    <li
+                      className={`flex items-center ${getPasswordStrength(watch("password")).uppercase ? "text-[#388A94]" : "text-gray-500"}`}
+                    >
+                      <span
+                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                          getPasswordStrength(watch("password")).uppercase ? "bg-[#388A94] text-white" : "border-gray-500"
+                        }`}
+                      >
+                        ✓
+                      </span>
+                      At least one uppercase letter
+                    </li>
+                    <li
+                      className={`flex items-center ${getPasswordStrength(watch("password")).number ? "text-[#388A94]" : "text-gray-500"}`}
+                    >
+                      <span
+                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                          getPasswordStrength(watch("password")).number ? "bg-[#388A94] text-white" : "border-gray-500"
+                        }`}
+                      >
+                        ✓
+                      </span>
+                      At least one number
+                    </li>
+                  </ul>
                 </FormItem>
               )}
             />

@@ -1,0 +1,64 @@
+Sam: 
+
+- convert from USD to my currency in external bookings 
+- two reqs for booking in flights
+- book transportation lw katab aktr mn available seats, tickets bta3et activity we itinerary aolo en mfish kfaya
+
+Amy: 
+
+alwan profile w settings
+- complaints 
+- preferences
+- booked hotels
+(kol el fat dol 3and tourist)
+
+
+Aby: 
+admin w seller y view zy table feha product w amount sold w quantity items in stock
+(report gdeeda)
+
+
+lw had by delete account tour guide msln w had 3aml book le haga ybaa hakhaly kol haga deactivated automatically hatta el booked, bs el booked tban lel aaml book
+
+- email for booking gets send as dollars instead of my currency
+
+
+Alaa:
+ sheel account info fe tourism governor we 7ot esmo foo2 zy admin 
+ estana radwa t3ml change pass we 5odha mn admin
+ change pass fe governor
+
+Houba:
+check hn3ml eh f update itinerary lw booked
+- make all popups consistent (success toast and delete popup zay el radwa 3amlha)
+
+
+Jana:
+ help amy fel user profiles 
+- single act has no loading until prices are displayed 
+- make loading like gray containers zay ma ana 3amla f notifications
+
+
+
+Zeina:
+redeem points tbaa kol 100 maamlsh redeem decimal
+admin by update products btaato bs bs ynf3 y delete aady
+
+
+Radwa:
+- raga3i sort by preference fe itinerary !!
+- sort by preference shklo w alwano mokhtlfa f kol page
+ change pass fe admin
+- all hotels (enti we amy)
+
+
+ 
+Habiba:
+- all flights (tab3y m3 amy)
+
+Hazem: 
+nehgez awl yom evaluation sprint 3
+- pagination all pages
+
+
+

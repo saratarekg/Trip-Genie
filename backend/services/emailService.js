@@ -75,12 +75,13 @@ const sendActivityReminder = async (activity) => {
       activity.save();
     }
   });
-}; 
+};
 
 const sendActivityBookingConfirmationEmail = async (
   email,
   booking,
-  activity
+  activity,
+  paymentAmount
 ) => {
   const mailOptions = {
     from: process.env.EMAIL,
@@ -95,7 +96,7 @@ const sendActivityBookingConfirmationEmail = async (
           "en-US"
         )}</p>
         <p><strong>Payment Type: ${booking.paymentType}</p>
-        <p><strong>Payment Amount: ${booking.paymentAmount}</p>
+        <p><strong>Payment Amount: ${paymentAmount}</p>
         <p><strong>Number of Tickets: ${booking.numberOfTickets}</p>
         <p>Enjoy your experience!</p>`,
   };
@@ -112,7 +113,8 @@ const sendActivityBookingConfirmationEmail = async (
 const sendItineraryBookingConfirmationEmail = async (
   email,
   booking,
-  itinerary
+  itinerary,
+  paymentAmount
 ) => {
   const mailOptions = {
     from: process.env.EMAIL,
@@ -126,7 +128,7 @@ const sendItineraryBookingConfirmationEmail = async (
               "en-US"
             )}</p>
             <p><strong>Payment Type: ${booking.paymentType}</p>
-            <p><strong>Payment Amount: ${booking.paymentAmount}</p>
+            <p><strong>Payment Amount: ${paymentAmount}</p>
             <p><strong>Number of Tickets: ${booking.numberOfTickets}</p>
             <p>Enjoy your trip!</p>`,
   };
@@ -154,18 +156,17 @@ const sendPurchaseConfirmationEmail = async (
         <p><strong>Order ID:</strong> ${purchase._id}</p>
         <p><strong>Delivery Date:</strong> ${new Date(
           purchase.deliveryDate
-        ).toLocaleDateString("en-US")}</p>
-        <p><strong>Delivery Time:</strong> ${purchase.deliveryTime}</p>
+        ).toLocaleDateString("en-US")}</p>  
         <p><strong>Delivery Address:</strong> ${purchase.shippingAddress}</p>
         <p><strong>Delivery Type:</strong> ${purchase.deliveryType}</p>
         <p><strong>Payment Method:</strong> ${purchase.paymentMethod}</p>
-        <p><strong>Total Price:</strong> $${purchase.totalPrice}</p>
+        <p><strong>Total Price:</strong> ${purchase.totalPrice}</p>
         <p><strong>Products:</strong></p>
         <ul>
           ${productsDetails
             .map(
               (item) =>
-                `<li>${item.quantity} x ${item.product.name} - $${item.product.price}</li>`
+                `<li>${item.quantity} x ${item.product.name} - ${item.product.price}</li>`
             )
             .join("")}
         </ul>`,

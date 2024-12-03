@@ -96,11 +96,10 @@ const advertiserSchema = new Schema(
         type: {
           type: String,
           enum: ["birthday", "payment", "alert", "offer", "reminder"], // The general category of the notification
-          required: true,
+
         },
         title: {
           type: String,
-          required: true, // Short title or headline for the notification
         },
         priority: {
           type: String,
@@ -109,7 +108,7 @@ const advertiserSchema = new Schema(
         },
       },
     ],
-    hasUnseenNotifications: { type: Boolean, default: true },
+    hasUnseenNotifications: { type: Boolean, default: false },
     logo: {
       public_id: { type: String },
       url: { type: String },

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react"
 import axios from "axios"
 import Flag from 'react-world-flags'
 import Cookies from "js-cookie"
-import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear, parseISO } from 'date-fns';import { Activity, ShoppingCart, Plane, Hotel, Calendar, Wallet, Award, Bell, ShoppingBasket, Bus, Map, User, Car } from 'lucide-react'
+import { format, isToday, isYesterday, isThisWeek, isThisMonth, isThisYear, parseISO } from 'date-fns';import { Activity, ShoppingCart, Plane, Hotel, Calendar, Wallet, Award, Bell, ShoppingBasket,CheckCircle, XCircle, Bus, Map, User, Car } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -27,6 +27,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import PasswordChanger from "@/components/Passwords";
+import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast";
 
 const convertUrlToBase64 = async (url) => {
   const response = await fetch(url);
@@ -114,12 +116,13 @@ const phoneValidator = (value) => {
   return phoneNumber ? phoneNumber.isValid() : false;
 };
 
+
 const SkeletonLoader = () => {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-2">My Account</h1>
-      <p className="text-sm text-gray-500 mb-6">Settings / Account</p>
-      <div className="container mx-auto px-4">
+      <h1 className="text-3xl font-bold mb-2">Account</h1>
+      <p className="text-sm text-gray-500 mb-2">Settings and Privacy  / Account</p>
+      <div className="container mx-auto px-4 py-8 ">
         <div className="animate-pulse">
           <div className="grid grid-cols-12 gap-6">
           <Card className="col-span-7">
@@ -343,6 +346,22 @@ export function TouristProfileComponent() {
   const [rates, setRates] = useState({});
   const [currencies, setCurrencies] = useState([]);
   const [activeTab, setActiveTab] = useState("wallet");
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+
+  const showToast = (message, type = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+  };
+
+  const handlePasswordChangeSuccess = (message) => {
+    setIsPasswordModalOpen(false);
+    setToastMessage(message);
+    setIsToastOpen(true);
+  };
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
@@ -539,7 +558,7 @@ export function TouristProfileComponent() {
   };
 
   const validateFields = () => {
-    const { email, mobile, nationality, jobOrStudent, fname, lname } = editedTourist;
+    const { email, mobile, nationality, jobOrStudent, fname, lname, username } = editedTourist;
     const messages = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -557,6 +576,7 @@ export function TouristProfileComponent() {
     if (!jobOrStudent) messages.jobOrStudent = "Occupation is required.";
     if (!fname) messages.fname = "First name is required.";
     if (!lname) messages.lname = "Last name is required.";
+    if (!username) messages.username = "Username is required.";
 
     setValidationMessages(messages);
     return Object.keys(messages).length === 0;
@@ -570,12 +590,15 @@ export function TouristProfileComponent() {
       finalTourist.mobile = "+" + editedTourist.mobile;
       finalTourist.fname = editedTourist.fname;
       finalTourist.lname = editedTourist.lname;
+      finalTourist.username=editedTourist.username;
+      finalTourist.email=editedTourist.email;
 
       const token = Cookies.get("jwt");
       const role = getUserRole();
       const api = `http://localhost:4000/${role}`;
       finalTourist.profilePicture = selectedImage;
       setDropdownOpen(false);
+      console.log(finalTourist);
 
       const response = await axios.put(api, finalTourist, {
         headers: { Authorization: `Bearer ${token}` },
@@ -588,9 +611,12 @@ export function TouristProfileComponent() {
         setError("");
         setValidationMessages({});
       }
+      console.log(response.data);
     } catch (err) {
       if (err.response?.data?.message === "Email already exists") {
         setValidationMessages({ email: "Email already exists" });
+      } else if (err.response?.data?.message === "Username already exists") {
+        setValidationMessages({ username: "Username already exists" });
       } else {
         setError(err.message);
       }
@@ -671,8 +697,9 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       "USD",
       preferredCurrency
     );
-    const pointsValueInEGP = user.loyaltyPoints / 100;
-    const pointsValueInUSD = convertCurrency(pointsValueInEGP, "EGP", "USD");
+    const convertiblePoints = Math.floor(user.loyaltyPoints / 10000) * 10000;
+    const pointsValueInEGP = convertiblePoints / 100; // Since 10,000 points = 100 EGP
+        const pointsValueInUSD = convertCurrency(pointsValueInEGP, "EGP", "USD");
     const pointsValueInPreferredCurrency = convertCurrency(
       pointsValueInUSD,
       "USD",
@@ -697,7 +724,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     };
   
     return (
-      <Card className="w-full h-[275px]">
+      <Card className="w-full h-[275px] shadow-none border border-white">
         <CardHeader>
           <CardTitle>Redeem Loyalty Points</CardTitle>
           <CardDescription>Convert your loyalty points into wallet balance.</CardDescription>
@@ -827,7 +854,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     };
   
     return (
-      <Card className="w-full h-[275px] overflow-y-auto">
+      <Card className="w-full h-[275px] overflow-y-auto shadow-none border border-white">
         <CardHeader>
           <CardTitle>Preferred Currency</CardTitle>
           <CardDescription>
@@ -1002,10 +1029,12 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
 
   return (
-    <div >
-    <h1 className="text-3xl font-bold mb-2">My Account</h1>
-    <p className="text-sm text-gray-500 mb-6">Settings / Account</p>
-    <div className="container mx-auto px-4">
+    <ToastProvider>
+    <div>
+      <h1 className="text-3xl font-bold mb-2">Account</h1>
+      <p className="text-sm text-gray-500 mb-2">Settings and Privacy  / Account</p>
+     
+    <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-12 gap-6">
         {/* Merged Profile Picture and Info Card - 8 columns */}
         <Card className="col-span-7">
@@ -1074,16 +1103,48 @@ const response = await axios.get("http://localhost:4000/tourist/", {
           )}
         </div>
         <div className="text-center mb-2">
-          <div className="flex items-center justify-center gap-2">
-            <h2 className="text-xl font-bold">{tourist.username}</h2>
-            <div
-              className={`w-7 h-7 flex items-center justify-center rounded-full ${getBadgeColor()}`}
-            >
-              <Award className="w-4 h-4 text-white items-center" />
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mt-1">{tourist.email}</p>
+  <div className="flex items-center justify-center gap-2">
+    {isEditing ? (
+      <div className="flex flex-col items-center">
+        <Input
+          type="text"
+          name="username"
+          value={editedTourist.username}
+          onChange={handleInputChange}
+          className={validationMessages.username ? "border-red-500" : ""}
+        />
+        {validationMessages.username && (
+          <p className="text-red-500 text-xs mt-1">{validationMessages.username}</p>
+        )}
+      </div>
+    ) : (
+      <>
+        <h2 className="text-xl font-bold">{tourist.username}</h2>
+        <div
+          className={`w-7 h-7 flex items-center justify-center rounded-full ${getBadgeColor()}`}
+        >
+          <Award className="w-4 h-4 text-white items-center" />
         </div>
+      </>
+    )}
+  </div>
+  {isEditing ? (
+    <div className="flex flex-col items-center mt-2">
+      <Input
+        type="email"
+        name="email"
+        value={editedTourist.email}
+        onChange={handleInputChange}
+        className={validationMessages.email ? "border-red-500" : ""}
+      />
+      {validationMessages.email && (
+        <p className="text-red-500 text-xs mt-1">{validationMessages.email}</p>
+      )}
+    </div>
+  ) : (
+    <p className="text-sm text-gray-500 mt-1">{tourist.email}</p>
+  )}
+</div>
         <Separator/>
         {isEditing ? (
           <div className="flex flex-col w-full max-w-[200px] ">
@@ -1112,12 +1173,12 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 </Button>
 
 
-          {/* <Button
-          //onClick={}
-          className=" p-2 mr-2 w-full mt-2 bg-[#1A3B47]"
-        >
-          Edit Profile
-        </Button> */}
+          <Button
+      onClick={() => setIsPasswordModalOpen(true)}
+      className="p-2 w-full mt-2 bg-[#1A3B47]"
+    >
+      Change Password
+    </Button>
         </>
         )}
       </div>
@@ -1152,14 +1213,14 @@ const response = await axios.get("http://localhost:4000/tourist/", {
             <p className="text-xs text-gray-500">Last Name</p>
             {isEditing ? (
               <div>
-              <Input
-                type="text"
-                name="lname"
-                value={editedTourist.lname}
-                onChange={handleInputChange}
-                className={validationMessages.lname ? "border-red-500" : ""}
-              />
-               {validationMessages.lname && (
+                <Input
+                  type="text"
+                  name="lname"
+                  value={editedTourist.lname}
+                  onChange={handleInputChange}
+                  className={validationMessages.lname ? "border-red-500" : ""}
+                />
+                {validationMessages.lname && (
                   <p className="text-red-500 text-xs mt-1">{validationMessages.lname}</p>
                 )}
               </div>
@@ -1169,7 +1230,6 @@ const response = await axios.get("http://localhost:4000/tourist/", {
           </div>
          
         </div>
-
         <Separator />
 
         {/* Row 2 */}
@@ -1313,25 +1373,56 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
          {/* Shipping Addresses - 4 columns */}
          <div className="col-span-5 ">
-          <ShippingAddress addresses={tourist.shippingAddresses} fetch={fetchTouristProfile} />
+          <ShippingAddress addresses={tourist.shippingAddresses} fetch={fetchTouristProfile} showToast={showToast} />
         </div>
 
         {/* Tabs Section - spans 8 columns */}
         <div className="col-span-8">
-  <Tabs defaultValue="wallet" onValueChange={setActiveTab} className="w-full">
-    <TabsList className="grid w-full grid-cols-3">
-      <TabsTrigger value="wallet">View Wallet Balance</TabsTrigger>
-      <TabsTrigger value="currency">Change Currency</TabsTrigger>
-      <TabsTrigger value="points">Redeem Points</TabsTrigger>
-    </TabsList>
+        <Card>
+        <CardContent>
+  <Tabs defaultValue="wallet" onValueChange={setActiveTab} className="w-full bg-white">
+    <TabsList className="grid w-full grid-cols-3 bg-white pt-3">
+    <TabsTrigger
+      value="wallet"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'wallet'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'text-gray-500 bg-white'
+      }`}
+    >
+      View Wallet Balance
+      
+    </TabsTrigger>     
+    <TabsTrigger
+      value="currency"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'currency'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'border-gray-300 text-gray-500 bg-white'
+      }`}
+    >
+      Change Currency
+      
+    </TabsTrigger>      
+    <TabsTrigger
+      value="points"
+      className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+        activeTab === 'points'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          : 'border-gray-300 text-gray-500 bg-white'
+      }`}
+    >
+      Redeem Points
+      
+    </TabsTrigger> </TabsList>
 
     <TabsContent value="wallet">
-      <Card>
+      <Card className="shadow-none border border-white">
         <CardContent className="pt-6">
           {/* Current Balance */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-xl">Current Balance</span>
+              <span className="font-bold text-xl">Current Balance</span>
             </div>
             <span className="text-xl font-bold">
               {formatWallet(tourist.wallet)}
@@ -1340,7 +1431,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
           {/* Wallet History */}
           <div className="mt-2 overflow-y-auto max-h-[173px]">
-            <h3 className="text-lg font-semibold mb-2">Wallet History</h3>
+            <h3 className="text-xl font-bold mb-2 text-[#1A3B47]">Wallet History</h3>
             {tourist.history && Array.isArray(tourist.history) && tourist.history.length > 0 ? (
               <div className="space-y-4">
                 {Object.entries(groupTransactionsByDate(tourist.history)).map(([dateGroup, groupData]) => {
@@ -1357,7 +1448,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
                           </div>
                           <ul className="space-y-2">
                             {monthData.transactions.map((entry, index) => (
-                              <li key={index} className="flex justify-between items-center pl-4 pr-4 pb-3 pt-3 bg-white rounded-md shadow-sm">
+                              <li key={index} className="flex justify-between items-center pl-4 pr-4 pb-3 pt-3 bg-white rounded-md">
                                 <div className="flex items-center gap-3">
                                   <div className="bg-gray-100 rounded-full p-2">
                                     {getTransactionIcon(entry.details)}
@@ -1443,6 +1534,8 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       <RedeemPoints user={tourist} onRedeemPoints={handleRedeemPoints} />
     </TabsContent>
   </Tabs>
+</CardContent>
+</Card>
 </div>
 
 {/* Notifications - 4 columns */}
@@ -1539,10 +1632,37 @@ const response = await axios.get("http://localhost:4000/tourist/", {
         isImageViewer={true}
         imageUrl={selectedImage?.url || selectedImage}
       />
+      <Modal show={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)}>
+      <PasswordChanger onSuccess={handlePasswordChangeSuccess} />
+    </Modal>
+    {isToastOpen && (
+      <Toast
+        onOpenChange={setIsToastOpen}
+        open={isToastOpen}
+        duration={1500}
+        className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+      >
+        <div className="flex items-center">
+          {toastType === 'success' ? (
+            <CheckCircle className="text-green-500 mr-2" />
+          ) : (
+            <XCircle className="text-red-500 mr-2" />
+          )}
+          <div>
+            <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+            <ToastDescription>{toastMessage}</ToastDescription>
+          </div>
+        </div>
+        <ToastClose />
+      </Toast>
+    )}
+    <ToastViewport className="fixed top-0 right-0 p-4" />
     </div>
     </div>
-  )
-}
+    </ToastProvider>
+  );
+};
+
 
 
 

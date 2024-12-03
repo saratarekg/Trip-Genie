@@ -308,7 +308,7 @@ export default function NotificationsPage() {
     <TooltipProvider>
       <div className=" min-h-screen">
       <h1 className="text-3xl font-bold mb-2">Notifications</h1>
-        <p className="text-sm text-gray-500 mb-6">Settings / Notifications</p>
+        <p className="text-sm text-gray-500 mb-6">Settings and Privacy / Notifications</p>
           
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -407,9 +407,9 @@ export default function NotificationsPage() {
             <div className="flex-1">
               {/* Search and Actions Row */}
               <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 grid grid-cols-9">
                   {/* Tabs */}
-                  <Tabs value={activeTab} onValueChange={setActiveTab} >
+                  <Tabs className="col-span-3" value={activeTab} onValueChange={setActiveTab} >
   <TabsList className="grid grid-cols-3 bg-white">
     {/* General Tab */}
     <TabsTrigger
@@ -478,7 +478,7 @@ export default function NotificationsPage() {
 
 
                   {/* Search Bar */}
-                  <div className="col-span-3 relative">
+                  <div className="col-span-4 relative">
   {!isFocused && !searchQuery && (
     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
   )}
@@ -495,7 +495,7 @@ export default function NotificationsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-sm text-white bg-[#388A94] hover:bg-[#2e6b77] whitespace-nowrap"
+                    className="text-sm col-span-2 text-white bg-[#388A94] hover:bg-[#2e6b77] whitespace-nowrap"
                     onClick={markNotificationsAsSeen}
                   >
                     <CheckCheck className="mr-2 h-4 w-4" />

@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { on } from 'events';
 
 /**
  * Creates a Zod schema for the form
@@ -24,7 +25,7 @@ const createFormSchema = () => z.object({
   body: z.string().min(1, 'Please enter a description')
 });
 
-export default function FileComplaintForm({ closeForm }) {
+export default function FileComplaintForm({ closeForm, showToast }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showDialog, setShowDialog] = useState(false);
@@ -60,13 +61,16 @@ export default function FileComplaintForm({ closeForm }) {
         }
       );
 
-      if (response.status === 200) {
-        setShowDialog(true);
+      console.log(response);
+
+      if (response.status === 201) {
+        showToast(' Your complaint was filed successfully!',"success");
+        closeForm();
       } else {
-        throw new Error('Failed to file complaint.');
+        showToast('Failed to file complaint. Please try again.',"error");
       }
     } catch (err) {
-      setError('Failed to file complaint. Please try again.');
+      showToast('Failed to file complaint. Please try again.',"error");
       console.error(err.message);
     } finally {
       setLoading(false);
@@ -125,14 +129,14 @@ export default function FileComplaintForm({ closeForm }) {
         <div className="flex justify-between items-center space-x-4">
   <button
     type="submit"
-    className="w-[900px] flex justify-center items-center bg-orange-500 text-white rounded-xl p-3 h-12 font-semibold hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+    className="w-[900px] flex justify-center items-center bg-[#388A94] hover:bg-[#2e6b77] text-white rounded-xl p-3 h-12 font-medium focus:outline-none focus:ring-2 "
     disabled={loading}
   >
     {loading ? 'Submitting...' : 'File Complaint'}
   </button>
   <Button
     onClick={closeForm}
-    className="w-full flex justify-center items-center bg-gray-300 text-black rounded-xl p-3 h-12 font-semibold hover:bg-gray-400 focus:outline-none"
+    className="w-full flex justify-center items-center bg-gray-300 text-black rounded-xl p-3 h-12 font-medium hover:bg-gray-400 focus:outline-none"
   >
     Close
   </Button>
@@ -145,33 +149,7 @@ export default function FileComplaintForm({ closeForm }) {
       </form>
 
       {/* Success Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-semibold text-teal-600">
-              Success!
-            </DialogTitle>
-            <DialogDescription className="text-gray-600 mt-2">
-              Your complaint was filed successfully.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4 flex justify-end space-x-4">
-            <Button
-              onClick={handleGoBack}
-              className="bg-teal-600 text-white hover:bg-teal-700"
-            >
-              Go to Home
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleCreateNew}
-              className="border-teal-600 text-teal-600 hover:bg-teal-50"
-            >
-              File Another
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+     
     </div>
   );
 }

@@ -60,6 +60,9 @@ const updateTourist = async (req, res) => {
     const { nationality, mobile, jobOrStudent, profilePicture } = req.body; // Data to update
 
     let { email, username } = req.body;
+    console.log("hereweeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    console.log(email);
+    console.log(username);
     email = email.toLowerCase();
     username = username.toLowerCase();
 
@@ -193,6 +196,9 @@ const updateTouristProfile = async (req, res) => {
     const { nationality, mobile, jobOrStudent, profilePicture, fname, lname } =
       req.body;
     let { email, username } = req.body;
+    console.log("hereweeeeeeeeeeeeeeeeee");
+    console.log(email);
+    console.log(username);
     email = email.toLowerCase();
     username = username.toLowerCase();
 
@@ -231,6 +237,7 @@ const updateTouristProfile = async (req, res) => {
         profilePicture: picture,
         fname,
         lname,
+        username,
       },
       { new: true }
     )
@@ -393,7 +400,10 @@ const cancelFlightBooking = async (req, res) => {
 
     res.status(200).json({
       message: "Flight booking canceled successfully and refund issued",
-      updatedWallet: updatedTourist.wallet,
+      data: {
+        refundedAmount: refundAmount,
+        newWalletBalance: updatedTourist.wallet
+      }
     });
   } catch (error) {
     console.error(error);
@@ -545,7 +555,10 @@ const cancelHotelBooking = async (req, res) => {
 
     res.status(200).json({
       message: "Hotel booking canceled successfully and refund issued",
-      updatedWallet: updatedTourist.wallet,
+      data: {
+        refundedAmount: refundAmount,
+        newWalletBalance: updatedTourist.wallet
+      }
     });
   } catch (error) {
     console.error(error);
@@ -557,7 +570,9 @@ const getMyHotels = async (req, res) => {
   const touristID = res.locals.user_id;
 
   try {
-    const hotels = await TouristHotel.find({ touristID });
+    // Populate the 'tourist' field (or the field name you have in the schema)
+    const hotels = await TouristHotel.find({ touristID })
+      .populate('touristID'); // Add this to populate the tourist details
 
     res.status(200).json(hotels);
   } catch (error) {
@@ -565,6 +580,7 @@ const getMyHotels = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const bookTransportation = async (req, res) => {
   const { transportationID, seatsToBook, paymentMethod } = req.body;
@@ -825,7 +841,8 @@ const redeemPoints = async (req, res) => {
     }
 
     // Redeem all loyalty points
-    const pointsToRedeem = tourist.loyaltyPoints;
+    // const pointsToRedeem = tourist.loyaltyPoints;
+    const pointsToRedeem =  Math.floor(tourist.loyaltyPoints / 10000) * 10000;
 
     // Calculate the redeemable cash based on all loyalty points
     const redeemableCash = pointsToRedeem / 100; // in EGP
@@ -835,7 +852,7 @@ const redeemPoints = async (req, res) => {
     const updatedTourist = await Tourist.findByIdAndUpdate(
       res.locals.user_id,
       {
-        $set: { loyaltyPoints: 0 },
+        $set: { loyaltyPoints: tourist.loyaltyPoints - pointsToRedeem },
         $inc: { wallet: updatedWalletinUSD },
       },
       { new: true } // Return the updated document
