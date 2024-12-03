@@ -24,6 +24,7 @@ import SingleActivityAdmin from "./SingleActivityAdmin.jsx";
 import { Dashboard } from "../components/AdminDashboard.jsx";
 import NotificationsPage from "@/pages/AdminNotifications.jsx"
 import { CreatePromoCode } from "../components/CreatePromoCode.jsx";
+import { AllPromoCodes } from "../components/AllPromoCodes.jsx"; // Import AllPromoCodes component
 
 import logo from "../assets/images/TGlogo.svg";
 
@@ -121,6 +122,8 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
             }} />
           ) : activeTab === 'create-promo-code' ? (
             <CreatePromoCode />
+          ) : activeTab === 'all-promo-codes' ? (
+            <AllPromoCodes />
           ) : activeTab === 'manage-products' ? (
             <AllProducts onSelectProduct={(id) => {
               setPreviousTab(activeTab);

@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Link } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, Filter, CheckCircle, Clock } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { AnimatePresence, motion } from "framer-motion";
+import { CheckCircle, XCircle } from 'lucide-react';
+import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast";
 
 export function ViewComplaints({ onSelectComplaint }) {
   const [complaints, setComplaints] = useState([]);
   const [error, setError] = useState(null);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("all");
   const [sortOrder, setSortOrder] = useState(-1);
-  const [isFiltering, setIsFiltering] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("all");
+  const [openComplaintId, setOpenComplaintId] = useState(null);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+
+  const showToast = (message, type = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+  };
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -48,184 +46,224 @@ export function ViewComplaints({ onSelectComplaint }) {
       } catch (err) {
         setError(err.message);
         console.error("Error fetching complaints:", err);
+        showToast("Failed to fetch complaints. Please try again later.", "error");
+        setLoading(false);
       }
     };
 
     fetchComplaints();
   }, [status, sortOrder]);
 
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const toggleAccordion = (id) => {
+    setOpenComplaintId(openComplaintId === id ? null : id);
   };
 
-  const toggleSortOrder = () => {
-    setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1));
-  };
+  const filteredComplaints = complaints.filter(
+    (complaint) => activeTab === "all" || complaint.status.toLowerCase() === activeTab
+  );
 
-  const handleStatusFilter = (newStatus) => {
-    setStatus(newStatus);
-  };
-
-  return (
-    <div className="min-h-screen">
-      <div className="">
-        <div>
-          {error ? (
-            <div className="text-red-500 p-4 rounded-md bg-red-50 mb-4">
-              {error}
-            </div>
-          ) : loading ? (
-            <div>
-              {/* First row (headers) */}
-              <div className="overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tourist
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Complaint Content
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                </table>
-              </div>
-          
-              {/* Skeleton rows for additional content */}
-              <div>
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex gap-4 p-4 animate-pulse bg-gray-200">
-                  
-                    <div className="flex-1 space-y-2">
-                      <div className="w-full h-4 bg-gray-300 rounded-md" />
-                      <div className="w-3/4 h-4 bg-gray-300 rounded-md" />
-                    </div>
+  if (loading) {
+    return (
+      <div>
+        <div className="animate-pulse">
+          <div className="bg-white border rounded-md shadow-md p-6">
+          <Tabs className=" mb-4 w-full">
+                <TabsList className="grid grid-cols-3 bg-white w-full">
+                  <TabsTrigger
+                    value="all"
+                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                      activeTab === "all"
+                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                        : "text-gray-500 border-b border-gray-400"
+                    }`}
+                  >
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="pending"
+                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                      activeTab === "pending"
+                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                        : "text-gray-500 border-b border-gray-400"
+                    }`}
+                  >
+                    Pending
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="resolved"
+                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                      activeTab === "resolved"
+                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                        : "text-gray-500 border-b border-gray-400"
+                    }`}
+                  >
+                    Resolved
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-24 bg-gray-200 rounded-md p-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="h-6 w-24 bg-gray-300 rounded-md"></div>
+                    <div className="h-6 w-16 bg-gray-300 rounded-md"></div>
                   </div>
-                ))}
-              </div>
+                  <div className="h-5 w-3/4 bg-gray-300 rounded-md"></div>
+                </div>
+              ))}
             </div>
-          ) : complaints.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No complaints found.
-            </div>
-          ) : (
-            <div>
-              {/* First row (headers) */}
-              <div className="overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tourist
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Complaint Content
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  {/* Table body */}
-                  <AnimatePresence mode="wait">
-                    <motion.tbody
-                      key="table-body"
-                      className="bg-white divide-y divide-gray-200"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {complaints.map((complaint, index) => (
-                        <motion.tr
-                          key={complaint._id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -20 }}
-                          transition={{
-                            duration: 0.2,
-                            delay: index * 0.05,
-                          }}
-                        >
-                          <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {complaint.number}
-                          </td>
-                          <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {complaint.tourist.username}
-                          </td>
-                          <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {complaint.title}
-                          </td>
-                          <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
-                            {formatDate(complaint.createdAt)}
-                          </td>
-                          <td className="px-6 py-2 whitespace-nowrap">
-                            <span className="inline-flex items-center leading-5 font-semibold">
-                              {complaint.status === "resolved" ? (
-                                <>
-                                  <CheckCircle className="w-4 h-4 text-[#5D9297] mr-1" />
-                                  <span className="text-[#5D9297]">Resolved</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Clock className="w-4 h-4 text-[#D4C4B2] mr-1" />
-                                  <span className="text-[#D4C4B2]">Pending</span>
-                                </>
-                              )}
-                            </span>
-                          </td>
-                          <td className="px-6 py-2 whitespace-nowrap text-left text-sm font-medium">
-                            <span
-                              onClick={() => onSelectComplaint(complaint._id)}
-                              className="text-[#B5D3D1] cursor-pointer hover:text-[#1A3B47] hover:underline"
-                            >
-                              View
-                            </span>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </motion.tbody>
-                  </AnimatePresence>
-                </table>
-              </div>
-            </div>
-          )}
-          
-          
-          
-          
+          </div>
         </div>
       </div>
-    </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
+
+  return (
+    <ToastProvider>
+      <div>
+        <div className="">
+          <div className="bg-white border rounded-md shadow-md p-6">
+            <div className="grid grid-cols-1 items-center gap-4 mb-6">
+              <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setStatus(value); }} className="w-full">
+                <TabsList className="grid grid-cols-3 bg-white w-full">
+                  <TabsTrigger
+                    value="all"
+                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                      activeTab === "all"
+                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                        : "text-gray-500 border-b border-gray-400"
+                    }`}
+                  >
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="pending"
+                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                      activeTab === "pending"
+                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                        : "text-gray-500 border-b border-gray-400"
+                    }`}
+                  >
+                    Pending
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="resolved"
+                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                      activeTab === "resolved"
+                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                        : "text-gray-500 border-b border-gray-400"
+                    }`}
+                  >
+                    Resolved
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            {filteredComplaints.length === 0 ? (
+              <p className="text-center text-gray-600">No complaints found.</p>
+            ) : (
+              filteredComplaints.map((complaint) => (
+                <div key={complaint._id} className="mb-4">
+                  <div
+                    className={`cursor-pointer border rounded-md p-4 transition-all duration-300 ${
+                      openComplaintId === complaint._id ? "bg-gray-50 shadow-md" : "bg-white shadow-sm"
+                    }`}
+                    onClick={() => toggleAccordion(complaint._id)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-teal-800">{complaint.title}</h3>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-gray-500">
+                          {complaint.replies?.length === 1
+                            ? "1 reply"
+                            : `${complaint.replies?.length || 0} replies`}
+                        </p>
+                        <div
+                          className={`flex items-center justify-center rounded-full transition-all duration-300 ${
+                            openComplaintId === complaint._id
+                              ? `${
+                                  complaint.status === "pending"
+                                    ? "bg-[#F88C33] text-white px-3 py-1"
+                                    : "bg-[#388A94] text-white px-3 py-1"
+                                } text-sm font-medium`
+                              : `${
+                                  complaint.status === "pending"
+                                    ? "bg-[#F88C33] text-white"
+                                    : "bg-[#388A94] text-white"
+                                } w-4 h-4`
+                          }`}
+                        >
+                          {openComplaintId === complaint._id
+                            ? `${complaint.status.charAt(0).toUpperCase()}${complaint.status.slice(1).toLowerCase()}`
+                            : ""}
+                        </div>
+                      </div>
+                    </div>
+                    {openComplaintId !== complaint._id && (
+                      <p className="text-sm text-gray-500 mt-2">
+                        {complaint.body.substring(0, 30)}...
+                      </p>
+                    )}
+                    {openComplaintId === complaint._id && (
+                      <div className="mt-2 flex justify-between items-center">
+                        <p className="text-gray-700">{complaint.body}</p>
+                        <span
+                          onClick={() => onSelectComplaint(complaint._id)}
+                          className=" text-sm text-[#5D9297] cursor-pointer hover:text-[#1A3B47] hover:underline mr-2 mt-2"
+                        >
+                          Reply To Complaint
+                        </span>
+                      </div>
+                    )}
+                    {openComplaintId === complaint._id && (
+                      <div className="mt-2">
+                        {complaint.replies?.map((reply, index) => (
+                          <div
+                            key={index}
+                            className="bg-gray-100 p-2 rounded-md mb-2 text-sm text-gray-700"
+                          >
+                            {reply.content}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+      {isToastOpen && (
+        <Toast
+          onOpenChange={setIsToastOpen}
+          open={isToastOpen}
+          duration={1500}
+          className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+        >
+          <div className="flex items-center">
+            {toastType === 'success' ? (
+              <CheckCircle className="text-green-500 mr-2" />
+            ) : (
+              <XCircle className="text-red-500 mr-2" />
+            )}
+            <div>
+              <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+              <ToastDescription>{toastMessage}</ToastDescription>
+            </div>
+          </div>
+          <ToastClose />
+        </Toast>
+      )}
+      <ToastViewport className="fixed top-0 right-0 p-4" />
+    </ToastProvider>
   );
-   
 }
 
 export default ViewComplaints;

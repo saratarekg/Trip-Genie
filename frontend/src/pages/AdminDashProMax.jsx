@@ -12,7 +12,7 @@ import {
   ArcElement,
   BarElement,
 } from 'chart.js';
-import { Bell, LogOut } from 'lucide-react';
+import { Bell, LogOut, Mail, CheckCircle } from 'lucide-react'; // Import the Mail icon
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { NotificationsDropdownAdmin } from '@/components/AdminNotificationsDropdown'
@@ -24,10 +24,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator"
+import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
 
 import { DashboardSidebar } from "./DashboardSidebar";
 import { DashboardContent } from "./DashboardContent";
 import logo from "@/assets/images/TGlogo.svg";  
+import PasswordChanger from "@/components/Passwords"; // Import PasswordChanger component
+import '@/styles/Modal.css'; // Ensure the CSS file for the modal is imported
 
 // Register all the chart elements
 ChartJS.register(
@@ -105,11 +108,6 @@ const tabs = [
   },
   { id: 'historical-places', title: 'Historical Places', icon: 'Map' },
   { 
-    id: 'create-promo-code', 
-    title: 'Create Promo Code', 
-    icon: 'Tag' 
-  },
-  { 
     id: 'reports', 
     title: 'Sales Reports', 
     icon: 'BarChart',
@@ -119,6 +117,15 @@ const tabs = [
       { id: 'my-product-sales-report', title: 'My Products Report'},
       { id: 'seller-product-sales-report', title: 'Seller\'s Products Report' },
       { id: 'user-stats', title: 'User Statistics' },
+    ]
+  },
+  { 
+    id: 'promo-code-management', 
+    title: 'Promo Codes', 
+    icon: 'Tag',
+    subItems: [
+      { id: 'all-promo-codes', title: 'All Promo Codes' },
+      { id: 'create-promo-code', title: 'Create Promo Code' },
     ]
   },
 ];
@@ -136,6 +143,11 @@ export function Dashboard() {
   });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [adminInfo, setAdminInfo] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('');
 
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
@@ -202,64 +214,131 @@ export function Dashboard() {
     setActiveTab(reportId);
   };
 
+  const handleChangePasswordClick = () => {
+    setIsModalOpen(true);
+    setIsDropdownOpen(false);
+  };
+
+  const handlePasswordChangeSuccess = (message) => {
+    setIsModalOpen(false);
+    showToast("Your password has been successfully updated.", 'success');
+  };
+
+  const handleDropdownToggle = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const showToast = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+  };
+
   return (
     <div>
-      <div className="text-[#1A3B47] p-2 border-b bg-gray-100 border-gray-300">
-        <div className="flex justify-end items-center">
-          {adminInfo && (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="focus:outline-none group">
-                <div className="flex items-center space-x-2 p-2 rounded-full transition-colors duration-200 group-hover:bg-[#B5D3D1]">
-                  <span className="mr-2 text-[#1A3B47]">{adminInfo.username}</span>
-                  <Avatar className="h-8 w-8 !bg-[#388A94] text-white" style={{ backgroundColor: '#388A94' }}>
-                    <AvatarFallback className="bg-transparent">{getInitials(adminInfo.username)}</AvatarFallback>
-                  </Avatar>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-md p-2">
-                <div className="flex items-center space-x-2 p-2">
-                  <Avatar className="h-12 w-12 bg-[#388A94] text-white">
-                    <AvatarFallback className="text-lg bg-transparet">{getInitials(adminInfo.username)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold text-[#1A3B47]">{adminInfo.username}</p>
-                    <p className="text-sm text-[#5D9297]">Administrator</p>
+      <ToastProvider>
+        <div className="text-[#1A3B47] p-2 border-b bg-gray-100 border-gray-300">
+          <div className="flex justify-end items-center">
+            {adminInfo && (
+              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+                <DropdownMenuTrigger className="focus:outline-none group" onClick={handleDropdownToggle}>
+                  <div className="flex items-center space-x-2 p-2 rounded-full transition-colors duration-200 group-hover:bg-[#B5D3D1]">
+                    <span className="mr-2 text-[#1A3B47]">{adminInfo.username}</span>
+                    <Avatar className="h-8 w-8 !bg-[#388A94] text-white" style={{ backgroundColor: '#388A94' }}>
+                      <AvatarFallback className="bg-transparent">{getInitials(adminInfo.username)}</AvatarFallback>
+                    </Avatar>
                   </div>
-                </div>
-                {adminInfo.email && (
-                      <p className="text-xs text-center mt-2 text-[#1A3B47]">{adminInfo.email}</p>
-                    )}
-                <Separator className="my-2" />
-                <DropdownMenuItem 
-                  className="w-full text-[#1A3B47] hover:bg-[#B5D3D1] transition-colors duration-200"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-          <NotificationsDropdownAdmin setActiveTabNav={setActiveTab} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-md p-2">
+                  <div className="flex items-center space-x-2 p-2">
+                    <Avatar className="h-12 w-12 bg-[#388A94] text-white">
+                      <AvatarFallback className="text-lg bg-transparet">{getInitials(adminInfo.username)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-[#1A3B47]">{adminInfo.username}</p>
+                      <p className="text-sm text-[#5D9297]">Administrator</p>
+                    </div>
+                  </div>
+                  {adminInfo.email && (
+                    <div className="flex items-center justify-center mt-2 text-[#1A3B47]">
+                      <Mail className="mr-2 h-4 w-4" />
+                      <p className="text-xs">{adminInfo.email}</p>
+                    </div>
+                  )}
+                  <DropdownMenuItem 
+                    className="w-full text-[#1A3B47] hover:bg-[#B5D3D1] transition-colors duration-200 border border-gray-300 text-center mt-2"
+                    onClick={handleChangePasswordClick}
+                  >
+                    <span className="w-full text-center">Change Password</span>
+                  </DropdownMenuItem>
+                  <Separator className="my-2" />
+                  <DropdownMenuItem 
+                    className="w-full text-[#1A3B47] hover:bg-[#B5D3D1] transition-colors duration-200"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            <NotificationsDropdownAdmin setActiveTabNav={setActiveTab} />
+          </div>
         </div>
-      </div>
-      <div className="flex bg-gray-100">
-        <DashboardSidebar 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          onToggleCollapse={handleToggleCollapse} 
-        />
-        <div className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}>
-          <main className="flex-1 overflow-y-auto transition-all duration-1000 ease-in-out transform">
-            <DashboardContent activeTab={activeTab} tabs={tabs} setActiveTab={setActiveTab} />
-          </main>
-          <footer className="sticky text-[#1A3B47] p-2 border-t border-gray-300 bg-white">
-            <div className="text-center">
-              © {new Date().getFullYear()} Trip Genie. All rights reserved .
+        <div className="flex bg-gray-100 relative"> {/* Add relative class */}
+          <DashboardSidebar 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab} 
+            onToggleCollapse={handleToggleCollapse} 
+          />
+          <div className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}> {/* Adjusted from ml-72 to ml-64 */}
+            <main className="flex-1 overflow-y-auto transition-all duration-1000 ease-in-out transform">
+              <DashboardContent activeTab={activeTab} tabs={tabs} setActiveTab={setActiveTab} />
+            </main>
+            <footer className="sticky text-[#1A3B47] p-2 border-t border-gray-300 bg-white">
+              <div className="text-center">
+                © {new Date().getFullYear()} Trip Genie. All rights reserved .
+              </div>
+            </footer>
+          </div>
+        </div>
+        {isModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <div className="modal-header">
+                <button className="close-button" onClick={() => setIsModalOpen(false)}>×</button>
+              </div>
+              <div className="modal-body">
+                <PasswordChanger onSuccess={handlePasswordChangeSuccess} />
+              </div>
             </div>
-          </footer>
-        </div>
-      </div>
+          </div>
+        )}
+        <ToastViewport />
+        {isToastOpen && (
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={2000}
+            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+          >
+            <div className="flex items-center">
+              {toastType === 'success' ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                <ToastDescription>
+                  {toastMessage}
+                </ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
+          </Toast>
+        )}
+      </ToastProvider>
     </div>
   );
 }
