@@ -70,34 +70,49 @@ export default function Home() {
       content: "Browse travel-related products and gear.",
       placement: "bottom",
     },
-    {
-      target: ".navbar-transportation",
-      content: "Find transportation options for your travels.",
-      placement: "bottom",
-    },
-    {
-      target: ".navbar-hotels",
-      content: "Book accommodations for your stay.",
-      placement: "bottom",
-    },
-    {
-      target: ".navbar-cart",
-      content: "View your shopping cart here.",
-      placement: "bottom",
-      genieOrientation: "left",
-    },
-    {
-      target: ".navbar-wishlist",
-      content: "Access your travel wishlist.",
-      placement: "bottom",
-      genieOrientation: "left",
-    },
-    {
-      target: ".navbar-profile",
-      content: "Manage your profile settings.",
-      placement: "bottom",
-      genieOrientation: "left",
-    },
+    ...(role === "guest"
+      ? [
+          {
+            target: ".navbar-signup-or-login",
+            content:
+              "Sign up or log in to start your journey with us and access more features.",
+            placement: "bottom",
+            genieOrientation: "left",
+          },
+        ]
+      : []),
+    ...(role === "tourist"
+      ? [
+          {
+            target: ".navbar-transportation",
+            content: "Find transportation options for your travels.",
+            placement: "bottom",
+          },
+          {
+            target: ".navbar-hotels",
+            content: "Book accommodations for your stay.",
+            placement: "bottom",
+          },
+          {
+            target: ".navbar-cart",
+            content: "View your shopping cart here.",
+            placement: "bottom",
+            genieOrientation: "left",
+          },
+          {
+            target: ".navbar-wishlist",
+            content: "Access your travel wishlist.",
+            placement: "bottom",
+            genieOrientation: "left",
+          },
+          {
+            target: ".navbar-profile",
+            content: "Manage your profile settings.",
+            placement: "bottom",
+            genieOrientation: "left",
+          },
+        ]
+      : []),
   ];
 
   const renderContent = () => {
