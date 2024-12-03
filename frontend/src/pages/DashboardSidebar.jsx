@@ -55,9 +55,13 @@ const tabs = [
     icon: Map 
   },
   { 
-    id: 'create-promo-code', 
-    title: 'Create Promo Code', 
-    icon: Tag 
+    id: 'promo-code-management', 
+    title: 'Promo Codes', 
+    icon: Tag,
+    subItems: [
+      { id: 'all-promo-codes', title: 'All Promo Codes' },
+      { id: 'create-promo-code', title: 'Create Promo Code' },
+    ]
   },
   { 
     id: 'reports', 
@@ -138,8 +142,9 @@ export function DashboardSidebar({
   return (
     <div
       className={`fixed left-0 top-0 h-screen flex flex-col bg-[#1A3B47] ${
-        isCollapsed ? "w-16" : "w-64"
+        isCollapsed ? "w-16" : "w-64" // Adjust width from w-72 to w-64
       } transition-all duration-300 ease-in-out ${className}`}
+      style={{ zIndex: 1000 }} // Add this line to set a higher z-index
     >
       {/* Sidebar Header */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-[#1A3B47]/20">
