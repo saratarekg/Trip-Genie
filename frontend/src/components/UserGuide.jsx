@@ -100,6 +100,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
         steps={steps}
         run={runTour}
         continuous={true}
+        disableOverlayClose={true}
         showSkipButton={true}
         showProgress={true}
         stepIndex={stepIndex}
@@ -126,6 +127,12 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
             genieOnLeft = false;
           }
 
+          if (step.genieOrientation === "right") {
+            genieOnLeft = false;
+          } else if (step.genieOrientation === "left") {
+            genieOnLeft = true;
+          }
+
           return (
             <div
               style={{
@@ -145,7 +152,6 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
                   position: "relative",
                   marginLeft: genieOnLeft ? "120px" : "0", // Adjust position to leave space for the character
                   marginRight: genieOnLeft ? "0" : "120px", // Adjust position to leave space for the character
-                  className: "animate-genie shadow-lg",
                 }}
               >
                 {/* Step Number */}

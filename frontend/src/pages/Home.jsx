@@ -84,16 +84,19 @@ export default function Home() {
       target: ".navbar-cart",
       content: "View your shopping cart here.",
       placement: "bottom",
+      genieOrientation: "left",
     },
     {
       target: ".navbar-wishlist",
       content: "Access your travel wishlist.",
       placement: "bottom",
+      genieOrientation: "left",
     },
     {
       target: ".navbar-profile",
       content: "Manage your profile settings.",
       placement: "bottom",
+      genieOrientation: "left",
     },
   ];
 
