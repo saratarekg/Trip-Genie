@@ -1,6 +1,8 @@
 const ActivityBooking = require("../models/activityBooking"); // Assuming your model is in models/activityBooking.js
 const Activity = require("../models/activity"); // Assuming your Activity model is in models/activity.js
 const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
+const Currency = require("../models/currency");
+const CurrencyRates = require("../models/currencyRate");
 const emailService = require("../services/emailService");
 
 // Create a new booking
@@ -17,7 +19,6 @@ exports.createBooking = async (req, res) => {
       return res.status(400).json({ message: "Activity not found" });
     }
 
-    
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
@@ -44,10 +45,18 @@ exports.createBooking = async (req, res) => {
 
     await newBooking.save();
 
+    const currency = (await Currency.findOne({
+      _id: user.preferredCurrency,
+    })) || { code: "USD" };
+    const rates = await CurrencyRates.findOne();
+    const exchangeRate = rates.rates.get(currency.code);
+    const paymentAmountExchanged = newBooking.paymentAmount * exchangeRate;
+
     await emailService.sendActivityBookingConfirmationEmail(
       user.email,
       newBooking,
-      activityExists
+      activityExists,
+      paymentAmountExchanged
     );
 
     // Calculate loyalty points based on the user's badge level
