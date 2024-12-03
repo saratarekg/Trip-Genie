@@ -1522,7 +1522,23 @@ const CurrencyApp = ({ user }) => {
 const DeleteAccount = ({ onClose }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteResult, setDeleteResult] = useState(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(true);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastType, setToastType] = useState('success');
+  const [toastMessage, setToastMessage] = useState('');
   const navigate = useNavigate();
+
+  const showToast = (type, message) => {
+    setToastType(type);
+    setToastMessage(message);
+    setIsToastOpen(true);
+    setTimeout(() => {
+      setIsToastOpen(false);
+      if (type === 'success') {
+        navigate("/");
+      }
+    }, 2000); // Show toast for 2 seconds before navigating
+  };
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
@@ -1542,6 +1558,7 @@ const DeleteAccount = ({ onClose }) => {
         });
         Cookies.remove("jwt");
         Cookies.remove("role");
+        showToast('success', 'Your account has been successfully deleted.');
       }
     } catch (error) {
       setDeleteResult({
@@ -1550,6 +1567,7 @@ const DeleteAccount = ({ onClose }) => {
           error.response?.data?.message ||
           "An error occurred while deleting your account.",
       });
+      showToast('error', 'An error occurred while deleting your account.');
     } finally {
       setIsDeleting(false);
     }
@@ -1564,56 +1582,42 @@ const DeleteAccount = ({ onClose }) => {
   };
 
   return (
-    <Dialog open={true} onOpenChange={handleClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {deleteResult ? (
-              deleteResult.success ? (
-                <span className="flex items-center">
-                  <CheckCircle className="text-green-500 mr-2" />
-                  Account Deleted
-                </span>
-              ) : (
-                <span className="flex items-center">
-                  <XCircle className="text-red-500 mr-2" />
-                  Error
-                </span>
-              )
+    <ToastProvider>
+    <>
+      {showDeleteConfirmation && (
+        <DeleteConfirmation
+          isOpen={showDeleteConfirmation}
+          onClose={() => setShowDeleteConfirmation(false)}
+          itemType="account"
+          onConfirm={handleDeleteAccount}
+        />
+      )}
+      {isToastOpen && (
+        <Toast
+          onOpenChange={setIsToastOpen}
+          open={isToastOpen}
+          duration={2000}
+          className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+        >
+          <div className="flex items-center">
+            {toastType === 'success' ? (
+              <CheckCircle className="text-green-500 mr-2" />
             ) : (
-              "Delete Account"
+              <XCircle className="text-red-500 mr-2" />
             )}
-          </DialogTitle>
-          <DialogDescription>
-            {deleteResult
-              ? deleteResult.message
-              : "Are you sure you want to delete your account? This action cannot be undone."}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          {!deleteResult && (
-            <>
-              <Button variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteAccount}
-                disabled={isDeleting}
-              >
-                {isDeleting ? "Deleting..." : "Confirm Delete"}
-              </Button>
-            </>
-          )}
-          {deleteResult && deleteResult.success && (
-            <Button onClick={() => navigate("/")}>Return to Home</Button>
-          )}
-          {deleteResult && !deleteResult.success && (
-            <Button onClick={onClose}>Close</Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <div>
+              <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+              <ToastDescription>
+                {toastMessage}
+              </ToastDescription>
+            </div>
+          </div>
+          <ToastClose />
+        </Toast>
+      )}
+      <ToastViewport />
+    </>
+    </ToastProvider>
   );
 };
 

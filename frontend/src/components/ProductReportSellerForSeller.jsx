@@ -5,6 +5,7 @@ import { format, subDays, subMonths, subYears, addDays, addMonths, addYears, sta
 import { Area, AreaChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Calendar, ChevronDown, ArrowUp, ArrowDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import {
   DropdownMenu,
