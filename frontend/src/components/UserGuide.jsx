@@ -100,36 +100,12 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
         steps={steps}
         run={runTour}
         continuous={true}
-        disableOverlayClose={true} // Prevents closing the tour by clicking the overlay
         showSkipButton={true}
         showProgress={true}
         stepIndex={stepIndex}
-        scrollToFirstStep={true} // Scroll to the first target component
+        scrollToFirstStep={true}
         scrollOffset={100}
         callback={handleJoyrideCallback}
-        // styles={{
-        //   options: {
-        //     primaryColor: "#388A94",
-        //     textColor: "#1A3B47",
-        //     zIndex: 10000,
-        //   },
-        //   spotlight: {
-        //     borderRadius: "8px", // Make the spotlight smooth
-        //     transition: "all 0.3s ease-in-out", // Smooth spotlight transitions
-        //   },
-        //   tooltip: {
-        //     transition: "opacity 0.3s ease-in-out", // Smooth tooltip fade
-        //   },
-        //   close: {
-        //     display: "none", // Remove the close (X) button
-        //     visibility: "hidden",
-        //   },
-        //   buttonBack: {
-        //     marginRight: 10, // Fix Back button alignment
-        //     color: stepIndex === 0 ? "rgba(0, 0, 0, 0.3)" : "#388A94", // Disable on first step
-        //     pointerEvents: stepIndex === 0 ? "none" : "auto", // Make non-clickable on the first step
-        //   },
-        // }}
         tooltipComponent={(props) => {
           const {
             backProps,
@@ -139,6 +115,8 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
             index,
             isLastStep,
           } = props;
+
+          const totalSteps = steps.length;
 
           const isEvenStep = index % 2 === 0;
           const isPlacedLeft = step.placement === "left";
@@ -160,7 +138,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
                 style={{
                   backgroundColor: "#fff",
                   borderRadius: "8px",
-                  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+                  // boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
                   padding: "20px",
                   color: "#1A3B47",
                   maxWidth: "400px",
@@ -169,6 +147,19 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
                   marginRight: genieOnLeft ? "0" : "120px", // Adjust position to leave space for the character
                 }}
               >
+                {/* Step Number */}
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#777",
+                    margin: "0 0 8px",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                  }}
+                >
+                  Step {index + 1} of {totalSteps}
+                </p>
+
                 {/* Tooltip Title */}
                 <h4
                   style={{
@@ -200,24 +191,6 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
                     alignItems: "center",
                   }}
                 >
-                  {/* Back Button */}
-                  {index > 0 && (
-                    <button
-                      {...backProps}
-                      style={{
-                        padding: "8px 16px",
-                        border: "none",
-                        borderRadius: "4px",
-                        backgroundColor: "#fff",
-                        color: "#388A94",
-                        boxShadow: "inset 0 0 0 2px #388A94",
-                        cursor: "pointer",
-                        pointerEvents: index === 0 ? "none" : "auto",
-                      }}
-                    >
-                      Back
-                    </button>
-                  )}
                   {/* Skip Button */}
                   <button
                     {...skipProps}
@@ -225,26 +198,58 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
                       padding: "8px 16px",
                       border: "none",
                       borderRadius: "4px",
-                      backgroundColor: "#fff",
-                      color: "#ff3d00",
-                      marginLeft: "auto",
+                      backgroundColor: "#388A94",
+                      color: "#fff",
                       cursor: "pointer",
+                      transition: "background-color 0.2s ease-in-out",
+                      fontWeight: "bold",
+                      marginRight: "auto", // Move Skip to the left
                     }}
+                    onMouseEnter={(e) =>
+                      (e.target.style.backgroundColor = "#2e6b77")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.backgroundColor = "#388A94")
+                    }
                   >
-                    Skip
+                    Got it!
                   </button>
+                  {/* Back Button */}
+                  {index > 0 && (
+                    <button
+                      {...backProps}
+                      style={{
+                        padding: "8px 0px",
+                        border: "none",
+                        borderRadius: "4px",
+                        // backgroundColor: "#f5f5f5",
+                        fontWeight: "bold",
+                        color: "#666",
+                        // boxShadow: "inset 0 0 0 2px #ddd",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) => (e.target.style.color = "#444")}
+                      onMouseLeave={(e) => (e.target.style.color = "#666")}
+                    >
+                      Prev
+                    </button>
+                  )}
                   {/* Next/Finish Button */}
                   <button
                     {...primaryProps}
                     style={{
-                      padding: "8px 16px",
+                      padding: "8px 8px",
                       border: "none",
-                      borderRadius: "4px",
-                      backgroundColor: "#388A94",
-                      color: "#fff",
+                      // borderRadius: "4px",
+                      backgroundColor: "#fff", // New background color
+                      color: "#388A94", // New foreground color
+                      // boxShadow: "inset 0 0 0 2px #388A94",
+                      fontWeight: "bold",
                       cursor: "pointer",
                       marginLeft: "12px",
                     }}
+                    onMouseEnter={(e) => (e.target.style.color = "#2e6b77")}
+                    onMouseLeave={(e) => (e.target.style.color = "#388A94")}
                   >
                     {isLastStep ? "Finish" : "Next"}
                   </button>
@@ -267,8 +272,6 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
                   style={{
                     width: "160px",
                     height: "160px",
-                    // borderRadius: "50%",
-                    // boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
                   }}
                 />
               </div>
