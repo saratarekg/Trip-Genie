@@ -65,6 +65,7 @@ export default function UserStats() {
 
   const fetchAllTimeStats = async () => {
     try {
+      setIsLoading(true);
       const token = Cookies.get("jwt");
       const response = await axios.get(
         "http://localhost:4000/admin/users-report",
@@ -73,6 +74,7 @@ export default function UserStats() {
         }
       );
       setStats(response.data);
+      setIsLoading(false);
     } catch (err) {
       setError(err.message);
     }
@@ -80,6 +82,7 @@ export default function UserStats() {
 
   const fetchMonthlyStats = async () => {
     try {
+      setIsLoading(true);
       const token = Cookies.get("jwt");
       const currentDate = new Date();
       const lastMonth = subMonths(currentDate, 1);
@@ -104,6 +107,8 @@ export default function UserStats() {
         currentMonth: currentMonthResponse.data,
         lastMonth: lastMonthResponse.data,
       });
+
+      setIsLoading(false);
     } catch (err) {
       setError(err.message);
     }
@@ -406,9 +411,10 @@ export default function UserStats() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {filteredStats?.total
-                              ? ((item.count / filteredStats.total) * 100).toFixed(
-                                  1
-                                )
+                              ? (
+                                  (item.count / filteredStats.total) *
+                                  100
+                                ).toFixed(1)
                               : 0}
                             %
                           </td>
