@@ -1660,12 +1660,10 @@ export default function AccountManagement() {
   useEffect(() => {
     const path = location.pathname.split("/").pop();
     if (path === "account" || path === "") {
-      setActiveTab("info");
       setActiveTab(role === "tourism-governor" ? "faqs" : "info");
     } else {
       setActiveTab(path);
     }
-  }, [location]);
   }, [location, role]);
 
   const handleRedeemPoints = async () => {
@@ -1850,6 +1848,7 @@ export default function AccountManagement() {
           "advertiser",
           "tour-guide",
           "admin",
+          
         ],
       },
       {

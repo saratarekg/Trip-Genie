@@ -712,7 +712,6 @@ export function NavbarComponent() {
                 {openDropdown === "userMenu" && (
                   <div className="absolute right-0 mt-2 w-48 bg-black/90 rounded-2xl border border-white/20 shadow-lg py-1">
                     <Link
-                      to="/account/info"
                       to={role === "tourism-governor" ? "/account/faqs" : "/account/info"}
                       className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                       onClick={closeDropdown}
@@ -974,7 +973,6 @@ export function NavbarComponent() {
             {role !== "guest" && role !== undefined && (
               <>
                 <Link
-                  to="/account/info"
                   to={role === "tourism-governor" ? "/account/faqs" : "/account/info"}
                   className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                   onClick={closeDropdown}
