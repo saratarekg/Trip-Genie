@@ -652,7 +652,7 @@ export function NavbarComponent() {
                 {role === "tourist" && <NotificationsDropdownTourist />}
                 {role === "tourist" && (
                   <>
-                    <div className="relative mr-2 mt-1">
+                    <div className="relative mr-2 mt-1 navbar-cart">
                       <button
                         onClick={() => setIsCartOpen(!isCartOpen)}
                         className="relative"
@@ -681,7 +681,7 @@ export function NavbarComponent() {
                     <NavLinkIcon to="/touristWishlist">
                       <button
                         onClick={() => setIsCartOpen(false)}
-                        className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2"
+                        className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 navbar-wishlist"
                       >
                         <Heart className="h-7 w-7" />
                         <span className="sr-only">Wishlist</span>
@@ -702,7 +702,7 @@ export function NavbarComponent() {
                 </Link>
               </>
             ) : role !== "admin" || role === "admin" ? (
-              <div className="relative" ref={userMenuRef}>
+              <div className="relative navbar-profile" ref={userMenuRef}>
                 <button
                   onClick={() => toggleDropdown("userMenu")}
                   className="inline-flex items-center justify-center p-2 rounded-full text-white hover:bg-white/10 focus:outline-none transition-colors duration-200"
