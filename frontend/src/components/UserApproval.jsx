@@ -26,6 +26,8 @@ import {
 import { Check, X, Mail, User, UserX, XCircle, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
+import ApprovalConfirmation from "@/components/ui/approvalConfirmation";
+
 
 export default function UserApproval() {
   const [advertisers, setAdvertisers] = useState([]);
@@ -41,12 +43,39 @@ export default function UserApproval() {
   const [toastType, setToastType] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserRole, setSelectedUserRole] = useState(null);
+
+
+  const openApprovalDialog = (user, role) => {
+    setSelectedUser(user);
+    setSelectedUserRole(role);
+    setIsApprovalDialogOpen(true);
+  };
+
+  const confirmApproval = async () => {
+    if (selectedUser && selectedUserRole) {
+      await approveUser(selectedUser._id, selectedUserRole);
+      closeApprovalDialog();
+    }
+  };
+
+  const closeApprovalDialog = () => {
+    setSelectedUser(null);
+    setSelectedUserRole(null);
+    setIsApprovalDialogOpen(false);
+  };
+
+
+
 
   useEffect(() => {
     fetchAdvertisers();
     fetchSellers();
     fetchTourGuides();
   }, []);
+
 
   const fetchFile = async (filename) => {
     try {
@@ -142,8 +171,8 @@ export default function UserApproval() {
       role === "advertiser"
         ? fetchAdvertisers()
         : role === "seller"
-        ? fetchSellers()
-        : fetchTourGuides();
+          ? fetchSellers()
+          : fetchTourGuides();
     } catch (err) {
       showToast(`Failed to approve ${role}`, "error");
       console.error(err);
@@ -207,12 +236,14 @@ export default function UserApproval() {
               </Button>
               <div className="h-5 border-l border-gray-300"></div>
               <Button
-                onClick={() => handleConfirm("approve", user, role)}
+                onClick={() => openApprovalDialog(user, role)}
                 className="text-green-500 hover:text-green-600 active:text-green-700 active:transform active:scale-95 transition-all duration-200 p-2"
                 variant="ghost"
               >
                 <Check className="h-5 w-5" />
               </Button>
+
+
             </div>
             <div className="">
               <div className="flex flex-col items-start">
@@ -307,8 +338,8 @@ export default function UserApproval() {
               )}
 
               {advertisers.length === 0 &&
-              sellers.length === 0 &&
-              tourGuides.length === 0 ? (
+                sellers.length === 0 &&
+                tourGuides.length === 0 ? (
                 <div className="flex items-center justify-center h-24 sm:h-32">
                   <p className="text-base sm:text-lg text-[#003f66] text-center px-4">
                     No users to Accept/Reject. Please check again later!
@@ -335,6 +366,15 @@ export default function UserApproval() {
           itemType="registered account"
           onConfirm={handleConfirmDelete}
         />
+
+        <ApprovalConfirmation
+          isOpen={isApprovalDialogOpen}
+          onClose={closeApprovalDialog}
+          itemType="user"
+          onConfirm={confirmApproval}
+        />
+
+
       </div>
 
       <ToastViewport />

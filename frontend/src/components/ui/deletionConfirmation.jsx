@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-export default function DeleteConfirmation({ 
-  isOpen, 
-  onClose, 
+export default function DeleteConfirmation({
+  isOpen,
+  onClose,
   itemType = "item", // Default value if not specified
   redirectPath,
-  onConfirm 
+  onConfirm
 }) {
   const handleConfirm = () => {
     onConfirm?.();
@@ -27,11 +27,12 @@ export default function DeleteConfirmation({
             </div>
             <div className="flex flex-col">
               <DialogTitle className="text-xl font-semibold text-left">
-                Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
+                Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)} ?
               </DialogTitle>
+
               <DialogDescription className="text-gray-500 text-left">
                 Are you sure you want to delete this {itemType}? If you delete this {itemType},
-               you can not undo this action.
+                you can not undo this action.
               </DialogDescription>
             </div>
           </div>
