@@ -1109,28 +1109,37 @@ const ActivityDetail = () => {
         "This section provides a detailed overview of the activity, including its name, timing, price, and location.",
       placement: "left",
     },
-    {
-      target: ".Save",
-      content: (
-        <>
-          {" "}
-          Click here to save this activity for later viewing or booking in your
-          saved activities list.
-          <br />
-          Tip:
-          <br />
-          You can view your saved activities anytime! Simply click the hamburger
-          menu on the top right corner → My Account → Activities → Saved
-        </>
-      ),
-      placement: "left",
-    },
-    {
-      target: ".bookNow",
-      content:
-        "Click here to be able to book this activity and proceed to the payment process.",
-      placement: "left",
-    },
+    // Conditionally add the Save step based on user role
+    ...(userRole !== "guest"
+      ? [
+          {
+            target: ".Save",
+            content: (
+              <>
+                Click here to save this activity for later viewing or booking in your
+                saved activities list.
+                <br />
+                Tip:
+                <br />
+                You can view your saved activities anytime! Simply click the hamburger
+                menu on the top right corner → My Account → Activities → Saved
+              </>
+            ),
+            placement: "left",
+          },
+        ]
+      : []),
+    // Conditionally add the bookNow step based on user role
+    ...(userRole !== "guest"
+      ? [
+          {
+            target: ".bookNow",
+            content:
+              "Click here to be able to book this activity and proceed to the payment process.",
+            placement: "left",
+          },
+        ]
+      : []),
     {
       target: ".AdvertiserDetail",
       content:
