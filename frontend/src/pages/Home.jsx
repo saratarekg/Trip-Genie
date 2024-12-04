@@ -19,7 +19,15 @@ export default function Home() {
 
   useEffect(() => {
     setRole(Cookies.get("role") || "guest");
+    incrementVisitCount();
   }, []);
+
+  const incrementVisitCount = async () => {
+    const response = await fetch("http://localhost:4000/increment-visit-count", {
+      method: "POST",
+    });
+    const data = await response.json();
+  }
 
   const tabs = {
     activities: <Activities />,
