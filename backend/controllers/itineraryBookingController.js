@@ -458,8 +458,8 @@ exports.getItinerariesReport = async (req, res) => {
       return { itinerary, tickets, revenue: revenue * 0.9 }; // Return itinerary report
     });
 
-    itineraryReport = itineraryReport.filter((report) => report.tickets > 0); // Filter out itineraries with no tickets
-
+    // itineraryReport = itineraryReport.filter((report) => report.tickets > 0); // Filter out itineraries with no tickets
+    itineraryReport = itineraryReport.sort((a, b) => b.revenue - a.revenue);
     totalRevenue *= 0.9;
     res.status(200).json({ itineraryReport, totalRevenue, totalTickets });
   } catch (error) {

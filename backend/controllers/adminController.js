@@ -374,7 +374,9 @@ const addPromoCode = async (req, res) => {
     const { code } = req.body;
     const existingPromoCode = await PromoCode.findOne({ code });
     if (existingPromoCode) {
-      return res.status(400).json({ message: "Promo code name already exists" });
+      return res
+        .status(400)
+        .json({ message: "Promo code name already exists" });
     }
     const promoCode = new PromoCode(req.body);
     await promoCode.save();
@@ -457,7 +459,7 @@ const getSalesReport = async (req, res) => {
     }
     query.sales = { $gt: 0 };
     const productSales = await ProductSales.find(query).populate("product");
-    const adminProductsSales = productSales.filter(
+    let adminProductsSales = productSales.filter(
       (sale) =>
         sale.product.seller === null || sale.product.seller === undefined
     );
@@ -466,7 +468,11 @@ const getSalesReport = async (req, res) => {
       0
     );
 
-    const sellerProductsSales = productSales
+    adminProductsSales = adminProductsSales.sort(
+      (a, b) => b.revenue - a.revenue
+    );
+
+    let sellerProductsSales = productSales
       .filter(
         (sale) =>
           sale.product.seller !== null || sale.product.seller !== undefined
@@ -475,6 +481,10 @@ const getSalesReport = async (req, res) => {
         const plainSale = sale.toObject();
         return { ...plainSale, appRevenue: plainSale.revenue * 0.1 };
       });
+
+    sellerProductsSales = sellerProductsSales.sort(
+      (a, b) => b.revenue - a.revenue
+    );
 
     const totalSellerSalesRevenue = sellerProductsSales.reduce(
       (total, sale) => total + sale.appRevenue,
@@ -529,8 +539,12 @@ const getItinerariesReport = async (req, res) => {
       return { itinerary, totalRevenue, appRevenue };
     });
 
-    itinerariesSales = itinerariesSales.filter(
-      (report) => report.totalRevenue > 0
+    // itinerariesSales = itinerariesSales.filter(
+    //   (report) => report.totalRevenue > 0
+    // );
+
+    itinerariesSales = itinerariesSales.sort(
+      (a, b) => b.totalRevenue - a.totalRevenue
     );
 
     const totalItinerariesRevenue = itinerariesSales.reduce(
@@ -586,8 +600,12 @@ const getActivitiesReport = async (req, res) => {
       return { activity, totalRevenue, appRevenue };
     });
 
-    activitiesSales = activitiesSales.filter(
-      (report) => report.totalRevenue > 0
+    // activitiesSales = activitiesSales.filter(
+    //   (report) => report.totalRevenue > 0
+    // );
+
+    activitiesSales = activitiesSales.sort(
+      (a, b) => b.totalRevenue - a.totalRevenue
     );
 
     const totalActivitiesRevenue = activitiesSales.reduce(

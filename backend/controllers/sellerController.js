@@ -371,7 +371,7 @@ const getSalesReport = async (req, res) => {
     }
 
     const productSales = await ProductSales.find(query).populate("product");
-    const sellerProductsSales = productSales
+    let sellerProductsSales = productSales
       .filter((sale) => sale.product.seller?.toString() === res.locals.user_id)
       .map((sale) => {
         const pureSale = sale.toObject();
@@ -382,6 +382,9 @@ const getSalesReport = async (req, res) => {
       0
     );
     const totalRevenueAfterCommission = totalSellerSalesRevenue * 0.9;
+    sellerProductsSales = sellerProductsSales.sort(
+      (a, b) => b.revenue - a.revenue
+    );
 
     res.status(200).json({
       sellerProductsSales,

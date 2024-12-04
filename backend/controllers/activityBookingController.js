@@ -473,7 +473,8 @@ exports.getBookingsReport = async (req, res) => {
     });
 
     totalRevenue *= 0.9; // 10% commission for the platform
-    activityReport = activityReport.filter((report) => report.tickets > 0);
+    // activityReport = activityReport.filter((report) => report.tickets > 0);
+    activityReport = activityReport.sort((a, b) => b.revenue - a.revenue);
     res.status(200).json({ activityReport, totalRevenue, totalTickets });
   } catch (error) {
     res.status(500).json({ message: error.message }); // Handle errors
