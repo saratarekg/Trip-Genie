@@ -67,6 +67,7 @@ import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";
 import TouristItineraries from "@/pages/TouristItineraries";
 import WalletHistory from "@/components/WalletHistory";
+import { Link } from "react-router-dom";
 
 import FAQ from "@/pages/FAQs";
 import TouristAttendedActivities from "@/pages/TouristAttended";
@@ -166,10 +167,6 @@ const ExternalFlightBookings = ({ user }) => {
   const [flights, setFlights] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [preferredCurrency, setPreferredCurrency] = useState({
-    code: "USD",
-    symbol: "$",
-  });
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
@@ -475,9 +472,12 @@ const ExternalFlightBookings = ({ user }) => {
               <p className="text-gray-500">
                 Start booking your flights to see the world!
               </p>
-              <Button className="mt-4 bg-[#388A94] text-white">
-                Start Booking
-              </Button>
+              <Link to="/flights">
+                <Button className="mt-4 bg-[#388A94] text-white">
+                  {" "}
+                  Start Booking
+                </Button>
+              </Link>
             </div>
           ) : (
             flights.map((flight, index) => (
