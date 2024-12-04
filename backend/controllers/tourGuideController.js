@@ -20,6 +20,7 @@ const getTourGuideProfile = async (req, res) => {
     // Find the tour guide by their ID
     const tourGuide = await TourGuide.findById(tourGuideId)
       .populate("nationality")
+      .populate("comments.tourist")
       .exec();
 
     if (!tourGuide) {
