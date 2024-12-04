@@ -1,99 +1,109 @@
 import React, { useState } from "react";
-import { BarChart, Users, Gift, Activity, MessageSquare, Map, LogOut, Home, ChevronDown, Bell, Tag } from 'lucide-react';
+import {
+  BarChart,
+  Users,
+  Gift,
+  Activity,
+  MessageSquare,
+  Map,
+  LogOut,
+  Home,
+  ChevronDown,
+  Bell,
+  Tag,
+} from "lucide-react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/TGlogo.svg";
 
 const tabs = [
-  { 
-    id: 'dashboard', 
-    title: 'Dashboard', 
-    icon: Home 
+  {
+    id: "dashboard",
+    title: "Dashboard",
+    icon: Home,
   },
-  { 
-    id: 'accounts', 
-    title: 'Accounts', 
+  {
+    id: "accounts",
+    title: "Accounts",
     icon: Users,
     subItems: [
-      { id: 'review-registration', title: 'Review Registration' },
-      { id: 'manage-accounts', title: 'Manage Accounts' },
-      { id: 'add-admin-governor', title: 'Add Admin/Governor' },
-    ]
+      { id: "review-registration", title: "Review Registration" },
+      { id: "manage-accounts", title: "Manage Accounts" },
+      { id: "add-admin-governor", title: "Add Admin/Governor" },
+    ],
   },
-  { 
-    id: 'product-management', 
-    title: 'Product Management', 
+  {
+    id: "product-management",
+    title: "Product Management",
     icon: Gift,
     subItems: [
-      { id: 'my-products', title: 'My Products' },
-      { id: 'manage-products', title: 'All Products' },
-      { id: 'archived-products', title: 'Archived Products' },
-      { id: 'create-product', title: 'Create Product' },
-    ]
+      { id: "my-products", title: "My Products" },
+      { id: "manage-products", title: "All Products" },
+      { id: "archived-products", title: "Archived Products" },
+      { id: "create-product", title: "Create Product" },
+    ],
   },
-  { 
-    id: 'activities-management', 
-    title: 'Activities Management', 
+  {
+    id: "activities-management",
+    title: "Activities Management",
     icon: Activity,
     subItems: [
-      { id: 'manage-activities', title: 'All Activities' },
-      { id: 'manage-categories', title: 'Manage Categories' },
-      { id: 'manage-tags', title: 'Manage Tags' },
-    ]
+      { id: "manage-activities", title: "All Activities" },
+      { id: "manage-categories", title: "Manage Categories" },
+      { id: "manage-tags", title: "Manage Tags" },
+    ],
   },
-  { 
-    id: 'itineraries', 
-    title: 'Itineraries', 
+  {
+    id: "itineraries",
+    title: "Itineraries",
     icon: Map,
-    subItems: [
-      { id: 'manage-itineraries', title: 'All Itineraries' },
-    ]
+    subItems: [{ id: "manage-itineraries", title: "All Itineraries" }],
   },
-  { 
-    id: 'historical-places', 
-    title: 'Historical Places', 
-    icon: Map 
+  {
+    id: "historical-places",
+    title: "Historical Places",
+    icon: Map,
   },
-  { 
-    id: 'promo-code-management', 
-    title: 'Promo Codes', 
+  {
+    id: "promo-code-management",
+    title: "Promo Codes",
     icon: Tag,
     subItems: [
-      { id: 'all-promo-codes', title: 'All Promo Codes' },
-      { id: 'create-promo-code', title: 'Create Promo Code' },
-    ]
+      { id: "all-promo-codes", title: "All Promo Codes" },
+      { id: "create-promo-code", title: "Create Promo Code" },
+    ],
   },
-  { 
-    id: 'reports', 
-    title: 'Reports', 
+  {
+    id: "reports",
+    title: "Reports",
     icon: BarChart,
     subItems: [
-      { id: 'itinerary-sales-report', title: 'Itineraries Report' },
-      { id: 'activity-reports', title: 'Activities Report' },
-      { id: 'my-product-sales-report', title: 'My Products Report' },
-      { id: 'seller-product-sales-report', title: "Seller's Products Report" },
-      { id: 'user-stats', title: 'User Statistics' },
-    ]
+      { id: "itinerary-sales-report", title: "Itineraries Report" },
+      { id: "activity-reports", title: "Activities Report" },
+      { id: "my-product-sales-report", title: "My Products Sales Report" },
+      { id: "my-product-stock-report", title: "My Products Stock Report" },
+      { id: "seller-product-sales-report", title: "Seller's Products Report" },
+      { id: "user-stats", title: "User Statistics" },
+    ],
   },
-  { 
-    id: 'complaints', 
-    title: 'Complaints', 
-    icon: MessageSquare 
+  {
+    id: "complaints",
+    title: "Complaints",
+    icon: MessageSquare,
   },
-  { 
-    id: 'notifications', 
-    title: 'Notifications', 
-    icon: Bell 
+  {
+    id: "notifications",
+    title: "Notifications",
+    icon: Bell,
   },
 ];
 
-
-export function DashboardSidebar({ 
-  className, 
+export function DashboardSidebar({
+  className,
   defaultCollapsed = false,
   activeTab,
   setActiveTab,
-  onToggleCollapse
+  onToggleCollapse,
 }) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [openMenu, setOpenMenu] = useState(null);
@@ -116,7 +126,7 @@ export function DashboardSidebar({
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
-        setActiveTab('dashboard'); // Set active tab to dashboard
+        setActiveTab("dashboard"); // Set active tab to dashboard
         navigate("/login");
         window.location.reload();
       } else {
@@ -134,8 +144,15 @@ export function DashboardSidebar({
 
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
-    if (tabId.startsWith('itinerary-sales-report') || tabId.startsWith('activity-reports') || tabId.startsWith('my-product-sales-report') || tabId.startsWith('seller-product-sales-report') || tabId.startsWith('user-stats')) {
-      setOpenMenu('reports');
+    if (
+      tabId.startsWith("itinerary-sales-report") ||
+      tabId.startsWith("activity-reports") ||
+      tabId.startsWith("my-product-sales-report") ||
+      tabId.startsWith("my-product-stock-report") ||
+      tabId.startsWith("seller-product-sales-report") ||
+      tabId.startsWith("user-stats")
+    ) {
+      setOpenMenu("reports");
     }
   };
 
@@ -179,20 +196,38 @@ export function DashboardSidebar({
                     }`}
                     onClick={() => toggleMenu(tab.id)}
                   >
-                    <tab.icon className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`} />
+                    <tab.icon
+                      className={`h-5 w-5 min-w-[1.25rem] ${
+                        isCollapsed ? "" : "mr-3"
+                      }`}
+                    />
                     {!isCollapsed && (
                       <>
-                        <span className="flex-1 text-left truncate">{tab.title}</span>
-                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${openMenu === tab.id ? "transform rotate-180" : ""}`} />
+                        <span className="flex-1 text-left truncate">
+                          {tab.title}
+                        </span>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform duration-200 ${
+                            openMenu === tab.id ? "transform rotate-180" : ""
+                          }`}
+                        />
                       </>
                     )}
                   </button>
-                  <div className={`pl-7 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${openMenu === tab.id && !isCollapsed ? "max-h-96" : "max-h-0"}`}>
+                  <div
+                    className={`pl-7 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${
+                      openMenu === tab.id && !isCollapsed
+                        ? "max-h-96"
+                        : "max-h-0"
+                    }`}
+                  >
                     {tab.subItems.map((subItem, index) => (
-                      <button 
+                      <button
                         key={subItem.id}
                         className={`flex items-center w-full p-2 rounded-md transition-all duration-500 ease-in-out text-white/70 hover:text-white hover:bg-white/10 ${
-                          activeTab === subItem.id ? "bg-white/20 text-white" : ""
+                          activeTab === subItem.id
+                            ? "bg-white/20 text-white"
+                            : ""
                         }`}
                         style={{ transitionDelay: getTransitionDelay(index) }}
                         onClick={() => handleTabClick(subItem.id)}
@@ -203,14 +238,20 @@ export function DashboardSidebar({
                   </div>
                 </div>
               ) : (
-                <button 
+                <button
                   className={`flex items-center w-full p-2 rounded-md transition-all duration-200 text-white hover:bg-white/10 ${
                     activeTab === tab.id ? "bg-white/20" : ""
                   }`}
                   onClick={() => handleTabClick(tab.id)}
                 >
-                  <tab.icon className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`} />
-                  {!isCollapsed && <span className="truncate">{tab.title}</span>}
+                  <tab.icon
+                    className={`h-5 w-5 min-w-[1.25rem] ${
+                      isCollapsed ? "" : "mr-3"
+                    }`}
+                  />
+                  {!isCollapsed && (
+                    <span className="truncate">{tab.title}</span>
+                  )}
                 </button>
               )}
             </React.Fragment>
@@ -227,11 +268,12 @@ export function DashboardSidebar({
           }`}
           onClick={logOut}
         >
-          <LogOut className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`} />
+          <LogOut
+            className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`}
+          />
           {!isCollapsed && <span className="truncate">Logout</span>}
         </button>
       </div>
     </div>
   );
 }
-

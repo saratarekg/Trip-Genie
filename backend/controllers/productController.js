@@ -5,10 +5,11 @@ const Purchase = require("../models/purchase");
 const cloudinary = require("../utils/cloudinary");
 
 const getAllProducts = async (req, res) => {
-  const { minPrice, maxPrice, searchBy, asc, sort, myproducts, rating } = req.query;
+  const { minPrice, maxPrice, searchBy, asc, sort, myproducts, rating } =
+    req.query;
   const role = res.locals.user_role;
   console.log(myproducts);
-  
+
   try {
     // Build the query object dynamically
     const query = {};
@@ -68,10 +69,13 @@ const getAllProducts = async (req, res) => {
 
 // Function to get the maximum price from products
 const getMaxPrice = async (req, res) => {
-  const maxPriceProduct = await Product.findOne({ isArchived: false, isDeleted: false }).sort({ price: -1 });
+  const maxPriceProduct = await Product.findOne({
+    isArchived: false,
+    isDeleted: false,
+  }).sort({ price: -1 });
   let maxPrice;
-  if(maxPriceProduct){
-  maxPrice = await maxPriceProduct.price;
+  if (maxPriceProduct) {
+    maxPrice = await maxPriceProduct.price;
   } else {
     maxPrice = 0;
   }
@@ -87,15 +91,22 @@ const getMaxPriceMy = async (req, res) => {
 
     if (role === "admin") {
       // Admin: Access max price across all non-archived products
-      maxPriceProduct = await Product.findOne({ seller: null, isArchived: false, isDeleted: false }).sort({ price: -1 });
+      maxPriceProduct = await Product.findOne({
+        seller: null,
+        isArchived: false,
+        isDeleted: false,
+      }).sort({ price: -1 });
     } else {
       // Seller: Retrieve max price for non-archived products belonging to this user
-      maxPriceProduct = await Product.findOne({ seller: userId, isArchived: false, isDeleted: false }).sort({ price: -1 });
+      maxPriceProduct = await Product.findOne({
+        seller: userId,
+        isArchived: false,
+        isDeleted: false,
+      }).sort({ price: -1 });
     }
 
     const maxPrice = maxPriceProduct ? maxPriceProduct.price : 0;
     res.status(200).json(maxPrice);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -110,22 +121,26 @@ const getMaxPriceArchived = async (req, res) => {
 
     if (role === "admin") {
       // Admin: Access max price across all non-archived products
-      maxPriceProduct = await Product.findOne({ seller: null, isArchived: true, isDeleted: false }).sort({ price: -1 });
+      maxPriceProduct = await Product.findOne({
+        seller: null,
+        isArchived: true,
+        isDeleted: false,
+      }).sort({ price: -1 });
     } else {
       // Seller: Retrieve max price for non-archived products belonging to this user
-      maxPriceProduct = await Product.findOne({ seller: userId, isArchived: true, isDeleted: false }).sort({ price: -1 });
+      maxPriceProduct = await Product.findOne({
+        seller: userId,
+        isArchived: true,
+        isDeleted: false,
+      }).sort({ price: -1 });
     }
 
     const maxPrice = maxPriceProduct ? maxPriceProduct.price : 0;
     res.status(200).json(maxPrice);
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
 
 const getAllProductsArchive = async (req, res) => {
   const { minPrice, maxPrice, searchBy, asc, myproducts, rating, sort } =
@@ -439,7 +454,7 @@ const deleteProduct = async (req, res) => {
           message: "Cannot delete product, there are pending purchases",
         });
       }
-    };
+    }
     const product = await Product.findByIdAndUpdate(id, { isDeleted: true });
     for (let i = 0; i < product.pictures.length; i++) {
       await cloudinary.uploader.destroy(product.pictures[i].public_id);
@@ -910,9 +925,76 @@ const updateCommentOnProduct = async (req, res) => {
   }
 };
 
+const getStockReport = async (req, res) => {
+  try {
+    let { productIds } = req.query;
+    const query = { isDeleted: false, seller: res.locals.user_id };
+    if (productIds) {
+      productIds = productIds.split(",");
+      query._id = { $in: productIds };
+    }
 
+    const products = await Product.find(query);
+    let stockReport = products.map((product) => {
+      return {
+        id: product._id,
+        name: product.name,
+        quantity: product.quantity,
+        sales: product.sales,
+      };
+    });
 
+    const totalStock = stockReport.reduce(
+      (acc, product) => acc + product.quantity,
+      0
+    );
 
+    const totalSales = stockReport.reduce(
+      (acc, product) => acc + product.sales,
+      0
+    );
+
+    stockReport = stockReport.sort((a, b) => b.quantity - a.quantity);
+    res.status(200).json({ stockReport, totalStock, totalSales });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAdminStockReport = async (req, res) => {
+  try {
+    let { productIds } = req.query;
+    const query = { isDeleted: false, seller: null };
+    if (productIds) {
+      productIds = productIds.split(",");
+      query._id = { $in: productIds };
+    }
+    const products = await Product.find(query);
+    let stockReport = products.map((product) => {
+      return {
+        id: product._id,
+        name: product.name,
+        quantity: product.quantity,
+        sales: product.sales,
+      };
+    });
+
+    const totalStock = stockReport.reduce(
+      (acc, product) => acc + product.quantity,
+      0
+    );
+
+    const totalSales = stockReport.reduce(
+      (acc, product) => acc + product.sales,
+      0
+    );
+
+    stockReport = stockReport.sort((a, b) => b.quantity - a.quantity);
+    res.status(200).json({ stockReport, totalStock, totalSales });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 module.exports = {
   rateProduct,
@@ -933,4 +1015,6 @@ module.exports = {
   getMaxPrice,
   getMaxPriceMy,
   getMaxPriceArchived,
+  getStockReport,
+  getAdminStockReport,
 };

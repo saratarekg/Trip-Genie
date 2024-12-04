@@ -97,6 +97,7 @@ import {
   ToastClose,
 } from "@/components/ui/toast";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
+import StockReport from "./StockReport.jsx";
 
 
 
@@ -1757,6 +1758,8 @@ export default function AccountManagement() {
         return <FAQs />;
       case "sales-report-seller":
         return <ProductReportSeller />;
+      case "stock-report":
+        return <StockReport />;
       case "flight-bookings":
         return <ExternalFlightBookings user={user} />;
       case "hotel-bookings":
@@ -1920,6 +1923,12 @@ export default function AccountManagement() {
         tab: "sales-report-seller",
         roles: ["seller"],
       },
+      {
+        name: "Stock Report",
+        icon: FileText,
+        tab: "stock-report",
+        roles: ["seller"],
+      }
     ],
     "Help and Support": [
       // {

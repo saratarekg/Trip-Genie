@@ -175,7 +175,6 @@ const ProductCard = ({
     window.location.href = "/checkout2"; // Replace with your actual checkout URL
   };
 
-
   useEffect(() => {
     const isInWishlist = wishlistItems.some(
       (item) => item.product._id === product._id
@@ -214,58 +213,55 @@ const ProductCard = ({
 
         {userInfo?.role === "tourist" && product.quantity > 0 ? (
           <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="bg-[#F88C33] hover:bg-orange-500 text-white"
-              style={{
-                borderRadius: "20px",
-                padding: "4px 12px",
-                fontSize: "14px",
-              }}
-            >
-              Add to Cart
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="text-[#1A3B47] text-2xl">Choose an option</DialogTitle>
-            </DialogHeader>
-           
-            <div className="grid gap-4 py-4">
+            <DialogTrigger asChild>
+              <Button
+                className="bg-[#F88C33] hover:bg-orange-500 text-white"
+                style={{
+                  borderRadius: "20px",
+                  padding: "4px 12px",
+                  fontSize: "14px",
+                }}
+              >
+                Add to Cart
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle className="text-[#1A3B47] text-2xl">
+                  Choose an option
+                </DialogTitle>
+              </DialogHeader>
 
-<Button
-  className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
-  onClick={(e) => {
-    e.stopPropagation();
-    onAddToCart(product);
-    setIsPopupOpen(false);
-  }}
->
-  Add to Cart and Continue Shopping
-</Button>
-<Button
-  className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
-  onClick={handleCheckoutNow}
->
-  Add to cart and Checkout Now
-</Button>
-
-            </div>
-          </DialogContent>
-        </Dialog>
-        
+              <div className="grid gap-4 py-4">
+                <Button
+                  className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToCart(product);
+                    setIsPopupOpen(false);
+                  }}
+                >
+                  Add to Cart and Continue Shopping
+                </Button>
+                <Button
+                  className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
+                  onClick={handleCheckoutNow}
+                >
+                  Add to cart and Checkout Now
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         ) : (
           userInfo?.role === "tourist" && (
-            <span className="text-red-500 text-lg font-bold">
-              Out of stock
-            </span>
+            <span className="text-red-500 text-lg font-bold">Out of stock</span>
           )
         )}
       </CardFooter>
 
       {userInfo?.role === "tourist" && (
         <div className="absolute top-2 right-2 flex space-x-2">
-          {!isInCart && product.quantity>0 && (
+          {!isInCart && product.quantity > 0 && (
             <Button
               className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
               onClick={(e) => {
@@ -475,10 +471,8 @@ export function AllProducts() {
         if (response.ok) {
           const data = await response.json();
           setCartItems(data);
-         // cartEvents.emit("cartUpdated", data);
-
+          // cartEvents.emit("cartUpdated", data);
         }
-
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
@@ -617,7 +611,7 @@ export function AllProducts() {
         message: "Product added to cart successfully!",
       });
       fetchCartItems();
-      window.dispatchEvent(new Event('cartUpdated'));
+      window.dispatchEvent(new Event("cartUpdated"));
     } catch (error) {
       console.log(error);
       setAlertMessage({
@@ -739,7 +733,8 @@ export function AllProducts() {
   const guideSteps = [
     {
       target: "body",
-      content: "Welcome to the Products page! Here you can view all the products available for purchase.",
+      content:
+        "Welcome to the Products page! Here you can view all the products available for purchase.",
       placement: "center",
     },
     {
@@ -758,7 +753,6 @@ export function AllProducts() {
 
   return (
     <div className="bg-gray-100">
-       
       <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
           <div className="flex-1">
@@ -1003,7 +997,7 @@ export function AllProducts() {
         <Alert
           className={`fixed bottom-4 right-4 w-96 ${
             alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          } text-white z-50`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -1012,8 +1006,8 @@ export function AllProducts() {
         </Alert>
       )}
       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-           <UserGuide steps={guideSteps} pageName="Products" />
-        )}
+        <UserGuide steps={guideSteps} pageName="Products" />
+      )}
     </div>
   );
 }

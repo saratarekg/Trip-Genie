@@ -337,6 +337,17 @@ exports.deletePurchase = async (req, res) => {
         },
         { $inc: { sales: -quantity, revenue: -product.price * quantity } }
       );
+
+      await Product.findByIdAndUpdate(
+        product,
+        {
+          $inc: {
+            quantity: quantity, // Decrease product quantity
+            sales: -quantity, // Increase product sales
+          },
+        },
+        { runValidators: true }
+      );
     }
 
     return res.status(200).json({ message: "Purchase deleted successfully" });
@@ -424,6 +435,17 @@ exports.cancelPurchase = async (req, res) => {
           year: purchase.createdAt.getFullYear(),
         },
         { $inc: { sales: -quantity, revenue: -revenue } }
+      );
+
+      await Product.findByIdAndUpdate(
+        product,
+        {
+          $inc: {
+            quantity: quantity, // Decrease product quantity
+            sales: -quantity, // Increase product sales
+          },
+        },
+        { runValidators: true }
       );
     }
 

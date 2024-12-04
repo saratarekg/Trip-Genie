@@ -8,14 +8,18 @@ const upload = multer({ storage: storage });
 
 const currencyController = require("../controllers/currencyController");
 
-
 // Routes for Seller Notifications
 router.get("/notifications", sellerController.getSellerNotifications);
 router.get("/unseen-notifications", sellerController.hasUnseenNotifications);
-router.post('/mark-notifications-seen', sellerController.markNotificationsAsSeen);
-router.post('/notifications/markAsSeen/:id', sellerController.markNotificationAsSeenForSeller);
+router.post(
+  "/mark-notifications-seen",
+  sellerController.markNotificationsAsSeen
+);
+router.post(
+  "/notifications/markAsSeen/:id",
+  sellerController.markNotificationAsSeenForSeller
+);
 router.post("/mark-dropdown-opened", sellerController.markDropdownAsOpened); // Mark dropdown opened route
-
 
 router.get("/getCurrency/:id", currencyController.getCurrencyById);
 router.get("/currencies", currencyController.getSupportedCurrencies);
@@ -49,5 +53,6 @@ router.post("/password", sellerController.changePassword);
 router.delete("/delete-account", sellerController.deleteSellerAccount);
 
 router.get("/sales-report", sellerController.getSalesReport);
+router.get("/stock-report", productController.getStockReport);
 
 module.exports = router;

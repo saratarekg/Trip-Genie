@@ -22,10 +22,15 @@ const router = express.Router();
 // Routes for Admin Notifications
 router.get("/notifications", adminController.getAdminNotifications);
 router.get("/unseen-notifications", adminController.hasUnseenNotifications);
-router.post('/notifications/markAsSeen/:id', adminController.markNotificationAsSeen);
-router.post("/mark-notifications-seen", adminController.markNotificationsAsSeen);
+router.post(
+  "/notifications/markAsSeen/:id",
+  adminController.markNotificationAsSeen
+);
+router.post(
+  "/mark-notifications-seen",
+  adminController.markNotificationsAsSeen
+);
 router.post("/mark-dropdown-opened", adminController.markDropdownAsOpened); // Added new route for dropdown
-
 
 router.get(
   "/historical-places",
@@ -185,6 +190,7 @@ router.get("/users-report", adminController.getUsersReport);
 router.get("/sales-report", adminController.getSalesReport);
 router.get("/itineraries-report", adminController.getItinerariesReport);
 router.get("/activities-report", adminController.getActivitiesReport);
+router.get("/stock-report", productController.getAdminStockReport);
 
 router.post("/promo-code", adminController.addPromoCode);
 router.get("/promo-code", adminController.getPromoCodes);

@@ -11,11 +11,11 @@ import {
   Legend,
   ArcElement,
   BarElement,
-} from 'chart.js';
-import { Bell, LogOut, Mail, CheckCircle } from 'lucide-react'; // Import the Mail icon
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { NotificationsDropdownAdmin } from '@/components/AdminNotificationsDropdown'
+} from "chart.js";
+import { Bell, LogOut, Mail, CheckCircle } from "lucide-react"; // Import the Mail icon
+import axios from "axios";
+import Cookies from "js-cookie";
+import { NotificationsDropdownAdmin } from "@/components/AdminNotificationsDropdown";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,14 +23,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator"
-import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "@/components/ui/toast";
+import { Separator } from "@/components/ui/separator";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
 
 import { DashboardSidebar } from "./DashboardSidebar";
 import { DashboardContent } from "./DashboardContent";
-import logo from "@/assets/images/TGlogo.svg";  
+import logo from "@/assets/images/TGlogo.svg";
 import PasswordChanger from "@/components/Passwords"; // Import PasswordChanger component
-import '@/styles/Modal.css'; // Ensure the CSS file for the modal is imported
+import "@/styles/Modal.css"; // Ensure the CSS file for the modal is imported
 
 // Register all the chart elements
 ChartJS.register(
@@ -62,82 +69,87 @@ const DashboardCard = ({ title, value, subtitle, icon }) => (
 );
 
 const tabs = [
-  { id: 'dashboard', title: 'Dashboard', icon: 'Home' },
-  { 
-    id: 'accounts', 
-    title: 'Accounts', 
-    icon: 'Users',
+  { id: "dashboard", title: "Dashboard", icon: "Home" },
+  {
+    id: "accounts",
+    title: "Accounts",
+    icon: "Users",
     subItems: [
-      { id: 'review-registration', title: 'Review Registration' },
-      { id: 'manage-accounts', title: 'Manage Accounts' },
-      { id: 'add-admin-governor', title: 'Add Admin/Governor' },
-    ]
+      { id: "review-registration", title: "Review Registration" },
+      { id: "manage-accounts", title: "Manage Accounts" },
+      { id: "add-admin-governor", title: "Add Admin/Governor" },
+    ],
   },
-  { id: 'complaints', title: 'Complaints', icon: 'MessageSquare' },
-  { id: 'notifications', title: 'Notifications', icon: 'Bell' },
-  { 
-    id: 'giftshop', 
-    title: 'Gift Shop', 
-    icon: 'Gift',
+  { id: "complaints", title: "Complaints", icon: "MessageSquare" },
+  { id: "notifications", title: "Notifications", icon: "Bell" },
+  {
+    id: "giftshop",
+    title: "Gift Shop",
+    icon: "Gift",
     subItems: [
-      { id: 'create-promo-code', title: 'Create Promo Code' },
-      { id: 'manage-products', title: 'Manage Products' },
-    ]
+      { id: "create-promo-code", title: "Create Promo Code" },
+      { id: "manage-products", title: "Manage Products" },
+    ],
   },
-  { 
-    id: 'activities', 
-    title: 'Activities', 
-    icon: 'Activity',
+  {
+    id: "activities",
+    title: "Activities",
+    icon: "Activity",
     subItems: [
-      { id: 'manage-categories', title: 'Manage Categories' },
-      { id: 'manage-tags', title: 'Manage Tags' },
-      { id: 'manage-activities', title: 'Manage Activities' }
-    ]
+      { id: "manage-categories", title: "Manage Categories" },
+      { id: "manage-tags", title: "Manage Tags" },
+      { id: "manage-activities", title: "Manage Activities" },
+    ],
   },
-  { id: 'manage-itineraries', title: 'Manage Itineraries', icon: 'Map' },
-  { 
-    id: 'product', 
-    title: 'Product', 
-    icon: 'Gift',
+  { id: "manage-itineraries", title: "Manage Itineraries", icon: "Map" },
+  {
+    id: "product",
+    title: "Product",
+    icon: "Gift",
     subItems: [
-      { id: 'my-products', title: 'My Products' },
-      { id: 'create-product', title: 'Create Product' },
-      { id: 'archived-products', title: 'Archived Products' },
-      { id: 'manage-products', title: 'Manage Products' },
-    ]
+      { id: "my-products", title: "My Products" },
+      { id: "create-product", title: "Create Product" },
+      { id: "archived-products", title: "Archived Products" },
+      { id: "manage-products", title: "Manage Products" },
+    ],
   },
-  { id: 'historical-places', title: 'Historical Places', icon: 'Map' },
-  { 
-    id: 'reports', 
-    title: 'Sales Reports', 
-    icon: 'BarChart',
+  { id: "historical-places", title: "Historical Places", icon: "Map" },
+  {
+    id: "reports",
+    title: "Sales Reports",
+    icon: "BarChart",
     subItems: [
-      { id: 'itinerary-sales-report', title: 'Itineraries Report' },
-      { id: 'activity-reports', title: 'Activities Report' },
-      { id: 'my-product-sales-report', title: 'My Products Report'},
-      { id: 'seller-product-sales-report', title: 'Seller\'s Products Report' },
-      { id: 'user-stats', title: 'User Statistics' },
-    ]
+      { id: "itinerary-sales-report", title: "Itineraries Report" },
+      { id: "activity-reports", title: "Activities Report" },
+      { id: "my-product-sales-report", title: "My Products Sales Report" },
+      { id: "my-product-stock-report", title: "My Products Stock Report" },
+      { id: "seller-product-sales-report", title: "Seller's Products Report" },
+      { id: "user-stats", title: "User Statistics" },
+    ],
   },
-  { 
-    id: 'promo-code-management', 
-    title: 'Promo Codes', 
-    icon: 'Tag',
+  {
+    id: "promo-code-management",
+    title: "Promo Codes",
+    icon: "Tag",
     subItems: [
-      { id: 'all-promo-codes', title: 'All Promo Codes' },
-      { id: 'create-promo-code', title: 'Create Promo Code' },
-    ]
+      { id: "all-promo-codes", title: "All Promo Codes" },
+      { id: "create-promo-code", title: "Create Promo Code" },
+    ],
   },
 ];
 
 const getInitials = (name) => {
-  if (!name) return '';
-  const initials = name.split(' ').map(word => word[0]).join('');
+  if (!name) return "";
+  const initials = name
+    .split(" ")
+    .map((word) => word[0])
+    .join("");
   return initials.slice(0, 2).toUpperCase();
 };
 
 export function Dashboard() {
-  const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] = useState(false);
+  const [hasUnseenNotificationsAdmin, setHasUnseenNotificationsAdmin] =
+    useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem("activeTab") || "dashboard";
   });
@@ -146,8 +158,8 @@ export function Dashboard() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState('');
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("");
 
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
@@ -163,7 +175,7 @@ export function Dashboard() {
       );
       setHasUnseenNotificationsAdmin(response.data.hasUnseen);
     } catch (error) {
-      console.error('Error checking unseen notifications:', error);
+      console.error("Error checking unseen notifications:", error);
       // Silently fail but don't show the notification dot
       setHasUnseenNotificationsAdmin(false);
     }
@@ -172,15 +184,18 @@ export function Dashboard() {
   useEffect(() => {
     const fetchAdminInfo = async () => {
       try {
-        const token = Cookies.get('jwt'); 
-        const response = await axios.get('http://localhost:4000/admin/admin-info', {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const token = Cookies.get("jwt");
+        const response = await axios.get(
+          "http://localhost:4000/admin/admin-info",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
         setAdminInfo(response.data);
       } catch (error) {
-        console.error('Error fetching admin info:', error);
+        console.error("Error fetching admin info:", error);
       }
     };
 
@@ -221,7 +236,7 @@ export function Dashboard() {
 
   const handlePasswordChangeSuccess = (message) => {
     setIsModalOpen(false);
-    showToast("Your password has been successfully updated.", 'success');
+    showToast("Your password has been successfully updated.", "success");
   };
 
   const handleDropdownToggle = () => {
@@ -240,22 +255,42 @@ export function Dashboard() {
         <div className="text-[#1A3B47] p-2 border-b bg-gray-100 border-gray-300">
           <div className="flex justify-end items-center">
             {adminInfo && (
-              <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-                <DropdownMenuTrigger className="focus:outline-none group" onClick={handleDropdownToggle}>
+              <DropdownMenu
+                open={isDropdownOpen}
+                onOpenChange={setIsDropdownOpen}
+              >
+                <DropdownMenuTrigger
+                  className="focus:outline-none group"
+                  onClick={handleDropdownToggle}
+                >
                   <div className="flex items-center space-x-2 p-2 rounded-full transition-colors duration-200 group-hover:bg-[#B5D3D1]">
-                    <span className="mr-2 text-[#1A3B47]">{adminInfo.username}</span>
-                    <Avatar className="h-8 w-8 !bg-[#388A94] text-white" style={{ backgroundColor: '#388A94' }}>
-                      <AvatarFallback className="bg-transparent">{getInitials(adminInfo.username)}</AvatarFallback>
+                    <span className="mr-2 text-[#1A3B47]">
+                      {adminInfo.username}
+                    </span>
+                    <Avatar
+                      className="h-8 w-8 !bg-[#388A94] text-white"
+                      style={{ backgroundColor: "#388A94" }}
+                    >
+                      <AvatarFallback className="bg-transparent">
+                        {getInitials(adminInfo.username)}
+                      </AvatarFallback>
                     </Avatar>
                   </div>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-md p-2">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 bg-white shadow-lg rounded-md p-2"
+                >
                   <div className="flex items-center space-x-2 p-2">
                     <Avatar className="h-12 w-12 bg-[#388A94] text-white">
-                      <AvatarFallback className="text-lg bg-transparet">{getInitials(adminInfo.username)}</AvatarFallback>
+                      <AvatarFallback className="text-lg bg-transparet">
+                        {getInitials(adminInfo.username)}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold text-[#1A3B47]">{adminInfo.username}</p>
+                      <p className="font-semibold text-[#1A3B47]">
+                        {adminInfo.username}
+                      </p>
                       <p className="text-sm text-[#5D9297]">Administrator</p>
                     </div>
                   </div>
@@ -265,14 +300,14 @@ export function Dashboard() {
                       <p className="text-xs">{adminInfo.email}</p>
                     </div>
                   )}
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     className="w-full text-[#1A3B47] hover:bg-[#B5D3D1] transition-colors duration-200 border border-gray-300 text-center mt-2"
                     onClick={handleChangePasswordClick}
                   >
                     <span className="w-full text-center">Change Password</span>
                   </DropdownMenuItem>
                   <Separator className="my-2" />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     className="w-full text-[#1A3B47] hover:bg-[#B5D3D1] transition-colors duration-200"
                     onClick={handleLogout}
                   >
@@ -285,15 +320,27 @@ export function Dashboard() {
             <NotificationsDropdownAdmin setActiveTabNav={setActiveTab} />
           </div>
         </div>
-        <div className="flex bg-gray-100 relative"> {/* Add relative class */}
-          <DashboardSidebar 
-            activeTab={activeTab} 
-            setActiveTab={setActiveTab} 
-            onToggleCollapse={handleToggleCollapse} 
+        <div className="flex bg-gray-100 relative">
+          {" "}
+          {/* Add relative class */}
+          <DashboardSidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onToggleCollapse={handleToggleCollapse}
           />
-          <div className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'ml-16' : 'ml-64'}`}> {/* Adjusted from ml-72 to ml-64 */}
+          <div
+            className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${
+              isSidebarCollapsed ? "ml-16" : "ml-64"
+            }`}
+          >
+            {" "}
+            {/* Adjusted from ml-72 to ml-64 */}
             <main className="flex-1 overflow-y-auto transition-all duration-1000 ease-in-out transform">
-              <DashboardContent activeTab={activeTab} tabs={tabs} setActiveTab={setActiveTab} />
+              <DashboardContent
+                activeTab={activeTab}
+                tabs={tabs}
+                setActiveTab={setActiveTab}
+              />
             </main>
             <footer className="sticky text-[#1A3B47] p-2 border-t border-gray-300 bg-white">
               <div className="text-center">
@@ -306,7 +353,12 @@ export function Dashboard() {
           <div className="modal-overlay">
             <div className="modal-content">
               <div className="modal-header">
-                <button className="close-button" onClick={() => setIsModalOpen(false)}>×</button>
+                <button
+                  className="close-button"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  ×
+                </button>
               </div>
               <div className="modal-body">
                 <PasswordChanger onSuccess={handlePasswordChangeSuccess} />
@@ -320,19 +372,19 @@ export function Dashboard() {
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
             duration={2000}
-            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+            className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
           >
             <div className="flex items-center">
-              {toastType === 'success' ? (
+              {toastType === "success" ? (
                 <CheckCircle className="text-green-500 mr-2" />
               ) : (
                 <XCircle className="text-red-500 mr-2" />
               )}
               <div>
-                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-                <ToastDescription>
-                  {toastMessage}
-                </ToastDescription>
+                <ToastTitle>
+                  {toastType === "success" ? "Success" : "Error"}
+                </ToastTitle>
+                <ToastDescription>{toastMessage}</ToastDescription>
               </div>
             </div>
             <ToastClose />
@@ -342,4 +394,3 @@ export function Dashboard() {
     </div>
   );
 }
-

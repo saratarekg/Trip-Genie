@@ -87,7 +87,7 @@ export const UserGuide = ({ steps, onStepChange, pageName }) => {
 
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-10">
         <Button
           onClick={startTour}
           className="w-10 h-10 rounded-full bg-[#388A94] text-white hover:bg-[#1A3B47] p-0"
