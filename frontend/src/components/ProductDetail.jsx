@@ -1911,7 +1911,7 @@ const ProductDetail = () => {
             <DialogDescription>{actionSuccess}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="default" onClick={() => setActionSuccess(null)}>
+            <Button className="bg-[#388A94] hover:bg-[#2e6b77]" onClick={() => setActionSuccess(null)}>
               Close
             </Button>
           </DialogFooter>

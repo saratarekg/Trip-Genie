@@ -62,9 +62,8 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
         />
       ))}
     </div>
@@ -101,8 +100,8 @@ const ProductCard = ({
       // Wait for currency and wishlist state to be set
       await Promise.all([
         userInfo &&
-        userInfo.role === "tourist" &&
-        userInfo.preferredCurrency !== product.currency
+          userInfo.role === "tourist" &&
+          userInfo.preferredCurrency !== product.currency
           ? fetchExchangeRate()
           : getCurrencySymbol(),
         setIsInWishlistLocal(
@@ -167,13 +166,7 @@ const ProductCard = ({
     }
   };
 
-  const handleCheckoutNow = () => {
-    onBuyNow(product);
-    onAddToCart(product);
-    setIsPopupOpen(false);
-    // Redirect to checkout page
-    window.location.href = "/checkout2"; // Replace with your actual checkout URL
-  };
+
 
   useEffect(() => {
     const isInWishlist = wishlistItems.some(
@@ -212,46 +205,20 @@ const ProductCard = ({
         </span>
 
         {userInfo?.role === "tourist" && product.quantity > 0 ? (
-          <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
-            <DialogTrigger asChild>
-              <Button
-                className="bg-[#F88C33] hover:bg-orange-500 text-white"
-                style={{
-                  borderRadius: "20px",
-                  padding: "4px 12px",
-                  fontSize: "14px",
-                }}
-              >
-                Add to Cart
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="text-[#1A3B47] text-2xl">
-                  Choose an option
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="grid gap-4 py-4">
-                <Button
-                  className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart(product);
-                    setIsPopupOpen(false);
-                  }}
-                >
-                  Add to Cart and Continue Shopping
-                </Button>
-                <Button
-                  className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
-                  onClick={handleCheckoutNow}
-                >
-                  Add to cart and Checkout Now
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button
+            className="bg-[#F88C33] hover:bg-orange-500 text-white"
+            style={{
+              borderRadius: "20px",
+              padding: "4px 12px",
+              fontSize: "14px",
+            }}
+            onClick={() => {
+              // Handle the add to cart action here
+              onAddToCart(product);
+            }}
+          >
+            Add to Cart
+          </Button>
         ) : (
           userInfo?.role === "tourist" && (
             <span className="text-red-500 text-lg font-bold">Out of stock</span>
@@ -261,24 +228,12 @@ const ProductCard = ({
 
       {userInfo?.role === "tourist" && (
         <div className="absolute top-2 right-2 flex space-x-2">
-          {!isInCart && product.quantity > 0 && (
-            <Button
-              className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
-              onClick={(e) => {
-                e.stopPropagation();
-                onAddToCart(product);
-              }}
-            >
-              <Plus className="w-5 h-5" />
-              <span className="sr-only">Add to Cart</span>
-            </Button>
-          )}
+
           <Button
-            className={`rounded-full w-10 h-10 p-0 ${
-              isInWishlistLocal
+            className={`rounded-full w-10 h-10 p-0 ${isInWishlistLocal
                 ? "bg-red-500 hover:bg-red-600"
                 : "bg-gray-200 hover:bg-gray-300"
-            } text-white`}
+              } text-white`}
             onClick={(e) => {
               e.stopPropagation();
               setIsInWishlistLocal(!isInWishlistLocal);
@@ -819,9 +774,8 @@ export function AllProducts() {
                   <button
                     key={rating}
                     onClick={() => setSelectedRating(rating)}
-                    className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
-                      selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                    }`}
+                    className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                      }`}
                   >
                     {renderStars(rating)}
                   </button>
@@ -956,9 +910,8 @@ export function AllProducts() {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
-                    }`}
+                    className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
+                      }`}
                   >
                     <ChevronLeft />
                   </button>
@@ -966,8 +919,8 @@ export function AllProducts() {
                   <span className="text-lg font-medium">
                     {products.length > 0
                       ? `Page ${currentPage} of ${Math.ceil(
-                          products.length / tripsPerPage
-                        )}`
+                        products.length / tripsPerPage
+                      )}`
                       : "No pages available"}
                   </span>
 
@@ -975,14 +928,13 @@ export function AllProducts() {
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={
                       currentPage ===
-                        Math.ceil(products.length / tripsPerPage) ||
+                      Math.ceil(products.length / tripsPerPage) ||
                       products.length === 0
                     }
-                    className={`px-4 py-2 rounded-full bg-white shadow ${
-                      currentPage === Math.ceil(products.length / tripsPerPage)
+                    className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(products.length / tripsPerPage)
                         ? "text-gray-300"
                         : "text-[#388A94]"
-                    }`}
+                      }`}
                   >
                     <ChevronRight />
                   </button>
@@ -995,9 +947,8 @@ export function AllProducts() {
 
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white z-50`}
+          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white z-50`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
