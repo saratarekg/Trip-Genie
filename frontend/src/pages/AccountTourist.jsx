@@ -175,10 +175,10 @@ const ExternalFlightBookings = ({ user }) => {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastType, setToastType] = useState("success");
   const [toastMessage, setToastMessage] = useState("");
-  const [exchangeRate, setExchangeRate] = useState(1);
+  const [exchangeRates, setExchangeRates] = useState(null);
   const [tourist, setTourist] = useState(null);
-  const [currencyCode, setCurrencyCode] = useState("USD");
-  const [currencySymbol, setCurrencySymbol] = useState("$");
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [currencies, setCurrencies] = useState(null);
 
   const showToast = (type, message) => {
     setToastType(type);
@@ -186,83 +186,84 @@ const ExternalFlightBookings = ({ user }) => {
     setIsToastOpen(true);
   };
 
-  const formatWallet = (price) => {
-    fetchExchangeRate();
-    getCurrencySymbol();
-    if (tourist && exchangeRate && currencySymbol) {
-      const exchangedPrice = price * exchangeRate;
-      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/currencies", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch currencies");
+      }
+      const data = await response.json();
+      setCurrencies(data);
+    } catch (error) {
+      console.error("Error fetching currencies:", error);
     }
   };
 
-  const getUserRole = () => Cookies.get("role") || "guest";
+  const convertPrice = (price, fromCurrency, toCurrency) => {
+    if (!exchangeRates || !fromCurrency || !toCurrency) {
+      return price;
+    }
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    return ((price * toRate) / fromRate).toFixed(2);
+  };
 
-  const fetchTouristProfile = async () => {
+  const fetchExchangeRate = async () => {
     try {
-      const token = Cookies.get("jwt");
-      const role = getUserRole();
-      const api = `http://localhost:4000/${role}`;
-      const response = await axios.get(api, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTourist(response.data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
+      const response = await fetch("http://localhost:4000/rates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch exchange rates");
+      }
+      const data = await response.json();
+      setExchangeRates(data.rates);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
+    }
+  };
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+
+    if (role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTourist(response.data);
+        const currencyId = response.data.preferredCurrency;
+
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
     }
   };
 
   useEffect(() => {
-    fetchTouristProfile();
+    Promise.all([
+      fetchUserInfo(),
+      fetchExchangeRate(),
+      fetchCurrencies(),
+      fetchFlights(),
+    ]);
   }, []);
-
-  const fetchExchangeRate = useCallback(async () => {
-    if (tourist) {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await fetch(`http://localhost:4000/tourist/populate`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            base: "67140446ee157ee4f239d523",
-            target: tourist.preferredCurrency,
-          }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setExchangeRate(data.conversion_rate);
-        } else {
-          console.error("Error in fetching exchange rate:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching exchange rate:", error);
-      }
-    }
-  }, [tourist]);
-
-  const getCurrencySymbol = useCallback(async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCurrencyCode(response.data.code);
-      setCurrencySymbol(response.data.symbol);
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-    }
-  }, [tourist]);
 
   const fetchFlights = async () => {
     try {
       const token = Cookies.get("jwt");
-      const [flightsResponse, currencyResponse] = await Promise.all([
+      const [flightsResponse] = await Promise.all([
         axios.get("http://localhost:4000/tourist/my-flights", {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -272,16 +273,6 @@ const ExternalFlightBookings = ({ user }) => {
       ]);
 
       setFlights(flightsResponse.data);
-
-      const currencyId = currencyResponse.data.preferredCurrency;
-      const currencyDetailsResponse = await axios.get(
-        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setPreferredCurrency(currencyDetailsResponse.data);
-
       setIsLoading(false);
     } catch (err) {
       setError("Failed to fetch flight bookings or currency information");
@@ -302,11 +293,19 @@ const ExternalFlightBookings = ({ user }) => {
         const refundedAmount = response.data.data.refundedAmount;
         const newWalletBalance = response.data.data.newWalletBalance;
         console.log(refundedAmount, newWalletBalance);
-        const refundConverted = formatWallet(refundedAmount);
-        const newWalletBalanceConverted = formatWallet(newWalletBalance);
+        const refundConverted = convertPrice(
+          refundedAmount,
+          "USD",
+          userPreferredCurrency.code
+        );
+        const newWalletBalanceConverted = convertPrice(
+          newWalletBalance,
+          "USD",
+          userPreferredCurrency.code
+        );
         showToast(
           "success",
-          `Booking cancelled. Refunded amount: ${refundConverted}. New wallet balance: ${newWalletBalanceConverted}`
+          `Booking cancelled. Refunded amount: ${userPreferredCurrency.symbol} ${refundConverted}. New wallet balance: ${userPreferredCurrency.symbol} ${newWalletBalanceConverted}`
         );
         setIsDialogOpen(false);
         fetchFlights();
@@ -316,10 +315,6 @@ const ExternalFlightBookings = ({ user }) => {
       showToast("error", "Failed to cancel the flight booking.");
     }
   };
-
-  useEffect(() => {
-    fetchFlights();
-  }, []);
 
   if (error) return <div>{error}</div>;
 
@@ -688,7 +683,12 @@ const ExternalFlightBookings = ({ user }) => {
                     <div className="flex flex-col ap-2">
                       <div className="text-sm text-gray-500">Price:</div>
                       <div className="text-4xl font-bold text-[#1A3B47]">
-                        {formatWallet(flight.price)}
+                        {userPreferredCurrency.symbol}
+                        {convertPrice(
+                          flight.price,
+                          "USD",
+                          userPreferredCurrency.code
+                        )}{" "}
                       </div>
                     </div>
                     <Button
@@ -955,8 +955,16 @@ const ExternalHotelBookings = ({ user }) => {
         const refundedAmount = response.data.data.refundedAmount;
         const newWalletBalance = response.data.data.newWalletBalance;
         console.log(refundedAmount, newWalletBalance);
-        const refundConverted = convertPrice(refundedAmount, "USD", userPreferredCurrency.code);
-        const newWalletBalanceConverted = convertPrice(newWalletBalance, "USD", userPreferredCurrency.code);
+        const refundConverted = convertPrice(
+          refundedAmount,
+          "USD",
+          userPreferredCurrency.code
+        );
+        const newWalletBalanceConverted = convertPrice(
+          newWalletBalance,
+          "USD",
+          userPreferredCurrency.code
+        );
         showToast(
           "success",
           `Booking cancelled. Refunded amount: ${userPreferredCurrency.symbol} ${refundConverted}. New wallet balance: ${userPreferredCurrency.symbol}${newWalletBalanceConverted}`
@@ -1056,11 +1064,12 @@ const ExternalHotelBookings = ({ user }) => {
                   {/* Booking price with cancel button */}
                   <div className="flex items-center space-x-4">
                     <p className="text-4xl font-semibold">
-                      {userPreferredCurrency.symbol + convertPrice(
-                        hotel.price,
-                        "USD",
-                        userPreferredCurrency.code
-                      ) }
+                      {userPreferredCurrency.symbol +
+                        convertPrice(
+                          hotel.price,
+                          "USD",
+                          userPreferredCurrency.code
+                        )}
                     </p>
                     <button
                       onClick={() => {
