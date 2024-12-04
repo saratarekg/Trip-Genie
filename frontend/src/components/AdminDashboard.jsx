@@ -29,6 +29,7 @@ import {
   AlarmCheck,
   Bell,
   LineChart,
+  Boxes,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -123,16 +124,13 @@ export function Dashboard({ setActiveTab }) {
   const [pageVisits, setPageVisits] = useState(0);
   const [pageVisitsToday, setPageVisitsToday] = useState(0);
 
-
   useEffect(() => {
     Promise.all([fetchNotifications(), fetchAdminInfo(), fetchPageVisits()]);
   }, []);
 
   const fetchPageVisits = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:4000/visit-count",
-      );
+      const response = await axios.get("http://localhost:4000/visit-count");
       setPageVisits(response.data.visitCount.count);
       setPageVisitsToday(response.data.visitCount.dailyCount);
     } catch (error) {
@@ -194,8 +192,6 @@ export function Dashboard({ setActiveTab }) {
       console.error("Error fetching notifications:", error);
     }
   };
-
-  
 
   const markNotificationAsSeen = async (notificationId) => {
     try {
@@ -312,8 +308,12 @@ export function Dashboard({ setActiveTab }) {
                   <LineChart className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-[#388A94]">{pageVisits.toLocaleString()}</div>
-                  <p className="text-xs text-[#1A3B47]">+{pageVisitsToday.toLocaleString()} today</p>
+                  <div className="text-2xl font-bold text-[#388A94]">
+                    {pageVisits.toLocaleString()}
+                  </div>
+                  <p className="text-xs text-[#1A3B47]">
+                    +{pageVisitsToday.toLocaleString()} today
+                  </p>
                 </CardContent>
               </Card>
               <Card className="col-span-2">
@@ -548,7 +548,7 @@ export function Dashboard({ setActiveTab }) {
                 <CardDescription>Select a report to view.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   <button
                     onClick={() => handleReportClick("itinerary-sales-report")}
                     className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
@@ -568,7 +568,14 @@ export function Dashboard({ setActiveTab }) {
                     className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
                   >
                     <Gift className="h-12 w-12 mb-2 text-[#388A94]" />
-                    <span>My Products Report</span>
+                    <span>My Products Sales Report</span>
+                  </button>
+                  <button
+                    onClick={() => handleReportClick("my-product-stock-report")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
+                    <Boxes className="h-12 w-12 mb-2 text-[#388A94]" />
+                    <span>My Products Stock Report</span>
                   </button>
                   <button
                     onClick={() =>
