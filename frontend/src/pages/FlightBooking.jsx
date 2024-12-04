@@ -376,7 +376,7 @@ function BookingPage() {
           console.log('Booking already processed');
           return;
         }
-        
+
         bookingProcessedRef.current = true;
         const sessionId = searchParams.get("session_id");
         const flightID = searchParams.get("flightID");
@@ -1292,8 +1292,7 @@ function BookingPage() {
             <DialogHeader>
               <DialogTitle>Booking Confirmed</DialogTitle>
               <DialogDescription>
-                Your flight has been booked successfully. You will receive a
-                confirmation email shortly.
+                Your flight has been booked successfully.
               </DialogDescription>
               {isBookingConfirmationOpen.paymentMethod === "Wallet" && (
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -1304,12 +1303,6 @@ function BookingPage() {
               <Label className="text-right">New Wallet Balance:</Label>
               <div>
               {convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)-isBookingConfirmationOpen.price}{currencyCode}
-              </div>
-              <div>
-              {convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)}{currencyCode}
-              </div>
-              <div>
-              {isBookingConfirmationOpen.price}{currencyCode}
               </div>
             </div>
           )}
