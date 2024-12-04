@@ -349,9 +349,13 @@ export default function AllHistoricalPlacesComponent() {
     </div>
   );
 
+  const handleFeaturedPlaceClick = (id) => {
+    setSelectedHistoricalPlaceId(id); // Set the selected historical place ID
+  };
+
   return (
     <div className="bg-gray-100">
-      <div className="container mx-auto">
+      <div className="">
         {selectedHistoricalPlaceId ? (
           <div>
             <Button onClick={handleBackToAll} className="mb-4 bg-[#5D9297] text-white text-base">
@@ -428,9 +432,9 @@ export default function AllHistoricalPlacesComponent() {
       ))
     ) : historicalPlaces && historicalPlaces.length > 0 ? (
       historicalPlaces.slice(0, 3).map((place) => (
-        <Link
+        <div
           key={place._id}
-          to={`/historical-place/${place._id}`}
+          onClick={() => handleFeaturedPlaceClick(place._id)}
           className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
         >
           <img
@@ -444,7 +448,7 @@ export default function AllHistoricalPlacesComponent() {
               {place.location.city}, {place.location.country}
             </p>
           </div>
-        </Link>
+        </div>
       ))
     ) : (
       <p className="text-sm text-gray-500">No historical places available.</p>

@@ -737,7 +737,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
   const ActivityPageSkeleton = () => {
     return (
       <div className="bg-gray-100">
-        <div className="container mx-auto px-4 py-8 lg:px-24">
+        <div className="">
           <div className="flex gap-8">
             {/* Sidebar Skeleton */}
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
@@ -834,7 +834,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
       {isLoading ? (
       <ActivityPageSkeleton />
       ) : (
-        <div className="container mx-auto px-4 py-8">
+        <div className="">
           <div className="flex gap-8">
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">

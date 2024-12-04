@@ -409,7 +409,7 @@ const HistoricalPlaceDetail = () => {
                           <Button
                             variant="ghost"
                             onClick={handleCopyLink}
-                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                            className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
                           >
                             <Link className="mr-2 h-4 w-4" />
                             Copy Link
@@ -417,7 +417,7 @@ const HistoricalPlaceDetail = () => {
                           <Button
                             variant="ghost"
                             onClick={handleEmailShare}
-                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                            className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
                           >
                             <Mail className="mr-2 h-4 w-4" />
                             Share by Email

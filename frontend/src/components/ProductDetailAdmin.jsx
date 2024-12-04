@@ -69,6 +69,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 
 const RatingDistributionBar = ({ percentage, count }) => (
   <div className="flex items-center gap-2 text-sm">
@@ -231,6 +232,16 @@ const ProductDetail = ({id, onBack}) => {
   const [isExpandedComment, setIsExpandedComment] = useState(false);
   const [open, setOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
+const [toastMessage, setToastMessage] = useState('');
+const [toastType, setToastType] = useState('');
+const [isDeleteToastOpen, setIsDeleteToastOpen] = useState(false);
+const [isLinkCopiedToastOpen, setIsLinkCopiedToastOpen] = useState(false);
+
+const showToast = (message, type, toastSetter) => {
+  setToastMessage(message);
+  setToastType(type);
+  toastSetter(true);
+};
 
   const handleToggleComment = () => {
     setIsExpandedComment(!isExpandedComment);
@@ -252,7 +263,7 @@ const ProductDetail = ({id, onBack}) => {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    setIsToastOpen(true);
+    showToast('Link Copied', 'success', setIsLinkCopiedToastOpen);
     setOpen(false);
   };
 
@@ -643,19 +654,29 @@ const ProductDetail = ({id, onBack}) => {
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 400) {
-          setDeleteError(errorData.message);
+          showToast('Cannot delete product, there are pending purchases', 'error', setIsDeleteToastOpen);
           return;
         }
         throw new Error("Failed to delete product");
       }
 
-      setShowDeleteSuccess(true);
+      showToast('Product deleted successfully!', 'success', setIsDeleteToastOpen);
+    setShowDeleteSuccess(true);
     } catch (err) {
-      setError("Error deleting product. Please try again later.");
       console.error("Error deleting product:", err);
+      showToast('Error deleting product', 'error', setIsDeleteToastOpen);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    handleDelete();
+    setShowDeleteConfirm(false);
   };
 
   const handleQuantityChange = (value) => {
@@ -888,7 +909,7 @@ const ProductDetail = ({id, onBack}) => {
 
   return (
     <div className="min-h-screen bg-gray-100 ">
-      <div className="container mx-auto px-4">
+      <div className="">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
             <Card>
@@ -1344,7 +1365,7 @@ const ProductDetail = ({id, onBack}) => {
                 <Button
                   className="w-full text-xl bg-red-500 hover:bg-red-600"
                   variant="destructive"
-                  onClick={() => setShowDeleteConfirm(true)}
+                  onClick={handleDeleteClick}
                 >
                   <Trash2 className="w-5 h-5 mr-2" /> Delete Product
                 </Button>
@@ -1512,28 +1533,12 @@ const ProductDetail = ({id, onBack}) => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Product</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this product? This action cannot
-              be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteConfirm(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmation
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        itemType="product"
+        onConfirm={handleConfirmDelete}
+      />
 
       <Dialog open={showDeleteSuccess} onOpenChange={setShowDeleteSuccess}>
         <DialogContent>
@@ -1550,26 +1555,6 @@ const ProductDetail = ({id, onBack}) => {
             <Button variant="default" onClick={() => navigate("/all-products")}>
             <ChevronLeft className="w-5 h-5 mr-2" />
               Back to All Products
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={deleteError !== null}
-        onOpenChange={() => setDeleteError(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
-              Failed to Delete Product
-            </DialogTitle>
-            <DialogDescription>{deleteError}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="default" onClick={() => setDeleteError(null)}>
-              Close
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -2175,6 +2160,47 @@ const ProductDetail = ({id, onBack}) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ToastProvider>
+  <Toast
+    onOpenChange={setIsDeleteToastOpen}
+    open={isDeleteToastOpen}
+    duration={3000} // Set duration to 3 seconds
+    className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+  >
+    <div className="flex items-center">
+      {toastType === 'success' ? (
+        <CheckCircle className="text-green-500 mr-2" />
+      ) : (
+        <XCircle className="text-red-500 mr-2" />
+      )}
+      <div>
+        <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+        <ToastDescription>
+          {toastMessage}
+        </ToastDescription>
+      </div>
+    </div>
+    <ToastClose />
+  </Toast>
+
+  <Toast
+    onOpenChange={setIsLinkCopiedToastOpen}
+    open={isLinkCopiedToastOpen}
+    duration={3000} // Set duration to 3 seconds
+    className="bg-green-100"
+  >
+    <div className="flex items-center">
+      <CheckCircle className="text-green-500 mr-2" />
+      <div>
+        <ToastTitle>Success</ToastTitle>
+        <ToastDescription>
+          Link Copied
+        </ToastDescription>
+      </div>
+    </div>
+    <ToastClose />
+  </Toast>
+</ToastProvider>
     </div>
   );
 };

@@ -226,7 +226,7 @@ const HistoricalPlaceDetail = ({ id }) => {
   return (
     <div style={{ backgroundColor: "#B5D3D1" }}> {/* Light Aqua/Seafoam Green */}
       <div className="bg-gray-100">
-        <div className="container mx-auto px-4">
+        <div className="">
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             <div className="p-6">
               <div className="flex flex-col mb-6">
@@ -265,7 +265,7 @@ const HistoricalPlaceDetail = ({ id }) => {
                           <Button
                             variant="ghost"
                             onClick={handleCopyLink}
-                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                            className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
                           >
                             <Link className="mr-2 h-4 w-4" />
                             Copy Link
@@ -273,7 +273,7 @@ const HistoricalPlaceDetail = ({ id }) => {
                           <Button
                             variant="ghost"
                             onClick={handleEmailShare}
-                            className="flex items-center justify-start px-4 py-2 hover:text-green-500"
+                            className="flex items-center justify-start px-4 py-2 hover:text-[#5D9297]"
                           >
                             <Mail className="mr-2 h-4 w-4" />
                             Share by Email

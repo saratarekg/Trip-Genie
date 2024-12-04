@@ -965,7 +965,7 @@ const SingleActivityAdmin = ({ activityId }) => {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-gray-100">
-        <div className="container " >
+        <div className="" >
           <div className="pt-4">
             <div className="flex flex-col md:flex-row gap-8">
               <div className="md:col-span-2">

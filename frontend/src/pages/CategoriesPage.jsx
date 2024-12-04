@@ -300,6 +300,7 @@ export default function CategoriesPage() {
           <Toast
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
+            duration={3000} // Set duration to 3 seconds
             className="bg-[#28A745] text-white p-4 mb-4 rounded-lg flex items-center"
           >
             <CheckCircle className="h-5 w-5 mr-2" />

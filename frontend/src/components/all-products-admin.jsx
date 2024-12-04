@@ -738,7 +738,7 @@ export function AllProducts() {
   const ActivityPageSkeleton = () => {
     return (
       <div className="bg-gray-100">
-        <div className="container mx-auto px-4 py-8 lg:px-24">
+        <div className="">
           <div className="flex gap-8">
             {/* Sidebar Skeleton */}
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
@@ -845,7 +845,7 @@ export function AllProducts() {
           <ProductDetail id={selectedProductId} />
         </div>
       ) : (
-        <div className="container mx-auto py-8">
+        <div className="">
           <div className="flex gap-8">
             <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
@@ -902,9 +902,9 @@ export function AllProducts() {
                 <div className="space-y-4">
                   {products && products.length > 0 ? (
                     products.slice(0, 3).map((product) => (
-                      <Link
+                      <div
                         key={product._id}
-                        to={`/product/${product._id}`}
+                        onClick={() => handleProductSelectbyid(product._id)}
                         className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
                       >
                         <img
@@ -918,7 +918,7 @@ export function AllProducts() {
                             {renderStars(product.rating)}
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     ))
                   ) : (
                     <p className="text-sm text-gray-500">

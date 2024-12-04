@@ -255,7 +255,7 @@ export function TagsPage() {
           <Toast
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
-            duration={2000}
+            duration={3000} // Set duration to 3 seconds
             className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
           >
             <div className="flex items-center">

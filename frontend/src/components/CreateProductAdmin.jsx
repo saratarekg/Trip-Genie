@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, Plus, CheckCircle, XCircle } from "lucide-react";
 
 import {
   Dialog,
@@ -30,6 +30,23 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
 import backgroundPicture from "../assets/images/backgroundPattern.png";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+} from "@/components/ui/toast";
 
 const formSchema = z.object({
   name: z.string().min(1, "Please enter a product name"),
@@ -44,10 +61,13 @@ const CreateProductForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [showDialog, setShowDialog] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("");
   const [pictures, setPictures] = useState([]);
   const [base64Pictures, setBase64Pictures] = useState([]);
   const [currencies, setCurrencies] = useState([]);
+  const [toastTimeout, setToastTimeout] = useState(null);
   const navigate = useNavigate();
   const userRole = Cookies.get("role") || "guest";
 
@@ -111,6 +131,16 @@ const CreateProductForm = () => {
     setBase64Pictures(updatedBase64Pictures);
   };
 
+  const showToast = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    setToastTimeout(setTimeout(() => setIsToastOpen(false), 3000));
+  };
+
   const onSubmit = async (data) => {
     setLoading(true);
     setError("");
@@ -139,9 +169,11 @@ const CreateProductForm = () => {
       );
       console.log("Server response:", response.data);
       setSuccess("Product created successfully!");
-      setShowDialog(true);
+      showToast("Product created successfully!", "success");
+      form.reset();
     } catch (err) {
       setError("Failed to create product. Please try again.");
+      showToast("Failed to create product. Please try again.", "error");
       console.error(
         "Error creating product:",
         err.response ? err.response.data : err.message
@@ -151,100 +183,137 @@ const CreateProductForm = () => {
     }
   };
 
-  const handleGoBack = () => {
-    setShowDialog(false);
-    navigate("/all-products");
-  };
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      price: 0,
+      description: "",
+      quantity: 0,
+    },
+  });
 
-  const handleCreateNew = () => {
-    setShowDialog(false);
-    window.location.reload();
-  };
+  const formStyles = "space-y-6";
+  const containerStyles = "grid grid-cols-1 md:grid-cols-2 gap-6";
+  const labelStyles = "text-[#003f66]";
+  const buttonStyles = "w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white";
 
   return (
-    <div>
-      <div
-        className="flex items-center justify-center bg-cover bg-center bg-no-repeat"
-      >
-        <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
-          <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
-            <h2 className="text-3xl font-bold text-[#1A3B47] mb-2">
-              Create New Product
-            </h2>
-            <p className="text-sm mb-6 text-[#1A3B47]">
-              Add a new product to your inventory. Fill in the details carefully
-              to ensure accurate product information.
-            </p>
-          </div>
-          <div className="w-full md:w-3/5 p-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  Product Name
-                </Label>
-                <Input id="name" {...register("name")} />
-                {errors.name && (
-                  <p className="text-red-500 text-xs">{errors.name.message}</p>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="quantity" className="text-sm font-medium">
-                    Quantity
-                  </Label>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    {...register("quantity", { valueAsNumber: true })}
-                  />
-                  {errors.quantity && (
-                    <p className="text-red-500 text-xs">
-                      {errors.quantity.message}
-                    </p>
+    <ToastProvider>
+      <div className="">
+        <div className="">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className={formStyles}>
+              <div className={containerStyles}>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={labelStyles}>Product Name</FormLabel>
+                      <FormControl>
+                        <Input id="name" {...field} className="w-full" />
+                      </FormControl>
+                      <FormDescription>
+                        Enter the name of the product.
+                      </FormDescription>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
                   )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="price" className="text-sm font-medium">
-                    Price (in USD)
-                  </Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    {...register("price", { valueAsNumber: true })}
-                  />
-                  {errors.price && (
-                    <p className="text-red-500 text-xs">
-                      {errors.price.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium">
-                  Description (min. 200 characters)
-                </Label>
-                <Textarea
-                  id="description"
-                  {...register("description")}
-                  className="h-24"
                 />
-                {errors.description && (
-                  <p className="text-red-500 text-xs">
-                    {errors.description.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="pictures" className="text-sm font-medium">
-                  Product Pictures
-                </Label>
-                <Input
-                  id="pictures"
-                  type="file"
-                  multiple
-                  onChange={handlePicturesUpload}
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={labelStyles}>Quantity</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="quantity"
+                          type="number"
+                          min="1"
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          className="w-full"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter the quantity of the product.
+                      </FormDescription>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
                 />
               </div>
+              <div className={containerStyles}>
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={labelStyles}>Price (in USD)</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="price"
+                          type="number"
+                          min="0"
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          className="w-full"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter the price of the product in USD.
+                      </FormDescription>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={labelStyles}>
+                        Description (min. 200 characters)
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          id="description"
+                          {...field}
+                          className="h-24 w-full"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Provide a detailed description of the product.
+                      </FormDescription>
+                      <FormMessage className="text-red-500" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="pictures"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={labelStyles}>Product Pictures</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="pictures"
+                        type="file"
+                        multiple
+                        onChange={handlePicturesUpload}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Upload pictures of the product.
+                    </FormDescription>
+                    <FormMessage className="text-red-500" />
+                  </FormItem>
+                )}
+              />
               <div className="grid grid-cols-3 gap-4 mt-4">
                 {base64Pictures.map((picture, index) => (
                   <div key={`new-${index}`} className="relative">
@@ -273,35 +342,42 @@ const CreateProductForm = () => {
               )}
               <Button
                 type="submit"
-                className="w-full bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                className={buttonStyles}
                 disabled={loading}
               >
+                <Plus className="mr-2 h-4 w-4" />
                 {loading ? "Creating..." : "Create Product"}
               </Button>
             </form>
-          </div>
+          </Form>
         </div>
 
-        <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Success!</DialogTitle>
-              <DialogDescription>
-                The Product was created successfully.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button className="bg-[#5D9297]" onClick={handleGoBack}>
-                Go to all products
-              </Button>
-              <Button variant="outline" onClick={handleCreateNew}>
-                Create Another
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <ToastViewport />
+        {isToastOpen && (
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={3000}
+            className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
+          >
+            <div className="flex items-center">
+              {toastType === "success" ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>
+                  {toastType === "success" ? "Success" : "Error"}
+                </ToastTitle>
+                <ToastDescription>{toastMessage}</ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
+          </Toast>
+        )}
       </div>
-    </div>
+    </ToastProvider>
   );
 };
 
