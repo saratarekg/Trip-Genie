@@ -747,7 +747,7 @@ export function NavbarComponent() {
                           Dashboard
                         </Link>
                         <Link
-                          to="/account/complain"
+                          to="/account/my-complaints"
                           className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                           onClick={closeDropdown}
                         >
@@ -1024,7 +1024,7 @@ export function NavbarComponent() {
                       Dashboard
                     </Link>
                     <Link
-                      to="/account/complain"
+                      to="/account/my-complaints"
                       className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                       onClick={closeDropdown}
                     >

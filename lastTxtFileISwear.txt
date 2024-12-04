@@ -1,64 +1,118 @@
+
 Sam: 
 
 - convert from USD to my currency in external bookings 
 - two reqs for booking in flights
 - book transportation lw katab aktr mn available seats, tickets bta3et activity we itinerary aolo en mfish kfaya
+- checkout baz
+- Khaly flight w transportation w hotels nafs el structure w nafs pallete (search and filter buttons)
+- flight bookings card teb2a zy bookings card
+-Cards el hotels white space awy (momken nekhaly 2 gamb b3d)
+-7ot reserve fo2 w lw lesa ma5tarsh room tala3o fo2 ye5tar el room el awel
+- sheel facilities el rooms el ta7t
+- matkhaleesh ay statistics fake
+
 
 Amy: 
 
-alwan profile w settings
 - complaints 
 - preferences
 - booked hotels
 (kol el fat dol 3and tourist)
+Loading cards
+Sooret el products fe orders
+
+Orders (A1,B1,C1 yetghayaro)
+Card elbookings fe my account tetghayar w cancel teb2a gowa w bara w Amy teb3at le hadea tet2aked
+
+alwan profile w settings (done)
+
 
 
 Aby: 
+
+- Seeb el 0 sales bas sort by revenue 3ashan yezharo ta7t (done)
+- Automated verify Otp
+- Black Friday use this promo code!!
+
+
 admin w seller y view zy table feha product w amount sold w quantity items in stock
-(report gdeeda)
+(report gdeeda) (done)
+lw had by delete account tour guide msln w had 3aml book le haga ybaa hakhaly kol haga deactivated automatically hatta el booked, bs el booked tban lel aaml book (done)
+- email for booking gets send as dollars instead of my currency (done)
 
-
-lw had by delete account tour guide msln w had 3aml book le haga ybaa hakhaly kol haga deactivated automatically hatta el booked, bs el booked tban lel aaml book
-
-- email for booking gets send as dollars instead of my currency
 
 
 Alaa:
  sheel account info fe tourism governor we 7ot esmo foo2 zy admin 
- estana radwa t3ml change pass we 5odha mn admin
+ 5od change pass mn el admin
  change pass fe governor
+-Single ay haga white space 3al yemen (Single Activity bezat)
+-7ot aktar men soora bardo fel single 3ashan nemla white space el sowar
+-wehna benadaf el db zabat description el hp (make it longer)
+- user reports for ALL-TIME not just a specific month
+
+
+
 
 Houba:
 check hn3ml eh f update itinerary lw booked
 - make all popups consistent (success toast and delete popup zay el radwa 3amlha)
+- all products: sheel zorar el + el fo2 w khaly add to cart teadd to cart 3alatool men gheer ma tefta7 options
+- popup: - are you sure you want to accept el user dah (badal mal tick bet accept 3alatool we dah dangerous action lazem popup)
+-Tourguide camel case fe registration 
+ALLL SUBMIT/CONFIRMATION BUTTONS RIGHT ALIGNED (fel popups we fe kol el creates we make kol el alwan consistent bel mara)
+Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button yemeen (Aby beyshed sha3ro fel background)
+
+
+
 
 
 Jana:
  help amy fel user profiles 
-- single act has no loading until prices are displayed 
 - make loading like gray containers zay ma ana 3amla f notifications
+- on purchase 2oly you earned kam point
+
 
 
 
 Zeina:
-redeem points tbaa kol 100 maamlsh redeem decimal
-admin by update products btaato bs bs ynf3 y delete aady
+redeem points tbaa kol 100 maamlsh redeem decimal (done)
+admin by update products btaato bs bs ynf3 y delete aady (done)
+- bayen en el single cards clickable (hover effect) (historical place we check enaha clickable fe kol el amaken el tanya)
+- sheel kelmet external bookings khaleeha my bookings w ta7teeha (flight ,hotels w transportations)
+- complaints sort by date 3ashan maba2tsh mawgooda fel page el gdeeda
+- manage accounts terga3 table
+7oto kol el sales reports fel settings le kol el accounts
+
 
 
 Radwa:
 - raga3i sort by preference fe itinerary !!
 - sort by preference shklo w alwano mokhtlfa f kol page
  change pass fe admin
-- all hotels (enti we amy)
-
+- khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)
+- past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)
+- complaints sort by date
+- tabs fe review registration
+- admin add user :
+ Add user teb2a button kebeer w 3al yemeen
+ whitespace bottom right (geebi password verification 3al yemeen aw get creative)
 
  
 Habiba:
 - all flights (tab3y m3 amy)
+Sheel el shay be laban men kol haga
+-- ghayar makan el wallet history (khaly wallet page lewa7daha)
+- empty wishlist button still appears when the wishlist is already empty
+el reports columns t2ba consistent (total sales t2ba tickets sold we y2ba we nsheel el numbering mn ay report)
 
 Hazem: 
-nehgez awl yom evaluation sprint 3
+- single act has no loading until prices are displayed  (already ma3moola fe my account)
 - pagination all pages
+- zabat shakl el pagination consistency (bas bardo e3melo el3ayzeeno 3ashan manetshalesh)
+(transportation + flights + hotels use shadcn pagination)
+make all the other pages the old pagination
 
 
 
