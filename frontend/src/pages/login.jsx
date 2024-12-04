@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import logInPicture from "../assets/images/logInPicture.jpg";
@@ -24,12 +24,13 @@ const Login = () => {
   const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
 
-
   // Separate error messages for each step
   const [loginErrorMessage, setLoginErrorMessage] = useState("");
-  const [forgotPasswordErrorMessage, setForgotPasswordErrorMessage] = useState("");
+  const [forgotPasswordErrorMessage, setForgotPasswordErrorMessage] =
+    useState("");
   const [otpErrorMessage, setOtpErrorMessage] = useState("");
-  const [resetPasswordErrorMessage, setResetPasswordErrorMessage] = useState("");
+  const [resetPasswordErrorMessage, setResetPasswordErrorMessage] =
+    useState("");
 
   // New state variables for forgot password flow
   const [forgotPasswordStep, setForgotPasswordStep] = useState(0);
@@ -37,8 +38,6 @@ const Login = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [newPassword, setNewPassword] = useState("");
   const strength = getPasswordStrength(newPassword);
-
-
 
   const getProgressBarColor = () => {
     if (strength.fulfilled === 2) return "bg-[#F88C33]";
@@ -127,7 +126,9 @@ const Login = () => {
         const errorData = await response.json();
 
         if (errorData.message === "Your account is not accepted yet") {
-          setLoginErrorMessage("Login failed. Your account is not accepted yet.");
+          setLoginErrorMessage(
+            "Login failed. Your account is not accepted yet."
+          );
         } else {
           setLoginErrorMessage("Login failed. Please check your credentials.");
         }
@@ -145,11 +146,14 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:4000/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "http://localhost:4000/auth/forgot-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       if (response.ok) {
         setForgotPasswordStep(2);
@@ -182,6 +186,7 @@ const Login = () => {
         setOtpErrorMessage("");
       } else {
         setOtpErrorMessage("Invalid OTP. Please try again.");
+        setOtp(Array(6).fill(""));
       }
     } catch (error) {
       setOtpErrorMessage("An error occurred. Please try again.");
@@ -190,36 +195,56 @@ const Login = () => {
 
   const handleResetPassword = async () => {
     if (newPassword.length < 8) {
-      setResetPasswordErrorMessage("Password must be at least 8 characters long.");
+      setResetPasswordErrorMessage(
+        "Password must be at least 8 characters long."
+      );
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:4000/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password : newPassword}),
-      });
+      const response = await fetch(
+        "http://localhost:4000/auth/reset-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password: newPassword }),
+        }
+      );
 
       if (response.ok) {
         setForgotPasswordStep(0);
-        setLoginErrorMessage("Password reset successfully. Please log in with your new password.");
+        setLoginErrorMessage(
+          "Password reset successfully. Please log in with your new password."
+        );
       } else {
-        setResetPasswordErrorMessage("Failed to reset password. Please try again.");
+        setResetPasswordErrorMessage(
+          "Failed to reset password. Please try again."
+        );
       }
     } catch (error) {
       setResetPasswordErrorMessage("An error occurred. Please try again.");
     }
   };
 
+  useEffect(() => {
+    if (otp.every((digit) => digit !== "")) {
+      handleVerifyOTP();
+    }
+  }, [otp]);
+
   const renderForgotPasswordStep = () => {
     switch (forgotPasswordStep) {
       case 1:
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900">Reset Password</h3>
+            <h3 className="text-lg font-medium text-gray-900">
+              Reset Password
+            </h3>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email Address
               </label>
               <input
@@ -232,11 +257,14 @@ const Login = () => {
                 required
               />
               {forgotPasswordErrorMessage && (
-                <p className="text-sm text-red-600 mt-1">{forgotPasswordErrorMessage}</p>
+                <p className="text-sm text-red-600 mt-1">
+                  {forgotPasswordErrorMessage}
+                </p>
               )}
             </div>
             <p className="text-sm text-gray-600">
-              Enter the email associated with your account to receive a password reset code.
+              Enter the email associated with your account to receive a password
+              reset code.
             </p>
             <button
               onClick={handleForgotPassword}
@@ -251,7 +279,10 @@ const Login = () => {
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900">Get Your Code</h3>
             <div>
-              <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="otp"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Enter OTP
               </label>
               <div className="flex justify-between mt-1">
@@ -259,20 +290,26 @@ const Login = () => {
                   <input
                     key={index}
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     maxLength={1}
                     value={digit}
                     onChange={(e) => {
+                      const numericValue = e.target.value.replace(
+                        /[^0-9]/g,
+                        ""
+                      );
                       const newOtp = [...otp];
-                      newOtp[index] = e.target.value;
+                      newOtp[index] = numericValue;
                       setOtp(newOtp);
-                      if (e.target.value && index < 5) {
+                      if (numericValue && index < 5) {
                         document.getElementById(`otp-${index + 1}`).focus();
                       }
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === 'Backspace' && !otp[index] && index > 0) {
+                      if (e.key === "Backspace" && !otp[index] && index > 0) {
                         const newOtp = [...otp];
-                        newOtp[index - 1] = '';
+                        newOtp[index - 1] = "";
                         setOtp(newOtp);
                         document.getElementById(`otp-${index - 1}`).focus();
                       }
@@ -287,22 +324,28 @@ const Login = () => {
               )}
             </div>
             <p className="text-sm text-gray-600">
-              We've sent a 6-digit code to your email. Please enter it above to verify your account.
+              We've sent a 6-digit code to your email. Please enter it above to
+              verify your account.
             </p>
-            <button
+            {/* <button
               onClick={handleVerifyOTP}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#5D9297] hover:bg-[#1A3B47] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
               Verify OTP
-            </button>
+            </button> */}
           </div>
         );
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Enter New Password</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Enter New Password
+            </h3>
             <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
                 New Password
               </label>
               <input
@@ -314,64 +357,86 @@ const Login = () => {
                 placeholder="Enter new password"
                 required
               />
-                <div className="flex items-center mt-2 space-x-2 w-full">
-  {/* Progress Bar */}
-  <div className="relative flex-grow h-2 bg-gray-200 rounded-full">
-    <div
-      className={`absolute h-2 rounded-full transition-all duration-300 ${newPassword.length === 0 ? 'bg-gray-300' : getProgressBarColor()}`}
-      style={{
-        width: `${newPassword.length === 0 ? 0 : Math.max((strength.fulfilled / 3), 1 / 3) * 100}%`
-      }}
-    ></div>
-  </div>
+              <div className="flex items-center mt-2 space-x-2 w-full">
+                {/* Progress Bar */}
+                <div className="relative flex-grow h-2 bg-gray-200 rounded-full">
+                  <div
+                    className={`absolute h-2 rounded-full transition-all duration-300 ${
+                      newPassword.length === 0
+                        ? "bg-gray-300"
+                        : getProgressBarColor()
+                    }`}
+                    style={{
+                      width: `${
+                        newPassword.length === 0
+                          ? 0
+                          : Math.max(strength.fulfilled / 3, 1 / 3) * 100
+                      }%`,
+                    }}
+                  ></div>
+                </div>
 
-  {/* Strength Label */}
-  {newPassword.length > 0 && (
-    <p className="text-sm font-medium text-gray-700 ml-2">
-      {getStrengthLabel()}
-    </p>
-  )}
-</div>
-<ul className="text-sm mt-4 space-y-1">
-              <li
-                className={`flex items-center ${strength.length ? "text-[#388A94]" : "text-gray-500"}`}
-              >
-                <span
-                  className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                    strength.length ? "bg-[#388A94] text-white" : "border-gray-500"
+                {/* Strength Label */}
+                {newPassword.length > 0 && (
+                  <p className="text-sm font-medium text-gray-700 ml-2">
+                    {getStrengthLabel()}
+                  </p>
+                )}
+              </div>
+              <ul className="text-sm mt-4 space-y-1">
+                <li
+                  className={`flex items-center ${
+                    strength.length ? "text-[#388A94]" : "text-gray-500"
                   }`}
                 >
-                  ✓
-                </span>
-                At least 8 characters
-              </li>
-              <li
-                className={`flex items-center ${strength.uppercase ? "text-[#388A94]" : "text-gray-500"}`}
-              >
-                <span
-                  className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                    strength.uppercase ? "bg-[#388A94] text-white" : "border-gray-500"
+                  <span
+                    className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                      strength.length
+                        ? "bg-[#388A94] text-white"
+                        : "border-gray-500"
+                    }`}
+                  >
+                    ✓
+                  </span>
+                  At least 8 characters
+                </li>
+                <li
+                  className={`flex items-center ${
+                    strength.uppercase ? "text-[#388A94]" : "text-gray-500"
                   }`}
                 >
-                  ✓
-                </span>
-                At least one uppercase letter
-              </li>
-              <li
-                className={`flex items-center ${strength.number ? "text-[#388A94]" : "text-gray-500"}`}
-              >
-                <span
-                  className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                    strength.number ? "bg-[#388A94] text-white" : "border-gray-500"
+                  <span
+                    className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                      strength.uppercase
+                        ? "bg-[#388A94] text-white"
+                        : "border-gray-500"
+                    }`}
+                  >
+                    ✓
+                  </span>
+                  At least one uppercase letter
+                </li>
+                <li
+                  className={`flex items-center ${
+                    strength.number ? "text-[#388A94]" : "text-gray-500"
                   }`}
                 >
-                  ✓
-                </span>
-                At least one number
-              </li>
-            </ul>
+                  <span
+                    className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
+                      strength.number
+                        ? "bg-[#388A94] text-white"
+                        : "border-gray-500"
+                    }`}
+                  >
+                    ✓
+                  </span>
+                  At least one number
+                </li>
+              </ul>
               {resetPasswordErrorMessage && (
-                <p className="text-sm text-red-600 mt-1">{resetPasswordErrorMessage}</p>
+                <p className="text-sm text-red-600 mt-1">
+                  {resetPasswordErrorMessage}
+                </p>
               )}
             </div>
             <button
@@ -479,17 +544,17 @@ const Login = () => {
                   </button>
                 </div>
                 {loginErrorMessage && (
-  <p
-    className={`text-sm mt-1 ${
-      loginErrorMessage === "Password reset successfully. Please log in with your new password."
-        ? "text-green-600"
-        : "text-red-600"
-    }`}
-  >
-    {loginErrorMessage}
-  </p>
-)}
-
+                  <p
+                    className={`text-sm mt-1 ${
+                      loginErrorMessage ===
+                      "Password reset successfully. Please log in with your new password."
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {loginErrorMessage}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-col items-center justify-between">
@@ -542,4 +607,3 @@ const Login = () => {
 };
 
 export { Login as default, role };
-
