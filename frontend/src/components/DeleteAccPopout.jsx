@@ -140,19 +140,21 @@ export function DeleteAccount() {
             onValueChange={setActiveRole}
             className="w-full"
           >
-            <div className="border-b border-[#B5D3D1]/20">
-              <TabsList className="h-10 bg-transparent w-full justify-start">
-                {roles.map((role) => (
-                  <TabsTrigger
-                    key={role.id}
-                    value={role.id}
-                    className="relative h-10 rounded-none border-none bg-transparent px-4 font-medium text-[#1A3B47]/60 hover:text-[#1A3B47] data-[state=active]:text-[#1A3B47] data-[state=active]:shadow-none data-[state=active]:bg-transparent before:absolute before:bottom-0 before:left-0 before:right-0 before:h-[2px] before:bg-[#388A94] before:opacity-0 hover:before:opacity-100 data-[state=active]:before:opacity-100 before:transition-opacity"
-                  >
-                    {role.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
+            <TabsList className="grid grid-cols-7  w-full">
+              {roles.map((role) => (
+                <TabsTrigger
+                  key={role.id}
+                  value={role.id}
+                  className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                    activeRole === role.id
+                      ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                      : "text-gray-500 border-b border-gray-400"
+                  }`}
+                >
+                  {role.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
             {roles.map((role) => (
               <TabsContent key={role.id} value={role.id} className="mt-6">
