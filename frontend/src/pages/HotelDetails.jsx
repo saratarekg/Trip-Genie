@@ -862,12 +862,12 @@ export default function HotelDetails() {
                 {paymentType === "Wallet" && (
                 <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <Label className="text-right">Amount Paid Via Wallet:</Label>
-                  <div>{price}{currencyCode} </div>
+                  <Label className="text-right">Amount Paid Via Wallet: </Label>
+                  <div>{price} {" "}{currencyCode} </div>
                 </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <Label className="text-right">New Wallet Balance:</Label>
-                    <div>{convertPrice(tourist?.wallet,"USD",currencyCode)-price}{currencyCode}</div>
+                    <Label className="text-right">New Wallet Balance: </Label>
+                    <div>{" "}{convertPrice(tourist?.wallet,"USD",currencyCode)-price}{" "}{currencyCode}</div>
                   </div>
                 </div>
                 )}
