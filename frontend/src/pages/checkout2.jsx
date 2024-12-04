@@ -508,7 +508,7 @@ export default function CheckoutPage() {
                 name: item.product.name,
               },
               quantity: item.quantity,
-              totalPrice: item.totalPrice,
+              totalPrice: formatPrice2(item.totalPrice),
             })),
             currency: userPreferredCurrency.code,
             deliveryInfo: {

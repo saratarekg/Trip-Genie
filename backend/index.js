@@ -108,17 +108,7 @@ app.post("/create-checkout-session", async (req, res) => {
     // Calculate the total price including delivery
     const totalAmount = itemsTotal + deliveryPrice;
 
-    if (
-      !flightID ||
-      !from ||
-      !to ||
-      !departureDate ||
-      !arrivalDate ||
-      !price ||
-      !numberOfTickets ||
-      !currency ||
-      !returnLocation
-    ) {
+    if (!items || !deliveryInfo || !currency) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -370,7 +360,7 @@ app.post("/create-hotel-booking-session", async (req, res) => {
 // get visit count
 app.get("/visit-count", async (req, res) => {
   try {
-   // find one 
+    // find one
     const visitCount = await VisitCount.findOne();
     res.json({ visitCount });
   } catch (error) {
