@@ -78,6 +78,7 @@ import MyHistoricalPlacesComponent from "./pages/myHP.jsx";
 import HotelSearch from "./components/hotel-search.jsx";
 import HotelDetails from "./pages/HotelDetails.jsx";
 import ActivityReport from "./components/ActivityReport.jsx";
+import TouristActivitiesPage from "./pages/TouristActivitiesPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -622,6 +623,14 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tourist", "advertiser"]}>
                 <TransportationPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-activities"
+            element={
+              <ProtectedRoute allowedRoles={["tourist"]}>
+                <TouristActivitiesPage />
               </ProtectedRoute>
             }
           />
