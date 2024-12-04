@@ -107,8 +107,8 @@ export const ViewComplaintDetails = ({ complaintId, onBack }) => {
   }
 
   return (
-    <div className="min-h-screen p-4">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen">
+      <div className="">
         <Button onClick={onBack} className="mb-3 bg-[#5D9297] text-white text-sm flex items-center">
           <ChevronLeft className="w-4 h-4 mr-2" />
           Back to Complaints

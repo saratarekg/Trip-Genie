@@ -333,6 +333,7 @@ export default function AllActivities() {
 
   const fetchActivities = useCallback(
     async (params = {}) => {
+      setIsLoading(true);
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
@@ -646,13 +647,118 @@ export default function AllActivities() {
     });
   };
 
+  const ActivityPageSkeleton = () => {
+    return (
+      <div className="bg-gray-100">
+        <div className="">
+          <div className="flex gap-8">
+            {/* Sidebar Skeleton */}
+            <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="h-6 w-24 bg-gray-300 rounded animate-pulse"></div>
+                <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-6">
+                {/* Price Range Skeleton */}
+                <div>
+                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="h-8 w-full bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                {/* Date Range Skeleton */}
+                <div>
+                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="h-8 w-full bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-8 w-full bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                {/* Star Rating Skeleton */}
+                <div>
+                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="space-y-2">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-8 w-full bg-gray-200 rounded animate-pulse"
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+                {/* Category Skeleton */}
+                <div>
+                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="space-y-2">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={index} className="flex items-center">
+                        <div className="h-5 w-5 bg-gray-300 rounded animate-pulse mr-2"></div>
+                        <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+            {/* Main Content Skeleton */}
+            <div className="flex-1">
+              {/* Search and Filters Skeleton */}
+              <div className="mb-4">
+                <div className="relative flex-grow mb-4 flex items-center gap-4">
+                  <div className="h-10 w-full bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="h-6 w-20 bg-gray-300 rounded animate-pulse"></div>
+                  <div className="h-10 w-40 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="h-10 w-40 bg-gray-200 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+  
+              {/* Cards Grid Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
+                  >
+                    <div className="h-60 bg-gray-300"></div>
+                    <div className="p-4 space-y-4">
+                      <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+                      <div className="h-6 w-1/2 bg-gray-200 rounded"></div>
+                      <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="p-4 border-t space-y-3">
+                      <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
+                      <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+  
+              {/* Pagination Skeleton */}
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  
+  
+  
+
   return (
     <div className="bg-gray-100">
-      <div className="container mx-auto px-4 py-8 lg:px-24">
-        {selectedActivityId ? (
+      <div className="">
+        {isLoading ? (
+          <ActivityPageSkeleton />
+        ) : selectedActivityId ? (
           <div>
-            <Button onClick={handleBackToAllActivities} className="mb-4 bg-[#5D9297] text-white text-base">
-            <ChevronLeft className="w-5 h-5 mr-2" />
+            <Button
+              onClick={handleBackToAllActivities}
+              className=" bg-[#5D9297] text-white text-base"
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
               Back to All Activities
             </Button>
             <SingleActivityAdmin activityId={selectedActivityId} />
@@ -693,15 +799,15 @@ export default function AllActivities() {
                     <input
                       type="date"
                       value={dateRange.start}
-                      min={new Date().toISOString().split('T')[0]}
-                      onChange={(e) => handleDateChange('start', e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      onChange={(e) => handleDateChange("start", e.target.value)}
                       className="w-full p-2 border rounded"
                     />
                     <input
                       type="date"
                       value={dateRange.end}
-                      min={dateRange.start || new Date().toISOString().split('T')[0]}
-                      onChange={(e) => handleDateChange('end', e.target.value)}
+                      min={dateRange.start || new Date().toISOString().split("T")[0]}
+                      onChange={(e) => handleDateChange("end", e.target.value)}
                       className="w-full p-2 border rounded"
                     />
                   </div>
@@ -713,12 +819,11 @@ export default function AllActivities() {
                       <button
                         key={rating}
                         onClick={() =>
-                          setSelectedRating(
-                            rating === selectedRating ? null : rating
-                          )
+                          setSelectedRating(rating === selectedRating ? null : rating)
                         }
-                        className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                          }`}
+                        className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
+                          selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                        }`}
                       >
                         {renderStars(rating)}
                       </button>
@@ -806,15 +911,15 @@ export default function AllActivities() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className={`whitespace-nowrap rounded-full ${isSortedByPreference ? "bg-red-100" : ""
-                          }`}
+                        className={`whitespace-nowrap rounded-full ${
+                          isSortedByPreference ? "bg-red-100" : ""
+                        }`}
                         onClick={handleSortByPreference}
                       >
                         <Heart
-                          className={`w-4 h-4 mr-2 ${isSortedByPreference
-                            ? "fill-current text-red-500"
-                            : ""
-                            }`}
+                          className={`w-4 h-4 mr-2 ${
+                            isSortedByPreference ? "fill-current text-red-500" : ""
+                          }`}
                         />
                         Sort by Preference
                       </Button>
@@ -892,15 +997,14 @@ export default function AllActivities() {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
+          onClose={() => setAlertMessage(null)}
         >
-          <AlertTitle>
-            {alertMessage.type === "success" ? "Success" : "Error"}
-          </AlertTitle>
-          <AlertDescription>{alertMessage.message}</AlertDescription>
+          {alertMessage.message}
         </Alert>
       )}
     </div>
   );
-}
+}  

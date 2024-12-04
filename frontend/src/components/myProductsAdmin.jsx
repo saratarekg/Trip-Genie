@@ -285,7 +285,7 @@ export function MyProducts() {
             <ProductDetail id={selectedProductId} />
           </div>
         ) : (
-      <div className="container mx-auto py-8 ">
+      <div className="">
         <div className="flex gap-8">
           {/* Sidebar Filters */}
           <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">

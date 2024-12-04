@@ -4,7 +4,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +23,9 @@ import {
   ToastDescription,
   ToastClose,
 } from "@/components/ui/toast";
-import { CheckCircle, XCircle, User } from "lucide-react";
+import { Check, X, Mail, User, UserX, XCircle, CheckCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 
 export default function UserApproval() {
   const [advertisers, setAdvertisers] = useState([]);
@@ -35,6 +39,8 @@ export default function UserApproval() {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
 
   useEffect(() => {
     fetchAdvertisers();
@@ -107,19 +113,19 @@ export default function UserApproval() {
     }
   };
 
-  const showDialog = (message) => {
-    setDialogMessage(message);
-    setDialogOpen(true);
+  const showToast = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+    setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
   };
 
-  const handleConfirm = (action, user, role) => {
-    setConfirmAction(() => async () => {
-      if (action === "approve") {
-        await approveUser(user._id, role);
-      } else {
-        await rejectUser(user, role);
-      }
-    });
+  const handleConfirm = async (action, user, role) => {
+    if (action === "approve") {
+      await approveUser(user._id, role);
+    } else {
+      await rejectUser(user, role);
+    }
     setConfirmDialogOpen(true);
   };
 
@@ -131,10 +137,7 @@ export default function UserApproval() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setToastMessage(`Successfully approved the ${role}.`);
-      setToastType("success");
-      setIsToastOpen(true);
-      setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
+      showToast(`Successfully approved the ${role}.`, "success");
       // Re-fetch the user type list after approval
       role === "advertiser"
         ? fetchAdvertisers()
@@ -142,10 +145,7 @@ export default function UserApproval() {
         ? fetchSellers()
         : fetchTourGuides();
     } catch (err) {
-      setToastMessage(`Failed to approve ${role}`);
-      setToastType("error");
-      setIsToastOpen(true);
-      setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
+      showToast(`Failed to approve ${role}`, "error");
       console.error(err);
     }
   };
@@ -159,10 +159,7 @@ export default function UserApproval() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setToastMessage(`Successfully rejected the ${role}.`);
-      setToastType("success");
-      setIsToastOpen(true);
-      setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
+      showToast(`Successfully rejected the ${role}.`, "success");
       // Re-fetch the user type list after rejection
       if (role === "advertiser") {
         fetchAdvertisers();
@@ -172,42 +169,88 @@ export default function UserApproval() {
         fetchTourGuides();
       }
     } catch (err) {
-      setToastMessage(`Failed to reject ${role}`);
-      setToastType("error");
-      setIsToastOpen(true);
-      setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
+      showToast(`Failed to reject ${role}`, "error");
       console.error(err);
+    }
+  };
+
+  const handleDeleteClick = (user, role) => {
+    setUserToDelete({ ...user, role });
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (userToDelete) {
+      await rejectUser(userToDelete, userToDelete.role);
+      setShowDeleteModal(false);
+      setUserToDelete(null);
     }
   };
 
   const renderUserCards = (users, role, startIndex = 0) =>
     users.map((user, index) => (
-      <Card
+      <motion.div
         key={user._id}
-        className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        <CardHeader className="border-b bg-gray-50 py-2 px-3">
-          <CardTitle className="text-base font-semibold text-[#003f66] text-center">
-            User {startIndex + index + 1}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 space-y-4">
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 rounded-full bg-[#5D9297] flex items-center justify-center flex-shrink-0 ">
-              <User size={32} className="text-white " />
+        <Card className="relative overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105">
+          <CardContent className="p-6">
+            <div className="absolute top-4 right-4 flex items-center space-x-2">
+              <Button
+                onClick={() => handleDeleteClick(user, role)}
+                className="text-red-500 hover:text-red-600 active:text-red-700 active:transform active:scale-95 transition-all duration-200 p-2"
+                variant="ghost"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+              <div className="h-5 border-l border-gray-300"></div>
+              <Button
+                onClick={() => handleConfirm("approve", user, role)}
+                className="text-green-500 hover:text-green-600 active:text-green-700 active:transform active:scale-95 transition-all duration-200 p-2"
+                variant="ghost"
+              >
+                <Check className="h-5 w-5" />
+              </Button>
             </div>
-            <div className="w-px h-16 bg-gray-200"></div>
-            <div>
-              <h3 className="font-bold text-[#003f66] text-lg mb-1">
-                {user.name}
-              </h3>
-              <span className="text-[#5D9297] text-xs font-medium">{role}</span>
+            <div className="">
+              <div className="flex flex-col items-start">
+                <Avatar className="h-12 w-12 bg-[#B5D3D1] mb-4">
+                  {user.profilePicture ? (
+                    <img
+                      src={user.profilePicture.url}
+                      alt={user.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <AvatarFallback className="text-[#1A3B47] font-semibold">
+                      {user.name?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <h3 className="font-bold text-lg text-[#1A3B47] mt-2">
+                  {user.name}
+                </h3>
+                <div className="space-y-2 text-sm text-[#5D9297] mt-2">
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2" />
+                    <span>{user.email || "N/A"}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-2" />
+                    <Badge
+                      variant="secondary"
+                      className="bg-[#388A94]/10 text-[#388A94]"
+                    >
+                      {role}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-
-          {user.files && (
-            <div className="flex flex-col items-center space-y-2 w-full">
-              {user.files.IDFilename && (
+            <div className="flex flex-col items-start space-y-2 mt-4">
+              {user.files?.IDFilename && (
                 <Button
                   onClick={() => fetchFile(user.files.IDFilename)}
                   className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
@@ -216,7 +259,7 @@ export default function UserApproval() {
                   View ID Document
                 </Button>
               )}
-              {user.files.taxationRegistryCardFilename && (
+              {user.files?.taxationRegistryCardFilename && (
                 <Button
                   onClick={() =>
                     fetchFile(user.files.taxationRegistryCardFilename)
@@ -227,7 +270,7 @@ export default function UserApproval() {
                   View Taxation Registry Card
                 </Button>
               )}
-              {user.files.certificatesFilenames &&
+              {user.files?.certificatesFilenames &&
                 user.files.certificatesFilenames.length > 0 &&
                 user.files.certificatesFilenames.map(
                   (certificate, certIndex) => (
@@ -242,31 +285,17 @@ export default function UserApproval() {
                   )
                 )}
             </div>
-          )}
-          <div className="flex space-x-2">
-            <Button
-              onClick={() => handleConfirm("reject", user, role)}
-              className="flex-1 bg-red-500 hover:bg-red-600 active:bg-red-700 active:transform active:scale-95 text-white transition-all duration-200 py-1 rounded-md text-sm"
-            >
-              Reject
-            </Button>
-            <Button
-              onClick={() => handleConfirm("approve", user, role)}
-              className="flex-1 text-sm bg-[#5D9297] hover:bg-[#388A94] active:bg-[#2D6F77] active:transform active:scale-95 text-white transition-all duration-200 py-1 rounded-md"
-            >
-              Accept
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
     ));
 
   return (
-    <div className="flex flex-col">
-      <ToastProvider>
-        <div className="flex-grow container mx-auto px-4 sm:py-8 flex items-center justify-center">
+    <ToastProvider>
+      <div className="flex flex-col mb-16">
+        <div className="flex-grow flex items-center justify-center">
           <div className="w-full">
-            <div className="p-4 sm:p-6">
+            <div className="">
               {/* <h1 className="text-xl sm:text-2xl font-bold text-[#003f66] mb-4 sm:mb-6">
                 User Approval Dashboard
               </h1> */}
@@ -286,7 +315,7 @@ export default function UserApproval() {
                   </p>
                 </div>
               ) : (
-                <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto">
+                <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto">
                   {renderUserCards(advertisers, "advertiser", 0)}
                   {renderUserCards(sellers, "seller", advertisers.length)}
                   {renderUserCards(
@@ -300,83 +329,38 @@ export default function UserApproval() {
           </div>
         </div>
 
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-[#003f66]">
-                Success
-              </DialogTitle>
-              <DialogDescription className="text-gray-600 mt-2">
-                {dialogMessage}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="mt-4">
-              <Button
-                onClick={() => setDialogOpen(false)}
-                className="bg-[#5D9297] hover:bg-[#388A94] text-white"
-              >
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <DeleteConfirmation
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          itemType="registered account"
+          onConfirm={handleConfirmDelete}
+        />
+      </div>
 
-        <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
-          <DialogContent className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-[#003f66]">
-                Confirm Action
-              </DialogTitle>
-              <DialogDescription className="text-gray-600 mt-2">
-                Are you sure you want to proceed with this action?
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="mt-4 space-x-2">
-              <Button
-                onClick={() => {
-                  confirmAction();
-                  setConfirmDialogOpen(false);
-                }}
-                className="bg-[#5D9297] hover:bg-[#388A94] text-white"
-              >
-                Yes
-              </Button>
-              <Button
-                onClick={() => setConfirmDialogOpen(false)}
-                variant="outline"
-                className="border-[#808080] text-[#003f66] hover:bg-gray-100"
-              >
-                Cancel
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        <ToastViewport />
-        {isToastOpen && (
-          <Toast
-            onOpenChange={setIsToastOpen}
-            open={isToastOpen}
-            duration={2000}
-            className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
-          >
-            <div className="flex items-center">
-              {toastType === "success" ? (
-                <CheckCircle className="text-green-500 mr-2" />
-              ) : (
-                <XCircle className="text-red-500 mr-2" />
-              )}
-              <div>
-                <ToastTitle>
-                  {toastType === "success" ? "Success" : "Error"}
-                </ToastTitle>
-                <ToastDescription>{toastMessage}</ToastDescription>
-              </div>
+      <ToastViewport />
+      {isToastOpen && (
+        <Toast
+          onOpenChange={setIsToastOpen}
+          open={isToastOpen}
+          duration={3000} // Automatically close after 3 seconds
+          className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
+        >
+          <div className="flex items-center">
+            {toastType === "success" ? (
+              <CheckCircle className="text-green-500 mr-2" />
+            ) : (
+              <XCircle className="text-red-500 mr-2" />
+            )}
+            <div>
+              <ToastTitle>
+                {toastType === "success" ? "Success" : "Error"}
+              </ToastTitle>
+              <ToastDescription>{toastMessage}</ToastDescription>
             </div>
-            <ToastClose />
-          </Toast>
-        )}
-      </ToastProvider>
-    </div>
+          </div>
+          <ToastClose />
+        </Toast>
+      )}
+    </ToastProvider>
   );
 }

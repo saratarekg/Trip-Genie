@@ -139,9 +139,9 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen">
       <ToastProvider>
-        <div className="max-w-6xl mx-auto">
+        <div className="">
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-bold text-[#1A3B47]">Create New Category</h2>
             <div className="flex space-x-4">
@@ -300,6 +300,7 @@ export default function CategoriesPage() {
           <Toast
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
+            duration={3000} // Set duration to 3 seconds
             className="bg-[#28A745] text-white p-4 mb-4 rounded-lg flex items-center"
           >
             <CheckCircle className="h-5 w-5 mr-2" />

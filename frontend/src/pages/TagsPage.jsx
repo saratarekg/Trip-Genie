@@ -116,9 +116,9 @@ export function TagsPage() {
   };
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen">
       <ToastProvider>
-        <div className="max-w-6xl mx-auto">
+        <div className="">
           
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-bold text-[#1A3B47]">Create New Tag</h2>
@@ -255,7 +255,7 @@ export function TagsPage() {
           <Toast
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
-            duration={2000}
+            duration={3000} // Set duration to 3 seconds
             className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
           >
             <div className="flex items-center">

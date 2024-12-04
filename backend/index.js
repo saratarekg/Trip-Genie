@@ -32,7 +32,7 @@ const currencyRateController = require("./controllers/currencyRateController");
 const Grid = require("gridfs-stream");
 const ItineraryBooking = require("./models/itineraryBooking");
 const ActivityBooking = require("./models/activityBooking");
-
+const VisitCount = require("./models/visitCount");
 const PORT = process.env.PORT;
 
 const app = express();
@@ -108,7 +108,17 @@ app.post("/create-checkout-session", async (req, res) => {
     // Calculate the total price including delivery
     const totalAmount = itemsTotal + deliveryPrice;
 
-    if (!flightID || !from || !to || !departureDate || !arrivalDate || !price || !numberOfTickets || !currency || !returnLocation) {
+    if (
+      !flightID ||
+      !from ||
+      !to ||
+      !departureDate ||
+      !arrivalDate ||
+      !price ||
+      !numberOfTickets ||
+      !currency ||
+      !returnLocation
+    ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -214,7 +224,6 @@ app.get("/check-payment-status", async (req, res) => {
 
 // create a flight checkout session
 
-
 app.post("/create-flight-checkout-session", async (req, res) => {
   try {
     const {
@@ -240,9 +249,10 @@ app.post("/create-flight-checkout-session", async (req, res) => {
 
     // Calculate the total price of items
     const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
-    let successURL = ``; 
+    let successURL = ``;
     if (flightType === "Round Trip") {
-      successURL = `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` + 
+      successURL =
+        `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` +
         `&flightID=${encodeURIComponent(flightID)}` +
         `&from=${encodeURIComponent(from)}` +
         `&to=${encodeURIComponent(to)}` +
@@ -257,7 +267,8 @@ app.post("/create-flight-checkout-session", async (req, res) => {
         `&flightType=${encodeURIComponent(flightType)}` +
         `&flightTypeReturn=${encodeURIComponent(flightTypeReturn)}`;
     } else {
-      successURL = `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` +
+      successURL =
+        `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` +
         `&flightID=${encodeURIComponent(flightID)}` +
         `&from=${encodeURIComponent(from)}` +
         `&to=${encodeURIComponent(to)}` +
@@ -294,7 +305,6 @@ app.post("/create-flight-checkout-session", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 // =====================
 // =====================
@@ -335,7 +345,17 @@ app.post("/create-hotel-booking-session", async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${req.body.returnLocation}&success=true&session_id={CHECKOUT_SESSION_ID}&hotelID=${hotelID}&roomName=${encodeURIComponent(roomName)}&checkinDate=${encodeURIComponent(checkinDate)}&checkoutDate=${encodeURIComponent(checkoutDate)}&numberOfRooms=${numberOfRooms}&numberOfAdults=${numberOfAdults}&paymentType=${encodeURIComponent(paymentType)}&price=${encodeURIComponent(price)}`,
+      success_url: `${
+        req.body.returnLocation
+      }&success=true&session_id={CHECKOUT_SESSION_ID}&hotelID=${hotelID}&roomName=${encodeURIComponent(
+        roomName
+      )}&checkinDate=${encodeURIComponent(
+        checkinDate
+      )}&checkoutDate=${encodeURIComponent(
+        checkoutDate
+      )}&numberOfRooms=${numberOfRooms}&numberOfAdults=${numberOfAdults}&paymentType=${encodeURIComponent(
+        paymentType
+      )}&price=${encodeURIComponent(price)}`,
       cancel_url: `${req.body.returnLocation}&cancel=true`,
     });
 
@@ -347,6 +367,27 @@ app.post("/create-hotel-booking-session", async (req, res) => {
   }
 });
 
+// get visit count
+app.get("/visit-count", async (req, res) => {
+  try {
+   // find one 
+    const visitCount = await VisitCount.findOne();
+    res.json({ visitCount });
+  } catch (error) {
+    console.error("Error fetching visit count:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/increment-visit-count", async (req, res) => {
+  try {
+    const count = await VisitCount.incrementCount();
+    res.json(count);
+  } catch (error) {
+    console.error("Error incrementing visit count:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Check and update the exchange rates when the server starts
 const checkAndUpdateRatesOnStart = async () => {

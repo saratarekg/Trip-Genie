@@ -1,13 +1,40 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CalendarDays, DollarSign, ShoppingCart, Users, BarChart, Activity, Gift, Map, Archive, Package, Compass, Landmark, Tag, CalendarIcon, CreditCard, AlertCircle, AlarmCheck, Bell } from 'lucide-react'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  CalendarDays,
+  DollarSign,
+  ShoppingCart,
+  Users,
+  BarChart,
+  Activity,
+  Gift,
+  Map,
+  Archive,
+  Package,
+  Compass,
+  Landmark,
+  Tag,
+  CalendarIcon,
+  CreditCard,
+  AlertCircle,
+  AlarmCheck,
+  Bell,
+  LineChart,
+} from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 // import { UserGrowthChart } from "./UserStats";
 import {
@@ -19,7 +46,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 
 function UserGrowthChart() {
   const [yearlyData, setYearlyData] = useState([]);
@@ -90,33 +117,62 @@ function UserGrowthChart() {
   );
 }
 
-export function Dashboard({
-  setActiveTab
-}) {
+export function Dashboard({ setActiveTab }) {
   const [notifications, setNotifications] = useState([]);
   const [adminInfo, setAdminInfo] = useState(null);
+  const [pageVisits, setPageVisits] = useState(0);
+  const [pageVisitsToday, setPageVisitsToday] = useState(0);
+
 
   useEffect(() => {
-    fetchNotifications();
-    fetchAdminInfo();
+    Promise.all([fetchNotifications(), fetchAdminInfo(), fetchPageVisits()]);
   }, []);
+
+  const fetchPageVisits = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:4000/visit-count",
+      );
+      setPageVisits(response.data.visitCount.count);
+      setPageVisitsToday(response.data.visitCount.dailyCount);
+    } catch (error) {
+      console.error("Error fetching page visits:", error);
+    }
+  };
 
   const getNotificationIcon = (type) => {
     const iconProps = {
-      birthday: { icon: CalendarIcon, color: "text-purple-500", bg: "bg-purple-100" },
-      payment: { icon: CreditCard, color: "text-green-500", bg: "bg-green-100" },
+      birthday: {
+        icon: CalendarIcon,
+        color: "text-purple-500",
+        bg: "bg-purple-100",
+      },
+      payment: {
+        icon: CreditCard,
+        color: "text-green-500",
+        bg: "bg-green-100",
+      },
       alert: { icon: AlertCircle, color: "text-red-500", bg: "bg-red-100" },
       offer: { icon: Gift, color: "text-blue-500", bg: "bg-blue-100" },
-      reminder: { icon: AlarmCheck, color: "text-amber-500", bg: "bg-amber-100" },
-    }[type] || { icon: Bell, color: "text-gray-500", bg: "bg-gray-100" }
-  
-    const Icon = iconProps.icon
+      reminder: {
+        icon: AlarmCheck,
+        color: "text-amber-500",
+        bg: "bg-amber-100",
+      },
+    }[type] || { icon: Bell, color: "text-gray-500", bg: "bg-gray-100" };
+
+    const Icon = iconProps.icon;
     return (
-      <div className={cn("p-2 rounded-full flex items-center justify-center", iconProps.bg)}>
+      <div
+        className={cn(
+          "p-2 rounded-full flex items-center justify-center",
+          iconProps.bg
+        )}
+      >
         <Icon className={cn("h-4 w-4", iconProps.color)} />
       </div>
-    )
-  }
+    );
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -139,6 +195,8 @@ export function Dashboard({
     }
   };
 
+  
+
   const markNotificationAsSeen = async (notificationId) => {
     try {
       await axios.post(
@@ -147,36 +205,42 @@ export function Dashboard({
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }
-      )
+      );
       setNotifications((prevNotifications) =>
         prevNotifications.map((notification) =>
           notification._id === notificationId
             ? { ...notification, seen: true }
             : notification
         )
-      )
+      );
     } catch (error) {
-      console.error("Error marking notification as seen:", error)
+      console.error("Error marking notification as seen:", error);
     }
-  }
+  };
 
   const fetchAdminInfo = async () => {
     try {
-      const token = Cookies.get('jwt'); 
-      const response = await axios.get('http://localhost:4000/admin/admin-info', {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        "http://localhost:4000/admin/admin-info",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
+      );
       setAdminInfo(response.data);
     } catch (error) {
-      console.error('Error fetching admin info:', error);
+      console.error("Error fetching admin info:", error);
     }
   };
 
   const getInitials = (name) => {
-    if (!name) return '';
-    const initials = name.split(' ').map(word => word[0]).join('');
+    if (!name) return "";
+    const initials = name
+      .split(" ")
+      .map((word) => word[0])
+      .join("");
     return initials.slice(0, 2).toUpperCase();
   };
 
@@ -204,7 +268,9 @@ export function Dashboard({
                   <DollarSign className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-[#388A94]">$45,231.89</div>
+                  <div className="text-2xl font-bold text-[#388A94]">
+                    $45,231.89
+                  </div>
                   <p className="text-xs text-[#1A3B47]">
                     +20.1% from last month
                   </p>
@@ -226,28 +292,28 @@ export function Dashboard({
               </Card>
               <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#1A3B47]">Sales</CardTitle>
+                  <CardTitle className="text-sm font-medium text-[#1A3B47]">
+                    Sales
+                  </CardTitle>
                   <ShoppingCart className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-[#388A94]">+12,234</div>
-                  <p className="text-xs text-[#1A3B47]">
-                    +19% from last month
-                  </p>
+                  <div className="text-2xl font-bold text-[#388A94]">
+                    +12,234
+                  </div>
+                  <p className="text-xs text-[#1A3B47]">+19% from last month</p>
                 </CardContent>
               </Card>
               <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-[#1A3B47]">
-                    Active Now
+                    Total Page Visits
                   </CardTitle>
-                  <CalendarDays className="h-4 w-4 text-[#5D9297]" />
+                  <LineChart className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-[#388A94]">+573</div>
-                  <p className="text-xs text-[#1A3B47]">
-                    +201 since last hour
-                  </p>
+                  <div className="text-2xl font-bold text-[#388A94]">{pageVisits.toLocaleString()}</div>
+                  <p className="text-xs text-[#1A3B47]">+{pageVisitsToday.toLocaleString()} today</p>
                 </CardContent>
               </Card>
               <Card className="col-span-2">
@@ -256,19 +322,25 @@ export function Dashboard({
                 </CardHeader>
                 <CardContent className="flex items-center space-x-4">
                   <Avatar>
-                    <AvatarFallback className="bg-[#B5D3D1] text-[#1A3B47]">{getInitials(adminInfo?.username)}</AvatarFallback>
+                    <AvatarFallback className="bg-[#B5D3D1] text-[#1A3B47]">
+                      {getInitials(adminInfo?.username)}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h3 className="font-medium text-[#1A3B47]">{adminInfo?.username || 'John Doe'}</h3>
+                    <h3 className="font-medium text-[#1A3B47]">
+                      {adminInfo?.username || "John Doe"}
+                    </h3>
                     {adminInfo?.email && (
-                      <p className="text-sm text-[#5D9297]">{adminInfo.email}</p>
+                      <p className="text-sm text-[#5D9297]">
+                        {adminInfo.email}
+                      </p>
                     )}
                   </div>
                 </CardContent>
               </Card>
             </div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-              <Card className="col-span-1">
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-3">
+              <Card className="col-span-2">
                 <CardHeader>
                   <CardTitle>User Statistcs Overview</CardTitle>
                 </CardHeader>
@@ -313,17 +385,22 @@ export function Dashboard({
                             <div className="ml-4 flex-1">
                               <p className="text-sm text-[#1A3B47] mb-1">
                                 <div
-                                  dangerouslySetInnerHTML={{ __html: notification.body }}
+                                  dangerouslySetInnerHTML={{
+                                    __html: notification.body,
+                                  }}
                                 ></div>
                               </p>
                               <p className="text-xs text-gray-500">
-                                {new Date(notification.date).toLocaleDateString(undefined, {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {new Date(notification.date).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
                               </p>
                             </div>
 
@@ -346,33 +423,49 @@ export function Dashboard({
             <Card>
               <CardHeader>
                 <CardTitle>View Content</CardTitle>
-                <CardDescription>
-                  Select a view to display.
-                </CardDescription>
+                <CardDescription>Select a view to display.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  <button onClick={() => handleReportClick('manage-activities')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("manage-activities")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Activity className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>All Activities</span>
                   </button>
-                  <button onClick={() => handleReportClick('manage-itineraries')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("manage-itineraries")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Compass className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>All Itineraries</span>
                   </button>
-                  <button onClick={() => handleReportClick('manage-products')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("manage-products")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Package className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>All Products</span>
                   </button>
-                  <button onClick={() => handleReportClick('my-products')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("my-products")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Gift className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>My Products</span>
                   </button>
-                  <button onClick={() => handleReportClick('archived-products')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("archived-products")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Archive className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Archived Products</span>
                   </button>
-                  <button onClick={() => handleReportClick('historical-places')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("historical-places")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Landmark className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Historical Places</span>
                   </button>
@@ -384,41 +477,63 @@ export function Dashboard({
             <Card>
               <CardHeader>
                 <CardTitle>Manage Content</CardTitle>
-                <CardDescription>
-                  Select a management option.
-                </CardDescription>
+                <CardDescription>Select a management option.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <button onClick={() => handleReportClick('review-registration')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("review-registration")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Users className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Review Registration</span>
                   </button>
-                  <button onClick={() => handleReportClick('manage-accounts')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("manage-accounts")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Users className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Accounts</span>
                   </button>
-                  <button onClick={() => handleReportClick('add-admin-governor')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("add-admin-governor")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Users className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Add Admin/Governor</span>
                   </button>
-                  <button onClick={() => handleReportClick('manage-categories')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("manage-categories")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Tag className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Categories</span>
                   </button>
-                  <button onClick={() => handleReportClick('manage-tags')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("manage-tags")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Tag className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Tags</span>
                   </button>
-                  <button onClick={() => handleReportClick('create-promo-code')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("create-promo-code")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Tag className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Create Promo Code</span>
                   </button>
-                  <button onClick={() => handleReportClick('manage-activities')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("manage-activities")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Activity className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Activities</span>
                   </button>
-                  <button onClick={() => handleReportClick('manage-itineraries')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("manage-itineraries")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Compass className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Manage Itineraries</span>
                   </button>
@@ -430,29 +545,44 @@ export function Dashboard({
             <Card>
               <CardHeader>
                 <CardTitle>Reports Content</CardTitle>
-                <CardDescription>
-                  Select a report to view.
-                </CardDescription>
+                <CardDescription>Select a report to view.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                  <button onClick={() => handleReportClick('itinerary-sales-report')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("itinerary-sales-report")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <BarChart className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Itineraries Report</span>
                   </button>
-                  <button onClick={() => handleReportClick('activity-reports')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("activity-reports")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Activity className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Activities Report</span>
                   </button>
-                  <button onClick={() => handleReportClick('my-product-sales-report')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("my-product-sales-report")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Gift className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>My Products Report</span>
                   </button>
-                  <button onClick={() => handleReportClick('seller-product-sales-report')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() =>
+                      handleReportClick("seller-product-sales-report")
+                    }
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <Users className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>Seller's Products Report</span>
                   </button>
-                  <button onClick={() => handleReportClick('user-stats')} className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                  <button
+                    onClick={() => handleReportClick("user-stats")}
+                    className="flex flex-col items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                  >
                     <BarChart className="h-12 w-12 mb-2 text-[#388A94]" />
                     <span>User Statistics</span>
                   </button>
@@ -465,4 +595,3 @@ export function Dashboard({
     </div>
   );
 }
-

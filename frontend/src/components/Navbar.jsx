@@ -630,12 +630,21 @@ export function NavbarComponent() {
               )}
               {(role === "guest" || role === undefined) && (
                 <>
-                  <NavLink to="/activity">Activities</NavLink>
-                  <NavLink to="/all-itineraries">Itineraries</NavLink>
-                  <NavLink to="/all-historical-places">
+                  <NavLink to="/activity" className="navbar-activities">
+                    Activities
+                  </NavLink>
+                  <NavLink to="/all-itineraries" className="navbar-itineraries">
+                    Itineraries
+                  </NavLink>
+                  <NavLink
+                    to="/all-historical-places"
+                    className="navbar-historical-places"
+                  >
                     Historical Places
                   </NavLink>
-                  <NavLink to="/all-products">Products</NavLink>
+                  <NavLink to="/all-products" className="navbar-products">
+                    Products
+                  </NavLink>
                 </>
               )}
             </div>
@@ -652,7 +661,7 @@ export function NavbarComponent() {
                 {role === "tourist" && <NotificationsDropdownTourist />}
                 {role === "tourist" && (
                   <>
-                    <div className="relative mr-2 mt-1">
+                    <div className="relative mr-2 mt-1 navbar-cart">
                       <button
                         onClick={() => setIsCartOpen(!isCartOpen)}
                         className="relative"
@@ -681,7 +690,7 @@ export function NavbarComponent() {
                     <NavLinkIcon to="/touristWishlist">
                       <button
                         onClick={() => setIsCartOpen(false)}
-                        className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2"
+                        className="text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200 mr-2 navbar-wishlist"
                       >
                         <Heart className="h-7 w-7" />
                         <span className="sr-only">Wishlist</span>
@@ -692,7 +701,7 @@ export function NavbarComponent() {
               </>
             )}
             {role === undefined ? (
-              <>
+              <div className="navbar-signup-or-login">
                 <NavLink to="/login">Login</NavLink>
                 <Link
                   to="/sign-up"
@@ -700,9 +709,9 @@ export function NavbarComponent() {
                 >
                   Sign up
                 </Link>
-              </>
+              </div>
             ) : role !== "admin" || role === "admin" ? (
-              <div className="relative" ref={userMenuRef}>
+              <div className="relative navbar-profile" ref={userMenuRef}>
                 <button
                   onClick={() => toggleDropdown("userMenu")}
                   className="inline-flex items-center justify-center p-2 rounded-full text-white hover:bg-white/10 focus:outline-none transition-colors duration-200"
@@ -712,7 +721,7 @@ export function NavbarComponent() {
                 {openDropdown === "userMenu" && (
                   <div className="absolute right-0 mt-2 w-48 bg-black/90 rounded-2xl border border-white/20 shadow-lg py-1">
                     <Link
-                      to="/account/info"
+                      to={role === "tourism-governor" ? "/account/faqs" : "/account/info"}
                       className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                       onClick={closeDropdown}
                     >
@@ -956,16 +965,32 @@ export function NavbarComponent() {
             )}
             {(role === "guest" || role === undefined) && (
               <>
-                <NavLink to="/activity" onClick={closeDropdown}>
+                <NavLink
+                  to="/activity"
+                  onClick={closeDropdown}
+                  className="navbar-activities"
+                >
                   Activities
                 </NavLink>
-                <NavLink to="/all-itineraries" onClick={closeDropdown}>
+                <NavLink
+                  to="/all-itineraries"
+                  onClick={closeDropdown}
+                  className="navbar-itineraries"
+                >
                   Itineraries
                 </NavLink>
-                <NavLink to="/all-historical-places" onClick={closeDropdown}>
+                <NavLink
+                  to="/all-historical-places"
+                  onClick={closeDropdown}
+                  className="navbar-historical-places"
+                >
                   Historical Places
                 </NavLink>
-                <NavLink to="/all-products" onClick={closeDropdown}>
+                <NavLink
+                  to="/all-products"
+                  onClick={closeDropdown}
+                  className="navbar-products"
+                >
                   Products
                 </NavLink>
               </>
@@ -973,7 +998,7 @@ export function NavbarComponent() {
             {role !== "guest" && role !== undefined && (
               <>
                 <Link
-                  to="/account/info"
+                  to={role === "tourism-governor" ? "/account/faqs" : "/account/info"}
                   className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                   onClick={closeDropdown}
                 >
