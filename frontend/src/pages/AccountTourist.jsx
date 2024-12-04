@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/separator";
 import {
   ChevronRight,
   CreditCard,
@@ -82,17 +82,16 @@ import { MyComplaintsComponent } from "@/components/myComplaints";
 import { AdvertiserProfileComponent } from "@/components/AdvertiserProfileComponent";
 import { SellerProfileComponent } from "@/components/SellerProfileComponent";
 import { TourGuideProfileComponent } from "@/components/tourGuideProfile";
-import  TGNotificationsPage from "@/pages/TourGuideNotifications.jsx";
-import  SellerNotificationsPage  from "@/pages/SellerNotifications.jsx";
-import  AdvertiserNotificationsPage  from "@/pages/AdvertiserNotifications.jsx";
-import  NotificationsPage  from "@/pages/TouristNotifications.jsx";
+import TGNotificationsPage from "@/pages/TourGuideNotifications.jsx";
+import SellerNotificationsPage from "@/pages/SellerNotifications.jsx";
+import AdvertiserNotificationsPage from "@/pages/AdvertiserNotifications.jsx";
+import NotificationsPage from "@/pages/TouristNotifications.jsx";
 import Savedactivites from "@/components/Savedactivites";
 import Saveditineraries from "@/components/Saveditineraries";
 import ProductReportSeller from "../components/ProductReportSellerForSeller.jsx";
 import TouristActivitiesPage from "@/pages/TouristActivitiesPage";
 import TouristItinerariesPage from "@/pages/TouristItinerariesPage";
 import TouristTransportationPage from "./TouristTransportationPage";
-
 
 import {
   ToastProvider,
@@ -104,8 +103,6 @@ import {
 } from "@/components/ui/toast";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 import StockReport from "./StockReport.jsx";
-
-
 
 // Sub-components
 const AccountInfo = ({ user }) => {
@@ -165,8 +162,6 @@ const Notifications = ({ user }) => {
   }
 };
 
-
-
 const ExternalFlightBookings = ({ user }) => {
   const [flights, setFlights] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -178,12 +173,12 @@ const ExternalFlightBookings = ({ user }) => {
   const [selectedFlight, setSelectedFlight] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastType, setToastType] = useState('success');
-  const [toastMessage, setToastMessage] = useState('');
-  const [exchangeRate, setExchangeRate] = useState(1);
+  const [toastType, setToastType] = useState("success");
+  const [toastMessage, setToastMessage] = useState("");
+  const [exchangeRates, setExchangeRates] = useState(null);
   const [tourist, setTourist] = useState(null);
-  const [currencyCode, setCurrencyCode] = useState("USD");
-  const [currencySymbol, setCurrencySymbol] = useState("$");
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [currencies, setCurrencies] = useState(null);
 
   const showToast = (type, message) => {
     setToastType(type);
@@ -191,86 +186,84 @@ const ExternalFlightBookings = ({ user }) => {
     setIsToastOpen(true);
   };
 
-
-  const formatWallet = (price) => {
-    fetchExchangeRate();
-    getCurrencySymbol();
-    if (tourist && exchangeRate && currencySymbol) {
-      const exchangedPrice = price * exchangeRate;
-      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/currencies", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch currencies");
+      }
+      const data = await response.json();
+      setCurrencies(data);
+    } catch (error) {
+      console.error("Error fetching currencies:", error);
     }
   };
 
-  const getUserRole = () => Cookies.get("role") || "guest";
+  const convertPrice = (price, fromCurrency, toCurrency) => {
+    if (!exchangeRates || !fromCurrency || !toCurrency) {
+      return price;
+    }
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    return ((price * toRate) / fromRate).toFixed(2);
+  };
 
-  const fetchTouristProfile = async () => {
+  const fetchExchangeRate = async () => {
     try {
-      const token = Cookies.get("jwt");
-      const role = getUserRole();
-      const api = `http://localhost:4000/${role}`;
-      const response = await axios.get(api, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTourist(response.data);
+      const response = await fetch("http://localhost:4000/rates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch exchange rates");
+      }
+      const data = await response.json();
+      setExchangeRates(data.rates);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
+    }
+  };
 
-    } catch (err) {
-      setError(err.message);
-    } finally {
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+
+    if (role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTourist(response.data);
+        const currencyId = response.data.preferredCurrency;
+
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
     }
   };
 
   useEffect(() => {
-    fetchTouristProfile();
+    Promise.all([
+      fetchUserInfo(),
+      fetchExchangeRate(),
+      fetchCurrencies(),
+      fetchFlights(),
+    ]);
   }, []);
-
-  const fetchExchangeRate = useCallback(async () => {
-    if (tourist) {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await fetch(`http://localhost:4000/tourist/populate`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            base: "67140446ee157ee4f239d523",
-            target: tourist.preferredCurrency,
-          }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setExchangeRate(data.conversion_rate);
-        } else {
-          console.error("Error in fetching exchange rate:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching exchange rate:", error);
-      }
-    }
-  }, [tourist]);
-
-  const getCurrencySymbol = useCallback(async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCurrencyCode(response.data.code);
-      setCurrencySymbol(response.data.symbol);
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-    }
-  }, [tourist]);
-
 
   const fetchFlights = async () => {
     try {
       const token = Cookies.get("jwt");
-      const [flightsResponse, currencyResponse] = await Promise.all([
+      const [flightsResponse] = await Promise.all([
         axios.get("http://localhost:4000/tourist/my-flights", {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -280,23 +273,12 @@ const ExternalFlightBookings = ({ user }) => {
       ]);
 
       setFlights(flightsResponse.data);
-
-      const currencyId = currencyResponse.data.preferredCurrency;
-      const currencyDetailsResponse = await axios.get(
-        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setPreferredCurrency(currencyDetailsResponse.data);
-
       setIsLoading(false);
     } catch (err) {
       setError("Failed to fetch flight bookings or currency information");
-     setIsLoading(false);
+      setIsLoading(false);
     }
   };
-
 
   const handleCancelFlight = async () => {
     try {
@@ -307,27 +289,32 @@ const ExternalFlightBookings = ({ user }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-
       if (response.status === 200) {
         const refundedAmount = response.data.data.refundedAmount;
         const newWalletBalance = response.data.data.newWalletBalance;
         console.log(refundedAmount, newWalletBalance);
-        const refundConverted = formatWallet(refundedAmount);
-        const newWalletBalanceConverted = formatWallet(newWalletBalance);
-        showToast("success",`Booking cancelled. Refunded amount: ${refundConverted}. New wallet balance: ${newWalletBalanceConverted}`);
+        const refundConverted = convertPrice(
+          refundedAmount,
+          "USD",
+          userPreferredCurrency.code
+        );
+        const newWalletBalanceConverted = convertPrice(
+          newWalletBalance,
+          "USD",
+          userPreferredCurrency.code
+        );
+        showToast(
+          "success",
+          `Booking cancelled. Refunded amount: ${userPreferredCurrency.symbol} ${refundConverted}. New wallet balance: ${userPreferredCurrency.symbol} ${newWalletBalanceConverted}`
+        );
         setIsDialogOpen(false);
         fetchFlights();
       }
     } catch (err) {
       console.error(err);
-      showToast("error","Failed to cancel the flight booking.");
+      showToast("error", "Failed to cancel the flight booking.");
     }
   };
-
-
-  useEffect(() => {
-    fetchFlights();
-  }, []);
 
   if (error) return <div>{error}</div>;
 
@@ -353,210 +340,194 @@ const ExternalFlightBookings = ({ user }) => {
         </p>
 
         <div className="container mx-auto px-4 py-4">
-        {isLoading ? (
-      <div className="space-y-6">
-        {[...Array(3)].map((_, index) => (
-          <div key={index} className="animate-pulse">
-            <div className="bg-white p-6 mb-4 rounded-lg shadow-lg">
-              <div className="flex justify-between items-center mb-6">
-                <div className="w-32 h-5 bg-gray-200 rounded-md"></div> {/* Flight Number */}
-                <div className="w-20 h-6 bg-gray-200 rounded-md"></div> {/* Seat Type */}
-              </div>
-              <div className="flex">
-                {/* Left section (3/4) */}
-                <div className="w-3/4 pr-6 border-r flex flex-col">
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* Depart text */}
-                        <div className="w-32 h-6 bg-gray-200 rounded-md"></div> {/* Departure Time */}
-                        <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Departure Date */}
-                        <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* From Airport */}
-                      </div>
-
-                      <div className="flex-1 flex flex-col items-center mx-4">
-                        <div className="w-20 h-8 bg-white rounded-full"></div> {/* Plane Icon */}
-                        <div className="w-full border-t-2 border-dashed border-gray-300 mt-4"></div>
-                        <div className="w-20 h-8 bg-white rounded-full mt-4"></div> {/* Plane Icon */}
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* Arrive text */}
-                        <div className="w-32 h-6 bg-gray-200 rounded-md"></div> {/* Arrival Time */}
-                        <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Arrival Date */}
-                        <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* To Airport */}
-                      </div>
+          {isLoading ? (
+            <div className="space-y-6">
+              {[...Array(3)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="bg-white p-6 mb-4 rounded-lg shadow-lg">
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="w-32 h-5 bg-gray-200 rounded-md"></div>{" "}
+                      {/* Flight Number */}
+                      <div className="w-20 h-6 bg-gray-200 rounded-md"></div>{" "}
+                      {/* Seat Type */}
                     </div>
-                  </div>
-                  {/* Return Flight if exists */}
-                  {false && (
-                    <div className="pt-6 border-t">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* Depart text */}
-                          <div className="w-32 h-6 bg-gray-200 rounded-md"></div> {/* Departure Time */}
-                          <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Departure Date */}
-                          <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* From Airport */}
-                        </div>
+                    <div className="flex">
+                      {/* Left section (3/4) */}
+                      <div className="w-3/4 pr-6 border-r flex flex-col">
+                        <div className="mb-6">
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <div className="w-20 h-3 bg-gray-200 rounded-md"></div>{" "}
+                              {/* Depart text */}
+                              <div className="w-32 h-6 bg-gray-200 rounded-md"></div>{" "}
+                              {/* Departure Time */}
+                              <div className="w-24 h-3 bg-gray-200 rounded-md"></div>{" "}
+                              {/* Departure Date */}
+                              <div className="w-20 h-3 bg-gray-200 rounded-md"></div>{" "}
+                              {/* From Airport */}
+                            </div>
 
-                        <div className="flex-1 flex flex-col items-center mx-4">
-                          <div className="w-10 h-10 bg-gray-200 rounded-full"></div> {/* Plane Icon */}
-                          <div className="w-full border-t-2 border-dashed border-gray-300 mt-4"></div>
-                          <div className="w-10 h-10 bg-gray-200 rounded-full mt-4"></div> {/* Plane Icon */}
-                        </div>
+                            <div className="flex-1 flex flex-col items-center mx-4">
+                              <div className="w-20 h-8 bg-white rounded-full"></div>{" "}
+                              {/* Plane Icon */}
+                              <div className="w-full border-t-2 border-dashed border-gray-300 mt-4"></div>
+                              <div className="w-20 h-8 bg-white rounded-full mt-4"></div>{" "}
+                              {/* Plane Icon */}
+                            </div>
 
-                        <div className="space-y-1">
-                          <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* Arrive text */}
-                          <div className="w-32 h-6 bg-gray-200 rounded-md"></div> {/* Arrival Time */}
-                          <div className="w-24 h-3 bg-gray-200 rounded-md"></div> {/* Arrival Date */}
-                          <div className="w-20 h-3 bg-gray-200 rounded-md"></div> {/* To Airport */}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {/* Important Notices */}
-                  <div className="mt-6 space-y-2">
-                    <div className="flex bg-gray-100 px-4 py-2 rounded-md">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div> {/* Icon */}
-                        <div className="w-48 h-3 bg-gray-200 rounded-md"></div> {/* Notice Text */}
-                      </div>
-
-                      <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
-
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <div className="w-10 h-10 bg-gray-200 rounded-full"></div> {/* Icon */}
-                        <div className="w-48 h-3 bg-gray-200 rounded-md"></div> {/* Notice Text */}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right section (1/4) */}
-                <div className="w-1/4 pl-6 space-y-6">
-                  <div>
-                    <div className="w-32 h-3 bg-gray-200 rounded-md"></div> {/* Name */}
-                    <div className="w-24 h-3 bg-gray-200 rounded-md mt-2"></div> {/* Email */}
-                  </div>
-                  <div>
-                    <div className="w-32 h-3 bg-gray-200 rounded-md"></div> {/* Tickets Booked */}
-                    <div className="w-24 h-3 bg-gray-200 rounded-md mt-2"></div> {/* Price */}
-                  </div>
-                  <div className="w-full h-10 bg-gray-200 rounded-md"></div> {/* Cancel Button */}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    ) : flights.length === 0 ? (
-      <div className="text-center space-y-4 py-12">
-        <h2 className="text-2xl font-semibold text-gray-600">No flight bookings yet</h2>
-        <p className="text-gray-500">Start booking your flights to see the world!</p>
-        <Button className="mt-4 bg-[#388A94] text-white">Start Booking</Button>
-      </div>
-    ) : (
-          flights.map((flight, index) => (
-            <Card key={index} className="p-6 mb-4">
-              {/* Header */}
-              <div className="flex justify-between items-cente mb-6">
-                <div className="text-lg">
-                  <span className="font-semibold text-[#1A3B47]">
-                    Flight Number
-                  </span>
-                  <span className="text-base ml-1  text-[#5D9297]">
-                    {flight.flightType}
-                    {flight.flightID}
-                  </span>
-                </div>
-
-                <span className="text-sm text-[#388A94] font-semibold bg-[#C6E0DD] px-3 py-1 rounded-full">
-                  {flight.seatType}
-                </span>
-              </div>
-
-              <div className="flex">
-                {/* Left section (3/4) */}
-                <div
-                  className={`w-3/4 pr-6 border-r flex flex-col ${
-                    !flight.returnDepartureDate ? "justify-center" : ""
-                  }`}
-                >
-                  {" "}
-                  {/* Outbound Flight */}
-                  <div className="mb-6">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="text-sm text-gray-500">Depart</div>
-                        <div className="text-3xl font-bold text-[#1A3B47]">
-                          {new Date(flight.departureDate).toLocaleTimeString(
-                            [],
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {new Date(flight.departureDate).toLocaleDateString()}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {flight.from}
-                        </div>
-                      </div>
-
-                      <div className="flex-1 flex flex-col items-center mx-4">
-                        <div className="w-full flex items-center gap-2">
-                          <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
-                          <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
-                            <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                              {calculateDuration(
-                                flight.departureDate,
-                                flight.arrivalDate
-                              )}{" "}
-                              {/* Calculate duration */}
-                            </span>
+                            <div className="space-y-1">
+                              <div className="w-20 h-3 bg-gray-200 rounded-md"></div>{" "}
+                              {/* Arrive text */}
+                              <div className="w-32 h-6 bg-gray-200 rounded-md"></div>{" "}
+                              {/* Arrival Time */}
+                              <div className="w-24 h-3 bg-gray-200 rounded-md"></div>{" "}
+                              {/* Arrival Date */}
+                              <div className="w-20 h-3 bg-gray-200 rounded-md"></div>{" "}
+                              {/* To Airport */}
+                            </div>
                           </div>
-                          <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                        </div>
+                        {/* Return Flight if exists */}
+                        {false && (
+                          <div className="pt-6 border-t">
+                            <div className="flex items-center justify-between">
+                              <div className="space-y-1">
+                                <div className="w-20 h-3 bg-gray-200 rounded-md"></div>{" "}
+                                {/* Depart text */}
+                                <div className="w-32 h-6 bg-gray-200 rounded-md"></div>{" "}
+                                {/* Departure Time */}
+                                <div className="w-24 h-3 bg-gray-200 rounded-md"></div>{" "}
+                                {/* Departure Date */}
+                                <div className="w-20 h-3 bg-gray-200 rounded-md"></div>{" "}
+                                {/* From Airport */}
+                              </div>
+
+                              <div className="flex-1 flex flex-col items-center mx-4">
+                                <div className="w-10 h-10 bg-gray-200 rounded-full"></div>{" "}
+                                {/* Plane Icon */}
+                                <div className="w-full border-t-2 border-dashed border-gray-300 mt-4"></div>
+                                <div className="w-10 h-10 bg-gray-200 rounded-full mt-4"></div>{" "}
+                                {/* Plane Icon */}
+                              </div>
+
+                              <div className="space-y-1">
+                                <div className="w-20 h-3 bg-gray-200 rounded-md"></div>{" "}
+                                {/* Arrive text */}
+                                <div className="w-32 h-6 bg-gray-200 rounded-md"></div>{" "}
+                                {/* Arrival Time */}
+                                <div className="w-24 h-3 bg-gray-200 rounded-md"></div>{" "}
+                                {/* Arrival Date */}
+                                <div className="w-20 h-3 bg-gray-200 rounded-md"></div>{" "}
+                                {/* To Airport */}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {/* Important Notices */}
+                        <div className="mt-6 space-y-2">
+                          <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>{" "}
+                              {/* Icon */}
+                              <div className="w-48 h-3 bg-gray-200 rounded-md"></div>{" "}
+                              {/* Notice Text */}
+                            </div>
+
+                            <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
+
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>{" "}
+                              {/* Icon */}
+                              <div className="w-48 h-3 bg-gray-200 rounded-md"></div>{" "}
+                              {/* Notice Text */}
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <div className="text-sm text-gray-500">Arrive</div>
-                        <div className="text-3xl font-bold text-[#1A3B47]">
-                          {new Date(flight.arrivalDate).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                      {/* Right section (1/4) */}
+                      <div className="w-1/4 pl-6 space-y-6">
+                        <div>
+                          <div className="w-32 h-3 bg-gray-200 rounded-md"></div>{" "}
+                          {/* Name */}
+                          <div className="w-24 h-3 bg-gray-200 rounded-md mt-2"></div>{" "}
+                          {/* Email */}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {new Date(flight.arrivalDate).toLocaleDateString()}
+                        <div>
+                          <div className="w-32 h-3 bg-gray-200 rounded-md"></div>{" "}
+                          {/* Tickets Booked */}
+                          <div className="w-24 h-3 bg-gray-200 rounded-md mt-2"></div>{" "}
+                          {/* Price */}
                         </div>
-                        <div className="text-sm text-gray-500">{flight.to}</div>
+                        <div className="w-full h-10 bg-gray-200 rounded-md"></div>{" "}
+                        {/* Cancel Button */}
                       </div>
                     </div>
                   </div>
-                  {/* Return Flight if exists */}
-                  {flight.returnDepartureDate && (
-                    <div className="pt-6 border-t">
+                </div>
+              ))}
+            </div>
+          ) : flights.length === 0 ? (
+            <div className="text-center space-y-4 py-12">
+              <h2 className="text-2xl font-semibold text-gray-600">
+                No flight bookings yet
+              </h2>
+              <p className="text-gray-500">
+                Start booking your flights to see the world!
+              </p>
+              <Button className="mt-4 bg-[#388A94] text-white">
+                Start Booking
+              </Button>
+            </div>
+          ) : (
+            flights.map((flight, index) => (
+              <Card key={index} className="p-6 mb-4">
+                {/* Header */}
+                <div className="flex justify-between items-cente mb-6">
+                  <div className="text-lg">
+                    <span className="font-semibold text-[#1A3B47]">
+                      Flight Number
+                    </span>
+                    <span className="text-base ml-1  text-[#5D9297]">
+                      {flight.flightType}
+                      {flight.flightID}
+                    </span>
+                  </div>
+
+                  <span className="text-sm text-[#388A94] font-semibold bg-[#C6E0DD] px-3 py-1 rounded-full">
+                    {flight.seatType}
+                  </span>
+                </div>
+
+                <div className="flex">
+                  {/* Left section (3/4) */}
+                  <div
+                    className={`w-3/4 pr-6 border-r flex flex-col ${
+                      !flight.returnDepartureDate ? "justify-center" : ""
+                    }`}
+                  >
+                    {" "}
+                    {/* Outbound Flight */}
+                    <div className="mb-6">
                       <div className="flex items-center justify-between">
                         <div className="space-y-1">
                           <div className="text-sm text-gray-500">Depart</div>
                           <div className="text-3xl font-bold text-[#1A3B47]">
-                            {new Date(
-                              flight.returnDepartureDate
-                            ).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {new Date(flight.departureDate).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
                           </div>
                           <div className="text-sm text-gray-500">
                             {new Date(
-                              flight.returnDepartureDate
+                              flight.departureDate
                             ).toLocaleDateString()}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {flight.to}
+                            {flight.from}
                           </div>
                         </div>
 
@@ -566,8 +537,8 @@ const ExternalFlightBookings = ({ user }) => {
                             <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
                               <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
                                 {calculateDuration(
-                                  flight.returnDepartureDate,
-                                  flight.returnArrivalDate
+                                  flight.departureDate,
+                                  flight.arrivalDate
                                 )}{" "}
                                 {/* Calculate duration */}
                               </span>
@@ -579,97 +550,162 @@ const ExternalFlightBookings = ({ user }) => {
                         <div className="space-y-1">
                           <div className="text-sm text-gray-500">Arrive</div>
                           <div className="text-3xl font-bold text-[#1A3B47]">
-                            {new Date(
-                              flight.returnArrivalDate
-                            ).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            {new Date(flight.arrivalDate).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {new Date(
-                              flight.returnArrivalDate
-                            ).toLocaleDateString()}
+                            {new Date(flight.arrivalDate).toLocaleDateString()}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {flight.from}
+                            {flight.to}
                           </div>
                         </div>
                       </div>
                     </div>
-                  )}
-                  {/* Important Notices */}
-                  <div className="mt-6 space-y-2">
-                    <div className="flex bg-gray-100 px-4 py-2 rounded-md">
-                      {/* First section */}
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Ticket className="h-10 w-10" />
-                        <span>
-                          Show e-tickets and passenger identities during
-                          check-in
-                        </span>
+                    {/* Return Flight if exists */}
+                    {flight.returnDepartureDate && (
+                      <div className="pt-6 border-t">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="text-sm text-gray-500">Depart</div>
+                            <div className="text-3xl font-bold text-[#1A3B47]">
+                              {new Date(
+                                flight.returnDepartureDate
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(
+                                flight.returnDepartureDate
+                              ).toLocaleDateString()}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {flight.to}
+                            </div>
+                          </div>
+
+                          <div className="flex-1 flex flex-col items-center mx-4">
+                            <div className="w-full flex items-center gap-2">
+                              <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                              <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
+                                <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
+                                  {calculateDuration(
+                                    flight.returnDepartureDate,
+                                    flight.returnArrivalDate
+                                  )}{" "}
+                                  {/* Calculate duration */}
+                                </span>
+                              </div>
+                              <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="text-sm text-gray-500">Arrive</div>
+                            <div className="text-3xl font-bold text-[#1A3B47]">
+                              {new Date(
+                                flight.returnArrivalDate
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(
+                                flight.returnArrivalDate
+                              ).toLocaleDateString()}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {flight.from}
+                            </div>
+                          </div>
+                        </div>
                       </div>
+                    )}
+                    {/* Important Notices */}
+                    <div className="mt-6 space-y-2">
+                      <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+                        {/* First section */}
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Ticket className="h-10 w-10" />
+                          <span>
+                            Show e-tickets and passenger identities during
+                            check-in
+                          </span>
+                        </div>
 
-                      {/* Divider line */}
-                      <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
+                        {/* Divider line */}
+                        <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
 
-                      {/* Second section */}
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Clock className="h-10 w-10" />
-                        <span>
-                          Please be at the boarding gate at least 30 minutes
-                          before boarding time
-                        </span>
+                        {/* Second section */}
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="h-10 w-10" />
+                          <span>
+                            Please be at the boarding gate at least 30 minutes
+                            before boarding time
+                          </span>
+                        </div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Right section (1/4) */}
+                  <div className="w-1/4 pl-6 space-y-6">
+                    <div>
+                      <div className="text-sm text-gray-500">Name</div>
+                      <span className="text-[#1A3B47]">
+                        {user?.fname && user?.lname
+                          ? `${user.fname} ${user.lname}`
+                          : "Passenger Name"}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Email</div>
+                      <div className="font-medium text-[#1A3B47]">
+                        {user?.email || "passenger@email.com"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">
+                        Tickets Booked
+                      </div>
+                      <div className="font-medium text-[#1A3B47]">
+                        {flight.numberOfTickets}
+                      </div>
+                    </div>
+                    <div className="flex flex-col ap-2">
+                      <div className="text-sm text-gray-500">Price:</div>
+                      <div className="text-4xl font-bold text-[#1A3B47]">
+                        {userPreferredCurrency.symbol}
+                        {convertPrice(
+                          flight.price,
+                          "USD",
+                          userPreferredCurrency.code
+                        )}{" "}
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full text-base bg-gray-200 text-[#388A94] hover:bg-gray-300"
+                      onClick={() => {
+                        setSelectedFlight(flight._id);
+                        setIsDialogOpen(true);
+                      }}
+                    >
+                      Cancel Booking
+                    </Button>
                   </div>
                 </div>
-
-                {/* Right section (1/4) */}
-                <div className="w-1/4 pl-6 space-y-6">
-                  <div>
-                    <div className="text-sm text-gray-500">Name</div>
-                    <span className="text-[#1A3B47]">
-                      {user?.fname && user?.lname
-                        ? `${user.fname} ${user.lname}`
-                        : "Passenger Name"}
-                    </span>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Email</div>
-                    <div className="font-medium text-[#1A3B47]">
-                      {user?.email || "passenger@email.com"}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500">Tickets Booked</div>
-                    <div className="font-medium text-[#1A3B47]">
-                      {flight.numberOfTickets}
-                    </div>
-                  </div>
-                  <div className="flex flex-col ap-2">
-                    <div className="text-sm text-gray-500">Price:</div>
-                    <div className="text-4xl font-bold text-[#1A3B47]">
-                      {formatWallet(flight.price)}
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="w-full text-base bg-gray-200 text-[#388A94] hover:bg-gray-300"
-                    onClick={() => {
-                      setSelectedFlight(flight._id);
-                      setIsDialogOpen(true);
-                    }}
-                  >
-                    Cancel Booking
-                  </Button>
-                </div>
-              </div>
               </Card>
             ))
           )}
-        
-          
 
           {/* Confirmation Dialog */}
           <DeleteConfirmation
@@ -685,19 +721,21 @@ const ExternalFlightBookings = ({ user }) => {
               onOpenChange={setIsToastOpen}
               open={isToastOpen}
               duration={5000}
-              className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+              className={
+                toastType === "success" ? "bg-green-100" : "bg-red-100"
+              }
             >
               <div className="flex items-center">
-                {toastType === 'success' ? (
+                {toastType === "success" ? (
                   <CheckCircle className="text-green-500 mr-2" />
                 ) : (
                   <XCircle className="text-red-500 mr-2" />
                 )}
                 <div>
-                  <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-                  <ToastDescription>
-                    {toastMessage}
-                  </ToastDescription>
+                  <ToastTitle>
+                    {toastType === "success" ? "Success" : "Error"}
+                  </ToastTitle>
+                  <ToastDescription>{toastMessage}</ToastDescription>
                 </div>
               </div>
               <ToastClose />
@@ -721,12 +759,32 @@ const ExternalHotelBookings = ({ user }) => {
   const [selectedHotel, setSelectedHotel] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastType, setToastType] = useState('success');
-  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState("success");
+  const [toastMessage, setToastMessage] = useState("");
   const [exchangeRate, setExchangeRate] = useState(1);
   const [tourist, setTourist] = useState(null);
-  const [currencyCode, setCurrencyCode] = useState("USD");
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState("$");
+  const [exchangeRates, setExchangeRates] = useState(null);
+  const [currencies, setCurrencies] = useState(null);
+
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/currencies", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch currencies");
+      }
+      const data = await response.json();
+      setCurrencies(data);
+    } catch (error) {
+      console.error("Error fetching currencies:", error);
+    }
+  };
 
   const HotelBookingsSkeleton = () => {
     return (
@@ -735,7 +793,7 @@ const ExternalHotelBookings = ({ user }) => {
         <p className="text-sm text-gray-500 mb-2">
           External Bookings / Hotel Bookings
         </p>
-  
+
         <div className="container mx-auto px-4 py-6">
           {/* Skeleton for two hotel booking cards */}
           {Array(2)
@@ -750,7 +808,7 @@ const ExternalHotelBookings = ({ user }) => {
                   <div className="h-6 bg-gray-300 rounded w-2/3 mb-2"></div>
                   <div className="h-4 bg-gray-300 rounded w-1/4"></div>
                 </div>
-  
+
                 {/* Card Content */}
                 <div className="grid grid-cols-2 gap-10">
                   {/* Left Side */}
@@ -763,7 +821,7 @@ const ExternalHotelBookings = ({ user }) => {
                       <div className="h-4 bg-gray-300 rounded w-full"></div>
                     </div>
                   </div>
-  
+
                   {/* Right Side */}
                   <div className="col-span-1 space-y-6">
                     <div className="h-4 bg-gray-300 rounded w-1/4"></div>
@@ -774,7 +832,7 @@ const ExternalHotelBookings = ({ user }) => {
                     </div>
                   </div>
                 </div>
-  
+
                 {/* Additional Info Section */}
                 <div className="mt-6 flex items-center bg-gray-100 px-4 py-4 rounded-md">
                   {/* First Section */}
@@ -782,9 +840,9 @@ const ExternalHotelBookings = ({ user }) => {
                     <div className="h-3 w-3 p-4 bg-gray-300 rounded-full"></div>
                     <div className="h-6 w-48 bg-gray-300 rounded w-1/3"></div>
                   </div>
-  
+
                   <div className="border-l-2 border-gray-300 h-8 mx-6"></div>
-  
+
                   {/* Second Section */}
                   <div className="flex items-center space-x-4">
                     <div className="h-3 w-3 p-4 bg-gray-300 rounded-full"></div>
@@ -797,8 +855,6 @@ const ExternalHotelBookings = ({ user }) => {
       </div>
     );
   };
-  
-  
 
   const showToast = (type, message) => {
     setToastType(type);
@@ -806,81 +862,64 @@ const ExternalHotelBookings = ({ user }) => {
     setIsToastOpen(true);
   };
 
-  const formatWallet = (price) => {
-    fetchExchangeRate();
-    getCurrencySymbol();
-    if (tourist && exchangeRate && currencySymbol) {
-      const exchangedPrice = price * exchangeRate;
-      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
+  // convert price that takes any currency and converts it to any currency using exchange rates
+  const convertPrice = (price, fromCurrency, toCurrency) => {
+    if (!exchangeRates || !fromCurrency || !toCurrency) {
+      return price;
     }
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    return ((price * toRate) / fromRate).toFixed(2);
   };
 
   const getUserRole = () => Cookies.get("role") || "guest";
 
-  const fetchTouristProfile = async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const role = getUserRole();
-      const api = `http://localhost:4000/${role}`;
-      const response = await axios.get(api, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTourist(response.data);
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
 
-    } catch (err) {
-      setError(err.message);
-    } finally {
+    if (role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTourist(response.data);
+        const currencyId = response.data.preferredCurrency;
+
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
     }
   };
 
   useEffect(() => {
-    fetchTouristProfile();
+    Promise.all([
+      fetchUserInfo(),
+      fetchExchangeRate(),
+      fetchCurrencies(),
+      fetchHotels(),
+    ]);
   }, []);
 
-  const fetchExchangeRate = useCallback(async () => {
-    if (tourist) {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await fetch(`http://localhost:4000/tourist/populate`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            base: "67140446ee157ee4f239d523",
-            target: tourist.preferredCurrency,
-          }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          setExchangeRate(data.conversion_rate);
-        } else {
-          console.error("Error in fetching exchange rate:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching exchange rate:", error);
-      }
-    }
-  }, [tourist]);
-
-  const getCurrencySymbol = useCallback(async () => {
+  const fetchExchangeRate = async () => {
     try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/tourist/getCurrency/${tourist.preferredCurrency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setCurrencyCode(response.data.code);
-      setCurrencySymbol(response.data.symbol);
+      const response = await fetch("http://localhost:4000/rates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch exchange rates");
+      }
+      const data = await response.json();
+      setExchangeRates(data.rates);
     } catch (error) {
-      console.error("Error fetching currency symbol:", error);
+      console.error("Error fetching exchange rates:", error);
     }
-  }, [tourist]);
-
-
+  };
 
   const fetchHotels = async () => {
     try {
@@ -896,19 +935,10 @@ const ExternalHotelBookings = ({ user }) => {
 
       setHotels(hotelsResponse.data);
 
-      const currencyId = currencyResponse.data.preferredCurrency;
-      const currencyDetailsResponse = await axios.get(
-        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setPreferredCurrency(currencyDetailsResponse.data);
-
-     setIsLoading(false);
+      setIsLoading(false);
     } catch (err) {
       setError("Failed to fetch hotel bookings or currency information");
-     setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -925,167 +955,201 @@ const ExternalHotelBookings = ({ user }) => {
         const refundedAmount = response.data.data.refundedAmount;
         const newWalletBalance = response.data.data.newWalletBalance;
         console.log(refundedAmount, newWalletBalance);
-        const refundConverted = formatWallet(refundedAmount);
-        const newWalletBalanceConverted = formatWallet(newWalletBalance);
-        showToast("success",`Booking cancelled. Refunded amount: ${refundConverted}. New wallet balance: ${newWalletBalanceConverted}`);
+        const refundConverted = convertPrice(
+          refundedAmount,
+          "USD",
+          userPreferredCurrency.code
+        );
+        const newWalletBalanceConverted = convertPrice(
+          newWalletBalance,
+          "USD",
+          userPreferredCurrency.code
+        );
+        showToast(
+          "success",
+          `Booking cancelled. Refunded amount: ${userPreferredCurrency.symbol} ${refundConverted}. New wallet balance: ${userPreferredCurrency.symbol}${newWalletBalanceConverted}`
+        );
         setIsDialogOpen(false);
         fetchHotels();
       }
     } catch (err) {
       console.error(err);
-      showToast("error","Failed to cancel the hotel booking.");
+      showToast("error", "Failed to cancel the hotel booking.");
     }
   };
 
-  useEffect(() => {
-    fetchHotels();
-  }, []);
-
-  if (isLoading) return <div><HotelBookingsSkeleton/></div>;
+  if (isLoading)
+    return (
+      <div>
+        <HotelBookingsSkeleton />
+      </div>
+    );
   if (error) return <div>{error}</div>;
 
   return (
-<ToastProvider>
-  <div>
-    <h1 className="text-3xl font-bold mb-2">Hotel Bookings</h1>
-    <p className="text-sm text-gray-500 mb-2">
-      External Bookings / Hotel Bookings
-    </p>
-
-    <div className="container mx-auto px-4 py-4">
-      {hotels.map((hotel, index) => (
-    <Card key={index} className="mb-4">
-    <CardHeader>
-      <CardTitle className="text-[#1A3B47] font-bold">
-        Hotel Booking at {hotel.hotelName}
-      </CardTitle>
-      <CardDescription className="font-semibold">
-        Hotel ID: {hotel.hotelID}
-      </CardDescription>
-    </CardHeader>
-  
-    <CardContent className="grid grid-cols-2 gap-10">
-  {/* Vertical Separator */}
-  <div className="col-span-1 border-r-2 border-gray-300 ">
-    {/* Left Side Content */}
-    <div className="space-y-4">
-      <div className="flex items-center mt-4">
-        <p className="text-xl font-semibold text-[#1A3B47]">
-          {hotel.roomName} <span className="font-normal">x</span> {hotel.numberOfRooms}
+    <ToastProvider>
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Hotel Bookings</h1>
+        <p className="text-sm text-gray-500 mb-2">
+          External Bookings / Hotel Bookings
         </p>
-      </div>
 
-      {/* Info in 2 rows */}
-      <div className="grid grid-cols-2 gap-3">
-        <p className="text-gray-600">
-          Check-in on <span className="font-bold">{new Date(hotel.checkinDate).toLocaleDateString()}</span>
-        </p>
-        <p className="text-gray-600">
-          <span className="font-bold">{hotel.numberOfAdults}</span> <span className="font-normal">Adult(s)</span>
-        </p>
-        <p className="text-gray-600">
-          Check-out on <span className="font-bold">{new Date(hotel.checkoutDate).toLocaleDateString()}</span>
-        </p>
-        <p className="text-gray-600">
-  Paid Via <span className="font-bold">{hotel.paymentType || "Credit Card"}</span>
-</p>
+        <div className="container mx-auto px-4 py-4">
+          {hotels.map((hotel, index) => (
+            <Card key={index} className="mb-4">
+              <CardHeader>
+                <CardTitle className="text-[#1A3B47] font-bold">
+                  Hotel Booking at {hotel.hotelName}
+                </CardTitle>
+                <CardDescription className="font-semibold">
+                  Hotel ID: {hotel.hotelID}
+                </CardDescription>
+              </CardHeader>
 
-      </div>
-    </div>
-  </div>
+              <CardContent className="grid grid-cols-2 gap-10">
+                {/* Vertical Separator */}
+                <div className="col-span-1 border-r-2 border-gray-300 ">
+                  {/* Left Side Content */}
+                  <div className="space-y-4">
+                    <div className="flex items-center mt-4">
+                      <p className="text-xl font-semibold text-[#1A3B47]">
+                        {hotel.roomName} <span className="font-normal">x</span>{" "}
+                        {hotel.numberOfRooms}
+                      </p>
+                    </div>
 
-  {/* Right Side Content */}
-  <div className="col-span-1 space-y-6 pl-10">
-    <div className="text-gray-600">
-      <p className="font-normal">Name:</p>
-      <p className="font-bold">{tourist.fname} {tourist.lname}</p>
-    </div>
-    <div className="text-gray-600">
-      <p className="font-normal">Email:</p>
-      <p className="font-bold">{tourist.email}</p>
-    </div>
+                    {/* Info in 2 rows */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <p className="text-gray-600">
+                        Check-in on{" "}
+                        <span className="font-bold">
+                          {new Date(hotel.checkinDate).toLocaleDateString()}
+                        </span>
+                      </p>
+                      <p className="text-gray-600">
+                        <span className="font-bold">
+                          {hotel.numberOfAdults}
+                        </span>{" "}
+                        <span className="font-normal">Adult(s)</span>
+                      </p>
+                      <p className="text-gray-600">
+                        Check-out on{" "}
+                        <span className="font-bold">
+                          {new Date(hotel.checkoutDate).toLocaleDateString()}
+                        </span>
+                      </p>
+                      <p className="text-gray-600">
+                        Paid Via{" "}
+                        <span className="font-bold">
+                          {hotel.paymentType || "Credit Card"}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-    {/* Booking price with cancel button */}
-    <div className="flex items-center space-x-4">
-      <p className="text-4xl font-semibold">{formatWallet(hotel.price)}</p>
-      <button
-        onClick={() => {
-          setSelectedHotel(hotel._id);
-          setIsDialogOpen(true);
-        }}
-        className="px-4 py-2 bg-gray-200 text-[#388A94] hover:bg-gray-300 rounded-md focus:outline-none"
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-</CardContent>
+                {/* Right Side Content */}
+                <div className="col-span-1 space-y-6 pl-10">
+                  <div className="text-gray-600">
+                    <p className="font-normal">Name:</p>
+                    <p className="font-bold">
+                      {tourist.fname} {tourist.lname}
+                    </p>
+                  </div>
+                  <div className="text-gray-600">
+                    <p className="font-normal">Email:</p>
+                    <p className="font-bold">{tourist.email}</p>
+                  </div>
 
-    {/* Additional Info Section */}
-    <div className="space-y-2 p-4">
-      <div className="flex bg-gray-100 px-4 py-2 rounded-md">
-        {/* First Section */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Ticket className="h-10 w-10" />
-          <span>Show your booking confirmation and ID during check-in</span>
-        </div>
-  
-        {/* Divider */}
-        <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
-  
-        {/* Second Section */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Clock className="h-10 w-10" />
-          <span>
-            Please check in at least 1 hour before your scheduled check-in time to ensure smooth processing and room availability.
-          </span>
-        </div>
-      </div>
-    </div>
-  </Card>
-  
-   
-      ))}
+                  {/* Booking price with cancel button */}
+                  <div className="flex items-center space-x-4">
+                    <p className="text-4xl font-semibold">
+                      {userPreferredCurrency.symbol +
+                        convertPrice(
+                          hotel.price,
+                          "USD",
+                          userPreferredCurrency.code
+                        )}
+                    </p>
+                    <button
+                      onClick={() => {
+                        setSelectedHotel(hotel._id);
+                        setIsDialogOpen(true);
+                      }}
+                      className="px-4 py-2 bg-gray-200 text-[#388A94] hover:bg-gray-300 rounded-md focus:outline-none"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
 
-      {/* Confirmation Dialog */}
-      <DeleteConfirmation
-        isOpen={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        itemType="hotel booking"
-        onConfirm={handleCancelHotel}
-      />
+              {/* Additional Info Section */}
+              <div className="space-y-2 p-4">
+                <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+                  {/* First Section */}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Ticket className="h-10 w-10" />
+                    <span>
+                      Show your booking confirmation and ID during check-in
+                    </span>
+                  </div>
 
-      {/* Toast Notification */}
-      {isToastOpen && (
+                  {/* Divider */}
+                  <div className="border-l-2 border-gray-300 h-10 mx-4"></div>
+
+                  {/* Second Section */}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock className="h-10 w-10" />
+                    <span>
+                      Please check in at least 1 hour before your scheduled
+                      check-in time to ensure smooth processing and room
+                      availability.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+
+          {/* Confirmation Dialog */}
+          <DeleteConfirmation
+            isOpen={isDialogOpen}
+            onClose={() => setIsDialogOpen(false)}
+            itemType="hotel booking"
+            onConfirm={handleCancelHotel}
+          />
+
+          {/* Toast Notification */}
+          {isToastOpen && (
             <Toast
               onOpenChange={setIsToastOpen}
               open={isToastOpen}
               duration={5000}
-              className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+              className={
+                toastType === "success" ? "bg-green-100" : "bg-red-100"
+              }
             >
               <div className="flex items-center">
-                {toastType === 'success' ? (
+                {toastType === "success" ? (
                   <CheckCircle className="text-green-500 mr-2" />
                 ) : (
                   <XCircle className="text-red-500 mr-2" />
                 )}
                 <div>
-                  <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-                  <ToastDescription>
-                    {toastMessage}
-                  </ToastDescription>
+                  <ToastTitle>
+                    {toastType === "success" ? "Success" : "Error"}
+                  </ToastTitle>
+                  <ToastDescription>{toastMessage}</ToastDescription>
                 </div>
               </div>
               <ToastClose />
             </Toast>
           )}
-      <ToastViewport />
-    </div>
-  </div>
-</ToastProvider>
-
-
-
+          <ToastViewport />
+        </div>
+      </div>
+    </ToastProvider>
   );
 };
 
@@ -1268,7 +1332,7 @@ const RedeemPoints = ({ user, onRedeemPoints }) => {
   );
   const convertiblePoints = Math.floor(user.loyaltyPoints / 10000) * 10000;
   const pointsValueInEGP = convertiblePoints / 100; // Since 10,000 points = 100 EGP
-    const pointsValueInUSD = convertCurrency(pointsValueInEGP, "EGP", "USD");
+  const pointsValueInUSD = convertCurrency(pointsValueInEGP, "EGP", "USD");
   const pointsValueInPreferredCurrency = convertCurrency(
     pointsValueInUSD,
     "USD",
@@ -1541,8 +1605,8 @@ const DeleteAccount = ({ onClose }) => {
   const [deleteResult, setDeleteResult] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(true);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastType, setToastType] = useState('success');
-  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState("success");
+  const [toastMessage, setToastMessage] = useState("");
   const navigate = useNavigate();
 
   const showToast = (type, message) => {
@@ -1551,7 +1615,7 @@ const DeleteAccount = ({ onClose }) => {
     setIsToastOpen(true);
     setTimeout(() => {
       setIsToastOpen(false);
-      if (type === 'success') {
+      if (type === "success") {
         navigate("/");
       }
     }, 2000); // Show toast for 2 seconds before navigating
@@ -1575,7 +1639,7 @@ const DeleteAccount = ({ onClose }) => {
         });
         Cookies.remove("jwt");
         Cookies.remove("role");
-        showToast('success', 'Your account has been successfully deleted.');
+        showToast("success", "Your account has been successfully deleted.");
       }
     } catch (error) {
       setDeleteResult({
@@ -1584,7 +1648,7 @@ const DeleteAccount = ({ onClose }) => {
           error.response?.data?.message ||
           "An error occurred while deleting your account.",
       });
-      showToast('error', 'An error occurred while deleting your account.');
+      showToast("error", "An error occurred while deleting your account.");
     } finally {
       setIsDeleting(false);
     }
@@ -1600,40 +1664,40 @@ const DeleteAccount = ({ onClose }) => {
 
   return (
     <ToastProvider>
-    <>
-      {showDeleteConfirmation && (
-        <DeleteConfirmation
-          isOpen={showDeleteConfirmation}
-          onClose={() => setShowDeleteConfirmation(false)}
-          itemType="account"
-          onConfirm={handleDeleteAccount}
-        />
-      )}
-      {isToastOpen && (
-        <Toast
-          onOpenChange={setIsToastOpen}
-          open={isToastOpen}
-          duration={2000}
-          className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
-        >
-          <div className="flex items-center">
-            {toastType === 'success' ? (
-              <CheckCircle className="text-green-500 mr-2" />
-            ) : (
-              <XCircle className="text-red-500 mr-2" />
-            )}
-            <div>
-              <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-              <ToastDescription>
-                {toastMessage}
-              </ToastDescription>
+      <>
+        {showDeleteConfirmation && (
+          <DeleteConfirmation
+            isOpen={showDeleteConfirmation}
+            onClose={() => setShowDeleteConfirmation(false)}
+            itemType="account"
+            onConfirm={handleDeleteAccount}
+          />
+        )}
+        {isToastOpen && (
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={2000}
+            className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
+          >
+            <div className="flex items-center">
+              {toastType === "success" ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>
+                  {toastType === "success" ? "Success" : "Error"}
+                </ToastTitle>
+                <ToastDescription>{toastMessage}</ToastDescription>
+              </div>
             </div>
-          </div>
-          <ToastClose />
-        </Toast>
-      )}
-      <ToastViewport />
-    </>
+            <ToastClose />
+          </Toast>
+        )}
+        <ToastViewport />
+      </>
     </ToastProvider>
   );
 };
@@ -1712,11 +1776,9 @@ export default function AccountManagement() {
   };
 
   const renderContent = () => {
-   
     if (error)
       return <div className="text-center text-red-500">Error: {error}</div>;
-    if (!user)
-      return <div className="text-center"></div>;
+    if (!user) return <div className="text-center"></div>;
 
     switch (activeTab) {
       case "info":
@@ -1759,8 +1821,8 @@ export default function AccountManagement() {
         return <TouristTransportationPage />;
       case "preferences":
         return <Preferences user={user} />;
-        // case "wallet-history":
-        // return <WalletHistory user={user} />;
+      // case "wallet-history":
+      // return <WalletHistory user={user} />;
       case "add-card":
         return user.role === "tourist" ? (
           <AddCard />
@@ -1867,14 +1929,7 @@ export default function AccountManagement() {
         name: "Account",
         icon: User,
         tab: "info",
-        roles: [
-          "tourist",
-          "seller",
-          "advertiser",
-          "tour-guide",
-          "admin",
-          
-        ],
+        roles: ["tourist", "seller", "advertiser", "tour-guide", "admin"],
       },
       {
         name: "Security",
@@ -1894,23 +1949,19 @@ export default function AccountManagement() {
         icon: Settings,
         tab: "preferences",
         roles: ["tourist"],
-      },{
+      },
+      {
         name: "Wallet History",
         icon: Wallet2,
         tab: "wallet-history",
         roles: ["tourist"],
       },
-       {
+      {
         name: "Notifications",
         icon: Bell,
         tab: "notifications",
-        roles: [
-          "tourist",
-          "seller",
-          "advertiser",
-          "tour-guide",
-        ],  
-          },
+        roles: ["tourist", "seller", "advertiser", "tour-guide"],
+      },
       // {
       //   name: "Points and Wallet",
       //   icon: Wallet,
@@ -1954,7 +2005,7 @@ export default function AccountManagement() {
         icon: FileText,
         tab: "stock-report",
         roles: ["seller"],
-      }
+      },
     ],
     "Help and Support": [
       // {
@@ -2001,7 +2052,6 @@ export default function AccountManagement() {
     //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     // ],
-
   };
 
   const LogoutPopup = ({ onConfirm, onCancel }) => {
