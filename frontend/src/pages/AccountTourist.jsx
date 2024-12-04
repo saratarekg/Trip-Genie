@@ -35,6 +35,7 @@ import {
   PlaneTakeoff,
   Ticket,
   Bell,
+  Wallet2,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -65,6 +66,7 @@ import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";
 import TouristItineraries from "@/pages/TouristItineraries";
+import WalletHistory from "@/components/WalletHistory";
 
 import FAQ from "@/pages/FAQs";
 import TouristAttendedActivities from "@/pages/TouristAttended";
@@ -87,6 +89,10 @@ import  NotificationsPage  from "@/pages/TouristNotifications.jsx";
 import Savedactivites from "@/components/Savedactivites";
 import Saveditineraries from "@/components/Saveditineraries";
 import ProductReportSeller from "../components/ProductReportSellerForSeller.jsx";
+import TouristActivitiesPage from "@/pages/TouristActivitiesPage";
+import TouristItinerariesPage from "@/pages/TouristItinerariesPage";
+import TouristTransportationPage from "./TouristTransportationPage";
+
 
 import {
   ToastProvider,
@@ -1138,7 +1144,7 @@ const Wishlist = ({ user }) => {
 
 const History = ({ user }) => {
   if (user.role === "tourist") {
-    return <TouristAttendedActivities />;
+    return <TouristActivitiesPage />;
   } else {
     return <div>History not available for {user.role}</div>;
   }
@@ -1146,7 +1152,7 @@ const History = ({ user }) => {
 
 const HistoryItineraries = ({ user }) => {
   if (user.role === "tourist") {
-    return <TouristAttendedItineraries />;
+    return <TouristItinerariesPage />;
   } else {
     return <div>History not available for {user.role}</div>;
   }
@@ -1154,7 +1160,7 @@ const HistoryItineraries = ({ user }) => {
 
 const UpcommingTransportationBooking = ({ user }) => {
   if (user.role === "tourist") {
-    return <UpcomingTransportation />;
+    return <TouristTransportationPage />;
   } else {
     return (
       <div>Upcomming Transportations are not available for {user.role}</div>
@@ -1187,6 +1193,14 @@ const Preferences = ({ user }) => {
     return <TravelPreferences />;
   } else {
     return <div>Preferences not available for {user.role}</div>;
+  }
+};
+
+const WalletHistoryComponent = ({ user }) => {
+  if (user.role === "tourist") {
+    return <WalletHistory />;
+  } else {
+    return <div>Wallet History not available for {user.role}</div>;
   }
 };
 
@@ -1737,9 +1751,16 @@ export default function AccountManagement() {
         return <Savedactivites />;
       case "SavedItineraries":
         return <Saveditineraries />;
-
+      case "activities":
+        return <TouristActivitiesPage />;
+      case "itineraries":
+        return <TouristItinerariesPage />;
+      case "transportation":
+        return <TouristTransportationPage />;
       case "preferences":
         return <Preferences user={user} />;
+        // case "wallet-history":
+        // return <WalletHistory user={user} />;
       case "add-card":
         return user.role === "tourist" ? (
           <AddCard />
@@ -1781,62 +1802,62 @@ export default function AccountManagement() {
   };
 
   const menuStructure = {
-    Activities: [
-      {
-        name: "Saved",
-        icon: Bookmark,
-        tab: "SavedActivities",
-        roles: ["tourist"],
-      },
-      {
-        name: "Upcoming",
-        icon: Calendar,
-        tab: "upcomingActivities",
-        roles: ["tourist"],
-      },
+    // Activities: [
+    //   {
+    //     name: "Saved",
+    //     icon: Bookmark,
+    //     tab: "SavedActivities",
+    //     roles: ["tourist"],
+    //   },
+    //   {
+    //     name: "Upcoming",
+    //     icon: Calendar,
+    //     tab: "upcomingActivities",
+    //     roles: ["tourist"],
+    //   },
 
-      {
-        name: "Attended",
-        icon: HistoryIcon,
-        tab: "history",
-        roles: ["tourist"],
-      },
-    ],
-    Itineraries: [
-      {
-        name: "Saved",
-        icon: Bookmark,
-        tab: "SavedItineraries",
-        roles: ["tourist"],
-      },
+    //   {
+    //     name: "All",
+    //     icon: HistoryIcon,
+    //     tab: "history",
+    //     roles: ["tourist"],
+    //   },
+    // ],
+    // Itineraries: [
+    //   {
+    //     name: "Saved",
+    //     icon: Bookmark,
+    //     tab: "SavedItineraries",
+    //     roles: ["tourist"],
+    //   },
 
-      {
-        name: "Upcoming",
-        icon: Calendar,
-        tab: "upcomingItineraries",
-        roles: ["tourist"],
-      },
-      {
-        name: "Attended",
-        icon: HistoryIcon,
-        tab: "historyItineraries",
-        roles: ["tourist"],
-      },
-    ],
-    Transportation: [
-      {
-        name: "Upcoming",
-        icon: Car,
-        tab: "upcomingTransportation",
-        roles: ["tourist"],
-      },
-      {
-        name: "Attended",
-        icon: HistoryIcon,
-        tab: "historyTransportation",
-        roles: ["tourist"],
-      },
-    ],
+    //   {
+    //     name: "Upcoming",
+    //     icon: Calendar,
+    //     tab: "upcomingItineraries",
+    //     roles: ["tourist"],
+    //   },
+    //   {
+    //     name: "All",
+    //     icon: HistoryIcon,
+    //     tab: "historyItineraries",
+    //     roles: ["tourist"],
+    //   },
+    // ],
+    // Transportation: [
+    //   {
+    //     name: "All",
+    //     icon: Car,
+    //     tab: "upcomingTransportation",
+    //     roles: ["tourist"],
+    //   },
+    //   {
+    //     name: "Attended",
+    //     icon: HistoryIcon,
+    //     tab: "historyTransportation",
+    //     roles: ["tourist"],
+    //   },
+    // ],
     // Products: [
     //   { name: "Cart", icon: ShoppingCartIcon, tab: "cart", roles: ["tourist"] },
     //   { name: "Wishlist", icon: Heart, tab: "wishlist", roles: ["tourist"] },
@@ -1872,6 +1893,11 @@ export default function AccountManagement() {
         name: "Preferences",
         icon: Settings,
         tab: "preferences",
+        roles: ["tourist"],
+      },{
+        name: "Wallet History",
+        icon: Wallet2,
+        tab: "wallet-history",
         roles: ["tourist"],
       },
        {

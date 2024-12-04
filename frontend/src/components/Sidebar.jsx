@@ -21,6 +21,40 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
     <aside className="max-w-30 h-screen overflow-y-auto sidebar-scroll">
       <nav className="p-4">
         <h2 className="text-3xl font-bold mb-6">My Account</h2>
+        {role === 'tourist' && (
+        <div className="mb-3">
+          <button
+            className={`flex items-center mt-0 w-full text-left px-4 mb-3 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
+              activeTab === 'activities'
+                ? 'bg-[#B5D3D1] text-black font-bold scale-105'
+                : 'text-gray-600 hover:text-black hover:font-bold hover:scale-105'
+            }`}
+            onClick={() => handleTabClick('activities')}
+          >
+            <span className='font-semibold'>Activities</span>
+          </button>
+          <button
+            className={`flex items-center w-full text-left mb-3 px-4 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
+              activeTab === 'itineraries'
+                ? 'bg-[#B5D3D1] text-black font-bold scale-105'
+                : 'text-gray-600 hover:text-black hover:font-bold hover:scale-105'
+            }`}
+            onClick={() => handleTabClick('itineraries')}
+          >
+            <span className='font-semibold'>Itineraries</span>
+          </button>
+          <button
+            className={`flex items-center w-full text-left px-4 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
+              activeTab === 'transportation'
+                ? 'bg-[#B5D3D1] text-black font-bold scale-105'
+                : 'text-gray-600 hover:text-black hover:font-bold hover:scale-105'
+            }`}
+            onClick={() => handleTabClick('transportation')}
+          >
+            <span className='font-semibold'>Transportation</span>
+          </button>
+        </div>
+        )}
         <ul className="space-y-1">
           {Object.entries(menuStructure).map(([category, items]) => {
             const filteredItems = items.filter((item) => item?.roles?.includes(role));

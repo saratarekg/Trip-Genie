@@ -296,9 +296,9 @@ export default function TouristAttendedItineraries() {
   if (isLoading) {
     return (
       <div className="bg-gray-100 min-h-screen">
-        <h1 className="text-3xl font-bold mb-2">Attended Itineraries</h1>
+        {/* <h1 className="text-3xl font-bold mb-2">Attended Itineraries</h1>
         <p className="text-sm text-gray-500 mb-2">Itineraries / Attended</p>
-  
+   */}
         <Toaster />
         <div className="container mx-auto px-4 py-8">
           <div className="grid gap-4 md:grid-cols-2">
@@ -330,9 +330,9 @@ if (error) return <div>{error}</div>;
 
   return (
     <div className="bg-gray-100 min-h-screen">
-              <h1 className="text-3xl font-bold mb-2">Attended Itineraries</h1>
+              {/* <h1 className="text-3xl font-bold mb-2">Attended Itineraries</h1>
         <p className="text-sm text-gray-500 mb-2">Itineraries / Attended</p>
-        
+         */}
       <Toaster />
       <div className="container mx-auto px-4 py-8">
 
