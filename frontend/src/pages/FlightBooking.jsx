@@ -214,6 +214,8 @@ function BookingPage() {
   const [bookingError, setBookingError] = useState("");
   const [exchangeRates, setExchangeRates] = useState(null);
   const [currencies, setCurrencies] = useState([]);
+  const bookingProcessedRef = useRef(false);
+
 
   const [tourist, setTourist] = useState(null);
 
@@ -243,9 +245,15 @@ function BookingPage() {
     }
   }, [departureDate, returnDate]);
 
+  // call this use effect only once to avoid double booking
   useEffect(() => {
-    handleBookNow();
+    const success = searchParams.get("success");
+    if (success === "true" && !bookingProcessedRef.current) {
+      handleBookNow();
+    }
   }, [searchParams]);
+  
+
 
   const renderLocationDisplay = (code) => {
     const location = airports.find((item) => item.code === code);
@@ -358,10 +366,18 @@ function BookingPage() {
   };
 
   const handleBookNow = async () => {
+
+
     try {
       const success = searchParams.get("success");
 
       if (success === "true") {
+        if (bookingProcessedRef.current) {
+          console.log('Booking already processed');
+          return;
+        }
+
+        bookingProcessedRef.current = true;
         const sessionId = searchParams.get("session_id");
         const flightID = searchParams.get("flightID");
         const from = searchParams.get("from");
@@ -446,6 +462,7 @@ function BookingPage() {
               const newUrl = `${window.location.pathname}`;
 
               window.history.replaceState(null, "", newUrl);
+              return; 
             }
           } catch (error) {
             console.error("Error checking payment status:", error);
@@ -460,7 +477,10 @@ function BookingPage() {
         return;
       }
 
+      if (paymentMethod === "Wallet") {
+
       const token = Cookies.get("jwt");
+      
       const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total), currencyCode, "USD");
       const response = await fetch(
         "http://localhost:4000/tourist/book-flight",
@@ -511,6 +531,8 @@ function BookingPage() {
         throw new Error("Failed to book the flight");
       }
 
+    
+
       const data = await response.json();
       console.log("Booking successful:", data);
       setIsBookingConfirmationOpen({
@@ -519,6 +541,8 @@ function BookingPage() {
         price :selectedFlight.price.total,
         wallet: tourist?.wallet,
       }); 
+
+    }
        } catch (error) {
       console.error("Booking error:", error);
     }
@@ -1268,8 +1292,7 @@ function BookingPage() {
             <DialogHeader>
               <DialogTitle>Booking Confirmed</DialogTitle>
               <DialogDescription>
-                Your flight has been booked successfully. You will receive a
-                confirmation email shortly.
+                Your flight has been booked successfully.
               </DialogDescription>
               {isBookingConfirmationOpen.paymentMethod === "Wallet" && (
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -1280,12 +1303,6 @@ function BookingPage() {
               <Label className="text-right">New Wallet Balance:</Label>
               <div>
               {convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)-isBookingConfirmationOpen.price}{currencyCode}
-              </div>
-              <div>
-              {convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)}{currencyCode}
-              </div>
-              <div>
-              {isBookingConfirmationOpen.price}{currencyCode}
               </div>
             </div>
           )}
