@@ -185,7 +185,8 @@ const Login = () => {
         setForgotPasswordStep(3);
         setOtpErrorMessage("");
       } else {
-        setOtpErrorMessage("Invalid OTP. Please try again.");
+        const errorData = await response.json();
+        setOtpErrorMessage(errorData.message);
         setOtp(Array(6).fill(""));
       }
     } catch (error) {
