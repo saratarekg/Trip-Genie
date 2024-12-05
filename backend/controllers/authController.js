@@ -443,7 +443,7 @@ const verifyOtp = async (req, res) => {
     if (!existingOTP) {
       return res
         .status(400)
-        .json({ message: "Incorrect OTP. Please try again." });
+        .json({ message: "Invalid OTP. Please try again." });
     }
 
     if (existingOTP.expiry < Date.now()) {

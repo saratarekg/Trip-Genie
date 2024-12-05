@@ -501,6 +501,8 @@ export default function CheckoutPage() {
       const API_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
       const stripe = await loadStripe(API_KEY);
 
+      console.log("discountedTotal", formatPrice2(discountAmount));
+
       const response = await fetch(
         "http://localhost:4000/create-checkout-session",
         {
@@ -524,6 +526,7 @@ export default function CheckoutPage() {
               deliveryPrice: getDeliveryPrice(deliveryType),
             },
             promoCode,
+            discountPercentage: promoDetails?.percentOff || 0,
           }),
         }
       );
