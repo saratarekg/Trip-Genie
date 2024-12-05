@@ -111,6 +111,7 @@ export default function CheckoutPage() {
   const [currentPromoCode, setCurrentPromoCode] = useState("");
   const [paySuccess, setPaySuccess] = useState(false);
   const [selectedDeliveryTime, setSelectedDeliveryTime] = useState("");
+  const purchaseProcessedRef = useRef(false);
 
   const [deliveryType, setDeliveryType] = useState("Standard");
   const [deliveryTime, setDeliveryTime] = useState("morning");
@@ -339,6 +340,9 @@ export default function CheckoutPage() {
               promoCode,
             });
 
+
+
+
           }
         } catch (error) {
           console.error("Error checking payment status:", error);
@@ -352,6 +356,14 @@ export default function CheckoutPage() {
 
 
   const completePurchase = async (data) => {
+
+
+    if (purchaseProcessedRef.current) {
+      console.log('Booking already processed');
+      return;
+    }
+    purchaseProcessedRef.current = true;
+
     try {
       console.log("Completing purchase... here");
       console.log("Data:", data);
