@@ -353,78 +353,87 @@ export default function BookedActivities() {
         </div>
 
         <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-  <DialogContent className="sm:max-w-[400px] bg-white rounded-lg shadow-lg p-4">
+  <DialogContent className="sm:max-w-[330px] bg-white rounded-lg shadow-lg p-4">
     <DialogHeader>
-    <DialogTitle className="text-lg font-semibold text-[#1A3B47]">
-  <div>
-    Booking Receipt for
-  </div>
-  <div className="text-[#388A94] text-xl font-bold">
-    {selectedBooking?.activity.name}
-  </div>
-</DialogTitle>
-
+      <DialogTitle className="text-lg font-semibold text-[#1A3B47]">
+        <div>
+          Booking Receipt for
+        </div>
+        <div className="text-[#388A94] text-xl font-bold">
+          {selectedBooking?.activity.name}
+        </div>
+        <div className="text-sm text-gray-400 mt-1">
+          Booking ID: <span className="text-[#1A3B47] font-semibold">
+            {selectedBooking?._id ? selectedBooking._id.substring(0, 10) : "AB123456"}
+          </span>
+        </div>
+      </DialogTitle>
     </DialogHeader>
     <div className="border-t border-gray-200 pt-4">
-      <div className="flex justify-between items-center mb-3">
-        <div>
-          <p className="text-sm font-medium text-gray-400">Name</p>
-          <p className="text-[#1A3B47] font-semibold">{tourist?.fname || "John"} {tourist?.lname || "Doe"}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-400">Booking ID</p>
+    <div className="flex justify-between mb-4">
+        <div className=" ">
+          <p className="text-sm font-medium text-gray-400">DATE</p>
           <p className="text-[#1A3B47] font-semibold">
-  {selectedBooking?._id ? selectedBooking._id.substring(0, 10) : "AB123456"}
-</p>        </div>
-      </div>
-      <div className="flex justify-between items-center mb-3">
-        <div>
-          <p className="text-sm font-medium text-gray-400">Date & Time</p>
-          <p className="text-[#1A3B47] font-semibold">
-          {new Date(selectedBooking?.activity.timing).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} at {new Date(selectedBooking?.activity.timing).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(selectedBooking?.activity.timing).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-400">Paid Via</p>
-          <p className="text-[#1A3B47] font-semibold">{selectedBooking?.paymentType || "Credit Card"}</p>
+        <div className="">
+          <p className="text-sm font-medium text-gray-400">TIME</p>
+          <p className="text-[#1A3B47] font-semibold">
+            {new Date(selectedBooking?.activity.timing).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+          </p>
         </div>
       </div>
-    
+      <div className="flex justify-between">
+      <div className="">
+        <p className="text-sm font-medium text-gray-400">TO</p>
+        <p className="text-[#1A3B47] font-semibold">
+          {tourist?.fname || "John"} {tourist?.lname || "Doe"}
+        </p>
+        <p className="text-[#1A3B47] text-xs">
+          {tourist?.email || "John"}
+        </p>
+      </div>
+      <div>
+          <p className="text-sm font-medium text-gray-400">BOOKED</p>
+          <p className="text-[#1A3B47] font-semibold">
+            {selectedBooking?.numberOfTickets || "1"} Tickets
+          </p>
+        </div>
+      </div>
+     
+      
       <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
-        <div>
-          <p className="text-sm font-medium text-gray-600">Tickets</p>
-          <p className="text-2xl font-bold text-[#1A3B47]">
-            {selectedBooking?.numberOfTickets || "1"}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-600">Total Price</p>
-          <p className="text-2xl font-bold text-[#388A94]">
-            {formatPrice(selectedBooking?.paymentAmount || 0)}
-          </p>
-        </div>
-      </div>
+  <div>
+    <p className="text-xl font-semibold text-gray-600">
+      Total Price:
+    </p>
+  </div>
+  <div className="text-right">
+    <p className="text-2xl font-bold text-[#388A94]">
+      {formatPrice(selectedBooking?.paymentAmount || 0)}
+    </p>
+  </div>
+</div>
+{/* Payment method displayed on the left under the price */}
+<div className="flex items-center justify-start pl-1">
+  <p className="text-sm text-gray-400">
+    via {selectedBooking?.paymentType || "Credit Card"}
+  </p>
+</div>
+
     </div>
     <div className="border-t border-gray-200 pt-4">
       <p className="text-center text-sm text-[#1A3B47] font-medium">
         Thank you for booking with us!
       </p>
       <div className="flex items-center justify-center text-xs text-gray-500 mt-2">
-  <Info className="h-6 w-6 text-gray-400 mb-3" />
-  <span className="text-center">
-    Please keep this receipt for your records. Present it upon arrival to confirm your booking.
-  </span>
-</div>
-
+        <Info className="h-6 w-6 text-gray-400 mb-3" />
+        <span className="text-center">
+          Please keep this receipt for your records. Present it upon arrival to confirm your booking.
+        </span>
+      </div>
     </div>
-    {/* <div className="flex justify-end -mt-6">
-      <button
-        className="px-4 py-2 bg-[#388A94] text-white font-medium rounded-md hover:bg-[#2e6b77] transition"
-        onClick={() => setIsViewDialogOpen(false)}
-      >
-        Close
-      </button>
-    </div> */}
   </DialogContent>
 </Dialog>
 

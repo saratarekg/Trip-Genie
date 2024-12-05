@@ -87,5 +87,5 @@ Orange: #F88C33
 Beige/Tan: #E6DCCF
 Light Aqua/Seafoam Green: #B5D3D1
 Teal: #5D9297
-Turquoise: #388A94 bg-[#B5D3D1] hover:bg-[#2e6b77]
+Turquoise: #388A94 bg-[#388A94] hover:bg-[#2e6b77]
 Dark Teal/Blue: #1A3B47

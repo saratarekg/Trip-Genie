@@ -18,7 +18,7 @@ exports.createPurchase = async (req, res) => {
     locationType,
     promoCode,
   } = req.body;
-  console.log(products, paymentMethod, shippingAddress);
+  console.log(products, paymentMethod, shippingAddress, promoCode);
   try {
     // Validate fields
     if (
@@ -216,7 +216,8 @@ exports.getPurchasesByTourist = async (req, res) => {
   try {
     // Fetch all purchases made by the tourist
     const purchases = await Purchase.find({ tourist: touristId })
-      .populate("products.product") // Populate the product details
+      .populate("products.product") 
+      .populate("promoCode")// Populate the product details
       .exec();
 
     if (!purchases.length) {

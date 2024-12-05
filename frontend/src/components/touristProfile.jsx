@@ -381,7 +381,7 @@ export function TouristProfileComponent() {
     }
    else if (!rates[fromCurrency] || !rates[toCurrency.code]) return amount;
     return (amount / rates[fromCurrency]) * rates[toCurrency?.code];
-  }, [rates]);
+  }, [rates]); 
 
   const formatCurrency = useCallback((amount, currency) => {
     const currencyInfo = currencies.find((c) => c.code === currencyCode);
@@ -414,8 +414,6 @@ export function TouristProfileComponent() {
   };
 
   useEffect(() => {
-   
-
     fetchTouristProfile();
   }, []);
 
@@ -726,7 +724,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     };
   
     return (
-      <Card className="w-full h-[275px] shadow-none border border-white">
+      <Card className="w-full h-[240px] shadow-none border border-white">
         <CardHeader>
           <CardTitle>Redeem Loyalty Points</CardTitle>
           <CardDescription>Convert your loyalty points into wallet balance.</CardDescription>
@@ -856,7 +854,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
     };
   
     return (
-      <Card className="w-full h-[275px] overflow-y-auto shadow-none border border-white">
+      <Card className="w-full h-[240px] shadow-none border border-white">
         <CardHeader>
           <CardTitle>Preferred Currency</CardTitle>
           <CardDescription>
@@ -1420,15 +1418,32 @@ const response = await axios.get("http://localhost:4000/tourist/", {
 
     <TabsContent value="wallet">
    
-      <WalletHistory 
-      tourist={tourist}
-       currencyCode={currencyCode} 
-      getTransactionIcon={getTransactionIcon} 
-      groupTransactionsByDate={groupTransactionsByDate}
-      convertCurrency={convertCurrency}
-      formatCurrency={formatCurrency}
-      formatWallet={formatWallet}
-      />
+    <Card className="shadow-none border border-white h-[240px]">
+  <CardContent className="pt-6">
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col">
+        <span className="font-bold text-2xl">Available Balance</span>
+        <span className="text-xs text-gray-500">
+          Your wallet balance is updated in real-time based on your latest transactions.
+        </span>
+      </div>
+      <span className="text-2xl text-[#388A94] font-bold self-start">
+        {formatWallet(tourist.wallet)}
+      </span>
+    </div>
+    <div className="border-t border-gray-200 pt-4">
+    <div className="text-sm text-gray-500">
+        - Use your wallet balance to book trips or purchase exclusive items.<br />
+        - Wallet funds are non-transferable and expire after 12 months of inactivity.<br />
+        - Access your <a href="/account/wallet-history" className=" font-semibold underline text-gray-600 hover:text-gray-800">Wallet History</a> to review all past transactions.<br />
+        - For more details, visit the <a href="/account/help" className="font-semibold underline text-gray-600 hover:text-gray-800">Help Center</a>.
+      </div>
+    </div>
+ 
+  </CardContent>
+</Card>
+
+
     
     </TabsContent> 
 

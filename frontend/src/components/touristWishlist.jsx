@@ -204,6 +204,7 @@ const WishlistPage = () => {
         throw new Error("Failed to add item to cart");
       }
       setActionSuccess("Item added to cart successfully!");
+      window.dispatchEvent(new Event('cartUpdated'));
       fetchWishlistItems();
     } catch (error) {
       setActionError("Error adding item to cart. Please try again.");
@@ -230,6 +231,7 @@ const WishlistPage = () => {
         throw new Error("Failed to add all items to cart");
       }
       setActionSuccess("All items added to cart successfully!");
+      window.dispatchEvent(new Event('cartUpdated'));
       fetchWishlistItems();
     } catch (error) {
       setActionError("Error adding all items to cart. Please try again.");

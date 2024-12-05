@@ -271,6 +271,7 @@ export default function CheckoutPage() {
       const deliveryType = searchParams.get("deliveryType");
       const deliveryTime = searchParams.get("deliveryTime");
       const shippingId = searchParams.get("shippingId");
+      const promoCode = searchParams.get("promoCode");
 
       await fetchUserInfo();
 
@@ -335,6 +336,7 @@ export default function CheckoutPage() {
               deliveryType,
               deliveryTime,
               paymentMethod: "credit_card",
+              promoCode,
             });
 
           }
@@ -381,7 +383,11 @@ export default function CheckoutPage() {
             data.paymentMethod === "credit_card"
               ? data.deliveryTime
               : deliveryTime,
-          promoCode,
+          promoCode:
+          data.paymentMethod === "credit_card"
+          ? data.promoCode
+          : promoCode,
+          
         }),
       });
 
@@ -517,6 +523,7 @@ export default function CheckoutPage() {
               time: deliveryTime,
               deliveryPrice: getDeliveryPrice(deliveryType),
             },
+            promoCode,
           }),
         }
       );
@@ -594,6 +601,7 @@ export default function CheckoutPage() {
 
       if (emptyCartResponse.ok) {
         console.log("Cart emptied successfully.");
+        window.dispatchEvent(new Event('cartUpdated'));
       } else {
         console.error("Failed to empty the cart.");
       }
@@ -1384,7 +1392,16 @@ export default function CheckoutPage() {
           {purchaseStatus === "success" && paymentMethod === "wallet" && (
             <div className="mt-4 text-gray-600">
               <p>
-                <strong>Amount Paid: </strong>{formatPrice(totalAmount)}
+                <strong>Amount Paid: </strong>  {formatPrice(
+                      (promoDetails ? discountedTotal : totalAmount) +
+                      (form.watch("deliveryType") === "Express"
+                        ? 4.99
+                        : form.watch("deliveryType") === "Next-Same"
+                          ? 6.99
+                          : form.watch("deliveryType") === "International"
+                            ? 14.99
+                            : 2.99)
+                    )}
               </p>
               <p>
                 <strong>New Wallet Balance: </strong>{formatPrice(tourist.wallet)}

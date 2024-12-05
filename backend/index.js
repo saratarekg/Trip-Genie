@@ -95,7 +95,7 @@ app.get("/rates", currencyRateController.getExchangeRate);
 // =====================
 app.post("/create-checkout-session", async (req, res) => {
   try {
-    const { items, currency, deliveryInfo } = req.body;
+    const { items, currency, deliveryInfo, promoCode } = req.body;
 
     console.log("Delivery Info:", deliveryInfo);
 
@@ -108,7 +108,7 @@ app.post("/create-checkout-session", async (req, res) => {
     // Calculate the total price including delivery
     const totalAmount = itemsTotal + deliveryPrice;
 
-    if (!items || !deliveryInfo || !currency) {
+    if (!items || !deliveryInfo || !currency || !promoCode) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -139,7 +139,7 @@ app.post("/create-checkout-session", async (req, res) => {
       mode: "payment",
       success_url: `${
         req.headers.origin
-      }/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}&deliveryType=${encodeURIComponent(
+      }/checkout2?success=true&session_id={CHECKOUT_SESSION_ID}&promoCode=${promoCode}&deliveryType=${encodeURIComponent(
         deliveryInfo.type
       )}&deliveryTime=${encodeURIComponent(
         deliveryInfo.time

@@ -66,7 +66,7 @@ import FileComplaintForm from "@/components/FileComplaintForm";
 import TravelPreferences from "@/components/TouristPreferences";
 import TouristActivities from "@/pages/TouristActivities";
 import TouristItineraries from "@/pages/TouristItineraries";
-import WalletHistory from "@/components/WalletHistory";
+import TouristWalletPage from "@/pages/TouristWalletPage";
 import { Link } from "react-router-dom";
 
 import FAQ from "@/pages/FAQs";
@@ -1262,7 +1262,7 @@ const Preferences = ({ user }) => {
 
 const WalletHistoryComponent = ({ user }) => {
   if (user.role === "tourist") {
-    return <WalletHistory />;
+    return <TouristWalletPage />;
   } else {
     return <div>Wallet History not available for {user.role}</div>;
   }
@@ -1821,8 +1821,8 @@ export default function AccountManagement() {
         return <TouristTransportationPage />;
       case "preferences":
         return <Preferences user={user} />;
-      // case "wallet-history":
-      // return <WalletHistory user={user} />;
+      case "wallet-history":
+      return <TouristWalletPage user={user} />;
       case "add-card":
         return user.role === "tourist" ? (
           <AddCard />
