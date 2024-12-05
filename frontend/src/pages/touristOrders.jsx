@@ -246,6 +246,11 @@ export default function OrdersPage() {
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage)
 
 
+  // Ensure currentOrders is sorted in reverse chronological order
+const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
+
+
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
@@ -302,8 +307,8 @@ export default function OrdersPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentOrders.map((order, index) => (
-              <Card key={order._id} className="bg-white w-full">
+       {sortedOrders.map((order, index) => (
+    <Card key={order._id} className="bg-white w-full">
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex gap-3">
@@ -385,8 +390,8 @@ export default function OrdersPage() {
   {/* Delivery Price with Info Icon */}
   <div className="flex justify-between items-center w-full text-gray-500">
   <div className="flex items-center gap-1">
-  <Info className="h-4 w-4 text-gray-500" />
-    <span className="text-sm font-semibold">Delivery</span>
+  <Info className="h-4 w-4 text-gray-400" />
+    <span className="text-sm font-semibold text-gray-400">Delivery</span>
     </div>
       <span className="text-sm">{getDeliveryPrice(order.deliveryType)}</span>
     
