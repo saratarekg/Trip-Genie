@@ -480,10 +480,13 @@ exports.cancelPurchase = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    // Return success response
-    return res
-      .status(200)
-      .json({ message: "Purchase cancelled successfully and refund issued" });
+    // Return success response with refunded amount and new wallet balance
+    return res.status(200).json({
+      message: "Purchase cancelled successfully and refund issued",
+      refundedAmount: totalRefund,
+      newWalletBalance: updatedTourist.wallet,
+      paymentMethod: purchase.paymentMethod,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: error.message });

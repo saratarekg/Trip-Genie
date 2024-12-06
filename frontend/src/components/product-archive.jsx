@@ -42,7 +42,7 @@ const renderStars = (rating) => {
 
 const ProductCard = ({ product, onSelect }) => {
   return (
-    <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+    <Card className="relative overflow-hidden transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-xl ">
       <CardHeader className="p-0" onClick={() => onSelect(product._id)}>
         <img
           src={product.pictures[0]?.url || defaultImage}

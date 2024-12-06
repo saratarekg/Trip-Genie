@@ -28,6 +28,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 import { Skeleton } from "@/components/ui/skeleton"
+import { CheckCircle, XCircle } from 'lucide-react';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([])
@@ -126,17 +127,22 @@ export default function OrdersPage() {
       const response = await axios.put(`http://localhost:4000/tourist/cancelPurchase/${orderToCancel}`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      console.log("Order canceled:", response.data);
-      console.log("order  refunded:", selectedOrder.totalPrice);
-      console.log("order with wallet refunded:", tourist.wallet+(selectedOrder.totalPrice));
-      fetchOrders()
+
+     fetchOrders()
+     console.log(response);
       // Assuming response.data contains the order products and payment details
-      const formattedTotalPrice = displayPrice(selectedOrder.totalPrice);  // Assuming response contains total price
-      const newwallet = tourist.wallet+(selectedOrder.totalPrice);  // Assuming response contains the updated wallet balance
+      const formattedTotalPrice = displayPrice(response.data.refundedAmount)  // Assuming response contains total price
+      const newwallet = response.data.newWalletBalance 
+      const payment =response.data.paymentMethod // Assuming response contains the updated wallet balance
     
       // Show a success toast notification
       toast({
-        title: "Order Cancelled",
+        title: (
+          <div className="flex items-center">
+            <CheckCircle className="text-green-500 mr-2" />
+            <span>Order Cancelled</span>
+          </div>
+        ),
         description: (
           <>
             <p>Your order has been successfully cancelled.</p>
@@ -145,23 +151,27 @@ export default function OrdersPage() {
                 <Label className="text-right">Amount Refunded:</Label>
                 <div>{formattedTotalPrice}</div>
               </div>
-              {selectedOrder.paymentMethod === "wallet" && (
                 <div className="grid grid-cols-2 gap-4">
                   <Label className="text-right">New Wallet Balance:</Label>
                   <div>{displayPrice(newwallet.toFixed(2))}</div>
                 </div>
-              )}
             </div>
           </>
         ),
-        duration: 3000,
+        duration: 5000,
+        className: 'bg-green-100',
       });
     } catch (error) {
       toast({
-        title: "Error",
+        title: (
+          <div className="flex items-center">
+            <XCircle className="text-red-500 mr-2" />
+            <span>Error</span>
+          </div>
+        ),
         description: "Failed to cancel the order. Please try again.",
-        duration: 3000,
-        variant: "destructive",
+        duration: 5000,
+        className: 'bg-red-100',
       })
       console.error("Error canceling order:", error)
     } finally {

@@ -21,7 +21,7 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
     <aside className="max-w-30 h-screen overflow-y-auto sidebar-scroll">
       <nav className="p-4">
         <h2 className="text-3xl font-bold mb-6">My Account</h2>
-        {role === 'tourist' && (
+        {/* {role === 'tourist' && (
         <div className="mb-2">
           <button
             className={`flex items-center mt-0 w-full text-left px-4 mb-2 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
@@ -64,7 +64,7 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
             <span className='font-semibold'>Purchases</span>
           </button>
         </div>
-        )}
+        )} */}
         <ul className="space-y-1">
           {Object.entries(menuStructure).map(([category, items]) => {
             const filteredItems = items.filter((item) => item?.roles?.includes(role));

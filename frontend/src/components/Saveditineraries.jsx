@@ -270,10 +270,11 @@ export default function SavedItineraries() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSavedItineraries(response.data);
-      setIsLoading(false);
+      setTimeout(() => setIsLoading(false), 1000);  
+    
     } catch (error) {
       console.error("Error fetching saved itineraries:", error);
-      setIsLoading(false);
+      setTimeout(() => setIsLoading(false), 1000);  
     }
   }, []);
 
@@ -302,15 +303,29 @@ export default function SavedItineraries() {
      */}
       <div className="container mx-auto px-4 py-8">
         {isLoading ? (
-               <div className="grid gap-4 md:grid-cols-2">
-               {/* Render Skeletons for Cards */}
-               {[...Array(4)].map((_, idx) => (
-                 <SkeletonCard key={idx} />
-               ))}
-             </div>
-     
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Render Skeletons for Cards */}
+            {[...Array(4)].map((_, idx) => (
+              <SkeletonCard key={idx} />
+            ))}
+          </div>
         ) : savedItineraries.length === 0 ? (
-          <div className="text-center py-8">No Itineraries Saved Yet!</div>
+          <div className="text-center space-y-4 py-12">
+            <h2 className="text-2xl font-semibold text-gray-600">
+              No itineraries saved yet
+            </h2>
+            <p className="text-gray-500">
+              Start exploring and save itineraries to your list!
+            </p>
+            <Button
+              size="lg"
+              variant="default"
+              className="mt-4 bg-[#388A94] text-white"
+              onClick={() => navigate("/all-itineraries")}
+            >
+              Explore Itineraries
+            </Button>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {savedItineraries.map((itinerary) => (
@@ -321,6 +336,7 @@ export default function SavedItineraries() {
                 onItineraryUnsaved={handleItineraryUnsaved}
                 userInfo={userInfo}
                 exchangeRates={exchangeRates}
+                showToast={showToast}
               />
             ))}
           </div>

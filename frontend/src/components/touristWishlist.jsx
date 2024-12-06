@@ -6,6 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle, XCircle } from "lucide-react";
 import Loader from "./Loader";
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from "@/components/ui/toast";
+import { Skeleton } from "@/components/ui/skeleton"
 
 const WishlistPage = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
@@ -19,6 +28,17 @@ const WishlistPage = () => {
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [exchangeRates, setExchangeRates] = useState({});
   const [currencies, setCurrencies] = useState([]);
+
+
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastType, setToastType] = useState('success');
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = (type, message) => {
+    setToastType(type);
+    setToastMessage(message);
+    setIsToastOpen(true);
+  };
 
   const fetchExchangeRates = useCallback(async () => {
     try {
@@ -104,7 +124,7 @@ const WishlistPage = () => {
       if (!token) {
         console.error("No JWT token found");
         setError("Authentication error. Please log in again.");
-        setLoading(false);
+        setTimeout(() => setLoading(false), 1000);
         return;
       }
 
@@ -130,11 +150,11 @@ const WishlistPage = () => {
       });
 
       setWishlistItems(formattedData.filter(Boolean));
-      setTimeout(() => setLoading(false), 500);
+     setTimeout(() => setLoading(false), 1000);
     } catch (err) {
       setError("Error fetching wishlist items. Please try again later.");
       console.error("Error fetching wishlist items:", err);
-      setLoading(false);
+      setTimeout(() => setLoading(false), 1000);
     }
   }, [userRole, formatPrice]);
 
@@ -173,7 +193,7 @@ const WishlistPage = () => {
         throw new Error("Failed to remove item from wishlist");
       }
       setWishlistItems(wishlistItems.filter((item) => item.product._id !== productId));
-      setActionSuccess("Item removed from wishlist successfully!");
+      showToast('success', 'Item removed from wishlist successfully!'); 
     } catch (error) {
       setActionError("Error removing item from wishlist. Please try again.");
       console.error("Error removing item from wishlist:", error);
@@ -203,7 +223,7 @@ const WishlistPage = () => {
       if (!response.ok) {
         throw new Error("Failed to add item to cart");
       }
-      setActionSuccess("Item added to cart successfully!");
+      showToast('success', 'Item added to cart successfully!');
       window.dispatchEvent(new Event('cartUpdated'));
       fetchWishlistItems();
     } catch (error) {
@@ -230,7 +250,7 @@ const WishlistPage = () => {
       if (!response.ok) {
         throw new Error("Failed to add all items to cart");
       }
-      setActionSuccess("All items added to cart successfully!");
+      showToast('success', 'All items added to cart successfully!');
       window.dispatchEvent(new Event('cartUpdated'));
       fetchWishlistItems();
     } catch (error) {
@@ -257,20 +277,53 @@ const WishlistPage = () => {
         throw new Error("Failed to empty wishlist");
       }
       setWishlistItems([]);
-      setActionSuccess("Wishlist emptied successfully!");
+      showToast('success', 'Wishlist emptied successfully!');
     } catch (error) {
       setActionError("Error emptying wishlist. Please try again.");
       console.error("Error emptying wishlist:", error);
     }
   };
 
-  if (loading) return <Loader />;
+  const WishlistSkeleton = () => (
+    <div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+  
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-6 text-left">My Wishlist</h1>
+        <div className="space-y-6">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="flex flex-col lg:flex-row items-start lg:items-center border-b border-gray-300">
+              <div className="w-28 h-28 mb-4 ">
+                <Skeleton className="w-28 h-28 mb-4" />
+              </div>
+              <div className="flex flex-col flex-grow mb-4 pl-4" >
+                <Skeleton className="w-60 h-6" />
+                <Skeleton className="w-40 h-6 mt-2" />
+                <Skeleton className="w-80 h-4 mt-2" />
+                <Skeleton className="w-80 h-4 mt-1" />
+              </div>
+              <div className="flex items-end space-x-2">
+                <Skeleton className="w-24 h-8" />
+                <Skeleton className="w-24 h-8" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+  
+
+  if (loading) return <WishlistSkeleton />;
 
   if (error) {
     return <div className="text-center mt-8 text-red-500">{error}</div>;
   }
 
   return (
+    <ToastProvider>
     <div>
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
@@ -279,7 +332,7 @@ const WishlistPage = () => {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold mb-6 text-left">My Wishlist</h1>
         {wishlistItems.length === 0 ? (
-          <p className="text-center text-gray-500 text-lg">Your wishlist is empty.</p>
+          <p className="text-center text-gray-500 text-lg mb-24">Your wishlist is empty.</p>
         ) : (
           <div className="space-y-6">
             <div className="">
@@ -328,11 +381,12 @@ const WishlistPage = () => {
                     </Button>
                   </div>
 
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
+      )}
+      {wishlistItems.length > 0 && (
         <div className="mt-6 flex justify-between">
           <Button
             variant="outline"
@@ -348,6 +402,7 @@ const WishlistPage = () => {
             Add All to Cart
           </Button>
         </div>
+      )}
 
         <Dialog open={actionSuccess !== null} onOpenChange={() => setActionSuccess(null)}>
           <DialogContent>
@@ -372,24 +427,50 @@ const WishlistPage = () => {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={actionError !== null} onOpenChange={() => setActionError(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                <div className="flex items-center">
-                  <XCircle className="w-6 h-6 text-red-500 mr-2" />
-                  Error
-                </div>
-              </DialogTitle>
-              <DialogDescription>{actionError}</DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button onClick={() => setActionError(null)}>Close</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <Dialog open={actionError !== null} onOpenChange={() => setActionError(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              <div className="flex items-center">
+                <XCircle className="w-6 h-6 text-red-500 mr-2" />
+                Error
+              </div>
+            </DialogTitle>
+            <DialogDescription>{actionError}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setActionError(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
+    <ToastViewport className="fixed top-0 right-0 p-4" />
+        {isToastOpen && (
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={5000}
+            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+          >
+            <div className="flex items-center">
+              {toastType === 'success' ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                <ToastDescription>
+                  {toastMessage}
+                </ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
+          </Toast>
+        )}
+  </div>
+  </ToastProvider>
+  
   );
 
 

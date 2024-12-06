@@ -9,12 +9,12 @@ export default function TouristActivitiesPage() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-2">My Activities</h1>
-      <p className="text-sm text-gray-500 mb-2">Activities</p>
+      <h1 className="text-3xl font-bold mb-2">Activity Bookings</h1>
+      <p className="text-sm text-gray-500 mb-2">My Bookings / Activities</p>
       <div className="bg-white shadow-md rounded-lg p-4">
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
           <TabsList className="grid grid-cols-3 bg-white">
-            <TabsTrigger
+          <TabsTrigger
               value={0}
               className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
                 selectedTab === 0
@@ -22,7 +22,7 @@ export default function TouristActivitiesPage() {
                   : 'border-gray-300 text-gray-500 bg-white'
               }`}
             >
-              Attended
+              Upcoming Events
             </TabsTrigger>
             <TabsTrigger
               value={1}
@@ -32,8 +32,9 @@ export default function TouristActivitiesPage() {
                   : 'border-gray-300 text-gray-500 bg-white'
               }`}
             >
-              Upcoming
+              Past Events
             </TabsTrigger>
+            
             <TabsTrigger
               value={2}
               className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
@@ -42,13 +43,13 @@ export default function TouristActivitiesPage() {
                   : 'border-gray-300 text-gray-500 bg-white'
               }`}
             >
-              Saved
+              Saved Events
             </TabsTrigger>
           </TabsList>
-          <TabsContent value={0}>
+          <TabsContent value={1}>
             <TouristAttendedActivities />
           </TabsContent>
-          <TabsContent value={1}>
+          <TabsContent value={0}>
             <BookedActivities />
           </TabsContent>
           <TabsContent value={2}>

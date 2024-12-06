@@ -447,11 +447,21 @@ export default function UpcomingTransportation() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-xl font-semibold text-gray-600">
+            <div className="text-center space-y-4 py-12">
+              <h2 className="text-2xl font-semibold text-gray-600">
                 No upcoming transportation bookings
+              </h2>
+              <p className="text-gray-500">
+                Book your next trip now!
               </p>
-              <p className="text-gray-500 mt-2">Book your next trip now!</p>
+              <Button
+                size="lg"
+                variant="default"
+                className="mt-4 bg-[#388A94] text-white"
+                onClick={() => navigate("/transportation")}
+              >
+                Start Booking
+              </Button>
             </div>
           )}
     
