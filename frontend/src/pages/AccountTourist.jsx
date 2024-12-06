@@ -2086,20 +2086,20 @@ export default function AccountManagement() {
         roles: ["tourist", "seller", "advertiser", "tour-guide"],
       },
     ],
-    "View Reports": [
-      {
-        name: "Sales Report",
-        icon: FileText,
-        tab: "sales-report-seller",
-        roles: ["seller"],
-      },
-      {
-        name: "Stock Report",
-        icon: FileText,
-        tab: "stock-report",
-        roles: ["seller"],
-      },
-    ],
+    // "View Reports": [
+    //   {
+    //     name: "Sales Report",
+    //     icon: FileText,
+    //     tab: "sales-report-seller",
+    //     roles: ["seller"],
+    //   },
+    //   {
+    //     name: "Stock Report",
+    //     icon: FileText,
+    //     tab: "stock-report",
+    //     roles: ["seller"],
+    //   },
+    // ],
     "Help and Support": [
       // {
       //   name: "File a Complaint",
