@@ -378,7 +378,7 @@ const addPromoCode = async (req, res) => {
         .status(400)
         .json({ message: "Promo code name already exists" });
     }
-    const promoCode = new PromoCode(req.body);
+    const promoCode = new PromoCode({ ...req.body, type: "general" });
     await promoCode.save();
     res.status(201).json({ promoCode });
   } catch (error) {
@@ -675,7 +675,6 @@ const markNotificationsAsSeen = async (req, res) => {
         arrayFilters: [{ "elem.seen": false }], // Only update notifications where seen is false
       }
     );
-
 
     // Set 'hasUnseenNotifications' to false after marking all notifications as seen
     await Admin.updateOne(

@@ -95,8 +95,8 @@ app.get("/rates", currencyRateController.getExchangeRate);
 // =====================
 app.post("/create-checkout-session", async (req, res) => {
   try {
-    const { items, currency, deliveryInfo, discountPercentage, promoCode } = req.body;
-
+    const { items, currency, deliveryInfo, discountPercentage, promoCode } =
+      req.body;
 
     console.log("Delivery Info:", deliveryInfo);
 
@@ -120,9 +120,17 @@ app.post("/create-checkout-session", async (req, res) => {
           price_data: {
             currency: currency,
             product_data: {
-              name: discountPercentage > 0? item.product.name + `(-${discountPercentage}%)` :item.product.name,
+              name:
+                discountPercentage > 0
+                  ? item.product.name + `(-${discountPercentage}%)`
+                  : item.product.name,
             },
-            unit_amount: discountPercentage>0?  Math.round((item.totalPrice * (1 - (discountPercentage/100))) * 100) : Math.round((item.totalPrice) * 100),
+            unit_amount:
+              discountPercentage > 0
+                ? Math.round(
+                    item.totalPrice * (1 - discountPercentage / 100) * 100
+                  )
+                : Math.round(item.totalPrice * 100),
           },
           quantity: item.quantity,
         })),
@@ -561,6 +569,7 @@ const sendBirthdayCards = async () => {
         code: code,
         percentOff: 50,
         usage_limit: 1,
+        type: "birthday",
         dateRange: {
           start: new Date(),
           end: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),

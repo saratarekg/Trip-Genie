@@ -60,7 +60,9 @@ const updateTourist = async (req, res) => {
     const { nationality, mobile, jobOrStudent, profilePicture } = req.body; // Data to update
 
     let { email, username } = req.body;
-    console.log("hereweeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+    console.log(
+      "hereweeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    );
     console.log(email);
     console.log(username);
     email = email.toLowerCase();
@@ -276,7 +278,7 @@ const bookFlight = async (req, res) => {
 
   try {
     const bookingData = {
-      paymentType, 
+      paymentType,
       touristID,
       flightID,
       from,
@@ -290,12 +292,12 @@ const bookFlight = async (req, res) => {
       flightType,
     };
 
-    if (returnDepartureDate) bookingData.returnDepartureDate = returnDepartureDate;
+    if (returnDepartureDate)
+      bookingData.returnDepartureDate = returnDepartureDate;
     if (returnArrivalDate) bookingData.returnArrivalDate = returnArrivalDate;
     if (flightTypeReturn) bookingData.flightTypeReturn = flightTypeReturn;
 
     const booking = new TouristFlight(bookingData);
-
 
     const paymentAmount = price * numberOfTickets;
 
@@ -402,8 +404,8 @@ const cancelFlightBooking = async (req, res) => {
       message: "Flight booking canceled successfully and refund issued",
       data: {
         refundedAmount: refundAmount,
-        newWalletBalance: updatedTourist.wallet
-      }
+        newWalletBalance: updatedTourist.wallet,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -435,27 +437,27 @@ const bookHotel = async (req, res) => {
     roomName,
     price,
     numberOfAdults,
-    paymentType, 
+    paymentType,
   } = req.body;
   const touristID = res.locals.user_id;
 
   const user = await Tourist.findById(touristID);
 
-    if (!user) {
-      return res.status(404).json({ message: "Tourist not found" });
-    }
+  if (!user) {
+    return res.status(404).json({ message: "Tourist not found" });
+  }
 
   let walletBalance = 0;
-    // Check if payment type is "Wallet"
-    if (paymentType === "Wallet") {
-      if (user.wallet < price) {
-        return res
-          .status(400)
-          .json({ message: `Insufficient funds in wallet: ${user.wallet}, but the price is: ${price}` });
-        }
-
-      walletBalance = user.wallet - price;
+  // Check if payment type is "Wallet"
+  if (paymentType === "Wallet") {
+    if (user.wallet < price) {
+      return res.status(400).json({
+        message: `Insufficient funds in wallet: ${user.wallet}, but the price is: ${price}`,
+      });
     }
+
+    walletBalance = user.wallet - price;
+  }
 
   try {
     const booking = new TouristHotel({
@@ -468,37 +470,35 @@ const bookHotel = async (req, res) => {
       roomName,
       price,
       numberOfAdults,
-      paymentType
+      paymentType,
     });
-
-
 
     const savedBooking = await booking.save();
 
     const updateFields = {};
 
-// Conditionally add wallet balance and history only for wallet payments
-if (paymentType === "Wallet") {
-  updateFields.wallet = walletBalance; // Update wallet balance
-  updateFields.$push = {
-    history: {
-      transactionType: "payment",
-      amount: price,
-      details: `You’ve successfully booked Hotel Rooms in ${hotelName}`,
-    },
-  };
-} 
+    // Conditionally add wallet balance and history only for wallet payments
+    if (paymentType === "Wallet") {
+      updateFields.wallet = walletBalance; // Update wallet balance
+      updateFields.$push = {
+        history: {
+          transactionType: "payment",
+          amount: price,
+          details: `You’ve successfully booked Hotel Rooms in ${hotelName}`,
+        },
+      };
+    }
 
-// Perform the update
-const updatedTourist = await Tourist.findByIdAndUpdate(
-  userId,
-  updateFields,
-  { new: true, runValidators: true } // Ensure it returns the updated tourist
-);
+    // Perform the update
+    const updatedTourist = await Tourist.findByIdAndUpdate(
+      userId,
+      updateFields,
+      { new: true, runValidators: true } // Ensure it returns the updated tourist
+    );
 
-if (!updatedTourist) {
-  return res.status(404).json({ message: "Tourist not found" });
-}
+    if (!updatedTourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
     res.status(201).json({
       message: "Hotel booking successful",
       booking: savedBooking,
@@ -557,8 +557,8 @@ const cancelHotelBooking = async (req, res) => {
       message: "Hotel booking canceled successfully and refund issued",
       data: {
         refundedAmount: refundAmount,
-        newWalletBalance: updatedTourist.wallet
-      }
+        newWalletBalance: updatedTourist.wallet,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -571,8 +571,7 @@ const getMyHotels = async (req, res) => {
 
   try {
     // Populate the 'tourist' field (or the field name you have in the schema)
-    const hotels = await TouristHotel.find({ touristID })
-      .populate('touristID'); // Add this to populate the tourist details
+    const hotels = await TouristHotel.find({ touristID }).populate("touristID"); // Add this to populate the tourist details
 
     res.status(200).json(hotels);
   } catch (error) {
@@ -580,7 +579,6 @@ const getMyHotels = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 const bookTransportation = async (req, res) => {
   const { transportationID, seatsToBook, paymentMethod } = req.body;
@@ -666,7 +664,8 @@ const getUpcomingBookings = async (req, res) => {
       .populate({
         path: "transportationID",
         match: { timeDeparture: { $gt: new Date() } }, // Only upcoming dates
-        select: "from to vehicleType ticketCost timeDeparture remainingSeats estimatedDuration", // Select specific fields if needed
+        select:
+          "from to vehicleType ticketCost timeDeparture remainingSeats estimatedDuration", // Select specific fields if needed
       })
       .exec();
 
@@ -682,8 +681,6 @@ const getUpcomingBookings = async (req, res) => {
   }
 };
 
-
-
 // Method to get all previous bookings for a tourist
 const getPreviousBookings = async (req, res) => {
   const touristID = res.locals.user_id;
@@ -694,7 +691,8 @@ const getPreviousBookings = async (req, res) => {
       .populate({
         path: "transportationID",
         match: { timeDeparture: { $lt: new Date() } }, // Only past dates
-        select: "from to vehicleType ticketCost timeDeparture remainingSeats estimatedDuration", // Select specific fields if needed
+        select:
+          "from to vehicleType ticketCost timeDeparture remainingSeats estimatedDuration", // Select specific fields if needed
       })
       .exec();
 
@@ -715,10 +713,14 @@ const deleteBooking = async (req, res) => {
   const touristID = res.locals.user_id; // Tourist ID from authenticated user context
 
   try {
-    console.log(`Attempting to delete booking with ID: ${id} for tourist: ${touristID}`);
+    console.log(
+      `Attempting to delete booking with ID: ${id} for tourist: ${touristID}`
+    );
 
     // Step 1: Find the booking with the associated transportation details
-    const booking = await TouristTransportation.findById(id).populate("transportationID");
+    const booking = await TouristTransportation.findById(id).populate(
+      "transportationID"
+    );
 
     if (!booking) {
       console.log("Booking not found");
@@ -728,14 +730,18 @@ const deleteBooking = async (req, res) => {
     // Ensure the booking belongs to the authenticated tourist
     if (booking.touristID.toString() !== touristID) {
       console.log("Unauthorized: Cannot delete others' bookings");
-      return res.status(403).json({ message: "Unauthorized: Cannot delete others' bookings" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized: Cannot delete others' bookings" });
     }
 
     const transportation = booking.transportationID;
 
     if (!transportation) {
       console.log("Associated transportation not found");
-      return res.status(404).json({ message: "Associated transportation not found" });
+      return res
+        .status(404)
+        .json({ message: "Associated transportation not found" });
     }
 
     // Step 2: Calculate the refund amount and update the tourist's wallet
@@ -790,7 +796,9 @@ const deleteBooking = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting booking:", error);
-    res.status(500).json({ message: "Failed to delete booking", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to delete booking", error: error.message });
   }
 };
 
@@ -842,7 +850,7 @@ const redeemPoints = async (req, res) => {
 
     // Redeem all loyalty points
     // const pointsToRedeem = tourist.loyaltyPoints;
-    const pointsToRedeem =  Math.floor(tourist.loyaltyPoints / 10000) * 10000;
+    const pointsToRedeem = Math.floor(tourist.loyaltyPoints / 10000) * 10000;
 
     // Calculate the redeemable cash based on all loyalty points
     const redeemableCash = pointsToRedeem / 100; // in EGP
@@ -2303,7 +2311,6 @@ const markNotificationsAsSeen = async (req, res) => {
       }
     );
 
-
     // Update 'hasUnseenNotifications' to false after marking all notifications as seen
     await Tourist.updateOne(
       { _id: res.locals.user_id },
@@ -2431,6 +2438,25 @@ const updateVisitedPages = async (req, res) => {
   }
 };
 
+const getPromoCodes = async (req, res) => {
+  try {
+    const now = new Date();
+    let promoCodes = await PromoCode.find({
+      type: "general",
+      status: "active",
+      "dateRange.start": { $lte: now },
+      "dateRange.end": { $gte: now },
+    });
+    promoCodes = promoCodes.filter(
+      (promo) => promo.timesUsed < promo.usage_limit
+    );
+    return res.status(200).json({ promoCodes });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred" });
+  }
+};
+
 module.exports = {
   removeProductFromWishlist,
   moveProductToCart,
@@ -2488,4 +2514,5 @@ module.exports = {
   markDropdownAsOpened,
   getVisitedPages,
   updateVisitedPages,
+  getPromoCodes,
 };

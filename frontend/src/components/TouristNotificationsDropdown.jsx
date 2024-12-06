@@ -302,7 +302,7 @@ export function NotificationsDropdownTourist() {
           <Button
             variant="ghost"
             size="icon"
-            className="relative p-2 rounded-full hover:bg-white/10 transition-colors duration-200"
+            className="relative p-2 rounded-full hover:bg-white/10 transition-colors duration-200 mr-2"
           >
             <Bell className="h-7 w-7 text-white" />
             {hasUnseenNotifications && (
@@ -434,7 +434,7 @@ export function NotificationsDropdownTourist() {
                   {/* Add more skeleton items as needed */}
                 </div>
               </div>
-             ) : notifications.length === 0 ? (
+            ) : notifications.length === 0 ? (
               <p className="text-[#1A3B47] p-4 text-center">
                 No notifications at the moment.
               </p>
