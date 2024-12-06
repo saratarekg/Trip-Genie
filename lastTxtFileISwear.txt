@@ -1,13 +1,13 @@
 
 Sam: 
 
-- convert from USD to my currency in external bookings 
-- two reqs for booking in flights
+- convert from USD to my currency in external bookings (done)
+- two reqs for booking in flights (done)
 - book transportation lw katab aktr mn available seats, tickets bta3et activity we itinerary aolo en mfish kfaya
-- checkout baz
-- Khaly flight w transportation w hotels nafs el structure w nafs pallete (search and filter buttons)
-- flight bookings card teb2a zy bookings card
--Cards el hotels white space awy (momken nekhaly 2 gamb b3d)
+- checkout baz (done)
+- Khaly flight w transportation w hotels nafs el structure w nafs pallete (search and filter buttons)(done)
+- flight bookings card teb2a zy bookings card(done?)
+-Cards el hotels white space awy (momken nekhaly 2 gamb b3d)(law asdak gowa hotel booking,done)
 -7ot reserve fo2 w lw lesa ma5tarsh room tala3o fo2 ye5tar el room el awel
 - sheel facilities el rooms el ta7t
 - matkhaleesh ay statistics fake

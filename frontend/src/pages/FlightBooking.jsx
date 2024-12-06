@@ -160,6 +160,7 @@ const styles = {
   },
   button: {
     padding: "12px 24px",
+    fontSize: "16px",
     backgroundColor: "#1A3B47",
     color: "white",
     border: "none",
@@ -170,9 +171,9 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "8px",
-    alignSelf: "flex-end",
-    marginTop: "24px",
+    marginTop: "20px",
   },
+  
 };
 
 const calculateDuration = (departureDate, arrivalDate) => {
@@ -971,7 +972,7 @@ function BookingPage() {
                   <button
                     style={styles.button}
                     disabled={isLoading}
-                    className="bg-[#1A3B47] hover:bg-[#1A3B47] text-white font-semibold px-8 searchButton"
+                    className="bg-[#1A3B47] text-white font-semibold px-8 searchButton"
                   >
                     {isLoading ? "Searching..." : "Search Flights"}
                   </button>
