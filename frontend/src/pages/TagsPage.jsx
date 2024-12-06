@@ -119,7 +119,7 @@ export function TagsPage() {
     <div className="min-h-screen">
       <ToastProvider>
         <div className="">
-          
+
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-bold text-[#1A3B47]">Create New Tag</h2>
             <div className="flex space-x-4">
@@ -130,8 +130,8 @@ export function TagsPage() {
                 placeholder="Enter new tag name"
                 className="flex-grow bg-white text-[#1A3B47] border-[#B5D3D1]"
               />
-              <Button 
-                onClick={createTag} 
+              <Button
+                onClick={createTag}
                 className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
               >
                 <Plus className="mr-2 h-4 w-4" /> Add Tag
@@ -230,10 +230,10 @@ export function TagsPage() {
                 onChange={(e) => setEditTagName(e.target.value)}
                 className="border-[#808080] mb-2"
               />
-              <DialogFooter className="sm:justify-start">
+              <DialogFooter className="flex justify-end space-x-4 mt-2">
                 <Button
                   onClick={updateTag}
-                  className="bg-[#F88C33] hover:bg-orange-500 text-white"
+                  className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded"
                 >
                   Save
                 </Button>
@@ -242,11 +242,12 @@ export function TagsPage() {
                     setEditTagId(null);
                     setEditTagName('');
                   }}
-                  className="bg-gray-500 hover:bg-gray-600 text-white"
+                  className="bg-[#A3A3A3] hover:bg-[#7E7E7E] text-white px-4 py-2 rounded"
                 >
                   Cancel
                 </Button>
               </DialogFooter>
+
             </DialogContent>
           </Dialog>
         )}

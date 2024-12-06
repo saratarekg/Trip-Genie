@@ -152,8 +152,8 @@ export default function CategoriesPage() {
                 placeholder="Enter new category name"
                 className="flex-grow bg-white text-[#1A3B47] border-[#B5D3D1]"
               />
-              <Button 
-                onClick={createCategory} 
+              <Button
+                onClick={createCategory}
                 className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
               >
                 <Plus className="mr-2 h-4 w-4" /> Add Category
@@ -274,10 +274,10 @@ export default function CategoriesPage() {
                 onChange={(e) => setUpdatedCategory(e.target.value)}
                 className="border-[#808080] mb-2"
               />
-              <DialogFooter className="sm:justify-start">
+              <DialogFooter className="flex justify-end space-x-4 mt-2">
                 <Button
                   onClick={handleUpdateCategory}
-                  className="bg-[#F88C33] hover:bg-orange-500 text-white"
+                  className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded"
                 >
                   Save
                 </Button>
@@ -286,11 +286,12 @@ export default function CategoriesPage() {
                     setSelectedCategoryId(null);
                     setUpdatedCategory('');
                   }}
-                  className="bg-gray-500 hover:bg-gray-600 text-white"
+                  className="bg-[#A3A3A3] hover:bg-[#7E7E7E] text-white px-4 py-2 rounded"
                 >
                   Cancel
                 </Button>
               </DialogFooter>
+
             </DialogContent>
           </Dialog>
         )}

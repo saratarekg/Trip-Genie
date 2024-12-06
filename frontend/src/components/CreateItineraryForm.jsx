@@ -966,11 +966,10 @@ const ItineraryForm = () => {
                               .toISOString()
                               .split("T")[0]
                           } // Sets min date to tomorrow
-                          className={`w-40 ${
-                            errors.availableDates?.[dateIndex]?.date
+                          className={`w-40 ${errors.availableDates?.[dateIndex]?.date
                               ? "border-red-500"
                               : ""
-                          }`}
+                            }`}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               e.preventDefault();
@@ -1087,21 +1086,22 @@ const ItineraryForm = () => {
                 The Itinerary was created successfully.
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter className="flex justify-center mr-16 mt-2">
+            <DialogFooter className="flex justify-end space-x-4 mt-2">
               <Button
                 onClick={handleGoBack}
-                className="bg-[#5D9297] text-white hover:bg-[#4C7A80]"
+                className="bg-[#5D9297] text-white hover:bg-[#4C7A80] px-4 py-2 rounded"
               >
                 Go to all itineraries
               </Button>
               <Button
                 variant="outline"
                 onClick={handleCreateNew}
-                className="bg-[#1A3B47] text-white hover:bg-[#142B36]"
+                className="bg-[#1A3B47] text-white hover:bg-[#142B36] px-4 py-2 rounded"
               >
                 Create Another
               </Button>
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
 

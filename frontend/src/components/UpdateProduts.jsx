@@ -276,10 +276,10 @@ const UpdateProduct = () => {
                   {(product.price === "" ||
                     isNaN(parseFloat(product.price)) ||
                     parseFloat(product.price) < 0) && (
-                    <p className="text-red-500 text-xs">
-                      Price must be a non-negative number
-                    </p>
-                  )}
+                      <p className="text-red-500 text-xs">
+                        Price must be a non-negative number
+                      </p>
+                    )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="quantity" className="text-sm font-medium">
@@ -396,9 +396,15 @@ const UpdateProduct = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate("/all-products")}>
-              Back to All Products
-            </Button>
+            <div className="flex justify-end mt-2">
+              <Button
+                onClick={() => navigate("/all-products")}
+                className="bg-[#1A3B47] hover:bg-[#142B36] text-white px-4 py-2 rounded"
+              >
+                Back to All Products
+              </Button>
+            </div>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>

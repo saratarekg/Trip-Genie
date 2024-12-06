@@ -46,7 +46,7 @@ const SkeletonLoader = () => {
                     </div>
                     <div className="text-center mb-2">
                       <div className="flex items-center justify-center gap-2">
-                      <div className="w-7 h-7 bg-gray-200 rounded-full animate-pulse"></div>
+                        <div className="w-7 h-7 bg-gray-200 rounded-full animate-pulse"></div>
                         <div className="w-24 h-6 bg-gray-200 rounded-md animate-pulse"></div>
                       </div>
                       <p className="w-32 h-4 bg-gray-200 rounded-md animate-pulse mt-1"></p>
@@ -95,7 +95,7 @@ const SkeletonLoader = () => {
                   <div className="space-y-4 p-4">
                     {[...Array(5)].map((_, index) => (
                       <div key={index} className="flex items-center gap-4 animate-pulse">
-                       
+
                         <div className="flex flex-col gap-2">
                           <div className="w-40 h-4 bg-gray-200 rounded-md"></div>
                           <div className="w-24 h-3 bg-gray-200 rounded-md"></div>
@@ -147,7 +147,7 @@ export function AdvertiserProfileComponent() {
         setAdvertiser(response.data);
         setEditedAdvertiser(response.data);
         setLogo(response.data.logo);
-       
+
         if (response.data.logo && response.data.logo.url) {
           convertUrlToBase64(response.data.logo.url).then((base64) => {
             setBase64Image(base64)
@@ -262,7 +262,7 @@ export function AdvertiserProfileComponent() {
         editedAdvertiser;
       const formData = new FormData();
       formData.append("name", name);
-      logo && formData.append("logo",JSON.stringify(logo));
+      logo && formData.append("logo", JSON.stringify(logo));
       formData.append("username", username);
       formData.append("email", email);
       formData.append("hotline", hotline);
@@ -586,13 +586,13 @@ export function AdvertiserProfileComponent() {
                 <CardTitle className="flex justify-between items-center">
                   <span>Notifications</span>
                   {notifications.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    className="text-sm text-[#388A94] p-2"
-                    onClick={() => (window.location.href = "/account/notifications")}
-                  >
-                    View All
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-sm text-[#388A94] p-2"
+                      onClick={() => (window.location.href = "/account/notifications")}
+                    >
+                      View All
+                    </Button>
                   )}
                 </CardTitle>
               </CardHeader>
@@ -646,14 +646,16 @@ export function AdvertiserProfileComponent() {
           onImageCropped={handleImageCropped}
           currentImage={logo ? (logo.public_id ? base64Image : logo) : null}
         />
-        <div className="mt-4 flex justify-end">
-          <Button onClick={handleFirstSave} className="mr-2">
+        <div className="mt-4 flex justify-end space-x-2">
+          <Button onClick={handleFirstSave} className="bg-[#1A3B47] hover:bg-[#142B36] text-white px-4 py-2 rounded">
             Save
           </Button>
-          <Button onClick={closeModal} variant="destructive">
+          <Button onClick={closeModal} variant="destructive" className="bg-[#A3A3A3] hover:bg-[#7E7E7E] text-white px-4 py-2 rounded">
             Close
           </Button>
         </div>
+
+
       </Modal>
       <Modal
         show={isImageViewerOpen}
