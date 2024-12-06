@@ -80,7 +80,7 @@ Jana:
 Zeina:
 redeem points tbaa kol 100 maamlsh redeem decimal (done)
 admin by update products btaato bs bs ynf3 y delete aady (done)
-- bayen en el single cards clickable (hover effect) (historical place we check enaha clickable fe kol el amaken el tanya)
+- bayen en el single cards clickable (hover effect) (historical place we check enaha clickable fe kol el amaken el tanya) (DONE)
 - sheel kelmet external bookings khaleeha my bookings w ta7teeha (flight ,hotels w transportations)
 - complaints sort by date 3ashan maba2tsh mawgooda fel page el gdeeda
 - manage accounts terga3 table
