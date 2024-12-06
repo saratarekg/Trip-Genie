@@ -849,7 +849,7 @@ export default function UpdateActivity() {
             {/* Centers the button */}
             <Button
               onClick={handleGoBack}
-              className="bg-[#388A94] hover:bg-[#2c6d75] text-white"
+              className="bg-[#1A3B47] hover:bg-[#142B36] text-white"
             >
               Back to Activities
             </Button>

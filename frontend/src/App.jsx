@@ -33,6 +33,8 @@ import { AllProducts } from "./components/all-products.jsx";
 import { SignupForm } from "./pages/SignUp.jsx";
 import TourGuideItineraryReport from "./pages/TourGuideReport.jsx";
 import AdvertiserReport from "./components/advertiser-report.jsx";
+import ProductReport from "./components/ProductReportSellerForSeller.jsx"
+import StockReport from "./pages/StockReport.jsx";
 
 import SellerNotifications from "./pages/SellerNotifications.jsx";
 import AdminNotifications from "./pages/AdminNotifications.jsx";
@@ -410,6 +412,22 @@ function AppContent() {
             element={
               <ProtectedRoute allowedRoles={["tourist"]}>
                 <ShoppingCart />
+              </ProtectedRoute>
+            }
+          />
+             <Route
+            path="/seller-report"
+            element={
+              <ProtectedRoute allowedRoles={["seller"]}>
+                <ProductReport />
+              </ProtectedRoute>
+            }
+          />
+             <Route
+            path="/seller-stock-report"
+            element={
+              <ProtectedRoute allowedRoles={["seller"]}>
+                <StockReport />
               </ProtectedRoute>
             }
           />

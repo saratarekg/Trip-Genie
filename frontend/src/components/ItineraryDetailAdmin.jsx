@@ -440,7 +440,7 @@ const TourguideProfileCard = ({
               <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                 <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
                   <div className="mb-4">
-                    <h2 className="text-lg font-semibold">Confirm Action</h2>
+                    <h2 className="text-lg font-semibold">Flagging the event</h2>
                     <p className="text-gray-600 mt-2">
                       Are you sure you want to change the status of this itinerary/event?
                     </p>

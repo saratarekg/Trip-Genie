@@ -566,7 +566,16 @@ const ActivityForm = ({
         ))}
       </div>
 
-      <Button type="submit">Save Activity</Button>
+      <div className="flex justify-end">
+        <Button
+          type="submit"
+          className="bg-[#1A3B47] hover:bg-[#3E5963] text-white rounded px-6 py-3 mr-4"
+        >
+          Save Activity
+        </Button>
+      </div>
+
+
     </form>
   );
 };
@@ -679,14 +688,14 @@ export default function UpdateItinerary() {
       activities: prev.activities.map((a) =>
         a._id === editingActivity._id
           ? {
-              ...updatedActivity,
-              _id: a._id,
-              tags: updatedActivity.tags.map((tagId) => ({ _id: tagId })),
-              category: updatedActivity.category.map((categoryId) => ({
-                _id: categoryId,
-              })),
-              pictures: updatedActivity.pictures,
-            }
+            ...updatedActivity,
+            _id: a._id,
+            tags: updatedActivity.tags.map((tagId) => ({ _id: tagId })),
+            category: updatedActivity.category.map((categoryId) => ({
+              _id: categoryId,
+            })),
+            pictures: updatedActivity.pictures,
+          }
           : a
       ),
     }));
@@ -950,10 +959,10 @@ export default function UpdateItinerary() {
                 {(itinerary.price === "" ||
                   isNaN(itinerary.price) ||
                   Number(itinerary.price) < 0) && (
-                  <span className="text-red-500 text-xs">
-                    Price must be a positive number.
-                  </span>
-                )}
+                    <span className="text-red-500 text-xs">
+                      Price must be a positive number.
+                    </span>
+                  )}
               </div>
 
               <div>
@@ -1019,9 +1028,8 @@ export default function UpdateItinerary() {
                       onChange={(e) =>
                         handleDateChange(e.target.value, dateIndex)
                       }
-                      className={`w-40 ${
-                        !dateObj.date ? "border-red-500" : ""
-                      }`}
+                      className={`w-40 ${!dateObj.date ? "border-red-500" : ""
+                        }`}
                     />
                     {itinerary.availableDates.length > 1 && (
                       <Button

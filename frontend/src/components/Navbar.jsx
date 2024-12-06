@@ -62,6 +62,8 @@ export function NavbarComponent() {
   const navigate = useNavigate();
   const itinerariesRef = useRef(null);
   const productsRef = useRef(null);
+  const reportsRef = useRef(null);
+
   const userMenuRef = useRef(null);
   const activitiesRef = useRef(null);
   const historicalRef = useRef(null);
@@ -100,6 +102,8 @@ export function NavbarComponent() {
     if (
       !itinerariesRef.current?.contains(event.target) &&
       !productsRef.current?.contains(event.target) &&
+      !reportsRef.current?.contains(event.target) &&
+
       !activitiesRef.current?.contains(event.target) &&
       !historicalRef.current?.contains(event.target) &&
       !userMenuRef.current?.contains(event.target) &&
@@ -442,6 +446,41 @@ export function NavbarComponent() {
                             <ArchiveIcon className="mr-2 h-4 w-4" /> Archived
                             Products
                           </Link>
+                        </div>
+                      )}
+                    </div>
+
+
+                    <div className="relative" ref={reportsRef}>
+                      <button
+                        onClick={() => toggleDropdown("reports")}
+                        className="text-white hover:bg-white/10 px-4 py-2 rounded-full transition-colors duration-200 text-sm font-medium flex items-center"
+                      >
+                        Reports
+                        {openDropdown === "reports" ? (
+                          <ChevronUp className="ml-1 h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="ml-1 h-4 w-4" />
+                        )}
+                      </button>
+                      {openDropdown === "reports" && (
+                        <div className="absolute left-0 mt-2 w-60 bg-black/90 rounded-xl border border-white/20 shadow-lg">
+                          <Link
+                            to="/seller-report"
+                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                            onClick={closeDropdown}
+                          >
+                            <List className="mr-2 h-4 w-4" /> Sales report
+                          </Link>
+                          <Link
+                            to="/seller-stock-report"
+                            className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
+                            onClick={closeDropdown}
+                          >
+                            <Folder className="mr-2 h-4 w-4" /> Stock report
+                          </Link>
+                         
+                    
                         </div>
                       )}
                     </div>

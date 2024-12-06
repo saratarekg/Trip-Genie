@@ -57,7 +57,7 @@ const SkeletonLoader = () => {
                     </div>
                     <div className="text-center mb-2">
                       <div className="flex items-center justify-center gap-2">
-                      <div className="w-7 h-7 bg-gray-200 rounded-full animate-pulse"></div>
+                        <div className="w-7 h-7 bg-gray-200 rounded-full animate-pulse"></div>
                         <div className="w-24 h-6 bg-gray-200 rounded-md animate-pulse"></div>
                       </div>
                       <p className="w-32 h-4 bg-gray-200 rounded-md animate-pulse mt-1"></p>
@@ -85,7 +85,7 @@ const SkeletonLoader = () => {
                       <div className="w-16 h-4 bg-gray-200 rounded-md animate-pulse"></div>
                       <div className="w-3/4 h-6 bg-gray-200 rounded-md animate-pulse"></div>
                     </div>
-                    
+
                   </div>
                 </div>
               </CardContent>
@@ -542,22 +542,22 @@ export function SellerProfileComponent() {
                     </div>
                     <Separator />
                     <div className="mt-4">
-  <p className="text-xs text-gray-500">Behind the Brand</p>
-  {isEditing ? (
-    <Textarea
-      id="description"
-      name="description"
-      value={editedSeller.description || ""}
-      onChange={handleInputChange}
-      rows={6} // Increased the rows for a taller textarea
-      maxLength={600} // Ensure max length of 600 characters
-      placeholder="Why do you do what you do? Let your buyers know!"
-      className="resize-none" // Prevents resizing for consistency
-    />
-  ) : (
-    <p className="text-sm font-medium">{seller.description.substring(0, 600)}</p>
-  )}
-</div>
+                      <p className="text-xs text-gray-500">Behind the Brand</p>
+                      {isEditing ? (
+                        <Textarea
+                          id="description"
+                          name="description"
+                          value={editedSeller.description || ""}
+                          onChange={handleInputChange}
+                          rows={6} // Increased the rows for a taller textarea
+                          maxLength={600} // Ensure max length of 600 characters
+                          placeholder="Why do you do what you do? Let your buyers know!"
+                          className="resize-none" // Prevents resizing for consistency
+                        />
+                      ) : (
+                        <p className="text-sm font-medium">{seller.description.substring(0, 600)}</p>
+                      )}
+                    </div>
 
                   </div>
                 </div>
@@ -568,14 +568,14 @@ export function SellerProfileComponent() {
                 <CardTitle className="flex justify-between items-center">
                   <span>Notifications</span>
                   {notifications.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    className="text-sm text-[#388A94] p-2"
-                    onClick={() => (window.location.href = "/account/notifications")}
-                  >
-                    View All
-                  </Button>
-                )}
+                    <Button
+                      variant="ghost"
+                      className="text-sm text-[#388A94] p-2"
+                      onClick={() => (window.location.href = "/account/notifications")}
+                    >
+                      View All
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -628,11 +628,11 @@ export function SellerProfileComponent() {
           onImageCropped={handleImageCropped}
           currentImage={logo ? (logo.public_id ? base64Image : logo) : null}
         />
-        <div className="mt-4 flex justify-end">
-          <Button onClick={handleFirstSave} className="mr-2">
+        <div className="mt-4 flex justify-end space-x-2">
+          <Button onClick={handleFirstSave} className="bg-[#1A3B47] hover:bg-[#142B36] text-white px-4 py-2 rounded">
             Save
           </Button>
-          <Button onClick={closeModal} variant="destructive">
+          <Button onClick={closeModal} variant="destructive" className="bg-[#A3A3A3] hover:bg-[#7E7E7E] text-white px-4 py-2 rounded">
             Close
           </Button>
         </div>
