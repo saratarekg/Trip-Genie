@@ -12,7 +12,6 @@ import { Toaster } from "@/components/ui/toaster"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -20,12 +19,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter
+  DialogFooter,
+  DialogOverlay,
 } from "@/components/ui/dialog"
 import { useNavigate } from "react-router-dom";
 import {Info} from "lucide-react"
 import { Separator } from '@/components/ui/separator'
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import DeleteConfirmation from "@/components/ui/deletionConfirmation";
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([])
@@ -41,6 +43,8 @@ export default function OrdersPage() {
   const [orderToCancel, setOrderToCancel] = useState(null)
   const ordersPerPage = 6
   const [tourist, setTourist] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -69,6 +73,19 @@ export default function OrdersPage() {
         return displayPrice(2.99);
     }
   };
+
+  function formatPaymentType(paymentType) {
+    const paymentTypes = {
+      credit_card: "Credit Card",
+      debit_card: "Debit Card",
+      wallet: "Wallet",
+      cash_on_delivery: "Cash on Delivery",
+    };
+  
+    return paymentTypes[paymentType] || "Unknown Payment Type"; // Default to "Unknown Payment Type" if not found
+  }
+  
+
 
 
   const fetchUserInfo = async () => {
@@ -99,10 +116,10 @@ export default function OrdersPage() {
 
   const handleCancelConfirm = (orderId) => {
     setOrderToCancel(orderId)
-    setCancelConfirmOpen(true)
+    setDeleteConfirmOpen(true)
   }
 
-  const handleCancel = async (orderId) => {
+  const handleCancel = async () => {
     if (!orderToCancel) return
     try {
       const token = Cookies.get("jwt")
@@ -185,6 +202,8 @@ export default function OrdersPage() {
       console.log(sortedOrders)
     } catch (error) {
       console.error('Error fetching orders:', error)
+    } finally {
+      setTimeout(() => setLoading(false), 1000)
     }
   }
 
@@ -252,44 +271,65 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
 
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        </div>
-      </div>
-      <div className=" mx-auto p-6">
+    <div className="min-h-screen">
       <Toaster />
-      <h1 className="text-5xl font-bold mb-3 text-[#1A3B47]">Orders</h1>
-        <div className="flex justify-between items-center mb-6">
-        <div className='mr-2' >
-  <button 
-    onClick={() => setFilter('all')} 
-    className={`px-4 py-2 mr-2 rounded ${filter === 'all' ? 'bg-[#388A94] text-white' : 'bg-white text-black'}`}>
-    All
-  </button>
-  <button 
-    onClick={() => setFilter('pending')} 
-    className={`px-4 py-2 mr-2 rounded ${filter === 'pending' ? 'bg-[#388A94] text-white' : 'bg-white text-black'}`}>
-    Pending
-  </button>
-  <button 
-    onClick={() => setFilter('delivered')} 
-    className={`px-4 py-2 mr-2 rounded ${filter === 'delivered' ? 'bg-[#388A94] text-white' : 'bg-white text-black'}`}>
-    Delivered
-  </button>
-  <button 
-    onClick={() => setFilter('cancelled')} 
-    className={`px-4 py-2 mr-2 rounded ${filter === 'cancelled' ? 'bg-[#388A94] text-white' : 'bg-white text-black'}`}>
-    Cancelled
-  </button>
-</div>
-
-          
-<div className="relative w-[350px]">
-  {/* Conditionally render the Search icon */}
+      <h1 className="text-3xl font-bold mb-2">My Orders</h1>
+      <p className="text-sm text-gray-500 mb-2">Purchases</p>
+      <div className="container bg-white rounded-lg mx-auto px-4 py-8">
+      <div className="flex w-full  justify-between  items-center mb-6">
+          <div className="flex-[2]">
+          <Tabs defaultValue="all" onValueChange={setFilter}>
+            <TabsList className="grid grid-cols-4 bg-white">
+              <TabsTrigger
+                value="all"
+                className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+                  filter === 'all'
+                    ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
+                    : 'border-gray-300 text-gray-500 bg-white'
+                }`}
+              >
+                All
+              </TabsTrigger>
+              <TabsTrigger
+                value="pending"
+                className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+                  filter === 'pending'
+                    ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
+                    : 'border-gray-300 text-gray-500 bg-white'
+                }`}
+              >
+                Pending
+              </TabsTrigger>
+              <TabsTrigger
+                value="delivered"
+                className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+                  filter === 'delivered'
+                    ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
+                    : 'border-gray-300 text-gray-500 bg-white'
+                }`}
+              >
+                Delivered
+              </TabsTrigger>
+              <TabsTrigger
+                value="cancelled"
+                className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
+                  filter === 'cancelled'
+                    ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
+                    : 'border-gray-300 text-gray-500 bg-white'
+                }`}
+              >
+                Cancelled
+                </TabsTrigger>
+              </TabsList>
+            
+          </Tabs>
+          </div>
+          <div className="flex-[1] ml-2 relative">
+  {/* Only show the icon when searchQuery is empty */}
   {!searchQuery && (
     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
   )}
+  
   <Input
     placeholder="    Search products, delivery type, or status..."
     className="pl-9 border-[#B5D3D1]"
@@ -300,7 +340,68 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
 
         </div>
 
-        {filteredOrders.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: ordersPerPage }).map((_, index) => (
+            <Card key={index} className="bg-white w-full">
+              <CardHeader className="pb-2">
+  <div className="flex items-start justify-between">
+    <div className="flex gap-3">
+      {/* Skeleton for Order Identifier */}
+      <Skeleton className="w-10 h-10 bg-[#B5D3D1] text-[#1A3B47] font-bold text-xl px-3 py-2 rounded" />
+      
+      {/* Skeleton for Delivery Type and Order Number */}
+      <div className="flex flex-col gap-2">
+        <Skeleton className="w-24 h-5 bg-gray-300" />
+        <Skeleton className="w-20 h-4 bg-gray-200" />
+      </div>
+    </div>
+    
+    {/* Skeleton for Status Badge */}
+    <Skeleton className="w-24 h-7 bg-gray-300 text-[#1A3B47] text-sm px-3 py-1 rounded-full" />
+  </div>
+  
+  {/* Skeleton for Date and Time */}
+  <div className="flex justify-between mt-4 text-sm text-muted-foreground">
+    <Skeleton className="w-full h-4 bg-gray-200" />
+  </div>
+</CardHeader>
+
+                <CardContent className="overflow-hidden h-[200px] ">
+                <Separator className="my-4" />
+
+                  {/* Skeleton for Product Details */}
+                  <div className="flex gap-4 items-center mb-2">
+                    <Skeleton className="w-12 h-12 rounded" />
+                    <Skeleton className="flex-1 h-4" />
+                  </div>
+                  <div className="flex gap-4 items-center mb-2">
+                    <Skeleton className="w-12 h-12 rounded" />
+                    <Skeleton className="flex-1 h-4" />
+                  </div>
+                </CardContent>
+                <CardFooter className="flex flex-col gap-2">
+  <Separator className="my-2" />
+
+  {/* Row with small skeletons on the left and right */}
+  <div className="flex justify-between w-full">
+    {/* Small skeleton on the left */}
+    <Skeleton className="w-24 h-6 bg-gray-300" />
+    
+    {/* Small skeleton on the right */}
+    <Skeleton className="w-16 h-6 bg-gray-300" />
+  </div>
+
+  {/* Large skeleton below them */}
+  <div className="mt-2">
+  <Skeleton className="w-72 h-8 bg-gray-300" />  </div>
+</CardFooter>
+
+
+              </Card>
+            ))}
+          </div>
+        ) : filteredOrders.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-lg text-[#1A3B47]">No orders found</p>
             <p className="text-sm text-muted-foreground mt-1">Try adjusting your search or filter criteria</p>
@@ -312,20 +413,20 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex gap-3">
-                      <div className="bg-[#B5D3D1] text-[#1A3B47] font-bold text-2xl px-3 py-2 rounded">
+                      <div className="bg-[#B5D3D1] text-[#1A3B47] font-bold text-xl px-3 py-2 rounded">
                         {getOrderIdentifier(order, index)}
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-lg font-medium">{order.deliveryType}</span>
+                        <span className="text-base font-medium">{order.deliveryType}</span>
                         <span className="text-xs text-muted-foreground">Order #{order._id.slice(-5)}</span>
                       </div>
                     </div>
-                    <div className={`px-4 py-1.5 rounded-full text-base font-medium ${getStatusColor(order.status)}`}>
+                    <div className={`px-3 py-1 rounded-full text-base font-medium text-sm ${getStatusColor(order.status)}`}>
                       {order.status === 'pending' ? 'Pending' : 
                        order.status === 'delivered' ? 'Delivered' : 'Cancelled'}
                     </div>
                   </div>
-                  <div className="flex justify-between mt-4 text-base text-muted-foreground">
+                  <div className="flex justify-between mt-4 text-sm text-muted-foreground">
                   <span>
   {order.status === 'delivered' 
     ? `Delivered on ${format(new Date(order.deliveryDate), 'EEE, MMM dd, yyyy')}` // Show delivered date if delivered
@@ -342,8 +443,11 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
 
                 </CardHeader>
                 
-                <CardContent className="border-y border-[#B5D3D1] overflow-hidden h-[200px]">
-                  <div className="grid grid-cols-[1fr,auto,auto] gap-4 mb-2 mt-2 text-sm text-muted-foreground">
+                
+                <CardContent className=" overflow-hidden h-[200px]">
+                <Separator className="my-2" /> 
+
+                  <div className="grid grid-cols-[1fr,auto,auto] gap-4 mb-2 mt-2 text-xs text-muted-foreground">
                     <span>Items</span>
                     <span className="text-center">Qty</span>
                     <span className="text-right">Price</span>
@@ -361,7 +465,7 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
   className="w-12 h-12 object-cover rounded"
 />
 
-                    <span className="text-base break-words">{item.product.name}</span>
+                    <span className="text-base break-words text-sm">{item.product.name}</span>
                     <span className="text-sm text-center text-gray-500">x{item.quantity}</span>
                     <span className="text-sm text-right">{displayPrice(item.product.price * item.quantity)}</span>
                   </div>
@@ -380,14 +484,14 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
                 </CardContent>
                 
                 <CardFooter className="flex flex-col gap-1 pt-4 min-h-[180px]">
-                <div className="flex justify-between items-center w-full">
+                {/* <div className="flex justify-between items-center w-full">
     <span className="text-sm font-semibold">Subtotal</span>
     <span className="text-lg font-semibold">
       {displayPrice(order.products.reduce((acc, item) => acc + item.product.price * item.quantity, 0))}
     </span>
   </div>
 
-  {/* Delivery Price with Info Icon */}
+
   <div className="flex justify-between items-center w-full text-gray-500">
   <div className="flex items-center gap-1">
   <Info className="h-4 w-4 text-gray-400" />
@@ -397,7 +501,6 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
     
   </div>
 
-  {/* Promo Code Discount */}
   {order.promoCode && order.promoCode.percentOff ? (
   <div className="flex justify-between items-center w-full text-[#388A94]">
     <span className="text-sm font-semibold">{order.promoCode.percentOff}% Discount!</span>
@@ -410,12 +513,13 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
 ) : (
   // Empty space for consistency when no promo code exists
   <div className="flex justify-between items-center w-full">
-    <span className="text-sm text-transparent">-</span> {/* Invisible text to maintain space */}
-    <span className="text-sm text-transparent">-</span> {/* Invisible text to maintain space */}
+    <span className="text-sm text-transparent">-</span> 
+    <span className="text-sm text-transparent">-</span> 
   </div>
 )}
+  */}
 
-<Separator className="my-2" />
+<Separator className="my-2" /> 
 
 {/* Total Price */}
 <div className="flex justify-between items-center w-full mb-4">
@@ -429,133 +533,179 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
 
 
 
-  <div className="flex gap-2 w-full">
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          className="flex-1 text-base bg-gray-200 text-[#388A94] hover:bg-gray-300"
-          onClick={() => setSelectedOrder(order)}
-        >
-          See Details
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-[800px] max-h-[80vh] p-6 bg-white rounded-lg shadow-lg overflow-y-auto">
-        {selectedOrder && (
-          <>
-            <DialogHeader className="space-y-2">
-              <DialogTitle className="text-2xl font-bold">Order Details</DialogTitle>
-              <DialogDescription className="text-lg text-gray-500">
-                Order #{selectedOrder._id.slice(-5)} • Purchased on {format(new Date(selectedOrder.purchaseDate), 'EEE, MMM dd, yyyy')}
-              </DialogDescription>
-            </DialogHeader>
+<div className="flex gap-2 w-full ">
+  <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <DialogTrigger asChild>
+      <Button 
+        className="flex-1 text-base bg-gray-200 text-[#388A94] hover:bg-gray-300"
+        onClick={() => setSelectedOrder(order)}
+      >
+        See Details
+      </Button>
+    </DialogTrigger>
 
-            <div className="py-6">
-              {/* Products and Total Section */}
-              <div className="bg-gray-50 rounded-md shadow-sm p-4">
-                <h3 className="text-2xl font-semibold mb-4">Products</h3>
+    {/* Apply custom overlay background styling */}
+    <DialogOverlay className="fixed inset-0 bg-gray-900 bg-opacity-10" />
 
-<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-{selectedOrder.products.map((item, idx) => (
-                                <div 
-                                  key={idx}
-                                  className="bg-white p-3 rounded-md shadow-sm hover:shadow-lg transition-shadow cursor-pointer"
-                                  onClick={() => handleProductClick(item.product)}
-                                >
-                                  <p className="font-medium">{item.product.name}</p>
-                                  <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                                  <p className="text-sm font-semibold mt-1">{displayPrice(item.product.price * item.quantity)}</p>
-                                </div>
-  ))}
-</div>
-
-                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                  <span className="text-2xl font-semibold">Total</span>
-                  <span className="text-2xl font-bold">{displayPrice(selectedOrder.totalPrice)}</span>
-                </div>
-              </div>
+    <DialogContent className="max-w-[400px] max-h-[630px] p-6 bg-white rounded-lg shadow-lg overflow-y-auto">
+      {selectedOrder && (
+        <>
+          {/* Header Section */}
+          <DialogHeader className="text-center ">
+            <div>
+              <span
+                className={`block text-2xl font-bold uppercase ${
+                  selectedOrder?.status?.toLowerCase()?.trim() === 'delivered'
+                    ? 'text-[#388A94]'
+                    : selectedOrder?.status?.toLowerCase()?.trim() === 'cancelled'
+                    ? 'text-[#1A3B47]'
+                    : selectedOrder?.status?.toLowerCase()?.trim() === 'pending'
+                    ? 'text-[#F88C33]'
+                    : 'text-[#B5D3D1]'
+                }`}
+              >
+                {selectedOrder?.status?.toLowerCase()?.trim() === 'delivered'
+                  ? 'Delivered'
+                  : selectedOrder?.status?.toLowerCase()?.trim() === 'cancelled'
+                  ? 'Cancelled'
+                  : selectedOrder?.status?.toLowerCase()?.trim() === 'pending'
+                  ? 'Pending'
+                  : 'Unknown Status'}
+              </span>
+              <span className="block text-sm text-gray-500">
+                {selectedOrder?.status?.toLowerCase() === 'delivered'
+                  ? `Delivered on ${format(new Date(selectedOrder.deliveryDate), 'EEE, MMM dd, yyyy')}`
+                  : `Purchased on ${format(new Date(selectedOrder.purchaseDate), 'EEE, MMM dd, yyyy')}`}
+              </span>
+              <span className="block text-sm font-medium text-gray-600">Order ID: #{selectedOrder._id.slice(-5)}</span>
             </div>
+          </DialogHeader>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6">
-              {/* Order Info Card */}
-              <div className="bg-gray-100 p-4 rounded-md shadow-sm">
-                <h3 className="text-2xl font-semibold mb-4">Order Information</h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-label text-xl font-semibold">Status:</span>
-                  <span
-                    className={`font-semibold text-xl text-value ${
-                      selectedOrder?.status?.toLowerCase()?.trim() === 'delivered'
-                        ? 'text-[#388A94]'
-                        : selectedOrder?.status?.toLowerCase()?.trim() === 'cancelled'
-                        ? 'text-[#1A3B47]'
-                        : selectedOrder?.status?.toLowerCase()?.trim() === 'pending'
-                        ? 'text-[#F88C33]'
-                        : 'text-[#B5D3D1]'
-                    }`}
+          <hr className="" />
+
+          {/* Delivered To Section */}
+          <div className="text-center text-gray-700">
+            {selectedOrder.shippingAddress ? (
+              <>
+                <div><strong>Delivery Address:</strong></div>
+                {
+                  selectedOrder.shippingAddress
+                    .split(',')
+                    .map((part) => {
+                      const value = part.split(':')[1]?.trim();
+                      return value ? value : null;
+                    })
+                    .filter((value) => value) // Remove undefined or null values
+                    .length > 0
+                    ? selectedOrder.shippingAddress
+                      .split(',')
+                      .map((part) => {
+                        const value = part.split(':')[1]?.trim();
+                        return value ? value : null;
+                      })
+                      .filter((value) => value) // Remove undefined or null values
+                      .join(', ')
+                    : 'No Address Provided'
+                }
+              </>
+            ) : (
+              <>
+                <div><strong>Delivery Address:</strong></div>
+                'No Address Provided'
+              </>
+            )}
+          </div>
+
+          <hr className="" />
+
+          {/* Order Summary Section */}
+          <div className="">
+            <h3 className="text-xl text-center font-bold mb-2">Order Summary</h3>
+            <div className="bg-gray-50 rounded-md shadow-sm p-4">
+              <ul className="space-y-2">
+                {selectedOrder.products.map((item, idx) => (
+                  <li 
+                    key={idx}
+                    className="flex items-center justify-between"
                   >
-                    {selectedOrder?.status?.toLowerCase()?.trim() === 'delivered'
-                      ? 'Delivered'
-                      : selectedOrder?.status?.toLowerCase()?.trim() === 'cancelled'
-                      ? 'Cancelled'
-                      : selectedOrder?.status?.toLowerCase()?.trim() === 'pending'
-                      ? 'Pending'
-                      : 'Unknown Status'}
-                  </span>
+                    <img 
+                      src={item.product.pictures[0]?.url || "/images/broken_genie_lamp.png"} 
+                      alt={item.product.name} 
+                      className="w-12 h-12 object-cover rounded-md"
+                    />
+                    <span className="flex-1 px-4 text-sm font-medium">{item.product.name} x {item.quantity}</span>
+                    <span className="text-sm font-semibold">{displayPrice(item.product.price * item.quantity)}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex justify-between items-center pt-4 mt-4 border-t border-gray-200">
+                <span className="text-sm font-semibold">Subtotal:</span>
+                <span className="text-sm font-bold">{displayPrice(selectedOrder.products.reduce((acc, item) => acc + item.product.price * item.quantity, 0))}</span>
+              </div>
+              <div className="flex justify-between mt-1 items-center">
+                <div className="flex items-center gap-1 text-gray-400">
+                  <Info className="h-4 w-4 " />
+                  <span className="text-sm font-semibold">Delivery</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-label font-semibold">Delivery Type:</span>
-                  <span className="text-value">{selectedOrder.deliveryType}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-label font-semibold">Delivery Date:</span>
-                  <span className="text-value">
-                    {isValid(new Date(selectedOrder.deliveryDate)) 
-                      ? format(new Date(selectedOrder.deliveryDate), 'EEE, MMM dd, yyyy') 
-                      : 'Invalid Delivery Date'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-label font-semibold">Delivery Time:</span>
-                  <span className="text-value">{selectedOrder.deliveryTime}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-label font-semibold">Payment Method:</span>
-                  <span className="text-value">{selectedOrder.paymentMethod.replace('_', ' ').toUpperCase()}</span>
-                </div>
+                <span className="text-sm font-bold">{getDeliveryPrice(order.deliveryType)}</span>
               </div>
 
-              {/* Shipping Info Card */}
-              {selectedOrder.shippingAddress && (
-                <div className="bg-gray-100 p-4 rounded-md shadow-sm">
-                  <h3 className="text-2xl font-semibold mb-4">Shipping Information</h3>
-                  <div className="text-value">
-                    <p><strong>Street Name:</strong> {selectedOrder.shippingAddress?.split(',')[0]?.split(':')[1]?.trim()}</p>
-                    <p><strong>Street Number:</strong> {selectedOrder.shippingAddress?.split(',')[1]?.split(':')[1]?.trim()}</p>
-                    <p><strong>Floor/Unit:</strong> {selectedOrder.shippingAddress?.split(',')[2]?.split(':')[1]?.trim()}</p>
-                    <p><strong>State:</strong> {selectedOrder.shippingAddress?.split(',')[3]?.split(':')[1]?.trim()}</p>
-                    <p><strong>City:</strong> {selectedOrder.shippingAddress?.split(',')[4]?.split(':')[1]?.trim()}</p>
-                    <p><strong>Postal Code:</strong> {selectedOrder.shippingAddress?.split(',')[5]?.split(':')[1]?.trim()}</p>
-                    <p><strong>Landmark:</strong> {selectedOrder.shippingAddress?.split(',')[6]?.split(':')[1]?.trim()}</p>
-                  </div>
-                  {/* Delivered To Section */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold text-gray-700">Delivered To:</span>
-                    <span className="text-lg text-gray-900">{selectedOrder.locationType}</span>
-                  </div>
+              {selectedOrder.promoCode && selectedOrder.promoCode.percentOff && (
+                <div className="flex justify-between mt-1 items-center w-full text-[#388A94]">
+                  <span className="text-sm font-semibold">{selectedOrder.promoCode.percentOff}% Discount!</span>
+                  <span className="text-sm">-{displayPrice(
+                    selectedOrder.products.reduce((acc, item) => acc + (item.product.price * item.quantity * (selectedOrder.promoCode.percentOff / 100)), 0)
+                  )}</span>
                 </div>
               )}
-            </div>
+              
+              <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
+  <span className="text-xl font-bold">Total:</span>
+  <div className="text-right">
+    <span className="text-xl font-bold block">{displayPrice(selectedOrder.totalPrice)}</span>
+    {selectedOrder.paymentMethod && (
+      <span className="text-base font-semibold text-gray-500 block">
+        Via {formatPaymentType(selectedOrder.paymentMethod)}
+      </span>
+    )}
+  </div>
+</div>
 
-            {/* Sticky Close Button */}
-            <div className="sticky -bottom-6 bg-white py-4 border-t flex justify-end gap-4 z-10">
-              <Button className="bg-gray-300 text-gray-700 hover:bg-gray-400" onClick={() => setIsOpen(false)}>
-                Close
-              </Button>
             </div>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
-    {order.status === 'pending' && (
+          </div>
+          <div className=" pt-2 text-center">
+  <p className="text-sm text-[#1A3B47] font-medium">
+    Thank you for your purchase!
+  </p>
+  <div className="flex items-center text-xs text-gray-500 mt-2">
+    <Info className="h-6 w-6 text-gray-400 mr-1 mb-1" />
+    <span>
+      Please keep this receipt for your records. You may use it for returns or exchanges if needed.
+    </span>
+  </div>
+</div>
+
+
+          {/* Footer Section */}
+          {selectedOrder.status === 'pending' && (
+        <div className=" text-center">
+          <Button 
+            variant="destructive" 
+            className="text-base bg-[#F88C33] hover:bg-[#e67d24] text-white"
+            onClick={() => handleCancelConfirm(selectedOrder._id)}
+          >
+            Cancel Order
+          </Button>
+        </div>
+      )}
+
+          {/* Sticky Close Button */}
+        </>
+      )}
+    </DialogContent>
+  </Dialog>
+  {order.status === 'pending' && (
        <Button 
        variant="destructive" 
        className="flex-1 text-base bg-[#F88C33] hover:bg-[#e67d24] text-white"
@@ -564,7 +714,8 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
        Cancel
      </Button>
     )}
-  </div>
+</div>
+
 </CardFooter>
 
 
@@ -615,7 +766,13 @@ const sortedOrders = [...currentOrders].sort((a, b) => new Date(b.purchaseDate) 
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
+      <DeleteConfirmation
+        isOpen={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        itemType="order"
+        onConfirm={handleCancel}
+        type="cancel"
+      />
     </div>
   )
 }

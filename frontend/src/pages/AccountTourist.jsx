@@ -68,6 +68,7 @@ import TouristActivities from "@/pages/TouristActivities";
 import TouristItineraries from "@/pages/TouristItineraries";
 import TouristWalletPage from "@/pages/TouristWalletPage";
 import { Link } from "react-router-dom";
+import OrdersPage from "@/pages/touristOrders";
 
 import FAQ from "@/pages/FAQs";
 import TouristAttendedActivities from "@/pages/TouristAttended";
@@ -1011,7 +1012,7 @@ const ExternalHotelBookings = ({ user }) => {
                 <div className="col-span-1 border-r-2 border-gray-300 ">
                   {/* Left Side Content */}
                   <div className="space-y-4">
-                    <div className="flex items-center mt-4">
+                    <div className="flex items-center">
                       <p className="text-xl font-semibold text-[#1A3B47]">
                         {hotel.roomName} <span className="font-normal">x</span>{" "}
                         {hotel.numberOfRooms}
@@ -1019,25 +1020,26 @@ const ExternalHotelBookings = ({ user }) => {
                     </div>
 
                     {/* Info in 2 rows */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <p className="text-gray-600">
+                    <div className="">
+                      <p className="text-gray-600 mb-3">
                         Check-in on{" "}
                         <span className="font-bold">
                           {new Date(hotel.checkinDate).toLocaleDateString()}
                         </span>
                       </p>
-                      <p className="text-gray-600">
-                        <span className="font-bold">
-                          {hotel.numberOfAdults}
-                        </span>{" "}
-                        <span className="font-normal">Adult(s)</span>
-                      </p>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 mb-3">
                         Check-out on{" "}
                         <span className="font-bold">
                           {new Date(hotel.checkoutDate).toLocaleDateString()}
                         </span>
                       </p>
+                      <p className="text-gray-600 mb-3">
+                        <span className="font-bold">
+                          {hotel.numberOfAdults}
+                        </span>{" "}
+                        <span className="font-normal">Adult(s)</span>
+                      </p>
+                      
                       <p className="text-gray-600">
                         Paid Via{" "}
                         <span className="font-bold">
@@ -1815,6 +1817,8 @@ export default function AccountManagement() {
         return <Saveditineraries />;
       case "activities":
         return <TouristActivitiesPage />;
+      case "purchases":
+        return <OrdersPage />;
       case "itineraries":
         return <TouristItinerariesPage />;
       case "transportation":
@@ -1931,19 +1935,19 @@ export default function AccountManagement() {
         tab: "info",
         roles: ["tourist", "seller", "advertiser", "tour-guide", "admin"],
       },
-      {
-        name: "Security",
-        icon: Lock,
-        tab: "security",
-        roles: [
-          "tourist",
-          "seller",
-          "advertiser",
-          "tour-guide",
-          "admin",
-          "tourism-governor",
-        ],
-      },
+      // {
+      //   name: "Security",
+      //   icon: Lock,
+      //   tab: "security",
+      //   roles: [
+      //     "tourist",
+      //     "seller",
+      //     "advertiser",
+      //     "tour-guide",
+      //     "admin",
+      //     "tourism-governor",
+      //   ],
+      // },
       {
         name: "Preferences",
         icon: Settings,

@@ -211,22 +211,30 @@ const Comments = ({ comments, tourGuide }) => {
   const [filteredRating, setFilteredRating] = useState(0);
 
   const [filteredReviews, setFilteredReviews] = useState(comments);
-  const [isExpandedComment, setIsExpandedComment] = useState(false);
+  const [expandedCommentIndex, setExpandedCommentIndex] = useState(null);
+
+  const filteredComments = comments.map((comment) => ({
+    ...comment,
+    content: {
+      liked: comment.content.liked || "No comment provided",
+      disliked: comment.content.disliked || "No comment provided",
+    },
+  }));
 
   const handleFilterRating = (rating, comments) => {
     setFilteredRating(rating);
     // If rating is 0, show all reviews; otherwise, filter by the selected rating
     if (rating === 0) {
-      setFilteredReviews(comments);
+      setFilteredReviews(filteredComments);
     } else {
       setFilteredReviews(
-        comments.filter((comment) => comment.rating === rating)
+        filteredComments.filter((comment) => comment.rating === rating)
       );
     }
   };
 
-  const handleToggleComment = () => {
-    setIsExpandedComment((prev) => !prev);
+  const handleToggleComment = (index) => {
+    setExpandedCommentIndex((prevIndex) => (prevIndex === index ? null : index));
   };
 
   const handleCommentClick = (comment) => {
@@ -251,7 +259,7 @@ const Comments = ({ comments, tourGuide }) => {
     <Card className="col-span-6 h-full">
       <CardHeader className="flex">
         <CardTitle className="flex justify-between items-center">
-          <span>Reviews ({comments.length})</span>
+          <span>Reviews ({filteredComments.length})</span>
           <Button
             variant="ghost"
             className="text-sm text-[#388A94] p-2"
@@ -263,14 +271,14 @@ const Comments = ({ comments, tourGuide }) => {
       </CardHeader>
       <CardContent>
         <ScrollArea className="max-h-[200px] overflow-y-auto pt-1">
-          {comments.length === 0 ? (
+          {filteredComments.length === 0 ? (
             <p className="text-[#1A3B47] p-4 text-center">No comments to display yet.</p>
           ) : (
             <ul className="divide-y divide-gray-300">
-              {comments.map((comment, index) => (
+              {filteredComments.map((comment, index) => (
                 <li
                   key={index}
-                  className="p-2 transition-colors relative cursor-pointer hover:scale-105"
+                  className="p-2 transition-colors relative cursor-pointer hover:bg-gray-100"
                   onClick={() => handleCommentClick(comment)}
                 >
                   <div className="mb-3">
@@ -358,11 +366,11 @@ const Comments = ({ comments, tourGuide }) => {
               <div>
                 <p className="flex items-center">
                   <ThumbsUp className="text-green-500 mr-2 w-4 h-4" />
-                  <strong>Liked:</strong> {selectedComment.content.liked}
+                  <strong className="mr-2">Liked: </strong> {selectedComment.content.liked}
                 </p>
                 <p className="flex items-center mt-2">
                   <ThumbsDown className="text-red-500 mr-2 w-4 h-4" />
-                  <strong>Disliked:</strong> {selectedComment.content.disliked}
+                  <strong className="mr-2">Disliked: </strong> {selectedComment.content.disliked}
                 </p>
               </div>
             </div>
@@ -433,13 +441,13 @@ const Comments = ({ comments, tourGuide }) => {
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold">{review.name}</h4>
+                  <h4 className="text-lg font-semibold">{review.username}</h4>
                   <StarRating rating={review.rating} />
                 </div>
 
                 {/* Show the first 50 characters of the comment and a "Show more" link */}
                 <p className="text-gray-600 mt-1">
-      {isExpandedComment ? (
+      {expandedCommentIndex === index ? (
         // Show both liked and disliked content when expanded
         <>
           <span>{review.content.liked}</span>
@@ -453,12 +461,14 @@ const Comments = ({ comments, tourGuide }) => {
     </p>
 
     {/* Only show "Show more" if the comment length exceeds 100 characters */}
-      <button
-        onClick={handleToggleComment}
-        className="text-blue-500 mt-2 hover:underline"
-      >
-        {isExpandedComment ? "Show less" : "Show more"}
-      </button>
+      {(review.content.liked && review.content.disliked) && (
+        <button
+          onClick={() => handleToggleComment(index)}
+          className="text-blue-500 mt-2 hover:underline"
+        >
+          {expandedCommentIndex === index ? "Show less" : "Show more"}
+        </button>
+      )}
   
               </div>
             </div>
@@ -918,6 +928,7 @@ export function TourGuideProfileComponent() {
         }
       );
       setReportData(response.data);
+      console.log(response.data);
       if (response.data && response.data.itineraryReport) {
         updateGraphData(response.data.itineraryReport, graphPeriod);
       }
@@ -927,6 +938,7 @@ export function TourGuideProfileComponent() {
   };
 
   const updateGraphData = (reportData, period) => {
+    console.log(reportData);
     if (!Array.isArray(reportData)) {
       console.error("Invalid report data:", reportData);
       return;
@@ -980,6 +992,7 @@ export function TourGuideProfileComponent() {
         }
       }
     });
+    console.log(data);
 
     setGraphData(data);
   };
@@ -1323,6 +1336,7 @@ export function TourGuideProfileComponent() {
               <CardHeader className="flex">
                 <CardTitle className="flex justify-between items-center">
                   <span>Notifications</span>
+                  {notifications.length > 0 && (
                   <Button
                     variant="ghost"
                     className="text-sm text-[#388A94] p-2"
@@ -1330,6 +1344,7 @@ export function TourGuideProfileComponent() {
                   >
                     View All
                   </Button>
+                )}
                 </CardTitle>
               </CardHeader>
 

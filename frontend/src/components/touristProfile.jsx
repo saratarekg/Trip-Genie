@@ -1386,7 +1386,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       value="wallet"
       className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
         activeTab === 'wallet'
-          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
           : 'text-gray-500 bg-white'
       }`}
     >
@@ -1397,7 +1397,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       value="currency"
       className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
         activeTab === 'currency'
-          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
           : 'border-gray-300 text-gray-500 bg-white'
       }`}
     >
@@ -1408,7 +1408,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       value="points"
       className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
         activeTab === 'points'
-          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
           : 'border-gray-300 text-gray-500 bg-white'
       }`}
     >
@@ -1464,6 +1464,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
   <CardHeader className="flex">
     <CardTitle className="flex justify-between items-center">
       <span>Notifications</span>
+      {notifications.length > 0 && (
       <Button
         variant="ghost"
         className="text-sm text-[#388A94] p-2"
@@ -1471,6 +1472,7 @@ const response = await axios.get("http://localhost:4000/tourist/", {
       >
         View All
       </Button>
+    )}
     </CardTitle>
   </CardHeader>
 

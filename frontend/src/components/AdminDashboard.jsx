@@ -352,6 +352,7 @@ export function Dashboard({ setActiveTab }) {
                 <CardHeader className="flex">
                   <CardTitle className="flex justify-between items-center">
                     <span>Notifications</span>
+                    {notifications.length > 0 && (
                     <Button
                       variant="ghost"
                       className="text-sm text-[#388A94] p-2"
@@ -359,6 +360,7 @@ export function Dashboard({ setActiveTab }) {
                     >
                       View All
                     </Button>
+                  )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

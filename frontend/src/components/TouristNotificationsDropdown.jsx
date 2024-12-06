@@ -320,6 +320,7 @@ export function NotificationsDropdownTourist() {
                 size="sm"
                 className="text-sm text-muted-foreground"
                 onClick={markAllAsSeen}
+                disabled={notifications.length === 0} // Disable if no notifications
               >
                 <CheckCheck className="mr-2 h-4 w-4" />
                 Mark all as read
@@ -346,7 +347,7 @@ export function NotificationsDropdownTourist() {
                   value="general"
                   className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
                     activeTab === "general"
-                      ? "border-[#1A3B47] text-[#1A3B47] border-b-2 "
+                      ? "border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none "
                       : "border-gray-300 text-gray-500 bg-white"
                   }`}
                 >
@@ -367,7 +368,7 @@ export function NotificationsDropdownTourist() {
                   value="personal"
                   className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
                     activeTab === "personal"
-                      ? "border-[#1A3B47] text-[#1A3B47] border-b-2 "
+                      ? "border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none "
                       : "border-gray-300 text-gray-500 bg-white"
                   }`}
                 >
@@ -388,7 +389,7 @@ export function NotificationsDropdownTourist() {
                   value="reminders"
                   className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
                     activeTab === "reminders"
-                      ? "border-[#1A3B47] text-[#1A3B47] border-b-2 "
+                      ? "border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none "
                       : "border-gray-300 text-gray-500 bg-white"
                   }`}
                 >
@@ -433,6 +434,10 @@ export function NotificationsDropdownTourist() {
                   {/* Add more skeleton items as needed */}
                 </div>
               </div>
+             ) : notifications.length === 0 ? (
+              <p className="text-[#1A3B47] p-4 text-center">
+                No notifications at the moment.
+              </p>
             ) : (
               <div>
                 {/* Check if filtered notifications are empty */}

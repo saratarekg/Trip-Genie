@@ -9,7 +9,8 @@ export default function DeleteConfirmation({
   onClose,
   itemType = "item", // Default value if not specified
   redirectPath,
-  onConfirm
+  onConfirm,
+  type,
 }) {
   const handleConfirm = () => {
     onConfirm?.();
@@ -26,14 +27,29 @@ export default function DeleteConfirmation({
               <Trash2 className="w-8 h-8 text-red-500" />
             </div>
             <div className="flex flex-col">
+              {type ? (
               <DialogTitle className="text-xl font-semibold text-left">
+                Cancel {itemType.charAt(0).toUpperCase() + itemType.slice(1)} ?
+              </DialogTitle>
+              ):(
+                <DialogTitle className="text-xl font-semibold text-left">
                 Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)} ?
               </DialogTitle>
+              )}
 
-              <DialogDescription className="text-gray-500 text-left">
+{type ? (
+                <DialogDescription className="text-gray-500 text-left">
+                Are you sure you want to cancel this {itemType}? If you cancel this {itemType},
+                you can not undo this action.
+              </DialogDescription>
+              ):(
+                <DialogDescription className="text-gray-500 text-left">
                 Are you sure you want to delete this {itemType}? If you delete this {itemType},
                 you can not undo this action.
               </DialogDescription>
+              )}
+
+            
             </div>
           </div>
 
@@ -43,10 +59,20 @@ export default function DeleteConfirmation({
               className="w-full sm:w-1/2 text-gray-700 hover:bg-gray-100"
               onClick={onClose}
             >
-              Cancel
+              Close
             </Button>
             {redirectPath ? (
               <Link to={redirectPath} className="w-full sm:w-1/2">
+                {type ? (
+               <Button
+               variant="destructive"
+               className="w-full bg-red-500 hover:bg-red-600"
+               onClick={handleConfirm}
+             >
+               Cancel {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
+             </Button>
+              ):(
+               
                 <Button
                   variant="destructive"
                   className="w-full bg-red-500 hover:bg-red-600"
@@ -54,15 +80,29 @@ export default function DeleteConfirmation({
                 >
                   Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
                 </Button>
+              )}
               </Link>
             ) : (
+              <> {type ? (
+                
               <Button
-                variant="destructive"
-                className="w-full sm:w-1/2 bg-red-500 hover:bg-red-600"
-                onClick={handleConfirm}
-              >
-                Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
-              </Button>
+              variant="destructive"
+              className="w-full sm:w-1/2 bg-red-500 hover:bg-red-600"
+              onClick={handleConfirm}
+            >
+              Cancel {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
+            </Button>
+               ):(   
+              <Button
+              variant="destructive"
+              className="w-full sm:w-1/2 bg-red-500 hover:bg-red-600"
+              onClick={handleConfirm}
+            >
+              Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
+            </Button>
+               )}</>
+              
+             
             )}
           </DialogFooter>
         </div>

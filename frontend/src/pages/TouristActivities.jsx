@@ -369,73 +369,106 @@ export default function BookedActivities() {
         </div>
       </DialogTitle>
     </DialogHeader>
-    <div className="border-t border-gray-200 pt-4">
-    <div className="flex justify-between mb-4">
-        <div className=" ">
-          <p className="text-sm font-medium text-gray-400">DATE</p>
-          <p className="text-[#1A3B47] font-semibold">
-            {new Date(selectedBooking?.activity.timing).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-          </p>
-        </div>
-        <div className="">
-          <p className="text-sm font-medium text-gray-400">TIME</p>
-          <p className="text-[#1A3B47] font-semibold">
-            {new Date(selectedBooking?.activity.timing).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-          </p>
-        </div>
-      </div>
-      <div className="flex justify-between">
-      <div className="">
-        <p className="text-sm font-medium text-gray-400">TO</p>
-        <p className="text-[#1A3B47] font-semibold">
-          {tourist?.fname || "John"} {tourist?.lname || "Doe"}
-        </p>
-        <p className="text-[#1A3B47] text-xs">
-          {tourist?.email || "John"}
-        </p>
-      </div>
-      <div>
-          <p className="text-sm font-medium text-gray-400">BOOKED</p>
-          <p className="text-[#1A3B47] font-semibold">
-            {selectedBooking?.numberOfTickets || "1"} Tickets
-          </p>
-        </div>
-      </div>
-     
-      
-      <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
-  <div>
-    <p className="text-xl font-semibold text-gray-600">
-      Total Price:
-    </p>
-  </div>
-  <div className="text-right">
-    <p className="text-2xl font-bold text-[#388A94]">
-      {formatPrice(selectedBooking?.paymentAmount || 0)}
-    </p>
-  </div>
-</div>
-{/* Payment method displayed on the left under the price */}
-<div className="flex items-center justify-start pl-1">
-  <p className="text-sm text-gray-400">
-    via {selectedBooking?.paymentType || "Credit Card"}
-  </p>
-</div>
 
+    {/* Main content */}
+    <div className="border-t border-gray-200 pt-4 space-y-4">
+      {/* Date */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Date</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {new Date(selectedBooking?.activity.timing).toLocaleDateString(
+            "en-US",
+            { year: "numeric", month: "long", day: "numeric" }
+          )}
+        </p>
+      </div>
+
+      {/* Time */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Time</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {new Date(selectedBooking?.activity.timing).toLocaleTimeString(
+            "en-US",
+            { hour: "2-digit", minute: "2-digit" }
+          )}
+        </p>
+      </div>
+
+     
+
+      {/* Tourist Information */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Recipient</p>
+        <div className="text-right">
+          <p className="text-[#1A3B47] font-semibold">
+            {tourist?.fname || "John"} {tourist?.lname || "Doe"}
+          </p>
+          <p className="text-[#1A3B47] text-xs">
+            {tourist?.email || "john.doe@example.com"}
+          </p>
+        </div>
+      </div>
+
+      {/* Tickets Booked */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Tickets Booked</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {selectedBooking?.numberOfTickets || "1"} Tickets
+        </p>
+      </div>
+
+      {/* Total Price */}
+      <div className="flex justify-between items-center border-t border-gray-200 pt-4">
+        <p className="text-xl font-semibold text-gray-600">Total Price</p>
+        <p className="text-2xl font-bold text-[#388A94]">
+          {formatPrice(selectedBooking?.paymentAmount || 0)}
+        </p>
+      </div>
+
+      {/* Payment Method */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-400">Payment Method</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          via {selectedBooking?.paymentType || "Credit Card"}
+        </p>
+      </div>
     </div>
-    <div className="border-t border-gray-200 pt-4">
-      <p className="text-center text-sm text-[#1A3B47] font-medium">
+
+    {/* Footer */}
+    <div className="border-t border-gray-200 pt-4 text-center">
+      <p className="text-sm text-[#1A3B47] font-medium">
         Thank you for booking with us!
       </p>
-      <div className="flex items-center justify-center text-xs text-gray-500 mt-2">
-        <Info className="h-6 w-6 text-gray-400 mb-3" />
-        <span className="text-center">
-          Please keep this receipt for your records. Present it upon arrival to confirm your booking.
-        </span>
-      </div>
+      <div className="flex items-center text-xs text-gray-500 mt-2">
+  <Info className="h-6 w-6 text-gray-400 mr-1 mb-3" />
+  <span>
+    Please keep this receipt for your records. Present it upon arrival to
+    confirm your booking.
+  </span>
+</div>
+
+
+    </div>
+
+    {/* Cancel Booking Button */}
+    <div className="text-center">
+      <Button
+        size="sm"
+        variant="default"
+        className="bg-red-500 hover:bg-red-600 text-white"
+        onClick={() => {
+          setIsViewDialogOpen(false);
+          handleDeleteBooking(selectedBooking);
+        }}
+      >
+        Cancel Booking
+      </Button>
     </div>
   </DialogContent>
 </Dialog>
+
+
+
 
 
 
@@ -444,6 +477,7 @@ export default function BookedActivities() {
   onClose={() => setIsDeleteDialogOpen(false)}
   itemType={`booking`}
   onConfirm={confirmDelete}
+  type="cancel"
 />
 
         <ToastViewport className="fixed top-0 right-0 p-4" />

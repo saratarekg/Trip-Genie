@@ -17,7 +17,7 @@ export default function TouristTransportationPage() {
               value={0}
               className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
                 selectedTab === 0
-                  ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+                  ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
                   : 'border-gray-300 text-gray-500 bg-white'
               }`}
             >
@@ -27,7 +27,7 @@ export default function TouristTransportationPage() {
               value={1}
               className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
                 selectedTab === 1
-                  ? 'border-[#1A3B47] text-[#1A3B47] border-b-2'
+                  ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none'
                   : 'border-gray-300 text-gray-500 bg-white'
               }`}
             >

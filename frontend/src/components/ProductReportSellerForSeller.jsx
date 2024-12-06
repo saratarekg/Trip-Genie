@@ -185,7 +185,7 @@ const ProductReport = () => {
 
   const resetFilters = () => {
     setFilters({ product: '', day: '', month: '', year: '' });
-    navigate('/product-report');
+    navigate('/account/sales-report-seller');
   };
 
   const handleFilterChange = (key, value) => {
@@ -201,7 +201,7 @@ const ProductReport = () => {
     ['day', 'month', 'year'].forEach(key => {
       if (newFilters[key]) searchParams.append(key, newFilters[key]);
     });
-    navigate(`/product-report?${searchParams.toString()}`);
+    navigate(`/account/sales-report-seller?${searchParams.toString()}`);
   };
 
   const applyProductFilter = (productName) => {

@@ -60,7 +60,7 @@ const ItineraryCard = ({ itinerary, onSelect, onItineraryUnsaved, userInfo, exch
         />
         {/* Bookmark Icon */}
         <div
-          className="absolute top-1 left-1 z-50 bg-white p-1 rounded-full"
+          className="absolute top-1 left-1 z-20 bg-white p-1 rounded-full"
           onMouseEnter={() => setTooltipVisible(true)}
           onMouseLeave={() => setTooltipVisible(false)}
         >

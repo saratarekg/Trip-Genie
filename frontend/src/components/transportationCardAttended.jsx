@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Info } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -131,82 +131,94 @@ export default function TransportationCard({
 
       {/* Popup Modal for Booking Details */}
       <Dialog open={showPopup} onOpenChange={setShowPopup}>
-  <DialogContent className="sm:max-w-[400px] bg-white rounded-md p-4">
+  <DialogContent className="sm:max-w-[330px] bg-white rounded-lg shadow-lg p-4">
     <DialogHeader>
-      <DialogTitle className="text-base font-semibold text-[#1A3B47]">
+      <DialogTitle className="text-lg font-semibold text-[#1A3B47]">
         <div>Transportation Details</div>
         <div className="text-[#388A94] text-xl font-bold">
           {booking.transportationID?.from} to {booking.transportationID?.to}
         </div>
+        <div className="text-sm text-gray-400 mt-1">
+          Trip Code: <span className="text-[#1A3B47] font-semibold">
+            {booking._id.substring(0, 10) || "N/A"}
+          </span>
+        </div>
       </DialogTitle>
     </DialogHeader>
 
-    <div className="border-t border-gray-200 pt-4">
-      {/* Tourist Name and Booking ID */}
-      <div className="flex justify-between items-center mb-3">
-        <div>
-          <p className="text-sm font-medium text-gray-400">Tourist Name</p>
+    {/* Main content */}
+    <div className="border-t border-gray-200 pt-4 space-y-4">
+      {/* Date */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Departure Date</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {new Date(booking.transportationID?.timeDeparture).toLocaleDateString(
+            "en-US",
+            { year: "numeric", month: "long", day: "numeric" }
+          )}
+        </p>
+      </div>
+
+      {/* Time */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Departure Time</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {new Date(booking.transportationID?.timeDeparture).toLocaleTimeString(
+            "en-US",
+            { hour: "2-digit", minute: "2-digit" }
+          )}
+        </p>
+      </div>
+
+      {/* Tourist Information */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Tourist Name</p>
+        <div className="text-right">
           <p className="text-[#1A3B47] font-semibold">
             {tourist?.fname || "John"} {tourist?.lname || "Doe"}
           </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-400">Trip Code</p>
-          <p className="text-[#1A3B47] font-semibold">
-            {booking._id.substring(0, 10) || "N/A"}
+          <p className="text-[#1A3B47] text-xs">
+            {tourist?.email || "john.doe@example.com"}
           </p>
         </div>
       </div>
 
-      {/* Departure Date & Payment Method */}
-      <div className="flex justify-between items-center mb-3">
-        <div>
-          <p className="text-sm font-medium text-gray-400">Departure Date</p>
-          <p className="text-[#1A3B47] font-semibold">
-            {formatDate(departureTime)}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-400">Payment Method</p>
-          <p className="text-[#1A3B47] font-semibold">
-  {booking.paymentMethod === "creditCard" || booking.paymentMethod === "debitCard"
-    ? "Credit Card"
-    : "Wallet"}
-</p>
-
-        </div>
+      {/* Seats Booked */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Seats Booked</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {booking.seatsBooked || "N/A"} Seats
+        </p>
       </div>
 
-      {/* Seats Booked & Total Cost */}
-      <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
-        <div>
-          <p className="text-sm font-medium text-gray-600">Seats Booked</p>
-          <p className="text-2xl font-bold text-[#1A3B47]">
-            {booking.seatsBooked || "N/A"}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-600">Total Cost</p>
-          <p className="text-2xl font-bold text-[#388A94]">
-            {formatPrice(booking.totalCost || 0)}
-          </p>
-        </div>
+      {/* Total Price */}
+      <div className="flex justify-between items-center border-t border-gray-200 pt-4">
+        <p className="text-xl font-semibold text-gray-600">Total Cost</p>
+        <p className="text-2xl font-bold text-[#388A94]">
+          {formatPrice(booking.totalCost || 0)}
+        </p>
+      </div>
+
+      {/* Payment Method */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-400">Payment Method</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          via {booking.paymentMethod === "creditCard" || booking.paymentMethod === "debitCard" ? "Credit Card" : "Wallet"}
+        </p>
       </div>
     </div>
 
-    <div className="border-t border-gray-200 pt-4">
-      {/* Thank You Message */}
-      <p className="text-center text-sm text-[#1A3B47] font-medium">
-        Thank you for choosing this transportation!
-      </p>
-
-      {/* Reminder and Info */}
-      <div className="flex items-center justify-center text-xs text-gray-500 mt-2">
-        <span className="text-center">
-        We hope you had a great trip. 
-               </span>
-      </div>
-    </div>
+    {/* Footer */}
+    <div className="border-t border-gray-200 pt-4 text-center">
+  <p className="text-sm text-[#1A3B47] font-medium">
+    Thank you for choosing this transportation!
+  </p>
+  <div className="mt-2">
+    <p className="text-xs text-gray-500">
+      We hope you had a great trip.
+    </p>
+  </div>
+</div>
 
   </DialogContent>
 </Dialog>

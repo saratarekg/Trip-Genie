@@ -559,7 +559,7 @@ const StockReport = () => {
                   }
                 >
                   <SelectTrigger className="w-full mt-4 sm:w-[200px]">
-                    <SelectValue placeholder="Select itinerary" />
+                    <SelectValue placeholder="Select Product" />
                   </SelectTrigger>
                   <SelectContent>
                     {products.map((product) => (

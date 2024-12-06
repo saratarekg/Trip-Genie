@@ -289,6 +289,7 @@ export function NotificationsDropdownAdvertiser() {
                 size="sm"
                 className="text-sm text-muted-foreground"
                 onClick={markAllAsSeen}
+                disabled={notifications.length === 0} // Disable if no notifications
               >
                 <CheckCheck className="mr-2 h-4 w-4" />
                 Mark all as read
@@ -310,7 +311,7 @@ export function NotificationsDropdownAdvertiser() {
       <TabsTrigger
         value="general"
         className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${activeTab === 'general'
-          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 '
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2  shadow-none'
           : 'border-gray-300 text-gray-500 bg-white'
         }`}
       >
@@ -327,7 +328,7 @@ export function NotificationsDropdownAdvertiser() {
       <TabsTrigger
         value="alert"
         className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${activeTab === 'alert'
-          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 '
+          ? 'border-[#1A3B47] text-[#1A3B47] border-b-2 shadow-none '
           : 'border-gray-300 text-gray-500 bg-white'
         }`}
       >
@@ -386,6 +387,11 @@ export function NotificationsDropdownAdvertiser() {
                   {/* Add more skeleton items as needed */}
                 </div>
               </div>
+              
+            ) : notifications.length === 0 ? (
+              <p className="text-[#1A3B47] p-4 text-center">
+                No notifications at the moment.
+              </p>
             ) : (
               <div>
                 {/* Check if filtered notifications are empty */}
@@ -394,6 +400,7 @@ export function NotificationsDropdownAdvertiser() {
                     <p>No notifications available for this tab.</p>
                   </div>
                 ) : (
+                  
                   getFilteredNotifications().map((notification, index) => (
                     <div
                       key={index}

@@ -354,7 +354,7 @@ if (error) return <div>{error}</div>;
       </div>
 
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-  <DialogContent className="sm:max-w-[400px] bg-white rounded-lg shadow-lg p-4">
+  <DialogContent className="sm:max-w-[330px] bg-white rounded-lg shadow-lg p-4">
     <DialogHeader>
       <DialogTitle className="text-lg font-semibold text-[#1A3B47]">
         <div>
@@ -363,65 +363,86 @@ if (error) return <div>{error}</div>;
         <div className="text-[#388A94] text-xl font-bold">
           {selectedBooking?.itinerary.title}
         </div>
+        <div className="text-sm text-gray-400 mt-1">
+          Booking ID: <span className="text-[#1A3B47] font-semibold">
+            {selectedBooking?._id ? selectedBooking._id.substring(0, 10) : "AB123456"}
+          </span>
+        </div>
       </DialogTitle>
     </DialogHeader>
 
-    <div className="border-t border-gray-200 pt-4">
-      {/* Name and Booking ID */}
-      <div className="flex justify-between items-center mb-3">
-        <div>
-          <p className="text-sm font-medium text-gray-400">Name</p>
-          <p className="text-[#1A3B47] font-semibold">{tourist?.fname || "John"} {tourist?.lname || "Doe"}</p>
-        </div>
+    {/* Main content */}
+    <div className="border-t border-gray-200 pt-4 space-y-4">
+      {/* Date */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Date</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {new Date(selectedBooking?.date).toLocaleDateString(
+            "en-US",
+            { year: "numeric", month: "long", day: "numeric" }
+          )}
+        </p>
+      </div>
+
+      {/* Time */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Time</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {new Date(selectedBooking?.date).toLocaleTimeString(
+            "en-US",
+            { hour: "2-digit", minute: "2-digit" }
+          )}
+        </p>
+      </div>
+
+      {/* Tourist Information */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Recipient</p>
         <div className="text-right">
-          <p className="text-sm font-medium text-gray-400">Booking ID</p>
           <p className="text-[#1A3B47] font-semibold">
-  {selectedBooking?._id ? selectedBooking._id.substring(0, 10) : "AB123456"}
-</p>
+            {tourist?.fname || "John"} {tourist?.lname || "Doe"}
+          </p>
+          <p className="text-[#1A3B47] text-xs">
+            {tourist?.email || "john.doe@example.com"}
+          </p>
         </div>
       </div>
 
-      {/* Date & Time and Paid Via */}
-      <div className="flex justify-between items-center mb-3">
-        <div>
-          <p className="text-sm font-medium text-gray-400">Date & Time</p>
-          <p className="text-[#1A3B47] font-semibold">
-          {new Date(selectedBooking?.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} at {new Date(selectedBooking?.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-400">Paid Via</p>
-          <p className="text-[#1A3B47] font-semibold">{selectedBooking?.paymentType || "Credit Card"}</p>
-        </div>
+      {/* Tickets Booked */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-400">Tickets Booked</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          {selectedBooking?.numberOfTickets || "1"} Tickets
+        </p>
       </div>
-    
-      {/* Tickets and Total Price */}
-      <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
-        <div>
-          <p className="text-sm font-medium text-gray-600">Tickets</p>
-          <p className="text-2xl font-bold text-[#1A3B47]">
-            {selectedBooking?.numberOfTickets || "1"}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm font-medium text-gray-600">Total Price</p>
-          <p className="text-2xl font-bold text-[#388A94]">
-            {getFormattedPrice(selectedBooking?.paymentAmount || 0)}
-          </p>
-        </div>
+
+      {/* Total Price */}
+      <div className="flex justify-between items-center border-t border-gray-200 pt-4">
+        <p className="text-xl font-semibold text-gray-600">Total Price</p>
+        <p className="text-2xl font-bold text-[#388A94]">
+          {getFormattedPrice(selectedBooking?.paymentAmount || 0)}
+        </p>
+      </div>
+
+      {/* Payment Method */}
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-gray-400">Payment Method</p>
+        <p className="text-[#1A3B47] font-semibold text-right">
+          via {selectedBooking?.paymentType || "Credit Card"}
+        </p>
       </div>
     </div>
 
-    <div className="border-t border-gray-200 pt-4">
-      {/* Thank You Message */}
-      <p className="text-center text-sm text-[#1A3B47] font-medium">
-      Thank you for joining the itinerary!
+    {/* Footer */}
+    <div className="border-t border-gray-200 pt-4 text-center">
+      <p className="text-sm text-[#1A3B47] font-medium">
+        Thank you for joining the itinerary!
       </p>
-      
-      {/* Reminder and Info */}
-      <div className="flex items-center justify-center text-xs text-gray-500 mt-2">
-        <span className="text-center">
-        We'd love to hear your thoughts! Please leave a review to help us improve.        </span>
+      <div className="flex items-center text-xs text-gray-500 mt-2">
+        <Info className="h-6 w-6 text-gray-400 mr-1 mb-3" />
+        <span>
+          We'd love to hear your thoughts! Please leave a review to help us improve.
+        </span>
       </div>
     </div>
   </DialogContent>

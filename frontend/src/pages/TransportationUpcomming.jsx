@@ -39,8 +39,6 @@ const fetchUpcomingBookings = async () => {
 const BookingDetails = ({ booking, isOpen, onClose, formatPrice, tourist, onDelete }) => {
   if (!booking) return null;
 
-
-
   const formatDate = (date) => {
     return date?.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -52,95 +50,113 @@ const BookingDetails = ({ booking, isOpen, onClose, formatPrice, tourist, onDele
   const departureTime = new Date(booking.transportationID?.timeDeparture);
   const arrivalTime = new Date(departureTime.getTime() + booking.transportationID?.estimatedDuration * 60 * 1000);
 
-
-
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-    <DialogContent className="sm:max-w-[400px] bg-white rounded-md p-4">
-      <DialogHeader>
-        <DialogTitle className="text-base font-semibold text-[#1A3B47]">
-          <div>Transportation Details</div>
-          <div className="text-[#388A94] text-xl font-bold">
-            {booking.transportationID?.from} to {booking.transportationID?.to}
-          </div>
-        </DialogTitle>
-      </DialogHeader>
-  
-      <div className="border-t border-gray-200 pt-4">
-        {/* Tourist Name and Booking ID */}
-        <div className="flex justify-between items-center mb-3">
-          <div>
-            <p className="text-sm font-medium text-gray-400">Tourist Name</p>
-            <p className="text-[#1A3B47] font-semibold">
-              {tourist?.fname || "John"} {tourist?.lname || "Doe"}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-gray-400">Trip Code</p>
-            <p className="text-[#1A3B47] font-semibold">
-              {booking._id.substring(0, 10) || "N/A"}
-            </p>
-          </div>
-        </div>
-  
-        {/* Departure Date & Payment Method */}
-        <div className="flex justify-between items-center mb-3">
-          <div>
+      <DialogContent className="sm:max-w-[330px] bg-white rounded-lg shadow-lg p-4">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-semibold text-[#1A3B47]">
+            <div>Transportation Details</div>
+            <div className="text-[#388A94] text-xl font-bold">
+              {booking.transportationID?.from} to {booking.transportationID?.to}
+            </div>
+            <div className="text-sm text-gray-400 mt-1">
+              Trip Code: <span className="text-[#1A3B47] font-semibold">
+                {booking._id.substring(0, 10) || "N/A"}
+              </span>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Main content */}
+        <div className="border-t border-gray-200 pt-4 space-y-4">
+          {/* Date */}
+          <div className="flex justify-between items-center">
             <p className="text-sm font-medium text-gray-400">Departure Date</p>
-            <p className="text-[#1A3B47] font-semibold">
+            <p className="text-[#1A3B47] font-semibold text-right">
               {formatDate(departureTime)}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-gray-400">Payment Method</p>
-            <p className="text-[#1A3B47] font-semibold">
-    {booking.paymentMethod === "creditCard" || booking.paymentMethod === "debitCard"
-      ? "Credit Card"
-      : "Wallet"}
-  </p>
-  
-          </div>
-        </div>
-  
-        {/* Seats Booked & Total Cost */}
-        <div className="flex items-center justify-between border-t border-gray-200 mt-4 pt-4">
-          <div>
-            <p className="text-sm font-medium text-gray-600">Seats Booked</p>
-            <p className="text-2xl font-bold text-[#1A3B47]">
-              {booking.seatsBooked || "N/A"}
+
+          {/* Time */}
+          <div className="flex justify-between items-center">
+            <p className="text-sm font-medium text-gray-400">Departure Time</p>
+            <p className="text-[#1A3B47] font-semibold text-right">
+              {departureTime.toLocaleTimeString(
+                "en-US",
+                { hour: "2-digit", minute: "2-digit" }
+              )}
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-gray-600">Total Cost</p>
+
+          {/* Tourist Information */}
+          <div className="flex justify-between items-center">
+            <p className="text-sm font-medium text-gray-400">Recipient</p>
+            <div className="text-right">
+              <p className="text-[#1A3B47] font-semibold">
+                {tourist?.fname || "John"} {tourist?.lname || "Doe"}
+              </p>
+              <p className="text-[#1A3B47] text-xs">
+                {tourist?.email || "john.doe@example.com"}
+              </p>
+            </div>
+          </div>
+
+          {/* Seats Booked */}
+          <div className="flex justify-between items-center">
+            <p className="text-sm font-medium text-gray-400">Seats Booked</p>
+            <p className="text-[#1A3B47] font-semibold text-right">
+              {booking.seatsBooked || "N/A"} Seats
+            </p>
+          </div>
+
+          {/* Total Price */}
+          <div className="flex justify-between items-center border-t border-gray-200 pt-4">
+            <p className="text-xl font-semibold text-gray-600">Total Cost</p>
             <p className="text-2xl font-bold text-[#388A94]">
               {formatPrice(booking.totalCost || 0)}
             </p>
           </div>
+
+          {/* Payment Method */}
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-gray-400">Payment Method</p>
+            <p className="text-[#1A3B47] font-semibold text-right">
+              via {booking.paymentMethod === "creditCard" || booking.paymentMethod === "debitCard" ? "Credit Card" : "Wallet"}
+            </p>
+          </div>
         </div>
-      </div>
-  
-      <div className="border-t border-gray-200 pt-4">
-        {/* Thank You Message */}
-        <p className="text-center text-sm text-[#1A3B47] font-medium">
-        Thank you for booking with us!
-      </p>
-      <div className="flex items-center justify-center text-xs text-gray-500 mt-2">
-  <Info className="h-6 w-6 text-gray-400 mb-3" />
-  <span className="text-center">
-    Please keep this receipt for your records. Present it upon arrival to confirm your booking.
-  </span>
+
+        {/* Footer */}
+        <div className="border-t border-gray-200 pt-4 text-center">
+          <p className="text-sm text-[#1A3B47] font-medium">
+            Thank you for booking with us!
+          </p>
+          <div className="flex items-center text-xs text-gray-500 mt-2">
+            <Info className="h-6 w-6 text-gray-400 mr-1 mb-3" />
+            <span>
+              Please keep this receipt for your records. Present it upon arrival to confirm your booking.
+            </span>
+          </div>
         </div>
-      </div>
-      <div className="flex justify-end mt-4">
-        <Button variant="destructive" onClick={onDelete}>
-          Cancel Booking
-        </Button>
-      </div>
-    </DialogContent>
-  </Dialog>
-  )
-}
+
+        {/* Cancel Booking Button */}
+        <div className="text-center">
+          <Button
+            size="sm"
+            variant="default"
+            className="bg-red-500 hover:bg-red-600 text-white"
+            onClick={() => {
+              onClose();
+              onDelete();
+            }}
+          >
+            Cancel Booking
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const TransportationCardSkeleton = () => {
   return (
@@ -455,6 +471,7 @@ export default function UpcomingTransportation() {
             onClose={() => setIsDeleteDialogOpen(false)}
             itemType={`booking`}
             onConfirm={confirmDelete}
+            type="cancel"
           />
     
           {/* Notification Dialog */}

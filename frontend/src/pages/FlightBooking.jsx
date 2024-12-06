@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowUpDown, Calendar, Plane, AlertCircle } from "lucide-react";
+import { ArrowUpDown, Calendar, Plane, AlertCircle,PlaneLanding,PlaneTakeoff,Info,Ticket,Clock } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -39,7 +39,7 @@ import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
 import { useSearchParams } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
-import { set } from "date-fns";
+import { set , format, startOfToday} from "date-fns";
 
 const airports = [
   { code: "CAI", name: "Cairo International Airport", region: "Egypt" },
@@ -175,9 +175,28 @@ const styles = {
   },
 };
 
+const calculateDuration = (departureDate, arrivalDate) => {
+  const departure = new Date(departureDate);
+  const arrival = new Date(arrivalDate);
+
+  const durationInMillis = arrival - departure; // Difference in milliseconds
+  const hours = Math.floor(durationInMillis / (1000 * 60 * 60)); // Convert to hours
+  const minutes = Math.floor(
+    (durationInMillis % (1000 * 60 * 60)) / (1000 * 60)
+  ); // Convert to minutes
+
+  return `${hours}h ${minutes}m`;
+};
+
 const formatDate = (date) => {
   return date.toISOString().split("T")[0];
 };
+
+function getTodayAtMidnight() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to midnight
+  return today;
+}
 
 function BookingPage() {
   const [searchParams] = useSearchParams();
@@ -186,7 +205,7 @@ function BookingPage() {
   const [numberOfSeats, setNumberOfSeats] = useState(1);
   const [seatType, setSeatType] = useState("Economy");
   const [departureDate, setDepartureDate] = useState(
-    searchParams.get("departDate") || formatDate(new Date())
+    searchParams.get("departDate") || format(startOfToday(), "yyyy-MM-dd")
   );
   const [returnDate, setReturnDate] = useState(
     searchParams.get("returnDate") ||
@@ -218,6 +237,7 @@ function BookingPage() {
 
 
   const [tourist, setTourist] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState("");
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -227,8 +247,17 @@ function BookingPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTourist(response.data);
+        const currencyId = response.data.preferredCurrency;
+
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setCurrencySymbol(response2.data.symbol);
       } catch (error) {
-        console.error("Error fetching tourist data:", error);
+        console.error("Error fetching user profile:", error);
       }
     };
 
@@ -608,7 +637,7 @@ function BookingPage() {
     {
       target: ".seeDetails",
       content:
-        "Click on the 'See Flight' button to view the details of the selected flight, Enter your personal data and to finally choose your payment method before confirming your flight booking!.",
+        "Click on the 'Book Now' button to view the details of the selected flight, Enter your personal data and to finally choose your payment method before confirming your flight booking!.",
       placement: "bottom",
     },
   ];
@@ -828,13 +857,13 @@ function BookingPage() {
   };
 
   return (
-    <div className="bg-[#E6DCCF]">
+    <div className="bg-gray-100">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className="h-16"></div>
 
-      <div className="bg-[#E6DCCF] min-h-screen mx-auto px-24">
+      <div className="bg-gray-100 min-h-screen mx-auto px-24">
         <div ref={mainContentRef}>
           <h1 className="text-5xl font-bold text-[#1A3B47]">Flight Booking</h1>
           <div className="h-10"></div>
@@ -1004,104 +1033,137 @@ function BookingPage() {
                   <SelectContent>
                     <SelectItem value="all">All Prices</SelectItem>
                     <SelectItem value="under25">
-                      Under {Math.floor(0.25 * maxPrice)} {currencyCode}
+                      Under {currencySymbol}{Math.floor(0.25 * maxPrice)} 
                     </SelectItem>
                     <SelectItem value="under50">
-                      Under {Math.floor(0.5 * maxPrice)} {currencyCode}
+                      Under {currencySymbol}{Math.floor(0.5 * maxPrice)}
                     </SelectItem>
                     <SelectItem value="under75">
-                      Under {Math.floor(0.75 * maxPrice)} {currencyCode}
+                      Under {currencySymbol}{Math.floor(0.75 * maxPrice)}
                     </SelectItem>
                     <SelectItem value="over75">
-                      Over {Math.floor(0.75 * maxPrice)} {currencyCode}
+                      Over {currencySymbol}{Math.floor(0.75 * maxPrice)} 
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className=" gap-3">
                 {paginatedFlights.map((flight, index) => (
-                  <Card key={index} className="overflow-hidden">
-                    <CardContent className="p-3">
-                      <div className="flex flex-col h-full">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 bg-[#388A94] text-white rounded">
-                            <Plane className="h-5 w-5" />
+                  <Card key={index} className="p-6 mb-4">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="text-lg">
+                      <span className="font-semibold text-[#1A3B47]">Flight Number</span>
+                      <span className="text-base ml-1 text-[#5D9297]">
+                        {flight.itineraries[0].segments[0].carrierCode} {flight.itineraries[0].segments[0].number}
+                      </span>
+                    </div>
+                    <span className="text-4xl font-bold text-[#1A3B47]">
+                    {currencySymbol}{flight.price.total}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className={`mb-6 ${!flight.itineraries[1] ? "justify-center" : ""}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-1">
+                          <div className="text-sm text-gray-500">Depart</div>
+                          <div className="text-3xl font-bold text-[#1A3B47]">
+                            {new Date(flight.itineraries[0].segments[0].departure.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </div>
-                          <h3 className="text-base font-semibold">
-                            {
-                              flight.itineraries[0].segments[0].departure
-                                .iataCode
-                            }{" "}
-                            →{" "}
-                            {
-                              flight.itineraries[0].segments[
-                                flight.itineraries[0].segments.length - 1
-                              ].arrival.iataCode
-                            }
-                          </h3>
+                          <div className="text-sm text-gray-500">
+                            {new Date(flight.itineraries[0].segments[0].departure.at).toLocaleDateString()}
+                          </div>
+                          <div className="text-sm text-gray-500">{flight.itineraries[0].segments[0].departure.iataCode}</div>
                         </div>
-                        <div className="text-sm text-muted-foreground space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>
-                              Departure:{" "}
-                              {formatDateTime(
-                                flight.itineraries[0].segments[0].departure.at
-                              )}
-                            </span>
+                        <div className="flex-1 flex flex-col items-center mx-4">
+                          <div className="w-full flex items-center gap-2">
+                            <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                            <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
+                              <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
+                                {calculateDuration(flight.itineraries[0].segments[0].departure.at, flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at)}
+                              </span>
+                            </div>
+                            <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>
-                              Arrival:{" "}
-                              {formatDateTime(
-                                flight.itineraries[0].segments[
-                                  flight.itineraries[0].segments.length - 1
-                                ].arrival.at
-                              )}
-                            </span>
-                          </div>
-                          {flight.itineraries[1] && (
-                            <>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                <span>
-                                  Return Departure:{" "}
-                                  {formatDateTime(
-                                    flight.itineraries[1].segments[0].departure
-                                      .at
-                                  )}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                <span>
-                                  Return Arrival:{" "}
-                                  {formatDateTime(
-                                    flight.itineraries[1].segments[
-                                      flight.itineraries[1].segments.length - 1
-                                    ].arrival.at
-                                  )}
-                                </span>
-                              </div>
-                            </>
-                          )}
                         </div>
-                        <div className="mt-auto pt-3 flex items-center justify-between">
-                          <p className="text-xl font-bold  text-[#F88C33]">
-                            {flight.price.total} {flight.price.currency}
-                          </p>
-                          <Button
-                            className="bg-[#388A94] hover:bg-[#1A3B47] text-white seeDetails"
-                            onClick={() => handleOpenDialog(flight)}
-                          >
-                            See Flight
-                          </Button>
+                        <div className="space-y-1">
+                          <div className="text-sm text-gray-500">Arrive</div>
+                          <div className="text-3xl font-bold text-[#1A3B47]">
+                            {new Date(flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {new Date(flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at).toLocaleDateString()}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.iataCode}
+                          </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                    {flight.itineraries[1] && (
+                      <div className="pt-6 border-t">
+                        {/* Return trip information */}
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="text-sm text-gray-500">Depart</div>
+                            <div className="text-3xl font-bold text-[#1A3B47]">
+                              {new Date(flight.itineraries[1].segments[0].departure.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(flight.itineraries[1].segments[0].departure.at).toLocaleDateString()}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {flight.itineraries[1].segments[0].departure.iataCode}
+                            </div>
+                          </div>
+                          <div className="flex-1 flex flex-col items-center mx-4">
+                            <div className="w-full flex items-center gap-2">
+                              <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                              <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
+                                <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
+                                  {calculateDuration(flight.itineraries[1].segments[0].departure.at, flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at)}
+                                </span>
+                              </div>
+                              <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="text-sm text-gray-500">Arrive</div>
+                            <div className="text-3xl font-bold text-[#1A3B47]">
+                              {new Date(flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at).toLocaleDateString()}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.iataCode}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between mt-6 space-y-0">
+                      <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Ticket className="h-6 w-6" />
+                          <span>Show e-tickets and passenger identities during check-in</span>
+                        </div>
+                        <div className="border-l-2 border-gray-300 h-9 mx-4"></div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Clock className="h-6 w-6" />
+                          <span>Please be at the boarding gate at least 30 minutes before boarding time</span>
+                        </div>
+                      </div>
+                      <Button
+                        className="bg-[#388A94] hover:bg-[#2e6b77] text-lg text-white seeDetails ml-2 px-16 pt-4 pb-4"
+                        onClick={() => handleOpenDialog(flight)}
+                      >
+                        Book Now
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+                
                 ))}
               </div>
 
@@ -1298,11 +1360,11 @@ function BookingPage() {
             <div className="grid grid-cols-2 gap-4 mt-4">
               <Label className="text-right">You Paid:</Label>
               <div>
-               {isBookingConfirmationOpen.price}{currencyCode}
+               {isBookingConfirmationOpen.price}{currencySymbol}
               </div>
               <Label className="text-right">New Wallet Balance:</Label>
               <div>
-              {convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)-isBookingConfirmationOpen.price}{currencyCode}
+              {currencySymbol}{convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)-isBookingConfirmationOpen.price}
               </div>
             </div>
           )}

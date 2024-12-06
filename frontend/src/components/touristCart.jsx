@@ -350,6 +350,7 @@ const ShoppingCart = () => {
         setCartItems(
           cartItems.filter((item) => item.product._id !== productId)
         );
+        fetchCartItems();
         openSuccessPopup("Item removed successfully!");
         window.dispatchEvent(new Event('cartUpdated'));
       }
@@ -472,7 +473,7 @@ const ShoppingCart = () => {
    
     <div className="flex h-screen ml-10 ">
       <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold mb-6 flex justify-between items-center">
+        <h1 className="text-5xl text-[#1A3B47] font-bold mb-6 flex justify-between items-center">
           Shopping Cart
           <span className="text-xl font-normal">({cartItems.length} items)</span>
         </h1>
@@ -605,87 +606,70 @@ const ShoppingCart = () => {
 
         )}
       </div>
-      <div className="w-80 bg-gray-200 p-8 overflow-y-auto">
-          <h2 className="text-3xl font-bold mb-6">Order Summary</h2>
-          <div className="mb-4 w-full">
-            <span className="font-bold text-xl">Products</span>
-            <div className="mt-2 space-y-2">
-              {cartItems.map((item, index) => (
-                <div key={index} className="flex justify-between text-base ">
-                  <span>{item?.product?.name} x {item?.quantity}</span>
-                  <span className="ml-3">{formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="border-t border-gray-500 pt-4 mt-4">
-            <div className="flex justify-between font-bold text-xl">
-              <span>Subtotal:</span>
-              <span>
-                {totalAmountLoading ? (
-                  <span className="animate-pulse bg-gray-200 h-6 w-24 inline-block align-middle rounded"></span>
-                ) : (
-                  formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")
-                )}
-              </span>
-            </div>
-          </div>
-          
-          <form onSubmit={handlePromoSubmit} className="mt-4">
-            <Label htmlFor="promo-code">Promo Code</Label>
-            <div className="flex mt-1">
-              <Input
-                id="promo-code"
-                type="text"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                placeholder={currentPromoCode || "Enter promo code"}
-                className="flex-grow"
-              />
-              <Button type="submit" className="ml-2 bg-[#388A94] hover:bg-[#2e6b77]" disabled={!promoCode.trim()}>
-                Apply
-              </Button>
-            </div>
-          </form>
-          {promoError && (
-            <p className="text-red-500 mt-2">{promoError}</p>
-          )}
-        {promoDetails && (
-  <div className="mt-2">
-    <p className="text-green-500">Promo applied: {promoDetails.percentOff}% off</p>
-  </div>
-)}
-
-<div className="border-t border-gray-500 pt-4 mt-4">
-  <div className="flex justify-between font-bold text-lg">
-    <span>Subtotal:</span>
-    <span>{formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
-  </div>
-
-  {promoDetails && (
-    <>
-      <div className="flex justify-between font-bold text-lg text-red-500 mt-2">
-        <span>Discount:</span>
-        <span>-{formatPrice(discountAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
-      </div>
-    </>
-  )}
-<div className="border-t border-gray-500 mt-4"></div>
-  <div className="flex justify-between font-bold text-xl mt-4">
-    <span>Final Total:</span>
-    <span>{formatPrice(promoDetails ? discountedTotal : totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
-  </div>
-</div>
-
-
-          <Button
-            className="w-full mt-6 bg-[#1A3B47] text-white py-3 text-lg"
-            onClick={() => navigate("/checkout2")}
-            disabled={cartItems.length === 0}
-          >
-            Proceed to Checkout
-          </Button>
+      <div className="w-1/3 bg-gray-100 p-8 overflow-y-auto">
+  <h2 className="text-2xl font-bold mb-6 text-[#1A3B47]">Order Summary ({cartItems.length})</h2>
+  <div className="space-y-4">
+    {cartItems.map((item, index) => (
+      <div key={index} className={`flex justify-between ${index === cartItems.length - 1 ? 'pb-2' : ''}`}>
+        <div>
+          <p className="font-medium text-[#1A3B47]">
+            {item?.product?.name} x {item?.quantity}
+          </p>
         </div>
+        <span className="text-[#388A94] font-semibold">
+          {formatPrice(item?.totalPrice)}
+        </span>
+      </div>
+    ))}
+  </div>
+  <div className="border-t border-gray-200 pt-4 mt-4">
+    <div className="flex justify-between  text-lg">
+    <span className="text-[#1A3B47]">Subtotal</span>
+    <span className="font-semibold text-[#388A94]">{formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
+    </div>
+    {promoDetails && (
+      <div className="flex justify-between  mt-2">
+        <span className="text-[#1A3B47]">Discount:</span>
+        <span className="font-semibold text-green-600">-{formatPrice(discountAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
+      </div>
+    )}
+    <div className="border-t  mt-4"></div>
+    <div className="flex justify-between text-[#1A3B47] font-bold text-xl mt-4">
+      <span>Total</span>
+      <span className="text-[#388A94]">{formatPrice(promoDetails ? discountedTotal : totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
+    </div>
+  </div>
+  <form onSubmit={handlePromoSubmit} className="mt-4">
+    <div className="flex mt-1">
+      <Input
+        id="promo-code"
+        type="text"
+        value={promoCode}
+        onChange={(e) => setPromoCode(e.target.value)}
+        placeholder={"Enter promo code"}
+        className="flex-grow"
+      />
+      <Button type="submit" className="ml-2 bg-[#388A94] hover:bg-[#2e6b77]" disabled={!promoCode.trim()}>
+        Apply
+      </Button>
+    </div>
+  </form>
+  {promoError && (
+    <p className="text-red-500 mt-2">{promoError}</p>
+  )}
+  {promoDetails && (
+    <div className="mt-2">
+      <p className="text-green-600 mt-2">Congratulations! You've saved {promoDetails.percentOff}% on this purchase!</p>
+                 </div>
+  )}
+  <Button
+    className="w-full mt-6 bg-[#1A3B47] text-white py-3 text-lg"
+    onClick={() => navigate("/checkout2")}
+    disabled={cartItems.length === 0}
+  >
+    Proceed to Checkout
+  </Button>
+</div>
 
       <Dialog
         open={actionError !== null}

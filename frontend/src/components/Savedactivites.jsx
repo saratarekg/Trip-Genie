@@ -62,7 +62,7 @@ const ActivityCard = ({ activity, onSelect, onActivityUnsaved, userInfo, exchang
         />
         {/* Bookmark Icon on Top of Image with Tooltip */}
         <div
-          className="absolute top-1 left-1 z-50 bg-white p-1 rounded-full"
+          className="absolute top-1 left-1 z-20 bg-white p-1 rounded-full"
           onMouseEnter={() => setTooltipVisible(true)}
           onMouseLeave={() => setTooltipVisible(false)}
         >

@@ -448,9 +448,7 @@ const markNotificationsAsSeen = async (req, res) => {
       }
     );
 
-    if (result.modifiedCount === 0) {
-      return res.status(404).json({ message: "No unseen notifications found" });
-    }
+   
 
     // Set 'hasUnseenNotifications' to false after marking all notifications as seen
     await Seller.updateOne(

@@ -676,11 +676,6 @@ const markNotificationsAsSeen = async (req, res) => {
       }
     );
 
-    if (result.modifiedCount === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No unseen notifications found" });
-    }
 
     // Set 'hasUnseenNotifications' to false after marking all notifications as seen
     await Admin.updateOne(

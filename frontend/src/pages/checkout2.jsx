@@ -1246,22 +1246,23 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   variant="outline"
-                  className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white"
+                  className="border-[#388A94] bg-[#388A94] hover:bg-[#2e6b77] text-white"
                 >
                   Apply
                 </Button>
               </form>
               {promoError && <p className="text-red-500 mt-2">{promoError}</p>}
               {promoDetails && (
-                <p className="text-green-600 mt-2">
-                  Promo code applied successfully!
-                </p>
+                <>
+                
+                 <p className="text-green-600 mt-2">Congratulations! You've saved {promoDetails.percentOff}% on this purchase!</p>
+                 </>
               )}
             </div>
 
             {/* Complete Purchase Button */}
             <Button
-              className="w-full mt-6 bg-[#1A3B47] text-white hover:bg-[#388A94] completePurchase "
+              className="w-full text-lg mt-6 bg-[#1A3B47] text-white hover:bg-[#388A94] completePurchase "
               size="lg"
               onClick={onSubmit}
             >

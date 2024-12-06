@@ -22,9 +22,9 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
       <nav className="p-4">
         <h2 className="text-3xl font-bold mb-6">My Account</h2>
         {role === 'tourist' && (
-        <div className="mb-3">
+        <div className="mb-2">
           <button
-            className={`flex items-center mt-0 w-full text-left px-4 mb-3 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
+            className={`flex items-center mt-0 w-full text-left px-4 mb-2 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
               activeTab === 'activities'
                 ? 'bg-[#B5D3D1] text-black font-bold scale-105'
                 : 'text-gray-600 hover:text-black hover:font-bold hover:scale-105'
@@ -34,7 +34,7 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
             <span className='font-semibold'>Activities</span>
           </button>
           <button
-            className={`flex items-center w-full text-left mb-3 px-4 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
+            className={`flex items-center w-full text-left mb-2 px-4 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
               activeTab === 'itineraries'
                 ? 'bg-[#B5D3D1] text-black font-bold scale-105'
                 : 'text-gray-600 hover:text-black hover:font-bold hover:scale-105'
@@ -44,7 +44,7 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
             <span className='font-semibold'>Itineraries</span>
           </button>
           <button
-            className={`flex items-center w-full text-left px-4 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
+            className={`flex items-center w-full text-left mb-2 px-4 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
               activeTab === 'transportation'
                 ? 'bg-[#B5D3D1] text-black font-bold scale-105'
                 : 'text-gray-600 hover:text-black hover:font-bold hover:scale-105'
@@ -52,6 +52,16 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
             onClick={() => handleTabClick('transportation')}
           >
             <span className='font-semibold'>Transportation</span>
+          </button>
+          <button
+            className={`flex items-center w-full text-left mb-2 px-4 py-2 pl-4 rounded-full transition-colors transition-transform duration-200 ${
+              activeTab === 'purchases'
+                ? 'bg-[#B5D3D1] text-black font-bold scale-105'
+                : 'text-gray-600 hover:text-black hover:font-bold hover:scale-105'
+            }`}
+            onClick={() => handleTabClick('purchases')}
+          >
+            <span className='font-semibold'>Purchases</span>
           </button>
         </div>
         )}
@@ -63,7 +73,7 @@ const Sidebar = ({ menuStructure, role, activeTab, onTabClick }) => {
             const isOpen = openCategory === category;
 
             return (
-              <li key={category} className={`mb-2 ${isOpen ? 'open-category' : ''}`}>
+              <li key={category} className={`mb-1 ${isOpen ? 'open-category' : ''}`}>
                 <button
                   onClick={() => toggleCategory(category)}
                   className={`flex justify-between items-center w-full text-left px-4 py-2 rounded-md text-gray-600 transition-transform transition-colors duration-200 ${

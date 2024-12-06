@@ -19,7 +19,7 @@ export default function TransportationCard({
   tourist,
   setSelectedBooking,
   userPreferredCurrency,
-  exchangeRate
+  exchangeRate,
 }) {
 
 
@@ -125,6 +125,16 @@ export default function TransportationCard({
         </div>
         <div className="flex items-center space-x-4">
           <div className="text-2xl font-bold text-[#1A3B47]">{formatPrice(booking.transportationID?.ticketCost)}</div>
+          <Button 
+  onClick={(e) => {
+    e.stopPropagation(); // Prevent the click from propagating to the parent
+    onDelete();
+  }} 
+  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition-colors"
+>
+  Cancel
+</Button>
+
         </div>
       </div>
       <Dialog open={showPopup} onOpenChange={setShowPopup}>
