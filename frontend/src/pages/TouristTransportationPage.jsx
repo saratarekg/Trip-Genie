@@ -8,12 +8,12 @@ export default function TouristTransportationPage() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-2">My Transportation</h1>
-      <p className="text-sm text-gray-500 mb-2">Transportation</p>
+      <h1 className="text-3xl font-bold mb-2">Transportation Bookings</h1>
+      <p className="text-sm text-gray-500 mb-2">My Bookings / Transportation</p>
       <div className="bg-white shadow-md rounded-lg p-4">
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
           <TabsList className="grid grid-cols-2 bg-white">
-            <TabsTrigger
+          <TabsTrigger
               value={0}
               className={`relative flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
                 selectedTab === 0
@@ -21,7 +21,7 @@ export default function TouristTransportationPage() {
                   : 'border-gray-300 text-gray-500 bg-white'
               }`}
             >
-              Attended
+              Upcoming Trips
             </TabsTrigger>
             <TabsTrigger
               value={1}
@@ -31,13 +31,14 @@ export default function TouristTransportationPage() {
                   : 'border-gray-300 text-gray-500 bg-white'
               }`}
             >
-              Upcoming
+              Past Trips
             </TabsTrigger>
+            
           </TabsList>
-          <TabsContent value={0}>
+          <TabsContent value={1}>
             <TransportationHistory />
           </TabsContent>
-          <TabsContent value={1}>
+          <TabsContent value={0}>
             <UpcomingTransportation />
           </TabsContent>
         </Tabs>

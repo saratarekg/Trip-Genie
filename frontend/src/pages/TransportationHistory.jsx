@@ -329,7 +329,22 @@ const formatPrice = (price, type) => {
     ))}
   </div>
 ) : (
-  noBookingsMessage
+  <div className="text-center space-y-4 py-12">
+    <h2 className="text-2xl font-semibold text-gray-600">
+      No past transportation bookings
+    </h2>
+    <p className="text-gray-500">
+      Your completed trips will appear here.
+    </p>
+    <Button
+      size="lg"
+      variant="default"
+      className="mt-4 bg-[#388A94] text-white"
+      onClick={() => navigate("/transportation")}
+    >
+      Start Booking
+    </Button>
+  </div>
 )}
 
        

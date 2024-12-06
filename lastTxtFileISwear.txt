@@ -15,15 +15,15 @@ Sam:
 
 Amy: 
 
-- complaints 
-- preferences
-- booked hotels
+- complaints {done}
+- preferences(done)
+- booked hotels(done)
 (kol el fat dol 3and tourist)
 Loading cards
-Sooret el products fe orders
+Sooret el products fe orders(done)
 
-Orders (A1,B1,C1 yetghayaro)
-Card elbookings fe my account tetghayar w cancel teb2a gowa w bara w Amy teb3at le hadea tet2aked
+Orders (A1,B1,C1 yetghayaro)(done)
+Card elbookings fe my account tetghayar w cancel teb2a gowa w bara w Amy teb3at le hadea tet2aked (done)
 
 alwan profile w settings (done)
 
@@ -92,8 +92,8 @@ Radwa:
 - raga3i sort by preference fe itinerary !!
 - sort by preference shklo w alwano mokhtlfa f kol page
  change pass fe admin
-- khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)
-- past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)
+- khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done)
+- past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)(done)
 - complaints sort by date
 - tabs fe review registration
 - admin add user :
@@ -102,10 +102,10 @@ Radwa:
 
  
 Habiba:
-- all flights (tab3y m3 amy)
+- all flights (tab3y m3 amy)(done)
 Sheel el shay be laban men kol haga
--- ghayar makan el wallet history (khaly wallet page lewa7daha)
-- empty wishlist button still appears when the wishlist is already empty
+-- ghayar makan el wallet history (khaly wallet page lewa7daha)(done)
+- empty wishlist button still appears when the wishlist is already empty(done)
 el reports columns t2ba consistent (total sales t2ba tickets sold we y2ba we nsheel el numbering mn ay report)
 
 Hazem: 

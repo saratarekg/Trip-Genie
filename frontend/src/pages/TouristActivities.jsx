@@ -102,7 +102,7 @@ const ActivityCard = ({ booking, onSelect, onDelete, userInfo, exchangeRates }) 
             <Button 
               size="sm" 
               variant="default" 
-              className="bg-gray-200 hover:bg-gray-300 text-black font-semibold"
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(booking);
@@ -335,7 +335,22 @@ export default function BookedActivities() {
 
     
           ) : bookedActivities.length === 0 ? (
-            <div className="text-center py-8">No Upcoming Activities</div>
+            <div className="text-center space-y-4 py-12">
+              <h2 className="text-2xl font-semibold text-gray-600">
+                No attended events yet
+              </h2>
+              <p className="text-gray-500">
+                Start booking your activities to see the world!
+              </p>
+              <Button
+                size="lg"
+                variant="default"
+                className="mt-4 bg-[#388A94] text-white"
+                onClick={() => navigate("/activity")}
+              >
+                Start Booking
+              </Button>
+            </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {bookedActivities.map((booking) => (

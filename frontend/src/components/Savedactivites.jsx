@@ -318,7 +318,22 @@ export default function SavedActivities() {
         </div>
 
         ) : savedActivities.length === 0 ? (
-          <div className="text-center py-8">No Activities Saved Yet!</div>
+          <div className="text-center space-y-4 py-12">
+            <h2 className="text-2xl font-semibold text-gray-600">
+              No activities saved yet
+            </h2>
+            <p className="text-gray-500">
+              Start exploring and save activities to your list!
+            </p>
+            <Button
+              size="lg"
+              variant="default"
+              className="mt-4 bg-[#388A94] text-white"
+              onClick={() => navigate("/activity")}
+            >
+              Explore Activities
+            </Button>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {savedActivities.map((activity) => (

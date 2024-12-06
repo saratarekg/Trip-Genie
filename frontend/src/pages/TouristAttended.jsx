@@ -312,17 +312,6 @@ export default function TouristAttendedActivities() {
 
 if (error) return <div>{error}</div>;
 
-  const noBookingsMessage = (
-    <div className="text-center py-8">
-      <p className="text-xl font-semibold text-gray-600">
-        No attended activities yet
-      </p>
-      <p className="text-gray-500 mt-2">
-        Your attended activities will appear here once you've completed them.
-      </p>
-    </div>
-  );
-
   return (
     <div className="bg-gray-100 min-h-screen">
               {/* <h1 className="text-3xl font-bold mb-2">Attended Activities</h1>
@@ -332,7 +321,22 @@ if (error) return <div>{error}</div>;
       <div className="container mx-auto px-4 py-8">
 
         {activities.length === 0 ? (
-          noBookingsMessage
+          <div className="text-center space-y-4 py-12">
+            <h2 className="text-2xl font-semibold text-gray-600">
+              No attended activities yet
+            </h2>
+            <p className="text-gray-500">
+              Your attended activities will appear here once you've completed them.
+            </p>
+            <Button
+              size="lg"
+              variant="default"
+              className="mt-4 bg-[#388A94] text-white"
+              onClick={() => navigate("/activity")}
+            >
+              Start Booking
+            </Button>
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {activities.map((booking) => (
