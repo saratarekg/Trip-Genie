@@ -272,122 +272,128 @@ const WishlistPage = () => {
 
   return (
     <div>
-    <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-    </div>
-
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-6 text-left">My Wishlist</h1>
-      {wishlistItems.length === 0 ? (
-        <p className="text-center text-gray-500 text-lg">Your wishlist is empty.</p>
-      ) : (
-        <div className="space-y-6">
-          <div className="">
-            {wishlistItems.map((item) => (
-              <div
-                key={item._id}
-                className="flex flex-col lg:flex-row items-start lg:items-center border-b border-gray-300 "
-              >
-                <div
-                  className="w-28 h-28 mb-4 mt-4 lg:mb-0 cursor-pointer relative"
-                  onClick={() => navigate(`/product/${item.product._id}`)}
-                >
-                  <img
-                    src={item.product.pictures[0]?.url}
-                    alt={item.product.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex flex-col flex-grow mb-4 lg:mb-0 lg:pl-4">
-  <h2
-    className="cursor-pointer hover:underline text-xl font-semibold"
-    onClick={() => navigate(`/product/${item.product._id}`)}
-  >
-    {item.product.name}
-  </h2>
-  <p className="text-2xl font-semibold mb-2">{item.formattedPrice}</p>
-  <p className="text-sm text-gray-600 mb-4 overflow-hidden text-ellipsis whitespace-normal break-words line-clamp-2 max-h-12">
-    {item.product.description.length > 70
-      ? item.product.description.substring(0, 70) + "..."
-      : item.product.description}
-  </p>
-</div>
-<div className="flex items-end space-x-2">
-  <Button
-    onClick={() => handleAddToCart(item.product._id)}
-    className="bg-[#5D9297] hover:bg-[#388A94] text-white px-3 py-1 text-sm"
-  >
-    Add to Cart
-  </Button>
-  <Button
-    variant="outline"
-    className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white transition duration-300 ease-in-out px-3 py-1 text-sm"
-    onClick={() => handleRemoveFromWishlist(item.product._id)}
-  >
-    Remove
-  </Button>
-</div>
-
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      <div className="mt-6 flex justify-between">
-        <Button
-          variant="outline"
-          className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white transition duration-300 ease-in-out px-3 py-1 text-sm"
-          onClick={handleEmptyWishlist}
-        >
-          Empty Wishlist
-        </Button>
-        <Button
-          onClick={handleAddAllToCart}
-          className="bg-[#1A3B47] hover:bg-[#388A94] text-white px-3 py-1 text-sm"
-        >
-          Add All to Cart
-        </Button>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
 
-      <Dialog open={actionSuccess !== null} onOpenChange={() => setActionSuccess(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <div className="flex items-center">
-                <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-                Success
-              </div>
-            </DialogTitle>
-            <DialogDescription>{actionSuccess}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setActionSuccess(null)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold mb-6 text-left">My Wishlist</h1>
+        {wishlistItems.length === 0 ? (
+          <p className="text-center text-gray-500 text-lg">Your wishlist is empty.</p>
+        ) : (
+          <div className="space-y-6">
+            <div className="">
+              {wishlistItems.map((item) => (
+                <div
+                  key={item._id}
+                  className="flex flex-col lg:flex-row items-start lg:items-center border-b border-gray-300 "
+                >
+                  <div
+                    className="w-28 h-28 mb-4 mt-4 lg:mb-0 cursor-pointer relative"
+                    onClick={() => navigate(`/product/${item.product._id}`)}
+                  >
+                    <img
+                      src={item.product.pictures[0]?.url}
+                      alt={item.product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col flex-grow mb-4 lg:mb-0 lg:pl-4">
+                    <h2
+                      className="cursor-pointer hover:underline text-xl font-semibold"
+                      onClick={() => navigate(`/product/${item.product._id}`)}
+                    >
+                      {item.product.name}
+                    </h2>
+                    <p className="text-2xl font-semibold mb-2">{item.formattedPrice}</p>
+                    <p className="text-sm text-gray-600 mb-4 overflow-hidden text-ellipsis whitespace-normal break-words line-clamp-2 max-h-12">
+                      {item.product.description.length > 70
+                        ? item.product.description.substring(0, 70) + "..."
+                        : item.product.description}
+                    </p>
+                  </div>
+                  <div className="flex items-end space-x-2">
+                    <Button
+                      onClick={() => handleAddToCart(item.product._id)}
+                      className="bg-[#5D9297] hover:bg-[#388A94] text-white px-3 py-1 text-sm"
+                    >
+                      Add to Cart
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white transition duration-300 ease-in-out px-3 py-1 text-sm"
+                      onClick={() => handleRemoveFromWishlist(item.product._id)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
 
-      <Dialog open={actionError !== null} onOpenChange={() => setActionError(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <div className="flex items-center">
-                <XCircle className="w-6 h-6 text-red-500 mr-2" />
-                Error
-              </div>
-            </DialogTitle>
-            <DialogDescription>{actionError}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setActionError(null)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="mt-6 flex justify-between">
+          <Button
+            variant="outline"
+            className="border-[#1A3B47] text-[#1A3B47] hover:bg-[#1A3B47] hover:text-white transition duration-300 ease-in-out px-3 py-1 text-sm"
+            onClick={handleEmptyWishlist}
+          >
+            Empty Wishlist
+          </Button>
+          <Button
+            onClick={handleAddAllToCart}
+            className="bg-[#1A3B47] hover:bg-[#388A94] text-white px-3 py-1 text-sm"
+          >
+            Add All to Cart
+          </Button>
+        </div>
+
+        <Dialog open={actionSuccess !== null} onOpenChange={() => setActionSuccess(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                <div className="flex items-center">
+                  <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                  Success
+                </div>
+              </DialogTitle>
+              <DialogDescription>{actionSuccess}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                onClick={() => setActionSuccess(null)}
+                className="bg-[#1A3B47] hover:bg-[#3E5963] text-white py-2 px-4 rounded"
+              >
+                Close
+              </Button>
+
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={actionError !== null} onOpenChange={() => setActionError(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                <div className="flex items-center">
+                  <XCircle className="w-6 h-6 text-red-500 mr-2" />
+                  Error
+                </div>
+              </DialogTitle>
+              <DialogDescription>{actionError}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => setActionError(null)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
-  </div>
   );
-  
-  
-  
+
+
+
 };
 
 export default WishlistPage;

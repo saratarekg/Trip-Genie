@@ -53,7 +53,7 @@ import {
   UserRound,
   ThumbsDown,
   ThumbsUp,
-  
+
 } from "lucide-react";
 import { X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -122,9 +122,8 @@ const StarRating = ({ rating, readOnly = true }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-5 h-5 ${readOnly ? "" : "cursor-pointer"} ${
-            star <= rating ? "text-[#1A3B47] fill-current" : "text-gray-300"
-          }`}
+          className={`w-5 h-5 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#1A3B47] fill-current" : "text-gray-300"
+            }`}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
       ))}
@@ -135,20 +134,20 @@ const StarRating = ({ rating, readOnly = true }) => {
 const PreviousWorks = ({ works, onEdit, onRemove, onAdd, onView }) => {
   return (
     <Card className="col-span-5 outline-none shadow-none border-white">
-     <CardHeader className="flex">
-                <CardTitle className="flex justify-between items-center">
-                  <span>Work History</span>
-                  <Button
-                    onClick={onAdd}
-                    variant="outline"
-                    size="sm"
-                    className="bg-gray-200 text-gray-700 hover:bg-gray-300"
-                     >
-                    Add More
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-  
+      <CardHeader className="flex">
+        <CardTitle className="flex justify-between items-center">
+          <span>Work History</span>
+          <Button
+            onClick={onAdd}
+            variant="outline"
+            size="sm"
+            className="bg-gray-200 text-gray-700 hover:bg-gray-300"
+          >
+            Add More
+          </Button>
+        </CardTitle>
+      </CardHeader>
+
       <CardContent className="bg-gray-50 rounded-lg">
         <ScrollArea className="max-h-[200px] overflow-y-auto pt-1">
           {works.length === 0 ? (
@@ -165,34 +164,34 @@ const PreviousWorks = ({ works, onEdit, onRemove, onAdd, onView }) => {
                   </div>
                   <div className=" pt-1 mt-3 border-t border-gray-100">
 
-                  <div className="flex justify-between w-full">
-  <Button
-    onClick={() => onView(index)}
-    variant="ghost"
-    size="sm"
-    className="text-gray-600 p-0 hover:bg-white hover:text-[#1A3B47]"
-  >
-    View
-  </Button>
-  <Button
-    onClick={() => onEdit(index)}
-    variant="ghost"
-    size="sm"
-    className="text-gray-600 p-0 hover:bg-white hover:text-[#1A3B47]"
-  >
-    Edit
-  </Button>
-  <Button
-    onClick={() => onRemove(index)}
-    variant="ghost"
-    size="sm"
-    className="text-gray-600 p-0 hover:bg-white hover:text-red-600"
-  >
-    Delete
-  </Button>
-</div>
+                    <div className="flex justify-between w-full">
+                      <Button
+                        onClick={() => onView(index)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-600 p-0 hover:bg-white hover:text-[#1A3B47]"
+                      >
+                        View
+                      </Button>
+                      <Button
+                        onClick={() => onEdit(index)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-600 p-0 hover:bg-white hover:text-[#1A3B47]"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => onRemove(index)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-600 p-0 hover:bg-white hover:text-red-600"
+                      >
+                        Delete
+                      </Button>
+                    </div>
 
-</div>
+                  </div>
 
                 </li>
               ))}
@@ -379,116 +378,116 @@ const Comments = ({ comments, tourGuide }) => {
 
         {/* All Comments Popup */}
         {isAllCommentsPopupOpen && (
-  <Dialog open={isAllCommentsPopupOpen} onOpenChange={setIsAllCommentsPopupOpen}>
-    <DialogContent className="max-w-2xl p-6">
-      <DialogHeader>
-        <DialogTitle>All Reviews</DialogTitle>
-        <DialogDescription>
-          <div className="text-center my-4">
-            <span className="text-gray-500 uppercase text-sm">Overall</span>
-            <div className="flex justify-center items-center">
-              <span className="text-4xl font-bold">
-                {tourGuide.rating ? tourGuide.rating.toFixed(1) : 0}
-              </span>
-              <div className="ml-2 flex items-center">
-                {[...Array(5)].map((_, i) => {
-                  if (i < Math.floor(tourGuide.rating)) {
-                    return <Star key={i} className="w-6 h-6 text-[#1A3B47]" />;
-                  } else if (i === Math.floor(tourGuide.rating) && tourGuide.rating % 1 >= 0.5) {
-                    return <StarHalf key={i} className="w-6 h-6 text-[#1A3B47]" />;
-                  } else {
-                    return <Star key={i} className="w-6 h-6 text-gray-300" />;
-                  }
-                })}
+          <Dialog open={isAllCommentsPopupOpen} onOpenChange={setIsAllCommentsPopupOpen}>
+            <DialogContent className="max-w-2xl p-6">
+              <DialogHeader>
+                <DialogTitle>All Reviews</DialogTitle>
+                <DialogDescription>
+                  <div className="text-center my-4">
+                    <span className="text-gray-500 uppercase text-sm">Overall</span>
+                    <div className="flex justify-center items-center">
+                      <span className="text-4xl font-bold">
+                        {tourGuide.rating ? tourGuide.rating.toFixed(1) : 0}
+                      </span>
+                      <div className="ml-2 flex items-center">
+                        {[...Array(5)].map((_, i) => {
+                          if (i < Math.floor(tourGuide.rating)) {
+                            return <Star key={i} className="w-6 h-6 text-[#1A3B47]" />;
+                          } else if (i === Math.floor(tourGuide.rating) && tourGuide.rating % 1 >= 0.5) {
+                            return <StarHalf key={i} className="w-6 h-6 text-[#1A3B47]" />;
+                          } else {
+                            return <Star key={i} className="w-6 h-6 text-gray-300" />;
+                          }
+                        })}
+                      </div>
+                    </div>
+                    <p className="text-lg font-semibold text-gray-600">
+                      {tourGuide.allRatings
+                        ? `${tourGuide.allRatings.length} Ratings`
+                        : "No Ratings Yet"}
+                    </p>
+                    <hr className="my-4 border-t border-gray-300" />
+                  </div>
+
+                  {/* Filter by Rating Buttons */}
+                  <div className="flex justify-center space-x-2 mb-4">
+                    <button
+                      className={`px-3 py-2 rounded-md ${filteredRating === 0 ? "bg-[#388A94] text-white" : "bg-gray-200"}`}
+                      onClick={() => handleFilterRating(0, tourGuide.comments)}
+                    >
+                      All
+                    </button>
+                    {[5, 4, 3, 2, 1].map((star) => (
+                      <button
+                        key={star}
+                        className={`px-3 py-2 rounded-md ${filteredRating === star ? "bg-[#388A94] text-white" : "bg-gray-200"}`}
+                        onClick={() => handleFilterRating(star, tourGuide.comments)}
+                      >
+                        {star} Star{star > 1 ? "s" : ""}
+                      </button>
+                    ))}
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+
+              {/* Reviews List */}
+              <div className="space-y-6 max-h-[40vh] overflow-y-auto">
+                {filteredReviews?.length > 0 ? (
+                  filteredReviews.map((review, index) => (
+                    <div key={index} className="flex space-x-4 border-b pb-4">
+                      <Avatar>
+                        <AvatarFallback>{review.username[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-lg font-semibold">{review.username}</h4>
+                          <StarRating rating={review.rating} />
+                        </div>
+
+                        {/* Show the first 50 characters of the comment and a "Show more" link */}
+                        <p className="text-gray-600 mt-1">
+                          {expandedCommentIndex === index ? (
+                            // Show both liked and disliked content when expanded
+                            <>
+                              <span>{review.content.liked}</span>
+                              <br />
+                              <span>{review.content.disliked}</span>
+                            </>
+                          ) : (
+                            // Show only liked content when not expanded
+                            review.content.liked
+                          )}
+                        </p>
+
+                        {/* Only show "Show more" if the comment length exceeds 100 characters */}
+                        {(review.content.liked && review.content.disliked) && (
+                          <button
+                            onClick={() => handleToggleComment(index)}
+                            className="text-blue-500 mt-2 hover:underline"
+                          >
+                            {expandedCommentIndex === index ? "Show less" : "Show more"}
+                          </button>
+                        )}
+
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500">No reviews for this rating.</p>
+                )}
               </div>
-            </div>
-            <p className="text-lg font-semibold text-gray-600">
-              {tourGuide.allRatings
-                ? `${tourGuide.allRatings.length} Ratings`
-                : "No Ratings Yet"}
-            </p>
-            <hr className="my-4 border-t border-gray-300" />
-          </div>
 
-          {/* Filter by Rating Buttons */}
-          <div className="flex justify-center space-x-2 mb-4">
-            <button
-              className={`px-3 py-2 rounded-md ${filteredRating === 0 ? "bg-[#388A94] text-white" : "bg-gray-200"}`}
-              onClick={() => handleFilterRating(0, tourGuide.comments)}
-            >
-              All
-            </button>
-            {[5, 4, 3, 2, 1].map((star) => (
-              <button
-                key={star}
-                className={`px-3 py-2 rounded-md ${filteredRating === star ? "bg-[#388A94] text-white" : "bg-gray-200"}`}
-                onClick={() => handleFilterRating(star, tourGuide.comments)}
-              >
-                {star} Star{star > 1 ? "s" : ""}
-              </button>
-            ))}
-          </div>
-        </DialogDescription>
-      </DialogHeader>
-
-      {/* Reviews List */}
-      <div className="space-y-6 max-h-[40vh] overflow-y-auto">
-        {filteredReviews?.length > 0 ? (
-          filteredReviews.map((review, index) => (
-            <div key={index} className="flex space-x-4 border-b pb-4">
-              <Avatar>
-                <AvatarFallback>{review.username[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-lg font-semibold">{review.username}</h4>
-                  <StarRating rating={review.rating} />
-                </div>
-
-                {/* Show the first 50 characters of the comment and a "Show more" link */}
-                <p className="text-gray-600 mt-1">
-      {expandedCommentIndex === index ? (
-        // Show both liked and disliked content when expanded
-        <>
-          <span>{review.content.liked}</span>
-          <br />
-          <span>{review.content.disliked}</span>
-        </>
-      ) : (
-        // Show only liked content when not expanded
-        review.content.liked
-      )}
-    </p>
-
-    {/* Only show "Show more" if the comment length exceeds 100 characters */}
-      {(review.content.liked && review.content.disliked) && (
-        <button
-          onClick={() => handleToggleComment(index)}
-          className="text-blue-500 mt-2 hover:underline"
-        >
-          {expandedCommentIndex === index ? "Show less" : "Show more"}
-        </button>
-      )}
-  
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500">No reviews for this rating.</p>
+              <DialogFooter>
+                <Button
+                  className="bg-[#1A3B47]"
+                  onClick={() => setIsAllCommentsPopupOpen(false)}
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         )}
-      </div>
-
-      <DialogFooter>
-        <Button
-          className="bg-[#1A3B47]"
-          onClick={() => setIsAllCommentsPopupOpen(false)}
-        >
-          Close
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-)}
 
       </CardContent>
     </Card>
@@ -800,7 +799,7 @@ export function TourGuideProfileComponent() {
     if (!validateFields()) {
       return;
     }
-  
+
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
@@ -812,7 +811,7 @@ export function TourGuideProfileComponent() {
         nationality,
         name,
       } = editedTourGuide;
-  
+
       const formData = new FormData();
       formData.append("name", name);
       profilePicture && formData.append("profilePicture", JSON.stringify(profilePicture));
@@ -820,15 +819,15 @@ export function TourGuideProfileComponent() {
       formData.append("email", email);
       formData.append("mobile", "+" + mobile);
       formData.append("yearsOfExperience", yearsOfExperience);
-  
+
       // Append old nationality if no nationality is provided
       const nationalityToAppend = nationality._id || nationality;
       formData.append("nationality", nationalityToAppend);
-  
+
       // If newWorks is provided and has items, append newWorks; otherwise, append previousWorks
       const worksToAppend = (newWorks && newWorks.length > 0) ? newWorks : editedTourGuide.previousWorks;
       formData.append("previousWorks", JSON.stringify(worksToAppend));
-  
+
       const api = `http://localhost:4000/${role}`;
       const response = await axios.put(api, formData, {
         headers: {
@@ -836,19 +835,19 @@ export function TourGuideProfileComponent() {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       const updatedTourGuide = response.data.tourGuide;
       updatedTourGuide.mobile = updatedTourGuide.mobile.slice(1);
       setTourGuide(updatedTourGuide);
       setEditedTourGuide(updatedTourGuide);
       setIsEditing(false);
       setError("");
-      showToast("Profile updated successfully.","success");
+      showToast("Profile updated successfully.", "success");
     } catch (err) {
       handleUpdateError(err);
     }
   };
-  
+
 
   const handleUpdateError = (err) => {
     if (err.response?.data?.message === "Email already exists") {
@@ -856,10 +855,10 @@ export function TourGuideProfileComponent() {
     } else if (err.response?.data?.message === "Username already exists") {
       setValidationMessages({ username: "Username already exists" });
     } else {
-      showToast("Error updating profile. Please try again later.","error");
+      showToast("Error updating profile. Please try again later.", "error");
     }
   };
-  
+
 
   const handleRemoveWork = (index) => {
     const newWorks = [...editedTourGuide.previousWorks];
@@ -1035,7 +1034,7 @@ export function TourGuideProfileComponent() {
 
 
 
-    return (
+  return (
 
     <ToastProvider>
       <div>
@@ -1049,157 +1048,157 @@ export function TourGuideProfileComponent() {
                 <div className="flex items-center justify-center">
                   {/* Profile Picture Section */}
                   <div className="w-1/3 flex flex-col items-center">
-  <div className="relative mb-4">
-  <button
-  className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center relative"
-  onClick={() => {
-    if (isEditing) {
-      toggleDropdown(); // Toggle dropdown if editing
-    } else {
-        setIsImageViewerOpen(true); // Open image viewer if no profile picture
-    }
-  }}
-  disabled={!profilePicture && !isEditing} // Disable if no profile picture and not editing
->
-  {profilePicture ? (
-    <img
-      src={profilePicture.url || profilePicture} // Use profile picture URL if available
-      alt="Profile"
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <User className="w-10 h-10 text-gray-400" />
-  )}
+                    <div className="relative mb-4">
+                      <button
+                        className="w-24 h-24 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center relative"
+                        onClick={() => {
+                          if (isEditing) {
+                            toggleDropdown(); // Toggle dropdown if editing
+                          } else {
+                            setIsImageViewerOpen(true); // Open image viewer if no profile picture
+                          }
+                        }}
+                        disabled={!profilePicture && !isEditing} // Disable if no profile picture and not editing
+                      >
+                        {profilePicture ? (
+                          <img
+                            src={profilePicture.url || profilePicture} // Use profile picture URL if available
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-10 h-10 text-gray-400" />
+                        )}
 
-  {isEditing && (
-    <div className="h-24 w-24 absolute bg-black bg-opacity-50 rounded-full flex items-center justify-center">
-      <span className="text-white text-xs text-center">
-        Edit Profile Picture
-      </span>
-    </div>
-  )}
-</button>
+                        {isEditing && (
+                          <div className="h-24 w-24 absolute bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs text-center">
+                              Edit Profile Picture
+                            </span>
+                          </div>
+                        )}
+                      </button>
 
-    {isDropdownOpen && (
-      <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
-        <ul className="py-2">
-          {profilePicture && (
-            <li
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-center"
-              onClick={() => {
-                setIsImageViewerOpen(true);
-                setDropdownOpen(false);
-              }}
-            >
-              View
-            </li>
-          )}
-          {isEditing && (
-            <li
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-center"
-              onClick={handleUpdateClick}
-            >
-              Update
-            </li>
-          )}
-          {isEditing && profilePicture && (
-            <li
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500 text-center"
-              onClick={() => {
-                setProfilePicture(null);
-                setDropdownOpen(false);
-              }}
-            >
-              Delete
-            </li>
-          )}
-        </ul>
-      </div>
-    )}
-  </div>
-  <div className="text-center mb-2">
-    <div className="flex flex-col items-center gap-2">
-      {isEditing ? (
-        <div className="flex flex-col items-center">
-          <Input
-            type="text"
-            name="username"
-            value={editedTourGuide.username}
-            onChange={handleInputChange}
-            className={validationMessages.username ? "border-red-500" : ""}
-          />
-          {validationMessages.username && (
-            <p className="text-red-500 text-xs mt-1">{validationMessages.username}</p>
-          )}
-        </div>
-      ) : (
-        <>
-          <StarRating rating={tourGuide?.rating} />
-          <div className="flex flex-col items-center">
-            <div className="flex items-center">
-              {tourGuide?.isAccepted ? (
-                <UserRoundCheck className="w-5 h-5 text-[#388A94]" />
-              ) : (
-                <UserRoundX className="w-5 h-5 text-[#F88C33]" />
-              )}
-              <h2 className="text-xl font-bold ml-1">{tourGuide?.username}</h2>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-    {isEditing ? (
-      <div className="flex flex-col items-center mt-2">
-        <Input
-          type="email"
-          name="email"
-          value={editedTourGuide.email}
-          onChange={handleInputChange}
-          className={validationMessages.email ? "border-red-500" : ""}
-        />
-        {validationMessages.email && (
-          <p className="text-red-500 text-xs mt-1">{validationMessages.email}</p>
-        )}
-      </div>
-    ) : (
-      <p className="text-sm text-gray-500 mt-1">{tourGuide?.email}</p>
-    )}
-  </div>
-  <Separator />
-  {isEditing ? (
-    <div className="flex flex-col w-full max-w-[200px] ">
-      <Button
-        onClick={handleUpdate}
-        className="w-full mt-2 bg-[#388A94] hover:bg-[#2e6b77]"
-      >
-        Update
-      </Button>
-      <Button
-        onClick={handleDiscard}
-        variant="outline"
-        className="w-full mt-2 hover:bg-gray-200 bg-gray-100"
-      >
-        Cancel
-      </Button>
-    </div>
-  ) : (
-    <>
-    <Button
-      variant="outline"
-      onClick={() => setIsEditing(true)}
-      className="w-full mt-2 text-sm hover:bg-gray-200 bg-gray-100"
-    >
-      Edit Profile
-    </Button>
-     <Button
-     onClick={() => setIsPasswordModalOpen(true)}
-     className="p-2 w-full mt-2 bg-[#1A3B47]"
-   >
-     Change Password
-   </Button>
-   </>
-  )}
-</div>
+                      {isDropdownOpen && (
+                        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-32">
+                          <ul className="py-2">
+                            {profilePicture && (
+                              <li
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-center"
+                                onClick={() => {
+                                  setIsImageViewerOpen(true);
+                                  setDropdownOpen(false);
+                                }}
+                              >
+                                View
+                              </li>
+                            )}
+                            {isEditing && (
+                              <li
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-center"
+                                onClick={handleUpdateClick}
+                              >
+                                Update
+                              </li>
+                            )}
+                            {isEditing && profilePicture && (
+                              <li
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500 text-center"
+                                onClick={() => {
+                                  setProfilePicture(null);
+                                  setDropdownOpen(false);
+                                }}
+                              >
+                                Delete
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center mb-2">
+                      <div className="flex flex-col items-center gap-2">
+                        {isEditing ? (
+                          <div className="flex flex-col items-center">
+                            <Input
+                              type="text"
+                              name="username"
+                              value={editedTourGuide.username}
+                              onChange={handleInputChange}
+                              className={validationMessages.username ? "border-red-500" : ""}
+                            />
+                            {validationMessages.username && (
+                              <p className="text-red-500 text-xs mt-1">{validationMessages.username}</p>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <StarRating rating={tourGuide?.rating} />
+                            <div className="flex flex-col items-center">
+                              <div className="flex items-center">
+                                {tourGuide?.isAccepted ? (
+                                  <UserRoundCheck className="w-5 h-5 text-[#388A94]" />
+                                ) : (
+                                  <UserRoundX className="w-5 h-5 text-[#F88C33]" />
+                                )}
+                                <h2 className="text-xl font-bold ml-1">{tourGuide?.username}</h2>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      {isEditing ? (
+                        <div className="flex flex-col items-center mt-2">
+                          <Input
+                            type="email"
+                            name="email"
+                            value={editedTourGuide.email}
+                            onChange={handleInputChange}
+                            className={validationMessages.email ? "border-red-500" : ""}
+                          />
+                          {validationMessages.email && (
+                            <p className="text-red-500 text-xs mt-1">{validationMessages.email}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 mt-1">{tourGuide?.email}</p>
+                      )}
+                    </div>
+                    <Separator />
+                    {isEditing ? (
+                      <div className="flex flex-col w-full max-w-[200px] ">
+                        <Button
+                          onClick={handleUpdate}
+                          className="w-full mt-2 bg-[#388A94] hover:bg-[#2e6b77]"
+                        >
+                          Update
+                        </Button>
+                        <Button
+                          onClick={handleDiscard}
+                          variant="outline"
+                          className="w-full mt-2 hover:bg-gray-200 bg-gray-100"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsEditing(true)}
+                          className="w-full mt-2 text-sm hover:bg-gray-200 bg-gray-100"
+                        >
+                          Edit Profile
+                        </Button>
+                        <Button
+                          onClick={() => setIsPasswordModalOpen(true)}
+                          className="p-2 w-full mt-2 bg-[#1A3B47]"
+                        >
+                          Change Password
+                        </Button>
+                      </>
+                    )}
+                  </div>
 
 
                   {/* Vertical Separator */}
@@ -1252,32 +1251,32 @@ export function TourGuideProfileComponent() {
 
                     {/* Row 2 */}
                     <div className="grid grid-cols-2 gap-4">
-                    <div>
-  <p className="text-xs text-gray-500">Phone Number</p>
-  {isEditing ? (
-    <div className="relative">
-      <PhoneInput
-        country="eg"
-        value={editedTourGuide.mobile}
-        onChange={(value) =>
-          handleInputChange({ target: { name: 'mobile', value } })
-        }
-        inputProps={{
-          name: 'mobile',
-          required: true,
-          className: `w-full pt-2 pb-2 pl-11 text-sm ${validationMessages.mobile ? 'border-red-500' : 'border-gray-300'}`,
-        }}
-        containerClass="w-full"
-        disableDropdown={false}
-      />
-      {validationMessages.mobile && (
-        <span className="text-red-500 text-xs">{validationMessages.mobile}</span>
-      )}
-    </div>
-  ) : (
-    <p className="text-sm font-medium">+{tourGuide?.mobile}</p>
-  )}
-</div>
+                      <div>
+                        <p className="text-xs text-gray-500">Phone Number</p>
+                        {isEditing ? (
+                          <div className="relative">
+                            <PhoneInput
+                              country="eg"
+                              value={editedTourGuide.mobile}
+                              onChange={(value) =>
+                                handleInputChange({ target: { name: 'mobile', value } })
+                              }
+                              inputProps={{
+                                name: 'mobile',
+                                required: true,
+                                className: `w-full pt-2 pb-2 pl-11 text-sm ${validationMessages.mobile ? 'border-red-500' : 'border-gray-300'}`,
+                              }}
+                              containerClass="w-full"
+                              disableDropdown={false}
+                            />
+                            {validationMessages.mobile && (
+                              <span className="text-red-500 text-xs">{validationMessages.mobile}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-sm font-medium">+{tourGuide?.mobile}</p>
+                        )}
+                      </div>
 
                       <div>
                         <p className="text-xs text-gray-500">Nationality</p>
@@ -1311,22 +1310,22 @@ export function TourGuideProfileComponent() {
                           <p className="text-sm font-medium">{tourGuide?.nationality.name}</p>
                         )}
 
- 
+
                       </div>
-                      
+
                     </div>
                     <Separator />
                     <div className="mt-4">
-      <button
-        onClick={handlePreviousWorksClick}
-        className="bg-[#388A94] hover:bg-[#2e6b77] w-full text-white px-4 py-2 rounded-md transition-colors"
-      >
-        View Previous Works
-      </button>
-    </div>
-      
+                      <button
+                        onClick={handlePreviousWorksClick}
+                        className="bg-[#388A94] hover:bg-[#2e6b77] w-full text-white px-4 py-2 rounded-md transition-colors"
+                      >
+                        View Previous Works
+                      </button>
+                    </div>
 
-                
+
+
                   </div>
                 </div>
               </CardContent>
@@ -1337,14 +1336,14 @@ export function TourGuideProfileComponent() {
                 <CardTitle className="flex justify-between items-center">
                   <span>Notifications</span>
                   {notifications.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    className="text-sm text-[#388A94] p-2"
-                    onClick={() => (window.location.href = "/account/notifications")}
-                  >
-                    View All
-                  </Button>
-                )}
+                    <Button
+                      variant="ghost"
+                      className="text-sm text-[#388A94] p-2"
+                      onClick={() => (window.location.href = "/account/notifications")}
+                    >
+                      View All
+                    </Button>
+                  )}
                 </CardTitle>
               </CardHeader>
 
@@ -1373,7 +1372,7 @@ export function TourGuideProfileComponent() {
                         <li
                           key={index}
                           className="p-2 hover:bg-gray-50 transition-colors relative cursor-pointer flex flex-col gap-1"
-                          onClick={() => {markNotificationAsSeen(notification._id), navigate("/account/notifications")}}
+                          onClick={() => { markNotificationAsSeen(notification._id), navigate("/account/notifications") }}
                         >
                           {!notification.seen && (
                             <span className="absolute top-2 right-2 bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
@@ -1403,14 +1402,14 @@ export function TourGuideProfileComponent() {
         onAdd={handleAddWork}
         onView={handleViewWork}
       /> */}
-            
+
 
             <div className="col-span-6 ">
-            <Comments comments={tourGuide?.comments || []} tourGuide={tourGuide} />
-          </div>
+              <Comments comments={tourGuide?.comments || []} tourGuide={tourGuide} />
+            </div>
 
             <Card className="col-span-6  h-full flex flex-col">
-            <CardHeader className="flex">
+              <CardHeader className="flex">
                 <CardTitle className="flex justify-between items-center">
                   <span>Weekly Revenue Analytics</span>
                   <Button
@@ -1479,7 +1478,7 @@ export function TourGuideProfileComponent() {
               </CardContent>
             </Card>
 
-            
+
           </div>
 
           {/* Profile Picture Update Modal */}
@@ -1490,12 +1489,12 @@ export function TourGuideProfileComponent() {
                 onImageCropped={handleImageCropped}
                 currentImage={profilePicture?.url || profilePicture}
               />
-              <div className="mt-6 flex justify-end gap-3">
-                <Button onClick={handleFirstSave} className="bg-[#F88C33]">
+              <div className="mt-4 flex justify-end space-x-2">
+                <Button onClick={handleFirstSave} className="bg-[#1A3B47] hover:bg-[#142B36] text-white px-4 py-2 rounded">
                   Save
                 </Button>
-                <Button onClick={closeModal} variant="outline">
-                  Cancel
+                <Button onClick={closeModal} variant="destructive" className="bg-[#A3A3A3] hover:bg-[#7E7E7E] text-white px-4 py-2 rounded">
+                  Close
                 </Button>
               </div>
             </div>
@@ -1509,24 +1508,24 @@ export function TourGuideProfileComponent() {
             imageUrl={profilePicture?.url || profilePicture}
           />
           {isPreviousWorksPopupOpen && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full relative">
-            <button
-              onClick={closePreviousWorksPopup}
-              className="absolute top-2 right-2 text-gray-600 text-xl"
-            >
-              &times;
-            </button>
-            <PreviousWorks
-              works={editedTourGuide?.previousWorks || []}
-              onEdit={handleEditWork}
-              onRemove={handleRemoveWork}
-              onAdd={handleAddWork}
-              onView={handleViewWork}
-            />
-          </div>
-        </div>
-      )}
+            <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
+              <div className="bg-white p-6 rounded-lg max-w-md w-full relative">
+                <button
+                  onClick={closePreviousWorksPopup}
+                  className="absolute top-2 right-2 text-gray-600 text-xl"
+                >
+                  &times;
+                </button>
+                <PreviousWorks
+                  works={editedTourGuide?.previousWorks || []}
+                  onEdit={handleEditWork}
+                  onRemove={handleRemoveWork}
+                  onAdd={handleAddWork}
+                  onView={handleViewWork}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <ToastViewport className="fixed top-0 right-0 p-4" />
@@ -1588,61 +1587,61 @@ export function TourGuideProfileComponent() {
       </Dialog>
 
       <Dialog open={isViewWorkDialogOpen} onOpenChange={handleCloseViewWork}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>{viewedWork?.title}</DialogTitle>
-    </DialogHeader>
-    <div className="grid gap-4 py-4">
-      <p><strong>Company:</strong> {viewedWork?.company}</p>
-      <p><strong>Duration:</strong> {viewedWork?.duration}</p>
-      <p>
-  <strong>Description:</strong>
-  <span
-    className="block"
-    style={{
-      maxWidth: '100%',
-      wordWrap: 'break-word',
-      overflowWrap: 'break-word', // Ensures long words wrap correctly
-      wordBreak: 'break-word', // For handling words that would overflow
-    }}
-  >
-    {viewedWork?.description}
-  </span>
-</p>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{viewedWork?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <p><strong>Company:</strong> {viewedWork?.company}</p>
+            <p><strong>Duration:</strong> {viewedWork?.duration}</p>
+            <p>
+              <strong>Description:</strong>
+              <span
+                className="block"
+                style={{
+                  maxWidth: '100%',
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word', // Ensures long words wrap correctly
+                  wordBreak: 'break-word', // For handling words that would overflow
+                }}
+              >
+                {viewedWork?.description}
+              </span>
+            </p>
 
-    </div>
-    <DialogFooter>
-      <Button className="bg-[#388A94] hover:bg-[#2e6b77]" onClick={handleCloseViewWork}>Close</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+          </div>
+          <DialogFooter>
+            <Button className="bg-[#388A94] hover:bg-[#2e6b77]" onClick={handleCloseViewWork}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
 
       <Modal show={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)}>
-      <PasswordChanger onSuccess={handlePasswordChangeSuccess} />
-    </Modal>
-    {isToastOpen && (
-      <Toast
-        onOpenChange={setIsToastOpen}
-        open={isToastOpen}
-        duration={1500}
-        className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
-      >
-        <div className="flex items-center">
-          {toastType === 'success' ? (
-            <CheckCircle className="text-green-500 mr-2" />
-          ) : (
-            <XCircle className="text-red-500 mr-2" />
-          )}
-          <div>
-            <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
-            <ToastDescription>{toastMessage}</ToastDescription>
+        <PasswordChanger onSuccess={handlePasswordChangeSuccess} />
+      </Modal>
+      {isToastOpen && (
+        <Toast
+          onOpenChange={setIsToastOpen}
+          open={isToastOpen}
+          duration={1500}
+          className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+        >
+          <div className="flex items-center">
+            {toastType === 'success' ? (
+              <CheckCircle className="text-green-500 mr-2" />
+            ) : (
+              <XCircle className="text-red-500 mr-2" />
+            )}
+            <div>
+              <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+              <ToastDescription>{toastMessage}</ToastDescription>
+            </div>
           </div>
-        </div>
-        <ToastClose />
-      </Toast>
-    )}
-      
+          <ToastClose />
+        </Toast>
+      )}
+
     </ToastProvider>
 
   );

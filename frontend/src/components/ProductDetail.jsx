@@ -1779,9 +1779,17 @@ const ProductDetail = () => {
             <DialogDescription>{deleteError}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="default" onClick={() => setDeleteError(null)}>
-              Close
-            </Button>
+            <div className="flex justify-end mt-2">
+              <Button
+                variant="default"
+                onClick={() => setDeleteError(null)}
+                className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded"
+              >
+                Close
+              </Button>
+            </div>
+
+
           </DialogFooter>
         </DialogContent>
       </Dialog>

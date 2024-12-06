@@ -127,5 +127,32 @@ Admin:
 
 --------------------------------------------Sprint 3------------------------------------------
 
--Saved button and functionality in activity details men gowa
--saved for itineraries(mesh lazem)
+(tourist)
+-Saved button and functionality in activity details men gowa(done✅)
+-saved for itineraries(mesh lazem done✅)
+-lama ba delete 7aga men el shopping cart lazem refresh 3ashan tro7
+-update prefrences toast teb2a zai elba2i(ta7t)
+
+(tour guide)
+-update itinerary leha popup(cant aw succesfully updated)
+-creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
+-sa3at beyede error lama mark all as read
+
+(advertiser)
+-choose country dropdown mesh bayen f create activity so testing this page we2ef
+-updating activity popup btdos basraha 3adi w btfdl f update activity
+
+
+(toursim governor)
+-failed to fetch countires cant create fa not tested 
+-creating historical tag betdos bara el popup(not an issue awi 3ashan we cant create 2 historical tags zai ba3d)
+
+(admin)
+-add admin/governor page zai ma hadwa 2alet ka layout
+-create product layout ytzbt bardo
+-no popup l flag inappropriate itinerary
+-when opening single itinerary to flag it, dashboard mesh betnavigate lazem return to all itineraries
+-create promo code alignment ttzbt
+
+toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
+

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowUpDown, Calendar, Plane, AlertCircle,PlaneLanding,PlaneTakeoff,Info,Ticket,Clock } from "lucide-react";
+import { ArrowUpDown, Calendar, Plane, AlertCircle, PlaneLanding, PlaneTakeoff, Info, Ticket, Clock } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -39,7 +39,7 @@ import { Label } from "@/components/ui/label";
 import Cookies from "js-cookie";
 import { useSearchParams } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
-import { set , format, startOfToday} from "date-fns";
+import { set, format, startOfToday } from "date-fns";
 
 const airports = [
   { code: "CAI", name: "Cairo International Airport", region: "Egypt" },
@@ -209,7 +209,7 @@ function BookingPage() {
   );
   const [returnDate, setReturnDate] = useState(
     searchParams.get("returnDate") ||
-      formatDate(new Date(Date.now() + 86400000))
+    formatDate(new Date(Date.now() + 86400000))
   );
   const [tripType, setTripType] = useState(
     searchParams.get("tripType") || "roundTrip"
@@ -281,7 +281,7 @@ function BookingPage() {
       handleBookNow();
     }
   }, [searchParams]);
-  
+
 
 
   const renderLocationDisplay = (code) => {
@@ -311,19 +311,17 @@ function BookingPage() {
       const items = [
         {
           product: {
-            name: `${
-              selectedFlight.itineraries[0].segments[0].departure.iataCode
-            } → ${
-              selectedFlight.itineraries[0].segments[
+            name: `${selectedFlight.itineraries[0].segments[0].departure.iataCode
+              } → ${selectedFlight.itineraries[0].segments[
                 selectedFlight.itineraries[0].segments.length - 1
               ].arrival.iataCode
-            }`,
+              }`,
           },
           quantity: numberOfSeats,
           totalPrice: Math.round(parseFloat(selectedFlight.price.total)), // convert price to cents
         },
       ];
-      const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total),currencyCode , "USD");
+      const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total), currencyCode, "USD");
 
       // Prepare metadata and other necessary details
       const metadata = {
@@ -345,15 +343,15 @@ function BookingPage() {
           : undefined,
         returnArrivalDate: selectedFlight.itineraries[1]
           ? selectedFlight.itineraries[1].segments[
-              selectedFlight.itineraries[1].segments.length - 1
-            ].arrival.at
+            selectedFlight.itineraries[1].segments.length - 1
+          ].arrival.at
           : undefined,
         seatType: seatType,
         flightType: `${selectedFlight.itineraries[0].segments[0].carrierCode} ${selectedFlight.itineraries[0].segments[0].number}`,
         flightTypeReturn: selectedFlight.itineraries[1]
           ? selectedFlight.itineraries[1].segments[0].carrierCode +
-            " " +
-            selectedFlight.itineraries[1].segments[0].number
+          " " +
+          selectedFlight.itineraries[1].segments[0].number
           : undefined,
       };
 
@@ -452,11 +450,11 @@ function BookingPage() {
                     price: convertedPrice,
                     numberOfTickets: numberOfTickets,
                     type: type,
-                    returnDepartureDate: returnDepartureDate? returnDepartureDate : undefined,
-                    returnArrivalDate: returnArrivalDate? returnArrivalDate : undefined,
+                    returnDepartureDate: returnDepartureDate ? returnDepartureDate : undefined,
+                    returnArrivalDate: returnArrivalDate ? returnArrivalDate : undefined,
                     seatType: seatType,
                     flightType: flightType,
-                    flightTypeReturn: flightTypeReturn? flightTypeReturn : undefined,
+                    flightTypeReturn: flightTypeReturn ? flightTypeReturn : undefined,
                   }),
                 }
               );
@@ -468,7 +466,7 @@ function BookingPage() {
 
               setIsBookingConfirmationOpen({
                 open: true,
-                paymentMethod : "CreditCard",
+                paymentMethod: "CreditCard",
                 price,
                 wallet: tourist?.wallet,
               });
@@ -491,7 +489,7 @@ function BookingPage() {
               const newUrl = `${window.location.pathname}`;
 
               window.history.replaceState(null, "", newUrl);
-              return; 
+              return;
             }
           } catch (error) {
             console.error("Error checking payment status:", error);
@@ -508,71 +506,71 @@ function BookingPage() {
 
       if (paymentMethod === "Wallet") {
 
-      const token = Cookies.get("jwt");
-      
-      const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total), currencyCode, "USD");
-      const response = await fetch(
-        "http://localhost:4000/tourist/book-flight",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            paymentType: paymentMethod,
-            flightID: `${Math.random().toString(36).substr(2, 9)}`,
-            from: selectedFlight.itineraries[0].segments[0].departure.iataCode,
-            to: selectedFlight.itineraries[0].segments[
-              selectedFlight.itineraries[0].segments.length - 1
-            ].arrival.iataCode,
-            departureDate:
-              selectedFlight.itineraries[0].segments[0].departure.at,
-            arrivalDate:
-              selectedFlight.itineraries[0].segments[
+        const token = Cookies.get("jwt");
+
+        const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total), currencyCode, "USD");
+        const response = await fetch(
+          "http://localhost:4000/tourist/book-flight",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              paymentType: paymentMethod,
+              flightID: `${Math.random().toString(36).substr(2, 9)}`,
+              from: selectedFlight.itineraries[0].segments[0].departure.iataCode,
+              to: selectedFlight.itineraries[0].segments[
                 selectedFlight.itineraries[0].segments.length - 1
-              ].arrival.at,
-            price: convertedPrice,
-            numberOfTickets: numberOfSeats,
-            type: selectedFlight.itineraries[1] ? "Round Trip" : "One Way",
-            returnDepartureDate: selectedFlight.itineraries[1]
-              ? selectedFlight.itineraries[1].segments[0].departure.at
-              : undefined,
-            returnArrivalDate: selectedFlight.itineraries[1]
-              ? selectedFlight.itineraries[1].segments[
+              ].arrival.iataCode,
+              departureDate:
+                selectedFlight.itineraries[0].segments[0].departure.at,
+              arrivalDate:
+                selectedFlight.itineraries[0].segments[
+                  selectedFlight.itineraries[0].segments.length - 1
+                ].arrival.at,
+              price: convertedPrice,
+              numberOfTickets: numberOfSeats,
+              type: selectedFlight.itineraries[1] ? "Round Trip" : "One Way",
+              returnDepartureDate: selectedFlight.itineraries[1]
+                ? selectedFlight.itineraries[1].segments[0].departure.at
+                : undefined,
+              returnArrivalDate: selectedFlight.itineraries[1]
+                ? selectedFlight.itineraries[1].segments[
                   selectedFlight.itineraries[1].segments.length - 1
                 ].arrival.at
-              : undefined,
-            seatType: seatType,
-            flightType:
-              selectedFlight.itineraries[0].segments[0].carrierCode +
-              " " +
-              selectedFlight.itineraries[0].segments[0].number,
-            flightTypeReturn: selectedFlight.itineraries[1]
-              ? selectedFlight.itineraries[1].segments[0].carrierCode
-              : undefined,
-          }),
+                : undefined,
+              seatType: seatType,
+              flightType:
+                selectedFlight.itineraries[0].segments[0].carrierCode +
+                " " +
+                selectedFlight.itineraries[0].segments[0].number,
+              flightTypeReturn: selectedFlight.itineraries[1]
+                ? selectedFlight.itineraries[1].segments[0].carrierCode
+                : undefined,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          setBookingError("Insufficient funds. Please try again.");
+          throw new Error("Failed to book the flight");
         }
-      );
 
-      if (!response.ok) {
-        setBookingError("Insufficient funds. Please try again.");
-        throw new Error("Failed to book the flight");
+
+
+        const data = await response.json();
+        console.log("Booking successful:", data);
+        setIsBookingConfirmationOpen({
+          open: true,
+          paymentMethod,
+          price: selectedFlight.price.total,
+          wallet: tourist?.wallet,
+        });
+
       }
-
-    
-
-      const data = await response.json();
-      console.log("Booking successful:", data);
-      setIsBookingConfirmationOpen({
-        open: true,
-        paymentMethod ,
-        price :selectedFlight.price.total,
-        wallet: tourist?.wallet,
-      }); 
-
-    }
-       } catch (error) {
+    } catch (error) {
       console.error("Booking error:", error);
     }
   };
@@ -722,8 +720,7 @@ function BookingPage() {
     setError("");
     try {
       const response = await fetch(
-        `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}${
-          tripType === "roundTrip" ? `&returnDate=${returnDate}` : ""
+        `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}${tripType === "roundTrip" ? `&returnDate=${returnDate}` : ""
         }&adults=1&nonStop=true&currencyCode=${currencyCode}`,
         {
           headers: {
@@ -1033,7 +1030,7 @@ function BookingPage() {
                   <SelectContent>
                     <SelectItem value="all">All Prices</SelectItem>
                     <SelectItem value="under25">
-                      Under {currencySymbol}{Math.floor(0.25 * maxPrice)} 
+                      Under {currencySymbol}{Math.floor(0.25 * maxPrice)}
                     </SelectItem>
                     <SelectItem value="under50">
                       Under {currencySymbol}{Math.floor(0.5 * maxPrice)}
@@ -1042,7 +1039,7 @@ function BookingPage() {
                       Under {currencySymbol}{Math.floor(0.75 * maxPrice)}
                     </SelectItem>
                     <SelectItem value="over75">
-                      Over {currencySymbol}{Math.floor(0.75 * maxPrice)} 
+                      Over {currencySymbol}{Math.floor(0.75 * maxPrice)}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -1051,77 +1048,36 @@ function BookingPage() {
               <div className=" gap-3">
                 {paginatedFlights.map((flight, index) => (
                   <Card key={index} className="p-6 mb-4">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="text-lg">
-                      <span className="font-semibold text-[#1A3B47]">Flight Number</span>
-                      <span className="text-base ml-1 text-[#5D9297]">
-                        {flight.itineraries[0].segments[0].carrierCode} {flight.itineraries[0].segments[0].number}
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="text-lg">
+                        <span className="font-semibold text-[#1A3B47]">Flight Number</span>
+                        <span className="text-base ml-1 text-[#5D9297]">
+                          {flight.itineraries[0].segments[0].carrierCode} {flight.itineraries[0].segments[0].number}
+                        </span>
+                      </div>
+                      <span className="text-4xl font-bold text-[#1A3B47]">
+                        {currencySymbol}{flight.price.total}
                       </span>
                     </div>
-                    <span className="text-4xl font-bold text-[#1A3B47]">
-                    {currencySymbol}{flight.price.total}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <div className={`mb-6 ${!flight.itineraries[1] ? "justify-center" : ""}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="text-sm text-gray-500">Depart</div>
-                          <div className="text-3xl font-bold text-[#1A3B47]">
-                            {new Date(flight.itineraries[0].segments[0].departure.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {new Date(flight.itineraries[0].segments[0].departure.at).toLocaleDateString()}
-                          </div>
-                          <div className="text-sm text-gray-500">{flight.itineraries[0].segments[0].departure.iataCode}</div>
-                        </div>
-                        <div className="flex-1 flex flex-col items-center mx-4">
-                          <div className="w-full flex items-center gap-2">
-                            <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
-                            <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
-                              <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                                {calculateDuration(flight.itineraries[0].segments[0].departure.at, flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at)}
-                              </span>
-                            </div>
-                            <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="text-sm text-gray-500">Arrive</div>
-                          <div className="text-3xl font-bold text-[#1A3B47]">
-                            {new Date(flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {new Date(flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at).toLocaleDateString()}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.iataCode}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    {flight.itineraries[1] && (
-                      <div className="pt-6 border-t">
-                        {/* Return trip information */}
+                    <div className="flex flex-col">
+                      <div className={`mb-6 ${!flight.itineraries[1] ? "justify-center" : ""}`}>
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">
                             <div className="text-sm text-gray-500">Depart</div>
                             <div className="text-3xl font-bold text-[#1A3B47]">
-                              {new Date(flight.itineraries[1].segments[0].departure.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              {new Date(flight.itineraries[0].segments[0].departure.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(flight.itineraries[1].segments[0].departure.at).toLocaleDateString()}
+                              {new Date(flight.itineraries[0].segments[0].departure.at).toLocaleDateString()}
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {flight.itineraries[1].segments[0].departure.iataCode}
-                            </div>
+                            <div className="text-sm text-gray-500">{flight.itineraries[0].segments[0].departure.iataCode}</div>
                           </div>
                           <div className="flex-1 flex flex-col items-center mx-4">
                             <div className="w-full flex items-center gap-2">
                               <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                               <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
                                 <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                                  {calculateDuration(flight.itineraries[1].segments[0].departure.at, flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at)}
+                                  {calculateDuration(flight.itineraries[0].segments[0].departure.at, flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at)}
                                 </span>
                               </div>
                               <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
@@ -1130,40 +1086,81 @@ function BookingPage() {
                           <div className="space-y-1">
                             <div className="text-sm text-gray-500">Arrive</div>
                             <div className="text-3xl font-bold text-[#1A3B47]">
-                              {new Date(flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              {new Date(flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at).toLocaleDateString()}
+                              {new Date(flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at).toLocaleDateString()}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.iataCode}
+                              {flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.iataCode}
                             </div>
                           </div>
                         </div>
                       </div>
-                    )}
-                    <div className="flex items-center justify-between mt-6 space-y-0">
-                      <div className="flex bg-gray-100 px-4 py-2 rounded-md">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Ticket className="h-6 w-6" />
-                          <span>Show e-tickets and passenger identities during check-in</span>
+                      {flight.itineraries[1] && (
+                        <div className="pt-6 border-t">
+                          {/* Return trip information */}
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <div className="text-sm text-gray-500">Depart</div>
+                              <div className="text-3xl font-bold text-[#1A3B47]">
+                                {new Date(flight.itineraries[1].segments[0].departure.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {new Date(flight.itineraries[1].segments[0].departure.at).toLocaleDateString()}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {flight.itineraries[1].segments[0].departure.iataCode}
+                              </div>
+                            </div>
+                            <div className="flex-1 flex flex-col items-center mx-4">
+                              <div className="w-full flex items-center gap-2">
+                                <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                                <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
+                                  <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
+                                    {calculateDuration(flight.itineraries[1].segments[0].departure.at, flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at)}
+                                  </span>
+                                </div>
+                                <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-sm text-gray-500">Arrive</div>
+                              <div className="text-3xl font-bold text-[#1A3B47]">
+                                {new Date(flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {new Date(flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at).toLocaleDateString()}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.iataCode}
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="border-l-2 border-gray-300 h-9 mx-4"></div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Clock className="h-6 w-6" />
-                          <span>Please be at the boarding gate at least 30 minutes before boarding time</span>
+                      )}
+                      <div className="flex items-center justify-between mt-6 space-y-0">
+                        <div className="flex bg-gray-100 px-4 py-2 rounded-md">
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Ticket className="h-6 w-6" />
+                            <span>Show e-tickets and passenger identities during check-in</span>
+                          </div>
+                          <div className="border-l-2 border-gray-300 h-9 mx-4"></div>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Clock className="h-6 w-6" />
+                            <span>Please be at the boarding gate at least 30 minutes before boarding time</span>
+                          </div>
                         </div>
+                        <Button
+                          className="bg-[#388A94] hover:bg-[#2e6b77] text-lg text-white seeDetails ml-2 px-16 pt-4 pb-4"
+                          onClick={() => handleOpenDialog(flight)}
+                        >
+                          Book Now
+                        </Button>
                       </div>
-                      <Button
-                        className="bg-[#388A94] hover:bg-[#2e6b77] text-lg text-white seeDetails ml-2 px-16 pt-4 pb-4"
-                        onClick={() => handleOpenDialog(flight)}
-                      >
-                        Book Now
-                      </Button>
                     </div>
-                  </div>
-                </Card>
-                
+                  </Card>
+
                 ))}
               </div>
 
@@ -1172,11 +1169,10 @@ function BookingPage() {
                   <PaginationItem>
                     <PaginationPrevious
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className={`cursor-pointer ${
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }`}
+                      className={`cursor-pointer ${currentPage === 1
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                        }`}
                     />
                   </PaginationItem>
                   {[...Array(totalPages)].map((_, i) => {
@@ -1209,11 +1205,10 @@ function BookingPage() {
                       onClick={() =>
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
-                      className={`cursor-pointer ${
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }`}
+                      className={`cursor-pointer ${currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                        }`}
                     />
                   </PaginationItem>
                 </PaginationContent>
@@ -1335,12 +1330,16 @@ function BookingPage() {
                   </Alert>
                 )}
 
-                <Button
-                  className="mt-4 w-full bg-[#388A94] hover:bg-[#1A3B47] text-white "
-                  onClick={handleBookNow}
-                >
-                  Book Now
-                </Button>
+                <div className="flex justify-end">
+                  <Button
+                    className="mt-4 bg-[#388A94] hover:bg-[#1A3B47] text-white"
+                    onClick={handleBookNow}
+                  >
+                    Book Now
+                  </Button>
+                </div>
+
+
               </div>
             )}
           </DialogContent>
@@ -1357,17 +1356,17 @@ function BookingPage() {
                 Your flight has been booked successfully.
               </DialogDescription>
               {isBookingConfirmationOpen.paymentMethod === "Wallet" && (
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <Label className="text-right">You Paid:</Label>
-              <div>
-               {isBookingConfirmationOpen.price}{currencySymbol}
-              </div>
-              <Label className="text-right">New Wallet Balance:</Label>
-              <div>
-              {currencySymbol}{convertPrice(isBookingConfirmationOpen.wallet,"USD",currencyCode)-isBookingConfirmationOpen.price}
-              </div>
-            </div>
-          )}
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <Label className="text-right">You Paid:</Label>
+                  <div>
+                    {isBookingConfirmationOpen.price}{currencySymbol}
+                  </div>
+                  <Label className="text-right">New Wallet Balance:</Label>
+                  <div>
+                    {currencySymbol}{convertPrice(isBookingConfirmationOpen.wallet, "USD", currencyCode) - isBookingConfirmationOpen.price}
+                  </div>
+                </div>
+              )}
             </DialogHeader>
             <DialogClose asChild>
               <Button
