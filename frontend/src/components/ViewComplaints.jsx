@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Cookies from "js-cookie";
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { CheckCircle, XCircle, ArrowUpDown } from 'lucide-react';
+import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast";
+import Cookies from 'js-cookie';
 
 export function ViewComplaints({ onSelectComplaint }) {
   const [complaints, setComplaints] = useState([]);
   const [error, setError] = useState(null);
   const [status, setStatus] = useState("all");
-  const [sortOrder, setSortOrder] = useState(-1);
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [dateSortOrder, setDateSortOrder] = useState('desc');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [openComplaintId, setOpenComplaintId] = useState(null);
@@ -35,14 +37,10 @@ export function ViewComplaints({ onSelectComplaint }) {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: {
-            status: status === "all" ? "" : status,
-            asc: sortOrder,
-          },
         });
-        setLoading(false);
         setComplaints(response.data);
         setError(null);
+        setLoading(false);
       } catch (err) {
         setError(err.message);
         console.error("Error fetching complaints:", err);
@@ -52,55 +50,63 @@ export function ViewComplaints({ onSelectComplaint }) {
     };
 
     fetchComplaints();
-  }, [status, sortOrder]);
+  }, []);
 
   const toggleAccordion = (id) => {
     setOpenComplaintId(openComplaintId === id ? null : id);
   };
 
-  const filteredComplaints = complaints.filter(
-    (complaint) => activeTab === "all" || complaint.status.toLowerCase() === activeTab
-  );
+  const toggleSortOrder = () => {
+    setSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  const toggleDateSort = () => {
+    setDateSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
+  };
+
+  const sortComplaints = (complaintsToSort) => {
+    return complaintsToSort.sort((a, b) => {
+      if (dateSortOrder === 'asc') {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      } else {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+    });
+  };
+
+  const filteredComplaints = complaints
+    .filter((complaint) => activeTab === "all" || complaint.status.toLowerCase() === activeTab)
+    .sort((a, b) => {
+      if (dateSortOrder === 'asc') {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      } else {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+    })
+    ;
 
   if (loading) {
     return (
       <div>
         <div className="animate-pulse">
           <div className="bg-white border rounded-md shadow-md p-6">
-          <Tabs className=" mb-4 w-full">
-                <TabsList className="grid grid-cols-3 bg-white w-full">
+            <Tabs className="mb-4 w-full">
+              <TabsList className="grid grid-cols-3 bg-white w-full">
+                {["all", "pending", "resolved"].map((tab) => (
                   <TabsTrigger
-                    value="all"
+                    key={tab}
+                    value={tab}
                     className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
-                      activeTab === "all"
+                      activeTab === tab
                         ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
                         : "text-gray-500 border-b border-gray-400"
                     }`}
                   >
-                    All
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
                   </TabsTrigger>
-                  <TabsTrigger
-                    value="pending"
-                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
-                      activeTab === "pending"
-                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
-                        : "text-gray-500 border-b border-gray-400"
-                    }`}
-                  >
-                    Pending
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="resolved"
-                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
-                      activeTab === "resolved"
-                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
-                        : "text-gray-500 border-b border-gray-400"
-                    }`}
-                  >
-                    Resolved
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+                ))}
+              </TabsList>
+            </Tabs>
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="h-24 bg-gray-200 rounded-md p-2">
@@ -130,38 +136,28 @@ export function ViewComplaints({ onSelectComplaint }) {
             <div className="grid grid-cols-1 items-center gap-4 mb-6">
               <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setStatus(value); }} className="w-full">
                 <TabsList className="grid grid-cols-3 bg-white w-full">
-                  <TabsTrigger
-                    value="all"
-                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
-                      activeTab === "all"
-                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
-                        : "text-gray-500 border-b border-gray-400"
-                    }`}
-                  >
-                    All
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="pending"
-                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
-                      activeTab === "pending"
-                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
-                        : "text-gray-500 border-b border-gray-400"
-                    }`}
-                  >
-                    Pending
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="resolved"
-                    className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
-                      activeTab === "resolved"
-                        ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
-                        : "text-gray-500 border-b border-gray-400"
-                    }`}
-                  >
-                    Resolved
-                  </TabsTrigger>
+                  {["all", "pending", "resolved"].map((tab) => (
+                    <TabsTrigger
+                      key={tab}
+                      value={tab}
+                      className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                        activeTab === tab
+                          ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                          : "text-gray-500 border-b border-gray-400"
+                      }`}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
               </Tabs>
+              <div className="flex justify-end space-x-4">
+                
+                <Button onClick={toggleDateSort} variant="outline" className="flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4" />
+                  Sort by Date ({dateSortOrder === 'asc' ? 'Oldest' : 'Newest'})
+                </Button>
+              </div>
             </div>
             {filteredComplaints.length === 0 ? (
               <p className="text-center text-gray-600">No complaints found.</p>
@@ -177,6 +173,9 @@ export function ViewComplaints({ onSelectComplaint }) {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-teal-800">{complaint.title}</h3>
+                        <span className="text-sm text-gray-500">
+                          {format(new Date(complaint.createdAt), 'MMM d, yyyy')}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <p className="text-sm text-gray-500">
@@ -215,7 +214,7 @@ export function ViewComplaints({ onSelectComplaint }) {
                         <p className="text-gray-700">{complaint.body}</p>
                         <span
                           onClick={() => onSelectComplaint(complaint._id)}
-                          className=" text-sm text-[#5D9297] cursor-pointer hover:text-[#1A3B47] hover:underline mr-2 mt-2"
+                          className="text-sm text-[#5D9297] cursor-pointer hover:text-[#1A3B47] hover:underline mr-2 mt-2"
                         >
                           Reply To Complaint
                         </span>
@@ -267,3 +266,4 @@ export function ViewComplaints({ onSelectComplaint }) {
 }
 
 export default ViewComplaints;
+

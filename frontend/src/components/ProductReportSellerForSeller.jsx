@@ -61,7 +61,7 @@ const ProductReport = () => {
         const token = Cookies.get('jwt');
         const role = getUserRole();
         const url = new URL(`http://localhost:4000/${role}/sales-report`);
-        
+
         // Only add day, month, and year to URL params
         ['day', 'month', 'year'].forEach(key => {
           if (filters[key]) url.searchParams.append(key, filters[key]);
@@ -74,7 +74,7 @@ const ProductReport = () => {
         });
         setSalesReport(response.data);
         updateGraphData(response.data.sellerProductsSales, graphPeriod);
-        
+
         const uniqueProductNames = [...new Set(response.data.sellerProductsSales
           .filter(item => item.product && item.product.name)
           .map(item => item.product.name))];
@@ -220,16 +220,19 @@ const ProductReport = () => {
     const lastMonth = subMonths(new Date(), 1);
     return salesReport.sellerProductsSales.reduce((sum, item) => {
       const saleDate = new Date(item.product.createdAt);
-      return sum + (saleDate.getMonth() === lastMonth.getMonth() && 
-                   saleDate.getFullYear() === lastMonth.getFullYear() ? (item.revenueAfterCommission) : 0);
+      return sum + (saleDate.getMonth() === lastMonth.getMonth() &&
+        saleDate.getFullYear() === lastMonth.getFullYear() ? (item.revenueAfterCommission) : 0);
     }, 0);
   })();
 
   const thisMonthChange = lastMonthSales === 0 ? 100 : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-gray-100 min-h-screen">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
+      <div className="max-w-7xl mt-4 mx-auto">
         <div className="grid gap-4 md:grid-cols-12 mb-4">
           {/* Total Revenue */}
           <Card className="md:col-span-3 flex flex-col justify-center items-center">
@@ -307,9 +310,8 @@ const ProductReport = () => {
                     <div className="flex items-center">
                       <span className="text-lg font-bold text-[#5D9297]">${thisMonthSales.toFixed(2)}</span>
                       <motion.span
-                        className={`ml-12 flex items-center text-xs font-semibold px-2 py-1 rounded-full ${
-                          thisMonthChange >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}
+                        className={`ml-12 flex items-center text-xs font-semibold px-2 py-1 rounded-full ${thisMonthChange >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
@@ -422,7 +424,7 @@ const ProductReport = () => {
           </CardHeader>
           <CardContent className="">
             <div className="flex flex-wrap gap-4 mb-4">
-              <Select 
+              <Select
                 value={filters.product}
                 onValueChange={(value) => handleFilterChange('product', value)}
               >
@@ -437,7 +439,7 @@ const ProductReport = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Select 
+              <Select
                 value={filters.year}
                 onValueChange={(value) => handleFilterChange('year', value)}
               >
@@ -452,7 +454,7 @@ const ProductReport = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Select 
+              <Select
                 value={filters.month}
                 onValueChange={(value) => handleFilterChange('month', value)}
                 disabled={!filters.year}
@@ -497,7 +499,7 @@ const ProductReport = () => {
                 </thead>
                 <AnimatePresence mode="wait">
                   {!isFiltering && (
-                    <motion.tbody 
+                    <motion.tbody
                       key="table-body"
                       className="bg-white divide-y divide-gray-200"
                       initial={{ opacity: 0 }}
@@ -506,7 +508,7 @@ const ProductReport = () => {
                       transition={{ duration: 0.3 }}
                     >
                       {filteredSales.map((item, index) => (
-                        <motion.tr 
+                        <motion.tr
                           key={index}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}

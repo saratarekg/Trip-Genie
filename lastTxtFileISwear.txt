@@ -1,13 +1,13 @@
 
 Sam: 
 
-- convert from USD to my currency in external bookings 
-- two reqs for booking in flights
+- convert from USD to my currency in external bookings (done)
+- two reqs for booking in flights (done)
 - book transportation lw katab aktr mn available seats, tickets bta3et activity we itinerary aolo en mfish kfaya
-- checkout baz
-- Khaly flight w transportation w hotels nafs el structure w nafs pallete (search and filter buttons)
-- flight bookings card teb2a zy bookings card
--Cards el hotels white space awy (momken nekhaly 2 gamb b3d)
+- checkout baz (done)
+- Khaly flight w transportation w hotels nafs el structure w nafs pallete (search and filter buttons)(done)
+- flight bookings card teb2a zy bookings card(done?)
+-Cards el hotels white space awy (momken nekhaly 2 gamb b3d)(law asdak gowa hotel booking,done)
 -7ot reserve fo2 w lw lesa ma5tarsh room tala3o fo2 ye5tar el room el awel
 - sheel facilities el rooms el ta7t
 - matkhaleesh ay statistics fake
@@ -62,8 +62,8 @@ Houba:
 -zabat popup button color of add to cart in single product(done✅)
 - popup: - are you sure you want to accept el user dah (badal mal tick bet accept 3alatool we dah dangerous action lazem popup)(done✅)
 -Tourguide camel case fe registration (da role kefaya 7anyaka ya hadwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa done✅)
-ALLL SUBMIT/CONFIRMATION BUTTONS RIGHT ALIGNED (fel popups we fe kol el creates we make kol el alwan consistent bel mara)
-Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button yemeen (Aby beyshed sha3ro fel background)
+ALLL SUBMIT/CONFIRMATION BUTTONS RIGHT ALIGNED (fel popups we fe kol el creates we make kol el alwan consistent bel mara)(done✅)
+Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button yemeen (Aby beyshed sha3ro fel background)(7a2ak ya aby done✅)
 
 
 
@@ -80,11 +80,11 @@ Jana:
 Zeina:
 redeem points tbaa kol 100 maamlsh redeem decimal (done)
 admin by update products btaato bs bs ynf3 y delete aady (done)
-- bayen en el single cards clickable (hover effect) (historical place we check enaha clickable fe kol el amaken el tanya)
-- sheel kelmet external bookings khaleeha my bookings w ta7teeha (flight ,hotels w transportations)
-- complaints sort by date 3ashan maba2tsh mawgooda fel page el gdeeda
-- manage accounts terga3 table
-7oto kol el sales reports fel settings le kol el accounts
+- bayen en el single cards clickable (hover effect) (historical place we check enaha clickable fe kol el amaken el tanya) (DONE)
+- sheel kelmet external bookings khaleeha my bookings w ta7teeha (flight ,hotels w transportations) (amy 3mltha)
+- complaints sort by date 3ashan maba2tsh mawgooda fel page el gdeeda (done)
+- manage accounts terga3 table (done)
+7oto kol el sales reports fel settings le kol el accounts (done)
 
 
 

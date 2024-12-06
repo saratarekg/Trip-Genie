@@ -51,7 +51,7 @@ const HistoricalPlaceCard = ({
   }, []);
 
   return (
-    <Card className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+    <Card className="relative overflow-hidden transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-xl ">
       <CardHeader className="p-0" onClick={() => onSelect(historicalPlace._id)}>
         <img
           src={historicalPlace.pictures?.[0]?.url || defaultImage}

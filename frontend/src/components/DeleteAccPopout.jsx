@@ -4,21 +4,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Cookies from "js-cookie";
-import { Search, Trash2, Mail, User, UserX } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, Trash2 } from 'lucide-react';
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 import {
   ToastProvider,
@@ -28,14 +17,12 @@ import {
   ToastDescription,
   ToastClose,
 } from "@/components/ui/toast";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from 'lucide-react';
 
 export function DeleteAccount() {
   const [users, setUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeRole, setActiveRole] = useState("all");
-  const [confirmDelete, setConfirmDelete] = useState(null);
-  const [feedbackMessage, setFeedbackMessage] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
   const [isToastOpen, setIsToastOpen] = useState(false);
@@ -68,7 +55,7 @@ export function DeleteAccount() {
       }
     } catch (error) {
       console.error("Error getting users:", error);
-      setFeedbackMessage("Failed to load users. Please try again.");
+      showToast("Failed to load users. Please try again.", "error");
     }
   };
 
@@ -80,7 +67,7 @@ export function DeleteAccount() {
     setToastMessage(message);
     setToastType(type);
     setIsToastOpen(true);
-    setTimeout(() => setIsToastOpen(false), 3000); // Close toast after 3 seconds
+    setTimeout(() => setIsToastOpen(false), 3000);
   };
 
   const handleDelete = async (id) => {
@@ -133,133 +120,86 @@ export function DeleteAccount() {
 
   return (
     <ToastProvider>
-      <div className="">
-        <div className="space-y-6">
-          <Tabs
-            defaultValue={activeRole}
-            onValueChange={setActiveRole}
-            className="w-full"
-          >
-            <TabsList className="grid grid-cols-7  w-full">
-              {roles.map((role) => (
-                <TabsTrigger
-                  key={role.id}
-                  value={role.id}
-                  className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
-                    activeRole === role.id
-                      ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
-                      : "text-gray-500 border-b border-gray-400"
-                  }`}
-                >
-                  {role.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
+      <div className="space-y-6">
+        <Tabs
+          defaultValue={activeRole}
+          onValueChange={setActiveRole}
+          className="w-full"
+        >
+          <TabsList className="grid grid-cols-7 w-full bg-[#F0F4F5]">
             {roles.map((role) => (
-              <TabsContent key={role.id} value={role.id} className="mt-6">
-                <div className="relative w-full mb-6">
-                  <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5D9297]" />
-                  <Input
-                    placeholder="Search by name or email..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-white border-[#B5D3D1] focus:ring-[#388A94] w-full"
-                    style={{ textIndent: "0.5rem" }}
-                  />
-                </div>
-
-                {filteredUsers.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center text-center text-[#1A3B47]/60 py-8 bg-white rounded-lg shadow h-52">
-                    <UserX className="h-12 w-12 text-[#5D9297]" />
-                    <p className="text-xl font-semibold">No users found. Please try a different search.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredUsers.map((user) => (
-                      <motion.div
-                        key={user._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <Card className="overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105">
-                          <CardContent className="p-6">
-                            <div className="flex items-center justify-between mb-4">
-                              <Avatar className="h-12 w-12 bg-[#B5D3D1]">
-                                {user.profilePicture || user.logo ? (
-                                  <img
-                                    src={
-                                      user.profilePicture?.url || user.logo?.url
-                                    }
-                                    alt={user.username}
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : (
-                                  <AvatarFallback className="text-[#1A3B47] font-semibold">
-                                    {user.username?.charAt(0).toUpperCase() ||
-                                      "U"}
-                                  </AvatarFallback>
-                                )}
-                              </Avatar>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteClick(user)}
-                                className="text-[#388A94] hover:text-[#2e6b77] hover:bg-[#B5D3D1]/10 rounded-full"
-                              >
-                                <Trash2 className="h-5 w-5" />
-                              </Button>
-                            </div>
-                            <h3 className="font-bold text-lg text-[#1A3B47] mb-2">
-                              {user.username}
-                            </h3>
-                            <div className="space-y-2 text-sm text-[#5D9297]">
-                              <div className="flex items-center">
-                                <Mail className="h-4 w-4 mr-2" />
-                                <span>{user.email || "N/A"}</span>
-                              </div>
-                              <div className="flex items-center">
-                                <User className="h-4 w-4 mr-2" />
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-[#388A94]/10 text-[#388A94]"
-                                >
-                                  {user.role}
-                                </Badge>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
+              <TabsTrigger
+                key={role.id}
+                value={role.id}
+                className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                  activeRole === role.id
+                    ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                    : "text-gray-500 border-b border-gray-400 hover:text-[#1A3B47] transition-colors"
+                }`}
+              >
+                {role.label}
+              </TabsTrigger>
             ))}
-          </Tabs>
+          </TabsList>
 
-          {feedbackMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={`p-4 rounded-md ${
-                feedbackMessage.includes("successfully")
-                  ? "bg-[#B5D3D1]/20 text-[#1A3B47]"
-                  : "bg-red-50 text-red-800"
-              }`}
-            >
-              {feedbackMessage}
-            </motion.div>
-          )}
+          {roles.map((role) => (
+            <TabsContent key={role.id} value={role.id} className="mt-6">
+              <div className="relative w-full mb-6">
+                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[#5D9297]" />
+                <Input
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white border-[#B5D3D1] focus:ring-[#388A94] w-full"
+                  style={{ textIndent: "0.5rem" }}
+                />
+              </div>
 
-          <DeleteConfirmation
-            isOpen={showDeleteModal}
-            onClose={() => setShowDeleteModal(false)}
-            itemType="account"
-            onConfirm={handleConfirmDelete}
-          />
-        </div>
+              {filteredUsers.length === 0 ? (
+                <div className="text-center text-[#1A3B47]/60 py-8">
+                  No users found. Please try a different search.
+                </div>
+              ) : (
+                <Table className="[&_tr]:h-2">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-medium p-3">Username</TableHead>
+                      <TableHead className="font-medium p-3">Email</TableHead>
+                      <TableHead className="font-medium p-3">Role</TableHead>
+                      <TableHead className="text-right p-3">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user._id}>
+                        <TableCell className="font-medium p-3">{user.username}</TableCell>
+                        <TableCell className="font-medium p-3">{user.email}</TableCell>
+                        <TableCell className="font-medium p-3">{user.role}</TableCell>
+                        <TableCell className="text-right p-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteClick(user)}
+                            className="text-[#388A94] hover:text-[#2e6b77] hover:bg-[#B5D3D1]/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+          ))}
+        </Tabs>
+
+        <DeleteConfirmation
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          itemType="account"
+          onConfirm={handleConfirmDelete}
+        />
       </div>
 
       <ToastViewport />
@@ -289,3 +229,6 @@ export function DeleteAccount() {
     </ToastProvider>
   );
 }
+
+export default DeleteAccount;
+

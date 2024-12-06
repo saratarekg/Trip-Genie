@@ -1292,18 +1292,19 @@ const SingleActivityAdmin = ({ activityId }) => {
                                 <Button
                                   variant="outlined"
                                   onClick={handleCloseDialog}
-                                  className="border-gray-300"
+                                  className="bg-[#A3A3A3] hover:bg-[#7E7E7E] text-white border-[#A3A3A3]"
                                 >
                                   Cancel
                                 </Button>
                                 <Button
                                   color="secondary"
                                   onClick={handleConfirmFlag}
-                                  className="bg-[#5D9297] hover:[#388A94] text-white"
+                                  className="bg-[#5D9297] hover:bg-[#388A94] text-white"
                                 >
                                   Confirm
                                 </Button>
                               </div>
+
                             </div>
                           </div>
                         )}
@@ -1900,7 +1901,7 @@ const SingleActivityAdmin = ({ activityId }) => {
             </DialogHeader>
             <DialogFooter>
               <Button onClick={handleDeleteSuccess} variant="default">
-              <ChevronLeft className="w-5 h-5 mr-2" />
+                <ChevronLeft className="w-5 h-5 mr-2" />
                 Back to All Activities
               </Button>
             </DialogFooter>
