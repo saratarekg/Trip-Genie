@@ -70,7 +70,7 @@ export default function HotelDetails() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState("");
   const [bookingPopupError, setBookingPopupError] = useState("");
-
+  const [reservedBefore, setReservedBefore] = useState(false);
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
   const [isSuccessWalletPopupOpen, setIsSuccessWalletPopupOpen] =
     useState(false);
@@ -411,6 +411,7 @@ export default function HotelDetails() {
 
           if (response.data.status === "paid") {
             setIsSuccessPopupOpen(true);
+            setReservedBefore(true);
             // Update any other necessary state here
           }
         } catch (error) {
@@ -538,6 +539,7 @@ export default function HotelDetails() {
       setBookingSuccess(true);
       setBookingError("");
       setIsSuccessPopupOpen(true);
+      setReservedBefore(true);
       setIsBookingConfirmationOpen(false);
     } catch (error) {
       console.error("Booking error:", error);
@@ -698,18 +700,18 @@ export default function HotelDetails() {
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-      <div className="container mx-auto p-4 mt-5">
+      <div className="container mx-auto p-4 mt-1">
         <div className="flex justify-between">
           <h1 className="text-3xl font-bold mb-6">{hotelData.name}</h1>
           <Button
             onClick={scrollToRoomSection}
             className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
           >
-            Reserve Now
-          </Button>
+            {reservedBefore ? "Reserve Again" : "Reserve Now"}
+            </Button>
         </div>
         <div className="flex flex-col md:flex-row gap-6 mb-6">
-          <div className="md:w-full hotelPictures">
+          <div className="w-4/5 hotelPictures">
             <Carousel className="w-full">
               <CarouselContent>
                 {hotelPhotos.map((photo, index) => (
