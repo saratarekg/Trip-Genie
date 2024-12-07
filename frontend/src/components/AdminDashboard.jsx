@@ -123,10 +123,63 @@ export function Dashboard({ setActiveTab }) {
   const [adminInfo, setAdminInfo] = useState(null);
   const [pageVisits, setPageVisits] = useState(0);
   const [pageVisitsToday, setPageVisitsToday] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalSellerRevenue, setTotalSellerRevenue] = useState(0);
+  const [totalSales, setTotalSales] = useState(0);
+  // const [totalRevenueLastMonth, setTotalRevenueLastMonth] = useState(0);
 
   useEffect(() => {
-    Promise.all([fetchNotifications(), fetchAdminInfo(), fetchPageVisits()]);
+    Promise.all([
+      fetchNotifications(),
+      fetchAdminInfo(),
+      fetchPageVisits(),
+      fetchSalesReport(),
+    ]);
   }, []);
+
+  // fetch http://localhost:4000/admin/sales-report
+
+  // const fetchSalesReportLastMonth = async () => {
+  //   try {
+  //     // last month number
+  //     const lastMonth = (new Date().getMonth() - 1);
+  //     if (lastMonth = 0) {
+  //       lastMonth = 12;
+  //     }
+  //     // get year of last month
+  //     const lastMonthYear = new Date().getFullYear();
+  //     if (lastMonth = 12) {
+  //       lastMonthYear = lastMonthYear - 1;
+  //     }
+
+  //     const response = await axios.get( `http://localhost:4000/admin/sales-report?month=${lastMonth}&year=${lastMonthYear}`,
+  //       { headers: { Authorization: `Bearer ${Cookies.get("jwt")}` } }
+  //     );
+  //     setTotalRevenueLastMonth(response.data.totalAdminSalesRevenue);
+  //   } catch (error) {
+  //     console.error("Error fetching sales report:", error);
+  //   }
+  // };
+
+  const fetchSalesReport = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:4000/admin/sales-report",
+        { headers: { Authorization: `Bearer ${Cookies.get("jwt")}` } }
+      );
+      setTotalRevenue(response.data.totalAdminSalesRevenue);
+      setTotalSellerRevenue(response.data.totalSellerSalesRevenue);
+
+      // sum of item.sales from the response
+      const sumSales = response.data.adminProductsSales.reduce(
+        (acc, item) => acc + item.sales,
+        0
+      );
+      setTotalSales(sumSales);
+    } catch (error) {
+      console.error("Error fetching sales report:", error);
+    }
+  };
 
   const fetchPageVisits = async () => {
     try {
@@ -265,41 +318,42 @@ export function Dashboard({ setActiveTab }) {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-[#388A94]">
-                    $45,231.89
+                    ${totalRevenue.toLocaleString()}
                   </div>
-                  <p className="text-xs text-[#1A3B47]">
-                    +20.1% from last month
-                  </p>
+                  <p className="text-xs text-[#1A3B47]">Your Sales Revenue</p>
                 </CardContent>
               </Card>
               <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-[#1A3B47]">
-                    New Customers
-                  </CardTitle>
-                  <Users className="h-4 w-4 text-[#5D9297]" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-[#388A94]">+2350</div>
-                  <p className="text-xs text-[#1A3B47]">
-                    +180.1% from last month
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="col-span-1">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-[#1A3B47]">
-                    Sales
+                    Total Sales
                   </CardTitle>
                   <ShoppingCart className="h-4 w-4 text-[#5D9297]" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-[#388A94]">
-                    +12,234
+                    {totalSales.toLocaleString()}
                   </div>
-                  <p className="text-xs text-[#1A3B47]">+19% from last month</p>
+                  <p className="text-xs text-[#1A3B47]">number of your sales</p>
                 </CardContent>
               </Card>
+              <Card className="col-span-1">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-[#1A3B47]">
+                    Seller Revenue
+                  </CardTitle>
+                  <Users className="h-4 w-4 text-[#5D9297]" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-[#388A94]">
+                    ${totalSellerRevenue.toLocaleString()}
+                  </div>
+                  <p className="text-xs text-[#1A3B47]">
+                    10% of all seller sales
+                  </p>
+                </CardContent>
+              </Card>
+
               <Card className="col-span-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-[#1A3B47]">
@@ -353,14 +407,14 @@ export function Dashboard({ setActiveTab }) {
                   <CardTitle className="flex justify-between items-center">
                     <span>Notifications</span>
                     {notifications.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      className="text-sm text-[#388A94] p-2"
-                      onClick={() => setActiveTab("notifications")}
-                    >
-                      View All
-                    </Button>
-                  )}
+                      <Button
+                        variant="ghost"
+                        className="text-sm text-[#388A94] p-2"
+                        onClick={() => setActiveTab("notifications")}
+                      >
+                        View All
+                      </Button>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
