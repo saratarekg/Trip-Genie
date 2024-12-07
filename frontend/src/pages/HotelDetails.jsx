@@ -715,7 +715,7 @@ export default function HotelDetails() {
                 {hotelPhotos.map((photo, index) => (
                   <CarouselItem
                     key={index}
-                    className="md:basis-1/5 lg:basis-1/5"
+                    className="md:basis-1/6 lg:basis-1/6"
                   >
                     <img
                       src={photo.url_1440}
@@ -729,7 +729,7 @@ export default function HotelDetails() {
               <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
             </Carousel>
           </div>
-          <Card className="md:w-1/2 hotelInfo">
+          <Card className="md:w-1/5 hotelInfo">
             <CardHeader>
               <CardTitle>Hotel Information</CardTitle>
             </CardHeader>
