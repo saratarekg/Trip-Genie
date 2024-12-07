@@ -318,16 +318,18 @@ export function CreatePromoCode() {
                 </FormItem>
               )}
             />
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              {isSubmitting ? "Creating..." : "Create Promo Code"}
-            </Button>
           </form>
         </Form>
+        <div className="flex justify-end mb-6 mr-6">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-8 py-4 text-xl"
+          >
+            <Plus className="mr-2 h-6 w-6" />
+            {isSubmitting ? "Creating..." : "Create Promo Code"}
+          </Button>
+        </div>
       </>
 
       <ToastViewport />

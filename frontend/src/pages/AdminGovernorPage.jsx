@@ -131,161 +131,166 @@ const AdminGovernorPage = () => {
 
   return (
     <ToastProvider>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-[#003f66]">Type *</FormLabel>
-                <div className="flex space-x-4 mb-6">
-                  <Button
-                    type="button"
-                    variant={field.value === "admin" ? "solid" : "outline"}
-                    onClick={() => field.onChange("admin")}
-                    className={`w-full ${field.value === "admin" ? "bg-[#5D9297] text-white" : "bg-gray-300 text-gray-700 hover:bg-gray-400"}`}
-                  >
-                    Admin
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={field.value === "governor" ? "solid" : "outline"}
-                    onClick={() => field.onChange("governor")}
-                    className={`w-full ${field.value === "governor" ? "bg-[#5D9297] text-white" : "bg-gray-300 text-gray-700 hover:bg-gray-400"}`}
-                  >
-                    Governor
-                  </Button>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="mb-8 relative">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
-              name="username"
+              name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-[#003f66]">Username *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter username"
-                      {...field}
-                      className="border-[#808080]"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Enter a unique username (min 3 characters).
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[#003f66]">Email *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="Enter email"
-                      {...field}
-                      className="border-[#808080]"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Enter a valid email address.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[#003f66]">Password *</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Enter password"
-                      {...field}
-                      className="border-[#808080]"
-                      onChange={(e) => {
-                        field.onChange(e);
-                        setPassword(e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <div className="flex items-center mt-2 space-x-2 w-full">
-                    <div className="relative flex-grow h-2 bg-gray-200 rounded-full">
-                      <div
-                        className={`absolute h-2 rounded-full transition-all duration-300 ${password.length === 0 ? 'bg-gray-300' : getProgressBarColor()}`}
-                        style={{
-                          width: `${password.length === 0 ? 0 : Math.max((strength.fulfilled / 3), 1 / 3) * 100}%`
-                        }}
-                      ></div>
-                    </div>
-                    {password.length > 0 && (
-                      <p className="text-sm font-medium text-gray-700 ml-2">
-                        {getStrengthLabel()}
-                      </p>
-                    )}
+                  <FormLabel className="text-[#003f66]">Type *</FormLabel>
+                  <div className="flex space-x-4 mb-6">
+                    <Button
+                      type="button"
+                      variant={field.value === "admin" ? "solid" : "outline"}
+                      onClick={() => field.onChange("admin")}
+                      className={`w-full ${field.value === "admin" ? "bg-[#5D9297] text-white" : "bg-gray-300 text-gray-700 hover:bg-gray-400"}`}
+                    >
+                      Admin
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={field.value === "governor" ? "solid" : "outline"}
+                      onClick={() => field.onChange("governor")}
+                      className={`w-full ${field.value === "governor" ? "bg-[#5D9297] text-white" : "bg-gray-300 text-gray-700 hover:bg-gray-400"}`}
+                    >
+                      Governor
+                    </Button>
                   </div>
+                  <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-          <ul className="text-sm mt-4 space-y-1">
-            <li
-              className={`flex items-center ${strength.length ? "text-[#388A94]" : "text-gray-500"}`}
-            >
-              <span
-                className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${strength.length ? "bg-[#388A94] text-white" : "border-gray-500"}`}
-              >
-                ✓
-              </span>
-              At least 8 characters
-            </li>
-            <li
-              className={`flex items-center ${strength.uppercase ? "text-[#388A94]" : "text-gray-500"}`}
-            >
-              <span
-                className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${strength.uppercase ? "bg-[#388A94] text-white" : "border-gray-500"}`}
-              >
-                ✓
-              </span>
-              At least one uppercase letter
-            </li>
-            <li
-              className={`flex items-center ${strength.number ? "text-[#388A94]" : "text-gray-500"}`}
-            >
-              <span
-                className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${strength.number ? "bg-[#388A94] text-white" : "border-gray-500"}`}
-              >
-                ✓
-              </span>
-              At least one number
-            </li>
-          </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#003f66]">Username *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter username"
+                          {...field}
+                          className="border-[#808080]"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter a unique username (min 3 characters).
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#003f66]">Email *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Enter email"
+                          {...field}
+                          className="border-[#808080]"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Enter a valid email address.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[#003f66]">Password *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Enter password"
+                          {...field}
+                          className="border-[#808080]"
+                          onChange={(e) => {
+                            field.onChange(e);
+                            setPassword(e.target.value);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <div className="flex items-center mt-2 space-x-2 w-full">
+                        <div className="relative flex-grow h-2 bg-gray-200 rounded-full">
+                          <div
+                            className={`absolute h-2 rounded-full transition-all duration-300 ${password.length === 0 ? 'bg-gray-300' : getProgressBarColor()}`}
+                            style={{
+                              width: `${password.length === 0 ? 0 : Math.max((strength.fulfilled / 3), 1 / 3) * 100}%`
+                            }}
+                          ></div>
+                        </div>
+                        {password.length > 0 && (
+                          <p className="text-sm font-medium text-gray-700 ml-2">
+                            {getStrengthLabel()}
+                          </p>
+                        )}
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                <ul className="text-sm mt-4 space-y-1">
+                  <li
+                    className={`flex items-center ${strength.length ? "text-[#388A94]" : "text-gray-500"}`}
+                  >
+                    <span
+                      className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${strength.length ? "bg-[#388A94] text-white" : "border-gray-500"}`}
+                    >
+                      ✓
+                    </span>
+                    At least 8 characters
+                  </li>
+                  <li
+                    className={`flex items-center ${strength.uppercase ? "text-[#388A94]" : "text-gray-500"}`}
+                  >
+                    <span
+                      className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${strength.uppercase ? "bg-[#388A94] text-white" : "border-gray-500"}`}
+                    >
+                      ✓
+                    </span>
+                    At least one uppercase letter
+                  </li>
+                  <li
+                    className={`flex items-center ${strength.number ? "text-[#388A94]" : "text-gray-500"}`}
+                  >
+                    <span
+                      className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${strength.number ? "bg-[#388A94] text-white" : "border-gray-500"}`}
+                    >
+                      ✓
+                    </span>
+                    At least one number
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </form>
+        </Form>
+        <div className="flex justify-end mb-6 mr-6">
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
+            className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-12 py-4 text-xl"
           >
-            <UserPlus className="mr-2 h-4 w-4" />
+            <UserPlus className="mr-2 h-6 w-6" />
             {isSubmitting ? "Adding..." : "Add User"}
           </Button>
-        </form>
-      </Form>
-
+        </div>
+      </div>
       <ToastViewport />
       {isToastOpen && (
         <Toast

@@ -64,6 +64,7 @@ Houba:
 -Tourguide camel case fe registration (da role kefaya 7anyaka ya hadwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa done✅)
 ALLL SUBMIT/CONFIRMATION BUTTONS RIGHT ALIGNED (fel popups we fe kol el creates we make kol el alwan consistent bel mara)(done✅)
 Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button yemeen (Aby beyshed sha3ro fel background)(7a2ak ya aby done✅)
+- popup archive products in admin m7taga ttzbt, sheel navigation w a3mlha toast + re-fetch
 
 
 
@@ -91,14 +92,14 @@ admin by update products btaato bs bs ynf3 y delete aady (done)
 Radwa:
 - raga3i sort by preference fe itinerary !!
 - sort by preference shklo w alwano mokhtlfa f kol page
- change pass fe admin
+- change pass fe admin (done✅)
 - khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done)
 - past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)(done)
-- complaints sort by date
-- tabs fe review registration
-- admin add user :
- Add user teb2a button kebeer w 3al yemeen
- whitespace bottom right (geebi password verification 3al yemeen aw get creative)
+- complaints sort by date (done✅)
+- tabs fe review registration (done✅)
+- admin add user : 
+ Add user teb2a button kebeer w 3al yemeen (done✅)
+ whitespace bottom right (geebi password verification 3al yemeen aw get creative) (done✅)
 
  
 Habiba:

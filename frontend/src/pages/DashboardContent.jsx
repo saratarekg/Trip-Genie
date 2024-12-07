@@ -25,6 +25,7 @@ import { Dashboard } from "../components/AdminDashboard.jsx";
 import NotificationsPage from "@/pages/AdminNotifications.jsx";
 import { CreatePromoCode } from "../components/CreatePromoCode.jsx";
 import { AllPromoCodes } from "../components/AllPromoCodes.jsx"; // Import AllPromoCodes component
+import { UpdateProduct } from "../components/UpdateProdutsAdmin.jsx";
 
 import logo from "../assets/images/TGlogo.svg";
 import StockReport from "./StockReport.jsx";
@@ -34,6 +35,7 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [previousTab, setPreviousTab] = useState(null);
   const [selectedItineraryId, setSelectedItineraryId] = useState(null);
+  const [updateProductId, setUpdateProductId] = useState(null);
 
   useEffect(() => {
     const savedTab = localStorage.getItem("activeTab");
@@ -46,6 +48,8 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
     localStorage.setItem("activeTab", activeTab);
     setSelectedComplaintId(null); // Reset selectedComplaintId when activeTab changes
     setSelectedProductId(null); // Reset selectedProductId when activeTab changes
+    setSelectedItineraryId(null); // Reset selectedItineraryId when activeTab changes
+    setUpdateProductId(null);
   }, [activeTab]);
 
   const handleReportClick = (reportId) => {
@@ -90,7 +94,15 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
                 setActiveTab(previousTab);
               }}
             />
-          ) : selectedItineraryId ? (
+          ) : selectedProductId && updateProductId ? (
+            <UpdateProduct
+              productId={updateProductId}
+              onBack={() => {
+                setUpdateProductId(null);
+                setActiveTab(previousTab);
+              }}
+            />
+          ): selectedItineraryId ? (
             <ItineraryDetail
               id={selectedItineraryId}
               onBack={() => setSelectedItineraryId(null)}

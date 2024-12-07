@@ -27,7 +27,7 @@ import { Check, X, Mail, User, UserX, XCircle, CheckCircle } from "lucide-react"
 import { motion } from "framer-motion";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 import ApprovalConfirmation from "@/components/ui/approvalConfirmation";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function UserApproval() {
   const [advertisers, setAdvertisers] = useState([]);
@@ -46,7 +46,30 @@ export default function UserApproval() {
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserRole, setSelectedUserRole] = useState(null);
+  const [activeRole, setActiveRole] = useState("all");
 
+  const roles = [
+    { id: "all", label: "All Users" },
+    { id: "advertiser", label: "Advertisers" },
+    { id: "seller", label: "Sellers" },
+    { id: "tourGuide", label: "Tour Guides" },
+  ];
+
+  const filteredUsers = (role) => {
+    if (role === "all") {
+      return [...advertisers, ...sellers, ...tourGuides];
+    }
+    if (role === "advertiser") {
+      return advertisers;
+    }
+    if (role === "seller") {
+      return sellers;
+    }
+    if (role === "tourGuide") {
+      return tourGuides;
+    }
+    return [];
+  };
 
   const openApprovalDialog = (user, role) => {
     setSelectedUser(user);
@@ -67,15 +90,11 @@ export default function UserApproval() {
     setIsApprovalDialogOpen(false);
   };
 
-
-
-
   useEffect(() => {
     fetchAdvertisers();
     fetchSellers();
     fetchTourGuides();
   }, []);
-
 
   const fetchFile = async (filename) => {
     try {
@@ -171,8 +190,8 @@ export default function UserApproval() {
       role === "advertiser"
         ? fetchAdvertisers()
         : role === "seller"
-          ? fetchSellers()
-          : fetchTourGuides();
+        ? fetchSellers()
+        : fetchTourGuides();
     } catch (err) {
       showToast(`Failed to approve ${role}`, "error");
       console.error(err);
@@ -242,8 +261,6 @@ export default function UserApproval() {
               >
                 <Check className="h-5 w-5" />
               </Button>
-
-
             </div>
             <div className="">
               <div className="flex flex-col items-start">
@@ -324,22 +341,30 @@ export default function UserApproval() {
   return (
     <ToastProvider>
       <div className="flex flex-col mb-16">
-        <div className="flex-grow flex items-center justify-center">
-          <div className="w-full">
-            <div className="">
-              {/* <h1 className="text-xl sm:text-2xl font-bold text-[#003f66] mb-4 sm:mb-6">
-                User Approval Dashboard
-              </h1> */}
+        <Tabs
+          defaultValue={activeRole}
+          onValueChange={setActiveRole}
+          className="w-full"
+        >
+          <TabsList className="grid grid-cols-4 w-full bg-[#F0F4F5]">
+            {roles.map((role) => (
+              <TabsTrigger
+                key={role.id}
+                value={role.id}
+                className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                  activeRole === role.id
+                    ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                    : "text-gray-500 border-b border-gray-400 hover:text-[#1A3B47] transition-colors"
+                }`}
+              >
+                {role.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-              {error && (
-                <div className="mb-4 p-3 bg-red-100 text-red-800 rounded-md text-sm sm:text-base">
-                  {error}
-                </div>
-              )}
-
-              {advertisers.length === 0 &&
-                sellers.length === 0 &&
-                tourGuides.length === 0 ? (
+          {roles.map((role) => (
+            <TabsContent key={role.id} value={role.id} className="mt-6">
+              {filteredUsers(role.id).length === 0 ? (
                 <div className="flex items-center justify-center h-24 sm:h-32">
                   <p className="text-base sm:text-lg text-[#003f66] text-center px-4">
                     No users to Accept/Reject. Please check again later!
@@ -347,18 +372,12 @@ export default function UserApproval() {
                 </div>
               ) : (
                 <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto">
-                  {renderUserCards(advertisers, "advertiser", 0)}
-                  {renderUserCards(sellers, "seller", advertisers.length)}
-                  {renderUserCards(
-                    tourGuides,
-                    "tourGuide",
-                    advertisers.length + sellers.length
-                  )}
+                  {renderUserCards(filteredUsers(role.id), role.id)}
                 </div>
               )}
-            </div>
-          </div>
-        </div>
+            </TabsContent>
+          ))}
+        </Tabs>
 
         <DeleteConfirmation
           isOpen={showDeleteModal}
@@ -373,8 +392,6 @@ export default function UserApproval() {
           itemType="user"
           onConfirm={confirmApproval}
         />
-
-
       </div>
 
       <ToastViewport />

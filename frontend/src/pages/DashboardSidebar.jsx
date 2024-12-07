@@ -127,6 +127,7 @@ export function DashboardSidebar({
         Cookies.remove("role");
         console.log("Logged out successfully");
         setActiveTab("dashboard"); // Set active tab to dashboard
+        localStorage.setItem("activeTab", "dashboard"); // Save active tab to localStorage
         navigate("/login");
         window.location.reload();
       } else {

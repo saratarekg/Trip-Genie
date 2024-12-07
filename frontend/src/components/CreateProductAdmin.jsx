@@ -195,8 +195,9 @@ const CreateProductForm = () => {
 
   const formStyles = "space-y-6";
   const containerStyles = "grid grid-cols-1 md:grid-cols-2 gap-6";
+  const columnStyles = "flex flex-col space-y-6 h-full";
   const labelStyles = "text-[#003f66]";
-  const buttonStyles = "w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white";
+  const buttonStyles = "bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-6 py-3 text-lg";
 
   return (
     <ToastProvider>
@@ -205,151 +206,155 @@ const CreateProductForm = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className={formStyles}>
               <div className={containerStyles}>
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={labelStyles}>Product Name</FormLabel>
-                      <FormControl>
-                        <Input id="name" {...field} className="w-full" />
-                      </FormControl>
-                      <FormDescription>
-                        Enter the name of the product.
-                      </FormDescription>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="quantity"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={labelStyles}>Quantity</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="quantity"
-                          type="number"
-                          min="1"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                          className="w-full"
+                <div className={columnStyles}>
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelStyles}>Product Name</FormLabel>
+                        <FormControl>
+                          <Input id="name" {...field} className="w-full" />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the name of the product.
+                        </FormDescription>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelStyles}>Price (in USD)</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="price"
+                            type="number"
+                            min="0"
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            className="w-full"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the price of the product in USD.
+                        </FormDescription>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="pictures"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelStyles}>Product Pictures</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="pictures"
+                            type="file"
+                            multiple
+                            onChange={handlePicturesUpload}
+                            className="w-full"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Upload pictures of the product.
+                        </FormDescription>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid grid-cols-3 gap-4 mt-4">
+                    {base64Pictures.map((picture, index) => (
+                      <div key={`new-${index}`} className="relative">
+                        <img
+                          src={picture}
+                          alt={`Activity ${index + 1}`}
+                          className="w-full h-32 object-cover rounded cursor-pointer"
+                          onClick={() => {
+                            setSelectedImage(picture);
+                          }}
                         />
-                      </FormControl>
-                      <FormDescription>
-                        Enter the quantity of the product.
-                      </FormDescription>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className={containerStyles}>
-                <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={labelStyles}>Price (in USD)</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="price"
-                          type="number"
-                          min="0"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                          className="w-full"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Enter the price of the product in USD.
-                      </FormDescription>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={labelStyles}>
-                        Description (min. 200 characters)
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          id="description"
-                          {...field}
-                          className="h-24 w-full"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Provide a detailed description of the product.
-                      </FormDescription>
-                      <FormMessage className="text-red-500" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="pictures"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={labelStyles}>Product Pictures</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="pictures"
-                        type="file"
-                        multiple
-                        onChange={handlePicturesUpload}
-                        className="w-full"
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload pictures of the product.
-                    </FormDescription>
-                    <FormMessage className="text-red-500" />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-3 gap-4 mt-4">
-                {base64Pictures.map((picture, index) => (
-                  <div key={`new-${index}`} className="relative">
-                    <img
-                      src={picture}
-                      alt={`Activity ${index + 1}`}
-                      className="w-full h-32 object-cover rounded cursor-pointer"
-                      onClick={() => {
-                        setSelectedImage(picture);
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removePicture(index)}
-                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-                    >
-                      <X size={16} />
-                    </button>
+                        <button
+                          type="button"
+                          onClick={() => removePicture(index)}
+                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+                <div className={columnStyles}>
+                  <FormField
+                    control={form.control}
+                    name="quantity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelStyles}>Quantity</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="quantity"
+                            type="number"
+                            min="1"
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            className="w-full"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Enter the quantity of the product.
+                        </FormDescription>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className={labelStyles}>
+                          Description (min. 200 characters)
+                        </FormLabel>
+                        <FormControl>
+                          <Textarea
+                            id="description"
+                            {...field}
+                            className="h-24 w-full"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Provide a detailed description of the product.
+                        </FormDescription>
+                        <FormMessage className="text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-              <Button
-                type="submit"
-                className={buttonStyles}
-                disabled={loading}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                {loading ? "Creating..." : "Create Product"}
-              </Button>
             </form>
           </Form>
+          <div className="flex justify-end mb-6 mr-6">
+            <Button
+              type="submit"
+              className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-8 py-4 text-xl"
+              disabled={loading}
+            >
+              <Plus className="mr-2 h-6 w-6" />
+              {loading ? "Creating..." : "Create Product"}
+            </Button>
+          </div>
         </div>
 
         <ToastViewport />

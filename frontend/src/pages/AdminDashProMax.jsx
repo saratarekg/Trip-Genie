@@ -215,7 +215,8 @@ export function Dashboard() {
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
-        // Replace Next.js routing with a placeholder function
+        setActiveTab("dashboard"); // Set active tab to dashboard
+        localStorage.setItem("activeTab", "dashboard"); // Save active tab to localStorage
         window.location.href = "/login";
       } else {
         console.error("Logout failed.");
