@@ -157,7 +157,7 @@ export default function TransportationCard({
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-400">Trip Code</p>
-                <p className="text-[#1A3B47] font-semibold">
+                <p className="text-gray-400 font-semibold">
                   {booking._id.substring(0, 10) || "N/A"}
                 </p>
               </div>

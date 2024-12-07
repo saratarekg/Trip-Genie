@@ -79,6 +79,8 @@ export default function HotelDetails() {
   const [exchangeRates, setExchangeRates] = useState(null);
   const [currencies, setCurrencies] = useState([]);
   const [tourist, setTourist] = useState(null);
+  const [promo, setPromo] = useState("");
+
 
   const checkinDate = searchParams.get("checkinDate");
   const checkoutDate = searchParams.get("checkoutDate");
@@ -381,6 +383,8 @@ export default function HotelDetails() {
       const quantity = searchParams.get("quantity");
       const selectedDateStr = searchParams.get("selectedDate");
       const sessionId = searchParams.get("session_id");
+      const promoCode = searchParams.get("promoCode");
+      const discount = searchParams.get("discountPercentage");
 
       // Extract additional parameters from the URL
       const hotelID = searchParams.get("hotelID");
@@ -389,6 +393,7 @@ export default function HotelDetails() {
       const checkoutDate = searchParams.get("checkoutDate");
       const numberOfRooms = searchParams.get("numberOfRooms");
       const numberOfAdults = searchParams.get("numberOfAdults");
+      const price = searchParams.get("price");
 
       console.log(
         success,
@@ -412,6 +417,7 @@ export default function HotelDetails() {
           if (response.data.status === "paid") {
             setIsSuccessPopupOpen(true);
             setReservedBefore(true);
+            setPrice(price);
             // Update any other necessary state here
           }
         } catch (error) {
@@ -434,6 +440,7 @@ export default function HotelDetails() {
       const numberOfRooms = searchParams.get("numberOfRooms");
       const numberOfAdults = searchParams.get("numberOfAdults");
       const price = searchParams.get("price");
+      const promoCode = searchParams.get("promoCode");
 
       try {
         // Assuming handleBooking uses these parameters
@@ -447,7 +454,8 @@ export default function HotelDetails() {
           checkoutDate,
           numberOfRooms,
           numberOfAdults,
-          price
+          price,
+          promoCode
         );
       } catch (error) {
         console.error("Error handling booking:", error);
@@ -468,6 +476,8 @@ export default function HotelDetails() {
     // searchParams.delete("checkoutDate");
     searchParams.delete("numberOfRooms");
     // searchParams.delete("numberOfAdults");
+    searchParams.delete("price");
+    searchParams.delete("promoCode");
 
     const newUrl = `${window.location.pathname} ${searchParams.toString()}`;
     window.history.replaceState(null, "", newUrl);
@@ -483,7 +493,8 @@ export default function HotelDetails() {
     checkoutDate,
     numberOfRooms,
     numberOfAdults,
-    price
+    price,
+    promoCode
   ) => {
     try {
       console.log(
@@ -516,6 +527,7 @@ export default function HotelDetails() {
           price: convertedPrice,
           numberOfAdults,
           paymentType,
+          promoCode
         }),
       });
 
@@ -779,6 +791,8 @@ export default function HotelDetails() {
               maxRooms={10}
               onWalletPayment={handleConfirmBooking}
               onSuccess={setIsSuccessWalletPopupOpen}
+              promo={promo}
+              setPromo={setPromo}
             />
           )}
         </div>
@@ -863,16 +877,17 @@ export default function HotelDetails() {
               <DialogTitle>Booking Successful</DialogTitle>
               <DialogDescription>
                 Your hotel room has been booked successfully.
-                {paymentType === "Wallet" && (
                   <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">
-                        Amount Paid Via Wallet:{" "}
+                        Amount Paid:{" "}
                       </Label>
                       <div>
                         {price} {currencyCode}{" "}
                       </div>
                     </div>
+                    {paymentType === "Wallet" && (
+
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">New Wallet Balance: </Label>
                       <div>
@@ -882,8 +897,9 @@ export default function HotelDetails() {
                         {currencyCode}
                       </div>
                     </div>
-                  </div>
+                  
                 )}
+                </div>
               </DialogDescription>
             </DialogHeader>
             <Button onClick={() => handleFinalOK()}>Close</Button>

@@ -60,7 +60,7 @@ const BookingDetails = ({ booking, isOpen, onClose, formatPrice, tourist, onDele
               {booking.transportationID?.from} to {booking.transportationID?.to}
             </div>
             <div className="text-sm text-gray-400 mt-1">
-              Trip Code: <span className="text-[#1A3B47] font-semibold">
+              Trip Code: <span className=" font-semibold">
                 {booking._id.substring(0, 10) || "N/A"}
               </span>
             </div>

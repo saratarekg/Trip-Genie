@@ -438,6 +438,7 @@ const bookHotel = async (req, res) => {
     price,
     numberOfAdults,
     paymentType,
+    promoCode, // Add promoCode to the request body
   } = req.body;
   const touristID = res.locals.user_id;
 
@@ -448,15 +449,29 @@ const bookHotel = async (req, res) => {
   }
 
   let walletBalance = 0;
+  let usedPromoCode = null;
+  let totalCost = price;
+
   // Check if payment type is "Wallet"
   if (paymentType === "Wallet") {
-    if (user.wallet < price) {
+    if (user.wallet < totalCost) {
       return res.status(400).json({
-        message: `Insufficient funds in wallet: ${user.wallet}, but the price is: ${price}`,
+        message: `Insufficient funds in wallet: ${user.wallet}, but the price is: ${totalCost}`,
       });
     }
 
-    walletBalance = user.wallet - price;
+    walletBalance = user.wallet - totalCost;
+  }
+
+  // Apply promo code if provided
+  if (promoCode) {
+    try {
+      usedPromoCode = await PromoCode.usePromoCode(promoCode);
+      const discount = (totalCost * usedPromoCode.percentOff) / 100;
+      totalCost -= discount;
+    } catch (error) {
+      console.error(`Promo code error: ${error.message}`);
+    }
   }
 
   try {
@@ -468,9 +483,10 @@ const bookHotel = async (req, res) => {
       checkoutDate,
       numberOfRooms,
       roomName,
-      price,
+      price: totalCost, // Use the discounted price if promo code is applied
       numberOfAdults,
       paymentType,
+      promoCode: usedPromoCode ? usedPromoCode : null, // Save the used promo code if any
     });
 
     const savedBooking = await booking.save();
@@ -483,7 +499,7 @@ const bookHotel = async (req, res) => {
       updateFields.$push = {
         history: {
           transactionType: "payment",
-          amount: price,
+          amount: totalCost,
           details: `You’ve successfully booked Hotel Rooms in ${hotelName}`,
         },
       };

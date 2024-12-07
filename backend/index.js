@@ -182,7 +182,6 @@ app.post("/create-booking-session", async (req, res) => {
       discountPercentage,
       promoCode 
     } = req.body;
-    console.log("in hereeeeeeeee");
 
     // Calculate the total price of items
     const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -324,7 +323,9 @@ app.post("/create-hotel-booking-session", async (req, res) => {
       numberOfAdults,
       paymentType,
       currency,
-      returnLocation, // Can be used later for payment method-specific logic
+      returnLocation, 
+      discountPercentage,
+      promoCode // Can be used later for payment method-specific logic
     } = req.body;
 
     // Ensure price is in cents (Stripe requires the price in the smallest currency unit, e.g., cents)
@@ -338,10 +339,10 @@ app.post("/create-hotel-booking-session", async (req, res) => {
           price_data: {
             currency: currency, // Adjust to dynamic currency if needed
             product_data: {
-              name: `${hotelName} - ${roomName}`, // Display hotel and room name in the checkout
+              name:  discountPercentage > 0 ? `(-${discountPercentage}%) ${hotelName} - ${roomName}` : `${hotelName} - ${roomName}`, // Display hotel and room name in the checkout
               description: `Booking for ${numberOfRooms} rooms, ${numberOfAdults} adults`,
             },
-            unit_amount: totalPrice, // The total amount for the booking (in cents)
+            unit_amount: totalPrice,
           },
           quantity: 1, // Only one booking (it already includes the full price)
         },
@@ -357,7 +358,7 @@ app.post("/create-hotel-booking-session", async (req, res) => {
         checkoutDate
       )}&numberOfRooms=${numberOfRooms}&numberOfAdults=${numberOfAdults}&paymentType=${encodeURIComponent(
         paymentType
-      )}&price=${encodeURIComponent(price)}`,
+      )}&price=${encodeURIComponent(price)}&promoCode=${promoCode}&discountPercentage=${discountPercentage}`,
       cancel_url: `${req.body.returnLocation}&cancel=true`,
     });
 

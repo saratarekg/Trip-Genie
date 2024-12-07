@@ -18,6 +18,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
+import { set } from "date-fns";
+import { Input } from "@/components/ui/input";
+import Cookies from "js-cookie";
+
 
 const PaymentPopup = ({
   isBookingConfirmationOpen,
@@ -38,16 +42,87 @@ const PaymentPopup = ({
   onError,
   onSuccess,
   returnLocation,
+  promo,
+  setPromo
 }) => {
   const [numberOfRooms, setNumberOfRooms] = useState(1);
   const [paymentType, setPaymentType] = useState("CreditCard");
   const [isProcessing, setIsProcessing] = useState(false);
   const [totalPrice, setTotalPrice] = useState(Number(price));
   const [bookingPopupError, setBookingPopupError] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+  const [promoError, setPromoError] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountedTotal, setDiscountedTotal] = useState(totalPrice);
 
   useEffect(() => {
     setTotalPrice(Number(price) * numberOfRooms);
-  }, [numberOfRooms, price]);
+    setDiscountedTotal(totalPrice - discountAmount);
+  }, [numberOfRooms, price, discountAmount, totalPrice]);
+
+  const handlePromoSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setPromoError("");
+    setDiscountAmount(0);
+    setDiscountedTotal(totalPrice);
+
+    if (!promoCode.trim()) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:4000/tourist/get/promo-code",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Cookies.get("jwt")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code: promoCode }),
+        }
+      );
+
+      if (response.status === 404) {
+        setPromoError("Promo Code Not Found.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch promo code details");
+      }
+
+      const data = await response.json();
+      setPromo(data.promoCode);
+      const promo2 = data.promoCode;
+
+      if (promo2.status === "inactive") {
+        setPromoError("This promo code is currently inactive.");
+        return;
+      }
+
+      const currentDate = new Date();
+      const startDate = new Date(promo2?.dateRange?.start);
+      const endDate = new Date(promo2?.dateRange?.end);
+
+      if (currentDate < startDate || currentDate > endDate) {
+        setPromoError("This promo code is not valid for the current date.");
+        return;
+      }
+
+      if (promo2.timesUsed >= promo2.usage_limit) {
+        setPromoError("This promo code has reached its usage limit.");
+        return;
+      }
+
+      const discount = totalPrice * (promo2.percentOff / 100);
+      setDiscountAmount(discount);
+      setDiscountedTotal(totalPrice - discount);
+    } catch (error) {
+      console.error(error);
+      setPromoError("Failed to apply promo code. Please try again.");
+    }
+  };
 
   const handleConfirmBooking = async () => {
     setIsProcessing(true);
@@ -55,8 +130,7 @@ const PaymentPopup = ({
 
     if (paymentType === "Wallet") {
       try {
-        await onWalletPayment("Wallet", "10", "selectedDateStr", hotelID, roomName, checkinDate, checkoutDate, numberOfRooms, numberOfAdults,totalPrice);
-      
+        await onWalletPayment("Wallet", "10", "selectedDateStr", hotelID, roomName, checkinDate, checkoutDate, numberOfRooms, numberOfAdults, discountedTotal,promo);
       } catch (error) {
         setBookingPopupError(error.message);
       } finally {
@@ -76,11 +150,13 @@ const PaymentPopup = ({
         checkoutDate,
         numberOfRooms,
         roomName,
-        price: totalPrice, // Total price for all rooms
+        price: discountedTotal, // Total price for all rooms after discount
         numberOfAdults,
         paymentType,
         returnLocation,
-        currency: currencyCode // Replace with a desired return location
+        currency: currencyCode,
+        promoCode: promo,
+        discountPercentage : promo.percentOff,
       };
 
       const response = await fetch("http://localhost:4000/create-hotel-booking-session", {
@@ -164,6 +240,34 @@ const PaymentPopup = ({
                     <Label htmlFor="Wallet">Wallet</Label>
                   </div>
                 </RadioGroup>
+              </div>
+              <Label htmlFor="promoCode" className="text-right">
+                Promo Code
+              </Label>
+              <Input
+                id="promoCode"
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+              />
+              <Button
+                onClick={handlePromoSubmit}
+                className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
+              >
+                Apply Promo Code
+              </Button>
+              {promoError && <div className="text-red-500 text-sm mt-2">{promoError}</div>}
+              {discountAmount > 0 && (
+                <div className="text-green-600 text-sm mt-2">
+                  Congratulations! You've saved {promo.percentOff}% on this purchase!
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label className="text-right">Total Price</Label>
+                <div className="font-medium">
+                  {currencySymbol}
+                  {discountedTotal.toFixed(2)}
+                </div>
               </div>
               {bookingPopupError && (
                 <div className="text-red-500 text-sm mt-2">{bookingPopupError}</div>

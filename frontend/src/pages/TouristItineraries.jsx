@@ -93,6 +93,17 @@ const ItineraryCard = ({ booking, onSelect, onDelete, userInfo, exchangeRates })
             {getFormattedPrice(booking.paymentAmount)}
           </div>
           <div className="flex gap-2">
+          <Button 
+              size="sm" 
+              variant="default" 
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(booking);
+              }}
+            >
+              Cancel
+            </Button>
             <Button
               size="sm"
               variant="default"
@@ -104,17 +115,7 @@ const ItineraryCard = ({ booking, onSelect, onDelete, userInfo, exchangeRates })
             >
               View
             </Button>
-            <Button 
-              size="sm" 
-              variant="default" 
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(booking);
-              }}
-            >
-              Cancel
-            </Button>
+           
           </div>
         </div>
       </div>
@@ -383,7 +384,7 @@ export default function BookedItineraries() {
           {selectedBooking?.itinerary.title}
         </div>
         <div className="text-sm text-gray-400 mt-1">
-          Booking ID: <span className="text-[#1A3B47] font-semibold">
+          Booking ID: <span className=" font-semibold">
             {selectedBooking?._id ? selectedBooking._id.substring(0, 10) : "AB123456"}
           </span>
         </div>

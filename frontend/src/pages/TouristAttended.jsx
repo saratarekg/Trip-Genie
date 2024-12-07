@@ -363,7 +363,7 @@ if (error) return <div>{error}</div>;
           {selectedBooking?.activity.name}
         </div>
         <div className="text-sm text-gray-400 mt-1">
-          Booking ID: <span className="text-[#1A3B47] font-semibold">
+          Booking ID: <span className=" font-semibold">
             {selectedBooking?._id ? selectedBooking._id.substring(0, 10) : "AB123456"}
           </span>
         </div>
