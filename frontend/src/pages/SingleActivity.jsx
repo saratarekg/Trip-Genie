@@ -1240,8 +1240,8 @@ const ActivityDetail = () => {
       <div className="bg-gray-100">
         <div className="mx-4 ">
           <div className="pt-4">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="md:col-span-2">
+            <div className="flex flex-col md:flex-row gap-8 justify-between">
+              <div className="md:w-full">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-4xl font-bold flex items-center justify-between">
@@ -1347,7 +1347,7 @@ const ActivityDetail = () => {
                 </Card>
               </div>
 
-              <div className="flex flex-col md:flex-col gap-8">
+              <div className="flex flex-col md:flex-col gap-8 md: w-2/5">
                 <div className="flex-1 bg-white shadow-md rounded-lg p-4">
                   <div>
                     <div className="space-y-4">
