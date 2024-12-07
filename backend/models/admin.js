@@ -49,34 +49,33 @@ const adminSchema = new Schema(
         tags: {
           type: [String], // Array of strings to allow multiple tags
           enum: [
-            "urgent", 
-            "personal", 
-            "informational", 
-            "promotional", 
-            "system", 
-            "birthday", 
-            "holiday", 
-            "special_offer", 
-            "reminder", 
-            "payment_due", 
-            "booking_update", 
-            "new_message", 
-            "feedback_request", 
-            "itinerary_change", 
-            "flight_update", 
-            "hotel_booking", 
-            "travel_alert", 
-            "success", 
-            "failure", 
-            "warning", 
-            "info", 
+            "urgent",
+            "personal",
+            "informational",
+            "promotional",
+            "system",
+            "birthday",
+            "holiday",
+            "special_offer",
+            "reminder",
+            "alert",
+            "payment_due",
+            "booking_update",
+            "new_message",
+            "feedback_request",
+            "itinerary_change",
+            "flight_update",
+            "hotel_booking",
+            "travel_alert",
+            "success",
+            "failure",
+            "warning",
+            "info",
             "product", // New tag
-            "activity" // New tag
+            "activity", // New tag
           ],
           default: [], // Default to an empty array if no tags are provided
-        }
-        ,
-        
+        },
         type: {
           type: String,
           enum: ["birthday", "payment", "alert", "offer", "reminder"], // The general category of the notification
@@ -92,7 +91,6 @@ const adminSchema = new Schema(
       },
     ],
     hasUnseenNotifications: { type: Boolean, default: false },
-
   },
   { timestamps: true }
 );
