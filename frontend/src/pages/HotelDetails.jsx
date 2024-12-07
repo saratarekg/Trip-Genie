@@ -646,27 +646,6 @@ export default function HotelDetails() {
                         <li key={i}>{bed.name_with_count}</li>
                       ))}
                   </ul>
-                  <p className="font-bold mb-2">Facilities:</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {room.facilities &&
-                      room.facilities.map((facility, i) => (
-                        <Badge key={i} variant="secondary">
-                          {facility.name === "Free WiFi" && (
-                            <Wifi className="w-4 h-4 mr-1" />
-                          )}
-                          {facility.name === "Tea/Coffee maker" && (
-                            <Coffee className="w-4 h-4 mr-1" />
-                          )}
-                          {facility.name === "TV" && (
-                            <Tv className="w-4 h-4 mr-1" />
-                          )}
-                          {facility.name === "Air conditioning" && (
-                            <AirVent className="w-4 h-4 mr-1" />
-                          )}
-                          {facility.name}
-                        </Badge>
-                      ))}
-                  </div>
                   <div className="mt-4 space-x-2 booking">
                     <Button onClick={() => handleBookRoom(room, false)}>
                       Book Now
