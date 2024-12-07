@@ -696,9 +696,6 @@ const TourGuideItineraryReport = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                        No.
-                      </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Itinerary
                       </th>
@@ -728,9 +725,6 @@ const TourGuideItineraryReport = () => {
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.2, delay: index * 0.05 }}
                           >
-                            <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {index + 1}
-                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {item.itinerary.title}
                             </td>

@@ -30,7 +30,6 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   DropdownMenu,
@@ -51,8 +50,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ProductReport = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const [salesReport, setSalesReport] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("all");
   const [graphPeriod, setGraphPeriod] = useState("week");
@@ -78,23 +75,12 @@ const ProductReport = () => {
   };
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    setFilters((prev) => ({
-      ...prev,
-      day: searchParams.get("day") || "",
-      month: searchParams.get("month") || "",
-      year: searchParams.get("year") || "",
-    }));
-  }, [location.search]);
-
-  useEffect(() => {
     const fetchSalesReport = async () => {
       try {
         const token = Cookies.get("jwt");
         const role = getUserRole();
         const url = new URL(`http://localhost:4000/${role}/sales-report`);
 
-        // Only add day, month, and year to URL params
         ["day", "month", "year"].forEach((key) => {
           if (filters[key]) url.searchParams.append(key, filters[key]);
         });
@@ -124,7 +110,6 @@ const ProductReport = () => {
           calculatePeriodRevenue(response.data.sellerProductsSales, "all")
         );
 
-        // Apply product filter in frontend
         const filteredData = filters.product
           ? response.data.sellerProductsSales.filter(
               (item) => item.product && item.product.name === filters.product
@@ -247,32 +232,19 @@ const ProductReport = () => {
 
   const resetFilters = () => {
     setFilters({ product: "", day: "", month: "", year: "" });
-    navigate("/account/sales-report-seller");
   };
 
   const handleFilterChange = (key, value) => {
-    const newFilters = { ...filters, [key]: value };
-    if (key === "year") {
-      newFilters.month = "";
-      newFilters.day = "";
-    } else if (key === "month") {
-      newFilters.day = "";
-    }
-    setFilters(newFilters);
-    const searchParams = new URLSearchParams();
-    ["day", "month", "year"].forEach((key) => {
-      if (newFilters[key]) searchParams.append(key, newFilters[key]);
+    setFilters((prev) => {
+      const newFilters = { ...prev, [key]: value };
+      if (key === "year") {
+        newFilters.month = "";
+        newFilters.day = "";
+      } else if (key === "month") {
+        newFilters.day = "";
+      }
+      return newFilters;
     });
-    navigate(`/account/sales-report-seller?${searchParams.toString()}`);
-  };
-
-  const applyProductFilter = (productName) => {
-    const filteredData = productName
-      ? salesReport.sellerProductsSales.filter(
-          (item) => item.product && item.product.name === productName
-        )
-      : salesReport.sellerProductsSales;
-    setFilteredSales(filteredData);
   };
 
   if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
@@ -302,6 +274,16 @@ const ProductReport = () => {
     lastMonthSales === 0
       ? 100
       : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
+
+  const totalSales = filteredSales.reduce((sum, item) => sum + item.sales, 0);
+  const totalFilteredRevenue = filteredSales.reduce(
+    (sum, item) => sum + item.revenue,
+    0
+  );
+  const totalFilteredRevenueAfterCommission = filteredSales.reduce(
+    (sum, item) => sum + item.revenueAfterCommission,
+    0
+  );
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -404,7 +386,7 @@ const ProductReport = () => {
                 </p>
                 <p className="text-base font-semibold text-[#1A3B47]">
                   {totalRevenueAfterCommission !== null &&
-                    `Commision Revenue: $${totalRevenueAfterCommission?.toFixed(
+                    `Commission Revenue: $${totalRevenueAfterCommission?.toFixed(
                       2
                     )}`}
                 </p>
@@ -662,16 +644,16 @@ const ProductReport = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                      Total Tickets Sold
+                      Product
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Product
+                      Sales
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Revenue
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Revenue After Commision
+                      Revenue After Commission
                     </th>
                   </tr>
                 </thead>
@@ -694,10 +676,10 @@ const ProductReport = () => {
                           transition={{ duration: 0.2, delay: index * 0.05 }}
                         >
                           <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {item.sales}
+                            {item.product ? item.product.name : "N/A"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.product ? item.product.name : "N/A"}
+                            {item.sales}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {item.revenue !== null &&
@@ -708,6 +690,31 @@ const ProductReport = () => {
                           </td>
                         </motion.tr>
                       ))}
+                      <motion.tr
+                        key="total-row"
+                        className="bg-gray-50 font-semibold"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{
+                          duration: 0.2,
+                          delay: filteredSales.length * 0.05,
+                        }}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          -
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          Total:{totalSales}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          Total: ${totalFilteredRevenue.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          Total: $
+                          {totalFilteredRevenueAfterCommission.toFixed(2)}
+                        </td>
+                      </motion.tr>
                     </motion.tbody>
                   )}
                 </AnimatePresence>
