@@ -15,7 +15,19 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ArrowUpDown, Calendar, Plane, AlertCircle, PlaneLanding, PlaneTakeoff, Info, Ticket, Clock } from "lucide-react";
+import {
+  ArrowUpDown,
+  Calendar,
+  Plane,
+  AlertCircle,
+  PlaneLanding,
+  PlaneTakeoff,
+  Info,
+  Ticket,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -173,7 +185,6 @@ const styles = {
     gap: "8px",
     marginTop: "20px",
   },
-  
 };
 
 const calculateDuration = (departureDate, arrivalDate) => {
@@ -210,7 +221,7 @@ function BookingPage() {
   );
   const [returnDate, setReturnDate] = useState(
     searchParams.get("returnDate") ||
-    formatDate(new Date(Date.now() + 86400000))
+      formatDate(new Date(Date.now() + 86400000))
   );
   const [tripType, setTripType] = useState(
     searchParams.get("tripType") || "roundTrip"
@@ -235,7 +246,6 @@ function BookingPage() {
   const [exchangeRates, setExchangeRates] = useState(null);
   const [currencies, setCurrencies] = useState([]);
   const bookingProcessedRef = useRef(false);
-
 
   const [tourist, setTourist] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState("");
@@ -283,8 +293,6 @@ function BookingPage() {
     }
   }, [searchParams]);
 
-
-
   const renderLocationDisplay = (code) => {
     const location = airports.find((item) => item.code === code);
     return location ? (
@@ -312,17 +320,23 @@ function BookingPage() {
       const items = [
         {
           product: {
-            name: `${selectedFlight.itineraries[0].segments[0].departure.iataCode
-              } → ${selectedFlight.itineraries[0].segments[
+            name: `${
+              selectedFlight.itineraries[0].segments[0].departure.iataCode
+            } → ${
+              selectedFlight.itineraries[0].segments[
                 selectedFlight.itineraries[0].segments.length - 1
               ].arrival.iataCode
-              }`,
+            }`,
           },
           quantity: numberOfSeats,
           totalPrice: Math.round(parseFloat(selectedFlight.price.total)), // convert price to cents
         },
       ];
-      const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total), currencyCode, "USD");
+      const convertedPrice = convertPrice(
+        parseFloat(selectedFlight.price.total),
+        currencyCode,
+        "USD"
+      );
 
       // Prepare metadata and other necessary details
       const metadata = {
@@ -344,15 +358,15 @@ function BookingPage() {
           : undefined,
         returnArrivalDate: selectedFlight.itineraries[1]
           ? selectedFlight.itineraries[1].segments[
-            selectedFlight.itineraries[1].segments.length - 1
-          ].arrival.at
+              selectedFlight.itineraries[1].segments.length - 1
+            ].arrival.at
           : undefined,
         seatType: seatType,
         flightType: `${selectedFlight.itineraries[0].segments[0].carrierCode} ${selectedFlight.itineraries[0].segments[0].number}`,
         flightTypeReturn: selectedFlight.itineraries[1]
           ? selectedFlight.itineraries[1].segments[0].carrierCode +
-          " " +
-          selectedFlight.itineraries[1].segments[0].number
+            " " +
+            selectedFlight.itineraries[1].segments[0].number
           : undefined,
       };
 
@@ -394,14 +408,12 @@ function BookingPage() {
   };
 
   const handleBookNow = async () => {
-
-
     try {
       const success = searchParams.get("success");
 
       if (success === "true") {
         if (bookingProcessedRef.current) {
-          console.log('Booking already processed');
+          console.log("Booking already processed");
           return;
         }
 
@@ -432,7 +444,11 @@ function BookingPage() {
             console.log("Payment status response:", response.data);
             if (response.data.status === "paid") {
               const token = Cookies.get("jwt");
-              const convertedPrice = convertPrice(parseFloat(price), currencyCode, "USD");
+              const convertedPrice = convertPrice(
+                parseFloat(price),
+                currencyCode,
+                "USD"
+              );
               const response = await fetch(
                 "http://localhost:4000/tourist/book-flight",
                 {
@@ -451,11 +467,17 @@ function BookingPage() {
                     price: convertedPrice,
                     numberOfTickets: numberOfTickets,
                     type: type,
-                    returnDepartureDate: returnDepartureDate ? returnDepartureDate : undefined,
-                    returnArrivalDate: returnArrivalDate ? returnArrivalDate : undefined,
+                    returnDepartureDate: returnDepartureDate
+                      ? returnDepartureDate
+                      : undefined,
+                    returnArrivalDate: returnArrivalDate
+                      ? returnArrivalDate
+                      : undefined,
                     seatType: seatType,
                     flightType: flightType,
-                    flightTypeReturn: flightTypeReturn ? flightTypeReturn : undefined,
+                    flightTypeReturn: flightTypeReturn
+                      ? flightTypeReturn
+                      : undefined,
                   }),
                 }
               );
@@ -506,10 +528,13 @@ function BookingPage() {
       }
 
       if (paymentMethod === "Wallet") {
-
         const token = Cookies.get("jwt");
 
-        const convertedPrice = convertPrice(parseFloat(selectedFlight.price.total), currencyCode, "USD");
+        const convertedPrice = convertPrice(
+          parseFloat(selectedFlight.price.total),
+          currencyCode,
+          "USD"
+        );
         const response = await fetch(
           "http://localhost:4000/tourist/book-flight",
           {
@@ -521,7 +546,8 @@ function BookingPage() {
             body: JSON.stringify({
               paymentType: paymentMethod,
               flightID: `${Math.random().toString(36).substr(2, 9)}`,
-              from: selectedFlight.itineraries[0].segments[0].departure.iataCode,
+              from: selectedFlight.itineraries[0].segments[0].departure
+                .iataCode,
               to: selectedFlight.itineraries[0].segments[
                 selectedFlight.itineraries[0].segments.length - 1
               ].arrival.iataCode,
@@ -539,8 +565,8 @@ function BookingPage() {
                 : undefined,
               returnArrivalDate: selectedFlight.itineraries[1]
                 ? selectedFlight.itineraries[1].segments[
-                  selectedFlight.itineraries[1].segments.length - 1
-                ].arrival.at
+                    selectedFlight.itineraries[1].segments.length - 1
+                  ].arrival.at
                 : undefined,
               seatType: seatType,
               flightType:
@@ -559,8 +585,6 @@ function BookingPage() {
           throw new Error("Failed to book the flight");
         }
 
-
-
         const data = await response.json();
         console.log("Booking successful:", data);
         setIsBookingConfirmationOpen({
@@ -569,7 +593,6 @@ function BookingPage() {
           price: selectedFlight.price.total,
           wallet: tourist?.wallet,
         });
-
       }
     } catch (error) {
       console.error("Booking error:", error);
@@ -584,32 +607,32 @@ function BookingPage() {
 
   const fetchExchangeRates = async () => {
     try {
-      const response = await fetch('http://localhost:4000/rates');
+      const response = await fetch("http://localhost:4000/rates");
       if (!response.ok) {
-        throw new Error('Failed to fetch exchange rates');
+        throw new Error("Failed to fetch exchange rates");
       }
       const data = await response.json();
       setExchangeRates(data.rates);
     } catch (error) {
-      console.error('Error fetching exchange rates:', error);
+      console.error("Error fetching exchange rates:", error);
     }
   };
 
   const fetchCurrencies = async () => {
     try {
-      const token = Cookies.get('jwt');
-      const response = await fetch('http://localhost:4000/tourist/currencies', {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/currencies", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch currencies');
+        throw new Error("Failed to fetch currencies");
       }
       const data = await response.json();
       setCurrencies(data);
     } catch (error) {
-      console.error('Error fetching currencies:', error);
+      console.error("Error fetching currencies:", error);
     }
   };
 
@@ -697,9 +720,13 @@ function BookingPage() {
   };
 
   useEffect(() => {
-    Promise.all([refreshToken(), getCurrencyCode(), fetchExchangeRates(), fetchCurrencies()]);
+    Promise.all([
+      refreshToken(),
+      getCurrencyCode(),
+      fetchExchangeRates(),
+      fetchCurrencies(),
+    ]);
   }, []);
-
 
   // convert price that takes any currency and converts it to any currency using exchange rates
   const convertPrice = (price, fromCurrency, toCurrency) => {
@@ -708,7 +735,7 @@ function BookingPage() {
     }
     const fromRate = exchangeRates[fromCurrency];
     const toRate = exchangeRates[toCurrency];
-    return (price * toRate / fromRate).toFixed(2);
+    return ((price * toRate) / fromRate).toFixed(2);
   };
 
   const handleSearch = async () => {
@@ -721,7 +748,8 @@ function BookingPage() {
     setError("");
     try {
       const response = await fetch(
-        `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}${tripType === "roundTrip" ? `&returnDate=${returnDate}` : ""
+        `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${departureDate}${
+          tripType === "roundTrip" ? `&returnDate=${returnDate}` : ""
         }&adults=1&nonStop=true&currencyCode=${currencyCode}`,
         {
           headers: {
@@ -1031,16 +1059,20 @@ function BookingPage() {
                   <SelectContent>
                     <SelectItem value="all">All Prices</SelectItem>
                     <SelectItem value="under25">
-                      Under {currencySymbol}{Math.floor(0.25 * maxPrice)}
+                      Under {currencySymbol}
+                      {Math.floor(0.25 * maxPrice)}
                     </SelectItem>
                     <SelectItem value="under50">
-                      Under {currencySymbol}{Math.floor(0.5 * maxPrice)}
+                      Under {currencySymbol}
+                      {Math.floor(0.5 * maxPrice)}
                     </SelectItem>
                     <SelectItem value="under75">
-                      Under {currencySymbol}{Math.floor(0.75 * maxPrice)}
+                      Under {currencySymbol}
+                      {Math.floor(0.75 * maxPrice)}
                     </SelectItem>
                     <SelectItem value="over75">
-                      Over {currencySymbol}{Math.floor(0.75 * maxPrice)}
+                      Over {currencySymbol}
+                      {Math.floor(0.75 * maxPrice)}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -1051,34 +1083,60 @@ function BookingPage() {
                   <Card key={index} className="p-6 mb-4">
                     <div className="flex justify-between items-center mb-6">
                       <div className="text-lg">
-                        <span className="font-semibold text-[#1A3B47]">Flight Number</span>
+                        <span className="font-semibold text-[#1A3B47]">
+                          Flight Number
+                        </span>
                         <span className="text-base ml-1 text-[#5D9297]">
-                          {flight.itineraries[0].segments[0].carrierCode} {flight.itineraries[0].segments[0].number}
+                          {flight.itineraries[0].segments[0].carrierCode}{" "}
+                          {flight.itineraries[0].segments[0].number}
                         </span>
                       </div>
                       <span className="text-4xl font-bold text-[#1A3B47]">
-                        {currencySymbol}{flight.price.total}
+                        {currencySymbol}
+                        {flight.price.total}
                       </span>
                     </div>
                     <div className="flex flex-col">
-                      <div className={`mb-6 ${!flight.itineraries[1] ? "justify-center" : ""}`}>
+                      <div
+                        className={`mb-6 ${
+                          !flight.itineraries[1] ? "justify-center" : ""
+                        }`}
+                      >
                         <div className="flex items-center justify-between">
                           <div className="space-y-1">
                             <div className="text-sm text-gray-500">Depart</div>
                             <div className="text-3xl font-bold text-[#1A3B47]">
-                              {new Date(flight.itineraries[0].segments[0].departure.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              {new Date(
+                                flight.itineraries[0].segments[0].departure.at
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(flight.itineraries[0].segments[0].departure.at).toLocaleDateString()}
+                              {new Date(
+                                flight.itineraries[0].segments[0].departure.at
+                              ).toLocaleDateString()}
                             </div>
-                            <div className="text-sm text-gray-500">{flight.itineraries[0].segments[0].departure.iataCode}</div>
+                            <div className="text-sm text-gray-500">
+                              {
+                                flight.itineraries[0].segments[0].departure
+                                  .iataCode
+                              }
+                            </div>
                           </div>
                           <div className="flex-1 flex flex-col items-center mx-4">
                             <div className="w-full flex items-center gap-2">
                               <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                               <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
                                 <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                                  {calculateDuration(flight.itineraries[0].segments[0].departure.at, flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at)}
+                                  {calculateDuration(
+                                    flight.itineraries[0].segments[0].departure
+                                      .at,
+                                    flight.itineraries[0].segments[
+                                      flight.itineraries[0].segments.length - 1
+                                    ].arrival.at
+                                  )}
                                 </span>
                               </div>
                               <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
@@ -1087,13 +1145,28 @@ function BookingPage() {
                           <div className="space-y-1">
                             <div className="text-sm text-gray-500">Arrive</div>
                             <div className="text-3xl font-bold text-[#1A3B47]">
-                              {new Date(flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                              {new Date(
+                                flight.itineraries[0].segments[
+                                  flight.itineraries[0].segments.length - 1
+                                ].arrival.at
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.at).toLocaleDateString()}
+                              {new Date(
+                                flight.itineraries[0].segments[
+                                  flight.itineraries[0].segments.length - 1
+                                ].arrival.at
+                              ).toLocaleDateString()}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {flight.itineraries[0].segments[flight.itineraries[0].segments.length - 1].arrival.iataCode}
+                              {
+                                flight.itineraries[0].segments[
+                                  flight.itineraries[0].segments.length - 1
+                                ].arrival.iataCode
+                              }
                             </div>
                           </div>
                         </div>
@@ -1103,15 +1176,27 @@ function BookingPage() {
                           {/* Return trip information */}
                           <div className="flex items-center justify-between">
                             <div className="space-y-1">
-                              <div className="text-sm text-gray-500">Depart</div>
+                              <div className="text-sm text-gray-500">
+                                Depart
+                              </div>
                               <div className="text-3xl font-bold text-[#1A3B47]">
-                                {new Date(flight.itineraries[1].segments[0].departure.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                {new Date(
+                                  flight.itineraries[1].segments[0].departure.at
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {new Date(flight.itineraries[1].segments[0].departure.at).toLocaleDateString()}
+                                {new Date(
+                                  flight.itineraries[1].segments[0].departure.at
+                                ).toLocaleDateString()}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {flight.itineraries[1].segments[0].departure.iataCode}
+                                {
+                                  flight.itineraries[1].segments[0].departure
+                                    .iataCode
+                                }
                               </div>
                             </div>
                             <div className="flex-1 flex flex-col items-center mx-4">
@@ -1119,22 +1204,46 @@ function BookingPage() {
                                 <PlaneTakeoff className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                                 <div className="w-full border-t-2 border-dashed border-[#388A94] relative">
                                   <span className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 text-xs text-gray-500 bg-white px-2">
-                                    {calculateDuration(flight.itineraries[1].segments[0].departure.at, flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at)}
+                                    {calculateDuration(
+                                      flight.itineraries[1].segments[0]
+                                        .departure.at,
+                                      flight.itineraries[1].segments[
+                                        flight.itineraries[1].segments.length -
+                                          1
+                                      ].arrival.at
+                                    )}
                                   </span>
                                 </div>
                                 <PlaneLanding className="h-5 w-5 text-[#388A94] shrink-0 mb-1" />
                               </div>
                             </div>
                             <div className="space-y-1">
-                              <div className="text-sm text-gray-500">Arrive</div>
+                              <div className="text-sm text-gray-500">
+                                Arrive
+                              </div>
                               <div className="text-3xl font-bold text-[#1A3B47]">
-                                {new Date(flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                {new Date(
+                                  flight.itineraries[1].segments[
+                                    flight.itineraries[1].segments.length - 1
+                                  ].arrival.at
+                                ).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {new Date(flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.at).toLocaleDateString()}
+                                {new Date(
+                                  flight.itineraries[1].segments[
+                                    flight.itineraries[1].segments.length - 1
+                                  ].arrival.at
+                                ).toLocaleDateString()}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {flight.itineraries[1].segments[flight.itineraries[1].segments.length - 1].arrival.iataCode}
+                                {
+                                  flight.itineraries[1].segments[
+                                    flight.itineraries[1].segments.length - 1
+                                  ].arrival.iataCode
+                                }
                               </div>
                             </div>
                           </div>
@@ -1144,12 +1253,18 @@ function BookingPage() {
                         <div className="flex bg-gray-100 px-4 py-2 rounded-md">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Ticket className="h-6 w-6" />
-                            <span>Show e-tickets and passenger identities during check-in</span>
+                            <span>
+                              Show e-tickets and passenger identities during
+                              check-in
+                            </span>
                           </div>
                           <div className="border-l-2 border-gray-300 h-9 mx-4"></div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Clock className="h-6 w-6" />
-                            <span>Please be at the boarding gate at least 30 minutes before boarding time</span>
+                            <span>
+                              Please be at the boarding gate at least 30 minutes
+                              before boarding time
+                            </span>
                           </div>
                         </div>
                         <Button
@@ -1161,59 +1276,34 @@ function BookingPage() {
                       </div>
                     </div>
                   </Card>
-
                 ))}
               </div>
 
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className={`cursor-pointer ${currentPage === 1
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                        }`}
-                    />
-                  </PaginationItem>
-                  {[...Array(totalPages)].map((_, i) => {
-                    if (
-                      i === 0 ||
-                      i === totalPages - 1 ||
-                      (i >= currentPage - 2 && i <= currentPage + 2)
-                    ) {
-                      return (
-                        <PaginationItem key={i + 1}>
-                          <PaginationLink
-                            onClick={() => setCurrentPage(i + 1)}
-                            isActive={currentPage === i + 1}
-                            className="cursor-pointer"
-                          >
-                            {i + 1}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    } else if (
-                      (i === currentPage - 3 && i > 0) ||
-                      (i === currentPage + 3 && i < totalPages - 1)
-                    ) {
-                      return <PaginationEllipsis key={i} />;
-                    }
-                    return null;
-                  })}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      className={`cursor-pointer ${currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                        }`}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <Button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  variant="outline"
+                  size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm font-medium text-[#1A3B47]">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  variant="outline"
+                  size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -1339,8 +1429,6 @@ function BookingPage() {
                     Book Now
                   </Button>
                 </div>
-
-
               </div>
             )}
           </DialogContent>
@@ -1360,11 +1448,17 @@ function BookingPage() {
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <Label className="text-right">You Paid:</Label>
                   <div>
-                    {isBookingConfirmationOpen.price}{currencySymbol}
+                    {isBookingConfirmationOpen.price}
+                    {currencySymbol}
                   </div>
                   <Label className="text-right">New Wallet Balance:</Label>
                   <div>
-                    {currencySymbol}{convertPrice(isBookingConfirmationOpen.wallet, "USD", currencyCode) - isBookingConfirmationOpen.price}
+                    {currencySymbol}
+                    {convertPrice(
+                      isBookingConfirmationOpen.wallet,
+                      "USD",
+                      currencyCode
+                    ) - isBookingConfirmationOpen.price}
                   </div>
                 </div>
               )}

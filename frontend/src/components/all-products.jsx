@@ -62,8 +62,9 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-4 h-4 ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
         />
       ))}
     </div>
@@ -100,8 +101,8 @@ const ProductCard = ({
       // Wait for currency and wishlist state to be set
       await Promise.all([
         userInfo &&
-          userInfo.role === "tourist" &&
-          userInfo.preferredCurrency !== product.currency
+        userInfo.role === "tourist" &&
+        userInfo.preferredCurrency !== product.currency
           ? fetchExchangeRate()
           : getCurrencySymbol(),
         setIsInWishlistLocal(
@@ -166,8 +167,6 @@ const ProductCard = ({
     }
   };
 
-
-
   useEffect(() => {
     const isInWishlist = wishlistItems.some(
       (item) => item.product._id === product._id
@@ -228,12 +227,12 @@ const ProductCard = ({
 
       {userInfo?.role === "tourist" && (
         <div className="absolute top-2 right-2 flex space-x-2">
-
           <Button
-            className={`rounded-full w-10 h-10 p-0 ${isInWishlistLocal
+            className={`rounded-full w-10 h-10 p-0 ${
+              isInWishlistLocal
                 ? "bg-red-500 hover:bg-red-600"
                 : "bg-gray-200 hover:bg-gray-300"
-              } text-white`}
+            } text-white`}
             onClick={(e) => {
               e.stopPropagation();
               setIsInWishlistLocal(!isInWishlistLocal);
@@ -774,8 +773,9 @@ export function AllProducts() {
                   <button
                     key={rating}
                     onClick={() => setSelectedRating(rating)}
-                    className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                      }`}
+                    className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
+                      selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                    }`}
                   >
                     {renderStars(rating)}
                   </button>
@@ -907,37 +907,30 @@ export function AllProducts() {
                 </div>
 
                 <div className="mt-8 flex justify-center items-center space-x-4">
-                  <button
+                  <Button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
-                      }`}
+                    variant="outline"
+                    size="icon"
+                    className="text-[#1A3B47] border-[#1A3B47]"
                   >
-                    <ChevronLeft />
-                  </button>
-
-                  <span className="text-lg font-medium">
-                    {products.length > 0
-                      ? `Page ${currentPage} of ${Math.ceil(
-                        products.length / tripsPerPage
-                      )}`
-                      : "No pages available"}
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium text-[#1A3B47]">
+                    Page {currentPage} of{" "}
+                    {Math.ceil(products.length / tripsPerPage)}
                   </span>
-
-                  <button
+                  <Button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={
-                      currentPage ===
-                      Math.ceil(products.length / tripsPerPage) ||
-                      products.length === 0
+                      currentPage === Math.ceil(products.length / tripsPerPage)
                     }
-                    className={`px-4 py-2 rounded-full bg-white shadow ${currentPage === Math.ceil(products.length / tripsPerPage)
-                        ? "text-gray-300"
-                        : "text-[#388A94]"
-                      }`}
+                    variant="outline"
+                    size="icon"
+                    className="text-[#1A3B47] border-[#1A3B47]"
                   >
-                    <ChevronRight />
-                  </button>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </>
             )}
@@ -947,8 +940,9 @@ export function AllProducts() {
 
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white z-50`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white z-50`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}

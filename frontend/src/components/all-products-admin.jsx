@@ -210,58 +210,55 @@ const ProductCard = ({
 
         {userInfo?.role === "tourist" && product.quantity > 0 ? (
           <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="bg-[#F88C33] hover:bg-orange-500 text-white"
-              style={{
-                borderRadius: "20px",
-                padding: "4px 12px",
-                fontSize: "14px",
-              }}
-            >
-              Buy Now
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="text-[#1A3B47] text-2xl">Choose an option</DialogTitle>
-            </DialogHeader>
-           
-            <div className="grid gap-4 py-4">
+            <DialogTrigger asChild>
+              <Button
+                className="bg-[#F88C33] hover:bg-orange-500 text-white"
+                style={{
+                  borderRadius: "20px",
+                  padding: "4px 12px",
+                  fontSize: "14px",
+                }}
+              >
+                Buy Now
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle className="text-[#1A3B47] text-2xl">
+                  Choose an option
+                </DialogTitle>
+              </DialogHeader>
 
-<Button
-  className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
-  onClick={(e) => {
-    e.stopPropagation();
-    onAddToCart(product);
-    setIsPopupOpen(false);
-  }}
->
-  Add to Cart and Continue Shopping
-</Button>
-<Button
-  className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
-  onClick={handleCheckoutNow}
->
-  Add to cart and Checkout Now
-</Button>
-
-            </div>
-          </DialogContent>
-        </Dialog>
-        
+              <div className="grid gap-4 py-4">
+                <Button
+                  className="bg-[#388A94] text-lg text-white hover:bg-[#306e78]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddToCart(product);
+                    setIsPopupOpen(false);
+                  }}
+                >
+                  Add to Cart and Continue Shopping
+                </Button>
+                <Button
+                  className="bg-[#1A3B47] text-lg text-white hover:bg-[#15303a]"
+                  onClick={handleCheckoutNow}
+                >
+                  Add to cart and Checkout Now
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         ) : (
           userInfo?.role === "tourist" && (
-            <span className="text-red-500 text-lg font-bold">
-              Out of stock
-            </span>
+            <span className="text-red-500 text-lg font-bold">Out of stock</span>
           )
         )}
       </CardFooter>
 
       {userInfo?.role === "tourist" && (
         <div className="absolute top-2 right-2 flex space-x-2">
-          {!isInCart && product.quantity>0 && (
+          {!isInCart && product.quantity > 0 && (
             <Button
               className="rounded-full w-10 h-10 p-0 bg-orange-400 hover:bg-orange-500 text-white"
               onClick={(e) => {
@@ -351,11 +348,11 @@ export function AllProducts() {
   }, []);
 
   const handleProductSelectbyid = (id) => {
-    setSelectedProductId(id); 
+    setSelectedProductId(id);
   };
 
   const handleBackToAll = () => {
-    setSelectedProductId(null); 
+    setSelectedProductId(null);
   };
 
   const fetchUserInfo = useCallback(async () => {
@@ -784,7 +781,7 @@ export function AllProducts() {
                 </div>
               </div>
             </div>
-  
+
             {/* Main Content Skeleton */}
             <div className="flex-1">
               {/* Search and Filters Skeleton */}
@@ -796,7 +793,7 @@ export function AllProducts() {
                   <div className="h-10 w-40 bg-gray-200 rounded-full animate-pulse"></div>
                 </div>
               </div>
-  
+
               {/* Cards Grid Skeleton */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -817,7 +814,7 @@ export function AllProducts() {
                   </div>
                 ))}
               </div>
-  
+
               {/* Pagination Skeleton */}
               <div className="mt-8 flex justify-center items-center space-x-4">
                 <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
@@ -838,7 +835,10 @@ export function AllProducts() {
         <ActivityPageSkeleton />
       ) : selectedProductId ? (
         <div>
-          <Button onClick={handleBackToAll} className="mb-4 bg-[#5D9297] text-white text-base">
+          <Button
+            onClick={handleBackToAll}
+            className="mb-4 bg-[#5D9297] text-white text-base"
+          >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Back to All Products
           </Button>
@@ -849,7 +849,9 @@ export function AllProducts() {
           <div className="flex gap-8">
             <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+                <h2 className="text-xl font-semibold text-[#1A3B47]">
+                  Filters
+                </h2>
                 <Button
                   onClick={clearFilters}
                   size="sm"
@@ -913,7 +915,9 @@ export function AllProducts() {
                           className="w-16 h-16 object-cover rounded-md"
                         />
                         <div>
-                          <h4 className="font-medium text-sm">{product.name}</h4>
+                          <h4 className="font-medium text-sm">
+                            {product.name}
+                          </h4>
                           <div className="mt-1">
                             {renderStars(product.rating)}
                           </div>
@@ -954,7 +958,9 @@ export function AllProducts() {
                     <ArrowUpDown className="w-4 h-4 mr-2" />
                     Sort by Rating
                     {sortBy === "rating" && (
-                      <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>
+                      <span className="ml-2">
+                        {sortOrder === 1 ? "↓" : "↑"}
+                      </span>
                     )}
                   </Button>
                   <Button
@@ -966,7 +972,9 @@ export function AllProducts() {
                     <ArrowUpDown className="w-4 h-4 mr-2" />
                     Sort by Price
                     {sortBy === "price" && (
-                      <span className="ml-2">{sortOrder === 1 ? "↓" : "↑"}</span>
+                      <span className="ml-2">
+                        {sortOrder === 1 ? "↓" : "↑"}
+                      </span>
                     )}
                   </Button>
                   <Button
@@ -1008,44 +1016,39 @@ export function AllProducts() {
                       ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500">No products available.</p>
+                  <p className="text-sm text-gray-500">
+                    No products available.
+                  </p>
                 )}
               </div>
 
               {/* Pagination */}
               <div className="mt-8 flex justify-center items-center space-x-4">
-                <button
+                <Button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === 1 ? "text-gray-300" : "text-[#388A94]"
-                  }`}
+                  variant="outline"
+                  size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
                 >
-                  <ChevronLeft />
-                </button>
-
-                <span className="text-lg font-medium">
-                  {products.length > 0
-                    ? `Page ${currentPage} of ${Math.ceil(
-                        products.length / tripsPerPage
-                      )}`
-                    : "No pages available"}
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm font-medium text-[#1A3B47]">
+                  Page {currentPage} of{" "}
+                  {Math.ceil(products.length / tripsPerPage)}
                 </span>
-
-                <button
+                <Button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={
                     currentPage === Math.ceil(products.length / tripsPerPage) ||
                     products.length === 0
                   }
-                  className={`px-4 py-2 rounded-full bg-white shadow ${
-                    currentPage === Math.ceil(products.length / tripsPerPage)
-                      ? "text-gray-300"
-                      : "text-[#388A94]"
-                  }`}
+                  variant="outline"
+                  size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
                 >
-                  <ChevronRight />
-                </button>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
