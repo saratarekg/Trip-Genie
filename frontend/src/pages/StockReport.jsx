@@ -283,9 +283,9 @@ const StockReport = () => {
         </div>
       )} */}
       <div className=" bg-gray-100 min-h-screen">
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-      </div>
+        <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+        </div>
         <div className="max-w-7xl mt-4 mx-auto">
           {/* <div className="grid gap-4 md:grid-cols-12 mb-4">
             <Card className="md:col-span-3 flex flex-col justify-center items-center">
@@ -677,17 +677,14 @@ const StockReport = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                        No.
-                      </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Product
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Stock Quantity
+                        Sales
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Sales
+                        Stock Quantity
                       </th>
                     </tr>
                   </thead>
@@ -709,17 +706,14 @@ const StockReport = () => {
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.2, delay: index * 0.05 }}
                           >
-                            <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {index + 1}
-                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {item.name}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {item.quantity}
+                              ${parseFloat(item.sales).toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              ${parseFloat(item.sales).toFixed(2)}
+                              {item.quantity}
                             </td>
                           </motion.tr>
                         ))}
@@ -735,16 +729,13 @@ const StockReport = () => {
                           }}
                         >
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            Total
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             -
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {totalStock}
+                            Total:${totalSales.toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            ${totalSales.toFixed(2)}
+                            Total:{totalStock}
                           </td>
                         </motion.tr>
                       </motion.tbody>

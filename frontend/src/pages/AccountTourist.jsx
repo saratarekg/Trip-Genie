@@ -361,9 +361,7 @@ const ExternalFlightBookings = ({ user }) => {
       
       <div className="bg-gray-100 max-w-7xl gap-4 ">
         <h1 className="text-3xl font-bold mb-2">Flight Bookings</h1>
-        <p className="text-sm text-gray-500 mb-2">
-          My Bookings / Flights
-        </p>
+        <p className="text-sm text-gray-500 mb-2">My Bookings / Flights</p>
 
         <div className="container mx-auto px-4 py-4">
           <div className="bg-white shadow-md rounded-lg p-4">
@@ -526,8 +524,7 @@ const ExternalFlightBookings = ({ user }) => {
                   Start booking your flights to see the world!
                 </p>
                 <Link to="/flights">
-                  <Button className="mt-4 bg-[#388A94] text-white" 
-                  >
+                  <Button className="mt-4 bg-[#388A94] text-white">
                     {" "}
                     Start Booking
                   </Button>
@@ -603,15 +600,18 @@ const ExternalFlightBookings = ({ user }) => {
                           <div className="space-y-1">
                             <div className="text-sm text-gray-500">Arrive</div>
                             <div className="text-3xl font-bold text-[#1A3B47]">
-                              {new Date(
-                                flight.arrivalDate
-                              ).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {new Date(flight.arrivalDate).toLocaleTimeString(
+                                [],
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {new Date(flight.arrivalDate).toLocaleDateString()}
+                              {new Date(
+                                flight.arrivalDate
+                              ).toLocaleDateString()}
                             </div>
                             <div className="text-sm text-gray-500">
                               {flight.to}
@@ -624,7 +624,9 @@ const ExternalFlightBookings = ({ user }) => {
                         <div className="pt-6 border-t">
                           <div className="flex items-center justify-between">
                             <div className="space-y-1">
-                              <div className="text-sm text-gray-500">Depart</div>
+                              <div className="text-sm text-gray-500">
+                                Depart
+                              </div>
                               <div className="text-3xl font-bold text-[#1A3B47]">
                                 {new Date(
                                   flight.returnDepartureDate
@@ -660,7 +662,9 @@ const ExternalFlightBookings = ({ user }) => {
                             </div>
 
                             <div className="space-y-1">
-                              <div className="text-sm text-gray-500">Arrive</div>
+                              <div className="text-sm text-gray-500">
+                                Arrive
+                              </div>
                               <div className="text-3xl font-bold text-[#1A3B47]">
                                 {new Date(
                                   flight.returnArrivalDate
@@ -744,17 +748,16 @@ const ExternalFlightBookings = ({ user }) => {
                         </div>
                       </div>
                       {selectedTab === "upcoming" && (
-                      <Button
-                      variant="outline"
-                      className="w-full text-base bg-red-500 text-white hover:bg-red-600"
-                      onClick={() => {
-                        setSelectedFlight(flight._id);
-                        setIsDialogOpen(true);
-                      }}
-                    >
-                      Cancel Booking
-                    </Button>
-                    
+                        <Button
+                          variant="outline"
+                          className="w-full text-base bg-red-500 text-white hover:bg-red-600"
+                          onClick={() => {
+                            setSelectedFlight(flight._id);
+                            setIsDialogOpen(true);
+                          }}
+                        >
+                          Cancel Booking
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -848,12 +851,10 @@ const ExternalHotelBookings = ({ user }) => {
     return (
       <div>
         <h1 className="text-3xl font-bold mb-2">Hotel Bookings</h1>
-        <p className="text-sm text-gray-500 mb-2">
-          My Bookings / Hotels
-        </p>
+        <p className="text-sm text-gray-500 mb-2">My Bookings / Hotels</p>
 
         <div className="container mx-auto px-4 py-6">
-        <div className="bg-white shadow-md rounded-lg p-4">
+          <div className="bg-white shadow-md rounded-lg p-4">
             <div className="flex mb-4">
               <button
                 className={`relative w-full flex items-center justify-center px-3 py-1 font-medium rounded-none border-b ${
@@ -876,63 +877,63 @@ const ExternalHotelBookings = ({ user }) => {
                 Past Reservations
               </button>
             </div>
-          {/* Skeleton for two hotel booking cards */}
-          {Array(2)
-            .fill(null)
-            .map((_, index) => (
-              <div
-                key={index}
-                className="mb-6 border rounded-lg shadow-sm bg-white p-6 animate-pulse"
-              >
-                {/* Header Section */}
-                <div className="mb-6">
-                  <div className="h-6 bg-gray-300 rounded w-2/3 mb-2"></div>
-                  <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-                </div>
-
-                {/* Card Content */}
-                <div className="grid grid-cols-2 gap-10">
-                  {/* Left Side */}
-                  <div className="col-span-1 border-r-2 border-gray-300 pr-6 space-y-6">
-                    <div className="h-6 bg-gray-300 rounded w-1/2"></div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="h-4 bg-gray-300 rounded w-full"></div>
-                      <div className="h-4 bg-gray-300 rounded w-full"></div>
-                      <div className="h-4 bg-gray-300 rounded w-full"></div>
-                      <div className="h-4 bg-gray-300 rounded w-full"></div>
-                    </div>
-                  </div>
-
-                  {/* Right Side */}
-                  <div className="col-span-1 space-y-6">
+            {/* Skeleton for two hotel booking cards */}
+            {Array(2)
+              .fill(null)
+              .map((_, index) => (
+                <div
+                  key={index}
+                  className="mb-6 border rounded-lg shadow-sm bg-white p-6 animate-pulse"
+                >
+                  {/* Header Section */}
+                  <div className="mb-6">
+                    <div className="h-6 bg-gray-300 rounded w-2/3 mb-2"></div>
                     <div className="h-4 bg-gray-300 rounded w-1/4"></div>
-                    <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="grid grid-cols-2 gap-10">
+                    {/* Left Side */}
+                    <div className="col-span-1 border-r-2 border-gray-300 pr-6 space-y-6">
+                      <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="h-4 bg-gray-300 rounded w-full"></div>
+                        <div className="h-4 bg-gray-300 rounded w-full"></div>
+                        <div className="h-4 bg-gray-300 rounded w-full"></div>
+                        <div className="h-4 bg-gray-300 rounded w-full"></div>
+                      </div>
+                    </div>
+
+                    {/* Right Side */}
+                    <div className="col-span-1 space-y-6">
+                      <div className="h-4 bg-gray-300 rounded w-1/4"></div>
+                      <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                      <div className="flex items-center space-x-4">
+                        <div className="h-10 bg-gray-300 rounded w-1/4"></div>
+                        <div className="h-8 bg-gray-300 rounded w-1/6"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Info Section */}
+                  <div className="mt-6 flex items-center bg-gray-100 px-4 py-4 rounded-md">
+                    {/* First Section */}
                     <div className="flex items-center space-x-4">
-                      <div className="h-10 bg-gray-300 rounded w-1/4"></div>
-                      <div className="h-8 bg-gray-300 rounded w-1/6"></div>
+                      <div className="h-3 w-3 p-4 bg-gray-300 rounded-full"></div>
+                      <div className="h-6 w-48 bg-gray-300 rounded w-1/3"></div>
+                    </div>
+
+                    <div className="border-l-2 border-gray-300 h-8 mx-6"></div>
+
+                    {/* Second Section */}
+                    <div className="flex items-center space-x-4">
+                      <div className="h-3 w-3 p-4 bg-gray-300 rounded-full"></div>
+                      <div className="h-6 w-96 bg-gray-300 rounded w-1/3"></div>
                     </div>
                   </div>
                 </div>
-
-                {/* Additional Info Section */}
-                <div className="mt-6 flex items-center bg-gray-100 px-4 py-4 rounded-md">
-                  {/* First Section */}
-                  <div className="flex items-center space-x-4">
-                    <div className="h-3 w-3 p-4 bg-gray-300 rounded-full"></div>
-                    <div className="h-6 w-48 bg-gray-300 rounded w-1/3"></div>
-                  </div>
-
-                  <div className="border-l-2 border-gray-300 h-8 mx-6"></div>
-
-                  {/* Second Section */}
-                  <div className="flex items-center space-x-4">
-                    <div className="h-3 w-3 p-4 bg-gray-300 rounded-full"></div>
-                    <div className="h-6 w-96 bg-gray-300 rounded w-1/3"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            </div>
+              ))}
+          </div>
         </div>
       </div>
     );
@@ -1078,9 +1079,7 @@ const ExternalHotelBookings = ({ user }) => {
     <ToastProvider>
       <div>
         <h1 className="text-3xl font-bold mb-2">Hotel Bookings</h1>
-        <p className="text-sm text-gray-500 mb-2">
-          My Bookings / Hotels
-        </p>
+        <p className="text-sm text-gray-500 mb-2">My Bookings / Hotels</p>
 
         <div className="container mx-auto px-4 py-4">
           <div className="bg-white shadow-md rounded-lg p-4">
@@ -1110,7 +1109,8 @@ const ExternalHotelBookings = ({ user }) => {
             {filteredHotels.length === 0 ? (
               <div className="text-center space-y-4 py-12">
                 <h2 className="text-2xl font-semibold text-gray-600">
-                  No {selectedTab === "upcoming" ? "upcoming" : "attended"} hotel reservations yet
+                  No {selectedTab === "upcoming" ? "upcoming" : "attended"}{" "}
+                  hotel reservations yet
                 </h2>
                 <p className="text-gray-500">
                   {selectedTab === "upcoming"
@@ -1119,9 +1119,7 @@ const ExternalHotelBookings = ({ user }) => {
                 </p>
                 {selectedTab === "upcoming" && (
                   <Link to="/hotels">
-                    <Button className="mt-4 bg-[#388A94] text-white"
-                   
-                    >
+                    <Button className="mt-4 bg-[#388A94] text-white">
                       Start Booking
                     </Button>
                   </Link>
@@ -1146,7 +1144,8 @@ const ExternalHotelBookings = ({ user }) => {
                       <div className="space-y-4">
                         <div className="flex items-center">
                           <p className="text-xl font-semibold text-[#1A3B47]">
-                            {hotel.roomName} <span className="font-normal">x</span>{" "}
+                            {hotel.roomName}{" "}
+                            <span className="font-normal">x</span>{" "}
                             {hotel.numberOfRooms}
                           </p>
                         </div>
@@ -1162,7 +1161,9 @@ const ExternalHotelBookings = ({ user }) => {
                           <p className="text-gray-600 mb-3">
                             Check-out on{" "}
                             <span className="font-bold">
-                              {new Date(hotel.checkoutDate).toLocaleDateString()}
+                              {new Date(
+                                hotel.checkoutDate
+                              ).toLocaleDateString()}
                             </span>
                           </p>
                           <p className="text-gray-600 mb-3">
@@ -1171,7 +1172,7 @@ const ExternalHotelBookings = ({ user }) => {
                             </span>{" "}
                             <span className="font-normal">Adult(s)</span>
                           </p>
-                          
+
                           <p className="text-gray-600">
                             Paid Via{" "}
                             <span className="font-bold">
@@ -1966,7 +1967,7 @@ export default function AccountManagement() {
       case "preferences":
         return <Preferences user={user} />;
       case "wallet-history":
-      return <TouristWalletPage user={user} />;
+        return <TouristWalletPage user={user} />;
       case "add-card":
         return user.role === "tourist" ? (
           <AddCard />
@@ -2027,19 +2028,21 @@ export default function AccountManagement() {
         icon: HistoryIcon,
         tab: "transportation",
         roles: ["tourist"],
-      },{
+      },
+      {
         name: "Hotels",
         icon: HistoryIcon,
         tab: "hotel-bookings",
         roles: ["tourist"],
-      },{
+      },
+      {
         name: "Flights",
         icon: HistoryIcon,
         tab: "flight-bookings",
         roles: ["tourist"],
       },
     ],
-   
+
     "Settings and Privacy": [
       {
         name: "Account",
@@ -2150,7 +2153,7 @@ export default function AccountManagement() {
         ],
       },
     ],
-    
+
     // "Display and Accessibility": [
     //   { name: "Theme", icon: Eye, tab: "theme", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
     //   { name: "Language", icon: MapPin, tab: "language", roles: ["tourist", "seller", "advertiser", "tour-guide", "admin", "tourism-governor"] },
