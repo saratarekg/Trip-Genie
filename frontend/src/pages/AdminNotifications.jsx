@@ -206,7 +206,7 @@ export default function NotificationsPage() {
         filtered = filtered.filter(n => n.tags.includes("reminder"))
         break
       case "alert":
-        filtered = filtered.filter(n.tags.some(tag => ["alert", "out_of_stock"].includes(tag)))
+        filtered = filtered.filter(n => n.tags.some(tag => ["alert", "out_of_stock"].includes(tag)))
         break
       case "general":
         break

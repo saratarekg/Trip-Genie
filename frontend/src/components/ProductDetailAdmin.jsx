@@ -70,6 +70,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
+import { UpdateProduct } from "../components/UpdateProdutsAdmin.jsx";
 
 const RatingDistributionBar = ({ percentage, count }) => (
   <div className="flex items-center gap-2 text-sm">
@@ -236,11 +237,20 @@ const [toastMessage, setToastMessage] = useState('');
 const [toastType, setToastType] = useState('');
 const [isDeleteToastOpen, setIsDeleteToastOpen] = useState(false);
 const [isLinkCopiedToastOpen, setIsLinkCopiedToastOpen] = useState(false);
+const [updateProductId, setUpdateProductId] = useState(null);
 
 const showToast = (message, type, toastSetter) => {
   setToastMessage(message);
   setToastType(type);
   toastSetter(true);
+};
+
+const handleProductSelectbyid = (id) => {
+  setUpdateProductId(id); 
+};
+
+const handleBackToProduct = () => {
+  setUpdateProductId(null); 
 };
 
   const handleToggleComment = () => {
@@ -537,27 +547,7 @@ const showToast = (message, type, toastSetter) => {
           }
         }
 
-        // Fetch user's purchases
-        const purchasesResponse = await fetch(
-          "http://localhost:4000/tourist/purchase",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (purchasesResponse.ok) {
-          const purchasesData = await purchasesResponse.json();
-
-          setHasPurchased(
-            purchasesData.some((purchase) =>
-              purchase.products.some(
-                (item) => item.product && item.product._id === id
-              )
-            )
-          );
-        }
+        
       } catch (err) {
         setError("Error fetching product details. Please try again later.");
         console.error("Error fetching product details:", err);
@@ -909,6 +899,15 @@ const showToast = (message, type, toastSetter) => {
 
   return (
     <div className="min-h-screen bg-gray-100 ">
+      {updateProductId ? (
+        <div>
+          <Button onClick={handleBackToProduct} className="mb-4 bg-[#5D9297] text-white text-base">
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Back to Product
+          </Button>
+          <UpdateProduct id={updateProductId} />
+        </div>
+      ) : (
       <div className="">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">
@@ -1334,7 +1333,7 @@ const showToast = (message, type, toastSetter) => {
                 <Button
                   className="w-full bg-[#1A3B47] text-xl  text-white"
                   variant="default"
-                  onClick={handleUpdate}
+                  onClick={() => handleProductSelectbyid(product._id)}
                 >
                   <Edit className="w-5 h-5 mr-2" /> Update Product
                 </Button>
@@ -1343,9 +1342,8 @@ const showToast = (message, type, toastSetter) => {
               {((userRole === "admin" && product.seller == null) ||
                 (userRole === "seller" && canModify && product.seller)) && (
                 <Button
-                  
                   variant={product.isArchived ? "outline" : "default"}
-                  className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78]"
+                  className={`w-full text-xl ${product.isArchived ? "text-white" : ""} bg-[#388A94] hover:bg-[#2d6e78]`}
                   onClick={() => setShowArchiveConfirm(true)}
                 >
                   {product.isArchived ? (
@@ -1451,7 +1449,7 @@ const showToast = (message, type, toastSetter) => {
             
           </div>
         </div>
-      </div>
+      
 
       {/* Dialogs */}
       <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm}>
@@ -2201,6 +2199,8 @@ const showToast = (message, type, toastSetter) => {
     <ToastClose />
   </Toast>
 </ToastProvider>
+</div>
+)}
     </div>
   );
 };

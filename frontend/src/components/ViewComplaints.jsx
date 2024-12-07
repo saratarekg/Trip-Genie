@@ -134,26 +134,25 @@ export function ViewComplaints({ onSelectComplaint }) {
         <div className="">
           <div className="bg-white border rounded-md shadow-md p-6">
             <div className="grid grid-cols-1 items-center gap-4 mb-6">
-              <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setStatus(value); }} className="w-full">
-                <TabsList className="grid grid-cols-3 bg-white w-full">
-                  {["all", "pending", "resolved"].map((tab) => (
-                    <TabsTrigger
-                      key={tab}
-                      value={tab}
-                      className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
-                        activeTab === tab
-                          ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
-                          : "text-gray-500 border-b border-gray-400"
-                      }`}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-              <div className="flex justify-end space-x-4">
-                
-                <Button onClick={toggleDateSort} variant="outline" className="flex items-center gap-2">
+              <div className="flex justify-between items-center w-full">
+                <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setStatus(value); }} className="w-full">
+                  <TabsList className="grid grid-cols-3 bg-white w-full">
+                    {["all", "pending", "resolved"].map((tab) => (
+                      <TabsTrigger
+                        key={tab}
+                        value={tab}
+                        className={`rounded-none relative flex items-center justify-center px-3 py-2 font-medium ${
+                          activeTab === tab
+                            ? "text-[#1A3B47] border-b-2 border-[#1A3B47]"
+                            : "text-gray-500 border-b border-gray-400"
+                        }`}
+                      >
+                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+                <Button onClick={toggleDateSort} variant="outline" className="flex items-center gap-2 ml-4">
                   <ArrowUpDown className="h-4 w-4" />
                   Sort by Date ({dateSortOrder === 'asc' ? 'Oldest' : 'Newest'})
                 </Button>
