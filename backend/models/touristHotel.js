@@ -45,6 +45,11 @@ const touristHotelSchema = new mongoose.Schema(
       enum: ["CreditCard", "DebitCard", "Wallet"],
       required: true,
     },
+    promoCode:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PromoCode",
+      default: null,
+    },
   },
   { timestamps: true }
 );

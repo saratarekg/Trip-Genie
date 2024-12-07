@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import PaymentPopup from "@/components/payment-popup";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -54,6 +54,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { UserGuide } from "@/components/UserGuide";
+import { data } from "autoprefixer";
 
 
 const formSchema = z.object({
@@ -113,6 +114,10 @@ export default function TransportationPage() {
   const [tourist, setTourist] = useState(null);
   const [closing, setClosing] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [promoDetails, setPromoDetails] = useState(null);
+  const bookingProcessedRef = useRef(false);
+
+
 
 
   useEffect(() => {
@@ -263,12 +268,17 @@ export default function TransportationPage() {
   };
 
 
-  const handleTransportationBooking = async (paymentMethod, seatsToBook, date, selectedTransportID) => {
-    console.log(paymentMethod, seatsToBook, selectedTransportID);
+  const handleTransportationBooking = async (paymentMethod, seatsToBook, date, selectedTransportID,promoCode) => {
+
+    if (bookingProcessedRef.current) {
+      console.log('Booking already processed');
+      return;
+    }
 
     setIsBooking(true);
     setBookingError("");
     try {
+      bookingProcessedRef.current = true;
       const token = Cookies.get("jwt");
       const response = await axios.post(
         "http://localhost:4000/tourist/book-transportation",
@@ -276,13 +286,15 @@ export default function TransportationPage() {
           transportationID: selectedTransportID,
           seatsToBook: seatsToBook,
           paymentMethod: paymentMethod,
+          promoCode
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      if (response.data.message === "Transportation Booking successful") {
+   
+      if (response.data.message === "Transportation booking successful") {
         const updatedTransportations = transportations.map((t) =>
           t._id === selectedTransportation._id
             ? { ...t, remainingSeats: response.data.remainingSeats }
@@ -291,6 +303,28 @@ export default function TransportationPage() {
 
         setTransportations(updatedTransportations);
         setFilteredTransportations(updatedTransportations);
+        const percentageOff = searchParams.get("discountPercentage") || 0;
+
+        console.log(percentageOff);
+
+        setShowTransportationBookingDialog(false);
+
+        setBookingError(
+          response.data.message || "Transportation booking successful"
+        );
+
+        console.log(percentageOff)
+        console.log(seatsToBook)
+        console.log(selectedTransportation?.ticketCost)
+
+        setShowTransportationSuccessDialog({
+          open: true,
+          paymentMethod,
+          seatsToBook,
+          ticketCost: selectedTransportation?.ticketCost,
+          wallet: tourist?.wallet,
+          percentageOff: percentageOff,
+        });
 
         fetchTransportations();
       } else {
@@ -305,16 +339,8 @@ export default function TransportationPage() {
       );
     } finally {
       setIsBooking(false);
-      setShowTransportationBookingDialog(false);
 
-      // Pass the data directly when showing the dialog
-      setShowTransportationSuccessDialog({
-        open: true,
-        paymentMethod,
-        seatsToBook,
-        ticketCost: selectedTransportation?.ticketCost,
-        wallet: tourist?.wallet,
-      });
+    
     }
   };
 
@@ -326,6 +352,8 @@ export default function TransportationPage() {
       const selectedDateStr = searchParams.get("selectedDate");
       const sessionId = searchParams.get("session_id");
       const selectedTransportID = searchParams.get("selectedTransportID");
+      const promoCode = searchParams.get("promoCode");
+      
 
       if (sessionId && success === "true") {
         try {
@@ -339,7 +367,7 @@ export default function TransportationPage() {
 
             // Now call handleBooking with the formatted date
             try {
-              await handleTransportationBooking("creditCard", parseInt(quantity), selectedDateStr, selectedTransportID);
+              await handleTransportationBooking("creditCard", parseInt(quantity), selectedDateStr, selectedTransportID, promoCode);
             } catch (error) {
               console.error("Error handling booking success:", error);
             }
@@ -360,6 +388,9 @@ export default function TransportationPage() {
     searchParams.delete("quantity");
     searchParams.delete("selectedDate");
     searchParams.delete("session_id");
+    searchParams.delete("selectedTransportID");
+    searchParams.delete("promoCode");
+
 
     const newUrl = `${window.location.pathname}`;
 
@@ -437,7 +468,7 @@ export default function TransportationPage() {
   const guideSteps = [
     {
       target: "body",
-      content: "Welcome to the Transportation Management page! This page allows you to choose appropriate transportation trips.",
+      content: "Welcome to the Transportation Booking page! This page allows you to choose appropriate transportation trips.",
       placement: "center",
     },
     {
@@ -571,7 +602,7 @@ export default function TransportationPage() {
         </div>
       </div>
       <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-6 text-[#1A3B47]">Transportation Management</h1>
+        <h1 className="text-3xl font-bold mb-6 text-[#1A3B47]">Transportation Bookings</h1>
 
         <div className="mb-6 flex flex-wrap gap-4 narrowing-down">
           <Input
@@ -1000,6 +1031,8 @@ export default function TransportationPage() {
               setError={setBookingError}
               selectedTransportID={selectedTransportation._id}
               transportationSeats={selectedTransportation.remainingSeats}
+              promoDetails={promoDetails}
+              setPromoDetails={setPromoDetails}
 
             />
           </>
@@ -1021,41 +1054,47 @@ export default function TransportationPage() {
                 </DialogTitle>
               ) : (
                 <>
-                  <DialogTitle>
-                    <div className="flex items-center">
-                      <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
-                      Transportation booking successful
-                    </div>
-                  </DialogTitle>
-                  {showTransportationSuccessDialog.paymentMethod === "Wallet" && (
-                    <div className="grid grid-cols-2 gap-4 mt-4">
-                      <Label className="text-right">You Paid:</Label>
-                      <div>
-                        {displayPrice(
-                          showTransportationSuccessDialog.seatsToBook *
-                          showTransportationSuccessDialog.ticketCost
-                        )}
-                      </div>
+                <DialogTitle>
+                  <div className="flex items-center">
+                    <CheckCircle className="w-6 h-6 text-green-500 mr-2" />
+                    Transportation booking successful
+                  </div>
+                </DialogTitle>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <Label className="text-right">You Paid:</Label>
+                  <div>
+                    {displayPrice(
+                      (showTransportationSuccessDialog?.seatsToBook) *
+                        (showTransportationSuccessDialog?.ticketCost) *
+                        (1 - (showTransportationSuccessDialog?.percentageOff) / 100)
+                    )}
+                  </div>
+                  {showTransportationSuccessDialog?.paymentMethod === "Wallet" && (
+                    <>
                       <Label className="text-right">New Wallet Balance:</Label>
                       <div>
                         {displayPrice(
-                          showTransportationSuccessDialog.wallet -
-                          showTransportationSuccessDialog.seatsToBook *
-                          showTransportationSuccessDialog.ticketCost
+                          (showTransportationSuccessDialog?.wallet) -
+                            (showTransportationSuccessDialog?.seatsToBook ) *
+                              (showTransportationSuccessDialog?.ticketCost) *
+                              (1 - (showTransportationSuccessDialog?.percentageOff) / 100)
                         )}
                       </div>
-                    </div>
+                    </>
                   )}
-                  <div className="py-4">
-                    <p>
-                      You have successfully booked{" "}
-                      {showTransportationSuccessDialog.seatsToBook} seat(s).
-                    </p>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleFinalOK}>Close</Button>
-                  </DialogFooter>
-                </>
+                </div>
+              
+                <div className="py-4">
+                  <p>
+                    You have successfully booked{" "}
+                    {showTransportationSuccessDialog?.seatsToBook ?? 0} seat(s).
+                  </p>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleFinalOK}>Close</Button>
+                </DialogFooter>
+              </>
+              
               )}
             </DialogHeader>
           </DialogContent>

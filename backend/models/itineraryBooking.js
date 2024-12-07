@@ -35,6 +35,11 @@ const itineraryBookingSchema = new Schema(
       required: true,
       default: false,
     },
+    promoCode:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PromoCode",
+      default: null,
+    },
   },
   { timestamps: true }
 );

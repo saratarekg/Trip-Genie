@@ -1,4 +1,5 @@
 const Transportation = require("../models/transportation");
+const PromoCode = require("../models/promoCode");
 
 // Get all transportations
 const getAllTransportations = async (req, res) => {

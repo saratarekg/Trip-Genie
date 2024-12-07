@@ -583,7 +583,7 @@ const getMyHotels = async (req, res) => {
 
 
 const bookTransportation = async (req, res) => {
-  const { transportationID, seatsToBook, paymentMethod } = req.body;
+  const { transportationID, seatsToBook, paymentMethod, promoCode } = req.body;
   const touristID = res.locals.user_id;
 
   try {
@@ -598,10 +598,26 @@ const bookTransportation = async (req, res) => {
       return res.status(400).json({ message: "Not enough seats available" });
     }
 
-    // Step 2: Calculate total cost
-    const totalCost = transportation.ticketCost * seatsToBook;
+    let usedPromoCode = null;
+    if (promoCode) {
+      try {
+        usedPromoCode = await PromoCode.usePromoCode(promoCode);
+      } catch (error) {
+        // If there's an error with the promo code, we'll just log it and continue without applying a discount
+        console.error(`Promo code error: ${error.message}`);
+      }
+    }
 
-    // Step 3: Handle wallet payment if applicable
+    // Step 2: Calculate total cost
+    let totalCost = transportation.ticketCost * seatsToBook;
+
+    // Step 3: Apply promo code if provided
+    if (usedPromoCode) {
+      const discount = (totalCost * usedPromoCode.percentOff) / 100;
+      totalCost -= discount;
+    }
+
+    // Step 4: Handle wallet payment if applicable
     if (paymentMethod === "wallet") {
       const tourist = await Tourist.findById(touristID);
 
@@ -630,26 +646,28 @@ const bookTransportation = async (req, res) => {
       );
     }
 
-    // Step 4: Decrease remaining seats in the transportation
+    // Step 5: Decrease remaining seats in the transportation
     transportation.remainingSeats -= seatsToBook;
     await transportation.save();
 
-    // Step 5: Create a new booking record in TouristTransportation
+    // Step 6: Create a new booking record in TouristTransportation
     const booking = new TouristTransportation({
       touristID,
       transportationID,
       seatsBooked: seatsToBook,
       totalCost,
       paymentMethod,
+      promoCode: usedPromoCode ? usedPromoCode : null
     });
 
     const savedBooking = await booking.save();
 
-    // Step 6: Send response
+    // Step 7: Send response
     res.status(201).json({
       message: "Transportation booking successful",
       booking: savedBooking,
       remainingSeats: transportation.remainingSeats,
+      percentageOff: usedPromoCode ? usedPromoCode.percentOff : 0,
     });
   } catch (error) {
     console.error(error);

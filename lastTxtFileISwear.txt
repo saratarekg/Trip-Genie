@@ -114,6 +114,8 @@ Hazem:
 - zabat shakl el pagination consistency (bas bardo e3melo el3ayzeeno 3ashan manetshalesh)
 (transportation + flights + hotels use shadcn pagination)
 make all the other pages the old pagination
+-popup logout lazem adoos mareten
+
 
 
 

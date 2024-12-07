@@ -3,13 +3,14 @@ const Activity = require("../models/activity"); // Assuming your Activity model 
 const Tourist = require("../models/tourist"); // Assuming your Tourist model is in models/tourist.js
 const Currency = require("../models/currency");
 const CurrencyRates = require("../models/currencyRate");
+const PromoCode = require("../models/promoCode");
 const emailService = require("../services/emailService");
 
 // Create a new booking
 exports.createBooking = async (req, res) => {
   try {
     const userId = res.locals.user_id; // Get the user's ID from response locals
-    const { paymentType, paymentAmount, activity, numberOfTickets } = req.body;
+    const { paymentType, paymentAmount, activity, numberOfTickets, promoCode } = req.body;
 
     // Check if the activity exists
     const activityExists = await Activity.findById(activity);
@@ -22,25 +23,45 @@ exports.createBooking = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
+
+    let usedPromoCode = null;
+    if (promoCode) {
+      try {
+        usedPromoCode = await PromoCode.usePromoCode(promoCode);
+      } catch (error) {
+        // If there's an error with the promo code, we'll just log it and continue without applying a discount
+        console.error(`Promo code error: ${error.message}`);
+      }
+    }
+
     let walletBalance = 0;
+    let finalPaymentAmount = paymentAmount;
+
+    // Apply promo code discount if available
+    if (usedPromoCode) {
+      const discount = (usedPromoCode.percentOff / 100) * paymentAmount;
+      finalPaymentAmount = paymentAmount - discount;
+    }
+
     // Check if payment type is "Wallet"
     if (paymentType === "Wallet") {
-      if (user.wallet < paymentAmount) {
+      if (user.wallet < finalPaymentAmount) {
         return res
           .status(400)
           .json({ message: "Insufficient funds in wallet" });
       }
 
-      walletBalance = user.wallet - paymentAmount;
+      walletBalance = user.wallet - finalPaymentAmount;
     }
 
     // Create a new booking
     const newBooking = new ActivityBooking({
       activity,
       paymentType,
-      paymentAmount,
+      paymentAmount: finalPaymentAmount,
       numberOfTickets,
       user: userId,
+      promoCode: usedPromoCode ? usedPromoCode : null,
     });
 
     await newBooking.save();
@@ -61,7 +82,7 @@ exports.createBooking = async (req, res) => {
 
     // Calculate loyalty points based on the user's badge level
     const loyaltyPoints = calculateLoyaltyPoints(
-      paymentAmount,
+      finalPaymentAmount,
       user.loyaltyBadge
     );
 
@@ -83,7 +104,7 @@ exports.createBooking = async (req, res) => {
       updateFields.$push = {
         history: {
           transactionType: "payment",
-          amount: paymentAmount,
+          amount: finalPaymentAmount,
           details: `You’ve successfully booked activity ${activityExists.name}`,
         },
       };
@@ -103,7 +124,9 @@ exports.createBooking = async (req, res) => {
     res.status(201).json({
       message: "Booking created successfully",
       booking: newBooking,
-      tourist: updatedTourist,
+      walletBalance: walletBalance, // Include the new wallet balance
+      pricePaid: finalPaymentAmount, // Include the price paid with promo code discount if available
+      percentageOff: usedPromoCode ? usedPromoCode.percentOff : 0,
     });
   } catch (error) {
     console.log(error);

@@ -701,6 +701,7 @@ const ItineraryDetail = () => {
   const [showAddReview, setShowAddReview] = useState(false);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
+  const [promoDetails, setPromoDetails] = useState(null);
   const [newReview, setNewReview] = useState({
     rating: 0,
     liked: "",
@@ -720,6 +721,7 @@ const ItineraryDetail = () => {
   const [isAppropriate, setIsAppropriate] = useState(true);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [numberOfTickets, setNumberOfTickets] = useState(1);
+  const [percentageOff, setPercentageOff] = useState(0);
   const [paymentType, setPaymentType] = useState("Wallet");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
@@ -1108,7 +1110,7 @@ const ItineraryDetail = () => {
     setBookingError("");
   };
 
-  const handleBooking = async (paymentType, numberOfTickets, date) => {
+  const handleBooking = async (paymentType, numberOfTickets, date,date2,promoCode) => {
     console.log(paymentType, numberOfTickets, date);
     setIsBooking(true);
     setBookingError("");
@@ -1129,6 +1131,7 @@ const ItineraryDetail = () => {
             paymentAmount: itinerary.price * numberOfTickets,
             numberOfTickets,
             date,
+            promoCode
           }),
         }
       );
@@ -1147,8 +1150,9 @@ const ItineraryDetail = () => {
         setShowBookingDialog(false);
         setNumberOfTickets(numberOfTickets);
         setPaymentType(paymentType);
+        setPercentageOff(data.percentageOff);
+        console.log("data",data);
         setShowSuccessDialog(true);
-        // Update the number of tickets in the state
       }
     } catch (error) {
       console.error("Error booking itinerary:", error);
@@ -1166,6 +1170,8 @@ const ItineraryDetail = () => {
       const quantity = searchParams.get("quantity");
       const selectedDateStr = searchParams.get("selectedDate");
       const sessionId = searchParams.get("session_id");
+      const promoCode = searchParams.get("promoCode");
+      const percentageOff = searchParams.get("discountPercentage");
 
       console.log(success, sessionId);
 
@@ -1181,7 +1187,8 @@ const ItineraryDetail = () => {
             setShowSuccessDialog(true);
             setNumberOfTickets(parseInt(quantity));
             setPaymentType("CreditCard");
-            // Update any other necessary state here
+            setPercentageOff(parseInt(percentageOff));
+            
           }
         } catch (error) {
           console.error("Error checking payment status:", error);
@@ -1196,8 +1203,9 @@ const ItineraryDetail = () => {
     if (searchParams.get("success") === "true") {
       const quantity = searchParams.get("quantity");
       const selectedDateStr = searchParams.get("selectedDate");
+      const promoCode = searchParams.get("promoCode");
       try {
-        await handleBooking("CreditCard", parseInt(quantity), selectedDateStr);
+        await handleBooking("CreditCard", parseInt(quantity), selectedDateStr,selectedDate, promoCode);
       } catch (error) {
         console.error("Error handling booking:", error);
         // Handle the error appropriately
@@ -1208,6 +1216,7 @@ const ItineraryDetail = () => {
     searchParams.delete("quantity");
     searchParams.delete("selectedDate");
     searchParams.delete("session_id");
+    searchParams.delete("promoCode");
 
     const newUrl = `${window.location.pathname}`;
     window.history.replaceState(null, "", newUrl);
@@ -2275,6 +2284,8 @@ const ItineraryDetail = () => {
                 setError={setBookingError}
                 availableDates={itinerary.availableDates}
                 selectedItineraryDate={selectedItineraryDate}
+                promoDetails={promoDetails}
+              setPromoDetails={setPromoDetails}
               />
             </>
           )}
@@ -2297,18 +2308,28 @@ const ItineraryDetail = () => {
                 {itinerary.title}.
               </p>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Label className="text-right">Amount Paid:</Label>
-                  <div> {formatPrice(calculateTotalPrice())} </div>
-                </div>
-                {paymentType === "Wallet" && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <Label className="text-right">New Wallet Balance:</Label>
-                    <div>
-                      {formatPrice(tourist?.wallet - calculateTotalPrice())}
-                    </div>
-                  </div>
-                )}
+              <div className="grid grid-cols-2 gap-4">
+  <Label className="text-right">Amount Paid:</Label>
+  <div>
+  {promoDetails?.percentOff 
+    ? formatPrice(calculateTotalPrice() * (1 - promoDetails.percentOff / 100))
+    : percentageOff 
+    ? formatPrice(calculateTotalPrice() * (1 - percentageOff / 100))
+    : formatPrice(calculateTotalPrice())}
+</div>
+
+</div>
+{paymentType === "Wallet" && (
+  <div className="grid grid-cols-2 gap-4">
+    <Label className="text-right">New Wallet Balance:</Label>
+    <div>
+      {promoDetails?.percentOff
+        ? formatPrice(tourist?.wallet - calculateTotalPrice() * (1 - promoDetails.percentOff / 100))
+        : formatPrice(tourist?.wallet - calculateTotalPrice())}
+    </div>
+  </div>
+)}
+
               </div>
             </div>
 

@@ -24,6 +24,11 @@ const touristTransportationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    promoCode:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PromoCode",
+      default: null,
+    },
   },
   { timestamps: true }
 );

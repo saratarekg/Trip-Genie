@@ -66,7 +66,13 @@ const touristFlightSchema = new mongoose.Schema(
 
     flightTypeReturn : {
       type: String, 
-    }
+    },
+    promoCode:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PromoCode",
+      default: null,
+    },
+
 
   },
   { timestamps: true }

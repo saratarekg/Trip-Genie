@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -207,18 +207,26 @@ const ActivityDetail = () => {
   const [open, setOpen] = useState(false); // Added state for popover
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [userBookings, setUserBookings] = useState([]);
-  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [isActivityBooked, setIsActivityBooked] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isAppropriate, setIsAppropriate] = useState(true);
   const [savedActivities, setSavedActivities] = useState([]);
   const [isSaved, setIsSaved] = useState(false);
   const [alertMessage, setAlertMessage] = useState(null);
+  const [promoDetails, setPromoDetails] = useState(null);
+  const [pricePaid, setPricePaid] = useState(null);
+  const [touristWallet, setTouristWallet] = useState(null);
+  const bookingProcessedRef = useRef(false);
+
+  const [exchangeRates, setExchangeRates] = useState(null);
+  const [tourist, setTourist] = useState(null);
+  const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
+  const [currencies, setCurrencies] = useState(null);
+ 
 
   const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
     useState(false);
 
-  const [exchangeRates, setExchangeRates] = useState({});
   const [currencySymbol, setCurrencySymbol] = useState({});
   const [ratingDistribution, setRatingDistribution] = useState({
     5: 0,
@@ -235,7 +243,6 @@ const ActivityDetail = () => {
     useState(false);
   const [seatsToBook, setSeatsToBook] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
-  const [tourist, setTourist] = useState(null);
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -258,8 +265,17 @@ const ActivityDetail = () => {
       const success = searchParams.get("success");
       const quantity = searchParams.get("quantity");
       const sessionId = searchParams.get("session_id");
+      const promoCode = searchParams.get("promoCode");
 
-      if (sessionId && success === "true" && activity) {
+      Promise.all([
+        fetchUserInfo(),
+        fetchExchangeRate(),
+        fetchCurrencies(),
+        
+      ]);
+
+      if (sessionId && success === "true" && activity && userPreferredCurrency && exchangeRates) {
+      
         try {
           const response = await axios.get(
             `http://localhost:4000/check-payment-status?session_id=${sessionId}`
@@ -269,7 +285,7 @@ const ActivityDetail = () => {
 
           if (response.data.status === "paid") {
             try {
-              await handlePaymentConfirm("CreditCard", parseInt(quantity));
+              await handlePaymentConfirm("CreditCard", parseInt(quantity), new Date(),new Date(), promoCode);
             } catch (error) {
               console.error("Error handling booking success:", error);
             }
@@ -283,14 +299,7 @@ const ActivityDetail = () => {
     handleBookingSuccess();
   }, [searchParams, activity]);
 
-  const formatWallet = (price) => {
-    fetchExchangeRate();
-    getCurrencySymbol();
-    if (tourist && exchangeRates && currencySymbol) {
-      const exchangedPrice = price * exchangeRates;
-      return `${currencySymbol}${exchangedPrice.toFixed(2)}`;
-    }
-  };
+
 
   const handleTransportationBooking = async () => {
     if (!selectedTransportation) return;
@@ -360,7 +369,7 @@ const ActivityDetail = () => {
                   </h3>
                 </div>
                 <span className="text-sm font-medium text-green-600">
-                  {formatPrice(transport.ticketCost)}
+                  {convertPrice(transport.ticketCost,"USD",userPreferredCurrency?.code)}
                 </span>
               </div>
               <div className="space-y-1 text-sm">
@@ -446,7 +455,7 @@ const ActivityDetail = () => {
     setBookingError("");
   };
 
-  const calculateTotalPrice = () => {
+  const calculateTotalPrice = (numberOfTickets) => {
     const discountedPrice = calculateDiscountedPrice(
       activity.price,
       activity.specialDiscount
@@ -543,6 +552,85 @@ const ActivityDetail = () => {
     visitDate: "",
     isAnonymous: false,
   });
+
+  
+  const fetchCurrencies = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch("http://localhost:4000/tourist/currencies", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch currencies");
+      }
+      const data = await response.json();
+      setCurrencies(data);
+    } catch (error) {
+      console.error("Error fetching currencies:", error);
+    }
+  };
+
+  const convertPrice = (price, fromCurrency, toCurrency) => {
+    if (!exchangeRates || !fromCurrency || !toCurrency) {
+      return price;
+    }
+    
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    
+    // Use template literal to correctly insert the symbol
+    return `${userPreferredCurrency?.symbol}${((price * toRate) / fromRate).toFixed(2)}`;
+  };
+  
+
+  const fetchExchangeRate = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/rates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch exchange rates");
+      }
+      const data = await response.json();
+      setExchangeRates(data.rates);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
+    }
+  };
+
+  const fetchUserInfo = async () => {
+    const role = Cookies.get("role") || "guest";
+
+    if (role === "tourist") {
+      try {
+        const token = Cookies.get("jwt");
+        const response = await axios.get("http://localhost:4000/tourist/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTourist(response.data);
+        const currencyId = response.data.preferredCurrency;
+
+        const response2 = await axios.get(
+          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setUserPreferredCurrency(response2.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    Promise.all([
+      fetchUserInfo(),
+      fetchExchangeRate(),
+      fetchCurrencies(),
+      
+    ]);
+  }, []);
 
   const navigate = useNavigate();
 
@@ -656,9 +744,8 @@ const ActivityDetail = () => {
         console.error("Error fetching user bookings:", error);
       }
     };
-
-    fetchUserInfo();
     fetchActivityDetails();
+    fetchUserInfo();
     if (userRole === "tourist") {
       fetchUserBookings();
       fetchMyBookings();
@@ -684,125 +771,6 @@ const ActivityDetail = () => {
     fetchSavedActivities();
   }, []);
 
-  const fetchExchangeRate = async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await fetch(
-        `http://localhost:4000/${userRole}/populate`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json", // Ensure content type is set to JSON
-          },
-          body: JSON.stringify({
-            base: activity.currency, // Sending base currency ID
-            target: userPreferredCurrency._id, // Sending target currency ID
-          }),
-        }
-      );
-      // Parse the response JSON
-      const data = await response.json();
-
-      if (response.ok) {
-        setExchangeRates(data.conversion_rate);
-      } else {
-        // Handle possible errors
-        console.error("Error in fetching exchange rate:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching exchange rate:", error);
-    }
-  };
-
-  const getCurrencySymbol = async () => {
-    try {
-      const token = Cookies.get("jwt");
-      const response = await axios.get(
-        `http://localhost:4000/${userRole}/getCurrency/${activity.currency}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setCurrencySymbol(response.data);
-    } catch (error) {
-      console.error("Error fetching currency symbol:", error);
-    }
-  };
-
-  const formatPrice = (price, type) => {
-    if (activity) {
-      if (userRole === "tourist" && userPreferredCurrency) {
-        if (userPreferredCurrency === activity.currency) {
-          return `${userPreferredCurrency.symbol}${price}`;
-        } else {
-          const exchangedPrice = price * exchangeRates;
-          return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-        }
-      } else {
-        if (currencySymbol) {
-          return `${currencySymbol.symbol}${price}`;
-        }
-      }
-    }
-  };
-
-  // format price that returns the activity price as an int
-
-  const formatPriceInt = (price) => {
-    if (activity) {
-      if (userRole === "tourist" && userPreferredCurrency) {
-        if (userPreferredCurrency === activity.currency) {
-          const exchangedPrice = price * exchangeRates;
-          return exchangedPrice.toFixed(2);
-        }
-      } else {
-        if (currencySymbol) {
-          return price;
-        }
-      }
-    }
-  };
-
-  const fetchUserInfo = async () => {
-    const role = Cookies.get("role") || "guest";
-    setUserRole(role);
-
-    if (role === "tourist") {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const currencyId = response.data.preferredCurrency;
-
-        const response2 = await axios.get(
-          `http://localhost:4000/tourist/getCurrency/${currencyId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setUserPreferredCurrency(response2.data);
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (activity) {
-      if (
-        userRole === "tourist" &&
-        userPreferredCurrency &&
-        userPreferredCurrency !== activity.currency
-      ) {
-        fetchExchangeRate();
-      } else {
-        getCurrencySymbol();
-      }
-    }
-  }, [userRole, userPreferredCurrency, activity]);
 
   const isActivityPassed = () => {
     return new Date(activity.timing) < new Date();
@@ -888,10 +856,16 @@ const ActivityDetail = () => {
     }
   };
 
-  const handlePaymentConfirm = async (paymentType, numberOfTickets, date) => {
+  const handlePaymentConfirm = async (paymentType, numberOfTickets, date, filler, promoCode) => {
+        if (bookingProcessedRef.current) {
+          console.log('Booking already processed');
+          return;
+        }
     setIsBooking(true);
     setBookingError("");
     try {
+      bookingProcessedRef.current = true;
+
       const token = Cookies.get("jwt");
       const totalPrice = calculateTotalPrice(numberOfTickets);
 
@@ -908,6 +882,7 @@ const ActivityDetail = () => {
             paymentType,
             paymentAmount: totalPrice,
             numberOfTickets,
+            promoCode
           }),
         }
       );
@@ -922,11 +897,17 @@ const ActivityDetail = () => {
           throw new Error(errorData.message || "Failed to book activity");
         }
       } else {
+        console.log(response);
+        console.log(response.message);
         const data = await response.json();
         setShowPaymentPopup(false);
         setNumberOfTickets(numberOfTickets);
-        setPaymentType(paymentType); // Update the number of tickets in the state
+        setPaymentType(paymentType); 
         setShowSuccessDialog(true);
+        setPricePaid(convertPrice(data?.pricePaid,"USD",userPreferredCurrency?.code));
+        setTouristWallet(convertPrice(data?.walletBalance,"USD",userPreferredCurrency?.code));
+       
+
       }
     } catch (error) {
       console.error("Error booking activity:", error);
@@ -1021,6 +1002,7 @@ const ActivityDetail = () => {
     searchParams.delete("success");
     searchParams.delete("quantity");
     searchParams.delete("session_id");
+    searchParams.delete("promoCode");
 
     const newUrl = `${window.location.pathname}`;
 
@@ -1406,11 +1388,11 @@ const ActivityDetail = () => {
                             <div className="flex flex-col items-start">
                               <div className="flex items-baseline">
                                 <span className="text-4xl font-bold text-gray-900">
-                                  {formatPrice(
+                                  {convertPrice(
                                     calculateDiscountedPrice(
                                       activity.price,
                                       activity.specialDiscount
-                                    )
+                                    ),"USD",userPreferredCurrency?.code
                                   )}
                                 </span>
                                 <span className="ml-3 text-xl font-semibold text-red-600">
@@ -1418,7 +1400,7 @@ const ActivityDetail = () => {
                                 </span>
                               </div>
                               <div className="text-2xl text-gray-500 line-through mt-2">
-                                {formatPrice(activity.price)}
+                                {convertPrice(activity.price,"USD",userPreferredCurrency?.code)}
                               </div>
                             </div>
                           </div>
@@ -1867,13 +1849,12 @@ const ActivityDetail = () => {
               items={[
                 {
                   name: activity.name,
-                  price:
+                  price:(
                     calculateDiscountedPrice(
                       activity.price,
                       activity.specialDiscount
-                    ) *
-                    exchangeRates *
-                    100,
+                    ) *  (exchangeRates[userPreferredCurrency.code]/exchangeRates["USD"])
+                  )*100,
                 },
               ]} // Convert price to cents
               onWalletPayment={handlePaymentConfirm}
@@ -1883,13 +1864,15 @@ const ActivityDetail = () => {
                 calculateDiscountedPrice(
                   activity.price,
                   activity.specialDiscount
-                ) * exchangeRates
+                ) *  (exchangeRates[userPreferredCurrency.code]/exchangeRates["USD"])
               ).toFixed(2)}
               currency={userPreferredCurrency.code}
               symbol={userPreferredCurrency.symbol}
               returnLoc={"http://localhost:3000/activity/" + id}
               error={bookingError}
               setError={setBookingError}
+              promoDetails={promoDetails}
+              setPromoDetails={setPromoDetails}
             />
           )}
 
@@ -1972,7 +1955,10 @@ const ActivityDetail = () => {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+          <Dialog
+            open={showSuccessDialog}
+            onOpenChange={setShowSuccessDialog}
+          >
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 {/* Flexbox container to align icon and title horizontally */}
@@ -1992,13 +1978,15 @@ const ActivityDetail = () => {
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">Amount Paid:</Label>
-                    <div> {formatPrice(calculateTotalPrice())} </div>
+                    <div>
+                      {pricePaid}
+                    </div>
                   </div>
                   {paymentType === "Wallet" && (
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">New Wallet Balance:</Label>
                       <div>
-                        {formatPrice(tourist.wallet - calculateTotalPrice())}
+                        {touristWallet}
                       </div>
                     </div>
                   )}
@@ -2276,9 +2264,9 @@ const ActivityDetail = () => {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Total Price</Label>
                 <div className="col-span-3">
-                  {formatPrice(
+                  {convertPrice((
                     (selectedTransportation?.ticketCost || 0) * seatsToBook
-                  )}
+                  ),"USD",userPreferredCurrency?.code)}
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -2299,10 +2287,11 @@ const ActivityDetail = () => {
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="Wallet" id="wallet" />
                     <Label htmlFor="wallet">Wallet</Label>
-                  </div>
-                </RadioGroup>
+                    </div>
+                  </RadioGroup>
+                </div>
               </div>
-            </div>
+          
             <DialogFooter>
               <Button
                 onClick={() => setTransportationBookingDialog(false)}
@@ -2340,6 +2329,7 @@ const ActivityDetail = () => {
           </DialogContent>
         </Dialog>
       </div>
+
       {alertMessage && (
         <Alert
           className={`fixed bottom-4 right-4 w-96 ${
@@ -2355,7 +2345,9 @@ const ActivityDetail = () => {
       {(userRole === "guest" || userRole === "tourist") && (
         <UserGuide steps={guideSteps} pageName="singleActivity" />
       )}
-    </div>
+      </div>
+     
+    
   );
 };
 

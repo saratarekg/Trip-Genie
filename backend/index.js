@@ -171,25 +171,28 @@ app.post("/create-booking-session", async (req, res) => {
       returnLocation,
       selectedDate,
       selectedTransportID,
+      discountPercentage,
+      promoCode 
     } = req.body;
+    console.log("in hereeeeeeeee");
 
     // Calculate the total price of items
     const itemsTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
-
+   console.log("itemsTotal", items);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: items.map((item) => ({
         price_data: {
           currency: currency,
           product_data: {
-            name: item.product.name,
+            name: discountPercentage > 0? item.product.name + `(-${discountPercentage}%)` :item.product.name,
           },
-          unit_amount: Math.round(item.totalPrice * 100),
+          unit_amount: discountPercentage>0?  Math.round((item.totalPrice * (1 - (discountPercentage/100))) * 100) : Math.round((item.totalPrice) * 100),
         },
         quantity: item.quantity,
       })),
       mode: "payment",
-      success_url: `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}&quantity=${quantity}&selectedDate=${selectedDate}&selectedTransportID=${selectedTransportID}`,
+      success_url: `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}&quantity=${quantity}&selectedDate=${selectedDate}&promoCode=${promoCode}&selectedTransportID=${selectedTransportID}&discountPercentage=${discountPercentage}`,
       cancel_url: `${returnLocation}`,
     });
 
