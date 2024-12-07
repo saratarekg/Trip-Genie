@@ -268,11 +268,44 @@ export function NavbarComponent() {
     };
   }, [fetchCartItems]);
 
+  const LogoutPopup = ({ onConfirm, onCancel }) => {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-sm">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Are you sure you want to log out?
+          </h3>
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={onCancel}
+              type="button"
+              className="px-4 py-2 text-sm text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              type="button"
+              className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+            >
+              Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const handleLogoutConfirm = () => {
     setShowLogoutModal(true);
   };
 
   const handleLogoutCancel = () => {
+    setShowLogoutModal(false);
+  };
+
+  const handleLogout = () => {
+    logOut();
     setShowLogoutModal(false);
   };
 
@@ -282,6 +315,8 @@ export function NavbarComponent() {
       const response = await fetch("http://localhost:4000/auth/logout");
 
       if (response.ok) {
+        Cookies.set("jwt", "");
+        Cookies.set("role", "");
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
@@ -303,32 +338,6 @@ export function NavbarComponent() {
 
   const closeDropdown = () => {
     setOpenDropdown(null);
-  };
-
-  const LogoutPopup = ({ onConfirm, onCancel }) => {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-sm">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            Are you sure you want to log out?
-          </h3>
-          <div className="flex justify-end gap-4">
-            <button
-              onClick={onCancel}
-              className="px-4 py-2 text-sm text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={onConfirm}
-              className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
-            >
-              Log Out
-            </button>
-          </div>
-        </div>
-      </div>
-    );
   };
 
   const promoBanner = <PromoBanner setPromoMargin={setPromoBannerMargin} />;
@@ -1129,6 +1138,7 @@ export function NavbarComponent() {
                   )}
                   <button
                     onClick={handleLogoutConfirm}
+                    type="button"
                     className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
@@ -1159,7 +1169,7 @@ export function NavbarComponent() {
         )}
       </nav>
       {showLogoutModal && (
-        <LogoutPopup onConfirm={logOut} onCancel={handleLogoutCancel} />
+        <LogoutPopup onConfirm={handleLogout} onCancel={handleLogoutCancel} />
       )}
     </div>
   );
