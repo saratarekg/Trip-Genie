@@ -300,10 +300,14 @@ export default function TransportationPage() {
             ? { ...t, remainingSeats: response.data.remainingSeats }
             : t
         );
+        
 
         setTransportations(updatedTransportations);
         setFilteredTransportations(updatedTransportations);
         const percentageOff = searchParams.get("discountPercentage") || 0;
+        const total = response.data.booking.totalCost;
+        console.log(total);
+
 
         console.log(percentageOff);
 
@@ -313,15 +317,12 @@ export default function TransportationPage() {
           response.data.message || "Transportation booking successful"
         );
 
-        console.log(percentageOff)
-        console.log(seatsToBook)
-        console.log(selectedTransportation?.ticketCost)
 
         setShowTransportationSuccessDialog({
           open: true,
           paymentMethod,
           seatsToBook,
-          ticketCost: selectedTransportation?.ticketCost,
+          ticketCost: total/seatsToBook,
           wallet: tourist?.wallet,
           percentageOff: percentageOff,
         });
