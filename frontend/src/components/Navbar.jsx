@@ -111,7 +111,6 @@ export function NavbarComponent() {
       !itinerariesRef.current?.contains(event.target) &&
       !productsRef.current?.contains(event.target) &&
       !reportsRef.current?.contains(event.target) &&
-
       !activitiesRef.current?.contains(event.target) &&
       !historicalRef.current?.contains(event.target) &&
       !userMenuRef.current?.contains(event.target) &&
@@ -461,7 +460,6 @@ export function NavbarComponent() {
                       )}
                     </div>
 
-
                     <div className="relative" ref={reportsRef}>
                       <button
                         onClick={() => toggleDropdown("reports")}
@@ -490,8 +488,6 @@ export function NavbarComponent() {
                           >
                             <Folder className="mr-2 h-4 w-4" /> Stock report
                           </Link>
-                         
-                    
                         </div>
                       )}
                     </div>

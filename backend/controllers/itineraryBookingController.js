@@ -10,8 +10,14 @@ const emailService = require("../services/emailService");
 exports.createBooking = async (req, res) => {
   try {
     const userId = res.locals.user_id;
-    const { itinerary, paymentType, paymentAmount, numberOfTickets, date, promoCode } =
-      req.body;
+    const {
+      itinerary,
+      paymentType,
+      paymentAmount,
+      numberOfTickets,
+      date,
+      promoCode,
+    } = req.body;
 
     // Step 1: Check if the itinerary exists
     const itineraryExists = await Itinerary.findById(itinerary);
@@ -40,7 +46,8 @@ exports.createBooking = async (req, res) => {
     // Apply promo code discount
     let finalPaymentAmount = paymentAmount;
     if (usedPromoCode) {
-      finalPaymentAmount = paymentAmount - (paymentAmount * usedPromoCode.percentOff / 100);
+      finalPaymentAmount =
+        paymentAmount - (paymentAmount * usedPromoCode.percentOff) / 100;
     }
 
     // Step 2: Handle Wallet payment type
@@ -417,14 +424,14 @@ exports.getItinerariesReport = async (req, res) => {
     const { day, month, year } = req.query;
     let selectedItineraries = req.query.selectedItineraries;
     const tourGuideId = res.locals.user_id; // Get the user's ID from response locals
-    const itineraries = await Itinerary.find({ tourGuide: tourGuideId }); // Fetch all itineraries
-    let itineraryIds = itineraries.map((itinerary) => itinerary._id); // Extract itinerary IDs
+    let itineraries = await Itinerary.find({ tourGuide: tourGuideId }); // Fetch all itineraries
     if (selectedItineraries) {
       selectedItineraries = selectedItineraries.split(",");
-      itineraryIds = itineraryIds.filter((itineraryId) =>
-        selectedItineraries.includes(itineraryId.toString())
+      itineraries = itineraries.filter((itinerary) =>
+        selectedItineraries.includes(itinerary._id.toString())
       );
     }
+    const itineraryIds = itineraries.map((itinerary) => itinerary._id); // Extract itinerary IDs
 
     const query = {};
     query.itinerary = { $in: itineraryIds };
