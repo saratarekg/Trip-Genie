@@ -106,6 +106,24 @@ import {
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 import StockReport from "./StockReport.jsx";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Mail } from "lucide-react";
+
+const getInitials = (name) => {
+  if (!name) return "";
+  const initials = name
+    .split(" ")
+    .map((word) => word[0])
+    .join("");
+  return initials.slice(0, 2).toUpperCase();
+};
+
 // Sub-components
 const AccountInfo = ({ user }) => {
   switch (user.role) {
@@ -340,6 +358,7 @@ const ExternalFlightBookings = ({ user }) => {
 
   return (
     <ToastProvider>
+      
       <div className="bg-gray-100 max-w-7xl gap-4 ">
         <h1 className="text-3xl font-bold mb-2">Flight Bookings</h1>
         <p className="text-sm text-gray-500 mb-2">
@@ -1844,7 +1863,11 @@ export default function AccountManagement() {
         const response = await axios.get(api, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setUser({ ...response.data, role });
+        setUser({ 
+          ...response.data, 
+          role,
+          email: response.data.email // Ensure email is included
+        });
       } catch (err) {
         setError(err.message);
         setUser(null);
@@ -2199,11 +2222,102 @@ export default function AccountManagement() {
     setSidebarVisible(!sidebarVisible);
   };
 
+  // First, add these state variables near the top of the AccountManagement component
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("");
+
+  // Add this handler function
+  const handleChangePasswordClick = () => {
+    setIsModalOpen(true);
+  };
+
+  // First, update the handlePasswordChangeSuccess function to properly show the toast
+  const handlePasswordChangeSuccess = (message) => {
+    setIsModalOpen(false);
+    setToastMessage("Your password has been successfully updated.");
+    setToastType("success");
+    setIsToastOpen(true);
+  };
+
+  const showToast = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+  };
+
+ 
+
+  
   return (
     <div>
+      <ToastProvider>
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
+      {role === "tourism-governor" && (
+        <div className="text-[#1A3B47] p-2 border-b bg-gray-100 border-gray-300">
+          <div className="flex justify-end items-center">
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger className="focus:outline-none group">
+                  <div className="flex items-center space-x-2 p-2 rounded-full transition-colors duration-200 group-hover:bg-[#B5D3D1]">
+                    <span className="mr-2 text-[#1A3B47]">
+                      {user.username}
+                    </span>
+                    <Avatar
+                      className="h-8 w-8 !bg-[#388A94] text-white"
+                      style={{ backgroundColor: "#388A94" }}
+                    >
+                      <AvatarFallback className="bg-transparent">
+                        {getInitials(user.username)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 bg-white shadow-lg rounded-md p-2"
+                >
+                  <div className="flex items-center space-x-2 p-2">
+                    <Avatar className="h-12 w-12 bg-[#388A94] text-white">
+                      <AvatarFallback className="text-lg bg-transparent">
+                        {getInitials(user.username)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold text-[#1A3B47]">
+                        {user.username}
+                      </p>
+                      <p className="text-sm text-[#5D9297]">Tourism Governor</p>
+                    </div>
+                  </div>
+                  {/* Always show email container if user exists */}
+                  <div className="flex items-center justify-center mt-2 text-[#1A3B47]">
+                    <Mail className="mr-2 h-4 w-4" />
+                    <p className="text-xs">{user.email || 'No email available'}</p>
+                  </div>
+                  <DropdownMenuItem
+                    className="w-full text-[#1A3B47] hover:bg-[#B5D3D1] transition-colors duration-200 border border-gray-300 text-center mt-2"
+                    onClick={handleChangePasswordClick}
+                  >
+                    <span className="w-full text-center">Change Password</span>
+                  </DropdownMenuItem>
+                  <Separator className="my-2" />
+                  <DropdownMenuItem
+                    className="w-full text-[#1A3B47] hover:bg-[#B5D3D1] transition-colors duration-200"
+                    onClick={handleLogoutClick}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </div>
+      )}
       <div className="flex min-h-screen bg-gray-100">
         <Sidebar
           menuStructure={menuStructure}
@@ -2211,7 +2325,7 @@ export default function AccountManagement() {
           activeTab={activeTab}
           onTabClick={handleTabClick}
         />
-        <main className=" flex-1 p-8">
+        <main className="flex-1 p-8">
           <div className="w-full mx-auto">{renderContent()}</div>
         </main>
 
@@ -2225,6 +2339,51 @@ export default function AccountManagement() {
           />
         )}
       </div>
+
+      {/* Password Change Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <button
+                className="close-button"
+                onClick={() => setIsModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <PasswordChanger onSuccess={handlePasswordChangeSuccess} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastViewport /> {/* Add this line */}
+      {isToastOpen && (
+        <Toast
+          onOpenChange={setIsToastOpen}
+          open={isToastOpen}
+          duration={2000}
+          className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
+        >
+          <div className="flex items-center">
+            {toastType === "success" ? (
+              <CheckCircle className="text-green-500 mr-2" />
+            ) : (
+              <XCircle className="text-red-500 mr-2" />
+            )}
+            <div>
+              <ToastTitle>
+                {toastType === "success" ? "Success" : "Error"}
+              </ToastTitle>
+              <ToastDescription>{toastMessage}</ToastDescription>
+            </div>
+          </div>
+          <ToastClose />
+        </Toast>
+      )}
+      </ToastProvider>
     </div>
   );
 }
