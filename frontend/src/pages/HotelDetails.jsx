@@ -62,8 +62,9 @@ export default function HotelDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currencyCode, setCurrencyCode] = useState("USD");
-  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] = useState(false);
-  const [price,setPrice]= useState(0);
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
+    useState(false);
+  const [price, setPrice] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [numberOfRooms, setNumberOfRooms] = useState(1);
   const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -326,6 +327,14 @@ export default function HotelDetails() {
       console.error("Error fetching currencies:", error);
     }
   };
+
+  function scrollToRoomSection() {
+    //Implementation to scroll to the room section
+    const roomSection = document.getElementById("room-section");
+    if (roomSection) {
+      roomSection.scrollIntoView({ behavior: "smooth" });
+    }
+  }
 
   const guideSteps = [
     {
@@ -621,15 +630,15 @@ export default function HotelDetails() {
                             className="md:basis-1/2 lg:basis-1/3"
                           >
                             <img
-                              src={photo.url_original}
+                              src={photo.url_max300}
                               alt={`Room photo ${photoIndex + 1}`}
                               className={`aspect-${photo.ratio} rounded-lg`}
                             />
                           </CarouselItem>
                         ))}
                     </CarouselContent>
-                    <CarouselPrevious />
-                    <CarouselNext />
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
                   </Carousel>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {room.highlights &&
@@ -647,12 +656,18 @@ export default function HotelDetails() {
                       ))}
                   </ul>
                   <div className="mt-4 space-x-2 booking">
-                    <Button onClick={() => handleBookRoom(room, false)}>
+                    <Button
+                      className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
+                      onClick={() => handleBookRoom(room, false)}
+                    >
                       Book Now
                     </Button>
                     {room.allInclusivePrice &&
                       room.allInclusivePrice !== room.price && (
-                        <Button onClick={() => handleBookRoom(room, true)}>
+                        <Button
+                          className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
+                          onClick={() => handleBookRoom(room, true)}
+                        >
                           Book All Inclusive
                         </Button>
                       )}
@@ -684,15 +699,23 @@ export default function HotelDetails() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className="container mx-auto p-4 mt-5">
-        <h1 className="text-3xl font-bold mb-6">{hotelData.name}</h1>
+        <div className="flex justify-between">
+          <h1 className="text-3xl font-bold mb-6">{hotelData.name}</h1>
+          <Button
+            onClick={scrollToRoomSection}
+            className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
+          >
+            Reserve Now
+          </Button>
+        </div>
         <div className="flex flex-col md:flex-row gap-6 mb-6">
-          <div className="md:w-1/2 hotelPictures">
-            <Carousel className="w-full max-w-xl">
+          <div className="md:w-full hotelPictures">
+            <Carousel className="w-full">
               <CarouselContent>
                 {hotelPhotos.map((photo, index) => (
                   <CarouselItem
                     key={index}
-                    className="md:basis-1/2 lg:basis-1/3"
+                    className="md:basis-1/5 lg:basis-1/5"
                   >
                     <img
                       src={photo.url_1440}
@@ -702,8 +725,8 @@ export default function HotelDetails() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
+              <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
             </Carousel>
           </div>
           <Card className="md:w-1/2 hotelInfo">
@@ -759,7 +782,7 @@ export default function HotelDetails() {
         </div>
         {renderFacilities()}{" "}
         {/* Add this line to render the facilities section */}
-        <Card className="mt-6 roomTypes">
+        <Card className="mt-6 roomTypes" id="room-section">
           <CardHeader>
             <CardTitle>Room Types</CardTitle>
           </CardHeader>
@@ -839,24 +862,31 @@ export default function HotelDetails() {
               <DialogDescription>
                 Your hotel room has been booked successfully.
                 {paymentType === "Wallet" && (
-                <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Label className="text-right">Amount Paid Via Wallet: </Label>
-                  <div>{price} {" "}{currencyCode} </div>
-                </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Label className="text-right">New Wallet Balance: </Label>
-                    <div>{" "}{convertPrice(tourist?.wallet,"USD",currencyCode)-price}{" "}{currencyCode}</div>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Label className="text-right">
+                        Amount Paid Via Wallet:{" "}
+                      </Label>
+                      <div>
+                        {price} {currencyCode}{" "}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Label className="text-right">New Wallet Balance: </Label>
+                      <div>
+                        {" "}
+                        {convertPrice(tourist?.wallet, "USD", currencyCode) -
+                          price}{" "}
+                        {currencyCode}
+                      </div>
+                    </div>
                   </div>
-                </div>
                 )}
               </DialogDescription>
             </DialogHeader>
             <Button onClick={() => handleFinalOK()}>Close</Button>
           </DialogContent>
         </Dialog>
-
-
         <Dialog
           open={isSuccessWalletPopupOpen}
           onOpenChange={setIsSuccessWalletPopupOpen}
@@ -867,13 +897,22 @@ export default function HotelDetails() {
               <DialogDescription>
                 Your hotel room has been booked successfully.
                 <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Label className="text-right">Amount Paid Via Wallet:</Label>
-                  <div>{price}{currencyCode} </div>
-                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Label className="text-right">
+                      Amount Paid Via Wallet:
+                    </Label>
+                    <div>
+                      {price}
+                      {currencyCode}{" "}
+                    </div>
+                  </div>
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">New Wallet Balance:</Label>
-                    <div>{convertPrice(tourist?.wallet,"USD",currencyCode)-price}{currencyCode}</div>
+                    <div>
+                      {convertPrice(tourist?.wallet, "USD", currencyCode) -
+                        price}
+                      {currencyCode}
+                    </div>
                   </div>
                 </div>
               </DialogDescription>
