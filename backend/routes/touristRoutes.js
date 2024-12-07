@@ -22,10 +22,15 @@ router.get("/currencies", currencyController.getSupportedCurrencies);
 // Routes for Tourist Notifications
 router.get("/notifications", touristController.getTouristNotifications);
 router.get("/unseen-notifications", touristController.hasUnseenNotifications);
-router.post('/notifications/markAsSeen/:id', touristController.markNotificationAsSeenForTourist);
-router.post('/mark-dropdown-opened', touristController.markDropdownAsOpened);
-router.post("/mark-notifications-seen", touristController.markNotificationsAsSeen);
-
+router.post(
+  "/notifications/markAsSeen/:id",
+  touristController.markNotificationAsSeenForTourist
+);
+router.post("/mark-dropdown-opened", touristController.markDropdownAsOpened);
+router.post(
+  "/mark-notifications-seen",
+  touristController.markNotificationsAsSeen
+);
 
 // router.get('/fill', currencyController.populateCurrencies);
 
@@ -241,6 +246,7 @@ router.get("/my-hotels", touristController.getMyHotels);
 router.post("/promo-code", touristController.applyPromoCode);
 
 router.post("/get/promo-code", touristController.getPromoCode);
+router.get("/promo-codes", touristController.getPromoCodes);
 
 router.get("/saved-activities", touristController.getSavedActivities);
 router.get("/saved-itineraries", touristController.getSavedItineraries);

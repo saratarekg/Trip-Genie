@@ -23,7 +23,11 @@ const promoCodeSchema = new Schema(
       min: [0, "Discount must be at least 0%"],
       max: [100, "Discount cannot exceed 100%"],
     },
-
+    type: {
+      type: String,
+      required: true,
+      enum: ["birthday", "general"],
+    },
     usage_limit: {
       type: Number,
       required: true,

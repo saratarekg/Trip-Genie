@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { useLocation, Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
@@ -6,11 +12,12 @@ import CartDropdown from "@/components/cartDropDown";
 import axios from "axios";
 import { cartEvents } from "@/service/cartEvents";
 import { Modal, Button } from "react-bootstrap";
+import PromoBanner from "./PromoBanner";
 
 import { NotificationsDropdownSeller } from "@/components/SellerNotificationsDropdown";
-import { NotificationsDropdownTourGuide } from "@/components/TourGuideNotificationsDropdown";
-import { NotificationsDropdownAdvertiser } from "@/components/AdvertiserNotificationsDropdown";
-import { NotificationsDropdownAdmin } from "@/components/AdminNotificationsDropdown";
+// import { NotificationsDropdownTourGuide } from "@/components/TourGuideNotificationsDropdown";
+// import { NotificationsDropdownAdvertiser } from "@/components/AdvertiserNotificationsDropdown";
+// import { NotificationsDropdownAdmin } from "@/components/AdminNotificationsDropdown";
 import { NotificationsDropdownTourist } from "@/components/TouristNotificationsDropdown";
 
 import logo from "../assets/images/TGlogo.svg";
@@ -70,6 +77,7 @@ export function NavbarComponent() {
   const transportationRef = useRef(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [promoBannerMargin, setPromoBannerMargin] = useState(0);
   const [hasUnseenNotificationsSeller, setHasUnseenNotificationsSeller] =
     useState(false);
   const [hasUnseenNotificationsTourGuide, setHasUnseenNotificationsTourGuide] =
@@ -324,8 +332,10 @@ export function NavbarComponent() {
     );
   };
 
+  const promoBanner = <PromoBanner setPromoMargin={setPromoBannerMargin} />;
+
   return (
-    <>
+    <div style={{ marginBottom: `${promoBannerMargin}px` }}>
       <nav
         key={key}
         className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
@@ -339,7 +349,8 @@ export function NavbarComponent() {
         }`}
         style={isScrolled ? { backdropFilter: "saturate(180%) blur(8px)" } : {}}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {promoBanner}
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`}>
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex-shrink-0 ml-8">
@@ -739,19 +750,20 @@ export function NavbarComponent() {
             <div className="hidden md:flex items-center">
               {role !== undefined && role !== "guest" && (
                 <>
-                  {role === "seller" && <NotificationsDropdownSeller />}
-                  {role === "tour-guide" && <NotificationsDropdownTourGuide />}
-                  {role === "advertiser" && (
-                    <NotificationsDropdownAdvertiser />
-                  )}
-                  {role === "admin" && <NotificationsDropdownAdmin />}
-                  {role === "tourist" && <NotificationsDropdownTourist />}
+                  {(role === "seller" ||
+                    role === "tour-guide" ||
+                    role === "advertiser" ||
+                    role === "admin") && <NotificationsDropdownSeller />}
+                  {/* {role === "tour-guide" && <NotificationsDropdownTourGuide />}
+                  {role === "advertiser" && <NotificationsDropdownAdvertiser />}
+                  {role === "admin" && <NotificationsDropdownAdmin />} */}
                   {role === "tourist" && (
                     <>
-                      <div className="relative mr-2 mt-1 navbar-cart">
+                      <NotificationsDropdownTourist />
+                      <div className="relative mr-2 navbar-cart">
                         <button
                           onClick={() => setIsCartOpen(!isCartOpen)}
-                          className="relative"
+                          className="relative text-white hover:bg-white/10 p-2 rounded-full transition-colors duration-200"
                         >
                           <ShoppingCart className="h-7 w-7 text-white" />{" "}
                           {/* Larger icon size */}
@@ -914,7 +926,6 @@ export function NavbarComponent() {
             </div>
           </div>
         </div>
-
         {/* Mobile Navigation */}
         {openDropdown === "mobileMenu" && (
           <div className="md:hidden bg-black/90 mt-2 mx-4 rounded-2xl border border-white/20">
@@ -1021,10 +1032,7 @@ export function NavbarComponent() {
                   <NavLink to="/all-itineraries" onClick={closeDropdown}>
                     Itineraries
                   </NavLink>
-                  <NavLink
-                    to="/all-historical-places"
-                    onClick={closeDropdown}
-                  >
+                  <NavLink to="/all-historical-places" onClick={closeDropdown}>
                     Historical Places
                   </NavLink>
                   <NavLink to="/all-products" onClick={closeDropdown}>
@@ -1154,9 +1162,9 @@ export function NavbarComponent() {
           </div>
         )}
       </nav>
-      {showLogoutModal &&(
-      <LogoutPopup onConfirm={logOut} onCancel={handleLogoutCancel} />
+      {showLogoutModal && (
+        <LogoutPopup onConfirm={logOut} onCancel={handleLogoutCancel} />
       )}
-    </>
+    </div>
   );
 }

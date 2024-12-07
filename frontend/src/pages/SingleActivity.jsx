@@ -1449,7 +1449,7 @@ const ActivityDetail = () => {
                           <div className="border-t-4 border-gray-300 w-1/2 mx-auto my-3"></div>
 
                           {!activity.isBookingOpen && (
-                            <div className="mb-3 p-3 bg-blue-50 text-blue-700 border border-blue-300 rounded-md shadow-sm text-center">
+                            <div className="mb-3 p-3 bg-blue-50 text-[#1A3B47] border border-blue-300 rounded-md shadow-sm text-center">
                               <strong>Save this activity</strong> to get
                               notified when booking opens.
                             </div>
