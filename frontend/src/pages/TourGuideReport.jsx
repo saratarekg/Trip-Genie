@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -44,8 +44,8 @@ import { Label } from "@/components/ui/label";
 
 const TourGuideItineraryReport = () => {
   const [reportData, setReportData] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState("all");
-  const [graphPeriod, setGraphPeriod] = useState("week");
+  const [selectedPeriod, setSelectedPeriod] = useState("Filtered Total");
+  const [graphPeriod, setGraphPeriod] = useState("year");
   const [filters, setFilters] = useState({
     itineraryId: "",
     startDate: null,
@@ -61,6 +61,8 @@ const TourGuideItineraryReport = () => {
   const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [initialTotalRevenue, setInitialTotalRevenue] = useState(0);
+  const initialGraphDataRef = useRef(null);
 
   const fetchMyItineraries = async () => {
     try {
@@ -138,6 +140,43 @@ const TourGuideItineraryReport = () => {
     }
   };
 
+  const loadStatistics = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const currentYear = new Date().getFullYear();
+      const monthlyData = [];
+
+      for (let month = 1; month <= 12; month++) {
+        const response = await axios.get(
+          `http://localhost:4000/tour-guide/itineraries-report?year=${currentYear}&month=${month}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        monthlyData.push(response.data);
+      }
+
+      const combinedData = monthlyData.flatMap(data => data.itineraryReport);
+      setReportData({ itineraryReport: combinedData });
+
+      const totalRevenue = monthlyData.reduce((sum, data) => sum + (data.totalRevenue || 0), 0);
+      setTotalRevenue(totalRevenue);
+      setInitialTotalRevenue(totalRevenue);
+
+      updateGraphData(combinedData, "year");
+    } catch (error) {
+      console.error("Error loading statistics:", error);
+      setError("Failed to load statistics. Please try again later.");
+    }
+  };
+
+  useEffect(() => {
+    loadStatistics();
+    fetchMyItineraries();
+  }, []);
+
   useEffect(() => {
     fetchItineraryReport();
     fetchMyItineraries();
@@ -162,9 +201,14 @@ const TourGuideItineraryReport = () => {
       console.error("Invalid report data:", reportData);
       return;
     }
+    if (initialGraphDataRef.current) {
+      setGraphData(initialGraphDataRef.current);
+      return;
+    }
+  
     const now = new Date();
     let startDate, dateFormat, groupingFunction, data;
-
+  
     switch (period) {
       case "week":
         startDate = subDays(now, 6);
@@ -186,7 +230,7 @@ const TourGuideItineraryReport = () => {
           revenue: 0,
         }));
         break;
-      case "all":
+      case "Filtered Total":
         startDate = subYears(now, 7);
         dateFormat = "yyyy";
         groupingFunction = (date) => format(date, "yyyy");
@@ -197,7 +241,7 @@ const TourGuideItineraryReport = () => {
         }));
         break;
     }
-
+  
     reportData.forEach((item) => {
       const date = new Date(item.itinerary.createdAt);
       if (date >= startDate && date <= now) {
@@ -211,9 +255,11 @@ const TourGuideItineraryReport = () => {
         }
       }
     });
-
+  
+    initialGraphDataRef.current = data;
     setGraphData(data);
   };
+  
 
   const calculatePeriodRevenue = (reportData, period) => {
     if (!Array.isArray(reportData)) return 0;
@@ -244,7 +290,7 @@ const TourGuideItineraryReport = () => {
             sum +
             (saleDate.getFullYear() === now.getFullYear() ? item.revenue : 0)
           );
-        case "all":
+        case "Filtered Total":
         default:
           return sum + item.revenue;
       }
@@ -264,8 +310,8 @@ const TourGuideItineraryReport = () => {
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
   if (isLoading) return <div className="p-6 text-center">Loading...</div>;
 
-  const fillPercentage = totalRevenue
-    ? (selectedPeriodRevenue / totalRevenue) * 100
+  const fillPercentage = initialTotalRevenue
+    ? (totalRevenue / initialTotalRevenue) * 100
     : 0;
 
   const thisMonthRevenue = calculatePeriodRevenue(
@@ -296,64 +342,24 @@ const TourGuideItineraryReport = () => {
   const isDateRangeSelected = filters.startDate || filters.endDate;
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-      <div className="p-6 bg-gray-100 min-h-screen">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex-grow py-6 bg-gray-100">
+        <div className="container px-8">
           <div className="grid gap-4 md:grid-cols-12 mb-4">
             {/* Total Revenue */}
-            <Card className="md:col-span-3 flex flex-col justify-center items-center">
+            <Card className="md:col-span-4 flex flex-col justify-center items-center h-[300px]">
               <CardHeader className="p-3 w-full">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg font-bold text-[#1A3B47]">
                     Total Revenue
                   </CardTitle>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
-                      >
-                        <Calendar className="h-3 w-3 mr-1" />
-                        <span className="mr-1">{selectedPeriod}</span>
-                        <ChevronDown className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[100px]">
-                      <DropdownMenuItem
-                        onSelect={() => setSelectedPeriod("today")}
-                      >
-                        Today
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => setSelectedPeriod("week")}
-                      >
-                        This Week
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => setSelectedPeriod("month")}
-                      >
-                        This Month
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => setSelectedPeriod("year")}
-                      >
-                        This Year
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => setSelectedPeriod("all")}
-                      >
-                        All Time
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </CardHeader>
               <CardContent className="p-3 flex flex-col justify-center items-center w-full">
-                <div className="relative flex items-center justify-center w-32 h-32">
+                <div className="relative flex items-center justify-center w-48 h-48 mb-8">
                   <svg
                     className="w-full h-full -rotate-90"
                     viewBox="0 0 100 100"
@@ -388,7 +394,7 @@ const TourGuideItineraryReport = () => {
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-lg font-bold text-[#1A3B47]">
-                      ${selectedPeriodRevenue?.toFixed(2)}
+                      ${totalRevenue?.toFixed(2)}
                     </span>
                     <span className="text-sm text-[#5D9297]">
                       {selectedPeriod.charAt(0).toUpperCase() +
@@ -396,112 +402,23 @@ const TourGuideItineraryReport = () => {
                     </span>
                   </div>
                 </div>
-                <div className="text-center mt-4">
-                  <p className="text-base text-[#5D9297]">
-                    {fillPercentage.toFixed(1)}% of total
-                  </p>
-                  <p className="text-base font-semibold text-[#1A3B47]">
-                    {totalRevenue !== null &&
-                      `Total Revenue: $${totalRevenue?.toFixed(2)}`}
-                  </p>
-                </div>
+                
               </CardContent>
             </Card>
 
-            <div className="md:col-span-3 flex flex-col gap-4">
-              {/* Monthly Revenue - This Month */}
-              <Card>
-                <CardHeader className="flex justify-between">
-                  <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                    This Month
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="">
-                  <div className="flex flex-col items-start -mt-4">
-                    <p className="text-sm text-gray-500">Revenue</p>
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center">
-                        <span className="text-lg font-bold text-[#5D9297]">
-                          ${thisMonthRevenue.toFixed(2)}
-                        </span>
-                        <motion.span
-                          className={`ml-12 flex items-center text-xs font-semibold px-2 py-1 rounded-full ${
-                            thisMonthChange >= 0
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5 }}
-                        >
-                          {thisMonthChange >= 0 ? (
-                            <TrendingUp className="mr-1" />
-                          ) : (
-                            <TrendingDown className="mr-1" />
-                          )}
-                          {thisMonthChange.toFixed(1)}%
-                        </motion.span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Monthly Revenue - Last Month */}
-              <Card>
-                <CardHeader className="">
-                  <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                    Last Month
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="">
-                  <div className="flex flex-col items-start -mt-4">
-                    <div>
-                      <p className="text-sm text-gray-500">Revenue</p>
-                      <span className="text-lg font-bold text-[#5D9297]">
-                        ${lastMonthRevenue.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
 
             {/* Revenue Analytics Card */}
-            <Card className="md:col-span-6">
+            <Card className="md:col-span-8 h-[300px]">
               <CardHeader className="p-3 mb-2">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg font-bold text-[#1A3B47]">
                     Revenue Analytics
                   </CardTitle>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
-                      >
-                        <Calendar className="h-3 w-3 mr-1" />
-                        <span className="mr-1">{graphPeriod}</span>
-                        <ChevronDown className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[100px]">
-                      <DropdownMenuItem onSelect={() => setGraphPeriod("week")}>
-                        This Week
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setGraphPeriod("year")}>
-                        This Year
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setGraphPeriod("all")}>
-                        All Time
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </CardHeader>
               <CardContent className="pl-0">
-                <div className="h-[200px]">
+                <div className="h-[210px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                       data={graphData}
@@ -750,9 +667,9 @@ const TourGuideItineraryReport = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             Total
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             -
-                          </td>
+                          </td> */}
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {totalTickets}
                           </td>
