@@ -1,6 +1,6 @@
 Priority List: 
 -Select by preference for itineraries (Sam)
--promo code activities, itineraries, hotels msh sha8al (sam)
+-promo code activities, itineraries, hotels msh sha8al (sam done✅)
 -reports bayza (done✅ Radwa)
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
