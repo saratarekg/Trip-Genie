@@ -2,19 +2,19 @@ Priority List:
 
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
+-promo code activities, itineraries, hotels msh sha8al
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
 -Error updating product. Please try again later. lama ba update product f admin s3at
--mfish show password f signup
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
 -pagination msh btl3 l awl elpage
+-mafish loading b3d ma ba search fe itineraries zy activities w HPs. 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
 -reports bayza 
 -mafish loading baad ma badoos update product
 -sa3at beyede error lama mark all as read
--orders trga3 fel dropdown
 consistency fe pages el all 
 navigation notification fe admin
 - shay be laban 3amatan (create activity we create products we kol el create )
@@ -42,9 +42,19 @@ navigation notification fe admin
 
 
 Sam: 
-67
-69
-111
+67 done✅
+69 done✅
+111 
+
+53
+54
+55
+56
+57
+58
+61
+70
+
 
 - raga3i sort by preference fe itinerary !!
 - convert from USD to my currency in external bookings (done✅)
@@ -81,6 +91,16 @@ Aby:
 90
 91 (done)
 
+71
+72
+73
+74
+75
+76
+77
+78
+
+
 - Seeb el 0 sales bas sort by revenue 3ashan yezharo ta7t (done)
 - Automated verify Otp (done)
 - Black Friday use this promo code!! (done)
@@ -94,6 +114,15 @@ lw had by delete account tour guide msln w had 3aml book le haga ybaa hakhaly ko
 
 
 Alaa:
+2
+4
+5
+6
+7
+8
+9
+10
+
  sheel account info fe tourism governor we 7ot esmo foo2 zy admin (done)
  5od change pass mn el admin(done)
  change pass fe governor(done)
@@ -106,6 +135,15 @@ Alaa:
 
 Houba:
 
+11
+12
+13
+14
+15
+16
+17
+18
+
 toasts ele 3ayza teb2a zai eleradwa 3mla:
 add to cart 
 advertiser deleting activity
@@ -115,10 +153,8 @@ save/unsave itinerary men all
 save/unsave itinerary men single 
 archive w unarchive product men admin
 
-
 -check hn3ml eh f update itinerary lw booked
 - make all popups consistent (success toast and delete popup zay el radwa 3amlha)
-- popup archive products in admin m7taga ttzbt, sheel navigation w a3mlha toast + re-fetch
 
 92(done✅)
 93(done✅)
@@ -146,6 +182,16 @@ Jana:
 109  
 110
 
+79
+80
+81
+82
+83
+84
+85
+86
+
+
  help amy fel user profiles 
 - make loading like gray containers zay ma ana 3amla f notifications
 - on purchase 2oly you earned kam point
@@ -161,6 +207,16 @@ Zeina:
 64
 65
 
+19
+20
+21
+22
+23
+24
+25
+26
+
+
 redeem points tbaa kol 100 maamlsh redeem decimal (done)
 admin by update products btaato bs bs ynf3 y delete aady (done)
 - bayen en el single cards clickable (hover effect) (historical place we check enaha clickable fe kol el amaken el tanya) (DONE)
@@ -174,6 +230,13 @@ admin by update products btaato bs bs ynf3 y delete aady (done)
 Radwa:
 
 27-32 
+
+87
+88
+89
+102
+103
+
 - sort by preference shklo w alwano mokhtlfa f kol page
 - alwan flag inappropriate fe admin activites different 3n itineraries
 - shakl view all 
@@ -194,6 +257,16 @@ Habiba:
 101✅
 104✅
 
+45
+46
+47
+48
+49
+50
+51
+52
+
+
 
 - all flights (tab3y m3 amy)(done)
 Sheel el shay be laban men kol haga
@@ -209,6 +282,18 @@ Hazem:
 35✅
 36✅
 38✅
+
+
+33
+37
+39
+40
+41
+42
+43
+44
+
+
 - single act has no loading until prices are displayed  (already ma3moola fe my account) (done✅)
 - pagination all pages (done✅)
 - zabat shakl el pagination consistency (bas bardo e3melo el3ayzeeno 3ashan manetshalesh)
