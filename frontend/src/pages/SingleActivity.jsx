@@ -1045,6 +1045,8 @@ const ActivityDetail = () => {
     searchParams.delete("promoCode");
 
     const newUrl = `${window.location.pathname}`;
+    // make booking ref to false
+    bookingProcessedRef.current = false;
 
     window.history.replaceState(null, "", newUrl);
   };
