@@ -8,7 +8,7 @@ Priority List:
 - shay be laban 3amatan (create activity we create products we kol el create ) (radwa)
 -create promo code layout (stretch start and end date we geeb el button foo2 ) (radwa)
 -update itinerary betawel w fl akhr error lama bghyr sowar kteer f activities
-- no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review
+- no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review (zeina)
 -lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
 -create promo code msh sha8ala
