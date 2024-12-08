@@ -44,7 +44,7 @@ const PromoBanner = ({ setPromoMargin }) => {
     setPromoMargin(0);
     return null;
   } else {
-    setPromoMargin(55);
+    setPromoMargin(53);
   }
 
   return (
