@@ -1148,12 +1148,13 @@ export function AllItinerariesComponent() {
                 </Button>
                 <span className="text-sm font-medium text-[#1A3B47]">
                   Page {currentPage} of{" "}
-                  {Math.ceil(itineraries.length / tripsPerPage)}
+                  {Math.max(1, Math.ceil(itineraries.length / tripsPerPage))}
                 </span>
                 <Button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={
-                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                    currentPage ===
+                    Math.max(1, Math.ceil(itineraries.length / tripsPerPage))
                   }
                   variant="outline"
                   size="icon"

@@ -51,7 +51,9 @@ const DeleteConfirmationModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-        <h2 className="text-xl font-bold mb-4 text-[#1A3B47]">Confirm Deletion</h2>
+        <h2 className="text-xl font-bold mb-4 text-[#1A3B47]">
+          Confirm Deletion
+        </h2>
         <p className="mb-6 text-[#1A3B47]">
           Are you sure you want to delete the itinerary "{itineraryTitle}"?
         </p>
@@ -190,7 +192,9 @@ const ItineraryCard = ({
       </div>
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xl font-semibold text-[#1A3B47]">{itinerary.title}</h3>
+          <h3 className="text-xl font-semibold text-[#1A3B47]">
+            {itinerary.title}
+          </h3>
           {!itinerary.isActivated && (
             <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
               {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
@@ -351,28 +355,27 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
   };
 
   useEffect(() => {
-    if(!isPriceInitialized){
+    if (!isPriceInitialized) {
       fetchMaxPrice();
-      }
+    }
   }, [userInfo]);
 
   const fetchMaxPrice = async () => {
     const role = getUserRole();
     const token = Cookies.get("jwt");
     const url = new URL(`http://localhost:4000/${role}/max-price-itinerary`);
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await response.json();
-          console.log("data: ",data);
-          setMaxPriceOfItinerary(data);
-          setMaxPrice(data);
-          setPriceRange([0, data]);
-          setIsPriceInitialized(true);
-          
-    };
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await response.json();
+    console.log("data: ", data);
+    setMaxPriceOfItinerary(data);
+    setMaxPrice(data);
+    setPriceRange([0, data]);
+    setIsPriceInitialized(true);
+  };
 
   const handleSortByPreference = async () => {
     try {
@@ -419,7 +422,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
       setError("Error fetching sorted itineraries. Please try again.");
       setItineraries([]);
     } finally {
-     setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -595,16 +598,12 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
   }, [searchTerm]);
 
   useEffect(() => {
-      if (sortBy || sortOrder || myItineraries) {
-        searchItineraries();
-      } else {
-        fetchItineraries();
-      }
-  }, [
-    sortBy,
-    sortOrder,
-    myItineraries,
-  ]);
+    if (sortBy || sortOrder || myItineraries) {
+      searchItineraries();
+    } else {
+      fetchItineraries();
+    }
+  }, [sortBy, sortOrder, myItineraries]);
 
   const handleSort = (attribute) => {
     setIsLoading(true);
@@ -783,7 +782,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                 </div>
               </div>
             </div>
-  
+
             {/* Main Content Skeleton */}
             <div className="flex-1">
               {/* Search and Filters Skeleton */}
@@ -795,7 +794,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   <div className="h-10 w-40 bg-gray-200 rounded-full animate-pulse"></div>
                 </div>
               </div>
-  
+
               {/* Cards Grid Skeleton */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -816,7 +815,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   </div>
                 ))}
               </div>
-  
+
               {/* Pagination Skeleton */}
               <div className="mt-8 flex justify-center items-center space-x-4">
                 <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
@@ -832,14 +831,16 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
   return (
     <div className="bg-gray-100 min-h-screen">
       {isLoading ? (
-      <ActivityPageSkeleton />
+        <ActivityPageSkeleton />
       ) : (
         <div className="">
           <div className="flex gap-8">
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+                <h2 className="text-xl font-semibold text-[#1A3B47]">
+                  Filters
+                </h2>
                 <Button
                   onClick={clearFilters}
                   size="sm"
@@ -848,7 +849,7 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   Clear All
                 </Button>
               </div>
-              
+
               {/* Price Range Filter */}
               <div className="mb-6">
                 <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
@@ -857,7 +858,12 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                     min={0}
                     max={maxPriceOfItinerary}
                     symbol={getSymbol()}
-                    step={Math.max(1, Math.ceil((maxPriceOfItinerary * exchangeRateForFilter) / 100))}
+                    step={Math.max(
+                      1,
+                      Math.ceil(
+                        (maxPriceOfItinerary * exchangeRateForFilter) / 100
+                      )
+                    )}
                     values={priceRange}
                     exchangeRate={exchangeRateForFilter}
                     middleColor="#5D9297"
@@ -867,38 +873,45 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                 )}
               </div>
 
-               {/* Date Range Input */}
-               <div className="mb-6">
-              <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
-              <div className="flex flex-col space-y-2">
-                <div>
-                  <label className="block text-sm font-medium text-[#1A3B47]">From:</label>
-                  <input
-                    type="date"
-                    value={dateRange.lower}
-                    onChange={handleLowerDateChange}
-                    className="w-full mt-1 border rounded-lg p-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-[#1A3B47]">To:</label>
-                  <input
-                    type="date"
-                    value={dateRange.upper}
-                    onChange={handleUpperDateChange}
-                    min={dateRange.lower}
-                    className="w-full mt-1 border rounded-lg p-2"
-                  />
+              {/* Date Range Input */}
+              <div className="mb-6">
+                <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
+                <div className="flex flex-col space-y-2">
+                  <div>
+                    <label className="block text-sm font-medium text-[#1A3B47]">
+                      From:
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRange.lower}
+                      onChange={handleLowerDateChange}
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#1A3B47]">
+                      To:
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRange.upper}
+                      onChange={handleUpperDateChange}
+                      min={dateRange.lower}
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
               {/* Type Filter */}
               <div className="mb-6">
                 <h3 className="font-medium text-[#1A3B47] mb-2">Type</h3>
                 <ScrollArea className="h-[150px]">
                   {typesOptions.map((type) => (
-                    <div key={type} className="flex items-center space-x-2 mb-2">
+                    <div
+                      key={type}
+                      className="flex items-center space-x-2 mb-2"
+                    >
                       <Checkbox
                         id={`type-${type}`}
                         checked={selectedTypes.includes(type)}
@@ -926,7 +939,10 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                 <h3 className="font-medium text-[#1A3B47] mb-2">Language</h3>
                 <ScrollArea className="h-[150px]">
                   {languagesOptions.map((language) => (
-                    <div key={language} className="flex items-center space-x-2 mb-2">
+                    <div
+                      key={language}
+                      className="flex items-center space-x-2 mb-2"
+                    >
                       <Checkbox
                         id={`language-${language}`}
                         checked={selectedLanguages.includes(language)}
@@ -970,23 +986,25 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   </span>
 
                   <Button
-                  variant="outline"
-                  size="sm"
-                  className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
-                  onClick={() => handleSort("price")}
-                >
-                  <ArrowUpDown className="w-4 h-4 mr-2" />
-                  Sort by Price {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
-                  onClick={() => handleSort("rating")}
-                >
-                  <ArrowUpDown className="w-4 h-4 mr-2" />
-                  Sort by Rating {sortBy === "rating" && (sortOrder === 1 ? "↑" : "↓")}
-                </Button>
+                    variant="outline"
+                    size="sm"
+                    className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
+                    onClick={() => handleSort("price")}
+                  >
+                    <ArrowUpDown className="w-4 h-4 mr-2" />
+                    Sort by Price{" "}
+                    {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
+                    onClick={() => handleSort("rating")}
+                  >
+                    <ArrowUpDown className="w-4 h-4 mr-2" />
+                    Sort by Rating{" "}
+                    {sortBy === "rating" && (sortOrder === 1 ? "↑" : "↓")}
+                  </Button>
                 </div>
               </div>
 
@@ -997,7 +1015,10 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
               {/* Itineraries Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {itineraries
-                  .slice((currentPage - 1) * tripsPerPage, currentPage * tripsPerPage)
+                  .slice(
+                    (currentPage - 1) * tripsPerPage,
+                    currentPage * tripsPerPage
+                  )
                   .map((itinerary) => (
                     <ItineraryCard
                       key={itinerary._id}
@@ -1025,11 +1046,15 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="text-sm font-medium text-[#1A3B47]">
-                  Page {currentPage} of {Math.ceil(itineraries.length / tripsPerPage)}
+                  Page {currentPage} of{" "}
+                  {Math.max(1, Math.ceil(itineraries.length / tripsPerPage))}
                 </span>
                 <Button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === Math.ceil(itineraries.length / tripsPerPage)}
+                  disabled={
+                    currentPage ===
+                    Math.max(1, Math.ceil(itineraries.length / tripsPerPage))
+                  }
                   variant="outline"
                   size="icon"
                   className="text-[#1A3B47] border-[#1A3B47]"
@@ -1052,7 +1077,9 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-[#1A3B47]">Delete Itinerary</DialogTitle>
+            <DialogTitle className="text-[#1A3B47]">
+              Delete Itinerary
+            </DialogTitle>
             <DialogDescription className="text-[#1A3B47]">
               Are you sure you want to delete this itinerary?
             </DialogDescription>
@@ -1065,7 +1092,11 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} className="bg-[#F88C33] text-white">
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="bg-[#F88C33] text-white"
+            >
               Delete
             </Button>
           </DialogFooter>
@@ -1113,7 +1144,11 @@ export function AllItinerariesComponent({ onSelectItinerary }) {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="default" onClick={() => setDeleteError(null)} className="bg-[#E6DCCF] hover:bg-[#F88C33]">
+            <Button
+              variant="default"
+              onClick={() => setDeleteError(null)}
+              className="bg-[#E6DCCF] hover:bg-[#F88C33]"
+            >
               Close
             </Button>
           </DialogFooter>

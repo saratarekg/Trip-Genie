@@ -5,7 +5,18 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { Search, ChevronLeft, ChevronRight, Star, Filter, ArrowUpDown, Heart, Edit, Trash2, Bookmark } from 'lucide-react';
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  Filter,
+  ArrowUpDown,
+  Heart,
+  Edit,
+  Trash2,
+  Bookmark,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,8 +40,9 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-4 h-4 ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
         />
       ))}
     </div>
@@ -59,8 +71,11 @@ const ActivityCard = ({
     if (savedActivities && savedActivities.length > 0) {
       console.log(savedActivities);
       console.log(activity._id);
-      setIsSaved(savedActivities.some(savedActivity => savedActivity._id === activity._id.toString()));
-
+      setIsSaved(
+        savedActivities.some(
+          (savedActivity) => savedActivity._id === activity._id.toString()
+        )
+      );
     }
     console.log(isSaved);
   }, [savedActivities, activity._id]);
@@ -89,8 +104,8 @@ const ActivityCard = ({
     const initializeCard = async () => {
       await Promise.all([
         userInfo &&
-          userInfo.role === "tourist" &&
-          userInfo.preferredCurrency !== activity.currency
+        userInfo.role === "tourist" &&
+        userInfo.preferredCurrency !== activity.currency
           ? fetchExchangeRate()
           : getCurrencySymbol(),
       ]);
@@ -130,7 +145,6 @@ const ActivityCard = ({
       }
     }
   }, [userInfo, activity]);
-
 
   const getCurrencySymbol = useCallback(async () => {
     if (userInfo) {
@@ -182,16 +196,22 @@ const ActivityCard = ({
             }}
           >
             <Bookmark
-              className={`w-6 h-6 ${isSaved ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]" : "stroke-black"
-                }`}
+              className={`w-6 h-6 ${
+                isSaved
+                  ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]"
+                  : "stroke-black"
+              }`}
             />
           </Button>
         )}
-
       </CardHeader>
       <CardContent className="p-4" onClick={() => onSelect(activity._id)}>
-        <CardTitle className="text-lg text-[#1A3B47]">{activity.name}</CardTitle>
-        <p className="text-sm text-gray-500 mt-1">{activity.location.address}</p>
+        <CardTitle className="text-lg text-[#1A3B47]">
+          {activity.name}
+        </CardTitle>
+        <p className="text-sm text-gray-500 mt-1">
+          {activity.location.address}
+        </p>
         <div className="mt-2 flex items-center">
           {renderStars(activity.rating)}
           <span className="ml-2 text-sm text-gray-600">
@@ -216,7 +236,9 @@ const ActivityCard = ({
           <span className="text-2xl font-bold text-[#388A94]">
             {formatPrice(activity.price)}
           </span>
-          <span className="text-sm text-gray-500">{activity.duration} hours</span>
+          <span className="text-sm text-gray-500">
+            {activity.duration} hours
+          </span>
         </div>
         <div className="flex flex-wrap gap-2">
           {activity.tags?.map((tag, index) => (
@@ -255,7 +277,6 @@ const ActivityCard = ({
       )}
     </Card>
   );
-
 };
 
 export default function AllActivities() {
@@ -293,9 +314,12 @@ export default function AllActivities() {
     if (userInfo?.role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/saved-activities", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://localhost:4000/tourist/saved-activities",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setSavedActivities(response.data);
       } catch (error) {
         console.error("Error fetching saved activities:", error);
@@ -306,7 +330,6 @@ export default function AllActivities() {
   useEffect(() => {
     fetchSavedActivities();
   }, [fetchSavedActivities]);
-
 
   const handleSaveActivity = async (activityId) => {
     try {
@@ -333,19 +356,24 @@ export default function AllActivities() {
     }
   };
 
-  const handleActivitySaved = useCallback((activityId, isSaved) => {
-    setAlertMessage({
-      type: "success",
-      message: isSaved ? "Activity saved successfully!" : "Activity unsaved successfully!",
-    });
+  const handleActivitySaved = useCallback(
+    (activityId, isSaved) => {
+      setAlertMessage({
+        type: "success",
+        message: isSaved
+          ? "Activity saved successfully!"
+          : "Activity unsaved successfully!",
+      });
 
-    // Clear the alert message after 3 seconds
-    setTimeout(() => {
-      setAlertMessage(null);
-    }, 2000);
+      // Clear the alert message after 3 seconds
+      setTimeout(() => {
+        setAlertMessage(null);
+      }, 2000);
 
-    fetchSavedActivities();
-  }, [fetchSavedActivities]);
+      fetchSavedActivities();
+    },
+    [fetchSavedActivities]
+  );
 
   const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
@@ -468,7 +496,6 @@ export default function AllActivities() {
       console.error("Error fetching exchange rates:", error);
     }
   }, []);
-
 
   const fetchCurrencies = useCallback(async () => {
     const role = Cookies.get("role");
@@ -662,7 +689,6 @@ export default function AllActivities() {
     dateRange,
   ]);
 
-
   const guideSteps = [
     {
       target: "body",
@@ -697,61 +723,59 @@ export default function AllActivities() {
   const AllProductsSkeleton = () => {
     return (
       <div className="bg-gray-100">
-      <div className="">
-        <div className="flex gap-8">
-          {/* Sidebar Skeleton */}
-         
+        <div className="">
+          <div className="flex gap-8">
+            {/* Sidebar Skeleton */}
 
-          {/* Main Content Skeleton */}
-          <div className="flex-1">
-            {/* Search and Filters Skeleton */}
-           
+            {/* Main Content Skeleton */}
+            <div className="flex-1">
+              {/* Search and Filters Skeleton */}
 
-            {/* Cards Grid Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
-                >
-                  <div className="h-40 bg-gray-300"></div>
-                  <div className="p-4 space-y-4">
-                    <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
-                    <div className="h-6 w-1/2 bg-gray-200 rounded"></div>
-                    <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+              {/* Cards Grid Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
+                  >
+                    <div className="h-40 bg-gray-300"></div>
+                    <div className="p-4 space-y-4">
+                      <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+                      <div className="h-6 w-1/2 bg-gray-200 rounded"></div>
+                      <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="p-4 border-t space-y-3">
+                      <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
+                      <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
+                    </div>
                   </div>
-                  <div className="p-4 border-t space-y-3">
-                    <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
-                    <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Pagination Skeleton */}
-            <div className="mt-8 flex justify-center items-center space-x-4">
-              <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
-              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              {/* Pagination Skeleton */}
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
   };
 
   const backgroundImage = "url('./src/assets/images/allActivities.jpg')";
 
   return (
     <div className="bg-gray-100">
-  <div
-    className="relative h-[330px] bg-cover bg-center"
-    style={{ backgroundImage }}
-  >
-    <div className="absolute inset-0"></div>
-    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
-    <div className="flex-1">
+      <div
+        className="relative h-[330px] bg-cover bg-center"
+        style={{ backgroundImage }}
+      >
+        <div className="absolute inset-0"></div>
+        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+          <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">
               All Activities
             </h1>
@@ -765,8 +789,8 @@ export default function AllActivities() {
               / Activities
             </p>
           </div>
-    </div>
-  </div>
+        </div>
+      </div>
       <div className="container py-8">
         <div className="flex gap-8">
           <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
@@ -829,8 +853,9 @@ export default function AllActivities() {
                           rating === selectedRating ? null : rating
                         )
                       }
-                      className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${selectedRating === rating ? "bg-[#B5D3D1]" : ""
-                        }`}
+                      className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
+                        selectedRating === rating ? "bg-[#B5D3D1]" : ""
+                      }`}
                     >
                       {renderStars(rating)}
                     </button>
@@ -918,11 +943,17 @@ export default function AllActivities() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`whitespace-nowrap rounded-full ${isSortedByPreference ? "bg-red-100" : ""}`}
+                      className={`whitespace-nowrap rounded-full ${
+                        isSortedByPreference ? "bg-red-100" : ""
+                      }`}
                       onClick={handleSortByPreference}
                     >
                       <Heart
-                        className={`w-4 h-4 mr-2 ${isSortedByPreference ? "fill-current text-red-500" : ""}`}
+                        className={`w-4 h-4 mr-2 ${
+                          isSortedByPreference
+                            ? "fill-current text-red-500"
+                            : ""
+                        }`}
                       />
                       Sort by Preference
                     </Button>
@@ -970,7 +1001,10 @@ export default function AllActivities() {
                 </Button>
                 <span className="text-sm">
                   Page {currentPage} of{" "}
-                  {Math.ceil(sortedActivities.length / activitiesPerPage)}
+                  {Math.max(
+                    1,
+                    Math.ceil(sortedActivities.length / activitiesPerPage)
+                  )}
                 </span>
                 <Button
                   variant="outline"
@@ -985,7 +1019,10 @@ export default function AllActivities() {
                   }
                   disabled={
                     currentPage ===
-                    Math.ceil(sortedActivities.length / activitiesPerPage)
+                    Math.max(
+                      1,
+                      Math.ceil(sortedActivities.length / activitiesPerPage)
+                    )
                   }
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -997,8 +1034,9 @@ export default function AllActivities() {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -1007,10 +1045,7 @@ export default function AllActivities() {
         </Alert>
       )}
       {(getUserRole() === "guest" || getUserRole() === "tourist") && (
-        <UserGuide
-          steps={guideSteps}
-          pageName="activities"
-        />
+        <UserGuide steps={guideSteps} pageName="activities" />
       )}
     </div>
   );
