@@ -359,13 +359,20 @@ export default function AllHistoricalPlacesComponent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const clearFilters = () => {
+  const clearFilters = async () => {
+    setIsLoading(true);
     setSearchTerm("");
     setSelectedTypes([]);
     setIsSortedByPreference(true);
-    fetchHistoricalPlaces(true);
+    try {
+      await fetchHistoricalPlaces(true);
+    } catch (error) {
+      console.error("Error clearing filters:", error);
+      setError("Error clearing filters. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
-
   const handleDeleteConfirm = (id, name) => {
     setHistoricalPlaceToDelete({ id, name });
     setShowDeleteModal(true);

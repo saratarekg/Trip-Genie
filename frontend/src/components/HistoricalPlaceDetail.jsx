@@ -304,26 +304,19 @@ const HistoricalPlaceDetail = () => {
         <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
         </div>
+        
         <div className="min-h-screen bg-gray-100 pt-8">
           <div className="container mx-auto px-4 py-8 ">
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
               <div className="p-6">
                 <div className="flex flex-col mb-6">
                   <div className="flex justify-between items-start mb-2">
-                    <div className="h-8 w-3/4 bg-gray-300 rounded animate-pulse"></div>
-                    <div className="flex flex-wrap gap-2">
-                      {[1, 2, 3].map((index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="text-lg px-4 py-2 rounded-full flex items-center bg-gray-300 animate-pulse"
-                        >
-                          <div className="h-4 w-16"></div>
-                        </Badge>
-                      ))}
-                    </div>
+                    <div className="h-8 w-1/4 bg-gray-300 rounded animate-pulse"></div>
+                    <div className="h-10 w-1/12 bg-gray-300 rounded animate-pulse mt-1"></div>
+
+                    
                   </div>
-                  <div className="h-20 w-full bg-gray-300 rounded animate-pulse mt-2"></div>
+                  <div className="h-12 w-2/4 bg-gray-300 rounded animate-pulse mt-2"></div>
                 </div>
   
                 <div className="flex flex-col md:flex-row gap-8">
@@ -389,14 +382,7 @@ const HistoricalPlaceDetail = () => {
                   </div>
                 </div>
   
-                <div className="mt-8 flex justify-end space-x-4">
-                  <Button variant="default" className="bg-gray-300 animate-pulse">
-                    <div className="h-4 w-16"></div>
-                  </Button>
-                  <Button variant="destructive" className="bg-gray-300 animate-pulse">
-                    <div className="h-4 w-16"></div>
-                  </Button>
-                </div>
+                
               </div>
             </div>
           </div>
