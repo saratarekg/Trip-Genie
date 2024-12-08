@@ -172,7 +172,6 @@ const styles = {
   },
   button: {
     padding: "12px 24px",
-    fontSize: "16px",
     backgroundColor: "#1A3B47",
     color: "white",
     border: "none",
@@ -249,6 +248,11 @@ function BookingPage() {
 
   const [tourist, setTourist] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+  const [promoError, setPromoError] = useState("");
+  const [promoDetails, setPromoDetails] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountedTotal, setDiscountedTotal] = useState(0);
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -305,6 +309,71 @@ function BookingPage() {
     ) : null;
   };
 
+  const handlePromoSubmit = async (e) => {
+    if (e) e.preventDefault();
+    setPromoError("");
+    setPromoDetails(null);
+    setDiscountAmount(0);
+    setDiscountedTotal(selectedFlight.price.total * numberOfSeats);
+
+    if (!promoCode.trim()) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:4000/tourist/get/promo-code",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Cookies.get("jwt")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code: promoCode }),
+        }
+      );
+
+      if (response.status === 404) {
+        setPromoError("Promo Code Not Found.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch promo code details");
+      }
+
+      const data = await response.json();
+      const promo = data.promoCode;
+
+      if (promo.status === "inactive") {
+        setPromoError("This promo code is currently inactive.");
+        return;
+      }
+
+      const currentDate = new Date();
+      const startDate = new Date(promo?.dateRange?.start);
+      const endDate = new Date(promo?.dateRange?.end);
+
+      if (currentDate < startDate || currentDate > endDate) {
+        setPromoError("This promo code is not valid for the current date.");
+        return;
+      }
+
+      if (promo.timesUsed >= promo.usage_limit) {
+        setPromoError("This promo code has reached its usage limit.");
+        return;
+      }
+
+      setPromoDetails(promo);
+      const discount = (selectedFlight.price.total * numberOfSeats) * (promo.percentOff / 100);
+      setDiscountAmount(discount);
+      setDiscountedTotal((selectedFlight.price.total * numberOfSeats) - discount);
+    } catch (error) {
+      console.error(error);
+      setPromoError("Failed to apply promo code. Please try again.");
+    }
+  };
+
   const handleCardPayment = async () => {
     try {
       // Initialize Stripe
@@ -337,6 +406,8 @@ function BookingPage() {
         currencyCode,
         "USD"
       );
+
+
 
       // Prepare metadata and other necessary details
       const metadata = {
@@ -383,6 +454,7 @@ function BookingPage() {
             items,
             returnLocation: "http://localhost:3000/flights",
             currency: currencyCode,
+            promoCode,
           }),
         }
       );
@@ -531,7 +603,7 @@ function BookingPage() {
         const token = Cookies.get("jwt");
 
         const convertedPrice = convertPrice(
-          parseFloat(selectedFlight.price.total),
+          parseFloat(discountedTotal === 0? selectedFlight.price.total * numberOfSeats : discountedTotal),
           currencyCode,
           "USD"
         );
@@ -590,7 +662,7 @@ function BookingPage() {
         setIsBookingConfirmationOpen({
           open: true,
           paymentMethod,
-          price: selectedFlight.price.total,
+          price: isBookingConfirmationOpen,
           wallet: tourist?.wallet,
         });
       }
@@ -1360,7 +1432,7 @@ function BookingPage() {
                 )}
                 <h4 className="font-semibold mt-4">Price Details</h4>
                 <p>
-                  Total: {selectedFlight.price.total * numberOfSeats}{" "}
+                  Total: {discountedTotal === 0? selectedFlight.price.total * numberOfSeats : discountedTotal}{" "}
                   {selectedFlight.price.currency}
                 </p>
                 <div className="space-y-4 mt-4">
@@ -1389,6 +1461,35 @@ function BookingPage() {
                       <SelectItem value="First Class">First Class</SelectItem>
                     </SelectContent>
                   </Select>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <Label htmlFor="promoCode" className="font-semibold mt-4">
+                      Promo Code
+                    </Label>
+                    <Input
+                      id="promoCode"
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                    />
+                    <Button
+                      onClick={handlePromoSubmit}
+                      className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
+                    >
+                      Apply Promo Code
+                    </Button>
+                    {promoError && (
+                      <div className="text-red-500 text-sm mt-2">
+                        {promoError}
+                      </div>
+                    )}
+                    {promoDetails && (
+                      <div className="text-green-600 text-sm mt-2">
+                        Congratulations! You've saved {promoDetails.percentOff}%
+                        on this purchase!
+                      </div>
+                    )}
+                  </div>
 
                   <RadioGroup
                     value={paymentMethod}
@@ -1448,7 +1549,7 @@ function BookingPage() {
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <Label className="text-right">You Paid:</Label>
                   <div>
-                    {isBookingConfirmationOpen.price}
+                    {discountedTotal === 0? selectedFlight.price.total * numberOfSeats : discountedTotal}
                     {currencySymbol}
                   </div>
                   <Label className="text-right">New Wallet Balance:</Label>
@@ -1458,7 +1559,7 @@ function BookingPage() {
                       isBookingConfirmationOpen.wallet,
                       "USD",
                       currencyCode
-                    ) - isBookingConfirmationOpen.price}
+                    ) - (discountedTotal === 0? selectedFlight.price.total * numberOfSeats : discountedTotal)}
                   </div>
                 </div>
               )}
