@@ -1,8 +1,14 @@
 Priority List: 
 
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
+-lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
+-cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
+-lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
+-advertiser cannot delete/update his activity mn bara (all activities)
+-admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
 -reports bayza 
 -sa3at beyede error lama mark all as read
+-orders trga3 fel dropdown
 consistency fe pages el all 
 navigation notification fe admin
 - shay be laban 3amatan (create activity we create products we kol el create )
@@ -11,9 +17,12 @@ sales report margins
 -create promo code layout (stretch start and end date we geeb el button foo2 )
 -no popup l flag inappropriate itinerary
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
+-birthday promocode msh beyban fel notifications 
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
 -updating activity popup btdos basraha 3adi w btfdl f update activity
-
+-(fen orders page ? ana 3mlt /orders 3ashan a3raf awsalha bas heyya etshalt men el site mahtota fen?)
+-create promo code msh sha8ala
+-out of stock notification msh sha8ala fe seller
 
 
 
@@ -23,6 +32,8 @@ sales report margins
 
 
 Sam: 
+67
+69
 111
 
 - raga3i sort by preference fe itinerary !!
@@ -57,9 +68,7 @@ alwan profile w settings (done)
 Aby: 
 
 66
-67
 68
-69
 90
 91
 
@@ -114,11 +123,11 @@ Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button
 
 
 Jana:
-105
-106
-107
-108
-109
+105   
+106  
+107  
+108  
+109  
 110
 
  help amy fel user profiles 
