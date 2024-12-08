@@ -43,6 +43,7 @@ const PaymentPopup = ({
   promoDetails,
   setPromoDetails,
   loyaltyPoints,
+  onDiscountedTotalChange,
 }) => {
   const formatDate = (date) => {
     const localDate = new Date(date);
@@ -72,8 +73,10 @@ const PaymentPopup = ({
 
   useEffect(() => {
     setTotalPrice(Number(priceOne) * numberOfTickets);
-    setDiscountedTotal(totalPrice - discountAmount);
-  }, [numberOfTickets, priceOne, discountAmount, totalPrice]);
+    const newDiscountedTotal = totalPrice - discountAmount;
+    setDiscountedTotal(newDiscountedTotal);
+    onDiscountedTotalChange(newDiscountedTotal); // Notify parent component of the change
+  }, [numberOfTickets, priceOne, discountAmount, totalPrice, onDiscountedTotalChange]);
 
   useEffect(() => {
     if (selectedItineraryDate) {

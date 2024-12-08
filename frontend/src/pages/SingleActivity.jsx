@@ -82,6 +82,7 @@ import {
   Bus,
 } from "lucide-react";
 import PaymentPopup from "@/components/payment-popup";
+import { use } from "react";
 const ImageGallery = ({ pictures }) => {
   const [mainImage, setMainImage] = useState(pictures[0]?.url);
   const [startIndex, setStartIndex] = useState(0);
@@ -248,7 +249,11 @@ const ActivityDetail = () => {
   const [point, setpoint] = useState(0);
   const [loyaltyy, setloyalty] = useState(0);
   const [totalloyaltyy, settotalloyalty] = useState(0);
+  const [discountedTotal, setDiscountedTotal] = useState(0);
 
+  const handleDiscountedTotalChange = (newTotal) => {
+    setDiscountedTotal(newTotal);
+  };
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -608,6 +613,18 @@ const ActivityDetail = () => {
     return `${userPreferredCurrency?.symbol}${((price * toRate) / fromRate).toFixed(2)}`;
   };
 
+  const convertPrice2 = (price, fromCurrency, toCurrency) => {
+    if (!exchangeRates || !fromCurrency || !toCurrency) {
+      return price;
+    }
+
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+
+    // Use template literal to correctly insert the symbol
+    return ((price * toRate) / fromRate).toFixed(2);
+  };
+
   const convertpoint = (price, fromCurrency, toCurrency) => {
     if (!exchangeRates || !fromCurrency || !toCurrency) {
       return price;
@@ -905,7 +922,7 @@ const ActivityDetail = () => {
       bookingProcessedRef.current = true;
 
       const token = Cookies.get("jwt");
-      const totalPrice = calculateTotalPrice(numberOfTickets);
+      const totalPrice = convertPrice2(discountedTotal, userPreferredCurrency?.code, "USD");
 
       const response = await fetch(
         `http://localhost:4000/${userRole}/activityBooking`,
@@ -1178,13 +1195,13 @@ const ActivityDetail = () => {
     // Determine points multiplier based on badge level
     switch (badgeLevel) {
       case "Bronze":
-        pointsMultiplier = 0.5; // 50% of amount paid
+        pointsMultiplier = 0.5; 
         break;
       case "Silver":
-        pointsMultiplier = 1.0; // 100% of amount paid
+        pointsMultiplier = 1.0; 
         break;
       case "Gold":
-        pointsMultiplier = 1.5; // 150% of amount paid
+        pointsMultiplier = 1.5; 
         break;
       default:
         pointsMultiplier = 0; // No points if badge level is unrecognized
@@ -2078,6 +2095,7 @@ const ActivityDetail = () => {
               promoDetails={promoDetails}
               setPromoDetails={setPromoDetails}
               loyaltyPoints={calculateLoyaltyPoints(activity.price, tourist.loyaltyBadge)}
+              onDiscountedTotalChange={handleDiscountedTotalChange} 
             />
           )}
 
@@ -2185,7 +2203,7 @@ const ActivityDetail = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">Amount Paid:</Label>
                       <div>
-                        {convertPrice(pricePaid, "USD", userPreferredCurrency.code)}
+                        {userPreferredCurrency.symbol}{discountedTotal.toFixed(2)}
                       </div>
                     </div>}
                   {paymentType === "Wallet" && (
