@@ -7,6 +7,7 @@ Priority List:
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
 -reports bayza 
+-mafish loading baad ma badoos update product
 -sa3at beyede error lama mark all as read
 -orders trga3 fel dropdown
 consistency fe pages el all 
