@@ -883,7 +883,7 @@ export default function HotelDetails() {
                         Amount Paid:{" "}
                       </Label>
                       <div>
-                        {price} {currencyCode}{" "}
+                        {Number(price).toFixed(2)} {currencyCode}{" "}
                       </div>
                     </div>
                     {paymentType === "Wallet" && (
@@ -902,7 +902,7 @@ export default function HotelDetails() {
                 </div>
               </DialogDescription>
             </DialogHeader>
-            <Button onClick={() => handleFinalOK()}>Close</Button>
+            <Button className = "w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white" onClick={() => handleFinalOK()}>Close</Button>
           </DialogContent>
         </Dialog>
         <Dialog
@@ -927,8 +927,8 @@ export default function HotelDetails() {
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">New Wallet Balance:</Label>
                     <div>
-                      {convertPrice(tourist?.wallet, "USD", currencyCode) -
-                        price}
+                      {Number(convertPrice(tourist?.wallet, "USD", currencyCode) -
+                        price).toFixed(2)}
                       {currencyCode}
                     </div>
                   </div>
