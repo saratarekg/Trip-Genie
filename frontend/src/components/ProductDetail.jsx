@@ -894,12 +894,26 @@ const ProductDetail = () => {
       ]
       : []),
 
-    {
-      target: ".sellerDetails",
-      content:
-        "Here you can find information about the seller of this product, including their name and ratings.",
-      placement: "left",
-    },
+        // Conditionally add the addToWishlist step based on userRole
+    ...(product?.seller
+      ? [
+        {
+          target: ".sellerDetails",
+          content: (
+            <>
+              {" "}
+              Here you can find information about the seller of this product, including their name and ratings.
+              <br />
+              Tip:
+              <br />
+              You can view your wishlist from the top right corner of the page
+            </>
+          ),
+          placement: "left",
+        },
+      ]
+      : []),
+
     // Conditionally add the addReview step based on userRole
     ...(userRole === "tourist"
       ? [

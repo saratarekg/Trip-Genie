@@ -61,18 +61,20 @@ const DeleteConfirmationModal = ({
         </p>
         <div className="flex justify-end space-x-4">
           <button
-            className="px-4 py-2 bg-[#E6DCCF] text-[#1A3B47] rounded hover:bg-[#F88C33] transition-colors"
+            className="px-4 py-2 bg-[#A3A3A3] text-white rounded hover:bg-[#7E7E7E] transition-colors"
             onClick={onClose}
           >
             Cancel
           </button>
           <button
-            className="px-4 py-2 bg-[#F88C33] text-white rounded hover:bg-[#E6DCCF] transition-colors"
+            className="px-4 py-2 bg-[#D32F2F] text-white rounded hover:bg-[#B71C1C] transition-colors"
             onClick={onConfirm}
           >
             Delete
           </button>
         </div>
+
+
       </div>
     </div>
   );
@@ -316,7 +318,7 @@ const ItineraryCard = ({
             <Edit className="h-4 w-4" />
           </button>
           <button
-            className="p-2 bg-[#F88C33] text-white rounded-full hover:bg-[#E6DCCF] transition-colors"
+            className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onDeleteConfirm(itinerary._id, itinerary.title);
@@ -325,6 +327,7 @@ const ItineraryCard = ({
           >
             <Trash2 className="h-4 w-4" />
           </button>
+
         </div>
       )}
     </div>
@@ -853,244 +856,244 @@ export function AllItinerariesComponent() {
   const AllProductsSkeleton = () => {
     return (
       <div className="bg-gray-100">
-      <div className="">
-        <div className="flex gap-8">
-          {/* Sidebar Skeleton */}
-         
+        <div className="">
+          <div className="flex gap-8">
+            {/* Sidebar Skeleton */}
 
-          {/* Main Content Skeleton */}
-          <div className="flex-1">
-            {/* Search and Filters Skeleton */}
-           
 
-            {/* Cards Grid Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
-                >
-                  <div className="h-40 bg-gray-300"></div>
-                  <div className="p-4 space-y-4">
-                    <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+            {/* Main Content Skeleton */}
+            <div className="flex-1">
+              {/* Search and Filters Skeleton */}
+
+
+              {/* Cards Grid Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
+                  >
+                    <div className="h-40 bg-gray-300"></div>
+                    <div className="p-4 space-y-4">
+                      <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+                    </div>
+                    <div className="p-4 border-t space-y-3">
+                      <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
+                      <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
+                    </div>
                   </div>
-                  <div className="p-4 border-t space-y-3">
-                    <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
-                    <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              {/* Pagination Skeleton */}
+
             </div>
-
-            {/* Pagination Skeleton */}
-            
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
   };
-  
+
 
   return (
     <div className="min-h-screen bg-gray-100">
-      
+
 
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
 
-      
-        <div className=" mx-auto px-4 py-8">
-          <div className=" px-4 sm:px-6 lg:px-8 mb-4">
-            <div className="max-w-7xl mx-auto">
-              <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
-                All Trip Plans
-              </h1>
-            </div>
 
-            <div className="flex gap-8 px-4 sm:px-6 lg:px-8 mb-4">
-              {/* Sidebar Filters */}
-              <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-[#1A3B47]">
-                    Filters
-                  </h2>
-                  <Button
-                    onClick={clearFilters}
-                    size="sm"
-                    className="text-[#1A3B47] hover:text-[#E6DCCF] bg-transparent border-none"
-                  >
-                    Clear All
-                  </Button>
-                </div>
+      <div className=" mx-auto px-4 py-8">
+        <div className=" px-4 sm:px-6 lg:px-8 mb-4">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
+              All Trip Plans
+            </h1>
+          </div>
 
-                {/* Price Range Filter */}
-                <div className="mb-6">
-                  <h3 className="font-medium text-[#1A3B47] mb-2">
-                    Price Range
-                  </h3>
-                  {isPriceInitialized && (
-                    <DualHandleSliderComponent
-                      min={0}
-                      max={maxPriceOfItinerary}
-                      symbol={getSymbol()}
-                      step={Math.max(
-                        1,
-                        Math.ceil(
-                          (maxPriceOfItinerary * exchangeRateForFilter) / 100
-                        )
-                      )}
-                      values={priceRange}
-                      exchangeRate={exchangeRateForFilter}
-                      middleColor="#5D9297"
-                      colorRing="#388A94"
-                      onChange={(values) => setPriceRange(values)}
+          <div className="flex gap-8 px-4 sm:px-6 lg:px-8 mb-4">
+            {/* Sidebar Filters */}
+            <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-[#1A3B47]">
+                  Filters
+                </h2>
+                <Button
+                  onClick={clearFilters}
+                  size="sm"
+                  className="text-[#1A3B47] hover:text-[#E6DCCF] bg-transparent border-none"
+                >
+                  Clear All
+                </Button>
+              </div>
+
+              {/* Price Range Filter */}
+              <div className="mb-6">
+                <h3 className="font-medium text-[#1A3B47] mb-2">
+                  Price Range
+                </h3>
+                {isPriceInitialized && (
+                  <DualHandleSliderComponent
+                    min={0}
+                    max={maxPriceOfItinerary}
+                    symbol={getSymbol()}
+                    step={Math.max(
+                      1,
+                      Math.ceil(
+                        (maxPriceOfItinerary * exchangeRateForFilter) / 100
+                      )
+                    )}
+                    values={priceRange}
+                    exchangeRate={exchangeRateForFilter}
+                    middleColor="#5D9297"
+                    colorRing="#388A94"
+                    onChange={(values) => setPriceRange(values)}
+                  />
+                )}
+              </div>
+              {/* Date Range Input */}
+              <div className="mb-6">
+                <h3 className="font-medium text-[#1A3B47] mb-2">
+                  Date Range
+                </h3>
+                <div className="flex flex-col space-y-2">
+                  <div>
+                    <label className="block text-sm font-medium text-[#1A3B47]">
+                      From:
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRange.lower}
+                      onChange={handleLowerDateChange}
+                      className="w-full mt-1 border rounded-lg p-2"
                     />
-                  )}
-                </div>
-                {/* Date Range Input */}
-                <div className="mb-6">
-                  <h3 className="font-medium text-[#1A3B47] mb-2">
-                    Date Range
-                  </h3>
-                  <div className="flex flex-col space-y-2">
-                    <div>
-                      <label className="block text-sm font-medium text-[#1A3B47]">
-                        From:
-                      </label>
-                      <input
-                        type="date"
-                        value={dateRange.lower}
-                        onChange={handleLowerDateChange}
-                        className="w-full mt-1 border rounded-lg p-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-[#1A3B47]">
-                        To:
-                      </label>
-                      <input
-                        type="date"
-                        value={dateRange.upper}
-                        onChange={handleUpperDateChange}
-                        min={dateRange.lower}
-                        className="w-full mt-1 border rounded-lg p-2"
-                      />
-                    </div>
                   </div>
-                </div>
-                {/* Type Filter */}
-                <div className="mb-6">
-                  <h3 className="font-medium text-[#1A3B47] mb-2">Type</h3>
-                  <ScrollArea className="h-[150px]">
-                    {typesOptions.map((type) => (
-                      <div
-                        key={type}
-                        className="flex items-center space-x-2 mb-2"
-                      >
-                        <Checkbox
-                          id={`type-${type}`}
-                          checked={selectedTypes.includes(type)}
-                          onCheckedChange={(checked) => {
-                            setSelectedTypes((prev) =>
-                              checked
-                                ? [...prev, type]
-                                : prev.filter((t) => t !== type)
-                            );
-                          }}
-                        />
-                        <label
-                          htmlFor={`type-${type}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
-                        >
-                          {type}
-                        </label>
-                      </div>
-                    ))}
-                  </ScrollArea>
-                </div>
-                {/* Language Filter */}
-                <div className="mb-6">
-                  <h3 className="font-medium text-[#1A3B47] mb-2">Language</h3>
-                  <ScrollArea className="h-[150px]">
-                    {languagesOptions.map((language) => (
-                      <div
-                        key={language}
-                        className="flex items-center space-x-2 mb-2"
-                      >
-                        <Checkbox
-                          id={`language-${language}`}
-                          checked={selectedLanguages.includes(language)}
-                          onCheckedChange={(checked) => {
-                            setSelectedLanguages((prev) =>
-                              checked
-                                ? [...prev, language]
-                                : prev.filter((l) => l !== language)
-                            );
-                          }}
-                        />
-                        <label
-                          htmlFor={`language-${language}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
-                        >
-                          {language}
-                        </label>
-                      </div>
-                    ))}
-                  </ScrollArea>
+                  <div>
+                    <label className="block text-sm font-medium text-[#1A3B47]">
+                      To:
+                    </label>
+                    <input
+                      type="date"
+                      value={dateRange.upper}
+                      onChange={handleUpperDateChange}
+                      min={dateRange.lower}
+                      className="w-full mt-1 border rounded-lg p-2"
+                    />
+                  </div>
                 </div>
               </div>
-              {/* Main Content */}
-              <div className="flex-1">
-                {/* Search and Filter Controls */}
-                <div className="mb-4">
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="relative flex-grow">
-                      <input
-                        type="text"
-                        placeholder="Search itineraries..."
-                        className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+              {/* Type Filter */}
+              <div className="mb-6">
+                <h3 className="font-medium text-[#1A3B47] mb-2">Type</h3>
+                <ScrollArea className="h-[150px]">
+                  {typesOptions.map((type) => (
+                    <div
+                      key={type}
+                      className="flex items-center space-x-2 mb-2"
+                    >
+                      <Checkbox
+                        id={`type-${type}`}
+                        checked={selectedTypes.includes(type)}
+                        onCheckedChange={(checked) => {
+                          setSelectedTypes((prev) =>
+                            checked
+                              ? [...prev, type]
+                              : prev.filter((t) => t !== type)
+                          );
+                        }}
                       />
-                      <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+                      <label
+                        htmlFor={`type-${type}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
+                      >
+                        {type}
+                      </label>
                     </div>
-                    <span className="text-gray-500 text-sm whitespace-nowrap">
-                      ({itineraries.length} itineraries)
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
-                      onClick={() => handleSort("price")}
+                  ))}
+                </ScrollArea>
+              </div>
+              {/* Language Filter */}
+              <div className="mb-6">
+                <h3 className="font-medium text-[#1A3B47] mb-2">Language</h3>
+                <ScrollArea className="h-[150px]">
+                  {languagesOptions.map((language) => (
+                    <div
+                      key={language}
+                      className="flex items-center space-x-2 mb-2"
                     >
-                      <ArrowUpDown className="w-4 h-4 mr-2" />
-                      Price{" "}
-                      {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
-                      onClick={() => handleSort("rating")}
-                    >
-                      <ArrowUpDown className="w-4 h-4 mr-2" />
-                      Rating{" "}
-                      {sortBy === "rating" && (sortOrder === 1 ? "↑" : "↓")}
-                    </Button>
+                      <Checkbox
+                        id={`language-${language}`}
+                        checked={selectedLanguages.includes(language)}
+                        onCheckedChange={(checked) => {
+                          setSelectedLanguages((prev) =>
+                            checked
+                              ? [...prev, language]
+                              : prev.filter((l) => l !== language)
+                          );
+                        }}
+                      />
+                      <label
+                        htmlFor={`language-${language}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-[#1A3B47]"
+                      >
+                        {language}
+                      </label>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </div>
+            </div>
+            {/* Main Content */}
+            <div className="flex-1">
+              {/* Search and Filter Controls */}
+              <div className="mb-4">
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="relative flex-grow">
+                    <input
+                      type="text"
+                      placeholder="Search itineraries..."
+                      className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
                   </div>
+                  <span className="text-gray-500 text-sm whitespace-nowrap">
+                    ({itineraries.length} itineraries)
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
+                    onClick={() => handleSort("price")}
+                  >
+                    <ArrowUpDown className="w-4 h-4 mr-2" />
+                    Price{" "}
+                    {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="whitespace-nowrap rounded-full text-[#1A3B47] border-[#1A3B47]"
+                    onClick={() => handleSort("rating")}
+                  >
+                    <ArrowUpDown className="w-4 h-4 mr-2" />
+                    Rating{" "}
+                    {sortBy === "rating" && (sortOrder === 1 ? "↑" : "↓")}
+                  </Button>
                 </div>
-                {error && (
-                  <div className="text-[#F88C33] text-center mb-4">{error}</div>
-                )}
-                {/* Itineraries Grid */}
-                
-                  
-                {isLoading ? (
+              </div>
+              {error && (
+                <div className="text-[#F88C33] text-center mb-4">{error}</div>
+              )}
+              {/* Itineraries Grid */}
+
+
+              {isLoading ? (
                 <AllProductsSkeleton />
               ) : (
-               // <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                // <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {itineraries
                     .slice(
@@ -1113,46 +1116,46 @@ export function AllItinerariesComponent() {
                       />
                     ))}
                 </div>
-               // </div>
+                // </div>
               )}
-                {/* Pagination */}
-                <div className="mt-8 flex justify-center items-center space-x-4">
-                  <Button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    variant="outline"
-                    size="icon"
-                    className="text-[#1A3B47] border-[#1A3B47]"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="text-sm font-medium text-[#1A3B47]">
-                    Page {currentPage} of{" "}
-                    {Math.ceil(itineraries.length / tripsPerPage)}
-                  </span>
-                  <Button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={
-                      currentPage ===
-                      Math.ceil(itineraries.length / tripsPerPage)
-                    }
-                    variant="outline"
-                    size="icon"
-                    className="text-[#1A3B47] border-[#1A3B47]"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                
-                </div>
-                
+              {/* Pagination */}
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <Button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  variant="outline"
+                  size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm font-medium text-[#1A3B47]">
+                  Page {currentPage} of{" "}
+                  {Math.ceil(itineraries.length / tripsPerPage)}
+                </span>
+                <Button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={
+                    currentPage ===
+                    Math.ceil(itineraries.length / tripsPerPage)
+                  }
+                  variant="outline"
+                  size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+
               </div>
-            
-                 
-                 
+
+            </div>
+
+
+
           </div>
         </div>
-        </div>
-      
+      </div>
+
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
