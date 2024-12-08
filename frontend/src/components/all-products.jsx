@@ -534,7 +534,6 @@ export function AllProducts() {
   };
 
   const handleCategoryChange = (category) => {
-    
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)
@@ -717,48 +716,46 @@ export function AllProducts() {
   const AllProductsSkeleton = () => {
     return (
       <div className="bg-gray-100">
-      <div className="">
-        <div className="flex gap-8">
-          {/* Sidebar Skeleton */}
-         
+        <div className="">
+          <div className="flex gap-8">
+            {/* Sidebar Skeleton */}
 
-          {/* Main Content Skeleton */}
-          <div className="flex-1">
-            {/* Search and Filters Skeleton */}
-           
+            {/* Main Content Skeleton */}
+            <div className="flex-1">
+              {/* Search and Filters Skeleton */}
 
-            {/* Cards Grid Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
-                >
-                  <div className="h-40 bg-gray-300"></div>
-                  <div className="p-4 space-y-4">
-                    <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
-                    <div className="h-6 w-1/2 bg-gray-200 rounded"></div>
-                    <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+              {/* Cards Grid Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
+                  >
+                    <div className="h-40 bg-gray-300"></div>
+                    <div className="p-4 space-y-4">
+                      <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+                      <div className="h-6 w-1/2 bg-gray-200 rounded"></div>
+                      <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="p-4 border-t space-y-3">
+                      <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
+                      <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
+                    </div>
                   </div>
-                  <div className="p-4 border-t space-y-3">
-                    <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
-                    <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Pagination Skeleton */}
-            <div className="mt-8 flex justify-center items-center space-x-4">
-              <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
-              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              {/* Pagination Skeleton */}
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
   };
 
   const backgroundImage = "url('./src/assets/images/allProducts.jpg')";
@@ -766,12 +763,12 @@ export function AllProducts() {
   return (
     <div className="bg-gray-100">
       <div
-    className="relative h-[330px] bg-cover bg-center"
-    style={{ backgroundImage }}
-  >
-    <div className="absolute inset-0"></div>
-    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
-    <div className="flex-1">
+        className="relative h-[330px] bg-cover bg-center"
+        style={{ backgroundImage }}
+      >
+        <div className="absolute inset-0"></div>
+        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+          <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">All Products</h1>
             <p className="text-gray-200">
               <Link
@@ -783,8 +780,8 @@ export function AllProducts() {
               / Products
             </p>
           </div>
-    </div>
-  </div>
+        </div>
+      </div>
       <div className="container py-8">
         <div className="flex gap-8">
           <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6 filter">
@@ -840,25 +837,24 @@ export function AllProducts() {
                 Featured Products
               </h3>
               <div className="space-y-4">
-              {isLoading ? (
-      // Skeleton Loading for Historical Places
-      Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 animate-pulse"
-        >
-          {/* Skeleton for Image */}
-          <div className="w-16 h-16 bg-gray-300 rounded-md" />
-          <div className="flex-1 space-y-2">
-            {/* Skeleton for Title */}
-            <div className="h-4 w-2/3 bg-gray-300 rounded" />
-            {/* Skeleton for Location */}
-            <div className="h-3 w-1/2 bg-gray-200 rounded" />
-          </div>
-        </div>
-      ))
-    ) :
-    products && products.length > 0 ? (
+                {isLoading ? (
+                  // Skeleton Loading for Historical Places
+                  Array.from({ length: 3 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 animate-pulse"
+                    >
+                      {/* Skeleton for Image */}
+                      <div className="w-16 h-16 bg-gray-300 rounded-md" />
+                      <div className="flex-1 space-y-2">
+                        {/* Skeleton for Title */}
+                        <div className="h-4 w-2/3 bg-gray-300 rounded" />
+                        {/* Skeleton for Location */}
+                        <div className="h-3 w-1/2 bg-gray-200 rounded" />
+                      </div>
+                    </div>
+                  ))
+                ) : products && products.length > 0 ? (
                   products.slice(0, 3).map((product) => (
                     <Link
                       key={product._id}
@@ -989,12 +985,13 @@ export function AllProducts() {
                   </Button>
                   <span className="text-sm font-medium text-[#1A3B47]">
                     Page {currentPage} of{" "}
-                    {Math.ceil(products.length / tripsPerPage)}
+                    {Math.max(1, Math.ceil(products.length / tripsPerPage))}
                   </span>
                   <Button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={
-                      currentPage === Math.ceil(products.length / tripsPerPage)
+                      currentPage ===
+                      Math.max(1, Math.ceil(products.length / tripsPerPage))
                     }
                     variant="outline"
                     size="icon"
