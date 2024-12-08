@@ -22,7 +22,6 @@ import { set } from "date-fns";
 import { Input } from "@/components/ui/input";
 import Cookies from "js-cookie";
 
-
 const PaymentPopup = ({
   isBookingConfirmationOpen,
   setIsBookingConfirmationOpen,
@@ -43,7 +42,7 @@ const PaymentPopup = ({
   onSuccess,
   returnLocation,
   promo,
-  setPromo
+  setPromo,
 }) => {
   const [numberOfRooms, setNumberOfRooms] = useState(1);
   const [paymentType, setPaymentType] = useState("CreditCard");
@@ -130,7 +129,19 @@ const PaymentPopup = ({
 
     if (paymentType === "Wallet") {
       try {
-        await onWalletPayment("Wallet", "10", "selectedDateStr", hotelID, roomName, checkinDate, checkoutDate, numberOfRooms, numberOfAdults, discountedTotal,promo);
+        await onWalletPayment(
+          "Wallet",
+          "10",
+          "selectedDateStr",
+          hotelID,
+          roomName,
+          checkinDate,
+          checkoutDate,
+          numberOfRooms,
+          numberOfAdults,
+          discountedTotal,
+          promo
+        );
       } catch (error) {
         setBookingPopupError(error.message);
       } finally {
@@ -156,14 +167,17 @@ const PaymentPopup = ({
         returnLocation,
         currency: currencyCode,
         promoCode: promo,
-        discountPercentage : promo.percentOff,
+        discountPercentage: promo.percentOff,
       };
 
-      const response = await fetch("http://localhost:4000/create-hotel-booking-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "http://localhost:4000/create-hotel-booking-session",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -186,7 +200,10 @@ const PaymentPopup = ({
   };
 
   return (
-    <Dialog open={isBookingConfirmationOpen} onOpenChange={setIsBookingConfirmationOpen}>
+    <Dialog
+      open={isBookingConfirmationOpen}
+      onOpenChange={setIsBookingConfirmationOpen}
+    >
       <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Confirm Booking</DialogTitle>
@@ -199,9 +216,9 @@ const PaymentPopup = ({
             <p>
               <strong>Room:</strong> {roomName || selectedRoom.name}
             </p>
-            <p>
+            {/* <p>
               <strong>Price:</strong>{currencySymbol}{totalPrice.toFixed(2)} 
-            </p>
+            </p> */}
             <p>
               <strong>Check-in Date:</strong> {checkinDate}
             </p>
@@ -211,26 +228,38 @@ const PaymentPopup = ({
             <p>
               <strong>Number of Adults:</strong> {numberOfAdults}
             </p>
-            <div className="space-y-2">
-              <Label htmlFor="numberOfRooms">Number of Rooms</Label>
-              <Select
-                value={numberOfRooms.toString()}
-                onValueChange={(value) => setNumberOfRooms(parseInt(value))}
-              >
-                <SelectTrigger id="numberOfRooms">
-                  <SelectValue placeholder="Select number of rooms" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: maxRooms }, (_, i) => i + 1).map((num) => (
-                    <SelectItem key={num} value={num.toString()}>
-                      {num}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Payment Type</Label>
-                <RadioGroup value={paymentType} onValueChange={setPaymentType} className="col-span-3">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="numberOfRooms" className="text-md">
+                  <strong>Number of Rooms</strong>
+                </Label>
+                <Select
+                  value={numberOfRooms.toString()}
+                  onValueChange={(value) => setNumberOfRooms(parseInt(value))}
+                >
+                  <SelectTrigger id="numberOfRooms">
+                    <SelectValue placeholder="Select number of rooms" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: maxRooms }, (_, i) => i + 1).map(
+                      (num) => (
+                        <SelectItem key={num} value={num.toString()}>
+                          {num}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 gap-4">
+                <Label className="text-left text-md">
+                  <strong>Payment Type</strong>
+                </Label>
+                <RadioGroup
+                  value={paymentType}
+                  onValueChange={setPaymentType}
+                  className="col-span-3"
+                >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="CreditCard" id="credit" />
                     <Label htmlFor="CreditCard">Credit Card/Debit Card</Label>
@@ -241,42 +270,60 @@ const PaymentPopup = ({
                   </div>
                 </RadioGroup>
               </div>
-              <Label htmlFor="promoCode" className="text-right">
-                Promo Code
-              </Label>
-              <Input
-                id="promoCode"
-                type="text"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-              />
-              <Button
-                onClick={handlePromoSubmit}
-                className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
-              >
-                Apply Promo Code
-              </Button>
-              {promoError && <div className="text-red-500 text-sm mt-2">{promoError}</div>}
-              {discountAmount > 0 && (
-                <div className="text-green-600 text-sm mt-2">
-                  Congratulations! You've saved {promo.percentOff}% on this purchase!
+              <div>
+                <Label htmlFor="promoCode" className="text-right text-md">
+                  <strong>Promo Code</strong>
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="promoCode"
+                    type="text"
+                    value={promoCode}
+                    className="w-4/5"
+                    onChange={(e) => setPromoCode(e.target.value)}
+                  />
+                  <Button
+                    onClick={handlePromoSubmit}
+                    className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white w-1/5"
+                  >
+                    Apply
+                  </Button>
                 </div>
-              )}
+                {promoError && (
+                  <div className="text-red-500 text-sm mt-2">{promoError}</div>
+                )}
+                {discountAmount > 0 && (
+                  <div className="text-green-600 text-sm mt-2">
+                    Congratulations! You've saved {promo.percentOff}% on this
+                    purchase!
+                  </div>
+                )}
+              </div>
               <div className="space-y-2">
-                <Label className="text-right">Total Price</Label>
-                <div className="font-medium">
+                <Label className="text-right mt-10 text-md">
+                  <strong>Total Price</strong>
+                </Label>
+                <div className="text-xl text-right font-semibold">
                   {currencySymbol}
                   {discountedTotal.toFixed(2)}
                 </div>
               </div>
               {bookingPopupError && (
-                <div className="text-red-500 text-sm mt-2">{bookingPopupError}</div>
+                <div className="text-red-500 text-sm mt-2">
+                  {bookingPopupError}
+                </div>
               )}
             </div>
           </div>
         )}
         <DialogFooter>
-          <Button onClick={() => {setIsBookingConfirmationOpen(false), setBookingPopupError("")}}>Cancel</Button>
+          <Button
+            onClick={() => {
+              setIsBookingConfirmationOpen(false), setBookingPopupError("");
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleConfirmBooking}
             disabled={isProcessing}

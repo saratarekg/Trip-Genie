@@ -47,7 +47,7 @@ const getAllItineraries = async (req, res) => {
     let query = [];
     query.push({ _id: { $in: searchResultIds } });
     query.push({ _id: { $in: filterResultIds } });
-    query.push({ appropriate: true });
+    // query.push({ appropriate: true });
 
     if (!myItineraries) {
       query.push({
@@ -76,6 +76,11 @@ const getAllItineraries = async (req, res) => {
     } else {
       // For guests or any other role
       query.push({ isActivated: true });
+    }
+
+    // If role is 'tour-guide', skip the 'appropriate' check for their own itineraries
+    if (userRole !== "tour-guide") {
+      query.push({ appropriate: true });
     }
 
     if (myItineraries) {
@@ -580,11 +585,11 @@ const updateItinerary = async (req, res) => {
               type: "informational",
               body: `The itinerary <b>${newItinerary.title}</b> is now available for booking.`,
               link: `/itinerary/${newItinerary._id}`,
-            }, 
+            },
           },
           $set: {
             hasUnseenNotifications: true, // Set the hasUnseen flag to true
-          },          
+          },
         });
       }
     }
@@ -633,7 +638,7 @@ const flagItinerary = async (req, res) => {
         date: new Date(),
         seen: false,
       };
-      
+
 
       await TourGuide.findByIdAndUpdate(itinerary.tourGuide._id, {
         $push: { notifications: notification },
@@ -925,9 +930,8 @@ const toggleActivationStatus = async (req, res) => {
 
     // Return the updated itinerary details
     return res.status(200).json({
-      message: `Itinerary ${
-        updatedItinerary.isActivated ? "activated" : "deactivated"
-      } successfully`,
+      message: `Itinerary ${updatedItinerary.isActivated ? "activated" : "deactivated"
+        } successfully`,
       itinerary: updatedItinerary,
     });
   } catch (error) {

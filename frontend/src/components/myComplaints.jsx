@@ -281,7 +281,8 @@ export function MyComplaintsComponent() {
                     </div>
                     {openComplaintId !== complaint._id && (
                       <p className="text-sm text-gray-500 mt-2">
-                        {complaint.body?.substring(0, 30)}...
+                        {complaint.body?.substring(0, 30)}
+                        {complaint.body?.length > 30 ? "..." : ""}
                       </p>
                     )}
                     {openComplaintId === complaint._id && (
