@@ -23,15 +23,19 @@ The project follows modern web development practices and conventions:
 - Role-based access control
 
 ## Screenshots
-![Homepage Screenshot](frontend/public/images/screenshot1.png)
-![Homepage Screenshot](frontend/public/images/screenshot2.png)
-![Homepage Screenshot](frontend/public/images/screenshot3.png)
-![Homepage Screenshot](frontend/public/images/screenshot4.png)
-![Homepage Screenshot](frontend/public/images/screenshot5.png)
-![Homepage Screenshot](frontend/public/images/screenshot7.png)
-![Homepage Screenshot](frontend/public/images/screenshot6.png)
 
+<p align="center">
+  <img src="frontend/public/images/screenshot1.png" alt="Screenshot 1" width="90%" style="margin: 10px;">
+  <img src="frontend/public/images/screenshot2.png" alt="Screenshot 2" width="45%" style="margin: 10px;">
 
+  <img src="frontend/public/images/screenshot3.png" alt="Screenshot 4" width="45%" style="margin: 10px;">
+  <img src="frontend/public/images/screenshot4.png" alt="Screenshot 5" width="90%" style="margin: 10px;">
+
+  <img src="frontend/public/images/screenshot5.png" alt="Screenshot 6" width="45%" style="margin: 10px;">
+  <img src="frontend/public/images/screenshot7.png" alt="Screenshot 7" width="45%" style="margin: 10px;">
+
+  <img src="frontend/public/images/screenshot6.png" alt="Screenshot 8" width="45%" style="margin: 10px;">
+</p>
 
 
 ## Tech/Framework Used
