@@ -181,8 +181,13 @@ const ItineraryCard = ({
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xl font-semibold">{itinerary.title}</h3>
           {!itinerary.isActivated && (
-            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+            <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
               {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
+            </span>
+          )}
+           {!itinerary.appropriate && (
+            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              {role === "tour-guide" ? "inappropriate" : "Currently Unavailable"}
             </span>
           )}
         </div>

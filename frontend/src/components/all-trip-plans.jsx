@@ -260,6 +260,11 @@ const ItineraryCard = ({
               {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
             </span>
           )}
+          {!itinerary.appropriate && (
+            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              {role === "tour-guide" ? "inappropriate" : "Currently Unavailable"}
+            </span>
+          )}
         </div>
         <div className="flex justify-between items-center mb-2">
           <span className="text-lg font-bold text-[#388A94]">
