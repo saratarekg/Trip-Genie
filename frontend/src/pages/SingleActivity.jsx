@@ -167,8 +167,9 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -223,7 +224,6 @@ const ActivityDetail = () => {
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [currencies, setCurrencies] = useState(null);
 
-
   const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
     useState(false);
 
@@ -265,12 +265,10 @@ const ActivityDetail = () => {
         setTourist(response.data);
         setPotentialLoyaltyPoints(response.data.loyaltyPoints);
 
-
         setbadge(response.data.loyaltyBadge);
 
         //  console.error(" badge :", badge );
         //  console.error(" tourist data loyalty points :", response.data.loyaltyPoints);
-
       } catch (error) {
         console.error("Error fetching tourist data:", error);
       }
@@ -288,15 +286,7 @@ const ActivityDetail = () => {
       const loyaltyPoints = searchParams.get("loyaltyPoints");
       setloyalty(loyaltyPoints);
 
-
-      Promise.all([
-        fetchUserInfo(),
-        fetchExchangeRate(),
-        fetchCurrencies(),
-
-      ]);
-
-
+      Promise.all([fetchUserInfo(), fetchExchangeRate(), fetchCurrencies()]);
 
       if (sessionId && success === "true" && activity) {
         console.log("we hate ehab1");
@@ -310,7 +300,13 @@ const ActivityDetail = () => {
           if (response.data.status === "paid") {
             try {
               console.log("we hate ehab3");
-              await handlePaymentConfirm("CreditCard", parseInt(quantity), new Date(), new Date(), promoCode);
+              await handlePaymentConfirm(
+                "CreditCard",
+                parseInt(quantity),
+                new Date(),
+                new Date(),
+                promoCode
+              );
             } catch (error) {
               console.error("Error handling booking success:", error);
             }
@@ -323,8 +319,6 @@ const ActivityDetail = () => {
 
     handleBookingSuccess();
   }, [searchParams, activity]);
-
-
 
   const handleTransportationBooking = async () => {
     if (!selectedTransportation) return;
@@ -384,7 +378,7 @@ const ActivityDetail = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   {transport.vehicleType === "Bus" ||
-                    transport.vehicleType === "Microbus" ? (
+                  transport.vehicleType === "Microbus" ? (
                     <Bus className="w-5 h-5 mr-2 text-blue-500" />
                   ) : (
                     <Car className="w-5 h-5 mr-2 text-green-500" />
@@ -394,7 +388,11 @@ const ActivityDetail = () => {
                   </h3>
                 </div>
                 <span className="text-sm font-medium text-green-600">
-                  {convertPrice(transport.ticketCost, "USD", userPreferredCurrency?.code)}
+                  {convertPrice(
+                    transport.ticketCost,
+                    "USD",
+                    userPreferredCurrency?.code
+                  )}
                 </span>
               </div>
               <div className="space-y-1 text-sm">
@@ -518,58 +516,6 @@ const ActivityDetail = () => {
     }
   };
 
-  const handleBooking = async () => {
-    setIsBooking(true);
-    setBookingError("");
-    try {
-      const token = Cookies.get("jwt");
-      const totalPrice = calculateTotalPrice();
-
-      const response = await fetch(
-        `http://localhost:4000/${userRole}/activityBooking`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            activity: id,
-            paymentType,
-            paymentAmount: totalPrice,
-            numberOfTickets,
-          }),
-        }
-
-      );
-
-
-
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.message === "Insufficient funds in wallet") {
-          setBookingError(
-            "Insufficient funds, please choose a different payment method or update your wallet."
-          );
-        } else {
-          throw new Error(errorData.message || "Failed to book activity");
-        }
-      } else {
-        const data = await response.json();
-        setShowBookingDialog(false);
-        setShowSuccessDialog(true);
-      }
-    } catch (error) {
-      console.error("Error booking activity:", error);
-      setBookingError(
-        error.message || "An error occurred while booking. Please try again."
-      );
-    } finally {
-      setIsBooking(false);
-    }
-  };
-
   // Comment Carousel State
   const [currentCommentIndex, setCurrentCommentIndex] = useState(0);
   const [showFullComment, setShowFullComment] = useState(false);
@@ -581,7 +527,6 @@ const ActivityDetail = () => {
     visitDate: "",
     isAnonymous: false,
   });
-
 
   const fetchCurrencies = async () => {
     try {
@@ -610,7 +555,10 @@ const ActivityDetail = () => {
     const toRate = exchangeRates[toCurrency];
 
     // Use template literal to correctly insert the symbol
-    return `${userPreferredCurrency?.symbol}${((price * toRate) / fromRate).toFixed(2)}`;
+    return `${userPreferredCurrency?.symbol}${(
+      (price * toRate) /
+      fromRate
+    ).toFixed(2)}`;
   };
 
   const convertPrice2 = (price, fromCurrency, toCurrency) => {
@@ -677,12 +625,7 @@ const ActivityDetail = () => {
   };
 
   useEffect(() => {
-    Promise.all([
-      fetchUserInfo(),
-      fetchExchangeRate(),
-      fetchCurrencies(),
-
-    ]);
+    Promise.all([fetchUserInfo(), fetchExchangeRate(), fetchCurrencies()]);
   }, []);
 
   const navigate = useNavigate();
@@ -752,7 +695,6 @@ const ActivityDetail = () => {
           }
         }
         //  console.error("loyalty points:", tourist.loyaltyPoints);
-
       } catch (err) {
         setError("Error fetching activity details. Please try again later.");
         console.error("Error fetching activity details:", err);
@@ -826,7 +768,6 @@ const ActivityDetail = () => {
     fetchSavedActivities();
   }, []);
 
-
   const isActivityPassed = () => {
     return new Date(activity.timing) < new Date();
   };
@@ -844,7 +785,7 @@ const ActivityDetail = () => {
       const additionalPrice =
         userBooking.paymentAmount +
         calculateDiscountedPrice(activity.price, activity.specialDiscount) *
-        additionalTickets;
+          additionalTickets;
 
       const response = await axios.put(
         `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
@@ -865,7 +806,7 @@ const ActivityDetail = () => {
       console.error("Error updating booking:", error);
       setBookingError(
         error.response?.data?.message ||
-        "An error occurred while updating the booking."
+          "An error occurred while updating the booking."
       );
     } finally {
       setIsBooking(false);
@@ -911,18 +852,38 @@ const ActivityDetail = () => {
     }
   };
 
-  const handlePaymentConfirm = async (paymentType, numberOfTickets, date, filler, promoCode) => {
+  const handlePaymentConfirm = async (
+    paymentType,
+    numberOfTickets,
+    date,
+    filler,
+    promoCode
+  ) => {
     if (bookingProcessedRef.current) {
-      console.log('Booking already processed');
+      console.log("Booking already processed");
       return;
     }
     setIsBooking(true);
     setBookingError("");
     try {
       bookingProcessedRef.current = true;
+      const discountPercentage = searchParams.get("discountPercentage");
 
       const token = Cookies.get("jwt");
-      const totalPrice = convertPrice2(discountedTotal, userPreferredCurrency?.code, "USD");
+      let totalPrice =
+        discountPercentage > 0
+          ? (calculateTotalPrice(numberOfTickets) *
+              (100 - discountPercentage)) /
+            100
+          : calculateTotalPrice(numberOfTickets);
+
+      if (paymentType === "Wallet") {
+        totalPrice = convertPrice2(
+          discountedTotal,
+          userPreferredCurrency?.code,
+          "USD"
+        );
+      }
 
       const response = await fetch(
         `http://localhost:4000/${userRole}/activityBooking`,
@@ -937,7 +898,7 @@ const ActivityDetail = () => {
             paymentType,
             paymentAmount: totalPrice,
             numberOfTickets,
-            promoCode
+            promoCode,
           }),
         }
       );
@@ -959,12 +920,16 @@ const ActivityDetail = () => {
         setNumberOfTickets(numberOfTickets);
         setPaymentType(paymentType);
         setShowSuccessDialog(true);
-        setPricePaid(convertPrice(data?.pricePaid, "USD", userPreferredCurrency?.code));
-        setpoint(convertpoint(data?.pricePaid, "USD", userPreferredCurrency?.code));
-        setTouristWallet(convertPrice(data?.walletBalance, "USD", userPreferredCurrency?.code));
+        setPricePaid(
+          convertPrice(data?.pricePaid, "USD", userPreferredCurrency?.code)
+        );
+        setpoint(
+          convertpoint(data?.pricePaid, "USD", userPreferredCurrency?.code)
+        );
+        setTouristWallet(
+          convertPrice(data?.walletBalance, "USD", userPreferredCurrency?.code)
+        );
         setloyalty(data?.loyaltyPoints);
-
-
       }
     } catch (error) {
       console.error("Error booking activity:", error);
@@ -1153,33 +1118,34 @@ const ActivityDetail = () => {
     // Conditionally add the Save step based on user role
     ...(userRole !== "guest"
       ? [
-        {
-          target: ".Save",
-          content: (
-            <>
-              Click here to save this activity for later viewing or booking in your
-              saved activities list.
-              <br />
-              Tip:
-              <br />
-              You can view your saved activities anytime! Simply click the hamburger
-              menu on the top right corner → My Account → Activities → Saved
-            </>
-          ),
-          placement: "left",
-        },
-      ]
+          {
+            target: ".Save",
+            content: (
+              <>
+                Click here to save this activity for later viewing or booking in
+                your saved activities list.
+                <br />
+                Tip:
+                <br />
+                You can view your saved activities anytime! Simply click the
+                hamburger menu on the top right corner → My Account → Activities
+                → Saved
+              </>
+            ),
+            placement: "left",
+          },
+        ]
       : []),
     // Conditionally add the bookNow step based on user role
     ...(userRole !== "guest"
       ? [
-        {
-          target: ".bookNow",
-          content:
-            "Click here to be able to book this activity and proceed to the payment process.",
-          placement: "left",
-        },
-      ]
+          {
+            target: ".bookNow",
+            content:
+              "Click here to be able to book this activity and proceed to the payment process.",
+            placement: "left",
+          },
+        ]
       : []),
     {
       target: ".AdvertiserDetail",
@@ -1195,13 +1161,13 @@ const ActivityDetail = () => {
     // Determine points multiplier based on badge level
     switch (badgeLevel) {
       case "Bronze":
-        pointsMultiplier = 0.5; 
+        pointsMultiplier = 0.5;
         break;
       case "Silver":
-        pointsMultiplier = 1.0; 
+        pointsMultiplier = 1.0;
         break;
       case "Gold":
-        pointsMultiplier = 1.5; 
+        pointsMultiplier = 1.5;
         break;
       default:
         pointsMultiplier = 0; // No points if badge level is unrecognized
@@ -1389,7 +1355,10 @@ const ActivityDetail = () => {
                 <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
                 <div className="flex-1 flex justify-between px-4">
                   {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                    <Card
+                      key={i}
+                      className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
+                    >
                       <CardHeader className="flex items-start">
                         <div className="flex">
                           <div className="h-12 w-12 bg-gray-300 rounded-full animate-pulse mr-4"></div>
@@ -1418,7 +1387,6 @@ const ActivityDetail = () => {
       </div>
     );
   };
-
 
   if (loading) {
     return <ActivityDetailSkeleton />;
@@ -1619,7 +1587,9 @@ const ActivityDetail = () => {
                                     calculateDiscountedPrice(
                                       activity.price,
                                       activity.specialDiscount
-                                    ), "USD", userPreferredCurrency?.code
+                                    ),
+                                    "USD",
+                                    userPreferredCurrency?.code
                                   )}
                                 </span>
                                 <span className="ml-3 text-xl font-semibold text-red-600">
@@ -1627,7 +1597,11 @@ const ActivityDetail = () => {
                                 </span>
                               </div>
                               <div className="text-2xl text-gray-500 line-through mt-2">
-                                {convertPrice(activity.price, "USD", userPreferredCurrency?.code)}
+                                {convertPrice(
+                                  activity.price,
+                                  "USD",
+                                  userPreferredCurrency?.code
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1658,8 +1632,9 @@ const ActivityDetail = () => {
                         <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
                           {isExpanded
                             ? activity.description
-                            : `${activity.description.substring(0, 130)}${activity.description.length > 130 ? "..." : ""
-                            }`}
+                            : `${activity.description.substring(0, 130)}${
+                                activity.description.length > 130 ? "..." : ""
+                              }`}
                           {activity.description.length > 130 && (
                             <button
                               onClick={toggleExpanded}
@@ -1686,26 +1661,29 @@ const ActivityDetail = () => {
                               e.stopPropagation();
                               handleSaveToggle(activity._id);
                             }}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
-                              ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                              : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                              }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${
+                              isSaved
+                                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                            }`}
                           >
                             <Bookmark
-                              className={`w-5 h-5 ${isSaved
-                                ? "stroke-white fill-[#1A3B47]"
-                                : "stroke-white"
-                                }`}
+                              className={`w-5 h-5 ${
+                                isSaved
+                                  ? "stroke-white fill-[#1A3B47]"
+                                  : "stroke-white"
+                              }`}
                             />
                             {isSaved ? "Unsave" : "Save"}
                           </Button>
 
                           <Button
                             onClick={handleBookNowClick}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${activity.isBookingOpen
-                              ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                              : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                              }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
+                              activity.isBookingOpen
+                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                            }`}
                             disabled={!activity.isBookingOpen}
                           >
                             {activity.isBookingOpen
@@ -1812,10 +1790,11 @@ const ActivityDetail = () => {
                         <>
                           <div className="mt-6 border-t border-gray-300 pt-4"></div>
                           <Button
-                            className={`w-full mx-auto text-white ${isAppropriate
-                              ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                              : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                              }`}
+                            className={`w-full mx-auto text-white ${
+                              isAppropriate
+                                ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                                : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                            }`}
                             onClick={handleOpenDialog}
                           >
                             {isAppropriate
@@ -1930,14 +1909,15 @@ const ActivityDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${(
-                            isRatingHovered
-                              ? quickRating >= star
-                              : quickRating >= star
-                          )
-                            ? "text-yellow-500 fill-current"
-                            : "text-gray-300"
-                            }`}
+                          className={`w-8 h-8 cursor-pointer ${
+                            (
+                              isRatingHovered
+                                ? quickRating >= star
+                                : quickRating >= star
+                            )
+                              ? "text-yellow-500 fill-current"
+                              : "text-gray-300"
+                          }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -2070,12 +2050,14 @@ const ActivityDetail = () => {
               items={[
                 {
                   name: activity.name,
-                  price: (
+                  price:
                     calculateDiscountedPrice(
                       activity.price,
                       activity.specialDiscount
-                    ) * (exchangeRates[userPreferredCurrency.code] / exchangeRates["USD"])
-                  ) * 100,
+                    ) *
+                    (exchangeRates[userPreferredCurrency.code] /
+                      exchangeRates["USD"]) *
+                    100,
                 },
               ]} // Convert price to cents
               onWalletPayment={handlePaymentConfirm}
@@ -2085,7 +2067,9 @@ const ActivityDetail = () => {
                 calculateDiscountedPrice(
                   activity.price,
                   activity.specialDiscount
-                ) * (exchangeRates[userPreferredCurrency.code] / exchangeRates["USD"])
+                ) *
+                (exchangeRates[userPreferredCurrency.code] /
+                  exchangeRates["USD"])
               ).toFixed(2)}
               currency={userPreferredCurrency.code}
               symbol={userPreferredCurrency.symbol}
@@ -2094,8 +2078,11 @@ const ActivityDetail = () => {
               setError={setBookingError}
               promoDetails={promoDetails}
               setPromoDetails={setPromoDetails}
-              loyaltyPoints={calculateLoyaltyPoints(activity.price, tourist.loyaltyBadge)}
-              onDiscountedTotalChange={handleDiscountedTotalChange} 
+              loyaltyPoints={calculateLoyaltyPoints(
+                activity.price,
+                tourist.loyaltyBadge
+              )}
+              onDiscountedTotalChange={handleDiscountedTotalChange}
             />
           )}
 
@@ -2178,10 +2165,7 @@ const ActivityDetail = () => {
             </DialogContent>
           </Dialog>
 
-          <Dialog
-            open={showSuccessDialog}
-            onOpenChange={setShowSuccessDialog}
-          >
+          <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 {/* Flexbox container to align icon and title horizontally */}
@@ -2199,33 +2183,39 @@ const ActivityDetail = () => {
                   {activity.name}.
                 </p>
                 <div className="grid gap-4 py-4">
-                  {userPreferredCurrency &&
+                  {userPreferredCurrency && (
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">Amount Paid:</Label>
-                      <div>
-                        {userPreferredCurrency.symbol}{discountedTotal.toFixed(2)}
-                      </div>
-                    </div>}
+                      {paymentType === "Wallet" && (
+                        <div>
+                          {userPreferredCurrency.symbol}
+                          {discountedTotal.toFixed(2)}
+                        </div>
+                      )}
+
+                      {paymentType === "CreditCard" && (
+                        <div>
+                          {convertPrice(
+                            pricePaid,
+                            "USD",
+                            userPreferredCurrency.code
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {paymentType === "Wallet" && (
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">New Wallet Balance:</Label>
-                      <div>
-                        {touristWallet}
-                      </div>
+                      <div>{touristWallet}</div>
                     </div>
                   )}
-
-
-
 
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right"> Points Earned:</Label>
 
                     {loyaltyy}
-
                   </div>
-
-
                 </div>
               </div>
 
@@ -2237,7 +2227,6 @@ const ActivityDetail = () => {
                   OK
                 </Button>
               </DialogFooter>
-
             </DialogContent>
           </Dialog>
         </div>
@@ -2448,7 +2437,6 @@ const ActivityDetail = () => {
                 OK
               </Button>
             </DialogFooter>
-
           </DialogContent>
         </Dialog>
         <Dialog
@@ -2512,9 +2500,11 @@ const ActivityDetail = () => {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Total Price</Label>
                 <div className="col-span-3">
-                  {convertPrice((
-                    (selectedTransportation?.ticketCost || 0) * seatsToBook
-                  ), "USD", userPreferredCurrency?.code)}
+                  {convertPrice(
+                    (selectedTransportation?.ticketCost || 0) * seatsToBook,
+                    "USD",
+                    userPreferredCurrency?.code
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -2580,8 +2570,9 @@ const ActivityDetail = () => {
 
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -2593,8 +2584,6 @@ const ActivityDetail = () => {
         <UserGuide steps={guideSteps} pageName="singleActivity" />
       )}
     </div>
-
-
   );
 };
 

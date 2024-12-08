@@ -771,6 +771,12 @@ const ItineraryDetail = () => {
 
   const [tourist, setTourist] = useState(null);
   const [loyalty, setLoyalty] = useState(0);
+  const [discountedTotal, setDiscountedTotal] = useState(0);
+
+  const handleDiscountedTotalChange = (newTotal) => {
+    setDiscountedTotal(newTotal);
+  };
+
   const bookingProcessedRef = useRef(false);
 
   useEffect(() => {
@@ -1053,6 +1059,26 @@ const ItineraryDetail = () => {
     }
   };
 
+  // same as above but with different parameters (actual price, from currency code and to currency code)
+
+  const formatPrice2 = (price, type) => {
+    if (itinerary) {
+      if (userRole === "tourist" && userPreferredCurrency) {
+        if (userPreferredCurrency === itinerary.currency) {
+          return price;
+        } else {
+          const exchangedPrice = price / exchangeRates;
+          return exchangedPrice.toFixed(2); 
+        }
+      } else {
+        if (currencySymbol) {
+          return price;
+        }
+      }
+    }
+  };
+
+
   const fetchUserInfo = async () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
@@ -1147,7 +1173,7 @@ const ItineraryDetail = () => {
           body: JSON.stringify({
             itinerary: id,
             paymentType,
-            paymentAmount: itinerary.price * numberOfTickets,
+            paymentAmount: formatPrice2(discountedTotal),
             numberOfTickets,
             date,
             promoCode,
@@ -2496,6 +2522,7 @@ const ItineraryDetail = () => {
                   itinerary.price,
                   tourist.loyaltyBadge
                 )}
+                onDiscountedTotalChange={handleDiscountedTotalChange} 
               />
             </>
           )}
