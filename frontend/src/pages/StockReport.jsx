@@ -277,15 +277,15 @@ const StockReport = () => {
 
   return (
     <div>
-      {/* {role === "admin" && (
+      {role !== "admin" && (
         <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
         </div>
-      )} */}
+      )}
       <div className=" bg-gray-100 min-h-screen">
-        <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        {/* <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
-        </div>
+        </div> */}
         <div className="max-w-7xl mt-4 mx-auto">
           {/* <div className="grid gap-4 md:grid-cols-12 mb-4">
             <Card className="md:col-span-3 flex flex-col justify-center items-center">

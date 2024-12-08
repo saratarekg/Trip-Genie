@@ -24,7 +24,8 @@ import { cn } from "@/lib/utils"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 
 export function NotificationsDropdownAdmin({
-  setActiveTabNav
+  setActiveTabNav,
+  handleNotificationClick
 }) {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(false)
@@ -196,7 +197,8 @@ export function NotificationsDropdownAdmin({
                   if (!notification.seen) {
                     markNotificationAsSeen(notification._id); // Mark as seen
                   }
-                  navigate(notification.link); // Navigate to the link
+                  const productId = notification.link.split("/").pop();
+                  handleNotificationClick(productId); // Use handleNotificationClick
                 }}
               >
                 {part}

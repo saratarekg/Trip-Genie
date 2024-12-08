@@ -741,12 +741,17 @@ export default function AllActivities() {
   );
   };
 
+  const backgroundImage = "url('./src/assets/images/allActivities.jpg')";
+
   return (
     <div className="bg-gray-100">
-
-      <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
-          <div className="flex-1">
+  <div
+    className="relative h-[330px] bg-cover bg-center"
+    style={{ backgroundImage }}
+  >
+    <div className="absolute inset-0"></div>
+    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+    <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">
               All Activities
             </h1>
@@ -760,17 +765,8 @@ export default function AllActivities() {
               / Activities
             </p>
           </div>
-          <div className="hidden lg:block w-1/3">
-            <img
-              src={activityImage}
-              alt="Decorative"
-              height="200"
-              width="200"
-              className="ml-auto"
-            />
-          </div>
-        </div>
-      </div>
+    </div>
+  </div>
       <div className="container mx-auto px-4 py-8 lg:px-24">
         <div className="flex gap-8">
           <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
@@ -875,18 +871,21 @@ export default function AllActivities() {
           </div>
           <div className="flex-1">
             <div className="mb-4">
-              <div className="relative flex-grow mb-4">
-                <input
-                  type="text"
-                  placeholder="Search activities..."
-                  className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
-              </div>
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-4">
+              <div className="flex justify-between items-center mb-4">
+                <div className="relative flex-grow">
+                  <input
+                    type="text"
+                    placeholder="Search activities..."
+                    className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  <Search className="absolute left-3 top-2.5 text-gray-400 w-5 h-5" />
+                </div>
+                <span className="text-gray-500 text-sm ml-4">
+                  ({sortedActivities.length} items)
+                </span>
+                <div className="flex items-center space-x-4 ml-4">
                   <Button
                     variant="outline"
                     size="sm"
@@ -919,32 +918,15 @@ export default function AllActivities() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`whitespace-nowrap rounded-full ${isSortedByPreference ? "bg-red-100" : ""
-                        }`}
+                      className={`whitespace-nowrap rounded-full ${isSortedByPreference ? "bg-red-100" : ""}`}
                       onClick={handleSortByPreference}
                     >
                       <Heart
-                        className={`w-4 h-4 mr-2 ${isSortedByPreference
-                          ? "fill-current text-red-500"
-                          : ""
-                          }`}
+                        className={`w-4 h-4 mr-2 ${isSortedByPreference ? "fill-current text-red-500" : ""}`}
                       />
                       Sort by Preference
                     </Button>
                   )}
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-500 text-sm">
-                    ({sortedActivities.length} items)
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="md:hidden"
-                    onClick={() => setFiltersVisible(!filtersVisible)}
-                  >
-                    <Filter className="w-4 h-4" />
-                  </Button>
                 </div>
               </div>
             </div>

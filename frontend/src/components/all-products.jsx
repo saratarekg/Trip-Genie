@@ -754,11 +754,17 @@ export function AllProducts() {
   );
   };
 
+  const backgroundImage = "url('./src/assets/images/allProducts.jpg')";
+
   return (
     <div className="bg-gray-100">
-      <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
-          <div className="flex-1">
+      <div
+    className="relative h-[330px] bg-cover bg-center"
+    style={{ backgroundImage }}
+  >
+    <div className="absolute inset-0"></div>
+    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+    <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">All Products</h1>
             <p className="text-gray-200">
               <Link
@@ -770,18 +776,9 @@ export function AllProducts() {
               / Products
             </p>
           </div>
-          <div className="hidden lg:block w-1/3">
-            <img
-              src={productImage}
-              alt="Decorative"
-              height="200"
-              width="230"
-              className="ml-auto"
-            />
-          </div>
-        </div>
-      </div>
-      <div className=" py-8 sm:px-12 lg:px-12">
+    </div>
+  </div>
+      <div className="container py-8">
         <div className="flex gap-8">
           <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6 filter">
             <div className="flex items-center justify-between mb-6">
