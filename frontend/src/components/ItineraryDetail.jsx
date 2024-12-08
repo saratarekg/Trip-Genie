@@ -788,6 +788,9 @@ const ItineraryDetail = () => {
   const [loyalty, setLoyalty] = useState(0);
   const [discountedTotal, setDiscountedTotal] = useState(0);
 
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('');
+
   const handleDiscountedTotalChange = (newTotal) => {
     setDiscountedTotal(newTotal);
   };
@@ -809,6 +812,13 @@ const ItineraryDetail = () => {
 
     fetchTouristData();
   }, []);
+
+  const showToast = (message, type) => {
+    setToastMessage(message);
+    setToastType(type);
+    setIsToastOpen(true);
+  };
+
 
   const [showTourGuideReviewDialog, setShowTourGuideReviewDialog] =
     useState(false);
@@ -1515,6 +1525,7 @@ const ItineraryDetail = () => {
       }
 
       const updatedItinerary = await response.json();
+      showToast( isActivated ? "Itinerary deactivated" : "Itinerary activated", "success");
     } catch (error) {
       console.error("Error toggling activation:", error);
       setIsActivated((prevState) => !prevState); // Revert the state if there's an error
@@ -2790,6 +2801,33 @@ const ItineraryDetail = () => {
       {(userRole === "guest" || userRole === "tourist") && (
         <UserGuide steps={guideSteps} pageName="singleItinerary" />
       )}
+
+<ToastProvider>
+        <ToastViewport />
+        {isToastOpen && (
+          <Toast
+            onOpenChange={setIsToastOpen}
+            open={isToastOpen}
+            duration={3000}
+            className={toastType === "success" ? "bg-green-100" : "bg-red-100"}
+          >
+            <div className="flex items-center">
+              {toastType === "success" ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>
+                  {toastType === "success" ? "Success" : "Error"}
+                </ToastTitle>
+                <ToastDescription>{toastMessage}</ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
+          </Toast>
+        )}
+      </ToastProvider>
     </div>
   );
 };
