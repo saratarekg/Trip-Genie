@@ -1,29 +1,26 @@
 Priority List: 
--Select by preference for itineraries (Sam)
+-Select by preference for itineraries (Sam done✅)
 -promo code activities, itineraries, hotels msh sha8al (sam done✅)
 -reports bayza (done✅ Radwa)
--notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
+-notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries) (done aby)
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -ALL msh zy MY (done✅ habiba)
+-button add user f admin add admin/gov bayez msh by3ml haga (done✅ radwa)
 - shay be laban 3amatan (create activity we create products we kol el create ) (done✅ radwa)
 -create promo code layout (stretch start and end date we geeb el button foo2 ) (radwa)
 -update itinerary betawel w fl akhr error lama bghyr sowar kteer f activities
 -leave a review navigation aal past lw deleted bydy error
 -no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review (zeina done✅)
 -lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh(zeina done✅)
--lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha(zeina)
+-lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha(zeina done✅ INSHALLAH)
 -create promo code msh sha8ala (done ✅)
--lama bafoos ala activity mn el fl itinerary details el website bydrab
--admin by delete activity category aady hatta law fe activity mstkhdmaha
--admin b y create activity category etnen b nafs elesm aady
--admin by delete activity tags aady hatta law fe activity mstkhdmaha
+-admin b y create activity category etnen b nafs elesm aady (zeina done✅)
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
--lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
 -Error updating product. Please try again later. lama ba update product f admin s3at
 -Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
--lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated (Hazem)
+-lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated 
 -Upon searching, no skeleton loading in (itineraries,historical places, Products) like the one in Activities.(done ✅)
 -mafish loading b3d ma ba search fe itineraries zy activities w HPs. (done✅)
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
@@ -48,9 +45,10 @@ navigation notification fe admin
 -when i update a product lama bzwd sora by3la2 w mbyrdash y update (seller w admin)
 flights we hotels we trans y2bo fe component wa7ed fel homepage
 -graph in admin dashboard bytawl
--logout popup 3and admin na2sa
+-logout popup 3and admin na2sa(ehab done✅)
 -pagination msh btl3 l awl elpage
 -currently unavailable fl itineraray card mn bara shklaha wehesh(lama deactivated)
+-when updating itinerary and there dates that have passed error message displayed "please choose a future date" (done✅)
 
 
 
@@ -106,20 +104,6 @@ alwan profile w settings (done)
 
 
 Aby: 
-66 (done)
-68 (done)
-90
-91 (done)
-
-71
-72
-73
-74
-75
-76
-77
-78
-
 
 - Seeb el 0 sales bas sort by revenue 3ashan yezharo ta7t (done)
 - Automated verify Otp (done)

@@ -616,7 +616,6 @@ export default function MyActivitiesComponent() {
     );
   };
 
-  
   const backgroundImage = "url('./src/assets/images/allActivities.jpg')";
 
   const sortedActivities = useMemo(() => {
@@ -631,13 +630,13 @@ export default function MyActivitiesComponent() {
 
   return (
     <div className="bg-gray-100">
-        <div
-    className="relative h-[330px] bg-cover bg-center"
-    style={{ backgroundImage }}
-  >
-    <div className="absolute inset-0"></div>
-    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
-    <div className="flex-1">
+      <div
+        className="relative h-[330px] bg-cover bg-center"
+        style={{ backgroundImage }}
+      >
+        <div className="absolute inset-0"></div>
+        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+          <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">
               My Activities
             </h1>
@@ -651,8 +650,8 @@ export default function MyActivitiesComponent() {
               / My Activities
             </p>
           </div>
-    </div>
-  </div>
+        </div>
+      </div>
       <div className="container py-8">
         <div className="flex gap-8">
           <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
@@ -880,7 +879,10 @@ export default function MyActivitiesComponent() {
                 </Button>
                 <span className="text-sm">
                   Page {currentPage} of{" "}
-                  {Math.ceil(sortedActivities.length / activitiesPerPage)}
+                  {Math.max(
+                    1,
+                    Math.ceil(sortedActivities.length / activitiesPerPage)
+                  )}
                 </span>
                 <Button
                   variant="outline"
@@ -895,7 +897,10 @@ export default function MyActivitiesComponent() {
                   }
                   disabled={
                     currentPage ===
-                    Math.ceil(sortedActivities.length / activitiesPerPage)
+                    Math.max(
+                      1,
+                      Math.ceil(sortedActivities.length / activitiesPerPage)
+                    )
                   }
                 >
                   <ChevronRight className="h-4 w-4" />

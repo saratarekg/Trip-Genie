@@ -321,7 +321,6 @@ export default function ProductArchive() {
     );
   };
 
-
   return (
     <div className="bg-gray-100">
       {isLoading ? (
@@ -343,7 +342,9 @@ export default function ProductArchive() {
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+                <h2 className="text-xl font-semibold text-[#1A3B47]">
+                  Filters
+                </h2>
                 <Button
                   onClick={clearFilters}
                   size="sm"
@@ -407,7 +408,9 @@ export default function ProductArchive() {
                             <h4 className="font-medium text-sm">
                               {product.name}
                             </h4>
-                            <div className="mt-1">{renderStars(product.rating)}</div>
+                            <div className="mt-1">
+                              {renderStars(product.rating)}
+                            </div>
                           </div>
                         </Link>
                       ))}
@@ -415,7 +418,7 @@ export default function ProductArchive() {
                 </ScrollArea>
               </div>
             </div>
-  
+
             {/* Main Content */}
             <div className="flex-1">
               <div className="mb-4">
@@ -473,11 +476,11 @@ export default function ProductArchive() {
                   </Button>
                 </div>
               </div>
-  
+
               {error && (
                 <div className="text-red-500 text-center mb-4">{error}</div>
               )}
-  
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.length > 0 &&
                   products
@@ -493,7 +496,7 @@ export default function ProductArchive() {
                       />
                     ))}
               </div>
-  
+
               <div className="mt-8 flex justify-center items-center space-x-4">
                 <Button
                   onClick={() => handlePageChange(currentPage - 1)}
@@ -506,12 +509,13 @@ export default function ProductArchive() {
                 </Button>
                 <span className="text-sm font-medium text-[#1A3B47]">
                   Page {currentPage} of{" "}
-                  {Math.ceil(products.length / tripsPerPage)}
+                  {Math.max(1, Math.ceil(products.length / tripsPerPage))}
                 </span>
                 <Button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={
-                    currentPage === Math.ceil(products.length / tripsPerPage) ||
+                    currentPage ===
+                      Math.max(1, Math.ceil(products.length / tripsPerPage)) ||
                     products.length === 0
                   }
                   variant="outline"
@@ -527,5 +531,4 @@ export default function ProductArchive() {
       )}
     </div>
   );
-  
 }

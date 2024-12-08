@@ -1133,7 +1133,10 @@ export default function TransportationPage() {
           {sortedTransportations.length > 0 ? (
             <span className="text-[#1A3B47]">
               Page {currentPage} of{" "}
-              {Math.ceil(sortedTransportations.length / transportationsPerPage)}
+              {Math.max(
+                1,
+                Math.ceil(sortedTransportations.length / transportationsPerPage)
+              )}
             </span>
           ) : (
             <span className="text-[#1A3B47]">No transportations available</span>
@@ -1143,7 +1146,10 @@ export default function TransportationPage() {
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={
               currentPage ===
-              Math.ceil(sortedTransportations.length / transportationsPerPage)
+              Math.max(
+                1,
+                Math.ceil(sortedTransportations.length / transportationsPerPage)
+              )
             }
             variant="outline"
             className="border-[#388A94] text-[#388A94] hover:bg-[#388A94] hover:text-white"
