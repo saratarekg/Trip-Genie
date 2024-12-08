@@ -205,7 +205,7 @@ const ActivityCard = ({ activity, onSelect, userInfo, onDeleteConfirm }) => {
       {role === "advertiser" && userInfo?.userId === activity.advertiser && (
         <div className="absolute top-2 right-2 flex space-x-2">
           <Button
-            className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            className="p-2 bg-[#5D9297] text-white rounded-full hover:bg-[#388A94] transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               window.location.href = `/update-activity/${activity._id}`;
