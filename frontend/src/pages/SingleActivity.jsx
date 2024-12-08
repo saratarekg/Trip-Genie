@@ -2422,9 +2422,15 @@ const ActivityDetail = () => {
                 This activity cannot be deleted because it has active bookings.
               </DialogDescription>
             </DialogHeader>
-            <DialogFooter>
-              <Button onClick={() => setDeleteError(false)}>OK</Button>
+            <DialogFooter className="flex justify-end mt-2">
+              <Button
+                onClick={() => setDeleteError(false)}
+                className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
+              >
+                OK
+              </Button>
             </DialogFooter>
+
           </DialogContent>
         </Dialog>
         <Dialog

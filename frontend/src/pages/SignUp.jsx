@@ -193,7 +193,7 @@ export function SignupForm() {
         if (
           data.dateOfBirth > new Date() ||
           data.dateOfBirth >
-            new Date().setFullYear(new Date().getFullYear() - 18)
+          new Date().setFullYear(new Date().getFullYear() - 18)
         ) {
           scrollToError();
           ctx.addIssue({
@@ -808,21 +808,19 @@ export function SignupForm() {
                   <div className="flex items-center mt-2 space-x-2 w-full">
                     <div className="relative flex-grow h-2 bg-gray-200 rounded-full">
                       <div
-                        className={`absolute h-2 rounded-full transition-all duration-300 ${
-                          watch("password").length === 0
-                            ? "bg-gray-300"
-                            : getProgressBarColor(watch("password"))
-                        }`}
+                        className={`absolute h-2 rounded-full transition-all duration-300 ${watch("password").length === 0
+                          ? "bg-gray-300"
+                          : getProgressBarColor(watch("password"))
+                          }`}
                         style={{
-                          width: `${
-                            watch("password").length === 0
-                              ? 0
-                              : Math.max(
-                                  getPasswordStrength(watch("password"))
-                                    .fulfilled / 3,
-                                  1 / 3
-                                ) * 100
-                          }%`,
+                          width: `${watch("password").length === 0
+                            ? 0
+                            : Math.max(
+                              getPasswordStrength(watch("password"))
+                                .fulfilled / 3,
+                              1 / 3
+                            ) * 100
+                            }%`,
                         }}
                       ></div>
                     </div>
@@ -834,54 +832,48 @@ export function SignupForm() {
                   </div>
                   <ul className="text-sm mt-4 space-y-1">
                     <li
-                      className={`flex items-center ${
-                        getPasswordStrength(watch("password")).length
-                          ? "text-[#388A94]"
-                          : "text-gray-500"
-                      }`}
+                      className={`flex items-center ${getPasswordStrength(watch("password")).length
+                        ? "text-[#388A94]"
+                        : "text-gray-500"
+                        }`}
                     >
                       <span
-                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                          getPasswordStrength(watch("password")).length
-                            ? "bg-[#388A94] text-white"
-                            : "border-gray-500"
-                        }`}
+                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${getPasswordStrength(watch("password")).length
+                          ? "bg-[#388A94] text-white"
+                          : "border-gray-500"
+                          }`}
                       >
                         ✓
                       </span>
                       At least 8 characters
                     </li>
                     <li
-                      className={`flex items-center ${
-                        getPasswordStrength(watch("password")).uppercase
-                          ? "text-[#388A94]"
-                          : "text-gray-500"
-                      }`}
+                      className={`flex items-center ${getPasswordStrength(watch("password")).uppercase
+                        ? "text-[#388A94]"
+                        : "text-gray-500"
+                        }`}
                     >
                       <span
-                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                          getPasswordStrength(watch("password")).uppercase
-                            ? "bg-[#388A94] text-white"
-                            : "border-gray-500"
-                        }`}
+                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${getPasswordStrength(watch("password")).uppercase
+                          ? "bg-[#388A94] text-white"
+                          : "border-gray-500"
+                          }`}
                       >
                         ✓
                       </span>
                       At least one uppercase letter
                     </li>
                     <li
-                      className={`flex items-center ${
-                        getPasswordStrength(watch("password")).number
-                          ? "text-[#388A94]"
-                          : "text-gray-500"
-                      }`}
+                      className={`flex items-center ${getPasswordStrength(watch("password")).number
+                        ? "text-[#388A94]"
+                        : "text-gray-500"
+                        }`}
                     >
                       <span
-                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                          getPasswordStrength(watch("password")).number
-                            ? "bg-[#388A94] text-white"
-                            : "border-gray-500"
-                        }`}
+                        className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${getPasswordStrength(watch("password")).number
+                          ? "bg-[#388A94] text-white"
+                          : "border-gray-500"
+                          }`}
                       >
                         ✓
                       </span>
@@ -894,35 +886,35 @@ export function SignupForm() {
             {(userType === "tourist" ||
               userType === "tour-guide" ||
               userType === "seller") && (
-              <>
-                <FormField
-                  control={control}
-                  name="mobile"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mobile*</FormLabel>
-                      <FormControl>
-                        <PhoneInput
-                          country={"eg"}
-                          value={field.value}
-                          onChange={(value) => field.onChange(value)}
-                          excludeCountries={["il"]}
-                          inputProps={{
-                            name: "mobile",
-                            required: true,
-                            autoFocus: true,
-                            placeholder: "+1234567890",
-                            ref: formRefs.mobile,
-                          }}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
+                <>
+                  <FormField
+                    control={control}
+                    name="mobile"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mobile*</FormLabel>
+                        <FormControl>
+                          <PhoneInput
+                            country={"eg"}
+                            value={field.value}
+                            onChange={(value) => field.onChange(value)}
+                            excludeCountries={["il"]}
+                            inputProps={{
+                              name: "mobile",
+                              required: true,
+                              autoFocus: true,
+                              placeholder: "+1234567890",
+                              ref: formRefs.mobile,
+                            }}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             {(userType === "tourist" || userType === "tour-guide") && (
               <>
                 <FormField
@@ -1022,26 +1014,26 @@ export function SignupForm() {
             {(userType === "seller" ||
               userType === "advertiser" ||
               userType === "tour-guide") && (
-              <>
-                <FormField
-                  control={control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name*</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Name"
-                          {...field}
-                          ref={formRefs.name}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
+                <>
+                  <FormField
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name*</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Name"
+                            {...field}
+                            ref={formRefs.name}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             {userType === "tour-guide" && (
               <Card className="w-full max-w-2xl mx-auto">
                 <CardContent className="space-y-6 p-6">
@@ -1664,12 +1656,14 @@ export function SignupForm() {
           <DialogFooter className="flex justify-center items-center w-full">
             <div className="flex justify-center w-full">
               <Button
-                className="bg-[#5D9297] text-white hover:bg-[#1A3B47]"
+                className="bg-[#1A3B47] text-white hover:bg-[#3E5963] px-4 py-2 rounded-lg"
                 onClick={() => navigate("/login")}
               >
                 Login
               </Button>
             </div>
+
+
           </DialogFooter>
         </DialogContent>
       </Dialog>

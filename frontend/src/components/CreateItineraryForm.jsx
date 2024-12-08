@@ -525,12 +525,15 @@ const ActivityForm = ({
           </div>
         ))}
       </div>
-      <Button
-        type="submit"
-        className="bg-[#1A3B47] hover:bg-[#388A94] rounded-full"
-      >
-        Save Activity
-      </Button>
+      <div className="flex justify-end pr-4">
+        <Button
+          type="submit"
+          className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
+        >
+          Save Activity
+        </Button>
+      </div>
+
     </form>
   );
 };
@@ -967,8 +970,8 @@ const ItineraryForm = () => {
                               .split("T")[0]
                           } // Sets min date to tomorrow
                           className={`w-40 ${errors.availableDates?.[dateIndex]?.date
-                              ? "border-red-500"
-                              : ""
+                            ? "border-red-500"
+                            : ""
                             }`}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
