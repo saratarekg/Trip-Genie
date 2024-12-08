@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
@@ -97,7 +99,7 @@ const ItineraryReport = () => {
             calculatePeriodRevenue(response.data.itinerariesSales, "all")
           );
 
-          setFilteredSales(response.data.itinerariesSales); // Set filtered sales directly from API response
+          setFilteredSales(response.data.itinerariesSales);
         } else {
           setError(
             "Invalid data structure received from the server: itinerariesSales missing"
@@ -195,7 +197,6 @@ const ItineraryReport = () => {
     const now = new Date();
     return salesData.reduce((sum, item) => {
       const saleDate = new Date(item.itinerary.createdAt);
-      // console.log(saleDate.toDateString());
       switch (period) {
         case "today":
           return (
@@ -242,11 +243,6 @@ const ItineraryReport = () => {
       newFilters.day = "";
     }
     setFilters(newFilters);
-    const searchParams = new URLSearchParams();
-    ["day", "month", "year"].forEach((key) => {
-      if (newFilters[key]) searchParams.append(key, newFilters[key]);
-    });
-    navigate(`/itinerary-report?${searchParams.toString()}`);
   };
 
   const applyItineraryFilter = (itineraryName) => {
@@ -289,6 +285,19 @@ const ItineraryReport = () => {
     lastMonthSales === 0
       ? 100
       : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
+
+  const calculateTotals = () => {
+    return filteredSales.reduce(
+      (acc, item) => {
+        acc.ticketsSold += Math.round(item.totalRevenue / item.itinerary.price);
+        acc.revenue += parseFloat(item.totalRevenue);
+        acc.commissionRevenue += parseFloat(item.appRevenue);
+        return acc;
+      },
+      { ticketsSold: 0, revenue: 0, commissionRevenue: 0 }
+    );
+  };
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto">
@@ -382,15 +391,12 @@ const ItineraryReport = () => {
                 </div>
               </div>
               <div className="text-center mt-4">
-                {/* <p className="text-base font-semibold text-[#1A3B47]">
-                  {totalRevenue !== null && `Total: $${totalRevenue?.toFixed(2)}`}
-                </p> */}
                 <p className="text-base text-[#5D9297]">
                   {fillPercentage.toFixed(1)}% of total
                 </p>
                 <p className="text-base font-semibold text-[#1A3B47]">
                   {totalAppRevenue !== null &&
-                    `Commision Revenue: $${totalAppRevenue?.toFixed(2)}`}
+                    `Commission Revenue: $${totalAppRevenue?.toFixed(2)}`}
                 </p>
               </div>
             </CardContent>
@@ -623,10 +629,10 @@ const ItineraryReport = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                      Total Sales
+                      Itinerary
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Itinerary
+                      Tickets Sold
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Revenue
@@ -655,10 +661,12 @@ const ItineraryReport = () => {
                           transition={{ duration: 0.2, delay: index * 0.05 }}
                         >
                           <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {index + 1}
+                            {item.itinerary.title}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.itinerary.title}
+                            {Math.round(
+                              item.totalRevenue / item.itinerary.price
+                            )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             ${parseFloat(item.totalRevenue).toFixed(2)}
@@ -668,6 +676,33 @@ const ItineraryReport = () => {
                           </td>
                         </motion.tr>
                       ))}
+                      {filteredSales.length > 0 && (
+                        <motion.tr
+                          key="total-row"
+                          className="bg-gray-50 font-semibold"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{
+                            duration: 0.2,
+                            delay: filteredSales.length * 0.05,
+                          }}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            -
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Total {calculateTotals().ticketsSold}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Total ${calculateTotals().revenue.toFixed(2)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            Total $
+                            {calculateTotals().commissionRevenue.toFixed(2)}
+                          </td>
+                        </motion.tr>
+                      )}
                     </motion.tbody>
                   )}
                 </AnimatePresence>
