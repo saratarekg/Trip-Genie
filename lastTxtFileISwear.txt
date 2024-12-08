@@ -15,7 +15,6 @@ Priority List:
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
 -birthday promocode msh beyban fel notifications  and mail
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
--add loading for wishlist 
 -updating activity popup btdos basraha 3adi w btfdl f update activity
 -single ay haga el title el fo2 saye2
 -out of stock notification  elleh fel navbar msh sha8ala fe seller 
@@ -31,6 +30,7 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
 ------------------------------------done-------------------------------------------
 -lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated (zeina hateit toast done✅)
 -sa3at beyede error lama mark all as read (sam done✅)
+-add loading for wishlist (done✅)
 
         - when updating itinerary and there dates that have passed error message displayed "please choose a future date" (done✅)
 		-logout popup 3and admin na2sa(ehab done✅)
