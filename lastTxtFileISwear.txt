@@ -5,6 +5,7 @@ Priority List:
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
 -advertiser cannot delete/update his activity mn bara (all activities)
+-admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
 -reports bayza 
 -sa3at beyede error lama mark all as read
 consistency fe pages el all 
