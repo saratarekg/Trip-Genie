@@ -1,7 +1,16 @@
 Priority List: 
 
+-notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
+-lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
+-lama admin y delete product msh bta3o mfish ay response
+-cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
+-lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
+-advertiser cannot delete/update his activity mn bara (all activities)
+-admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
 -reports bayza 
+-mafish loading baad ma badoos update product
 -sa3at beyede error lama mark all as read
+-orders trga3 fel dropdown
 consistency fe pages el all 
 navigation notification fe admin
 - shay be laban 3amatan (create activity we create products we kol el create )
@@ -10,9 +19,13 @@ sales report margins
 -create promo code layout (stretch start and end date we geeb el button foo2 )
 -no popup l flag inappropriate itinerary
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
+-birthday promocode msh beyban fel notifications 
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
+-add loading for wishlist 
 -updating activity popup btdos basraha 3adi w btfdl f update activity
-
+-(fen orders page ? ana 3mlt /orders 3ashan a3raf awsalha bas heyya etshalt men el site mahtota fen?)
+-create promo code msh sha8ala
+-out of stock notification  elleh fel navbar msh sha8ala fe seller 
 
 
 
@@ -22,6 +35,8 @@ sales report margins
 
 
 Sam: 
+67
+69
 111
 
 - raga3i sort by preference fe itinerary !!
@@ -56,9 +71,7 @@ alwan profile w settings (done)
 Aby: 
 
 66
-67
 68
-69
 90
 91
 
@@ -87,34 +100,44 @@ Alaa:
 
 Houba:
 
-92
-93
-94
-95
-96
-97
+toasts ele 3ayza teb2a zai eleradwa 3mla:
+add to cart 
+advertiser deleting activity
+save/unsave activity men all
+save/unsave activity men single 
+save/unsave itinerary men all
+save/unsave itinerary men single 
+archive w unarchive product men admin
 
 
 -check hn3ml eh f update itinerary lw booked
 - make all popups consistent (success toast and delete popup zay el radwa 3amlha)
+- popup archive products in admin m7taga ttzbt, sheel navigation w a3mlha toast + re-fetch
+
+92(done✅)
+93(done✅)
+94(done✅)
+95(done✅)
+96(done✅)
+97(done✅)
 - all products: sheel zorar el + el fo2 w khaly add to cart teadd to cart 3alatool men gheer ma tefta7 options(done✅)
 -zabat popup button color of add to cart in single product(done✅)
 - popup: - are you sure you want to accept el user dah (badal mal tick bet accept 3alatool we dah dangerous action lazem popup)(done✅)
 -Tourguide camel case fe registration (da role kefaya 7anyaka ya hadwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa done✅)
 ALLL SUBMIT/CONFIRMATION BUTTONS RIGHT ALIGNED (fel popups we fe kol el creates we make kol el alwan consistent bel mara)(done✅)
 Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button yemeen (Aby beyshed sha3ro fel background)(7a2ak ya aby done✅)
-- popup archive products in admin m7taga ttzbt, sheel navigation w a3mlha toast + re-fetch
+
 
 
 
 
 
 Jana:
-105
-106
-107
-108
-109
+105   
+106  
+107  
+108  
+109  
 110
 
  help amy fel user profiles 
@@ -146,6 +169,7 @@ Radwa:
 
 27-32 
 - sort by preference shklo w alwano mokhtlfa f kol page
+- alwan flag inappropriate fe admin activites different 3n itineraries
 - shakl view all 
 - change pass fe admin (done✅)
 - khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done)
@@ -155,6 +179,7 @@ Radwa:
 - admin add user : 
  Add user teb2a button kebeer w 3al yemeen (done✅)
  whitespace bottom right (geebi password verification 3al yemeen aw get creative) (done✅)
+ -approve user : in all user whenever I approve, an error message appear upon approving because of "all".
 
  
 Habiba:
@@ -173,16 +198,16 @@ el reports columns t2ba consistent (total sales t2ba tickets sold we y2ba we nsh
 
 Hazem: 
 
-1
-3
-34 
-35
-36
-38
-- single act has no loading until prices are displayed  (already ma3moola fe my account)
+1 ✅
+3 ✅
+34🚨
+35✅
+36✅
+38✅
+- single act has no loading until prices are displayed  (already ma3moola fe my account) (done✅)
 - pagination all pages (done✅)
 - zabat shakl el pagination consistency (bas bardo e3melo el3ayzeeno 3ashan manetshalesh)
-(transportation + flights + hotels use shadcn pagination)
+(transportation + flights + hotels use shadcn pagination) (done✅)
 make all the other pages the old pagination (done✅)
 -popup logout lazem adoos mareten (done✅)
 

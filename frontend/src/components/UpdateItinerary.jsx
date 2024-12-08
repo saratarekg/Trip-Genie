@@ -1174,9 +1174,15 @@ export default function UpdateItinerary() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate("/all-itineraries")}>
-              Back to All Itineraries
-            </Button>
+            <div className="flex justify-end mt-2">
+              <Button
+                onClick={() => navigate("/all-itineraries")}
+                className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
+              >
+                Back to All Itineraries
+              </Button>
+            </div>
+
           </DialogFooter>
         </DialogContent>
       </Dialog>

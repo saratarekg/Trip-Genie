@@ -109,7 +109,7 @@ app.post("/create-checkout-session", async (req, res) => {
     // Calculate the total price including delivery
     const totalAmount = itemsTotal + deliveryPrice;
 
-    if (!items || !deliveryInfo || !currency || !promoCode) {
+    if (!items || !deliveryInfo || !currency) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
