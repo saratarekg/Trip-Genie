@@ -100,8 +100,9 @@ const StarRating = ({ rating, onRatingChange = null }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-5 h-5 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            } ${onRatingChange ? "cursor-pointer" : ""}`}
+          className={`w-5 h-5 ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          } ${onRatingChange ? "cursor-pointer" : ""}`}
           onClick={() => onRatingChange && onRatingChange(star)}
         />
       ))}
@@ -129,8 +130,9 @@ const ImageGallery = ({ pictures }) => {
           {pictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex === 0 ? "bg-gray-400" : "bg-black"
-                }`}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex === 0 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
@@ -152,8 +154,9 @@ const ImageGallery = ({ pictures }) => {
           {pictures.length > 5 && (
             <button
               onClick={handleNext}
-              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= pictures.length - 5 ? "bg-gray-400" : "bg-black"
-                }`}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex >= pictures.length - 5 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex >= pictures.length - 5}
               aria-label="Next images"
             >
@@ -208,6 +211,7 @@ const ProductDetail = () => {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [comment, setComment] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [filteredRating, setFilteredRating] = useState(0);
   const [streetName, setStreetName] = useState("");
@@ -357,6 +361,14 @@ const ProductDetail = () => {
           }
         );
         setUserPreferredCurrency(response2.data);
+        if (response.data.wishlist) {
+          const wishlistIds = response.data.wishlist.map((item) =>
+            item.product.toString()
+          );
+          console.log(wishlistIds);
+          console.log(id.toString());
+          setIsWishlisted(wishlistIds.includes(id.toString()));
+        }
       } catch (error) {
         console.error("Error fetching user profile:", error);
       }
@@ -732,6 +744,30 @@ const ProductDetail = () => {
     }
   };
 
+  const handleRemoveFromWishlist = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await fetch(
+        `http://localhost:4000/tourist/remove/wishlist/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to remove from wishlist");
+      }
+
+      setActionSuccess("Product removed from wishlist successfully!");
+    } catch (error) {
+      setActionError("Error removing product from wishlist. Please try again.");
+    }
+  };
+
   const handlePurchase = async (fullLocation) => {
     try {
       const token = Cookies.get("jwt");
@@ -866,52 +902,53 @@ const ProductDetail = () => {
     // Conditionally add the addToCart step based on product.quantity
     ...(product?.quantity > 0 && userRole === "tourist"
       ? [
-        {
-          target: ".addToCart",
-          content: "Click here to add the product to your cart.",
-          placement: "left",
-        },
-      ]
+          {
+            target: ".addToCart",
+            content: "Click here to add the product to your cart.",
+            placement: "left",
+          },
+        ]
       : []),
     // Conditionally add the addToWishlist step based on userRole
     ...(userRole === "tourist"
       ? [
-        {
-          target: ".addToWishlist",
-          content: (
-            <>
-              {" "}
-              Click here to add this product to your wishlist for later viewing or
-              purchase.
-              <br />
-              Tip:
-              <br />
-              You can view your wishlist from the top right corner of the page
-            </>
-          ),
-          placement: "left",
-        },
-      ]
+          {
+            target: ".addToWishlist",
+            content: (
+              <>
+                {" "}
+                Click here to add this product to your wishlist for later
+                viewing or purchase.
+                <br />
+                Tip:
+                <br />
+                You can view your wishlist from the top right corner of the page
+              </>
+            ),
+            placement: "left",
+          },
+        ]
       : []),
 
     // Conditionally add the addToWishlist step based on userRole
     ...(product?.seller
       ? [
-        {
-          target: ".sellerDetails",
-          content: (
-            <>
-              {" "}
-              Here you can find information about the seller of this product, including their name and ratings.
-              <br />
-              Tip:
-              <br />
-              You can view your wishlist from the top right corner of the page
-            </>
-          ),
-          placement: "left",
-        },
-      ]
+          {
+            target: ".sellerDetails",
+            content: (
+              <>
+                {" "}
+                Here you can find information about the seller of this product,
+                including their name and ratings.
+                <br />
+                Tip:
+                <br />
+                You can view your wishlist from the top right corner of the page
+              </>
+            ),
+            placement: "left",
+          },
+        ]
       : []),
   ];
 
@@ -955,7 +992,6 @@ const ProductDetail = () => {
           </div>
         </nav>
 
-
         <div className="mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="lg:w-3/4">
@@ -967,13 +1003,6 @@ const ProductDetail = () => {
                   </div>
 
                   <div className="w-full h-[400px] bg-gray-300 rounded animate-pulse mb-6"></div>
-
-
-
-
-
-
-
                 </div>
               </div>
             </div>
@@ -986,11 +1015,7 @@ const ProductDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="mt-4 text-4xl font-semibold text-center animate-pulse">
-
-                    <div className="text-sm text-gray-500 flex items-center justify-center mt-6">
-
-
-                    </div>
+                    <div className="text-sm text-gray-500 flex items-center justify-center mt-6"></div>
                   </div>
 
                   <div className="mt-4 animate-pulse">
@@ -998,15 +1023,10 @@ const ProductDetail = () => {
                     <div className="h-4 w-2/3 bg-gray-300 rounded mt-40"></div>
                   </div>
 
-
-
-
                   <div className="mt-6 animate-pulse">
                     <div className="h-10  bg-gray-300 rounded"></div>
                     <div className="h-10 bg-gray-300 rounded mt-6"></div>
                   </div>
-
-
                 </CardContent>
               </Card>
             </div>
@@ -1041,7 +1061,10 @@ const ProductDetail = () => {
                 <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
                 <div className="flex-1 flex justify-between px-4">
                   {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                    <Card
+                      key={i}
+                      className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
+                    >
                       <CardHeader className="flex items-start">
                         <div className="flex">
                           <div className="h-12 w-12 bg-gray-300 rounded-full animate-pulse mr-4"></div>
@@ -1071,11 +1094,7 @@ const ProductDetail = () => {
     );
   };
 
-
-
-
   if (loading) return <ItineraryDetailSkeleton />;
-
 
   if (error) {
     return (
@@ -1089,7 +1108,7 @@ const ProductDetail = () => {
         </div>
       </div>
     );
-  };
+  }
 
   if (loading) {
     return <ProductDetailSkeleton />;
@@ -1273,14 +1292,15 @@ const ProductDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${(
-                            isRatingHovered
-                              ? quickRating >= star
-                              : quickRating >= star
-                          )
-                            ? "text-[#F88C33] fill-current"
-                            : "text-gray-300"
-                            }`}
+                          className={`w-8 h-8 cursor-pointer ${
+                            (
+                              isRatingHovered
+                                ? quickRating >= star
+                                : quickRating >= star
+                            )
+                              ? "text-[#F88C33] fill-current"
+                              : "text-gray-300"
+                          }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -1490,12 +1510,12 @@ const ProductDetail = () => {
                     <div>
                       <p className="text-gray-700 inline break-words ">
                         {isExpanded ||
-                          product.description.length <= characterLimit
+                        product.description.length <= characterLimit
                           ? product.description
                           : `${product.description.slice(
-                            0,
-                            characterLimit
-                          )}...`}
+                              0,
+                              characterLimit
+                            )}...`}
 
                         {/* "View More / View Less" link placed inline */}
                         {product.description.length > characterLimit && (
@@ -1515,49 +1535,49 @@ const ProductDetail = () => {
                       (userRole === "seller" &&
                         canModify &&
                         product.seller)) && (
-                        <Button
-                          className="w-full bg-[#1A3B47] text-xl  text-white"
-                          variant="default"
-                          onClick={handleUpdate}
-                        >
-                          <Edit className="w-5 h-5 mr-2" /> Update Product
-                        </Button>
-                      )}
+                      <Button
+                        className="w-full bg-[#1A3B47] text-xl  text-white"
+                        variant="default"
+                        onClick={handleUpdate}
+                      >
+                        <Edit className="w-5 h-5 mr-2" /> Update Product
+                      </Button>
+                    )}
 
                     {((userRole === "admin" && product.seller == null) ||
                       (userRole === "seller" &&
                         canModify &&
                         product.seller)) && (
-                        <Button
-                          variant={product.isArchived ? "outline" : "default"}
-                          className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78] text-white"
-                          onClick={() => setShowArchiveConfirm(true)}
-                        >
-                          {product.isArchived ? (
-                            <>
-                              <ArchiveX className="w-5 h-5 mr-2" /> Unarchive Product
-                            </>
-                          ) : (
-                            <>
-                              <Archive className="w-5 h-5 mr-2" /> Archive Product
-                            </>
-                          )}
-                        </Button>
-
-                      )}
+                      <Button
+                        variant={product.isArchived ? "outline" : "default"}
+                        className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78] text-white"
+                        onClick={() => setShowArchiveConfirm(true)}
+                      >
+                        {product.isArchived ? (
+                          <>
+                            <ArchiveX className="w-5 h-5 mr-2" /> Unarchive
+                            Product
+                          </>
+                        ) : (
+                          <>
+                            <Archive className="w-5 h-5 mr-2" /> Archive Product
+                          </>
+                        )}
+                      </Button>
+                    )}
 
                     {(userRole === "admin" ||
                       (userRole === "seller" &&
                         canModify &&
                         product.seller)) && (
-                        <Button
-                          className="w-full text-xl bg-red-500 hover:bg-red-600"
-                          variant="destructive"
-                          onClick={() => setShowDeleteConfirm(true)}
-                        >
-                          <Trash2 className="w-5 h-5 mr-2" /> Delete Product
-                        </Button>
-                      )}
+                      <Button
+                        className="w-full text-xl bg-red-500 hover:bg-red-600"
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(true)}
+                      >
+                        <Trash2 className="w-5 h-5 mr-2" /> Delete Product
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
 
@@ -1579,11 +1599,25 @@ const ProductDetail = () => {
                       {/* Add to Wishlist Button - Always visible */}
                       <Button
                         variant="secondary"
-                        className="w-full text-xl bg-[#1A3B47] hover:bg-[#152D38] text-white font-bold py-2 flex items-center justify-center addToWishlist"
-                        onClick={handleAddToWishlist}
+                        className={`w-full text-xl text-white font-bold py-2 flex items-center justify-center addToWishlist ${
+                          isWishlisted
+                            ? "bg-red-600 hover:bg-red-500"
+                            : "bg-[#1A3B47] hover:bg-[#152D38]"
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isWishlisted) {
+                            handleRemoveFromWishlist();
+                          } else {
+                            handleAddToWishlist();
+                          }
+                          setIsWishlisted(!isWishlisted);
+                        }}
                       >
                         <Heart className="w-5 h-5 mr-2" />
-                        Add to Wishlist
+                        {isWishlisted
+                          ? "Remove from Wishlist"
+                          : "Add to Wishlist"}
                       </Button>
                     </div>
                   )}
@@ -1874,7 +1908,6 @@ const ProductDetail = () => {
               Close
             </Button>
           </DialogFooter>
-
         </DialogContent>
       </Dialog>
 
@@ -1942,8 +1975,6 @@ const ProductDetail = () => {
                 Close
               </Button>
             </div>
-
-
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2073,7 +2104,10 @@ const ProductDetail = () => {
             <DialogDescription>{actionSuccess}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button className="bg-[#388A94] hover:bg-[#2e6b77]" onClick={() => setActionSuccess(null)}>
+            <Button
+              className="bg-[#388A94] hover:bg-[#2e6b77]"
+              onClick={() => setActionSuccess(null)}
+            >
               Close
             </Button>
           </DialogFooter>
@@ -2146,10 +2180,11 @@ const ProductDetail = () => {
               {/* Filter by Rating Buttons */}
               <div className="flex justify-center space-x-2 mb-4">
                 <button
-                  className={`px-3 py-2 rounded-md ${filteredRating === 0
-                    ? "bg-[#388A94] text-white"
-                    : "bg-gray-200"
-                    }`}
+                  className={`px-3 py-2 rounded-md ${
+                    filteredRating === 0
+                      ? "bg-[#388A94] text-white"
+                      : "bg-gray-200"
+                  }`}
                   onClick={() => handleFilterRating(0, product)}
                 >
                   All
@@ -2157,10 +2192,11 @@ const ProductDetail = () => {
                 {[5, 4, 3, 2, 1].map((star) => (
                   <button
                     key={star}
-                    className={`px-3 py-2 rounded-md ${filteredRating === star
-                      ? "bg-[#388A94] text-white"
-                      : "bg-gray-200"
-                      }`}
+                    className={`px-3 py-2 rounded-md ${
+                      filteredRating === star
+                        ? "bg-[#388A94] text-white"
+                        : "bg-gray-200"
+                    }`}
                     onClick={() => handleFilterRating(star, product)}
                   >
                     {star} Star{star > 1 ? "s" : ""}

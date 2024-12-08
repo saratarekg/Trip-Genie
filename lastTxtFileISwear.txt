@@ -7,10 +7,10 @@ Priority List:
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
 -Error updating product. Please try again later. lama ba update product f admin s3at
--mfish show password f signup
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
 -pagination msh btl3 l awl elpage
+-mafish loading b3d ma ba search fe itineraries zy activities w HPs. 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
 -reports bayza 
 -mafish loading baad ma badoos update product
