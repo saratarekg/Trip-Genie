@@ -78,10 +78,26 @@ The project follows modern web development practices and conventions:
 - Inventory tracking
 - Sales analytics
 
+ ### For Advertisers
+- Create and manage activities
+- Set up transportation options
+- Track bookings and revenue
+- Manage advertising campaigns
+- Access analytics and performance reports
+
 ### For Tourism Governors
 - Manage historical places
 - Create and manage tags
 - Monitor tourism activities
+
+### For Admins
+- Manage user accounts
+- Monitor and moderate content
+- Generate sales reports
+- Handle complaints and support tickets
+- Create and manage promo codes
+- Oversee overall platform operations
+
 
 ## Installation
 
