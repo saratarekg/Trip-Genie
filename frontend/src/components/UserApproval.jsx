@@ -23,7 +23,7 @@ import {
   ToastDescription,
   ToastClose,
 } from "@/components/ui/toast";
-import { Check, X, Mail, User, UserX, XCircle, CheckCircle } from "lucide-react";
+import { Check, X, Mail, User, UserX, XCircle, CheckCircle } from 'lucide-react';
 import { motion } from "framer-motion";
 import DeleteConfirmation from "@/components/ui/deletionConfirmation";
 import ApprovalConfirmation from "@/components/ui/approvalConfirmation";
@@ -47,7 +47,7 @@ export default function UserApproval() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserRole, setSelectedUserRole] = useState(null);
   const [activeRole, setActiveRole] = useState("all");
-  const [isLoading,setIsLoading]= useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const roles = [
     { id: "all", label: "All Users" },
@@ -58,7 +58,11 @@ export default function UserApproval() {
 
   const filteredUsers = (role) => {
     if (role === "all") {
-      return [...advertisers, ...sellers, ...tourGuides];
+      return [
+        ...advertisers,
+        ...sellers,
+        ...tourGuides
+      ];
     }
     if (role === "advertiser") {
       return advertisers;
@@ -242,6 +246,7 @@ export default function UserApproval() {
       setUserToDelete(null);
     }
   };
+
   if (isLoading) {
     return (
       <>
@@ -297,108 +302,115 @@ export default function UserApproval() {
     );
   }
   
-  const renderUserCards = (users, role, startIndex = 0) =>
-    users.map((user, index) => (
-      <motion.div
-        key={user._id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Card className="relative overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105">
-          <CardContent className="p-6">
-            <div className="absolute top-4 right-4 flex items-center space-x-2">
-              <Button
-                onClick={() => handleDeleteClick(user, role)}
-                className="text-red-500 hover:text-red-600 active:text-red-700 active:transform active:scale-95 transition-all duration-200 p-2"
-                variant="ghost"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-              <div className="h-5 border-l border-gray-300"></div>
-              <Button
-                onClick={() => openApprovalDialog(user, role)}
-                className="text-green-500 hover:text-green-600 active:text-green-700 active:transform active:scale-95 transition-all duration-200 p-2"
-                variant="ghost"
-              >
-                <Check className="h-5 w-5" />
-              </Button>
-            </div>
-            <div className="">
-              <div className="flex flex-col items-start">
-                <Avatar className="h-12 w-12 bg-[#B5D3D1] mb-4">
-                  {user.profilePicture ? (
-                    <img
-                      src={user.profilePicture.url}
-                      alt={user.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <AvatarFallback className="text-[#1A3B47] font-semibold">
-                      {user.name?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <h3 className="font-bold text-lg text-[#1A3B47] mt-2">
-                  {user.name}
-                </h3>
-                <div className="space-y-2 text-sm text-[#5D9297] mt-2">
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2" />
-                    <span>{user.email || "N/A"}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-2" />
-                    <Badge
-                      variant="secondary"
-                      className="bg-[#388A94]/10 text-[#388A94]"
-                    >
-                      {role}
-                    </Badge>
+  const renderUserCards = (users) =>
+    users.map((user) => {
+      const userRole = 
+        advertisers.some(a => a._id === user._id) ? "advertiser" :
+        sellers.some(s => s._id === user._id) ? "seller" :
+        "tourGuide";
+
+      return (
+        <motion.div
+          key={user._id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="relative overflow-hidden bg-white shadow-md hover:shadow-xl transition-shadow duration-300 transform hover:scale-105">
+            <CardContent className="p-6">
+              <div className="absolute top-4 right-4 flex items-center space-x-2">
+                <Button
+                  onClick={() => handleDeleteClick(user, userRole)}
+                  className="text-red-500 hover:text-red-600 active:text-red-700 active:transform active:scale-95 transition-all duration-200 p-2"
+                  variant="ghost"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+                <div className="h-5 border-l border-gray-300"></div>
+                <Button
+                  onClick={() => openApprovalDialog(user, userRole)}
+                  className="text-green-500 hover:text-green-600 active:text-green-700 active:transform active:scale-95 transition-all duration-200 p-2"
+                  variant="ghost"
+                >
+                  <Check className="h-5 w-5" />
+                </Button>
+              </div>
+              <div className="">
+                <div className="flex flex-col items-start">
+                  <Avatar className="h-12 w-12 bg-[#B5D3D1] mb-4">
+                    {user.profilePicture ? (
+                      <img
+                        src={user.profilePicture.url}
+                        alt={user.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <AvatarFallback className="text-[#1A3B47] font-semibold">
+                        {user.name?.charAt(0).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <h3 className="font-bold text-lg text-[#1A3B47] mt-2">
+                    {user.name}
+                  </h3>
+                  <div className="space-y-2 text-sm text-[#5D9297] mt-2">
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 mr-2" />
+                      <span>{user.email || "N/A"}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 mr-2" />
+                      <Badge
+                        variant="secondary"
+                        className="bg-[#388A94]/10 text-[#388A94]"
+                      >
+                        {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="flex flex-col items-start space-y-2 mt-4">
-              {user.files?.IDFilename && (
-                <Button
-                  onClick={() => fetchFile(user.files.IDFilename)}
-                  className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
-                  variant="outline"
-                >
-                  View ID Document
-                </Button>
-              )}
-              {user.files?.taxationRegistryCardFilename && (
-                <Button
-                  onClick={() =>
-                    fetchFile(user.files.taxationRegistryCardFilename)
-                  }
-                  className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
-                  variant="outline"
-                >
-                  View Taxation Registry Card
-                </Button>
-              )}
-              {user.files?.certificatesFilenames &&
-                user.files.certificatesFilenames.length > 0 &&
-                user.files.certificatesFilenames.map(
-                  (certificate, certIndex) => (
-                    <Button
-                      key={certIndex}
-                      onClick={() => fetchFile(certificate)}
-                      className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
-                      variant="outline"
-                    >
-                      View Certificate {certIndex + 1}
-                    </Button>
-                  )
+              <div className="flex flex-col items-start space-y-2 mt-4">
+                {user.files?.IDFilename && (
+                  <Button
+                    onClick={() => fetchFile(user.files.IDFilename)}
+                    className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
+                    variant="outline"
+                  >
+                    View ID Document
+                  </Button>
                 )}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    ));
+                {user.files?.taxationRegistryCardFilename && (
+                  <Button
+                    onClick={() =>
+                      fetchFile(user.files.taxationRegistryCardFilename)
+                    }
+                    className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
+                    variant="outline"
+                  >
+                    View Taxation Registry Card
+                  </Button>
+                )}
+                {user.files?.certificatesFilenames &&
+                  user.files.certificatesFilenames.length > 0 &&
+                  user.files.certificatesFilenames.map(
+                    (certificate, certIndex) => (
+                      <Button
+                        key={certIndex}
+                        onClick={() => fetchFile(certificate)}
+                        className="w-full bg-white text-[#2D6F77] border border-[#2D6F77] hover:bg-[#2D6F77] hover:text-teal hover:font-bold active:bg-[#1A3B47] active:transform active:scale-95 transition-all duration-200 py-1 rounded-md text-sm"
+                        variant="outline"
+                      >
+                        View Certificate {certIndex + 1}
+                      </Button>
+                    )
+                  )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      );
+    });
 
   return (
     <ToastProvider>
@@ -434,7 +446,7 @@ export default function UserApproval() {
                 </div>
               ) : (
                 <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-auto">
-                  {renderUserCards(filteredUsers(role.id), role.id)}
+                  {renderUserCards(filteredUsers(role.id))}
                 </div>
               )}
             </TabsContent>
@@ -483,3 +495,4 @@ export default function UserApproval() {
     </ToastProvider>
   );
 }
+
