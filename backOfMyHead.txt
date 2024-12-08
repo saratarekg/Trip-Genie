@@ -128,10 +128,6 @@ Admin:
 --------------------------------------------Sprint 3------------------------------------------
 
 (tourist)
--Saved button and functionality in activity details men gowa(done✅)
--saved for itineraries(mesh lazem done✅)
--lama ba delete 7aga men el shopping cart lazem refresh 3ashan tro7
--update prefrences toast teb2a zai elba2i(ta7t)
 
 
 (tour guide)

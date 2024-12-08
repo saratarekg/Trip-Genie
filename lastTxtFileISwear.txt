@@ -12,6 +12,7 @@ sales report margins
 -no popup l flag inappropriate itinerary
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
+-add loading for wishlist 
 -updating activity popup btdos basraha 3adi w btfdl f update activity
 
 
@@ -88,26 +89,33 @@ Alaa:
 
 Houba:
 
-92
-93
-94
-95
-96
-97
+toasts ele 3ayza teb2a zai eleradwa 3mla:
+add to cart 
+advertiser deleting activity
+save/unsave activity men all
+save/unsave activity men single 
+save/unsave itinerary men all
+save/unsave itinerary men single 
+archive w unarchive product men admin
 
 
--cant add reviews sometimes(add condition to guidesteps)
 -check hn3ml eh f update itinerary lw booked
 - make all popups consistent (success toast and delete popup zay el radwa 3amlha)
+- popup archive products in admin m7taga ttzbt, sheel navigation w a3mlha toast + re-fetch
 
-
+92(done✅)
+93(done✅)
+94(done✅)
+95(done✅)
+96(done✅)
+97(done✅)
 - all products: sheel zorar el + el fo2 w khaly add to cart teadd to cart 3alatool men gheer ma tefta7 options(done✅)
 -zabat popup button color of add to cart in single product(done✅)
 - popup: - are you sure you want to accept el user dah (badal mal tick bet accept 3alatool we dah dangerous action lazem popup)(done✅)
 -Tourguide camel case fe registration (da role kefaya 7anyaka ya hadwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa done✅)
 ALLL SUBMIT/CONFIRMATION BUTTONS RIGHT ALIGNED (fel popups we fe kol el creates we make kol el alwan consistent bel mara)(done✅)
 Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button yemeen (Aby beyshed sha3ro fel background)(7a2ak ya aby done✅)
-- popup archive products in admin m7taga ttzbt, sheel navigation w a3mlha toast + re-fetch
+
 
 
 
