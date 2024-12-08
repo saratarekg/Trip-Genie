@@ -12,6 +12,8 @@ import {
   addMonths,
   addYears,
   startOfYear,
+  endOfYear,
+  parseISO,
 } from "date-fns";
 import {
   Area,
@@ -22,7 +24,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Calendar, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
+import { Calendar, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
@@ -45,7 +47,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const ItineraryReport = () => {
   const [salesReport, setSalesReport] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("all");
-  const [graphPeriod, setGraphPeriod] = useState("week");
+  const [graphPeriod, setGraphPeriod] = useState("year");
   const [filters, setFilters] = useState({
     itinerary: "",
     month: "",
@@ -59,6 +61,11 @@ const ItineraryReport = () => {
   const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
   const [isFiltering, setIsFiltering] = useState(false);
   const [error, setError] = useState(null);
+  const [initialTotalRevenue, setInitialTotalRevenue] = useState(0);
+  const [initialFillPercentage, setInitialFillPercentage] = useState(0);
+  const [thisMonthSales, setThisMonthSales] = useState(0);
+  const [lastMonthSales, setLastMonthSales] = useState(0);
+  const [initialTotalCommissionRevenue, setInitialTotalCommissionRevenue] = useState(0);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -66,87 +73,126 @@ const ItineraryReport = () => {
     return role;
   };
 
-  useEffect(() => {
-    const fetchSalesReport = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const role = getUserRole();
-        const { itinerary, month, year } = filters;
+  const loadStatistics = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const currentYear = new Date().getFullYear();
+      const monthlyDataPromises = Array.from({ length: 12 }, (_, i) => {
+        const month = i + 1;
         const url = new URL(`http://localhost:4000/${role}/itineraries-report`);
-        if (itinerary) url.searchParams.append("itinerary", itinerary);
-        if (month) url.searchParams.append("month", month);
-        if (year) url.searchParams.append("year", year);
-
-        const response = await axios.get(url.toString(), {
+        url.searchParams.append("year", currentYear);
+        url.searchParams.append("month", month);
+        return axios.get(url.toString(), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+      });
+
+      const monthlyDataResponses = await Promise.all(monthlyDataPromises);
+      const monthlySalesData = monthlyDataResponses.map((response) => response.data.itinerariesSales).flat();
+
+      if (monthlySalesData.length > 0) {
+        setSalesReport({ itinerariesSales: monthlySalesData });
+
+        const uniqueItineraryNames = [
+          ...new Set(
+            monthlySalesData.map((item) => item.itinerary.title)
+          ),
+        ];
+        setItineraryNames(uniqueItineraryNames);
+
+        const totalRevenue = monthlyDataResponses.reduce((sum, response) => sum + (response.data.totalItinerariesRevenue || 0), 0);
+        const totalAppRevenue = monthlyDataResponses.reduce((sum, response) => sum + (response.data.totalItinerariesAppRevenue || 0), 0);
+        setTotalRevenue(totalRevenue);
+        setTotalAppRevenue(totalAppRevenue);
+        setSelectedPeriodRevenue(
+          calculatePeriodRevenue(monthlySalesData, "all")
+        );
+        setInitialTotalRevenue(totalAppRevenue);
+        setInitialTotalCommissionRevenue(totalAppRevenue);
+        setInitialFillPercentage(
+          totalAppRevenue
+            ? (calculatePeriodRevenue(monthlySalesData, "all") /
+                totalAppRevenue) *
+                100
+            : 0
+        );
+
+        setFilteredSales(monthlySalesData);
+
+        // Calculate this month and last month sales
+        const thisMonthSales = calculatePeriodRevenue(monthlySalesData, "month");
+        const lastMonthSales = calculateLastMonthSales(monthlySalesData);
+        setThisMonthSales(thisMonthSales);
+        setLastMonthSales(lastMonthSales);
+
+        // Process graph data
+        updateGraphData(monthlySalesData, "year");
+      } else {
+        setError(
+          "Invalid data structure received from the server: itinerariesSales missing"
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching sales report:", error);
+      setError("Failed to fetch sales report. Please try again later.");
+    }
+  };
+
+  const fetchFilteredData = async (newFilters) => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const url = new URL(`http://localhost:4000/${role}/itineraries-report`);
+      if (newFilters.month) url.searchParams.append("month", newFilters.month);
+      if (newFilters.year) url.searchParams.append("year", newFilters.year);
+
+      const response = await axios.get(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data && response.data.itinerariesSales) {
         setSalesReport(response.data);
-        if (response.data && response.data.itinerariesSales) {
-          updateGraphData(response.data.itinerariesSales, graphPeriod);
-
-          const uniqueItineraryNames = [
-            ...new Set(
-              response.data.itinerariesSales.map((item) => item.itinerary.title)
-            ),
-          ];
-          setItineraryNames(uniqueItineraryNames);
-
-          setTotalRevenue(response.data.totalItinerariesRevenue || 0);
-          setTotalAppRevenue(response.data.totalItinerariesAppRevenue || 0);
-          setSelectedPeriodRevenue(
-            calculatePeriodRevenue(response.data.itinerariesSales, "all")
-          );
-
-          setFilteredSales(response.data.itinerariesSales);
-        } else {
-          setError(
-            "Invalid data structure received from the server: itinerariesSales missing"
+        let filteredData = response.data.itinerariesSales;
+        
+        // Apply itinerary filter in the front-end
+        if (newFilters.itinerary) {
+          filteredData = filteredData.filter(
+            (item) => item.itinerary && item.itinerary.title === newFilters.itinerary
           );
         }
-      } catch (error) {
-        console.error("Error fetching sales report:", error);
-        setError("Failed to fetch sales report. Please try again later.");
+        
+        setFilteredSales(filteredData);
+        updateGraphData(filteredData, graphPeriod);
+      } else {
+        setError("Invalid data structure received from the server: itinerariesSales missing");
       }
-    };
-
-    fetchSalesReport();
-  }, [
-    filters.day,
-    filters.month,
-    filters.year,
-    filters.itinerary,
-    graphPeriod,
-  ]);
+    } catch (error) {
+      console.error("Error fetching filtered data:", error);
+      setError("Failed to fetch filtered data. Please try again later.");
+    }
+  };
 
   useEffect(() => {
-    if (salesReport) {
-      setSelectedPeriodRevenue(
-        calculatePeriodRevenue(salesReport.itinerariesSales, selectedPeriod)
-      );
-    }
-  }, [selectedPeriod, salesReport]);
+    loadStatistics();
+  }, []);
 
   useEffect(() => {
-    if (salesReport) {
-      updateGraphData(salesReport.itinerariesSales, graphPeriod);
-    }
-  }, [graphPeriod, salesReport]);
+    fetchFilteredData(filters);
+  }, [filters]);
 
   const updateGraphData = (salesData, period) => {
-    if (!Array.isArray(salesData)) {
-      console.error("Invalid sales data:", salesData);
-      return;
-    }
     const now = new Date();
-    let startDate, dateFormat, groupingFunction, data;
+    let startDate, dateFormat, data;
 
     switch (period) {
       case "week":
         startDate = subDays(now, 6);
         dateFormat = "EEE";
-        groupingFunction = (date) => format(date, "yyyy-MM-dd");
         data = Array.from({ length: 7 }, (_, i) => ({
           date: format(addDays(startDate, i), dateFormat),
           sales: 0,
@@ -156,7 +202,6 @@ const ItineraryReport = () => {
       case "year":
         startDate = startOfYear(now);
         dateFormat = "MMM";
-        groupingFunction = (date) => format(date, "yyyy-MM");
         data = Array.from({ length: 12 }, (_, i) => ({
           date: format(addMonths(startDate, i), dateFormat),
           sales: 0,
@@ -166,7 +211,6 @@ const ItineraryReport = () => {
       case "all":
         startDate = subYears(now, 7);
         dateFormat = "yyyy";
-        groupingFunction = (date) => format(date, "yyyy");
         data = Array.from({ length: 8 }, (_, i) => ({
           date: format(addYears(startDate, i), dateFormat),
           sales: 0,
@@ -176,12 +220,10 @@ const ItineraryReport = () => {
     }
 
     salesData.forEach((item) => {
-      const date = new Date(item.itinerary.createdAt);
+      const date = parseISO(item.itinerary.createdAt);
       if (date >= startDate && date <= now) {
-        const key = groupingFunction(date);
-        const index = data.findIndex(
-          (d) => d.date === format(date, dateFormat)
-        );
+        const key = format(date, dateFormat);
+        const index = data.findIndex((d) => d.date === key);
         if (index !== -1) {
           data[index].sales += 1;
           data[index].revenue += item.appRevenue;
@@ -196,7 +238,7 @@ const ItineraryReport = () => {
     if (!Array.isArray(salesData)) return 0;
     const now = new Date();
     return salesData.reduce((sum, item) => {
-      const saleDate = new Date(item.itinerary.createdAt);
+      const saleDate = parseISO(item.itinerary.createdAt);
       switch (period) {
         case "today":
           return (
@@ -230,6 +272,20 @@ const ItineraryReport = () => {
     }, 0);
   };
 
+  const calculateLastMonthSales = (salesData) => {
+    const lastMonth = subMonths(new Date(), 1);
+    return salesData.reduce((sum, item) => {
+      const saleDate = parseISO(item.itinerary.createdAt);
+      return (
+        sum +
+        (saleDate.getMonth() === lastMonth.getMonth() &&
+        saleDate.getFullYear() === lastMonth.getFullYear()
+          ? item.appRevenue
+          : 0)
+      );
+    }, 0);
+  };
+
   const resetFilters = () => {
     setFilters({ itinerary: "", month: "", year: "" });
   };
@@ -238,48 +294,16 @@ const ItineraryReport = () => {
     const newFilters = { ...filters, [key]: value };
     if (key === "year") {
       newFilters.month = "";
-      newFilters.day = "";
-    } else if (key === "month") {
-      newFilters.day = "";
     }
     setFilters(newFilters);
-  };
-
-  const applyItineraryFilter = (itineraryName) => {
-    const filteredData = itineraryName
-      ? salesReport.itinerariesSales.filter(
-          (item) => item.itinerary && item.itinerary.title === itineraryName
-        )
-      : salesReport.itinerariesSales;
-    setFilteredSales(filteredData);
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
   if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
 
-  const fillPercentage = totalAppRevenue
-    ? (selectedPeriodRevenue / totalAppRevenue) * 100
+  const fillPercentage = initialTotalRevenue
+    ? (selectedPeriodRevenue / initialTotalRevenue) * 100
     : 0;
-
-  const thisMonthSales = calculatePeriodRevenue(
-    salesReport?.itinerariesSales || [],
-    "month"
-  );
-  const lastMonthSales = (() => {
-    const lastMonth = subMonths(new Date(), 1);
-    return (
-      salesReport?.itinerariesSales?.reduce((sum, item) => {
-        const saleDate = new Date(item.createdAt);
-        return (
-          sum +
-          (saleDate.getMonth() === lastMonth.getMonth() &&
-          saleDate.getFullYear() === lastMonth.getFullYear()
-            ? item.appRevenue
-            : 0)
-        );
-      }, 0) || 0
-    );
-  })();
 
   const thisMonthChange =
     lastMonthSales === 0
@@ -309,44 +333,6 @@ const ItineraryReport = () => {
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
                   Total Revenue
                 </CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
-                    >
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span className="mr-1">{selectedPeriod}</span>
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[100px]">
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("today")}
-                    >
-                      Today
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("week")}
-                    >
-                      This Week
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("month")}
-                    >
-                      This Month
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("year")}
-                    >
-                      This Year
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setSelectedPeriod("all")}>
-                      All Time
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </CardHeader>
             <CardContent className="p-3 flex flex-col justify-center items-center w-full">
@@ -372,7 +358,8 @@ const ItineraryReport = () => {
                     strokeDashoffset="283"
                     initial={{ strokeDashoffset: 283 }}
                     animate={{
-                      strokeDashoffset: 283 - (283 * fillPercentage) / 100,
+                      strokeDashoffset:
+                        283 - (283 * initialFillPercentage) / 100,
                     }}
                     transition={{
                       duration: 1,
@@ -384,19 +371,16 @@ const ItineraryReport = () => {
                   <span className="text-lg font-bold text-[#1A3B47]">
                     ${selectedPeriodRevenue?.toFixed(2)}
                   </span>
-                  <span className="text-sm text-[#5D9297]">
-                    {selectedPeriod.charAt(0).toUpperCase() +
-                      selectedPeriod.slice(1)}
-                  </span>
+                  <span className="text-sm text-[#5D9297]">All Time</span>
                 </div>
               </div>
               <div className="text-center mt-4">
                 <p className="text-base text-[#5D9297]">
-                  {fillPercentage.toFixed(1)}% of total
+                  {initialFillPercentage.toFixed(1)}% of total
                 </p>
                 <p className="text-base font-semibold text-[#1A3B47]">
-                  {totalAppRevenue !== null &&
-                    `Commission Revenue: $${totalAppRevenue?.toFixed(2)}`}
+                  {initialTotalCommissionRevenue !== null &&
+                    `Total Commission Revenue: $${initialTotalCommissionRevenue?.toFixed(2)}`}
                 </p>
               </div>
             </CardContent>
@@ -468,30 +452,6 @@ const ItineraryReport = () => {
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
                   Sales Analytics
                 </CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
-                    >
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span className="mr-1">{graphPeriod}</span>
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[100px]">
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("week")}>
-                      This Week
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("year")}>
-                      This Year
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("all")}>
-                      All Time
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </CardHeader>
             <CardContent className="pl-0">
@@ -571,7 +531,7 @@ const ItineraryReport = () => {
               <Select
                 value={filters.itinerary}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, itinerary: value }))
+                  handleFilterChange("itinerary", value)
                 }
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
@@ -588,7 +548,7 @@ const ItineraryReport = () => {
               <Select
                 value={filters.year}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, year: value, month: "" }))
+                  handleFilterChange("year", value)
                 }
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
@@ -608,7 +568,7 @@ const ItineraryReport = () => {
               <Select
                 value={filters.month}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, month: value }))
+                  handleFilterChange("month", value)
                 }
                 disabled={!filters.year}
               >
@@ -716,3 +676,4 @@ const ItineraryReport = () => {
 };
 
 export default ItineraryReport;
+
