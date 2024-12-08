@@ -8,6 +8,8 @@ Priority List:
 -Error updating product. Please try again later. lama ba update product f admin s3at
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
+-pagination msh btl3 l awl elpage
+-single pages el title mktoob 3 mrat leh f activity/itinerary/product
 -reports bayza 
 -mafish loading baad ma badoos update product
 -sa3at beyede error lama mark all as read
