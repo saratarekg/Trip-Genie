@@ -549,7 +549,7 @@ const ProductDetail = ({ id, onBack }) => {
         setError("Error fetching product details. Please try again later.");
         console.error("Error fetching product details:", err);
       } finally {
-        setLoading(false);
+       // setLoading(false);
       }
     };
     fetchUserInfo();
@@ -871,9 +871,117 @@ const ProductDetail = ({ id, onBack }) => {
       setActionError("Error submitting review. Please try again.");
     }
   };
+  const ItineraryDetailSkeleton = () => {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        
+
+        <div className="mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="lg:w-3/4">
+              <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="h-10 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                    <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                  </div>
+
+                  <div className="w-full h-[400px] bg-gray-300 rounded animate-pulse mb-6"></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="lg:w-1/4">
+              <Card>
+                <CardHeader>
+                  <div className="h-8 w-3/4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="mt-4 text-4xl font-semibold text-center animate-pulse">
+                    <div className="text-sm text-gray-500 flex items-center justify-center mt-6"></div>
+                  </div>
+
+                  <div className="mt-4 animate-pulse">
+                    <div className="h-12 w-1/2 bg-gray-300 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-300 rounded mt-40"></div>
+                  </div>
+
+                  <div className="mt-6 animate-pulse">
+                    <div className="h-10  bg-gray-300 rounded"></div>
+                    <div className="h-10 bg-gray-300 rounded mt-6"></div>
+                    <div className="h-10 bg-gray-300 rounded mt-6"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          <div className="mt-8 bg-white p-6 rounded-lg shadow-md ">
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-8 w-1/4 bg-gray-300 rounded animate-pulse"></div>
+                <div className="h-8 w-20 bg-gray-300 rounded animate-pulse"></div>
+              </div>
+
+              <div className="flex gap-8 mb-6">
+                <div className="text-center">
+                  <div className="h-12 w-12 bg-gray-300 rounded animate-pulse mx-auto mb-2"></div>
+                  <div className="h-4 w-16 bg-gray-300 rounded animate-pulse mx-auto"></div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <div className="h-4 w-full bg-gray-300 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-6">
+              <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-4"></div>
+              <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse mb-4"></div>
+              <div className="flex items-left justify-between mb-4">
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                <div className="flex-1 flex justify-between px-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card
+                      key={i}
+                      className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
+                    >
+                      <CardHeader className="flex items-start">
+                        <div className="flex">
+                          <div className="h-12 w-12 bg-gray-300 rounded-full animate-pulse mr-4"></div>
+                          <div className="flex flex-col">
+                            <div className="h-4 w-24 bg-gray-300 rounded animate-pulse mb-2"></div>
+                            <div className="h-3 w-16 bg-gray-300 rounded animate-pulse"></div>
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-4 w-full bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-full bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-3/4 bg-gray-300 rounded animate-pulse"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
 
   if (loading) {
-    return <Loader />;
+    return <ItineraryDetailSkeleton />;
   }
 
   if (error) {
