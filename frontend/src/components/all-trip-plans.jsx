@@ -369,7 +369,9 @@ export function AllItinerariesComponent() {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [isSortedByPreference, setIsSortedByPreference] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState({
+    role: Cookies.get("role") || "guest",
+  });
   const [isPriceInitialized, setIsPriceInitialized] = useState(false);
   const [alertMessage, setAlertMessage] = useState(null);
 
@@ -417,7 +419,7 @@ export function AllItinerariesComponent() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-
+        console.log(userInfo);
         setUserInfo({
           role,
           preferredCurrency: currencyResponse.data,
@@ -618,8 +620,8 @@ export function AllItinerariesComponent() {
   }, [sortBy, myItineraries]);
 
   useEffect(() => {
-    fetchUserInfo();
-  }, [fetchUserInfo]);
+    Promise.all([fetchUserInfo(), fetchItineraries(), fetchData()]);
+  }, []);
 
   useEffect(() => {
     if (userInfo) {
@@ -697,24 +699,18 @@ export function AllItinerariesComponent() {
     }
   };
 
-  useEffect(() => {
-    fetchItineraries();
-
-    const fetchData = async () => {
-      try {
-        const [typesResponse, languagesResponse] = await Promise.all([
-          axios.get("http://localhost:4000/api/getAllTypes"),
-          axios.get("http://localhost:4000/api/getAllLanguages"),
-        ]);
-        setTypesOptions(typesResponse.data);
-        setLanguagesOptions(languagesResponse.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const fetchData = async () => {
+    try {
+      const [typesResponse, languagesResponse] = await Promise.all([
+        axios.get("http://localhost:4000/api/getAllTypes"),
+        axios.get("http://localhost:4000/api/getAllLanguages"),
+      ]);
+      setTypesOptions(typesResponse.data);
+      setLanguagesOptions(languagesResponse.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
