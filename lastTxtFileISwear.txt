@@ -108,10 +108,8 @@ save/unsave itinerary men all
 save/unsave itinerary men single 
 archive w unarchive product men admin
 
-
 -check hn3ml eh f update itinerary lw booked
 - make all popups consistent (success toast and delete popup zay el radwa 3amlha)
-- popup archive products in admin m7taga ttzbt, sheel navigation w a3mlha toast + re-fetch
 
 92(done✅)
 93(done✅)
