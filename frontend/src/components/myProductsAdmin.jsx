@@ -467,14 +467,19 @@ export function MyProducts() {
                     </Button>
                     <span className="text-sm font-medium text-[#1A3B47]">
                       Page {currentPage} of{" "}
-                      {Math.ceil(products.length / productsPerPage)}
+                      {Math.max(
+                        1,
+                        Math.ceil(products.length / productsPerPage)
+                      )}
                     </span>
                     <Button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={
                         currentPage ===
-                          Math.ceil(products.length / productsPerPage) ||
-                        products.length === 0
+                          Math.max(
+                            1,
+                            Math.ceil(products.length / productsPerPage)
+                          ) || products.length === 0
                       }
                       variant="outline"
                       size="icon"

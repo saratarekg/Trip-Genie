@@ -261,9 +261,11 @@ const ItineraryCard = ({
               {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
             </span>
           )}
-           {!itinerary.appropriate && (
+          {!itinerary.appropriate && (
             <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-              {role === "tour-guide" ? "inappropriate" : "Currently Unavailable"}
+              {role === "tour-guide"
+                ? "inappropriate"
+                : "Currently Unavailable"}
             </span>
           )}
         </div>
@@ -915,7 +917,7 @@ export function MyItinerariesComponent() {
         style={{ backgroundImage }}
       >
         <div className="absolute inset-0"></div>
-        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+        <div className="relative py-8 h-full flex items-center">
           <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">
               My Itineraries
@@ -1148,12 +1150,13 @@ export function MyItinerariesComponent() {
                 </Button>
                 <span className="text-sm font-medium text-[#1A3B47]">
                   Page {currentPage} of{" "}
-                  {Math.ceil(itineraries.length / tripsPerPage)}
+                  {Math.max(1, Math.ceil(itineraries.length / tripsPerPage))}
                 </span>
                 <Button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={
-                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
+                    currentPage ===
+                    Math.max(1, Math.ceil(itineraries.length / tripsPerPage))
                   }
                   variant="outline"
                   size="icon"

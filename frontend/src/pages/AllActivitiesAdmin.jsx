@@ -5,7 +5,18 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { Search, ChevronLeft, ChevronRight, Star, Filter, ArrowUpDown, Heart, Edit, Trash2, Bookmark } from 'lucide-react';
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  Filter,
+  ArrowUpDown,
+  Heart,
+  Edit,
+  Trash2,
+  Bookmark,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,8 +40,9 @@ const renderStars = (rating) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-4 h-4 ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-4 h-4 ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
         />
       ))}
     </div>
@@ -57,8 +69,12 @@ const ActivityCard = ({
 
   useEffect(() => {
     if (savedActivities && savedActivities.length > 0) {
-      setIsSaved(savedActivities.some(savedActivity => savedActivity.activity.toString() === activity._id.toString()));
-      
+      setIsSaved(
+        savedActivities.some(
+          (savedActivity) =>
+            savedActivity.activity.toString() === activity._id.toString()
+        )
+      );
     }
     console.log(isSaved);
   }, [savedActivities, activity._id]);
@@ -87,8 +103,8 @@ const ActivityCard = ({
     const initializeCard = async () => {
       await Promise.all([
         userInfo &&
-          userInfo.role === "tourist" &&
-          userInfo.preferredCurrency !== activity.currency
+        userInfo.role === "tourist" &&
+        userInfo.preferredCurrency !== activity.currency
           ? fetchExchangeRate()
           : getCurrencySymbol(),
       ]);
@@ -129,7 +145,6 @@ const ActivityCard = ({
     }
   }, [userInfo, activity]);
 
-
   const getCurrencySymbol = useCallback(async () => {
     if (userInfo) {
       setCurrencySymbol("$");
@@ -158,56 +173,77 @@ const ActivityCard = ({
   }
 
   return (
-<Card
-    className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative"
-    onClick={() => onSelect(activity._id)}
-  >
-    <div className="relative aspect-video overflow-hidden">
-      <img
-        src={activity.pictures?.[0]?.url || defaultImage}
-        alt={activity.name}
-        className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-      />
-    </div>
-    <CardHeader className="p-4">
-      <CardTitle className="text-xl font-semibold text-[#1A3B47]">{activity.name}</CardTitle>
-      <p className="text-sm text-muted-foreground">{activity.location.address}</p>
-    </CardHeader>
-    <CardContent className="p-4 pt-0 space-y-2">
-      <div className="flex items-center space-x-1">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            className={`h-4 w-4 ${
-              i < activity.rating ? "text-[#F88C33] fill-[#F88C33]" : "text-gray-300"
-            }`}
-          />
-        ))}
-        <span className="text-sm text-muted-foreground ml-1">{activity.rating.toFixed(1)}</span>
+    <Card
+      className="overflow-hidden cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl relative"
+      onClick={() => onSelect(activity._id)}
+    >
+      <div className="relative aspect-video overflow-hidden">
+        <img
+          src={activity.pictures?.[0]?.url || defaultImage}
+          alt={activity.name}
+          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+        />
       </div>
-      <div className="flex justify-between items-center">
-        <span className="text-lg font-bold text-[#388A94]">$ {activity.price}</span>
-        <span className="text-sm text-[#1A3B47]">{activity.duration} hours</span>
-      </div>
-      <p className="text-sm text-[#1A3B47]">{new Date(activity.timing).toLocaleDateString()}</p>
-    </CardContent>
-    <CardFooter className="p-4 pt-0">
-      <div className="flex flex-wrap gap-2">
-        {activity.tags.map((tag, index) => (
-          <Badge key={index} variant="outline" className="bg-[#E6DCCF] text-[#1A3B47]">
-            {tag.type}
-          </Badge>
-        ))}
-        {activity.category.map((cat, index) => (
-          <Badge key={index} variant="secondary" className="bg-[#B5D3D1] text-[#1A3B47]">
-            {cat.name}
-          </Badge>
-        ))}
-      </div>
-    </CardFooter>
-  </Card>
-);
-
+      <CardHeader className="p-4">
+        <CardTitle className="text-xl font-semibold text-[#1A3B47]">
+          {activity.name}
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          {activity.location.address}
+        </p>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 space-y-2">
+        <div className="flex items-center space-x-1">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              className={`h-4 w-4 ${
+                i < activity.rating
+                  ? "text-[#F88C33] fill-[#F88C33]"
+                  : "text-gray-300"
+              }`}
+            />
+          ))}
+          <span className="text-sm text-muted-foreground ml-1">
+            {activity.rating.toFixed(1)}
+          </span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-bold text-[#388A94]">
+            $ {activity.price}
+          </span>
+          <span className="text-sm text-[#1A3B47]">
+            {activity.duration} hours
+          </span>
+        </div>
+        <p className="text-sm text-[#1A3B47]">
+          {new Date(activity.timing).toLocaleDateString()}
+        </p>
+      </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <div className="flex flex-wrap gap-2">
+          {activity.tags.map((tag, index) => (
+            <Badge
+              key={index}
+              variant="outline"
+              className="bg-[#E6DCCF] text-[#1A3B47]"
+            >
+              {tag.type}
+            </Badge>
+          ))}
+          {activity.category.map((cat, index) => (
+            <Badge
+              key={index}
+              variant="secondary"
+              className="bg-[#B5D3D1] text-[#1A3B47]"
+            >
+              {cat.name}
+            </Badge>
+          ))}
+        </div>
+      </CardFooter>
+    </Card>
+  );
 };
 
 export default function AllActivities() {
@@ -246,9 +282,12 @@ export default function AllActivities() {
     if (userInfo?.role === "tourist") {
       try {
         const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/saved-activities", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "http://localhost:4000/tourist/saved-activities",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setSavedActivities(response.data);
       } catch (error) {
         console.error("Error fetching saved activities:", error);
@@ -259,7 +298,6 @@ export default function AllActivities() {
   useEffect(() => {
     fetchSavedActivities();
   }, [fetchSavedActivities]);
-
 
   const handleSaveActivity = async (activityId) => {
     try {
@@ -286,19 +324,24 @@ export default function AllActivities() {
     }
   };
 
-  const handleActivitySaved = useCallback((activityId, isSaved) => {
-    setAlertMessage({
-      type: "success",
-      message: isSaved ? "Activity saved successfully!" : "Activity unsaved successfully!",
-    });
-    
-    // Clear the alert message after 3 seconds
-    setTimeout(() => {
-      setAlertMessage(null);
-    }, 2000);
+  const handleActivitySaved = useCallback(
+    (activityId, isSaved) => {
+      setAlertMessage({
+        type: "success",
+        message: isSaved
+          ? "Activity saved successfully!"
+          : "Activity unsaved successfully!",
+      });
 
-    fetchSavedActivities();
-  }, [fetchSavedActivities]);
+      // Clear the alert message after 3 seconds
+      setTimeout(() => {
+        setAlertMessage(null);
+      }, 2000);
+
+      fetchSavedActivities();
+    },
+    [fetchSavedActivities]
+  );
 
   const fetchUserInfo = useCallback(async () => {
     const role = Cookies.get("role") || "guest";
@@ -421,7 +464,6 @@ export default function AllActivities() {
     }
   }, []);
 
-
   const fetchCurrencies = useCallback(async () => {
     const role = Cookies.get("role");
     if (role !== "tourist") return;
@@ -489,12 +531,9 @@ export default function AllActivities() {
     dateRange,
   ]);
 
-  const handleActivitySelect = useCallback(
-    (id) => {
-      setSelectedActivityId(id);
-    },
-    []
-  );
+  const handleActivitySelect = useCallback((id) => {
+    setSelectedActivityId(id);
+  }, []);
 
   const handleBackToAllActivities = () => {
     setSelectedActivityId(null);
@@ -640,7 +679,11 @@ export default function AllActivities() {
       // Ensure 'end' date is not before 'start' date
       if (type === "start" && newRange.end && newRange.start > newRange.end) {
         newRange.end = newRange.start;
-      } else if (type === "end" && newRange.start && newRange.end < newRange.start) {
+      } else if (
+        type === "end" &&
+        newRange.start &&
+        newRange.end < newRange.start
+      ) {
         newRange.end = newRange.start;
       }
       return newRange;
@@ -696,7 +739,7 @@ export default function AllActivities() {
                 </div>
               </div>
             </div>
-  
+
             {/* Main Content Skeleton */}
             <div className="flex-1">
               {/* Search and Filters Skeleton */}
@@ -708,7 +751,7 @@ export default function AllActivities() {
                   <div className="h-10 w-40 bg-gray-200 rounded-full animate-pulse"></div>
                 </div>
               </div>
-  
+
               {/* Cards Grid Skeleton */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -729,7 +772,7 @@ export default function AllActivities() {
                   </div>
                 ))}
               </div>
-  
+
               {/* Pagination Skeleton */}
               <div className="mt-8 flex justify-center items-center space-x-4">
                 <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
@@ -742,10 +785,6 @@ export default function AllActivities() {
       </div>
     );
   };
-  
-  
-  
-  
 
   return (
     <div className="bg-gray-100">
@@ -767,7 +806,9 @@ export default function AllActivities() {
           <div className="flex gap-8">
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+                <h2 className="text-xl font-semibold text-[#1A3B47]">
+                  Filters
+                </h2>
                 <Button
                   onClick={clearFilters}
                   size="sm"
@@ -778,7 +819,9 @@ export default function AllActivities() {
               </div>
               <div className="space-y-6">
                 <div>
-                  <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">
+                    Price Range
+                  </h3>
                   {isPriceInitialized && (
                     <DualHandleSliderComponent
                       min={0}
@@ -794,32 +837,43 @@ export default function AllActivities() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">
+                    Date Range
+                  </h3>
                   <div className="space-y-2">
                     <input
                       type="date"
                       value={dateRange.start}
                       min={new Date().toISOString().split("T")[0]}
-                      onChange={(e) => handleDateChange("start", e.target.value)}
+                      onChange={(e) =>
+                        handleDateChange("start", e.target.value)
+                      }
                       className="w-full p-2 border rounded"
                     />
                     <input
                       type="date"
                       value={dateRange.end}
-                      min={dateRange.start || new Date().toISOString().split("T")[0]}
+                      min={
+                        dateRange.start ||
+                        new Date().toISOString().split("T")[0]
+                      }
                       onChange={(e) => handleDateChange("end", e.target.value)}
                       className="w-full p-2 border rounded"
                     />
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-medium text-[#1A3B47] mb-2">Star Rating</h3>
+                  <h3 className="font-medium text-[#1A3B47] mb-2">
+                    Star Rating
+                  </h3>
                   <div className="space-y-2">
                     {[5, 4, 3, 2, 1].map((rating) => (
                       <button
                         key={rating}
                         onClick={() =>
-                          setSelectedRating(rating === selectedRating ? null : rating)
+                          setSelectedRating(
+                            rating === selectedRating ? null : rating
+                          )
                         }
                         className={`flex items-center w-full p-2 rounded hover:bg-gray-100 ${
                           selectedRating === rating ? "bg-[#B5D3D1]" : ""
@@ -918,7 +972,9 @@ export default function AllActivities() {
                       >
                         <Heart
                           className={`w-4 h-4 mr-2 ${
-                            isSortedByPreference ? "fill-current text-red-500" : ""
+                            isSortedByPreference
+                              ? "fill-current text-red-500"
+                              : ""
                           }`}
                         />
                         Sort by Preference
@@ -962,14 +1018,19 @@ export default function AllActivities() {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
+                    onClick={() =>
+                      handlePageChange(Math.max(currentPage - 1, 1))
+                    }
                     disabled={currentPage === 1}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span className="text-sm">
                     Page {currentPage} of{" "}
-                    {Math.ceil(sortedActivities.length / activitiesPerPage)}
+                    {Math.max(
+                      1,
+                      Math.ceil(sortedActivities.length / activitiesPerPage)
+                    )}
                   </span>
                   <Button
                     variant="outline"
@@ -984,7 +1045,10 @@ export default function AllActivities() {
                     }
                     disabled={
                       currentPage ===
-                      Math.ceil(sortedActivities.length / activitiesPerPage)
+                      Math.max(
+                        1,
+                        Math.ceil(sortedActivities.length / activitiesPerPage)
+                      )
                     }
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -1007,4 +1071,4 @@ export default function AllActivities() {
       )}
     </div>
   );
-}  
+}

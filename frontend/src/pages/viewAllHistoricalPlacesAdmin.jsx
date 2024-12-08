@@ -6,7 +6,14 @@ import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import * as jwtDecode from "jwt-decode";
-import { Search, ChevronLeft, ChevronRight, Edit, Trash2, Heart } from "lucide-react";
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Trash2,
+  Heart,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,7 +39,7 @@ import Loader from "@/components/loader";
 import defaultImage from "../assets/images/default-image.jpg";
 import historicalPlaceImage from "../assets/images/hp.png";
 import HistoricalPlaceDetail from "@/components/HistoricalPlaceDetailAdmin"; // Import the detail component
-import { Pagination } from "@/components/ui/pagination2"
+import { Pagination } from "@/components/ui/pagination2";
 
 const HistoricalPlaceCard = ({
   historicalPlace,
@@ -76,26 +83,23 @@ const HistoricalPlaceCard = ({
         <div className="flex flex-col">
           {historicalPlace.ticketPrices?.native && (
             <span className="text-md font-bold text-gray-900">
-              Native: $
-              {historicalPlace.ticketPrices.native}
+              Native: ${historicalPlace.ticketPrices.native}
             </span>
           )}
           {historicalPlace.ticketPrices?.student && (
             <span className="text-md font-bold text-gray-900">
-              Student: $
-              {historicalPlace.ticketPrices.student}
+              Student: ${historicalPlace.ticketPrices.student}
             </span>
           )}
           {historicalPlace.ticketPrices?.foreigner && (
             <span className="text-md font-bold text-gray-900">
-              Foreigner: $
-              {historicalPlace.ticketPrices.foreigner}
+              Foreigner: ${historicalPlace.ticketPrices.foreigner}
             </span>
           )}
         </div>
       </CardFooter>
       <div className="p-4 pt-0">
-      <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500">
           {historicalPlace.location.city}, {historicalPlace.location.country}
         </span>
       </div>
@@ -119,9 +123,10 @@ export default function AllHistoricalPlacesComponent() {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [isSortedByPreference, setIsSortedByPreference] = useState(true);
-  const [selectedHistoricalPlaceId, setSelectedHistoricalPlaceId] = useState(null); // Add state for selected historical place
+  const [selectedHistoricalPlaceId, setSelectedHistoricalPlaceId] =
+    useState(null); // Add state for selected historical place
   const navigate = useNavigate();
- 
+
   const tripsPerPage = 6;
 
   const getUserRole = useCallback(() => {
@@ -132,9 +137,7 @@ export default function AllHistoricalPlacesComponent() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        await Promise.all([
-          fetchTypesAndPeriods(),
-        ]);
+        await Promise.all([fetchTypesAndPeriods()]);
         await fetchHistoricalPlaces(true);
       } catch (error) {
         console.error("Error in fetching data:", error);
@@ -152,23 +155,21 @@ export default function AllHistoricalPlacesComponent() {
     }
   }, [searchTerm, selectedTypes]);
 
- 
-
   const fetchHistoricalPlaces = async (sortByPreference = false) => {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
       let url = `http://localhost:4000/${role}/historical-places`;
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setHistoricalPlaces(data);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setHistoricalPlaces(data);
       setError(null);
     } catch (error) {
       console.error("Error fetching historical places:", error);
@@ -287,7 +288,7 @@ export default function AllHistoricalPlacesComponent() {
     setSearchTerm("");
     setSelectedTypes([]);
   };
-  
+
   const SkeletonSearchBar = () => (
     <div className="relative mb-4">
       <div className="h-10 w-full bg-gray-300 rounded-full animate-pulse" />
@@ -301,23 +302,22 @@ export default function AllHistoricalPlacesComponent() {
       <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse" />
     </div>
   );
-  
-  const SkeletonCard = () => (
 
+  const SkeletonCard = () => (
     <Card className="overflow-hidden border rounded-lg shadow-sm">
       {/* Header: Simulates an image */}
       <CardHeader className="p-0">
         <div className="h-48 bg-gray-300 animate-pulse" />
       </CardHeader>
-  
+
       {/* Content: Simulates title, subtitle, and description */}
       <CardContent className="p-6">
         {/* Title */}
         <div className="h-6 w-2/3 bg-gray-300 rounded animate-pulse mb-4" />
-  
+
         {/* Subtitle */}
         <div className="h-4 w-1/2 bg-gray-200 rounded animate-pulse mb-4" />
-  
+
         {/* Paragraph or description */}
         <div className="space-y-3">
           <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
@@ -325,19 +325,16 @@ export default function AllHistoricalPlacesComponent() {
           <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
         </div>
       </CardContent>
-  
+
       {/* Footer: Simulates buttons or additional information */}
       <CardFooter className="p-6 border-t flex justify-between items-center">
         {/* Simulates label or small text */}
         <div className="h-4 w-1/3 bg-gray-300 rounded animate-pulse" />
-  
+
         {/* Simulates a button or action */}
-       
       </CardFooter>
     </Card>
   );
-  
-  
 
   const SkeletonFeaturedPlace = () => (
     <div className="flex items-center gap-3 p-2">
@@ -358,8 +355,11 @@ export default function AllHistoricalPlacesComponent() {
       <div className="">
         {selectedHistoricalPlaceId ? (
           <div>
-            <Button onClick={handleBackToAll} className="mb-4 bg-[#5D9297] text-white text-base">
-            <ChevronLeft className="w-5 h-5 mr-2" />
+            <Button
+              onClick={handleBackToAll}
+              className="mb-4 bg-[#5D9297] text-white text-base"
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
               Back to All Historical Places
             </Button>
             <HistoricalPlaceDetail id={selectedHistoricalPlaceId} />
@@ -369,7 +369,9 @@ export default function AllHistoricalPlacesComponent() {
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
+                <h2 className="text-xl font-semibold text-[#1A3B47]">
+                  Filters
+                </h2>
                 <Button
                   onClick={clearFilters}
                   size="sm"
@@ -383,7 +385,10 @@ export default function AllHistoricalPlacesComponent() {
                 <h3 className="font-medium text-[#1A3B47] mb-2">Type</h3>
                 <ScrollArea className="h-[150px]">
                   {typesOptions.map((type) => (
-                    <div key={type} className="flex items-center space-x-2 mb-2">
+                    <div
+                      key={type}
+                      className="flex items-center space-x-2 mb-2"
+                    >
                       <Checkbox
                         id={`type-${type}`}
                         checked={selectedTypes.includes(type)}
@@ -409,66 +414,67 @@ export default function AllHistoricalPlacesComponent() {
 
               {/* Featured Historical Places Section */}
               <div className="mt-6">
-  <h3 className="font-medium text-[#1A3B47] mb-4">
-    Featured Historical Places
-  </h3>
-  <div className="space-y-4">
-    {isLoading ? (
-      // Skeleton Loading for Historical Places
-      Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 animate-pulse"
-        >
-          {/* Skeleton for Image */}
-          <div className="w-16 h-16 bg-gray-300 rounded-md" />
-          <div className="flex-1 space-y-2">
-            {/* Skeleton for Title */}
-            <div className="h-4 w-2/3 bg-gray-300 rounded" />
-            {/* Skeleton for Location */}
-            <div className="h-3 w-1/2 bg-gray-200 rounded" />
-          </div>
-        </div>
-      ))
-    ) : historicalPlaces && historicalPlaces.length > 0 ? (
-      historicalPlaces.slice(0, 3).map((place) => (
-        <div
-          key={place._id}
-          onClick={() => handleFeaturedPlaceClick(place._id)}
-          className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-        >
-          <img
-            src={place.pictures[0]?.url || defaultImage}
-            alt={place.title}
-            className="w-16 h-16 object-cover rounded-md"
-          />
-          <div>
-            <h4 className="font-medium text-sm">{place.title}</h4>
-            <p className="text-xs text-gray-500">
-              {place.location.city}, {place.location.country}
-            </p>
-          </div>
-        </div>
-      ))
-    ) : (
-      <p className="text-sm text-gray-500">No historical places available.</p>
-    )}
-  </div>
-</div>
-
+                <h3 className="font-medium text-[#1A3B47] mb-4">
+                  Featured Historical Places
+                </h3>
+                <div className="space-y-4">
+                  {isLoading ? (
+                    // Skeleton Loading for Historical Places
+                    Array.from({ length: 3 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 animate-pulse"
+                      >
+                        {/* Skeleton for Image */}
+                        <div className="w-16 h-16 bg-gray-300 rounded-md" />
+                        <div className="flex-1 space-y-2">
+                          {/* Skeleton for Title */}
+                          <div className="h-4 w-2/3 bg-gray-300 rounded" />
+                          {/* Skeleton for Location */}
+                          <div className="h-3 w-1/2 bg-gray-200 rounded" />
+                        </div>
+                      </div>
+                    ))
+                  ) : historicalPlaces && historicalPlaces.length > 0 ? (
+                    historicalPlaces.slice(0, 3).map((place) => (
+                      <div
+                        key={place._id}
+                        onClick={() => handleFeaturedPlaceClick(place._id)}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                      >
+                        <img
+                          src={place.pictures[0]?.url || defaultImage}
+                          alt={place.title}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                        <div>
+                          <h4 className="font-medium text-sm">{place.title}</h4>
+                          <p className="text-xs text-gray-500">
+                            {place.location.city}, {place.location.country}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No historical places available.
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Main Content */}
             <div className="flex-1">
               {/* Search and Filter Controls */}
               <div className="mb-4">
-                
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="relative flex-grow">
-                    
                     <input
                       type="text"
-                      placeholder={isLoading ? "" : "Search historical places..."}
+                      placeholder={
+                        isLoading ? "" : "Search historical places..."
+                      }
                       className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#5D9297]"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -488,12 +494,13 @@ export default function AllHistoricalPlacesComponent() {
                 </Alert>
               )}
 
-{isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <SkeletonCard key={index} />
-            ))}
-          </div>) : (
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <SkeletonCard key={index} />
+                  ))}
+                </div>
+              ) : (
                 <>
                   {/* Historical Places Grid */}
                   {historicalPlaces.length > 0 ? (
@@ -535,13 +542,19 @@ export default function AllHistoricalPlacesComponent() {
                       </Button>
                       <span className="text-sm font-medium">
                         Page {currentPage} of{" "}
-                        {Math.ceil(historicalPlaces.length / tripsPerPage)}
+                        {Math.max(
+                          1,
+                          Math.ceil(historicalPlaces.length / tripsPerPage)
+                        )}
                       </span>
                       <Button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={
                           currentPage ===
-                          Math.ceil(historicalPlaces.length / tripsPerPage)
+                          Math.max(
+                            1,
+                            Math.ceil(historicalPlaces.length / tripsPerPage)
+                          )
                         }
                         variant="outline"
                         size="icon"

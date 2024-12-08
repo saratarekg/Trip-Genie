@@ -278,18 +278,18 @@ const AdminGovernorPage = () => {
                 </ul>
               </div>
             </div>
+            <div className="flex justify-end mb-6 mr-6">
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-12 py-4 text-xl"
+              >
+                <UserPlus className="mr-2 h-6 w-6" />
+                {isSubmitting ? "Adding..." : "Add User"}
+              </Button>
+            </div>
           </form>
         </Form>
-        <div className="flex justify-end mb-6 mr-6">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-12 py-4 text-xl"
-          >
-            <UserPlus className="mr-2 h-6 w-6" />
-            {isSubmitting ? "Adding..." : "Add User"}
-          </Button>
-        </div>
       </div>
       <ToastViewport />
       {isToastOpen && (

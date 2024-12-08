@@ -739,13 +739,19 @@ export default function AllHistoricalPlacesComponent() {
                     </Button>
                     <span className="text-sm font-medium">
                       Page {currentPage} of{" "}
-                      {Math.ceil(historicalPlaces.length / tripsPerPage)}
+                      {Math.max(
+                        1,
+                        Math.ceil(historicalPlaces.length / tripsPerPage)
+                      )}
                     </span>
                     <Button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={
                         currentPage ===
-                        Math.ceil(historicalPlaces.length / tripsPerPage)
+                        Math.max(
+                          1,
+                          Math.ceil(historicalPlaces.length / tripsPerPage)
+                        )
                       }
                       variant="outline"
                       size="icon"

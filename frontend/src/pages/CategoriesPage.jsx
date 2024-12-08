@@ -302,14 +302,22 @@ export default function CategoriesPage() {
             onOpenChange={setIsToastOpen}
             open={isToastOpen}
             duration={3000} // Set duration to 3 seconds
-            className="bg-[#28A745] text-white p-4 mb-4 rounded-lg flex items-center"
+            className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
           >
-            <CheckCircle className="h-5 w-5 mr-2" />
-            <ToastTitle>Success!</ToastTitle>
-            <ToastDescription>{toastMessage}</ToastDescription>
-            <ToastClose className="text-white ml-2">
-              <XCircle className="h-5 w-5" />
-            </ToastClose>
+            <div className="flex items-center">
+              {toastType === 'success' ? (
+                <CheckCircle className="text-green-500 mr-2" />
+              ) : (
+                <XCircle className="text-red-500 mr-2" />
+              )}
+              <div>
+                <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                <ToastDescription>
+                  {toastMessage}
+                </ToastDescription>
+              </div>
+            </div>
+            <ToastClose />
           </Toast>
         )}
       </ToastProvider>
