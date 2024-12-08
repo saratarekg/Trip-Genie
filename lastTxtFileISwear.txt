@@ -11,7 +11,7 @@ Priority List:
 - no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review (zeina done✅)
 -lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
--create promo code msh sha8ala
+-create promo code msh sha8ala (done ✅)
 -lama bafoos ala activity mn el fl itinerary details el website bydrab
 -admin by delete activity category aady hatta law fe activity mstkhdmaha
 -admin b y create activity category etnen b nafs elesm aady
@@ -23,7 +23,7 @@ Priority List:
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
 -lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated
--Upon searching, no skeleton loading in (itineraries,historical places, Products) like the one in Activities.
+-Upon searching, no skeleton loading in (itineraries,historical places, Products) like the one in Activities.(done ✅)
 -mafish loading b3d ma ba search fe itineraries zy activities w HPs. 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
 -mafish loading baad ma badoos update product
