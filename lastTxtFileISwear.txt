@@ -1,13 +1,16 @@
 Priority List: 
 -CANT TEST CREATE ACTIVITY AASHAN COUNTRIES (had y testaha)
 -CANT TEST CREATE/UPDATE HISTORICAL PLACE AASHAN COUNTRIES (had y testaha)
+-ALL msh zy MY
 -lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
 -promo code activities, itineraries, hotels msh sha8al
+- can cancel any time msh shart 48 hours 
 -admin by delete activity category aady hatta law fe activity mstkhdmaha
 -admin b y create activity category etnen b nafs elesm aady
 -admin by delete activity tags aady hatta law fe activity mstkhdmaha
+- no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review
 -lama bafoos ala activity mn el fl itinerary details el website bydrab
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
@@ -44,6 +47,16 @@ navigation notification fe admin
 -(fen orders page ? ana 3mlt /orders 3ashan a3raf awsalha bas heyya etshalt men el site mahtota fen?)
 -create promo code msh sha8ala
 -out of stock notification  elleh fel navbar msh sha8ala fe seller 
+-lazem refresh when adding addres 3ashan tzhar f tourist profile
+-userole beyb2a all lama nb2a ben review registration to all users ka admin
+-delete popups yeb2o zai bto3 radwa f tourist
+
+
+
+-when i update a product lama bzwd sora by3la2 w mbyrdash y update (seller w admin)
+-graph in admin dashboard bytawl
+-logout popup 3and admin na2sa
+
 
 
 
@@ -55,16 +68,16 @@ navigation notification fe admin
 Sam: 
 67 done✅
 69 done✅
-111 
+111 done✅
 
-53
-54
-55
-56
-57
-58
-61
-70
+53 done✅
+54 done✅
+55 done✅
+56 done✅
+57 done✅
+58 done✅
+61 done✅
+70 done✅
 
 
 - raga3i sort by preference fe itinerary !!
@@ -146,14 +159,14 @@ Alaa:
 
 Houba:
 
-11
-12
-13
-14
-15
-16
-17
-18
+11(done✅)
+12(done✅)
+13(done✅)
+14(done✅)
+15(done✅)
+16(done✅)
+17(done✅ added to radwa's bomh)
+18(done✅ added to radwa's bomh)
 
 toasts ele 3ayza teb2a zai eleradwa 3mla:
 add to cart 
@@ -242,18 +255,20 @@ Radwa:
 
 27-32 
 
-87
-88
-89
-102
-103
+87 done✅
+88 done✅
+89 done✅
+102 done✅
+103 done✅
 
+
+-add user l governor w admin not functional
 - sort by preference shklo w alwano mokhtlfa f kol page
 - alwan flag inappropriate fe admin activites different 3n itineraries
-- shakl view all 
+- shakl view all done✅
 - change pass fe admin (done✅)
-- khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done)
-- past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)(done)
+- khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done✅)
+- past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)(done✅)
 - complaints sort by date (done✅)
 - tabs fe review registration (done✅)
 - admin add user : 

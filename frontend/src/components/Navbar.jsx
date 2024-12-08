@@ -862,7 +862,7 @@ export function NavbarComponent() {
                             className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors duration-200 flex items-center"
                             onClick={closeDropdown}
                           >
-                            <HistoryIcon className="mr-2 h-4 w-4" />
+                            <Package className="mr-2 h-4 w-4" />
                             Orders
                           </Link>
                           <Link
