@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -12,6 +12,7 @@ import {
   addMonths,
   addYears,
   startOfYear,
+  parseISO,
 } from "date-fns";
 import {
   Area,
@@ -22,7 +23,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Calendar, ChevronDown, TrendingUp, TrendingDown } from "lucide-react";
+import { Calendar, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
@@ -45,7 +46,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const ActivityReport = () => {
   const [salesReport, setSalesReport] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState("all");
-  const [graphPeriod, setGraphPeriod] = useState("week");
+  const [graphPeriod, setGraphPeriod] = useState("year");
   const [filters, setFilters] = useState({
     activity: "",
     month: "",
@@ -56,9 +57,13 @@ const ActivityReport = () => {
   const [filteredSales, setFilteredSales] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalAppRevenue, setTotalAppRevenue] = useState(0);
-  const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
   const [isFiltering, setIsFiltering] = useState(false);
   const [error, setError] = useState(null);
+  const [initialTotalRevenue, setInitialTotalRevenue] = useState(0);
+  const [thisMonthSales, setThisMonthSales] = useState(0);
+  const [lastMonthSales, setLastMonthSales] = useState(0);
+  const [initialTotalCommissionRevenue, setInitialTotalCommissionRevenue] = useState(0);
+  const initialGraphDataRef = useRef(null);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -66,50 +71,53 @@ const ActivityReport = () => {
     return role;
   };
 
-  const fetchSalesReport = async (overrideFilters = filters) => {
+  const loadStatistics = async () => {
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
-      const { day, month, year } = overrideFilters;
-      const url = new URL(`http://localhost:4000/${role}/activities-report`);
-      if (day) url.searchParams.append("day", day);
-      if (month) url.searchParams.append("month", month);
-      if (year) url.searchParams.append("year", year);
-
-      const response = await axios.get(url.toString(), {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const currentYear = new Date().getFullYear();
+      const monthlyDataPromises = Array.from({ length: 12 }, (_, i) => {
+        const month = i + 1;
+        const url = new URL(`http://localhost:4000/${role}/activities-report`);
+        url.searchParams.append("year", currentYear);
+        url.searchParams.append("month", month);
+        return axios.get(url.toString(), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
       });
-      setSalesReport(response.data);
-      if (response.data && response.data.activitiesSales) {
-        updateGraphData(response.data.activitiesSales, graphPeriod);
+
+      const monthlyDataResponses = await Promise.all(monthlyDataPromises);
+      const monthlySalesData = monthlyDataResponses.map((response) => response.data.activitiesSales).flat();
+
+      if (monthlySalesData.length > 0) {
+        setSalesReport({ activitiesSales: monthlySalesData });
 
         const uniqueActivityNames = [
           ...new Set(
-            response.data.activitiesSales
-              .filter((item) => item.activity && item.activity.name)
-              .map((item) => item.activity.name)
+            monthlySalesData.map((item) => item.activity.name)
           ),
         ];
         setActivityNames(uniqueActivityNames);
 
-        // Set total revenue and total app revenue only once
-        if (!totalRevenue && !totalAppRevenue) {
-          setTotalRevenue(response.data.totalActivitiesRevenue || 0);
-          setTotalAppRevenue(response.data.totalActivitiesAppRevenue || 0);
-        }
-        setSelectedPeriodRevenue(
-          calculatePeriodRevenue(response.data.activitiesSales, "all")
-        );
+        const totalRevenue = monthlyDataResponses.reduce((sum, response) => sum + (response.data.totalActivitiesRevenue || 0), 0);
+        const totalAppRevenue = monthlyDataResponses.reduce((sum, response) => sum + (response.data.totalActivitiesAppRevenue || 0), 0);
+        setTotalRevenue(totalRevenue);
+        setTotalAppRevenue(totalAppRevenue);
+        setInitialTotalRevenue(totalAppRevenue);
+        setInitialTotalCommissionRevenue(totalAppRevenue);
 
-        // Apply activity filter in frontend
-        const filteredData = filters.activity
-          ? response.data.activitiesSales.filter(
-              (item) => item.activity && item.activity.name === filters.activity
-            )
-          : response.data.activitiesSales;
-        setFilteredSales(filteredData.filter((item) => item.totalRevenue > 0));
+        setFilteredSales(monthlySalesData);
+
+        // Calculate this month and last month sales
+        const thisMonthSales = calculatePeriodRevenue(monthlySalesData, "month");
+        const lastMonthSales = calculateLastMonthSales(monthlySalesData);
+        setThisMonthSales(thisMonthSales);
+        setLastMonthSales(lastMonthSales);
+
+        // Process graph data
+        updateGraphData(monthlySalesData, "year");
       } else {
         setError(
           "Invalid data structure received from the server: activitiesSales missing"
@@ -121,37 +129,62 @@ const ActivityReport = () => {
     }
   };
 
-  useEffect(() => {
-    fetchSalesReport();
-  }, [filters.day, filters.month, filters.year, filters.activity, graphPeriod]);
+  const fetchFilteredData = async (newFilters) => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const url = new URL(`http://localhost:4000/${role}/activities-report`);
+      if (newFilters.month) url.searchParams.append("month", newFilters.month);
+      if (newFilters.year) url.searchParams.append("year", newFilters.year);
+
+      const response = await axios.get(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data && response.data.activitiesSales) {
+        setSalesReport(response.data);
+        let filteredData = response.data.activitiesSales;
+        
+        // Apply activity filter in the front-end
+        if (newFilters.activity) {
+          filteredData = filteredData.filter(
+            (item) => item.activity && item.activity.name === newFilters.activity
+          );
+        }
+        
+        setFilteredSales(filteredData);
+        // updateGraphData(filteredData, graphPeriod);
+      } else {
+        setError("Invalid data structure received from the server: activitiesSales missing");
+      }
+    } catch (error) {
+      console.error("Error fetching filtered data:", error);
+      setError("Failed to fetch filtered data. Please try again later.");
+    }
+  };
 
   useEffect(() => {
-    if (salesReport) {
-      setSelectedPeriodRevenue(
-        calculatePeriodRevenue(salesReport.activitiesSales, selectedPeriod)
-      );
-    }
-  }, [selectedPeriod, salesReport]);
+    loadStatistics();
+  }, []);
 
   useEffect(() => {
-    if (salesReport) {
-      updateGraphData(salesReport.activitiesSales, graphPeriod);
-    }
-  }, [graphPeriod, salesReport]);
+    fetchFilteredData(filters);
+  }, [filters]);
 
   const updateGraphData = (salesData, period) => {
-    if (!Array.isArray(salesData)) {
-      console.error("Invalid sales data:", salesData);
+    const now = new Date();
+    let startDate, dateFormat, data;
+    if (initialGraphDataRef.current) {
+      setGraphData(initialGraphDataRef.current);
       return;
     }
-    const now = new Date();
-    let startDate, dateFormat, groupingFunction, data;
 
     switch (period) {
       case "week":
         startDate = subDays(now, 6);
         dateFormat = "EEE";
-        groupingFunction = (date) => format(date, "yyyy-MM-dd");
         data = Array.from({ length: 7 }, (_, i) => ({
           date: format(addDays(startDate, i), dateFormat),
           sales: 0,
@@ -161,7 +194,6 @@ const ActivityReport = () => {
       case "year":
         startDate = startOfYear(now);
         dateFormat = "MMM";
-        groupingFunction = (date) => format(date, "yyyy-MM");
         data = Array.from({ length: 12 }, (_, i) => ({
           date: format(addMonths(startDate, i), dateFormat),
           sales: 0,
@@ -171,7 +203,6 @@ const ActivityReport = () => {
       case "all":
         startDate = subYears(now, 7);
         dateFormat = "yyyy";
-        groupingFunction = (date) => format(date, "yyyy");
         data = Array.from({ length: 8 }, (_, i) => ({
           date: format(addYears(startDate, i), dateFormat),
           sales: 0,
@@ -181,19 +212,17 @@ const ActivityReport = () => {
     }
 
     salesData.forEach((item) => {
-      const date = new Date(item.activity.createdAt);
+      const date = parseISO(item.activity.createdAt);
       if (date >= startDate && date <= now) {
-        const key = groupingFunction(date);
-        const index = data.findIndex(
-          (d) => d.date === format(date, dateFormat)
-        );
+        const key = format(date, dateFormat);
+        const index = data.findIndex((d) => d.date === key);
         if (index !== -1) {
           data[index].sales += 1;
           data[index].revenue += item.appRevenue;
         }
       }
     });
-
+    initialGraphDataRef.current = data;
     setGraphData(data);
   };
 
@@ -201,7 +230,7 @@ const ActivityReport = () => {
     if (!Array.isArray(salesData)) return 0;
     const now = new Date();
     return salesData.reduce((sum, item) => {
-      const saleDate = new Date(item.activity.createdAt);
+      const saleDate = parseISO(item.activity.createdAt);
       switch (period) {
         case "today":
           return (
@@ -235,36 +264,39 @@ const ActivityReport = () => {
     }, 0);
   };
 
+  const calculateLastMonthSales = (salesData) => {
+    const lastMonth = subMonths(new Date(), 1);
+    return salesData.reduce((sum, item) => {
+      const saleDate = parseISO(item.activity.createdAt);
+      return (
+        sum +
+        (saleDate.getMonth() === lastMonth.getMonth() &&
+        saleDate.getFullYear() === lastMonth.getFullYear()
+          ? item.appRevenue
+          : 0)
+      );
+    }, 0);
+  };
+
   const resetFilters = () => {
     setFilters({ activity: "", month: "", year: "" });
-    fetchSalesReport({ activity: "", month: "", year: "" });
   };
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     if (key === "year") {
       newFilters.month = "";
-      newFilters.day = "";
-    } else if (key === "month") {
-      newFilters.day = "";
     }
     setFilters(newFilters);
-    const searchParams = new URLSearchParams();
-    ["day", "month", "year"].forEach((key) => {
-      if (newFilters[key]) searchParams.append(key, newFilters[key]);
-    });
-    // Note: 'navigate' function is not defined in this component. You might want to use a routing library or remove this line.
-    // navigate(`/activity-report?${searchParams.toString()}`);
   };
 
-  const applyActivityFilter = (activityName) => {
-    const filteredData = activityName
-      ? salesReport.activitiesSales.filter(
-          (item) => item.activity && item.activity.name === activityName
-        )
-      : salesReport.activitiesSales;
-    setFilteredSales(filteredData.filter((item) => item.totalRevenue > 0));
-  };
+  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
+  if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
+
+  const thisMonthChange =
+    lastMonthSales === 0
+      ? 100
+      : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
   const calculateTotals = () => {
     return filteredSales.reduce(
@@ -278,41 +310,9 @@ const ActivityReport = () => {
     );
   };
 
-  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
-
-  const fillPercentage = totalAppRevenue
-    ? (selectedPeriodRevenue / totalAppRevenue) * 100
-    : 0;
-
-  const thisMonthSales = calculatePeriodRevenue(
-    salesReport?.activitiesSales || [],
-    "month"
-  );
-  const lastMonthSales = (() => {
-    const lastMonth = subMonths(new Date(), 1);
-    return (
-      salesReport?.activitiesSales?.reduce((sum, item) => {
-        const saleDate = new Date(item.createdAt);
-        return (
-          sum +
-          (saleDate.getMonth() === lastMonth.getMonth() &&
-          saleDate.getFullYear() === lastMonth.getFullYear()
-            ? item.appRevenue
-            : 0)
-        );
-      }, 0) || 0
-    );
-  })();
-
-  const thisMonthChange =
-    lastMonthSales === 0
-      ? 100
-      : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
-
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className=" bg-gray-100 min-h-screen">
+      <div className="">
         <div className="grid gap-4 md:grid-cols-12 mb-4">
           {/* Total Revenue */}
           <Card className="md:col-span-3 flex flex-col justify-center items-center">
@@ -321,44 +321,6 @@ const ActivityReport = () => {
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
                   Total Revenue
                 </CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
-                    >
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span className="mr-1">{selectedPeriod}</span>
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[100px]">
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("today")}
-                    >
-                      Today
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("week")}
-                    >
-                      This Week
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("month")}
-                    >
-                      This Month
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("year")}
-                    >
-                      This Year
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setSelectedPeriod("all")}>
-                      All Time
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </CardHeader>
             <CardContent className="p-3 flex flex-col justify-center items-center w-full">
@@ -384,7 +346,7 @@ const ActivityReport = () => {
                     strokeDashoffset="283"
                     initial={{ strokeDashoffset: 283 }}
                     animate={{
-                      strokeDashoffset: 283 - (283 * fillPercentage) / 100,
+                      strokeDashoffset: 0,
                     }}
                     transition={{
                       duration: 1,
@@ -394,21 +356,14 @@ const ActivityReport = () => {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-lg font-bold text-[#1A3B47]">
-                    ${selectedPeriodRevenue?.toFixed(2)}
+                    ${initialTotalCommissionRevenue?.toFixed(2)}
                   </span>
-                  <span className="text-sm text-[#5D9297]">
-                    {selectedPeriod.charAt(0).toUpperCase() +
-                      selectedPeriod.slice(1)}
-                  </span>
+                  <span className="text-sm text-[#5D9297]">All Time</span>
                 </div>
               </div>
               <div className="text-center mt-4">
-                <p className="text-base text-[#5D9297]">
-                  {fillPercentage.toFixed(1)}% of total
-                </p>
                 <p className="text-base font-semibold text-[#1A3B47]">
-                  {totalAppRevenue !== null &&
-                    `Commission Revenue: $${totalAppRevenue?.toFixed(2)}`}
+                  Total Commission Revenue
                 </p>
               </div>
             </CardContent>
@@ -480,30 +435,6 @@ const ActivityReport = () => {
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
                   Sales Analytics
                 </CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
-                    >
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span className="mr-1">{graphPeriod}</span>
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[100px]">
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("week")}>
-                      This Week
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("year")}>
-                      This Year
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("all")}>
-                      All Time
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </CardHeader>
             <CardContent className="pl-0">
@@ -583,7 +514,7 @@ const ActivityReport = () => {
               <Select
                 value={filters.activity}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, activity: value }))
+                  handleFilterChange("activity", value)
                 }
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
@@ -600,7 +531,7 @@ const ActivityReport = () => {
               <Select
                 value={filters.year}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, year: value, month: "" }))
+                  handleFilterChange("year", value)
                 }
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
@@ -620,7 +551,7 @@ const ActivityReport = () => {
               <Select
                 value={filters.month}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, month: value }))
+                  handleFilterChange("month", value)
                 }
                 disabled={!filters.year}
               >
@@ -728,3 +659,4 @@ const ActivityReport = () => {
 };
 
 export default ActivityReport;
+

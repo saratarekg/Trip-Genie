@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -66,6 +66,7 @@ const ItineraryReport = () => {
   const [thisMonthSales, setThisMonthSales] = useState(0);
   const [lastMonthSales, setLastMonthSales] = useState(0);
   const [initialTotalCommissionRevenue, setInitialTotalCommissionRevenue] = useState(0);
+  const initialGraphDataRef = useRef(null);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -167,7 +168,7 @@ const ItineraryReport = () => {
         }
         
         setFilteredSales(filteredData);
-        updateGraphData(filteredData, graphPeriod);
+        // updateGraphData(filteredData, graphPeriod);
       } else {
         setError("Invalid data structure received from the server: itinerariesSales missing");
       }
@@ -188,6 +189,10 @@ const ItineraryReport = () => {
   const updateGraphData = (salesData, period) => {
     const now = new Date();
     let startDate, dateFormat, data;
+    if (initialGraphDataRef.current) {
+      setGraphData(initialGraphDataRef.current);
+      return;
+    }
 
     switch (period) {
       case "week":
@@ -230,7 +235,7 @@ const ItineraryReport = () => {
         }
       }
     });
-
+    initialGraphDataRef.current = data;
     setGraphData(data);
   };
 
@@ -323,8 +328,8 @@ const ItineraryReport = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className=" bg-gray-100 min-h-screen">
+      <div className="">
         <div className="grid gap-4 md:grid-cols-12 mb-4">
           {/* Total Revenue */}
           <Card className="md:col-span-3 flex flex-col justify-center items-center">
@@ -375,10 +380,10 @@ const ItineraryReport = () => {
                 </div>
               </div>
               <div className="text-center mt-4">
-                <p className="text-base text-[#5D9297]">
+                {/* <p className="text-base text-[#5D9297]">
                   {initialFillPercentage.toFixed(1)}% of total
-                </p>
-                <p className="text-base font-semibold text-[#1A3B47]">
+                </p> */}
+                <p className="text-base text-[#5D9297]">
                   {initialTotalCommissionRevenue !== null &&
                     `Total Commission Revenue: $${initialTotalCommissionRevenue?.toFixed(2)}`}
                 </p>

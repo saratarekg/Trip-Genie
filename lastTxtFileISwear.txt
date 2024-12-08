@@ -1,12 +1,12 @@
 Priority List: 
 -Select by preference for itineraries (Sam)
 -promo code activities, itineraries, hotels msh sha8al (sam)
--reports bayza (Radwa)
+-reports bayza (done✅ Radwa)
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
--ALL msh zy MY
-- shay be laban 3amatan (create activity we create products we kol el create )
--create promo code layout (stretch start and end date we geeb el button foo2 )
+-ALL msh zy MY (radwa)
+- shay be laban 3amatan (create activity we create products we kol el create ) (radwa)
+-create promo code layout (stretch start and end date we geeb el button foo2 ) (radwa)
 - no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review
 -lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
@@ -41,7 +41,7 @@ navigation notification fe admin
 -single ay haga el title el fo2 saye2
 -out of stock notification  elleh fel navbar msh sha8ala fe seller 
 -lazem refresh when adding addres 3ashan tzhar f tourist profile
--userole beyb2a all lama nb2a ben review registration to all users ka admin (done✅ radwa)
+-userole beyb2a all lama nb2a ben review registration to all users ka admin (done✅ Radwa)
 -delete popups yeb2o zai bto3 radwa f tourist
 -when i update a product lama bzwd sora by3la2 w mbyrdash y update (seller w admin)
 flights we hotels we trans y2bo fe component wa7ed fel homepage
