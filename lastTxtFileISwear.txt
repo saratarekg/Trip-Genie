@@ -4,8 +4,8 @@ Priority List:
 -reports bayza (done✅ Radwa)
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
--ALL msh zy MY (radwa)
-- shay be laban 3amatan (create activity we create products we kol el create ) (radwa)
+-ALL msh zy MY (done✅ habiba)
+- shay be laban 3amatan (create activity we create products we kol el create ) (done✅ radwa)
 -create promo code layout (stretch start and end date we geeb el button foo2 ) (radwa)
 -update itinerary betawel w fl akhr error lama bghyr sowar kteer f activities
 -leave a review navigation aal past lw deleted bydy error
@@ -258,8 +258,8 @@ Radwa:
 103 done✅
 
 
-- add user l governor w admin not functional
-- sort by preference shklo w alwano mokhtlfa f kol page
+- add user l governor w admin not functional (done✅)
+- sort by preference shklo w alwano mokhtlfa f kol page (done✅) (m3ada el sam hyrg3ha)
 - alwan flag inappropriate fe admin activites different 3n itineraries
 - shakl view all done✅
 - change pass fe admin (done✅)

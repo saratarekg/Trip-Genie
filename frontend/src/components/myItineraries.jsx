@@ -915,7 +915,7 @@ export function MyItinerariesComponent() {
         style={{ backgroundImage }}
       >
         <div className="absolute inset-0"></div>
-        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+        <div className="relative py-8 h-full flex items-center">
           <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">
               My Itineraries
