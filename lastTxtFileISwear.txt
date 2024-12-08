@@ -1,8 +1,8 @@
 Priority List: 
 
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
--lw itinerary flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
--cancel booking 48 hrs before (bycancel lw activity bokra)
+-lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
+-cancel booking 48 hrs before (bycancel lw activity/ itinerary bokra)
 -reports bayza 
 -sa3at beyede error lama mark all as read
 consistency fe pages el all 
