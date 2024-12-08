@@ -48,7 +48,7 @@ navigation notification fe admin
 -create promo code msh sha8ala
 -out of stock notification  elleh fel navbar msh sha8ala fe seller 
 -lazem refresh when adding addres 3ashan tzhar f tourist profile
--userole beyb2a all lama nb2a ben review registration to all users ka admin
+-userole beyb2a all lama nb2a ben review registration to all users ka admin (done✅ radwa)
 -delete popups yeb2o zai bto3 radwa f tourist
 
 
@@ -262,7 +262,7 @@ Radwa:
 103 done✅
 
 
--add user l governor w admin not functional
+- add user l governor w admin not functional
 - sort by preference shklo w alwano mokhtlfa f kol page
 - alwan flag inappropriate fe admin activites different 3n itineraries
 - shakl view all done✅
