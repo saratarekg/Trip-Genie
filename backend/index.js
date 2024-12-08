@@ -180,7 +180,8 @@ app.post("/create-booking-session", async (req, res) => {
       selectedDate,
       selectedTransportID,
       discountPercentage,
-      promoCode 
+      promoCode ,
+      loyaltyPoints
     } = req.body;
 
     // Calculate the total price of items
@@ -199,7 +200,7 @@ app.post("/create-booking-session", async (req, res) => {
         quantity: item.quantity,
       })),
       mode: "payment",
-      success_url: `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}&quantity=${quantity}&selectedDate=${selectedDate}&promoCode=${promoCode}&selectedTransportID=${selectedTransportID}&discountPercentage=${discountPercentage}`,
+      success_url: `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}&quantity=${quantity}&selectedDate=${selectedDate}&promoCode=${promoCode}&selectedTransportID=${selectedTransportID}&discountPercentage=${discountPercentage}&loyaltyPoints=${loyaltyPoints}`,
       cancel_url: `${returnLocation}`,
     });
 

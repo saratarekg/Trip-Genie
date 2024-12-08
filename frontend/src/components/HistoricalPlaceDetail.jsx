@@ -298,9 +298,114 @@ const HistoricalPlaceDetail = () => {
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
     setOpen(false); // Close the popover
   };
-
+  const HistoricalPlaceDetailSkeleton = () => {
+    return (
+      <div>
+        <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+        </div>
+        <div className="min-h-screen bg-gray-100 pt-8">
+          <div className="container mx-auto px-4 py-8 ">
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+              <div className="p-6">
+                <div className="flex flex-col mb-6">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="h-8 w-3/4 bg-gray-300 rounded animate-pulse"></div>
+                    <div className="flex flex-wrap gap-2">
+                      {[1, 2, 3].map((index) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="text-lg px-4 py-2 rounded-full flex items-center bg-gray-300 animate-pulse"
+                        >
+                          <div className="h-4 w-16"></div>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="h-20 w-full bg-gray-300 rounded animate-pulse mt-2"></div>
+                </div>
+  
+                <div className="flex flex-col md:flex-row gap-8">
+                  <div className="md:w-2/3">
+                    <div className="relative pb-[56.25%] h-0">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gray-300 rounded-lg animate-pulse"></div>
+                    </div>
+                    <div className="mt-4 flex gap-2 overflow-x-auto">
+                      {[1, 2, 3, 4].map((index) => (
+                        <div key={index} className="w-24 h-24 bg-gray-300 rounded animate-pulse"></div>
+                      ))}
+                    </div>
+                  </div>
+  
+                  <div className="md:w-1/3 space-y-4">
+                    <Button variant="outline" size="sm" className="ml-auto">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+  
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Location</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center">
+                          <MapPin className="w-5 h-5 mr-2 text-gray-500" />
+                          <div className="h-4 w-3/4 bg-gray-300 rounded animate-pulse"></div>
+                        </div>
+                        <div className="flex items-center mt-2">
+                          <Globe className="w-5 h-5 mr-2 text-gray-500" />
+                          <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+  
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Ticket Prices</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {['Foreigner', 'Native', 'Student'].map((type, index) => (
+                          <div key={index} className="flex items-center justify-between mt-2">
+                            <span>{type}:</span>
+                            <div className="h-4 w-1/4 bg-gray-300 rounded animate-pulse"></div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+  
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Opening Hours</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {['Weekdays', 'Weekends'].map((day, index) => (
+                          <div key={index} className="flex items-center justify-between mt-2">
+                            <span>{day}:</span>
+                            <div className="h-4 w-1/3 bg-gray-300 rounded animate-pulse"></div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+  
+                <div className="mt-8 flex justify-end space-x-4">
+                  <Button variant="default" className="bg-gray-300 animate-pulse">
+                    <div className="h-4 w-16"></div>
+                  </Button>
+                  <Button variant="destructive" className="bg-gray-300 animate-pulse">
+                    <div className="h-4 w-16"></div>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
   if (loading) {
-    return <LoadingSpinner />;
+    return <HistoricalPlaceDetailSkeleton />;
   }
 
   if (error) {

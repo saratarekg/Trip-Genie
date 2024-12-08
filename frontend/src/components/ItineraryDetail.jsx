@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, userInfo } from "react";
+import React, { useState, useEffect, useCallback, userInfo ,useRef } from "react";
 import { formatDistanceToNow, format } from "date-fns";
 import { useParams, useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -774,6 +774,8 @@ const ItineraryDetail = () => {
   });
 
   const [tourist, setTourist] = useState(null);
+  const [loyalty,setLoyalty] = useState(0);
+  const bookingProcessedRef = useRef(false);
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -1122,11 +1124,16 @@ const ItineraryDetail = () => {
 
   const handleBooking = async (paymentType, numberOfTickets, date,date2,promoCode) => {
     console.log(paymentType, numberOfTickets, date);
+    if (bookingProcessedRef.current) {
+      console.log('Booking already processed');
+      return;
+    }
     setIsBooking(true);
     setBookingError("");
     try {
+     // bookingProcessedRef.current=true;
       const token = Cookies.get("jwt");
-      const totalPrice = calculateTotalPrice();
+     // const totalPrice = calculateTotalPrice();
       const response = await fetch(
         `http://localhost:4000/${userRole}/itineraryBooking`,
         {
@@ -1163,6 +1170,8 @@ const ItineraryDetail = () => {
         setPercentageOff(data.percentageOff);
         console.log("data",data);
         setShowSuccessDialog(true);
+        setLoyalty(data?.loyaltyPoints);
+        
       }
     } catch (error) {
       console.error("Error booking itinerary:", error);
@@ -1182,8 +1191,13 @@ const ItineraryDetail = () => {
       const sessionId = searchParams.get("session_id");
       const promoCode = searchParams.get("promoCode");
       const percentageOff = searchParams.get("discountPercentage");
+      const loyaltyPoints= searchParams.get("loyaltyPoints");
+      setLoyalty(loyaltyPoints);
+      
+       console.log(success, sessionId);
+      // console.log("itinerary price",itinerary.price);
+     // console.log("badge",tourist.loyaltyBadge);
 
-      console.log(success, sessionId);
 
       if (sessionId && success === "true") {
         try {
@@ -1194,10 +1208,18 @@ const ItineraryDetail = () => {
           console.log("Payment status response:", response.data);
 
           if (response.data.status === "paid") {
+            // try {
+            //   await handleBooking("CreditCard", parseInt(quantity), selectedDateStr,selectedDate, promoCode);
+            // } catch (error) {
+            //   console.error("Error handling booking:", error);
+            //   // Handle the error appropriately
+            // }
+          
             setShowSuccessDialog(true);
             setNumberOfTickets(parseInt(quantity));
             setPaymentType("CreditCard");
             setPercentageOff(parseInt(percentageOff));
+
             
           }
         } catch (error) {
@@ -1214,12 +1236,14 @@ const ItineraryDetail = () => {
       const quantity = searchParams.get("quantity");
       const selectedDateStr = searchParams.get("selectedDate");
       const promoCode = searchParams.get("promoCode");
+      const loyaltyPoints=searchParams.get("loyaltyPoints");
       try {
-        await handleBooking("CreditCard", parseInt(quantity), selectedDateStr,selectedDate, promoCode);
+        await handleBooking("CreditCard", parseInt(quantity), selectedDateStr,selectedDate, promoCode,loyaltyPoints);
       } catch (error) {
         console.error("Error handling booking:", error);
         // Handle the error appropriately
       }
+    
     }
     setShowSuccessDialog(false);
     searchParams.delete("success");
@@ -1249,6 +1273,29 @@ const ItineraryDetail = () => {
 
   const navigate = useNavigate();
 
+
+  const calculateLoyaltyPoints = (paymentAmount, badgeLevel) => {
+    let pointsMultiplier = 0;
+  
+    // Determine points multiplier based on badge level
+    switch (badgeLevel) {
+      case "Bronze":
+        pointsMultiplier = 0.5; // 50% of amount paid
+        break;
+      case "Silver":
+        pointsMultiplier = 1.0; // 100% of amount paid
+        break;
+      case "Gold":
+        pointsMultiplier = 1.5; // 150% of amount paid
+        break;
+      default:
+        pointsMultiplier = 0; // No points if badge level is unrecognized
+        break;
+    }
+  
+    // Calculate and return the loyalty points
+    return paymentAmount * pointsMultiplier;
+  };
   useEffect(() => {
     scrollToTop();
   }, [isActivated]);
@@ -1306,6 +1353,7 @@ const ItineraryDetail = () => {
     const fetchItineraryDetails = async () => {
       if (!id) {
         setError("Invalid itinerary ID.");
+       
         setLoading(false);
         return;
       }
@@ -1702,8 +1750,160 @@ const ItineraryDetail = () => {
       // Handle error (e.g., show an error message)
     }
   };
+  const ItineraryDetailSkeleton = () => {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <nav className="bg-[#1a202c] shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-between items-center">
+              <div className="h-6 w-32 bg-gray-600 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </nav>
+  
+        <div className="bg-[#1a202c] text-white py-20 px-4">
+          <div className="container mx-auto text-center">
+            <div className="h-12 w-3/4 bg-gray-600 rounded animate-pulse mx-auto"></div>
+          </div>
+        </div>
+  
+        <div className="mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="lg:w-3/4">
+              <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="h-10 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                    <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                  </div>
+  
+                  <div className="w-full h-[400px] bg-gray-300 rounded animate-pulse mb-6"></div>
+  
+                  <div className="mb-6">
+                    <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                    
+                  </div>
+  
+                  
+                  
+  
+                  <div className="mt-8">
+                    <div className="h-[200px] w-full bg-gray-300 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+            <div className="lg:w-1/4">
+              <Card>
+                <CardHeader>
+                  <div className="h-8 w-3/4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                </CardHeader>
+                <CardContent>
+                <div className="mt-4 text-4xl font-semibold text-center animate-pulse">
+  <div className="h-8 w-32 bg-gray-300 rounded mx-auto"></div>
+  <div className="text-sm text-gray-500 flex items-center justify-center mt-6">
+   
+    <div className="h-4 w-24 bg-gray-300 rounded"></div>
+  </div>
+</div>
 
-  if (loading) return <Loader />;
+<div className="mt-4 animate-pulse">
+  <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
+  <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
+</div>
+
+<div className="mt-2 animate-pulse">
+  <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
+  <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
+</div>
+
+<div className="mt-4 animate-pulse">
+  <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
+  <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
+</div>
+
+<div className="mt-2 animate-pulse">
+  <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
+  <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
+</div>
+
+<div className="mt-6 animate-pulse">
+  <div className="h-10  bg-gray-300 rounded"></div>
+  <div className="h-10 bg-gray-300 rounded mt-6"></div>
+</div>
+
+                  
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+  
+          <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-8 w-1/4 bg-gray-300 rounded animate-pulse"></div>
+                <div className="h-8 w-20 bg-gray-300 rounded animate-pulse"></div>
+              </div>
+  
+              <div className="flex gap-8 mb-6">
+                <div className="text-center">
+                  <div className="h-12 w-12 bg-gray-300 rounded animate-pulse mx-auto mb-2"></div>
+                  <div className="h-4 w-16 bg-gray-300 rounded animate-pulse mx-auto"></div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <div className="h-4 w-full bg-gray-300 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+  
+            <div className="border-t pt-6">
+              <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-4"></div>
+              <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse mb-4"></div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                <div className="flex-1 flex justify-between px-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                      <CardHeader className="flex items-start">
+                        <div className="flex">
+                          <div className="h-12 w-12 bg-gray-300 rounded-full animate-pulse mr-4"></div>
+                          <div className="flex flex-col">
+                            <div className="h-4 w-24 bg-gray-300 rounded animate-pulse mb-2"></div>
+                            <div className="h-3 w-16 bg-gray-300 rounded animate-pulse"></div>
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-4 w-full bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-full bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-3/4 bg-gray-300 rounded animate-pulse"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  
+
+  
+  if (loading) return <ItineraryDetailSkeleton />;
+
 
   if (error) {
     return (
@@ -2299,6 +2499,7 @@ const ItineraryDetail = () => {
                 selectedItineraryDate={selectedItineraryDate}
                 promoDetails={promoDetails}
               setPromoDetails={setPromoDetails}
+              loyaltyPoints={ calculateLoyaltyPoints(itinerary.price,tourist.loyaltyBadge)}
               />
             </>
           )}
@@ -2342,7 +2543,10 @@ const ItineraryDetail = () => {
     </div>
   </div>
 )}
-
+ <Label className="text-left">Loyalty Points Earned:</Label>
+    <div>
+      {loyalty}
+    </div>
               </div>
             </div>
 

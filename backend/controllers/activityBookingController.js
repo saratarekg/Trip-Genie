@@ -127,6 +127,7 @@ exports.createBooking = async (req, res) => {
       walletBalance: walletBalance, // Include the new wallet balance
       pricePaid: finalPaymentAmount, // Include the price paid with promo code discount if available
       percentageOff: usedPromoCode ? usedPromoCode.percentOff : 0,
+      loyaltyPoints
     });
   } catch (error) {
     console.log(error);

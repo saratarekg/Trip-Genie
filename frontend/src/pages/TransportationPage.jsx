@@ -116,6 +116,7 @@ export default function TransportationPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [promoDetails, setPromoDetails] = useState(null);
   const bookingProcessedRef = useRef(false);
+  const[isLoading,setIsLoading]=useState(false);
 
 
 
@@ -193,6 +194,7 @@ export default function TransportationPage() {
   };
 
   const fetchTransportations = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = Cookies.get("role");
@@ -206,8 +208,10 @@ export default function TransportationPage() {
       setFilteredTransportations(response.data);
       setFromLocations([...new Set(response.data.map((t) => t.from))]);
       setToLocations([...new Set(response.data.map((t) => t.to))]);
+      //setIsLoading(false);
     } catch (error) {
       console.error("Error fetching transportations:", error);
+     // setIsLoading(false);
     }
   };
 
@@ -590,6 +594,61 @@ export default function TransportationPage() {
             className="w-full"
           />
         </div>
+      </div>
+    );
+  };
+  const TransportationCardSkeleton = () => {
+    return (
+      <div>
+        {/* <h1 className="text-3xl font-bold mb-2">Transportation History</h1>
+        <p className="text-sm text-gray-500 mb-2">Transportation / Attended</p> */}
+  
+      <div className="container mx-auto px-4 py-8">
+       
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {Array(4).fill().map((_, index) => (
+          <div
+            key={index}
+            className="bg-gray-200 rounded-lg shadow-sm border p-4 space-y-4 animate-pulse"
+          >
+            {/* Departure Section */}
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col items-start w-1/5">
+                <div className="h-4 w-16 bg-gray-300 rounded"></div>
+                <div className="h-6 w-24 bg-gray-300 rounded mt-2"></div>
+                <div className="flex items-center mt-2">
+                  <div className="h-4 w-12 bg-gray-300 rounded"></div>
+                </div>
+              </div>
+  
+              {/* Center Section (Date and Duration) */}
+              <div className="flex flex-col items-center justify-center w-3/5 relative">
+                <div className="absolute h-4 w-24 bg-gray-300 rounded top-1"></div>
+                <div className="absolute h-6 w-28 bg-gray-300 rounded -top-6"></div>
+              </div>
+  
+              {/* Arrival Section */}
+              <div className="flex flex-col items-end w-1/5">
+                <div className="h-4 w-16 bg-gray-300 rounded"></div>
+                <div className="h-6 w-24 bg-gray-300 rounded mt-2"></div>
+                <div className="h-4 w-12 bg-gray-300 rounded mt-2"></div>
+              </div>
+            </div>
+  
+            {/* Vehicle Type and Price Section */}
+            <div className="mt-4 flex justify-between items-center">
+              <div className="h-4 w-32 bg-gray-300 rounded text-center"></div>
+              <div className="flex items-center space-x-4">
+                <div className="h-6 w-16 bg-gray-300 rounded"></div>
+              </div>
+            </div>
+  
+            {/* Skeleton for Dialog (Popup) Content */}
+           
+          </div>
+        ))}
+      </div>
+      </div>
       </div>
     );
   };

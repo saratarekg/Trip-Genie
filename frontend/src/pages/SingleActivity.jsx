@@ -243,6 +243,13 @@ const ActivityDetail = () => {
     useState(false);
   const [seatsToBook, setSeatsToBook] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
+  const [potentialLoyaltyPoints, setPotentialLoyaltyPoints] = useState(0);
+  const [loyaltyPointsEarned, setLoyaltyPointsEarned] = useState(0);
+  const[badge,setbadge]= useState("Bronze");
+  const [point,setpoint]=useState(0);
+  const[loyaltyy,setloyalty]=useState(0);
+  const[totalloyaltyy,settotalloyalty]=useState(0);
+  
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -252,6 +259,14 @@ const ActivityDetail = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTourist(response.data);
+        setPotentialLoyaltyPoints(response.data.loyaltyPoints);
+
+    
+      setbadge(response.data.loyaltyBadge);
+
+      //  console.error(" badge :", badge );
+      //  console.error(" tourist data loyalty points :", response.data.loyaltyPoints);
+
       } catch (error) {
         console.error("Error fetching tourist data:", error);
       }
@@ -266,6 +281,9 @@ const ActivityDetail = () => {
       const quantity = searchParams.get("quantity");
       const sessionId = searchParams.get("session_id");
       const promoCode = searchParams.get("promoCode");
+       const loyaltyPoints= searchParams.get("loyaltyPoints");
+       setloyalty(loyaltyPoints);
+       
 
       Promise.all([
         fetchUserInfo(),
@@ -274,18 +292,21 @@ const ActivityDetail = () => {
         
       ]);
 
-      if (sessionId && success === "true" && activity && userPreferredCurrency && exchangeRates) {
       
+
+      if (sessionId && success === "true"&& activity) {
+        console.log("we hate ehab1");
         try {
           const response = await axios.get(
             `http://localhost:4000/check-payment-status?session_id=${sessionId}`
           );
-
+          console.log("we hate ehab2");
           console.log("Payment status response:", response.data);
 
           if (response.data.status === "paid") {
             try {
-              await handlePaymentConfirm("CreditCard", parseInt(quantity), new Date(),new Date(), promoCode);
+              console.log("we hate ehab3");
+              await handlePaymentConfirm("CreditCard", parseInt(quantity), new Date(),new Date(), promoCode );
             } catch (error) {
               console.error("Error handling booking success:", error);
             }
@@ -297,10 +318,10 @@ const ActivityDetail = () => {
     };
 
     handleBookingSuccess();
-  }, [searchParams, activity]);
+  }, [searchParams,activity]);
 
-
-
+ 
+  
   const handleTransportationBooking = async () => {
     if (!selectedTransportation) return;
 
@@ -515,7 +536,11 @@ const ActivityDetail = () => {
             numberOfTickets,
           }),
         }
+        
       );
+     
+     
+
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -584,6 +609,17 @@ const ActivityDetail = () => {
     return `${userPreferredCurrency?.symbol}${((price * toRate) / fromRate).toFixed(2)}`;
   };
   
+  const convertpoint = (price, fromCurrency, toCurrency) => {
+    if (!exchangeRates || !fromCurrency || !toCurrency) {
+      return price;
+    }
+    
+    const fromRate = exchangeRates[fromCurrency];
+    const toRate = exchangeRates[toCurrency];
+    
+    // Use template literal to correctly insert the symbol
+    return ((price * toRate) / fromRate).toFixed(2);
+  };
 
   const fetchExchangeRate = async () => {
     try {
@@ -616,6 +652,7 @@ const ActivityDetail = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+      //  console.error("data:", response.data);
         setUserPreferredCurrency(response2.data);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -698,6 +735,8 @@ const ActivityDetail = () => {
             }
           }
         }
+      //  console.error("loyalty points:", tourist.loyaltyPoints);
+      
       } catch (err) {
         setError("Error fetching activity details. Please try again later.");
         console.error("Error fetching activity details:", err);
@@ -886,7 +925,7 @@ const ActivityDetail = () => {
           }),
         }
       );
-
+     
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.message === "Insufficient funds in wallet") {
@@ -905,8 +944,10 @@ const ActivityDetail = () => {
         setPaymentType(paymentType); 
         setShowSuccessDialog(true);
         setPricePaid(convertPrice(data?.pricePaid,"USD",userPreferredCurrency?.code));
+        setpoint(convertpoint(data?.pricePaid,"USD",userPreferredCurrency?.code));
         setTouristWallet(convertPrice(data?.walletBalance,"USD",userPreferredCurrency?.code));
-       
+        setloyalty(data?.loyaltyPoints);
+        
 
       }
     } catch (error) {
@@ -1130,6 +1171,29 @@ const ActivityDetail = () => {
     },
   ];
 
+  const calculateLoyaltyPoints = (paymentAmount, badgeLevel) => {
+    let pointsMultiplier = 0;
+  
+    // Determine points multiplier based on badge level
+    switch (badgeLevel) {
+      case "Bronze":
+        pointsMultiplier = 0.5; // 50% of amount paid
+        break;
+      case "Silver":
+        pointsMultiplier = 1.0; // 100% of amount paid
+        break;
+      case "Gold":
+        pointsMultiplier = 1.5; // 150% of amount paid
+        break;
+      default:
+        pointsMultiplier = 0; // No points if badge level is unrecognized
+        break;
+    }
+  
+    // Calculate and return the loyalty points
+    return paymentAmount * pointsMultiplier;
+  };
+
   const handleAddReview = async () => {
     try {
       const method = userComment ? "PUT" : "POST";
@@ -1193,8 +1257,153 @@ const ActivityDetail = () => {
     }
   };
 
+  const ActivityDetailSkeleton = () => {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <nav className="bg-[#1a202c] shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-between items-center">
+              <div className="h-6 w-32 bg-gray-600 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </nav>
+  
+        <div className="bg-[#1a202c] text-white py-20 px-4">
+          <div className="container mx-auto text-center">
+            <div className="h-12 w-3/4 bg-gray-600 rounded animate-pulse mx-auto"></div>
+          </div>
+        </div>
+  
+        <div className="mx-auto px-4 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Left Section */}
+            <div className="lg:w-3/4 flex-1">
+              <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="h-10 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                    <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                  </div>
+  
+                  <div className="w-full h-[400px] bg-gray-300 rounded animate-pulse mb-6"></div>
+  
+                  <div className="mb-6">
+                    <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  </div>
+  
+                  <div className="mt-8">
+                    <div className="h-[200px] w-full bg-gray-300 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+            {/* Right Section */}
+            <div className="lg:w-1/4 flex-none">
+              <Card>
+                <CardHeader>
+                  <div className="h-8 w-3/4 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse"></div>
+                </CardHeader>
+                <CardContent>
+                  <div className="mt-4 text-4xl font-semibold text-center animate-pulse">
+                    <div className="h-8 w-32 bg-gray-300 rounded mx-auto"></div>
+                    <div className="text-sm text-gray-500 flex items-center justify-center mt-6">
+                      <div className="h-4 w-24 bg-gray-300 rounded"></div>
+                    </div>
+                  </div>
+  
+                  <div className="mt-4 animate-pulse">
+                    <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
+                  </div>
+  
+                  <div className="mt-2 animate-pulse">
+                    <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
+                  </div>
+  
+                  <div className="mt-4 animate-pulse">
+                    <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
+                  </div>
+  
+                  <div className="mt-2 animate-pulse">
+                    <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
+                  </div>
+  
+                  <div className="mt-6 animate-pulse">
+                    <div className="h-10 bg-gray-300 rounded"></div>
+                    <div className="h-10 bg-gray-300 rounded mt-6"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+  
+          <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <div className="h-8 w-1/4 bg-gray-300 rounded animate-pulse"></div>
+                <div className="h-8 w-20 bg-gray-300 rounded animate-pulse"></div>
+              </div>
+  
+              <div className="flex gap-8 mb-6">
+                <div className="text-center">
+                  <div className="h-12 w-12 bg-gray-300 rounded animate-pulse mx-auto mb-2"></div>
+                  <div className="h-4 w-16 bg-gray-300 rounded animate-pulse mx-auto"></div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <div className="h-4 w-full bg-gray-300 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+  
+            <div className="border-t pt-6">
+              <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-4"></div>
+              <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse mb-4"></div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                <div className="flex-1 flex justify-between px-4">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                      <CardHeader className="flex items-start">
+                        <div className="flex">
+                          <div className="h-12 w-12 bg-gray-300 rounded-full animate-pulse mr-4"></div>
+                          <div className="flex flex-col">
+                            <div className="h-4 w-24 bg-gray-300 rounded animate-pulse mb-2"></div>
+                            <div className="h-3 w-16 bg-gray-300 rounded animate-pulse"></div>
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="h-4 w-20 bg-gray-300 rounded animate-pulse"></div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-4 w-full bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-full bg-gray-300 rounded animate-pulse mb-2"></div>
+                        <div className="h-4 w-3/4 bg-gray-300 rounded animate-pulse"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+
   if (loading) {
-    return <Loader />;
+    return <ActivityDetailSkeleton />;
   }
 
   if (error) {
@@ -1873,6 +2082,7 @@ const ActivityDetail = () => {
               setError={setBookingError}
               promoDetails={promoDetails}
               setPromoDetails={setPromoDetails}
+              loyaltyPoints={calculateLoyaltyPoints(activity.price,tourist.loyaltyBadge)}
             />
           )}
 
@@ -1976,12 +2186,13 @@ const ActivityDetail = () => {
                   {activity.name}.
                 </p>
                 <div className="grid gap-4 py-4">
+                  {userPreferredCurrency&&
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">Amount Paid:</Label>
                     <div>
-                      {pricePaid}
+                      {convertPrice(pricePaid,"USD",userPreferredCurrency.code)}
                     </div>
-                  </div>
+                  </div>}
                   {paymentType === "Wallet" && (
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">New Wallet Balance:</Label>
@@ -1990,6 +2201,18 @@ const ActivityDetail = () => {
                       </div>
                     </div>
                   )}
+
+                  
+
+              
+                  <div className="grid grid-cols-2 gap-4">
+                    <Label className="text-right"> Points Earned:</Label>
+                    
+                      {loyaltyy}
+                   
+                  </div>
+                
+
                 </div>
               </div>
 

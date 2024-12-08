@@ -850,7 +850,47 @@ export function AllItinerariesComponent() {
     }
   };
 
+  const AllProductsSkeleton = () => {
+    return (
+      <div className="bg-gray-100">
+      <div className="">
+        <div className="flex gap-8">
+          {/* Sidebar Skeleton */}
+         
 
+          {/* Main Content Skeleton */}
+          <div className="flex-1">
+            {/* Search and Filters Skeleton */}
+           
+
+            {/* Cards Grid Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
+                >
+                  <div className="h-40 bg-gray-300"></div>
+                  <div className="p-4 space-y-4">
+                    <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+                  </div>
+                  <div className="p-4 border-t space-y-3">
+                    <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
+                    <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination Skeleton */}
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  };
+  
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -860,9 +900,7 @@ export function AllItinerariesComponent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
 
-      {isLoading ? (
-        <Loader />
-      ) : (
+      
         <div className=" mx-auto px-4 py-8">
           <div className=" px-4 sm:px-6 lg:px-8 mb-4">
             <div className="max-w-7xl mx-auto">
@@ -1047,6 +1085,12 @@ export function AllItinerariesComponent() {
                   <div className="text-[#F88C33] text-center mb-4">{error}</div>
                 )}
                 {/* Itineraries Grid */}
+                
+                  
+                {isLoading ? (
+                <AllProductsSkeleton />
+              ) : (
+               // <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {itineraries
                     .slice(
@@ -1069,6 +1113,8 @@ export function AllItinerariesComponent() {
                       />
                     ))}
                 </div>
+               // </div>
+              )}
                 {/* Pagination */}
                 <div className="mt-8 flex justify-center items-center space-x-4">
                   <Button
@@ -1096,12 +1142,17 @@ export function AllItinerariesComponent() {
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
+                
                 </div>
+                
               </div>
-            </div>
+            
+                 
+                 
           </div>
         </div>
-      )}
+        </div>
+      
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}

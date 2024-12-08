@@ -141,6 +141,7 @@ exports.createBooking = async (req, res) => {
       message: "Booking created successfully",
       booking: newBooking,
       percentageOff: usedPromoCode ? usedPromoCode.percentOff : 0,
+      loyaltyPoints
     });
   } catch (error) {
     console.log(error.message);

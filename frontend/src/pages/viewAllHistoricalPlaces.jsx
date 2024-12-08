@@ -283,6 +283,7 @@ export default function AllHistoricalPlacesComponent() {
   };
 
   const fetchHistoricalPlaces = async (sortByPreference = false) => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const role = getUserRole();
@@ -323,10 +324,12 @@ export default function AllHistoricalPlacesComponent() {
         setHistoricalPlaces(data);
       }
       setError(null);
+     // setIsLoading(false);
     } catch (error) {
       console.error("Error fetching historical places:", error);
       setError("Error fetching historical places");
       setHistoricalPlaces([]);
+      setIsLoading(false);
     }
   };
 
@@ -456,6 +459,63 @@ export default function AllHistoricalPlacesComponent() {
     setSelectedTypes([]);
   };
 
+  const SkeletonFeaturedPlace = () => (
+    <div className="flex items-center gap-3 p-2">
+      <div className="w-16 h-16 bg-gray-300 rounded-md animate-pulse" />
+      <div className="flex flex-col flex-1">
+        <div className="h-4 w-3/4 bg-gray-300 rounded animate-pulse mb-2" />
+        <div className="h-3 w-1/2 bg-gray-200 rounded animate-pulse" />
+      </div>
+    </div>
+  );
+
+  const AllProductsSkeleton = () => {
+    return (
+      <div className="bg-gray-100">
+      <div className="">
+        <div className="flex gap-8">
+          {/* Sidebar Skeleton */}
+         
+
+          {/* Main Content Skeleton */}
+          <div className="flex-1">
+            {/* Search and Filters Skeleton */}
+           
+
+            {/* Cards Grid Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
+                >
+                  <div className="h-40 bg-gray-300"></div>
+                  <div className="p-4 space-y-4">
+                    <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+                    <div className="h-6 w-1/2 bg-gray-200 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                  </div>
+                  <div className="p-4 border-t space-y-3">
+                    <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
+                    <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination Skeleton */}
+            <div className="mt-8 flex justify-center items-center space-x-4">
+              <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  };
+
   return (
     <div className="bg-gray-100">
 
@@ -536,7 +596,25 @@ export default function AllHistoricalPlacesComponent() {
                 Featured Historical Places
               </h3>
               <div className="space-y-4">
-                {historicalPlaces && historicalPlaces.length > 0 ? (
+              {isLoading ? (
+      // Skeleton Loading for Historical Places
+      Array.from({ length: 3 }).map((_, index) => (
+        <div
+          key={index}
+          className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 animate-pulse"
+        >
+          {/* Skeleton for Image */}
+          <div className="w-16 h-16 bg-gray-300 rounded-md" />
+          <div className="flex-1 space-y-2">
+            {/* Skeleton for Title */}
+            <div className="h-4 w-2/3 bg-gray-300 rounded" />
+            {/* Skeleton for Location */}
+            <div className="h-3 w-1/2 bg-gray-200 rounded" />
+          </div>
+        </div>
+      ))
+    ) :
+    historicalPlaces && historicalPlaces.length > 0 ? (
                   historicalPlaces.slice(0, 3).map((place) => (
                     <Link
                       key={place._id}
@@ -611,7 +689,7 @@ export default function AllHistoricalPlacesComponent() {
             )}
 
             {isLoading ? (
-              <Loader />
+              <AllProductsSkeleton />
             ) : (
               <>
                 {/* Historical Places Grid */}

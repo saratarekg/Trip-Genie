@@ -42,6 +42,7 @@ const PaymentPopup = ({
   transportationSeats,
   promoDetails,
   setPromoDetails,
+  loyaltyPoints
 }) => {
   const formatDate = (date) => {
     const localDate = new Date(date);
@@ -183,6 +184,9 @@ const PaymentPopup = ({
           payload.selectedTransportID = selectedTransportID // Pass the Date object as ISO string
         }
 
+        if(loyaltyPoints){
+          payload.loyaltyPoints= loyaltyPoints;
+        }
         
       
         const response = await fetch("http://localhost:4000/create-booking-session", {
