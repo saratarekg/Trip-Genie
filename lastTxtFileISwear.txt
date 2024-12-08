@@ -5,6 +5,7 @@ Priority List:
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
+-Error updating product. Please try again later. lama ba update product f admin s3at
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
 -reports bayza 
