@@ -1416,22 +1416,9 @@ const ActivityDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div
-        style={{
-          backgroundImage: `linear-gradient(rgba(93, 146, 151, 0.7), rgba(93, 146, 151, 0.5)), url(${activity.pictures[0]?.url})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-        className="bg-[#1a202c] text-white py-20 px-4"
-      >
-        <div className="container mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4">
-            {activity.name}
-          </h1>
-        </div>
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-
       <div className="bg-gray-100">
         <div className="mx-4 ">
           <div className="pt-4">
@@ -1547,20 +1534,31 @@ const ActivityDetail = () => {
                   <div>
                     <div className="space-y-4">
                       <div className="ActivityDetail">
-                        <div className="">
-                          <h1 className="text-3xl font-bold">
-                            {activity.name}
-                          </h1>
-                        </div>
+                        <div className=""></div>
                         {(userRole === "advertiser" || userRole === "admin") &&
                           !activity.isBookingOpen && (
                             <div className="mt-2 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-center">
                               Booking is currently closed.
                             </div>
                           )}
+                        <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
+                          {isExpanded
+                            ? activity.description
+                            : `${activity.description.substring(0, 130)}${
+                                activity.description.length > 130 ? "..." : ""
+                              }`}
+                          {activity.description.length > 130 && (
+                            <button
+                              onClick={toggleExpanded}
+                              className="text-blue-500 hover:underline ml-2"
+                            >
+                              {isExpanded ? "View Less" : "View More"}
+                            </button>
+                          )}
+                        </div>
                         <div className="flex items-center">
                           {/* Rating Badge */}
-                          <div className="flex items-center px-3 py-1 rounded-full">
+                          <div className="flex items-center py-1 rounded-full">
                             <StarRating
                               rating={activity.rating}
                               readOnly={true}
@@ -1628,21 +1626,6 @@ const ActivityDetail = () => {
                               minute: "2-digit",
                             })}
                           </span>
-                        </div>
-                        <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
-                          {isExpanded
-                            ? activity.description
-                            : `${activity.description.substring(0, 130)}${
-                                activity.description.length > 130 ? "..." : ""
-                              }`}
-                          {activity.description.length > 130 && (
-                            <button
-                              onClick={toggleExpanded}
-                              className="text-blue-500 hover:underline ml-2"
-                            >
-                              {isExpanded ? "View Less" : "View More"}
-                            </button>
-                          )}
                         </div>
                       </div>
                       {userRole === "tourist" && !isActivityPassed() && (
