@@ -1,6 +1,66 @@
+Priority List: 
+-CANT TEST CREATE ACTIVITY AASHAN COUNTRIES (had y testaha)
+-notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
+-lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
+-promo code activities, itineraries, hotels msh sha8al
+-lama bafoos ala activity mn el fl itinerary details el website bydrab
+-lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
+-cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
+-lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
+-Error updating product. Please try again later. lama ba update product f admin s3at
+-advertiser cannot delete/update his activity mn bara (all activities)
+-admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
+-Upon searching, no skeleton loading in (itineraries,historical places, Products) like the one in Activities.
+-Select by preference for itineraries not working (Sam)
+-Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
+-pagination msh btl3 l awl elpage
+-mafish loading b3d ma ba search fe itineraries zy activities w HPs. 
+-single pages el title mktoob 3 mrat leh f activity/itinerary/product
+-reports bayza 
+-mafish loading baad ma badoos update product
+-sa3at beyede error lama mark all as read
+consistency fe pages el all 
+navigation notification fe admin
+- shay be laban 3amatan (create activity we create products we kol el create )
+- sales report margins
+- booking confirmation popouts mesh zy b3d
+-update itinerary leha popup(cant aw succesfully updated)
+-create promo code layout (stretch start and end date we geeb el button foo2 )
+-no popup l flag inappropriate itinerary
+- toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
+-birthday promocode msh beyban fel notifications  and mail
+-creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
+-add loading for wishlist 
+-updating activity popup btdos basraha 3adi w btfdl f update activity
+-single ay haga el title el fo2 saye2
+
+-(fen orders page ? ana 3mlt /orders 3ashan a3raf awsalha bas heyya etshalt men el site mahtota fen?)
+-create promo code msh sha8ala
+-out of stock notification  elleh fel navbar msh sha8ala fe seller 
+
+
+
+
+
+
+
 
 Sam: 
+67 done✅
+69 done✅
+111 
 
+53
+54
+55
+56
+57
+58
+61
+70
+
+
+- raga3i sort by preference fe itinerary !!
 - convert from USD to my currency in external bookings (done✅)
 - two reqs for booking in flights (done✅)
 - book transportation lw katab aktr mn available seats, tickets bta3et activity we itinerary aolo en mfish kfaya
@@ -30,10 +90,24 @@ alwan profile w settings (done)
 
 
 Aby: 
+66 (done)
+68 (done)
+90
+91 (done)
+
+71
+72
+73
+74
+75
+76
+77
+78
+
 
 - Seeb el 0 sales bas sort by revenue 3ashan yezharo ta7t (done)
-- Automated verify Otp
-- Black Friday use this promo code!!
+- Automated verify Otp (done)
+- Black Friday use this promo code!! (done)
 
 
 admin w seller y view zy table feha product w amount sold w quantity items in stock
@@ -44,33 +118,84 @@ lw had by delete account tour guide msln w had 3aml book le haga ybaa hakhaly ko
 
 
 Alaa:
+2
+4
+5
+6
+7
+8
+9
+10
+
  sheel account info fe tourism governor we 7ot esmo foo2 zy admin (done)
  5od change pass mn el admin(done)
  change pass fe governor(done)
 -Single ay haga white space 3al yemen (Single Activity bezat)
 -7ot aktar men soora bardo fel single 3ashan nemla white space el sowar
 -wehna benadaf el db zabat description el hp (make it longer)
-- user reports for ALL-TIME not just a specific month
 
 
 
 
 Houba:
+
+11
+12
+13
+14
+15
+16
+17
+18
+
+toasts ele 3ayza teb2a zai eleradwa 3mla:
+add to cart 
+advertiser deleting activity
+save/unsave activity men all
+save/unsave activity men single 
+save/unsave itinerary men all
+save/unsave itinerary men single 
+archive w unarchive product men admin
+
 -check hn3ml eh f update itinerary lw booked
 - make all popups consistent (success toast and delete popup zay el radwa 3amlha)
+
+92(done✅)
+93(done✅)
+94(done✅)
+95(done✅)
+96(done✅)
+97(done✅)
 - all products: sheel zorar el + el fo2 w khaly add to cart teadd to cart 3alatool men gheer ma tefta7 options(done✅)
 -zabat popup button color of add to cart in single product(done✅)
 - popup: - are you sure you want to accept el user dah (badal mal tick bet accept 3alatool we dah dangerous action lazem popup)(done✅)
 -Tourguide camel case fe registration (da role kefaya 7anyaka ya hadwaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa done✅)
 ALLL SUBMIT/CONFIRMATION BUTTONS RIGHT ALIGNED (fel popups we fe kol el creates we make kol el alwan consistent bel mara)(done✅)
 Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button yemeen (Aby beyshed sha3ro fel background)(7a2ak ya aby done✅)
-- popup archive products in admin m7taga ttzbt, sheel navigation w a3mlha toast + re-fetch
+
 
 
 
 
 
 Jana:
+105   
+106  
+107  
+108  
+109  
+110
+
+79
+80
+81
+82
+83
+84
+85
+86
+
+
  help amy fel user profiles 
 - make loading like gray containers zay ma ana 3amla f notifications
 - on purchase 2oly you earned kam point
@@ -78,7 +203,24 @@ Jana:
 
 
 
-Zeina:
+Zeina: AY HAGA GMBAHA DONE BS MSHAKL KTEER KTBTHA FO2
+59 done✅
+60 done✅
+62 done✅
+63 done✅
+64 done✅
+65 done✅
+
+19 done✅
+20
+21
+22
+23
+24
+25
+26
+
+
 redeem points tbaa kol 100 maamlsh redeem decimal (done)
 admin by update products btaato bs bs ynf3 y delete aady (done)
 - bayen en el single cards clickable (hover effect) (historical place we check enaha clickable fe kol el amaken el tanya) (DONE)
@@ -90,8 +232,18 @@ admin by update products btaato bs bs ynf3 y delete aady (done)
 
 
 Radwa:
-- raga3i sort by preference fe itinerary !!
+
+27-32 
+
+87
+88
+89
+102
+103
+
 - sort by preference shklo w alwano mokhtlfa f kol page
+- alwan flag inappropriate fe admin activites different 3n itineraries
+- shakl view all 
 - change pass fe admin (done✅)
 - khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done)
 - past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)(done)
@@ -103,6 +255,23 @@ Radwa:
 
  
 Habiba:
+98 ✅
+99 ✅
+100 ✅
+101✅
+104✅
+
+45
+46
+47
+48
+49
+50
+51
+52
+
+
+
 - all flights (tab3y m3 amy)(done)
 Sheel el shay be laban men kol haga
 -- ghayar makan el wallet history (khaly wallet page lewa7daha)(done)
@@ -110,10 +279,29 @@ Sheel el shay be laban men kol haga
 el reports columns t2ba consistent (total sales t2ba tickets sold we y2ba we nsheel el numbering mn ay report)
 
 Hazem: 
-- single act has no loading until prices are displayed  (already ma3moola fe my account)
+
+1 ✅
+3 ✅
+34🚨
+35✅
+36✅
+38✅
+
+
+33✅
+37✅
+39✅
+40
+41
+42
+43
+44
+
+
+- single act has no loading until prices are displayed  (already ma3moola fe my account) (done✅)
 - pagination all pages (done✅)
 - zabat shakl el pagination consistency (bas bardo e3melo el3ayzeeno 3ashan manetshalesh)
-(transportation + flights + hotels use shadcn pagination)
+(transportation + flights + hotels use shadcn pagination) (done✅)
 make all the other pages the old pagination (done✅)
 -popup logout lazem adoos mareten (done✅)
 

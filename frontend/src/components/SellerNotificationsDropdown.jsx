@@ -64,8 +64,9 @@ export function NotificationsDropdownSeller() {
 
   const checkUnseenNotifications = async () => {
     try {
+      const role = getUserRole();
       const response = await axios.get(
-        `http://localhost:4000/${getUserRole}/unseen-notifications`,
+        `http://localhost:4000/${role}/unseen-notifications`,
         {
           headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
         }

@@ -1175,7 +1175,7 @@ const ItineraryDetail = ({ id, onBack }) => {
     <ToastProvider>
       <div className="min-h-screen bg-gray-100">
         <Button
-        onClick={onBack}
+          onClick={onBack}
           className="mb-4 bg-[#5D9297] text-white text-base"
         >
           <ChevronLeft className="w-5 h-5 mr-2" />

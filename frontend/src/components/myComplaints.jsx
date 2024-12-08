@@ -4,11 +4,18 @@ import Cookies from "js-cookie";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { XCircle, CheckCircle, ArrowUpDown } from 'lucide-react';
+import { XCircle, CheckCircle, ArrowUpDown } from "lucide-react";
 import { FaPlus } from "react-icons/fa";
 import FileComplaintForm from "@/components/FileComplaintForm";
-import { Toast, ToastClose, ToastDescription, ToastTitle, ToastProvider, ToastViewport } from "@/components/ui/toast";
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastTitle,
+  ToastProvider,
+  ToastViewport,
+} from "@/components/ui/toast";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function MyComplaintsComponent() {
   const [complaints, setComplaints] = useState([]);
@@ -20,38 +27,36 @@ export function MyComplaintsComponent() {
   const [activeTab, setActiveTab] = useState("pending");
   const [openComplaintId, setOpenComplaintId] = useState(null);
   const [isToastOpen, setIsToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState('success');
-  const [dateSortOrder, setDateSortOrder] = useState('desc');
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
+  const [dateSortOrder, setDateSortOrder] = useState("desc");
 
-  const showToast = (message, type = 'success') => {
+  const showToast = (message, type = "success") => {
     setToastMessage(message);
     setToastType(type);
     setIsToastOpen(true);
   };
 
+  const fetchComplaints = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get(
+        "http://localhost:4000/tourist/complaints",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setComplaints(response.data);
+      setTimeout(() => setIsLoading(false), 1000);
+    } catch (error) {
+      console.error("Error fetching complaints:", error);
+      showToast("Failed to fetch complaints. Please try again later.", "error");
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchComplaints = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get(
-          "http://localhost:4000/tourist/complaints",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setComplaints(response.data);
-        setTimeout(() => setIsLoading(false), 1000);
-
-      } catch (error) {
-        console.error("Error fetching complaints:", error);
-        showToast("Failed to fetch complaints. Please try again later.", "error");
-        setIsLoading(false);
-      }
-    };
-
     fetchComplaints();
-  }, []);
+  }, [fetchComplaints]);
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -85,6 +90,10 @@ export function MyComplaintsComponent() {
         return "bg-red-800";
     }
   };
+  const handleComplaintFiled = (newComplaint) => {
+    setComplaints((prevComplaints) => [newComplaint, ...prevComplaints]);
+    setActiveTab("pending");
+  };
 
   const openForm = () => setIsFormOpen(true);
   const closeForm = () => setIsFormOpen(false);
@@ -101,15 +110,17 @@ export function MyComplaintsComponent() {
   };
 
   const toggleDateSort = () => {
-    setDateSortOrder(prevOrder => prevOrder === 'asc' ? 'desc' : 'asc');
+    setDateSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
   };
 
   if (isLoading) {
     return (
       <div>
         <h1 className="text-3xl font-bold mb-2">Complaints</h1>
-        <p className="text-sm text-gray-500 mb-2">Help and Support / Complaints</p>
-  
+        <p className="text-sm text-gray-500 mb-2">
+          Help and Support / Complaints
+        </p>
+
         <div className="container mx-auto px-4 py-8 animate-pulse">
           <div className="bg-white border rounded-md shadow-md p-6">
             <div className="grid grid-cols-4 items-center gap-4 mb-6">
@@ -136,16 +147,18 @@ export function MyComplaintsComponent() {
       </div>
     );
   }
-  
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
   }
 
   const filteredComplaints = complaints
-    .filter((complaint) => complaint.status.toLowerCase() === activeTab)
+    .filter(
+      (complaint) =>
+        (complaint.status?.toLowerCase() || "pending") === activeTab
+    )
     .sort((a, b) => {
-      if (dateSortOrder === 'asc') {
+      if (dateSortOrder === "asc") {
         return new Date(a.createdAt) - new Date(b.createdAt);
       } else {
         return new Date(b.createdAt) - new Date(a.createdAt);
@@ -158,12 +171,17 @@ export function MyComplaintsComponent() {
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-bold">Complaints</h1>
-        
           </div>
-          <p className="text-sm text-gray-500 mb-4">Help and Support / Complaints</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Help and Support / Complaints
+          </p>
           <div className="bg-white border rounded-md shadow-md p-6">
             <div className="grid grid-cols-5 items-center gap-4 mb-6">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="col-span-3">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="col-span-3"
+              >
                 <TabsList className="grid grid-cols-2 bg-white w-full">
                   <TabsTrigger
                     value="pending"
@@ -188,18 +206,17 @@ export function MyComplaintsComponent() {
                 </TabsList>
               </Tabs>
               <Button
-              onClick={toggleDateSort}
-              className="bg-[#388A94] hover:bg-[#2e6b77] text-white py-2 px-4 rounded-md text-sm font-medium shadow-sm"
-            >
-              Sort by Date ({dateSortOrder === 'asc' ? 'Oldest' : 'Newest'})
-            </Button>
+                onClick={toggleDateSort}
+                className="bg-[#388A94] hover:bg-[#2e6b77] text-white py-2 px-4 rounded-md text-sm font-medium shadow-sm"
+              >
+                Sort by Date ({dateSortOrder === "asc" ? "Oldest" : "Newest"})
+              </Button>
               <Button
                 onClick={openForm}
                 className="col-span-1 bg-[#388A94] hover:bg-[#2e6b77] text-white py-2 px-4 rounded-md text-sm font-medium shadow-sm"
               >
                 File a Complaint
               </Button>
-         
             </div>
 
             {filteredComplaints.length === 0 ? (
@@ -209,19 +226,26 @@ export function MyComplaintsComponent() {
                 <div key={complaint._id} className="mb-4">
                   <div
                     className={`cursor-pointer border rounded-md p-4 transition-all duration-300 ${
-                      openComplaintId === complaint._id ? "bg-gray-50 shadow-md" : "bg-white shadow-sm"
+                      openComplaintId === complaint._id
+                        ? "bg-gray-50 shadow-md"
+                        : "bg-white shadow-sm"
                     }`}
                     onClick={() => toggleAccordion(complaint._id)}
                   >
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-teal-800">{complaint.title}</h3>
+                        <h3 className="font-semibold text-teal-800">
+                          {complaint.title}
+                        </h3>
                         <p className="text-xs text-gray-500">
-                          {new Date(complaint.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                          {new Date(complaint.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -246,14 +270,18 @@ export function MyComplaintsComponent() {
                           }`}
                         >
                           {openComplaintId === complaint._id
-                            ? `${complaint.status.charAt(0).toUpperCase()}${complaint.status.slice(1).toLowerCase()}`
+                            ? `${complaint.status
+                                .charAt(0)
+                                .toUpperCase()}${complaint.status
+                                .slice(1)
+                                .toLowerCase()}`
                             : ""}
                         </div>
                       </div>
                     </div>
                     {openComplaintId !== complaint._id && (
                       <p className="text-sm text-gray-500 mt-2">
-                        {complaint.body.substring(0, 30)}...
+                        {complaint.body?.substring(0, 30)}...
                       </p>
                     )}
                     {openComplaintId === complaint._id && (
@@ -279,7 +307,11 @@ export function MyComplaintsComponent() {
 
           {isFormOpen && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <FileComplaintForm closeForm={closeForm} showToast={showToast} />
+              <FileComplaintForm
+                closeForm={closeForm}
+                showToast={showToast}
+                onComplaintFiled={handleComplaintFiled}
+              />
             </div>
           )}
 
@@ -288,16 +320,20 @@ export function MyComplaintsComponent() {
               onOpenChange={setIsToastOpen}
               open={isToastOpen}
               duration={1500}
-              className={toastType === 'success' ? 'bg-green-100' : 'bg-red-100'}
+              className={
+                toastType === "success" ? "bg-green-100" : "bg-red-100"
+              }
             >
               <div className="flex items-center">
-                {toastType === 'success' ? (
+                {toastType === "success" ? (
                   <CheckCircle className="text-green-500 mr-2" />
                 ) : (
                   <XCircle className="text-red-500 mr-2" />
                 )}
                 <div>
-                  <ToastTitle>{toastType === 'success' ? 'Success' : 'Error'}</ToastTitle>
+                  <ToastTitle>
+                    {toastType === "success" ? "Success" : "Error"}
+                  </ToastTitle>
                   <ToastDescription>{toastMessage}</ToastDescription>
                 </div>
               </div>
@@ -310,4 +346,3 @@ export function MyComplaintsComponent() {
     </ToastProvider>
   );
 }
-

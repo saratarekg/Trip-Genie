@@ -292,10 +292,12 @@ export default function OrdersPage() {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-100">
+      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+      </div>
       <Toaster />
-      <h1 className="text-3xl font-bold mb-2">My Orders</h1>
-      <p className="text-sm text-gray-500 mb-2">Purchases</p>
+
       <div className="container bg-white rounded-lg mx-auto px-4 py-8">
         <div className="flex w-full  justify-between  items-center mb-6">
           <div className="flex-[2]">

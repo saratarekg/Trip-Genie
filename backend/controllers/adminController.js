@@ -511,6 +511,12 @@ const getSalesReport = async (req, res) => {
       return acc;
     }, []);
 
+    if (year) {
+      sellerProductsSales = sellerProductsSales.filter(
+        (sale) => sale.revenue > 0
+      );
+    }
+
     sellerProductsSales = sellerProductsSales.sort(
       (a, b) => b.revenue - a.revenue
     );
@@ -568,9 +574,11 @@ const getItinerariesReport = async (req, res) => {
       return { itinerary, totalRevenue, appRevenue };
     });
 
-    // itinerariesSales = itinerariesSales.filter(
-    //   (report) => report.totalRevenue > 0
-    // );
+    if (year) {
+      itinerariesSales = itinerariesSales.filter(
+        (report) => report.totalRevenue > 0
+      );
+    }
 
     itinerariesSales = itinerariesSales.sort(
       (a, b) => b.totalRevenue - a.totalRevenue
@@ -629,9 +637,11 @@ const getActivitiesReport = async (req, res) => {
       return { activity, totalRevenue, appRevenue };
     });
 
-    // activitiesSales = activitiesSales.filter(
-    //   (report) => report.totalRevenue > 0
-    // );
+    if (year) {
+      activitiesSales = activitiesSales.filter(
+        (report) => report.totalRevenue > 0
+      );
+    }
 
     activitiesSales = activitiesSales.sort(
       (a, b) => b.totalRevenue - a.totalRevenue

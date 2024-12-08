@@ -148,7 +148,7 @@ exports.createBooking = async (req, res) => {
       message: "Booking created successfully",
       booking: newBooking,
       percentageOff: usedPromoCode ? usedPromoCode.percentOff : 0,
-      loyaltyPoints
+      loyaltyPoints,
     });
   } catch (error) {
     console.log(error.message);
@@ -485,7 +485,9 @@ exports.getItinerariesReport = async (req, res) => {
       return { itinerary, tickets, revenue: revenue * 0.9 }; // Return itinerary report
     });
 
-    // itineraryReport = itineraryReport.filter((report) => report.tickets > 0); // Filter out itineraries with no tickets
+    if (year) {
+      itineraryReport = itineraryReport.filter((report) => report.tickets > 0); // Filter out itineraries with no tickets
+    }
     itineraryReport = itineraryReport.sort((a, b) => b.revenue - a.revenue);
     totalRevenue *= 0.9;
     res.status(200).json({ itineraryReport, totalRevenue, totalTickets });
