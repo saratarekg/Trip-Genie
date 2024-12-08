@@ -3,6 +3,7 @@ Priority List:
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
 -promo code activities, itineraries, hotels msh sha8al
+-lama bafoos ala activity mn el fl itinerary details el website bydrab
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
@@ -199,15 +200,15 @@ Jana:
 
 
 
-Zeina:
-59
-60
-62
-63
-64
-65
+Zeina: AY HAGA GMBAHA DONE BS MSHAKL KTEER KTBTHA FO2
+59 done✅
+60 done✅
+62 done✅
+63 done✅
+64 done✅
+65 done✅
 
-19
+19 done✅
 20
 21
 22
