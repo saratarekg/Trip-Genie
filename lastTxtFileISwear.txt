@@ -111,11 +111,11 @@ el reports columns t2ba consistent (total sales t2ba tickets sold we y2ba we nsh
 
 Hazem: 
 - single act has no loading until prices are displayed  (already ma3moola fe my account)
-- pagination all pages
+- pagination all pages (done✅)
 - zabat shakl el pagination consistency (bas bardo e3melo el3ayzeeno 3ashan manetshalesh)
 (transportation + flights + hotels use shadcn pagination)
-make all the other pages the old pagination
--popup logout lazem adoos mareten
+make all the other pages the old pagination (done✅)
+-popup logout lazem adoos mareten (done✅)
 
 
 
