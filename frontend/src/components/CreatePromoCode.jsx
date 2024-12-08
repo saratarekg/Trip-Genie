@@ -89,8 +89,10 @@ export function CreatePromoCode() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function onSubmit(values) {
+   
     setIsSubmitting(true);
     try {
+    
       const token = Cookies.get("jwt");
       const formattedValues = {
         ...values,
@@ -243,94 +245,106 @@ export function CreatePromoCode() {
               />
             </div>
             <FormField
-              control={form.control}
-              name="dateRange"
-              render={({ field, fieldState }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel className="text-[#003f66]">Date Range</FormLabel>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[272px] pl-3 text-left font-normal",
-                              !field.value.start && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value.start
-                              ? format(field.value.start, "PPP")
-                              : "Pick a start date"}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value.start}
-                          onSelect={(date) =>
-                            field.onChange({ ...field.value, start: date })
-                          }
-                          initialFocus
-                          disabled={(date) => date < new Date().setHours(0, 0, 0, 0) || (field.value.end && date > field.value.end)}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <span className="text-center">to</span>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-[272px] pl-3 text-left font-normal",
-                              !field.value.end && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value.end
-                              ? format(field.value.end, "PPP")
-                              : "Pick an end date"}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value.end}
-                          onSelect={(date) =>
-                            field.onChange({ ...field.value, end: date })
-                          }
-                          initialFocus
-                          disabled={(date) => date < new Date().setHours(0, 0, 0, 0) || (field.value.start && date <= field.value.start)}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <FormDescription>
-                    Select the start and end dates for the promo code validity.
-                  </FormDescription>
-                  {fieldState.error && (
-                    <p className="text-red-500 text-sm font-medium text-destructive">{"Start and end dates must be selected"}</p>
-                  )}
-                </FormItem>
-              )}
+  control={form.control}
+  name="dateRange"
+  render={({ field, fieldState }) => (
+    <FormItem className="flex flex-col">
+      <FormLabel className="text-[#003f66]">Date Range</FormLabel>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
+        <Popover>
+          <PopoverTrigger asChild>
+            <FormControl>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full sm:w-[272px] pl-3 text-left font-normal", // Adjust width here
+                  !field.value.start && "text-muted-foreground"
+                )}
+              >
+                {field.value.start
+                  ? format(field.value.start, "PPP")
+                  : "Pick a start date"}
+                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+              </Button>
+            </FormControl>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={field.value.start}
+              onSelect={(date) =>
+                field.onChange({ ...field.value, start: date })
+              }
+              initialFocus
+              disabled={(date) =>
+                date < new Date().setHours(0, 0, 0, 0) ||
+                (field.value.end && date > field.value.end)
+              }
             />
-          </form>
-        </Form>
-        <div className="flex justify-end mb-6 mr-6">
+          </PopoverContent>
+        </Popover>
+        <span className="text-center">to</span>
+        <Popover>
+          <PopoverTrigger asChild>
+            <FormControl>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-full sm:w-[272px] pl-3 text-left font-normal", // Adjust width here
+                  !field.value.end && "text-muted-foreground"
+                )}
+              >
+                {field.value.end
+                  ? format(field.value.end, "PPP")
+                  : "Pick an end date"}
+                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+              </Button>
+            </FormControl>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={field.value.end}
+              onSelect={(date) =>
+                field.onChange({ ...field.value, end: date })
+              }
+              initialFocus
+              disabled={(date) =>
+                date < new Date().setHours(0, 0, 0, 0) ||
+                (field.value.start && date <= field.value.start)
+              }
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+      <FormDescription>
+        Select the start and end dates for the promo code validity.
+      </FormDescription>
+      {fieldState.error && (
+        <p className="text-red-500 text-sm font-medium text-destructive">
+          {"Start and end dates must be selected"}
+        </p>
+      )}
+    </FormItem>
+  )}
+/>
+
+            
+            <div className="flex justify-end mb-6 mr-6">
         <Button
   type="submit"
   disabled={isSubmitting}
-  className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-8 py-4 text-xl -mt-20" // Reduce or remove `mt`
+  className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-8 py-4 text-xl -mt-28" // Reduce or remove `mt`
 >
   <Plus className="mr-2 h-6 w-6" />
   {isSubmitting ? "Creating..." : "Create Promo Code"}
 </Button>
 
         </div>
+          </form>
+          
+        </Form>
+        
       </>
 
       <ToastViewport />

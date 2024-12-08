@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import {
@@ -11,6 +13,7 @@ import {
   addYears,
   startOfYear,
   getDaysInMonth,
+  parseISO,
 } from "date-fns";
 import {
   Area,
@@ -21,14 +24,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import {
-  Calendar,
-  ChevronDown,
-  ArrowUp,
-  ArrowDown,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { Calendar, ChevronDown, TrendingUp, TrendingDown } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 
 import {
@@ -39,7 +35,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -51,8 +46,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ProductReport = () => {
   const [salesReport, setSalesReport] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState("all");
-  const [graphPeriod, setGraphPeriod] = useState("week");
+  const [selectedPeriod, setSelectedPeriod] = useState("All Time");
+  const [graphPeriod, setGraphPeriod] = useState("year");
   const [filters, setFilters] = useState({
     product: "",
     day: "",
@@ -64,7 +59,13 @@ const ProductReport = () => {
   const [filteredSales, setFilteredSales] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [selectedPeriodRevenue, setSelectedPeriodRevenue] = useState(0);
+  const [initialSelectedPeriodRevenue, setInitialSelectedPeriodRevenue] = useState(null);
+  const [initialTotalRevenue, setInitialTotalRevenue] = useState(null);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [error, setError] = useState(null);
+  const [thisMonthSales, setThisMonthSales] = useState(0);
+  const [lastMonthSales, setLastMonthSales] = useState(0);
+  const initialGraphDataRef = useRef(null);
 
   const getUserRole = () => {
     let role = Cookies.get("role");
@@ -72,87 +73,116 @@ const ProductReport = () => {
     return role;
   };
 
-  useEffect(() => {
-    const fetchSalesReport = async () => {
-      try {
-        const token = Cookies.get("jwt");
-        const role = getUserRole();
-        const { day, month, year } = filters;
+  const loadStatistics = async () => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const currentYear = new Date().getFullYear();
+      const monthlyDataPromises = Array.from({ length: 12 }, (_, i) => {
+        const month = i + 1;
         const url = new URL(`http://localhost:4000/${role}/sales-report`);
-        if (day) url.searchParams.append("day", day);
-        if (month) url.searchParams.append("month", month);
-        if (year) url.searchParams.append("year", year);
-
-        const response = await axios.get(url.toString(), {
+        url.searchParams.append("year", currentYear);
+        url.searchParams.append("month", month);
+        return axios.get(url.toString(), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setSalesReport(response.data);
-        updateGraphData(response.data.adminProductsSales, graphPeriod);
+      });
+
+      const monthlyDataResponses = await Promise.all(monthlyDataPromises);
+      const monthlySalesData = monthlyDataResponses.map((response) => response.data.adminProductsSales).flat();
+
+      if (monthlySalesData.length > 0) {
+        setSalesReport({ adminProductsSales: monthlySalesData });
 
         const uniqueProductNames = [
           ...new Set(
-            response.data.adminProductsSales
+            monthlySalesData
               .filter((item) => item.product && item.product.name)
               .map((item) => item.product.name)
           ),
         ];
         setProductNames(uniqueProductNames);
 
-        setTotalRevenue(response.data.totalAdminSalesRevenue);
-        setSelectedPeriodRevenue(
-          calculatePeriodRevenue(response.data.adminProductsSales, "all")
+        const totalRevenue = monthlyDataResponses.reduce((sum, response) => sum + (response.data.totalAdminSalesRevenue || 0), 0);
+        setTotalRevenue(totalRevenue);
+
+        setFilteredSales(monthlySalesData);
+
+        // Calculate this month and last month sales
+        const thisMonthSales = calculatePeriodRevenue(monthlySalesData, "month");
+        const lastMonthSales = calculateLastMonthSales(monthlySalesData);
+        setThisMonthSales(thisMonthSales);
+        setLastMonthSales(lastMonthSales);
+
+        // Process graph data
+        updateGraphData(monthlySalesData, "year");
+      } else {
+        setError(
+          "Invalid data structure received from the server: adminProductsSales missing"
         );
-
-        // Apply product filter in frontend
-        const filteredData = filters.product
-          ? response.data.adminProductsSales.filter(
-              (item) => item.product && item.product.name === filters.product
-            )
-          : response.data.adminProductsSales;
-        setFilteredSales(filteredData);
-      } catch (error) {
-        console.error("Error fetching sales report:", error);
       }
-    };
-
-    fetchSalesReport();
-  }, [filters.day, filters.month, filters.year, filters.product, graphPeriod]);
-
-  const handleFilterChange = (key, value) => {
-    const newFilters = { ...filters, [key]: value };
-    if (key === "year") {
-      newFilters.month = "";
-      newFilters.day = "";
-    } else if (key === "month") {
-      newFilters.day = "";
+    } catch (error) {
+      console.error("Error fetching sales report:", error);
+      setError("Failed to fetch sales report. Please try again later.");
     }
-    setFilters(newFilters);
-    const searchParams = new URLSearchParams();
-    ["day", "month", "year"].forEach((key) => {
-      if (newFilters[key]) searchParams.append(key, newFilters[key]);
-    });
-    navigate(`/product-report?${searchParams.toString()}`);
   };
 
-  const applyProductFilter = (productName) => {
-    const filteredData = productName
-      ? salesReport.adminProductsSales.filter(
-          (item) => item.product && item.product.name === productName
-        )
-      : salesReport.adminProductsSales;
-    setFilteredSales(filteredData);
+  const fetchFilteredData = async (newFilters) => {
+    try {
+      const token = Cookies.get("jwt");
+      const role = getUserRole();
+      const url = new URL(`http://localhost:4000/${role}/sales-report`);
+      if (newFilters.day) url.searchParams.append("day", newFilters.day);
+      if (newFilters.month) url.searchParams.append("month", newFilters.month);
+      if (newFilters.year) url.searchParams.append("year", newFilters.year);
+
+      const response = await axios.get(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data && response.data.adminProductsSales) {
+        setSalesReport(response.data);
+        let filteredData = response.data.adminProductsSales;
+        
+        // Apply product filter in the front-end
+        if (newFilters.product) {
+          filteredData = filteredData.filter(
+            (item) => item.product && item.product.name === newFilters.product
+          );
+        }
+        
+        setFilteredSales(filteredData);
+        setTotalRevenue(response.data.totalAdminSalesRevenue);
+        setSelectedPeriodRevenue(calculatePeriodRevenue(filteredData, selectedPeriod));
+      } else {
+        setError("Invalid data structure received from the server: adminProductsSales missing");
+      }
+    } catch (error) {
+      console.error("Error fetching filtered data:", error);
+      setError("Failed to fetch filtered data. Please try again later.");
+    }
   };
 
   useEffect(() => {
-    if (salesReport) {
-      filterSalesData(salesReport.adminProductsSales);
-      setSelectedPeriodRevenue(
-        calculatePeriodRevenue(salesReport.adminProductsSales, selectedPeriod)
-      );
+    loadStatistics();
+  }, []);
+
+  useEffect(() => {
+    if (initialSelectedPeriodRevenue === null && salesReport) {
+      setInitialSelectedPeriodRevenue(calculatePeriodRevenue(salesReport.adminProductsSales, selectedPeriod));
     }
-  }, [filters, selectedPeriod, salesReport]);
+    if (initialTotalRevenue === null && totalRevenue !== 0) {
+      setInitialTotalRevenue(totalRevenue);
+    }
+  }, [salesReport, selectedPeriod, totalRevenue]);
+
+  useEffect(() => {
+    fetchFilteredData(filters);
+  }, [filters, selectedPeriod]);
 
   useEffect(() => {
     if (salesReport) {
@@ -160,34 +190,18 @@ const ProductReport = () => {
     }
   }, [graphPeriod, salesReport]);
 
-  const filterSalesData = (salesData) => {
-    setIsFiltering(true);
-    setTimeout(() => {
-      const filtered = salesData.filter((item) => {
-        const itemDate = new Date(item.createdAt);
-        return (
-          (!filters.product || item.product.name === filters.product) &&
-          (!filters.year ||
-            itemDate.getFullYear().toString() === filters.year) &&
-          (!filters.month ||
-            (itemDate.getMonth() + 1).toString() === filters.month) &&
-          (!filters.day || itemDate.getDate().toString() === filters.day)
-        );
-      });
-      setFilteredSales(filtered);
-      setIsFiltering(false);
-    }, 300);
-  };
-
   const updateGraphData = (salesData, period) => {
     const now = new Date();
-    let startDate, dateFormat, groupingFunction, data;
+    let startDate, dateFormat, data;
+    if (initialGraphDataRef.current) {
+      setGraphData(initialGraphDataRef.current);
+      return;
+    }
 
     switch (period) {
       case "week":
         startDate = subDays(now, 6);
         dateFormat = "EEE";
-        groupingFunction = (date) => format(date, "yyyy-MM-dd");
         data = Array.from({ length: 7 }, (_, i) => ({
           date: format(addDays(startDate, i), dateFormat),
           sales: 0,
@@ -197,17 +211,15 @@ const ProductReport = () => {
       case "year":
         startDate = startOfYear(now);
         dateFormat = "MMM";
-        groupingFunction = (date) => format(date, "yyyy-MM");
         data = Array.from({ length: 12 }, (_, i) => ({
           date: format(addMonths(startDate, i), dateFormat),
           sales: 0,
           revenue: 0,
         }));
         break;
-      case "all":
+      case "All Time":
         startDate = subYears(now, 7);
         dateFormat = "yyyy";
-        groupingFunction = (date) => format(date, "yyyy");
         data = Array.from({ length: 8 }, (_, i) => ({
           date: format(addYears(startDate, i), dateFormat),
           sales: 0,
@@ -217,27 +229,25 @@ const ProductReport = () => {
     }
 
     salesData.forEach((item) => {
-      const date = new Date(item.createdAt);
+      const date = parseISO(item.createdAt);
       if (date >= startDate && date <= now) {
-        const key = groupingFunction(date);
-        const index = data.findIndex(
-          (d) => d.date === format(date, dateFormat)
-        );
+        const key = format(date, dateFormat);
+        const index = data.findIndex((d) => d.date === key);
         if (index !== -1) {
           data[index].sales += item.sales;
           data[index].revenue += item.revenue;
         }
       }
     });
-
+    initialGraphDataRef.current = data;
     setGraphData(data);
   };
 
   const calculatePeriodRevenue = (salesData, period) => {
-    if (!salesData) return 0;
+    if (!Array.isArray(salesData)) return 0;
     const now = new Date();
     return salesData.reduce((sum, item) => {
-      const saleDate = new Date(item.createdAt);
+      const saleDate = parseISO(item.createdAt);
       switch (period) {
         case "today":
           return (
@@ -260,29 +270,17 @@ const ProductReport = () => {
             sum +
             (saleDate.getFullYear() === now.getFullYear() ? item.revenue : 0)
           );
-        case "all":
+        case "All Time":
         default:
           return sum + item.revenue;
       }
     }, 0);
   };
 
-  const resetFilters = () => {
-    setFilters({ product: "", day: "", month: "", year: "" });
-  };
-
-  if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
-
-  const fillPercentage = (selectedPeriodRevenue / totalRevenue) * 100;
-
-  const thisMonthSales = calculatePeriodRevenue(
-    salesReport.adminProductsSales,
-    "month"
-  );
-  const lastMonthSales = (() => {
+  const calculateLastMonthSales = (salesData) => {
     const lastMonth = subMonths(new Date(), 1);
-    return salesReport.adminProductsSales.reduce((sum, item) => {
-      const saleDate = new Date(item.createdAt);
+    return salesData.reduce((sum, item) => {
+      const saleDate = parseISO(item.createdAt);
       return (
         sum +
         (saleDate.getMonth() === lastMonth.getMonth() &&
@@ -291,7 +289,27 @@ const ProductReport = () => {
           : 0)
       );
     }, 0);
-  })();
+  };
+
+  const resetFilters = () => {
+    setFilters({ product: "", day: "", month: "", year: "" });
+  };
+
+  const handleFilterChange = (key, value) => {
+    const newFilters = { ...filters, [key]: value };
+    if (key === "year") {
+      newFilters.month = "";
+      newFilters.day = "";
+    } else if (key === "month") {
+      newFilters.day = "";
+    }
+    setFilters(newFilters);
+  };
+
+  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
+  if (!salesReport) return <div className="p-6 text-center">Loading...</div>;
+
+  const fillPercentage = (initialSelectedPeriodRevenue / initialTotalRevenue) * 100;
 
   const thisMonthChange =
     lastMonthSales === 0
@@ -299,291 +317,9 @@ const ProductReport = () => {
       : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid gap-4 md:grid-cols-12 mb-4">
-          {/* Total Revenue */}
-          <Card className="md:col-span-3 flex flex-col justify-center items-center">
-            <CardHeader className="p-3 w-full">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                  Total Revenue
-                </CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
-                    >
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span className="mr-1">{selectedPeriod}</span>
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[100px]">
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("today")}
-                    >
-                      Today
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("week")}
-                    >
-                      This Week
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("month")}
-                    >
-                      This Month
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onSelect={() => setSelectedPeriod("year")}
-                    >
-                      This Year
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setSelectedPeriod("all")}>
-                      All Time
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent className="p-3 flex flex-col justify-center items-center w-full">
-              <div className="relative flex items-center justify-center w-32 h-32">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke="#E6DCCF"
-                    strokeWidth="10"
-                  />
-                  <motion.circle
-                    cx="50"
-                    cy="50"
-                    r="45"
-                    fill="none"
-                    stroke="#1A3B47"
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                    strokeDasharray="283"
-                    strokeDashoffset="283"
-                    initial={{ strokeDashoffset: 283 }}
-                    animate={{
-                      strokeDashoffset: 283 - (283 * fillPercentage) / 100,
-                    }}
-                    transition={{
-                      duration: 1,
-                      ease: "easeInOut",
-                    }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-lg font-bold text-[#1A3B47]">
-                    ${selectedPeriodRevenue.toFixed(2)}
-                  </span>
-                  <span className="text-sm text-[#5D9297]">
-                    {selectedPeriod.charAt(0).toUpperCase() +
-                      selectedPeriod.slice(1)}
-                  </span>
-                </div>
-              </div>
-              <div className="text-center mt-4">
-                <p className="text-base font-semibold text-[#1A3B47]">
-                  {totalRevenue !== null &&
-                    `Total: $${totalRevenue.toFixed(2)}`}
-                </p>
-                <p className="text-base text-[#5D9297]">
-                  {fillPercentage.toFixed(1)}% of total
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="md:col-span-3 flex flex-col gap-4">
-            {/* Monthly Sales - This Month */}
-            <Card>
-              <CardHeader className="flex justify-between">
-                <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                  This Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="">
-                <div className="flex flex-col items-start -mt-4">
-                  <p className="text-sm text-gray-500">Sales</p>
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center">
-                      <span className="text-lg font-bold text-[#5D9297]">
-                        ${thisMonthSales.toFixed(2)}
-                      </span>
-                      <motion.span
-                        className={`ml-12 flex items-center text-xs font-semibold px-2 py-1 rounded-full ${
-                          thisMonthChange >= 0
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {thisMonthChange >= 0 ? (
-                          <TrendingUp className="mr-1" />
-                        ) : (
-                          <TrendingDown className="mr-1" />
-                        )}
-                        {thisMonthChange.toFixed(1)}%
-                      </motion.span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* <Card>
-    <CardHeader className="flex justify-between items-center">
-      <CardTitle className="text-lg font-bold text-[#1A3B47]">This Month</CardTitle>
-    </CardHeader>
-    <CardContent className="">
-      <div className="flex flex-col items-start -mt-4">
-        <div className="flex items-center justify-between w-full">
-          <p className="text-sm text-gray-500">Sales</p>
-          <div className=
-  "flex items-center">
-            <span className="text-lg font-bold text-[#5D9297]">${thisMonthSales.toFixed(2)}</span>
-            <motion.span
-              className={`ml-2 flex items-center text-xs font-semibold px-2 py-1 rounded-full ${
-                thisMonthChange >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              {thisMonthChange >= 0 ? (
-                <TrendingUp className="mr-1" />
-              ) : (
-                <TrendingDown className="mr-1" />
-              )}
-              {thisMonthChange.toFixed(1)}%
-            </motion.span>
-          </div>
-        </div>
-      </div>
-    </CardContent>
-  </Card> */}
-
-            {/* Monthly Sales - Last Month */}
-            <Card>
-              <CardHeader className="">
-                <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                  Last Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="">
-                <div className="flex flex-col items-start -mt-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Sales</p>
-                    <span className="text-lg font-bold text-[#5D9297]">
-                      ${lastMonthSales.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sales Analytics Card */}
-          <Card className="md:col-span-6">
-            <CardHeader className="p-3 mb-2">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                  Sales Analytics
-                </CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-[100px] h-7 text-[#388A94] focus:ring-0 focus:ring-offset-0"
-                    >
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span className="mr-1">{graphPeriod}</span>
-                      <ChevronDown className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[100px]">
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("week")}>
-                      This Week
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("year")}>
-                      This Year
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => setGraphPeriod("all")}>
-                      All Time
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent className="pl-0">
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={graphData}
-                    margin={{ top: 5, right: 0, left: 0, bottom: 5 }}
-                  >
-                    <defs>
-                      <linearGradient
-                        id="colorRevenue"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#B5D3D1"
-                          stopOpacity={0.8}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#B5D3D1"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#B5D3D1"
-                      fillOpacity={1}
-                      fill="url(#colorRevenue)"
-                      strokeWidth={2}
-                      dot={{
-                        r: 3,
-                        strokeWidth: 2,
-                        stroke: "#B5D3D1",
-                        fill: "white",
-                      }}
-                      activeDot={{
-                        r: 5,
-                        strokeWidth: 2,
-                        stroke: "#B5D3D1",
-                        fill: "white",
-                      }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
+    <div className="bg-gray-100 min-h-screen">
+      <div className="">
+      
         <Card>
           <CardHeader className="p-4">
             <div className="flex justify-between items-center">
@@ -603,7 +339,7 @@ const ProductReport = () => {
               <Select
                 value={filters.product}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, product: value }))
+                  handleFilterChange("product", value)
                 }
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
@@ -620,12 +356,7 @@ const ProductReport = () => {
               <Select
                 value={filters.year}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    year: value,
-                    month: "",
-                    day: "",
-                  }))
+                  handleFilterChange("year", value)
                 }
               >
                 <SelectTrigger className="w-full sm:w-[200px]">
@@ -645,7 +376,7 @@ const ProductReport = () => {
               <Select
                 value={filters.month}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, month: value, day: "" }))
+                  handleFilterChange("month", value)
                 }
                 disabled={!filters.year}
               >
@@ -663,7 +394,7 @@ const ProductReport = () => {
               <Select
                 value={filters.day}
                 onValueChange={(value) =>
-                  setFilters((prev) => ({ ...prev, day: value }))
+                  handleFilterChange("day", value)
                 }
                 disabled={!filters.year || !filters.month}
               >
@@ -732,8 +463,7 @@ const ProductReport = () => {
                             {item.sales}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.revenue !== null &&
-                              `$${item.revenue.toFixed(2)}`}
+                            ${item.revenue.toFixed(2)}
                           </td>
                         </motion.tr>
                       ))}
@@ -750,3 +480,4 @@ const ProductReport = () => {
 };
 
 export default ProductReport;
+
