@@ -114,7 +114,8 @@ export function NavbarComponent() {
       !activitiesRef.current?.contains(event.target) &&
       !historicalRef.current?.contains(event.target) &&
       !userMenuRef.current?.contains(event.target) &&
-      !transportationRef.current?.contains(event.target)
+      !transportationRef.current?.contains(event.target) &&
+      !document.querySelector(".logout-popup")?.contains(event.target) // Exclude modal
     ) {
       closeDropdown();
     }
@@ -270,21 +271,35 @@ export function NavbarComponent() {
 
   const LogoutPopup = ({ onConfirm, onCancel }) => {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-sm">
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        onClick={onCancel} // Closes modal if the background is clicked
+      >
+        <div
+          className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-sm"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent background click from propagating
+          }}
+        >
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Are you sure you want to log out?
           </h3>
           <div className="flex justify-end gap-4">
             <button
-              onClick={onCancel}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent button click from affecting parent
+                onCancel();
+              }}
               type="button"
               className="px-4 py-2 text-sm text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300"
             >
               Cancel
             </button>
             <button
-              onClick={onConfirm}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent button click from affecting parent
+                onConfirm();
+              }}
               type="button"
               className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
             >
@@ -296,7 +311,11 @@ export function NavbarComponent() {
     );
   };
 
+  useEffect(() => {
+    console.log("showLogoutModal state updated:", showLogoutModal);
+  }, [showLogoutModal]);
   const handleLogoutConfirm = () => {
+    setOpenDropdown(false); // Ensure the dropdown is closed
     setShowLogoutModal(true);
   };
 
@@ -332,12 +351,12 @@ export function NavbarComponent() {
 
   const toggleDropdown = (dropdown) => {
     setOpenDropdown((prevDropdown) =>
-      prevDropdown === dropdown ? null : dropdown
+      prevDropdown === dropdown ? false : dropdown
     );
   };
 
   const closeDropdown = () => {
-    setOpenDropdown(null);
+    setOpenDropdown(false);
   };
 
   const promoBanner = <PromoBanner setPromoMargin={setPromoBannerMargin} />;
