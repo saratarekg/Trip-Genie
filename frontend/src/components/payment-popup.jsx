@@ -42,7 +42,7 @@ const PaymentPopup = ({
   transportationSeats,
   promoDetails,
   setPromoDetails,
-  loyaltyPoints
+  loyaltyPoints,
 }) => {
   const formatDate = (date) => {
     const localDate = new Date(date);
@@ -53,7 +53,6 @@ const PaymentPopup = ({
   };
 
   console.log(items);
-
 
   // State to keep the date as a string for both display and selection
   const [formattedDate, setFormattedDate] = useState(
@@ -66,7 +65,7 @@ const PaymentPopup = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [totalPrice, setTotalPrice] = useState(Number(priceOne));
   const [promoCode, setPromoCode] = useState("");
-  
+
   const [promoError, setPromoError] = useState("");
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountedTotal, setDiscountedTotal] = useState(totalPrice);
@@ -88,11 +87,11 @@ const PaymentPopup = ({
     setPromoDetails(null);
     setDiscountAmount(0);
     setDiscountedTotal(totalPrice);
-  
+
     if (!promoCode.trim()) {
       return;
     }
-  
+
     try {
       const response = await fetch(
         "http://localhost:4000/tourist/get/promo-code",
@@ -105,38 +104,38 @@ const PaymentPopup = ({
           body: JSON.stringify({ code: promoCode }),
         }
       );
-  
+
       if (response.status === 404) {
         setPromoError("Promo Code Not Found.");
         return;
       }
-  
+
       if (!response.ok) {
         throw new Error("Failed to fetch promo code details");
       }
-  
+
       const data = await response.json();
       const promo = data.promoCode;
-  
+
       if (promo.status === "inactive") {
         setPromoError("This promo code is currently inactive.");
         return;
       }
-  
+
       const currentDate = new Date();
       const startDate = new Date(promo?.dateRange?.start);
       const endDate = new Date(promo?.dateRange?.end);
-  
+
       if (currentDate < startDate || currentDate > endDate) {
         setPromoError("This promo code is not valid for the current date.");
         return;
       }
-  
+
       if (promo.timesUsed >= promo.usage_limit) {
         setPromoError("This promo code has reached its usage limit.");
         return;
       }
-  
+
       setPromoDetails(promo);
       const discount = totalPrice * (promo.percentOff / 100);
       setDiscountAmount(discount);
@@ -148,20 +147,24 @@ const PaymentPopup = ({
   };
 
   const handleConfirm = async () => {
-
     setIsProcessing(true);
-    
+
     // Convert the formattedDate string back to a Date object
     const selectedDate = new Date(formattedDate.split("-").reverse().join("-")); // Convert to Date object
-   
+
     if (paymentType === "Wallet") {
-      onWalletPayment(paymentType, numberOfTickets, selectedDate, selectedTransportID, promoCode); // Pass the Date object here
+      onWalletPayment(
+        paymentType,
+        numberOfTickets,
+        selectedDate,
+        selectedTransportID,
+        promoCode
+      ); // Pass the Date object here
     } else {
       try {
         const stripe = await loadStripe(stripeKey);
         if (!stripe) throw new Error("Stripe failed to initialize");
 
-      
         const payload = {
           items: items.map((item) => ({
             product: { name: item.name },
@@ -174,37 +177,41 @@ const PaymentPopup = ({
           promoCode,
           discountPercentage: promoDetails?.percentOff || 0,
         };
-      
+
         // Include the selectedDate only if there are available dates
         if (availableDates && availableDates.length > 0) {
           payload.selectedDate = selectedDate.toISOString(); // Pass the Date object as ISO string
         }
 
         if (selectedTransportID) {
-          payload.selectedTransportID = selectedTransportID // Pass the Date object as ISO string
+          payload.selectedTransportID = selectedTransportID; // Pass the Date object as ISO string
         }
 
-        if(loyaltyPoints){
-          payload.loyaltyPoints= loyaltyPoints;
+        if (loyaltyPoints) {
+          payload.loyaltyPoints = loyaltyPoints;
         }
-        
-      
-        const response = await fetch("http://localhost:4000/create-booking-session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-      
+
+        const response = await fetch(
+          "http://localhost:4000/create-booking-session",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
+
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(
-            `Failed to create checkout session: ${errorData.error || response.statusText}`
+            `Failed to create checkout session: ${
+              errorData.error || response.statusText
+            }`
           );
         }
-      
+
         const { id: sessionId } = await response.json();
         const result = await stripe.redirectToCheckout({ sessionId });
-      
+
         if (result.error) {
           throw new Error(result.error.message);
         }
@@ -214,18 +221,20 @@ const PaymentPopup = ({
     }
     setIsProcessing(false);
   };
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[425px] max-h-[600px] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{`Booking for ${title}`}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{`Booking for`}</DialogTitle>
+          <DialogTitle className="text-3xl font-bold text-[#5D9297]">
+            {title}
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           {availableDates && availableDates.length > 0 && (
-            <div className="grid grid-cols-1 gap-4">
-              <Label htmlFor="dates" className="text-right">
+            <div className="grid grid-cols-1 gap-2">
+              <Label htmlFor="dates" className="text-left font-semibold">
                 Select Date
               </Label>
               <Select
@@ -236,7 +245,10 @@ const PaymentPopup = ({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue value={formattedDate} placeholder="Choose a date" />
+                  <SelectValue
+                    value={formattedDate}
+                    placeholder="Choose a date"
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {availableDates.map(({ date, _id }) => (
@@ -248,8 +260,8 @@ const PaymentPopup = ({
               </Select>
             </div>
           )}
-           <div className="grid grid-cols-1 gap-4">
-            <Label htmlFor="tickets" className="text-right">
+          <div className="grid grid-cols-1 gap-2">
+            <Label htmlFor="tickets" className="text-left font-semibold">
               {transportationSeats ? "Seats" : "Tickets"}
             </Label>
             <Input
@@ -267,40 +279,46 @@ const PaymentPopup = ({
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            <Label htmlFor="promoCode" className="text-right">
+          <div className="grid grid-cols-1 gap-2">
+            <Label htmlFor="promoCode" className="text-left font-semibold">
               Promo Code
             </Label>
-            <Input
-              id="promoCode"
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-            />
-            <Button
-              onClick={handlePromoSubmit}
-              className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
-            >
-              Apply Promo Code
-            </Button>
-            {promoError && <div className="text-red-500 text-sm mt-2">{promoError}</div>}
+            <div className="flex gap-2">
+              <Input
+                id="promoCode"
+                type="text"
+                value={promoCode}
+                className="w-4/5"
+                onChange={(e) => setPromoCode(e.target.value)}
+              />
+              <Button
+                onClick={handlePromoSubmit}
+                className="bg-[#B5D3D1] hover:bg-[#1A3B47]/90 text-white w-1/5"
+              >
+                Apply
+              </Button>
+            </div>
+            {promoError && (
+              <div className="text-red-500 text-sm mt-2">{promoError}</div>
+            )}
             {promoDetails && (
               <div className="text-green-600 text-sm mt-2">
-                Congratulations! You've saved {promoDetails.percentOff}% on this purchase!
+                Congratulations! You've saved {promoDetails.percentOff}% on this
+                purchase!
               </div>
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
-            <Label className="text-right">Total Price</Label>
-            <div className="font-medium">
+          <div className="grid grid-cols-1 gap-2">
+            <Label className="text-left font-semibold">Total Price</Label>
+            <div className="text-xl text-right">
               {symbol}
               {discountedTotal.toFixed(2)}
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
-            <Label className="text-right">Payment Type</Label>
+            <Label className="text-left font-semibold">Payment Type</Label>
             <RadioGroup value={paymentType} onValueChange={setPaymentType}>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="CreditCard" id="credit" />
@@ -313,14 +331,26 @@ const PaymentPopup = ({
             </RadioGroup>
           </div>
 
-            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => { onClose(); setError(""); }}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              onClose();
+              setError("");
+            }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={isProcessing || (availableDates && availableDates.length > 0 && !formattedDate)}
-           className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white">
+          <Button
+            onClick={handleConfirm}
+            disabled={
+              isProcessing ||
+              (availableDates && availableDates.length > 0 && !formattedDate)
+            }
+            className="w-full sm:w-auto bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white"
+          >
             {isProcessing ? "Processing..." : "Confirm Booking"}
           </Button>
         </DialogFooter>
