@@ -1,5 +1,5 @@
 Priority List: 
-		
+-cancel booking 48 hrs before (bycancel lw activity/itinerary bokra) (sam)
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -Error updating product. Please try again later. lama ba update product f admin s3at (radwa)
 -Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
@@ -42,7 +42,6 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
 		-promo code activities, itineraries, hotels msh sha8al (sam done✅)
 		-reports bayza (done✅ Radwa)
 		-notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries) (done aby)
--cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
         -ALL msh zy MY (done✅ habiba)
         -button add user f admin add admin/gov bayez msh by3ml haga (done✅ radwa)
 -types filter in all - my itineraires
