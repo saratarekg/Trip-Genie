@@ -68,6 +68,7 @@ tourismGovernorSchema.methods.comparePassword = async function (
 
 const TourismGovernor = mongoose.model(
   "TourismGovernor",
+  
   tourismGovernorSchema
 );
 module.exports = TourismGovernor;

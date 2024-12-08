@@ -72,7 +72,8 @@ const adminSchema = new Schema(
             "warning",
             "info",
             "product", // New tag
-            "activity", // New tag
+            "activity",
+            "out_of_stock",// New tag
           ],
           default: [], // Default to an empty array if no tags are provided
         },

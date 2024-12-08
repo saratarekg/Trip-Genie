@@ -88,7 +88,8 @@ const advertiserSchema = new Schema(
             "warning",
             "info",
             "product", // New tag
-            "activity", // New tag
+            "activity",
+            "inappropriate", // New tag
           ],
           default: [], // Default to an empty array if no tags are provided
         },

@@ -133,7 +133,9 @@ const tourGuideSchema = new Schema(
             "alert",
             "info",
             "product", // New tag
-            "activity", // New tag
+            "activity",
+            "itinerary",
+            "inappropriate", // New tag
           ],
           default: [], // Default to an empty array if no tags are provided
         },
@@ -203,7 +205,7 @@ const tourGuideSchema = new Schema(
         tourist: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Tourist",
-          required: true,
+          // required: false,
         },
       },
     ],
