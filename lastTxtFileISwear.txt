@@ -1,6 +1,7 @@
 Priority List: 
 -CANT TEST CREATE ACTIVITY AASHAN COUNTRIES (had y testaha)
 -CANT TEST CREATE/UPDATE HISTORICAL PLACE AASHAN COUNTRIES (had y testaha)
+-lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
 -promo code activities, itineraries, hotels msh sha8al
@@ -14,6 +15,8 @@ Priority List:
 -Error updating product. Please try again later. lama ba update product f admin s3at
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
+-lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated
+-currently unavailable fl itineraray card mn bara shklaha wehesh(lama deactivated)
 -Upon searching, no skeleton loading in (itineraries,historical places, Products) like the one in Activities.
 -Select by preference for itineraries not working (Sam)
 -Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
@@ -221,7 +224,7 @@ Zeina: AY HAGA GMBAHA DONE BS MSHAKL KTEER KTBTHA FO2
 22 done✅
 23 done✅
 24 done✅
-25
+25 done✅
 26 done✅
 
 
