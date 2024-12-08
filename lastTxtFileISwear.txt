@@ -5,6 +5,7 @@ Priority List:
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -ALL msh zy MY (radwa)
+-button add user f admin add admin/gov bayez msh by3ml haga
 - shay be laban 3amatan (create activity we create products we kol el create ) (radwa)
 -create promo code layout (stretch start and end date we geeb el button foo2 ) (radwa)
 -update itinerary betawel w fl akhr error lama bghyr sowar kteer f activities
