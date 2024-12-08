@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Activity = require("./activity");
+const Tag = require("./tag");
 const Schema = mongoose.Schema;
 
 const itinerarySchema = new Schema(
@@ -214,14 +215,23 @@ itinerarySchema.statics.findByFields = async function (searchCriteria) {
 itinerarySchema.statics.filter = async function (
   maxPrice,
   minPrice,
-  upperdate,
-  lowerdate,
+  upperDate,
+  lowerDate,
   types,
   languages,
   isBooked
 ) {
   const query = [];
   let itineraries = null;
+  console.log(
+    maxPrice,
+    minPrice,
+    upperDate,
+    lowerDate,
+    types,
+    languages,
+    isBooked
+  );
 
   if (maxPrice !== undefined && maxPrice !== null && maxPrice !== "") {
     query.push({ price: { $lte: maxPrice } });
@@ -229,72 +239,44 @@ itinerarySchema.statics.filter = async function (
   if (minPrice !== undefined && minPrice !== null && minPrice !== "") {
     query.push({ price: { $gte: minPrice } });
   }
-
-  if (upperdate !== undefined && upperdate !== null && upperdate !== "") {
-    // console.log(upperdate);
-    query.push({ ["availableDates.date"]: { $lte: upperdate } });
-  }
-  if (lowerdate !== undefined && lowerdate !== null && lowerdate !== "") {
-    query.push({ ["availableDates.date"]: { $gte: lowerdate } });
-  }
   if (languages !== undefined && languages !== null && languages.length !== 0) {
     const languageArray = Array.isArray(languages)
       ? languages
       : languages.split(","); // Ensure it's an array
-    console.log(languages);
     query.push({ language: { $in: languageArray } });
+  }
+  if (types !== undefined && types !== null && types.length !== 0) {
+    const typeArray = Array.isArray(types) ? types : types.split(",");
+    const typesIds = await Tag.find({ type: { $in: typeArray } }).select("_id");
+    query.push({ "activities.tags": { $elemMatch: { $in: typesIds } } });
   }
   if (isBooked !== undefined && isBooked !== null) {
     query.push({ isBooked: isBooked });
   }
 
-  console.log("hello");
-  console.log(query);
-  if (query.length === 0)
-    itineraries = await this.find()
-      .populate("tourGuide")
-      .populate("activities")
-      .exec();
-  else
-    itineraries = await this.find({ $and: query })
-      .populate("tourGuide")
-      .populate("activities")
-      .exec();
+  console.log(upperDate, lowerDate);
+  itineraries = await this.find({ $or: query });
+  itineraries = itineraries.filter((itinerary) => {
+    let isMatch = false;
+    for (const date of itinerary.availableDates) {
+      if (upperDate === undefined || lowerDate === undefined) {
+        isMatch = true;
+        break;
+      }
+      if (
+        date.date <= new Date(upperDate) &&
+        date.date >= new Date(lowerDate)
+      ) {
+        isMatch = true;
+        break;
+      }
+    }
+    return isMatch;
+  });
 
   if (itineraries.length === 0) return [];
 
-  const itinerariesIds = itineraries.map((itinerary) =>
-    itinerary._id.toString()
-  );
-  const cursor = this.find().cursor();
-  let activities = [];
-  if (types != undefined && types != null && types.length !== 0) {
-    activities = await Activity.findByTagTypes(types);
-  } else {
-    return itineraries;
-  }
-  if (activities.length === 0) return [];
-
-  const activityIds = activities.map((activity) => activity._id.toString());
-  const query2 = [];
-
-  for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
-    if (itinerariesIds.includes(doc._id.toString())) {
-      doc.activities.forEach((activity) => {
-        if (activityIds.includes(activity._id.toString())) {
-          query2.push({ _id: doc._id });
-        }
-      });
-    }
-  }
-
-  console.log(query2);
-  if (query2.length === 0) return [];
-
-  return this.find({ $or: query2 })
-    .populate("tourGuide")
-    .populate("activities")
-    .exec();
+  return itineraries;
 };
 
 itinerarySchema.methods.addRating = async function (newRating) {
