@@ -767,7 +767,7 @@ export default function AllActivities() {
           </div>
     </div>
   </div>
-      <div className="container mx-auto px-4 py-8 lg:px-24">
+      <div className="container py-8">
         <div className="flex gap-8">
           <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
             <div className="flex items-center justify-between mb-6">

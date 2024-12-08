@@ -924,7 +924,7 @@ export function AllItinerariesComponent() {
         <div className=" container py-8">
           <div className=" mb-4">
 
-          <div className="flex gap-8 px-4 sm:px-6 lg:px-8 mb-4">
+          <div className="flex gap-8 mb-4">
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
               <div className="flex items-center justify-between mb-6">
