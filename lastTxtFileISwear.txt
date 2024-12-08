@@ -15,9 +15,7 @@ Priority List:
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha(zeina done✅ INSHALLAH)
 -create promo code msh sha8ala (done ✅)
 -lama bafoos ala activity mn el fl itinerary details el website bydrab
--admin by delete activity category aady hatta law fe activity mstkhdmaha
 -admin b y create activity category etnen b nafs elesm aady (zeina done✅)
--admin by delete activity tags aady hatta law fe activity mstkhdmaha
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
 -Error updating product. Please try again later. lama ba update product f admin s3at
