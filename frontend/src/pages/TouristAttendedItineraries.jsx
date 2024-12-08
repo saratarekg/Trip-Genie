@@ -445,8 +445,18 @@ if (error) return <div>{error}</div>;
       <div className="flex items-center text-xs text-gray-500 mt-2">
         <Info className="h-6 w-6 text-gray-400 mr-1 mb-3" />
         <span>
-          We'd love to hear your thoughts! Please leave a review to help us improve.
-        </span>
+              We'd love to hear your thoughts!{" "}
+              <span 
+                className="text-[#388A94] cursor-pointer hover:underline"
+                onClick={() => {
+                  setIsViewDialogOpen(false);
+                  navigate(`/itinerary/${selectedBooking?.itinerary._id}`);
+                }}
+              >
+                Please leave a review
+              </span>{" "}
+              to help us improve.
+            </span>
       </div>
     </div>
   </DialogContent>

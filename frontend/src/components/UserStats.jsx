@@ -169,12 +169,16 @@ export default function UserStats() {
     ? (selectedUserCount / totalUsers) * 100
     : 0;
 
+  const resetFilters = () => {
+    setFilters({ month: (new Date().getMonth() + 1).toString(), year: new Date().getFullYear().toString() });
+  };
+
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+    <div className="bg-gray-100 min-h-screen">
+      <div className="">
         <div className="grid gap-4 md:grid-cols-12 mb-4">
           {/* Total Users Card */}
-          <Card className="md:col-span-3 flex flex-col justify-center items-center">
+          <Card className="md:col-span-4 flex flex-col justify-center items-center">
             <CardHeader className="p-3 w-full">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
@@ -256,60 +260,8 @@ export default function UserStats() {
             </CardContent>
           </Card>
 
-          {/* Monthly Stats Cards */}
-          <div className="md:col-span-3 flex flex-col gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                  This Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-start -mt-4">
-                  <p className="text-sm text-gray-500">Users</p>
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center">
-                      <span className="text-2xl font-bold text-[#5D9297]">
-                        {monthlyStats.currentMonth?.total || 0}
-                      </span>
-                      <span
-                        className={`ml-12 flex items-center text-sm font-semibold px-2 py-1 rounded-full ${
-                          monthlyChange >= 0
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {monthlyChange >= 0 ? (
-                          <TrendingUp className="mr-1 h-4 w-4" />
-                        ) : (
-                          <TrendingDown className="mr-1 h-4 w-4" />
-                        )}
-                        {Math.abs(monthlyChange).toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                  Last Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-start -mt-4">
-                  <p className="text-sm text-gray-500">Users</p>
-                  <span className="text-2xl font-bold text-[#5D9297]">
-                    {monthlyStats.lastMonth?.total || 0}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* User Growth Chart */}
-          <Card className="md:col-span-6">
+          <Card className="md:col-span-8">
             <CardHeader className="p-3">
               <CardTitle className="text-lg font-bold text-[#1A3B47]">
                 User Growth
@@ -328,48 +280,54 @@ export default function UserStats() {
               <CardTitle className="text-xl font-bold text-[#1A3B47]">
                 Monthly New Users
               </CardTitle>
-              <div className="flex gap-4">
-                <Select
-                  value={filters.year}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, year: value }))
-                  }
-                >
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <SelectItem
-                        key={i}
-                        value={(new Date().getFullYear() - i).toString()}
-                      >
-                        {new Date().getFullYear() - i}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={filters.month}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, month: value }))
-                  }
-                >
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Select month" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 12 }, (_, i) => (
-                      <SelectItem key={i} value={(i + 1).toString()}>
-                        {format(new Date(2024, i), "MMMM")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <button
+                onClick={resetFilters}
+                className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                Clear all filters
+              </button>
             </div>
           </CardHeader>
           <CardContent>
+            <div className="flex flex-wrap gap-4 mb-4">
+              <Select
+                value={filters.year}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, year: value }))
+                }
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <SelectItem
+                      key={i}
+                      value={(new Date().getFullYear() - i).toString()}
+                    >
+                      {new Date().getFullYear() - i}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filters.month}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, month: value }))
+                }
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <SelectItem key={i} value={(i + 1).toString()}>
+                      {format(new Date(2024, i), "MMMM")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
