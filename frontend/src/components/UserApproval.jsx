@@ -47,7 +47,7 @@ export default function UserApproval() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserRole, setSelectedUserRole] = useState(null);
   const [activeRole, setActiveRole] = useState("all");
-  const [isLoading,setIsLoading] = useState(false);
+  const [isLoading,setIsLoading]= useState(false);
 
   const roles = [
     { id: "all", label: "All Users" },
@@ -115,6 +115,7 @@ export default function UserApproval() {
   };
 
   const fetchAdvertisers = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
@@ -124,6 +125,7 @@ export default function UserApproval() {
         }
       );
       setAdvertisers(Array.isArray(response.data) ? response.data : []);
+      setIsLoading(false);
     } catch (err) {
       console.error("Failed to fetch advertisers", err);
       setError("Failed to fetch advertisers");
@@ -131,6 +133,7 @@ export default function UserApproval() {
   };
 
   const fetchSellers = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
@@ -140,6 +143,7 @@ export default function UserApproval() {
         }
       );
       setSellers(Array.isArray(response.data) ? response.data : []);
+      setIsLoading(false);
     } catch (err) {
       console.error("Failed to fetch sellers", err);
       setError("Failed to fetch sellers");
@@ -147,6 +151,7 @@ export default function UserApproval() {
   };
 
   const fetchTourGuides = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const response = await axios.get(
@@ -155,7 +160,9 @@ export default function UserApproval() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      
       setTourGuides(Array.isArray(response.data) ? response.data : []);
+      setIsLoading(false);
     } catch (err) {
       console.error("Failed to fetch tour guides", err);
       setError("Failed to fetch tour guides");
@@ -235,7 +242,61 @@ export default function UserApproval() {
       setUserToDelete(null);
     }
   };
+  if (isLoading) {
+    return (
+      <>
+        {/* Category Skeletons */}
+        <div className="grid grid-cols-4 gap-0 mb-6">
+          {["All Users", "Advertiser", "Seller", "Tour Guides"].map((category, index) => (
+            <div
+              key={`category-${index}`}
+              className="bg-gray-200  shadow-md p-3 flex flex-col justify-center items-center animate-pulse"
+            >
+              
+              
+            </div>
+          ))}
+        </div>
 
+        {/* Skeleton User Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array(3)
+            .fill(0)
+            .map((_, index) => (
+              <motion.div
+                key={`skeleton-${index}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="bg-gray-200 shadow-md animate-pulse rounded-lg">
+                  <CardContent className="p-6 space-y-3">
+                  <div className="flex items-center justify-between">
+  {/* Large Circle on the Left */}
+  <div className="h-16 w-16 rounded-full bg-gray-300"></div>
+
+  {/* Smaller Circles on the Right */}
+  <div className="flex space-x-2 relative -top-3">
+    <div className="h-8 w-8 rounded-full bg-gray-300"></div>
+    <div className="h-8 w-8 rounded-full bg-gray-300"></div>
+  </div>
+</div>
+
+
+
+                    <div className="h-4 w-3/4 bg-gray-300 rounded-md ml-0"></div>
+                    <div className="h-4 w-1/2 bg-gray-300 rounded-md ml-0"></div>
+                    <div className="h-8 w-full bg-gray-300 rounded-md mx-auto mt-4"></div>
+                    <div className="h-8 w-full bg-gray-300 rounded-md mx-auto "></div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+        </div>
+      </>
+    );
+  }
+  
   const renderUserCards = (users, role, startIndex = 0) =>
     users.map((user, index) => (
       <motion.div
