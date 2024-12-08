@@ -18,7 +18,7 @@ Priority List:
 -admin b y create activity category etnen b nafs elesm aady
 -admin by delete activity tags aady hatta law fe activity mstkhdmaha
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
--lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
+-lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)(makes sense hayb2a 3ando infinite itneraires done✅)
 -Error updating product. Please try again later. lama ba update product f admin s3at
 -Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
 -advertiser cannot delete/update his activity mn bara (all activities)
