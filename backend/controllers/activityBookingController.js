@@ -128,7 +128,7 @@ exports.createBooking = async (req, res) => {
       walletBalance: walletBalance, // Include the new wallet balance
       pricePaid: finalPaymentAmount, // Include the price paid with promo code discount if available
       percentageOff: usedPromoCode ? usedPromoCode.percentOff : 0,
-      loyaltyPoints
+      loyaltyPoints,
     });
   } catch (error) {
     console.log(error);
@@ -498,7 +498,9 @@ exports.getBookingsReport = async (req, res) => {
     });
 
     totalRevenue *= 0.9; // 10% commission for the platform
-    // activityReport = activityReport.filter((report) => report.tickets > 0);
+    if (year) {
+      activityReport = activityReport.filter((report) => report.tickets > 0);
+    }
     activityReport = activityReport.sort((a, b) => b.revenue - a.revenue);
     res.status(200).json({ activityReport, totalRevenue, totalTickets });
   } catch (error) {
