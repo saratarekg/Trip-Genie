@@ -110,7 +110,7 @@ Sheel el shay be laban men kol haga
 el reports columns t2ba consistent (total sales t2ba tickets sold we y2ba we nsheel el numbering mn ay report)
 
 Hazem: 
-- single act has no loading until prices are displayed  (already ma3moola fe my account)
+- single act has no loading until prices are displayed  (already ma3moola fe my account) (done✅)
 - pagination all pages (done✅)
 - zabat shakl el pagination consistency (bas bardo e3melo el3ayzeeno 3ashan manetshalesh)
 (transportation + flights + hotels use shadcn pagination)
