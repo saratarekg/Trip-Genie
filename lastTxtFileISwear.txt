@@ -2,7 +2,7 @@ Priority List:
 -Select by preference for itineraries (Sam)
 -promo code activities, itineraries, hotels msh sha8al (sam done✅)
 -reports bayza (done✅ Radwa)
--notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
+-notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries) (done aby)
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -ALL msh zy MY (radwa)
 - shay be laban 3amatan (create activity we create products we kol el create ) (radwa)
@@ -107,20 +107,6 @@ alwan profile w settings (done)
 
 
 Aby: 
-66 (done)
-68 (done)
-90
-91 (done)
-
-71
-72
-73
-74
-75
-76
-77
-78
-
 
 - Seeb el 0 sales bas sort by revenue 3ashan yezharo ta7t (done)
 - Automated verify Otp (done)
