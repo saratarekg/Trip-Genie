@@ -11,6 +11,7 @@ import {
   XCircle,
   Bookmark,
   ArrowUpDown,
+  Heart,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import FilterComponent from "./Filter.jsx";
@@ -1077,6 +1078,27 @@ export function AllItinerariesComponent() {
                   <span className="text-gray-500 text-sm whitespace-nowrap">
                     ({itineraries.length} itineraries)
                   </span>
+
+                  {userInfo?.role === "tourist" && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`whitespace-nowrap rounded-full ${
+                        isSortedByPreference ? "bg-red-100" : ""
+                      }`}
+                      onClick={handleSortByPreference}
+                    >
+                      <Heart
+                        className={`w-4 h-4 mr-2 ${
+                          isSortedByPreference
+                            ? "fill-current text-red-500"
+                            : ""
+                        }`}
+                      />
+                      Sort by Preference
+                    </Button>
+                  )}
+
                   <Button
                     variant="outline"
                     size="sm"
