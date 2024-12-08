@@ -22,7 +22,7 @@ sales report margins
 -create promo code layout (stretch start and end date we geeb el button foo2 )
 -no popup l flag inappropriate itinerary
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
--birthday promocode msh beyban fel notifications 
+-birthday promocode msh beyban fel notifications  and mail
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
 -add loading for wishlist 
 -updating activity popup btdos basraha 3adi w btfdl f update activity
