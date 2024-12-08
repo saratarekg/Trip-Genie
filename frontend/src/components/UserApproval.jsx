@@ -47,6 +47,7 @@ export default function UserApproval() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserRole, setSelectedUserRole] = useState(null);
   const [activeRole, setActiveRole] = useState("all");
+  const [isLoading,setIsLoading] = useState(false);
 
   const roles = [
     { id: "all", label: "All Users" },

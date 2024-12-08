@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie";
+import { Link } from "react-router-dom";
 import {
   Search,
   ChevronLeft,
@@ -893,26 +894,37 @@ export function AllItinerariesComponent() {
       </div>
     );
   };
-
-
+  
+  const backgroundImage = "url('./src/assets/images/allItineraries.jpg')";
   return (
     <div className="min-h-screen bg-gray-100">
-
-
-      <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
+<div
+    className="relative h-[330px] bg-cover bg-center"
+    style={{ backgroundImage }}
+  >
+    <div className="absolute inset-0"></div>
+    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+      <div className="flex-1">
+        <h1 className="text-5xl font-bold text-white mb-4">
+          All Itineraries
+        </h1>
+        <p className="text-gray-200">
+          <Link
+            to="/"
+            className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
+          >
+            Home
+          </Link>{" "}
+          / All Itineraries
+        </p>
       </div>
+    </div>
+  </div>
+      
+        <div className=" container py-8">
+          <div className=" mb-4">
 
-
-      <div className=" mx-auto px-4 py-8">
-        <div className=" px-4 sm:px-6 lg:px-8 mb-4">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
-              All Trip Plans
-            </h1>
-          </div>
-
-          <div className="flex gap-8 px-4 sm:px-6 lg:px-8 mb-4">
+          <div className="flex gap-8 mb-4">
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
               <div className="flex items-center justify-between mb-6">
