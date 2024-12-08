@@ -685,14 +685,53 @@ export function MyItinerariesComponent() {
     }
   };
 
+  const AllProductsSkeleton = () => {
+    return (
+      <div className="bg-gray-100">
+      <div className="">
+        <div className="flex gap-8">
+          {/* Sidebar Skeleton */}
+         
+
+          {/* Main Content Skeleton */}
+          <div className="flex-1">
+            {/* Search and Filters Skeleton */}
+           
+
+            {/* Cards Grid Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
+                >
+                  <div className="h-40 bg-gray-300"></div>
+                  <div className="p-4 space-y-4">
+                    <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+                  </div>
+                  <div className="p-4 border-t space-y-3">
+                    <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
+                    <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination Skeleton */}
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  };
+  
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-      {isLoading ? (
-        <Loader />
-      ) : (
+      
         <div className=" px-4 sm:px-6 lg:px-8 mb-4">
           <div className="max-w-7xl mx-auto">
             <h1 className="text-4xl font-bold text-gray-900 mb-8 mt-4 ">
@@ -756,26 +795,33 @@ export function MyItinerariesComponent() {
               <div className="text-red-500 text-center mb-4">{error}</div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {itineraries
-                .slice(
-                  (currentPage - 1) * tripsPerPage,
-                  currentPage * tripsPerPage
-                )
-                .map((itinerary) => (
-                  <ItineraryCard
-                    key={itinerary._id}
-                    itinerary={itinerary}
-                    onSelect={handleItinerarySelect}
-                    role={userInfo.role}
-                    userInfo={userInfo}
-                    canModify={canModify}
-                    setShowDeleteConfirm={setShowDeleteConfirm}
-                    setSelectedItinerary={setSelectedItinerary}
-                    onDeleteConfirm={handleDeleteConfirm}
-                  />
-                ))}
-            </div>
+{isLoading ? (
+                <AllProductsSkeleton />
+              ) : (
+               // <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {itineraries
+                    .slice(
+                      (currentPage - 1) * tripsPerPage,
+                      currentPage * tripsPerPage
+                    )
+                    .map((itinerary) => (
+                      <ItineraryCard
+                        key={itinerary._id}
+                        itinerary={itinerary}
+                        onSelect={handleItinerarySelect}
+                        role={userInfo.role}
+                        userInfo={userInfo}
+                        canModify={canModify}
+                        setShowDeleteConfirm={setShowDeleteConfirm}
+                        setSelectedItinerary={setSelectedItinerary}
+                        onDeleteConfirm={handleDeleteConfirm}
+                        
+                      />
+                    ))}
+                </div>
+               // </div>
+              )}
 
             <div className="mt-8 flex justify-center items-center space-x-4">
               <button
@@ -814,7 +860,7 @@ export function MyItinerariesComponent() {
             </div>
           </div>
         </div>
-      )}
+      
 
       <DeleteConfirmationModal
         isOpen={showDeleteModal}

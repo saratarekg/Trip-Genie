@@ -208,10 +208,10 @@ export default function TransportationPage() {
       setFilteredTransportations(response.data);
       setFromLocations([...new Set(response.data.map((t) => t.from))]);
       setToLocations([...new Set(response.data.map((t) => t.to))]);
-      //setIsLoading(false);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching transportations:", error);
-     // setIsLoading(false);
+     
     }
   };
 
@@ -653,6 +653,8 @@ export default function TransportationPage() {
     );
   };
 
+
+
   return (
     <div className="bg-gray-100">
 
@@ -875,7 +877,6 @@ export default function TransportationPage() {
                         Add Transportation
                       </Button>
                     </div>
-
                   </form>
                 </Form>
               </DialogContent>
@@ -883,8 +884,12 @@ export default function TransportationPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {currentTransportations.map((transportation) => (
+       
+        {isLoading ? (
+              <TransportationCardSkeleton />
+            ) :
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+         { currentTransportations.map((transportation) => (
             <div key={transportation._id}>
               <TransportationCard
                 transportation={transportation}
@@ -1037,8 +1042,10 @@ export default function TransportationPage() {
                 )}
               </Dialog>
             </div>
-          ))}
+          ))})
+
         </div>
+           }
 
 
         <div className="mt-6 flex justify-center items-center space-x-4">
