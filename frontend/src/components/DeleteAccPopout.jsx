@@ -28,6 +28,7 @@ export function DeleteAccount() {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const roles = [
     { id: "all", label: "All Users" },
@@ -40,6 +41,7 @@ export function DeleteAccount() {
   ];
 
   const fetchUsers = async (role) => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const url = "http://localhost:4000/admin/userbyrole";
@@ -53,6 +55,7 @@ export function DeleteAccount() {
           : response.data.users || [];
         setUsers(allUsers);
       }
+      setIsLoading(false);
     } catch (error) {
       console.error("Error getting users:", error);
       showToast("Failed to load users. Please try again.", "error");
@@ -155,7 +158,23 @@ export function DeleteAccount() {
                 />
               </div>
 
-              {filteredUsers.length === 0 ? (
+              {isLoading ? (
+                <div className="space-y-4">
+                  {Array(5)
+                    .fill(0)
+                    .map((_, index) => (
+                      <div
+                        key={`skeleton-${index}`}
+                        className="animate-pulse flex justify-between items-center border border-gray-300 p-4 rounded-lg"
+                      >
+                        <div className="w-1/4 h-6 bg-gray-300 rounded-md"></div>
+                        <div className="w-1/3 h-6 bg-gray-300 rounded-md"></div>
+                        <div className="w-1/6 h-6 bg-gray-300 rounded-md"></div>
+                        <div className="h-8 w-8 rounded-full bg-gray-300"></div>
+                      </div>
+                    ))}
+                </div>
+              ) : filteredUsers.length === 0 ? (
                 <div className="text-center text-[#1A3B47]/60 py-8">
                   No users found. Please try a different search.
                 </div>
@@ -193,7 +212,6 @@ export function DeleteAccount() {
             </TabsContent>
           ))}
         </Tabs>
-
         <DeleteConfirmation
           isOpen={showDeleteModal}
           onClose={() => setShowDeleteModal(false)}
@@ -231,4 +249,3 @@ export function DeleteAccount() {
 }
 
 export default DeleteAccount;
-
