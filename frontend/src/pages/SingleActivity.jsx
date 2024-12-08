@@ -2047,7 +2047,7 @@ const ActivityDetail = () => {
             <PaymentPopup
               isOpen={showPaymentPopup}
               onClose={() => setShowPaymentPopup(false)}
-              title={`Book Activity: ${activity.name}`}
+              title={`${activity.name}`}
               items={[
                 {
                   name: activity.name,

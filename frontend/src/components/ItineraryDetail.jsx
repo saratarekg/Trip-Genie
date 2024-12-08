@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, userInfo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  userInfo,
+  useRef,
+} from "react";
 import { formatDistanceToNow, format } from "date-fns";
 import { useParams, useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -114,8 +120,9 @@ const ImageGallery = ({ activities }) => {
           {allPictures.length > 5 && (
             <button
               onClick={handlePrev}
-              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex === 0 ? "bg-gray-400" : "bg-black"
-                }`}
+              className={`absolute top-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex === 0 ? "bg-gray-400" : "bg-black"
+              }`}
               disabled={startIndex === 0}
               aria-label="Previous images"
             >
@@ -137,10 +144,11 @@ const ImageGallery = ({ activities }) => {
           {allPictures.length > 5 && (
             <button
               onClick={handleNext}
-              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= allPictures.length - 5
-                ? "bg-gray-400"
-                : "bg-black"
-                }`}
+              className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${
+                startIndex >= allPictures.length - 5
+                  ? "bg-gray-400"
+                  : "bg-black"
+              }`}
               disabled={startIndex >= allPictures.length - 5}
               aria-label="Next images"
             >
@@ -183,8 +191,9 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-            }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
+            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+          }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -455,10 +464,11 @@ const TourguideProfileCard = ({
             <Button
               onClick={() => handleActivationToggle()}
               variant={isActivated ? "destructive" : "default"}
-              className={`w-full flex items-center ${isActivated
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600"
-                }`}
+              className={`w-full flex items-center ${
+                isActivated
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
             >
               {isActivated ? "Deactivate" : "Activate"}
             </Button>
@@ -480,24 +490,27 @@ const TourguideProfileCard = ({
                 e.stopPropagation();
                 handleSaveToggle();
               }}
-              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
-                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                }`}
+              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${
+                isSaved
+                  ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                  : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+              }`}
             >
               <Bookmark
-                className={`w-5 h-5 ${isSaved ? "stroke-white fill-[#1A3B47]" : "stroke-white"
-                  }`}
+                className={`w-5 h-5 ${
+                  isSaved ? "stroke-white fill-[#1A3B47]" : "stroke-white"
+                }`}
               />
               {isSaved ? "Unsave" : "Save"}
             </Button>
 
             <Button
               onClick={handleBookNowClick}
-              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${itinerary.isBookingOpen
-                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                }`}
+              className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
+                itinerary.isBookingOpen
+                  ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                  : "bg-gray-400 text-gray-700 cursor-not-allowed"
+              }`}
               disabled={!itinerary.isBookingOpen}
             >
               {itinerary.isBookingOpen ? "Book Now" : "Booking Closed"}
@@ -602,10 +615,11 @@ const TourguideProfileCard = ({
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`w-8 h-8 cursor-pointer ${tourGuideRating >= star
-                      ? "text-yellow-500 fill-current"
-                      : "text-gray-300"
-                      }`}
+                    className={`w-8 h-8 cursor-pointer ${
+                      tourGuideRating >= star
+                        ? "text-yellow-500 fill-current"
+                        : "text-gray-300"
+                    }`}
                     onClick={() => handleQuickTourGuideRating(star)}
                   />
                 ))}
@@ -628,10 +642,11 @@ const TourguideProfileCard = ({
           <>
             <div className="mt-6 border-t border-gray-300 pt-4"></div>
             <Button
-              className={`w-full mx-auto text-white ${isAppropriate
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600"
-                }`}
+              className={`w-full mx-auto text-white ${
+                isAppropriate
+                  ? "bg-red-500 hover:bg-red-600"
+                  : "bg-green-500 hover:bg-green-600"
+              }`}
               onClick={handleOpenDialog}
             >
               {isAppropriate ? "Flag as Inappropriate" : "Flag as Appropriate"}
@@ -671,8 +686,9 @@ const TourguideProfileCard = ({
       </CardContent>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -1112,10 +1128,16 @@ const ItineraryDetail = () => {
     setBookingError("");
   };
 
-  const handleBooking = async (paymentType, numberOfTickets, date, date2, promoCode) => {
+  const handleBooking = async (
+    paymentType,
+    numberOfTickets,
+    date,
+    date2,
+    promoCode
+  ) => {
     console.log(paymentType, numberOfTickets, date);
     if (bookingProcessedRef.current) {
-      console.log('Booking already processed');
+      console.log("Booking already processed");
       return;
     }
     setIsBooking(true);
@@ -1138,7 +1160,7 @@ const ItineraryDetail = () => {
             paymentAmount: itinerary.price * numberOfTickets,
             numberOfTickets,
             date,
-            promoCode
+            promoCode,
           }),
         }
       );
@@ -1161,7 +1183,6 @@ const ItineraryDetail = () => {
         console.log("data", data);
         setShowSuccessDialog(true);
         setLoyalty(data?.loyaltyPoints);
-
       }
     } catch (error) {
       console.error("Error booking itinerary:", error);
@@ -1188,7 +1209,6 @@ const ItineraryDetail = () => {
       // console.log("itinerary price",itinerary.price);
       // console.log("badge",tourist.loyaltyBadge);
 
-
       if (sessionId && success === "true") {
         try {
           const response = await axios.get(
@@ -1209,8 +1229,6 @@ const ItineraryDetail = () => {
             setNumberOfTickets(parseInt(quantity));
             setPaymentType("CreditCard");
             setPercentageOff(parseInt(percentageOff));
-
-
           }
         } catch (error) {
           console.error("Error checking payment status:", error);
@@ -1228,12 +1246,18 @@ const ItineraryDetail = () => {
       const promoCode = searchParams.get("promoCode");
       const loyaltyPoints = searchParams.get("loyaltyPoints");
       try {
-        await handleBooking("CreditCard", parseInt(quantity), selectedDateStr, selectedDate, promoCode, loyaltyPoints);
+        await handleBooking(
+          "CreditCard",
+          parseInt(quantity),
+          selectedDateStr,
+          selectedDate,
+          promoCode,
+          loyaltyPoints
+        );
       } catch (error) {
         console.error("Error handling booking:", error);
         // Handle the error appropriately
       }
-
     }
     setShowSuccessDialog(false);
     searchParams.delete("success");
@@ -1262,7 +1286,6 @@ const ItineraryDetail = () => {
   };
 
   const navigate = useNavigate();
-
 
   const calculateLoyaltyPoints = (paymentAmount, badgeLevel) => {
     let pointsMultiplier = 0;
@@ -1369,13 +1392,13 @@ const ItineraryDetail = () => {
         const userBookingsFetch =
           userRole === "tourist"
             ? axios
-              .get(
-                `http://localhost:4000/${userRole}/touristItineraryAttendedBookings`,
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                }
-              )
-              .then((response) => response.data)
+                .get(
+                  `http://localhost:4000/${userRole}/touristItineraryAttendedBookings`,
+                  {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }
+                )
+                .then((response) => response.data)
             : Promise.resolve([]);
 
         const [data, userBookings] = await Promise.all([
@@ -1658,34 +1681,34 @@ const ItineraryDetail = () => {
     // Conditionally add the Save step based on user role
     ...(userRole !== "guest"
       ? [
-        {
-          target: ".Save",
-          content: (
-            <>
-              Click here to save this itinerary for later viewing or booking
-              in your saved itineraries list.
-              <br />
-              Tip:
-              <br />
-              You can view your saved itineraries anytime! Simply click the
-              hamburger menu on the top right corner → My Account →
-              Itineraries → Saved
-            </>
-          ),
-          placement: "left",
-        },
-      ]
+          {
+            target: ".Save",
+            content: (
+              <>
+                Click here to save this itinerary for later viewing or booking
+                in your saved itineraries list.
+                <br />
+                Tip:
+                <br />
+                You can view your saved itineraries anytime! Simply click the
+                hamburger menu on the top right corner → My Account →
+                Itineraries → Saved
+              </>
+            ),
+            placement: "left",
+          },
+        ]
       : []),
     // Conditionally add the bookNow step based on user role
     ...(userRole !== "guest"
       ? [
-        {
-          target: ".bookNow",
-          content:
-            "Click here to be able to book this itinerary and proceed to the payment process.",
-          placement: "left",
-        },
-      ]
+          {
+            target: ".bookNow",
+            content:
+              "Click here to be able to book this itinerary and proceed to the payment process.",
+            placement: "left",
+          },
+        ]
       : []),
     {
       target: ".tourGuideDetail",
@@ -1707,12 +1730,12 @@ const ItineraryDetail = () => {
     },
     ...(userRole !== "guest"
       ? [
-        {
-          target: ".review",
-          content: "Here you can add/edit your reviews to this itinerary ",
-          placement: "right",
-        },
-      ]
+          {
+            target: ".review",
+            content: "Here you can add/edit your reviews to this itinerary ",
+            placement: "right",
+          },
+        ]
       : []),
   ];
 
@@ -1771,11 +1794,7 @@ const ItineraryDetail = () => {
 
                   <div className="mb-6">
                     <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-2"></div>
-
                   </div>
-
-
-
 
                   <div className="mt-8">
                     <div className="h-[200px] w-full bg-gray-300 rounded animate-pulse"></div>
@@ -1794,7 +1813,6 @@ const ItineraryDetail = () => {
                   <div className="mt-4 text-4xl font-semibold text-center animate-pulse">
                     <div className="h-8 w-32 bg-gray-300 rounded mx-auto"></div>
                     <div className="text-sm text-gray-500 flex items-center justify-center mt-6">
-
                       <div className="h-4 w-24 bg-gray-300 rounded"></div>
                     </div>
                   </div>
@@ -1823,8 +1841,6 @@ const ItineraryDetail = () => {
                     <div className="h-10  bg-gray-300 rounded"></div>
                     <div className="h-10 bg-gray-300 rounded mt-6"></div>
                   </div>
-
-
                 </CardContent>
               </Card>
             </div>
@@ -1859,7 +1875,10 @@ const ItineraryDetail = () => {
                 <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
                 <div className="flex-1 flex justify-between px-4">
                   {[...Array(3)].map((_, i) => (
-                    <Card key={i} className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg">
+                    <Card
+                      key={i}
+                      className="w-[30%] bg-gray-100 shadow-none border-none p-4 rounded-lg"
+                    >
                       <CardHeader className="flex items-start">
                         <div className="flex">
                           <div className="h-12 w-12 bg-gray-300 rounded-full animate-pulse mr-4"></div>
@@ -1889,11 +1908,7 @@ const ItineraryDetail = () => {
     );
   };
 
-
-
-
   if (loading) return <ItineraryDetailSkeleton />;
-
 
   if (error) {
     return (
@@ -1997,19 +2012,19 @@ const ItineraryDetail = () => {
                   {itinerary.activities.map((activity, index) =>
                     activity.category
                       ? activity.category.map((cat, catIndex) => (
-                        <Badge key={catIndex} variant="secondary">
-                          {cat.name}
-                        </Badge>
-                      ))
+                          <Badge key={catIndex} variant="secondary">
+                            {cat.name}
+                          </Badge>
+                        ))
                       : null
                   )}
                   {itinerary.activities.map((activity, index) =>
                     activity.tags
                       ? activity.tags.map((tag, tagIndex) => (
-                        <Badge key={tagIndex} variant="outline">
-                          {tag.type}
-                        </Badge>
-                      ))
+                          <Badge key={tagIndex} variant="outline">
+                            {tag.type}
+                          </Badge>
+                        ))
                       : null
                   )}
                 </div>
@@ -2109,14 +2124,15 @@ const ItineraryDetail = () => {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-8 h-8 cursor-pointer ${(
-                          isRatingHovered
-                            ? quickRating >= star
-                            : quickRating >= star
-                        )
-                          ? "text-[#F88C33] fill-current"
-                          : "text-gray-300"
-                          }`}
+                        className={`w-8 h-8 cursor-pointer ${
+                          (
+                            isRatingHovered
+                              ? quickRating >= star
+                              : quickRating >= star
+                          )
+                            ? "text-[#F88C33] fill-current"
+                            : "text-gray-300"
+                        }`}
                         onMouseEnter={() => {
                           setIsRatingHovered(true);
                           setQuickRating(star);
@@ -2157,10 +2173,11 @@ const ItineraryDetail = () => {
                       .map((comment, index) => (
                         <Card
                           key={index}
-                          className={`w-[30%] ${comment.tourist === userId
-                            ? "bg-[#B5D3D1]"
-                            : "bg-gray-100"
-                            } shadow-none border-none p-4 rounded-lg`}
+                          className={`w-[30%] ${
+                            comment.tourist === userId
+                              ? "bg-[#B5D3D1]"
+                              : "bg-gray-100"
+                          } shadow-none border-none p-4 rounded-lg`}
                         >
                           <CardHeader className="flex items-start">
                             <div className="flex">
@@ -2257,8 +2274,9 @@ const ItineraryDetail = () => {
               {tourGuideProfile?.comments.map((review, index) => (
                 <Card
                   key={index}
-                  className={`mb-4 ${review.tourist === userId ? "bg-[#B5D3D1]" : ""
-                    }`} // Apply blue background if comment is from the logged-in user
+                  className={`mb-4 ${
+                    review.tourist === userId ? "bg-[#B5D3D1]" : ""
+                  }`} // Apply blue background if comment is from the logged-in user
                 >
                   <CardHeader>
                     <div className="flex justify-between items-center">
@@ -2466,7 +2484,7 @@ const ItineraryDetail = () => {
               <PaymentPopup
                 isOpen={showBookingDialog}
                 onClose={() => setShowBookingDialog(false)}
-                title={`Book Itinerary: ${itinerary.title}`}
+                title={`${itinerary.title}`}
                 items={[
                   {
                     name: itinerary.title,
@@ -2486,7 +2504,10 @@ const ItineraryDetail = () => {
                 selectedItineraryDate={selectedItineraryDate}
                 promoDetails={promoDetails}
                 setPromoDetails={setPromoDetails}
-                loyaltyPoints={calculateLoyaltyPoints(itinerary.price, tourist.loyaltyBadge)}
+                loyaltyPoints={calculateLoyaltyPoints(
+                  itinerary.price,
+                  tourist.loyaltyBadge
+                )}
               />
             </>
           )}
@@ -2513,27 +2534,33 @@ const ItineraryDetail = () => {
                   <Label className="text-right">Amount Paid:</Label>
                   <div>
                     {promoDetails?.percentOff
-                      ? formatPrice(calculateTotalPrice() * (1 - promoDetails.percentOff / 100))
+                      ? formatPrice(
+                          calculateTotalPrice() *
+                            (1 - promoDetails.percentOff / 100)
+                        )
                       : percentageOff
-                        ? formatPrice(calculateTotalPrice() * (1 - percentageOff / 100))
-                        : formatPrice(calculateTotalPrice())}
+                      ? formatPrice(
+                          calculateTotalPrice() * (1 - percentageOff / 100)
+                        )
+                      : formatPrice(calculateTotalPrice())}
                   </div>
-
                 </div>
                 {paymentType === "Wallet" && (
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right">New Wallet Balance:</Label>
                     <div>
                       {promoDetails?.percentOff
-                        ? formatPrice(tourist?.wallet - calculateTotalPrice() * (1 - promoDetails.percentOff / 100))
+                        ? formatPrice(
+                            tourist?.wallet -
+                              calculateTotalPrice() *
+                                (1 - promoDetails.percentOff / 100)
+                          )
                         : formatPrice(tourist?.wallet - calculateTotalPrice())}
                     </div>
                   </div>
                 )}
                 <Label className="text-left">Loyalty Points Earned:</Label>
-                <div>
-                  {loyalty}
-                </div>
+                <div>{loyalty}</div>
               </div>
             </div>
 
@@ -2545,7 +2572,6 @@ const ItineraryDetail = () => {
                 OK
               </Button>
             </DialogFooter>
-
           </DialogContent>
         </Dialog>
 
@@ -2715,8 +2741,9 @@ const ItineraryDetail = () => {
       </div>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}

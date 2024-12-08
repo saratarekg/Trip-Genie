@@ -50,7 +50,14 @@ import TermsAndConditions from "@/components/TermsAndConditions";
 import { ImageCropper } from "@/components/ImageCropper";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, MinusCircle, Check, ChevronLeft } from "lucide-react";
+import {
+  PlusCircle,
+  MinusCircle,
+  Check,
+  ChevronLeft,
+  EyeIcon,
+  EyeOffIcon,
+} from "lucide-react";
 import signUpPicture from "../assets/images/signUpPicture.jpeg";
 
 const phoneValidator = (value) => {
@@ -99,6 +106,7 @@ export function SignupForm() {
   const termsRef = useRef(null); // Reference to the terms div
   const [showScrollMessage, setShowScrollMessage] = useState(false);
   const divRef = useRef(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const formSchema = z
     .object({
@@ -108,12 +116,8 @@ export function SignupForm() {
           message: "Username must be at least 3 characters.",
         })
         .trim(),
-        fname: z
-        .string()
-        .optional(),
-        lname: z
-        .string()
-       .optional(),
+      fname: z.string().optional(),
+      lname: z.string().optional(),
       email: z
         .string()
         .email({
@@ -327,8 +331,8 @@ export function SignupForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
-      fname:"",
-      lname:"",
+      fname: "",
+      lname: "",
       email: "",
       password: "",
       userType: undefined,
@@ -716,42 +720,41 @@ export function SignupForm() {
               useRef={formRefs.username}
             />
 
-{userType === "tourist" && (
-  <>
-    <div className="flex space-x-4">
-      <FormField
-        control={control}
-        name="fname"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>First Name (Optional)</FormLabel>
-            <FormControl>
-              <Input placeholder="First Name" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-        useRef={formRefs.fname}
-      />
+            {userType === "tourist" && (
+              <>
+                <div className="flex space-x-4">
+                  <FormField
+                    control={control}
+                    name="fname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="First Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                    useRef={formRefs.fname}
+                  />
 
-      <FormField
-        control={control}
-        name="lname"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Last Name (Optional)</FormLabel>
-            <FormControl>
-              <Input placeholder="Last Name" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-        useRef={formRefs.lname}
-      />
-    </div>
-  </>
-)}
-
+                  <FormField
+                    control={control}
+                    name="lname"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name (Optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Last Name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                    useRef={formRefs.lname}
+                  />
+                </div>
+              </>
+            )}
 
             <FormField
               control={control}
@@ -777,15 +780,49 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel>Password*</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Password" {...field} />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        {...field}
+                      />
+                      {field.value.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 focus:outline-none"
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOffIcon className="h-5 w-5" />
+                          ) : (
+                            <EyeIcon className="h-5 w-5" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                   <div className="flex items-center mt-2 space-x-2 w-full">
                     <div className="relative flex-grow h-2 bg-gray-200 rounded-full">
                       <div
-                        className={`absolute h-2 rounded-full transition-all duration-300 ${watch("password").length === 0 ? 'bg-gray-300' : getProgressBarColor(watch("password"))}`}
+                        className={`absolute h-2 rounded-full transition-all duration-300 ${
+                          watch("password").length === 0
+                            ? "bg-gray-300"
+                            : getProgressBarColor(watch("password"))
+                        }`}
                         style={{
-                          width: `${watch("password").length === 0 ? 0 : Math.max((getPasswordStrength(watch("password")).fulfilled / 3), 1 / 3) * 100}%`
+                          width: `${
+                            watch("password").length === 0
+                              ? 0
+                              : Math.max(
+                                  getPasswordStrength(watch("password"))
+                                    .fulfilled / 3,
+                                  1 / 3
+                                ) * 100
+                          }%`,
                         }}
                       ></div>
                     </div>
@@ -797,11 +834,17 @@ export function SignupForm() {
                   </div>
                   <ul className="text-sm mt-4 space-y-1">
                     <li
-                      className={`flex items-center ${getPasswordStrength(watch("password")).length ? "text-[#388A94]" : "text-gray-500"}`}
+                      className={`flex items-center ${
+                        getPasswordStrength(watch("password")).length
+                          ? "text-[#388A94]"
+                          : "text-gray-500"
+                      }`}
                     >
                       <span
                         className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                          getPasswordStrength(watch("password")).length ? "bg-[#388A94] text-white" : "border-gray-500"
+                          getPasswordStrength(watch("password")).length
+                            ? "bg-[#388A94] text-white"
+                            : "border-gray-500"
                         }`}
                       >
                         ✓
@@ -809,11 +852,17 @@ export function SignupForm() {
                       At least 8 characters
                     </li>
                     <li
-                      className={`flex items-center ${getPasswordStrength(watch("password")).uppercase ? "text-[#388A94]" : "text-gray-500"}`}
+                      className={`flex items-center ${
+                        getPasswordStrength(watch("password")).uppercase
+                          ? "text-[#388A94]"
+                          : "text-gray-500"
+                      }`}
                     >
                       <span
                         className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                          getPasswordStrength(watch("password")).uppercase ? "bg-[#388A94] text-white" : "border-gray-500"
+                          getPasswordStrength(watch("password")).uppercase
+                            ? "bg-[#388A94] text-white"
+                            : "border-gray-500"
                         }`}
                       >
                         ✓
@@ -821,11 +870,17 @@ export function SignupForm() {
                       At least one uppercase letter
                     </li>
                     <li
-                      className={`flex items-center ${getPasswordStrength(watch("password")).number ? "text-[#388A94]" : "text-gray-500"}`}
+                      className={`flex items-center ${
+                        getPasswordStrength(watch("password")).number
+                          ? "text-[#388A94]"
+                          : "text-gray-500"
+                      }`}
                     >
                       <span
                         className={`mr-2 w-4 h-4 flex items-center justify-center rounded-full border ${
-                          getPasswordStrength(watch("password")).number ? "bg-[#388A94] text-white" : "border-gray-500"
+                          getPasswordStrength(watch("password")).number
+                            ? "bg-[#388A94] text-white"
+                            : "border-gray-500"
                         }`}
                       >
                         ✓
@@ -1480,24 +1535,24 @@ export function SignupForm() {
       <div className="bg-white rounded-xl shadow-xl overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
         <div className="w-full md:w-2/5 bg-[#B5D3D1] p-6">
           <h2 className="text-4xl font-bold text-[#1A3B47] mb-2 sticky top-0 bg-[#B5D3D1]">
-            Create Your <br/> Account Now!
+            Create Your <br /> Account Now!
           </h2>
           <p className="text-s mb-6 text-[#1A3B47]">
-            Join us today! It only takes a few steps to set <br/>up your account and
-            start exploring.
+            Join us today! It only takes a few steps to set <br />
+            up your account and start exploring.
           </p>
           {renderStepIndicator()}
-            <div className="mt-4 text-center text-s">
-              <p className="text-gray-600">
-                Already have an account?{" "}
-                <Link
-                  to="/login"
-                  className="font-medium text-[#5D9297] hover:text-[#1A3B47]"
-                >
-                  Sign in
-                </Link>
-              </p>
-            </div>
+          <div className="mt-4 text-center text-s">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="font-medium text-[#5D9297] hover:text-[#1A3B47]"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
         <div
           className="w-full md:w-3/5 p-6 max-h-[90vh] overflow-y-auto"
@@ -1584,8 +1639,6 @@ export function SignupForm() {
               )}
             </form>
           </Form>
-
-          
         </div>
       </div>
 

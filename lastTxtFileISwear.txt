@@ -2,10 +2,15 @@ Priority List:
 
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
+-lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
+-Error updating product. Please try again later. lama ba update product f admin s3at
+-mfish show password f signup
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
+-pagination msh btl3 l awl elpage
+-single pages el title mktoob 3 mrat leh f activity/itinerary/product
 -reports bayza 
 -mafish loading baad ma badoos update product
 -sa3at beyede error lama mark all as read
@@ -13,15 +18,18 @@ Priority List:
 consistency fe pages el all 
 navigation notification fe admin
 - shay be laban 3amatan (create activity we create products we kol el create )
-sales report margins 
+- sales report margins
+- booking confirmation popouts mesh zy b3d
 -update itinerary leha popup(cant aw succesfully updated)
 -create promo code layout (stretch start and end date we geeb el button foo2 )
 -no popup l flag inappropriate itinerary
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
--birthday promocode msh beyban fel notifications 
+-birthday promocode msh beyban fel notifications  and mail
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
 -add loading for wishlist 
 -updating activity popup btdos basraha 3adi w btfdl f update activity
+-single ay haga el title el fo2 saye2
+
 -(fen orders page ? ana 3mlt /orders 3ashan a3raf awsalha bas heyya etshalt men el site mahtota fen?)
 -create promo code msh sha8ala
 -out of stock notification  elleh fel navbar msh sha8ala fe seller 
@@ -68,15 +76,14 @@ alwan profile w settings (done)
 
 
 Aby: 
-
-66
-68
+66 (done)
+68 (done)
 90
-91
+91 (done)
 
 - Seeb el 0 sales bas sort by revenue 3ashan yezharo ta7t (done)
-- Automated verify Otp
-- Black Friday use this promo code!!
+- Automated verify Otp (done)
+- Black Friday use this promo code!! (done)
 
 
 admin w seller y view zy table feha product w amount sold w quantity items in stock
@@ -176,15 +183,15 @@ Radwa:
 - admin add user : 
  Add user teb2a button kebeer w 3al yemeen (done✅)
  whitespace bottom right (geebi password verification 3al yemeen aw get creative) (done✅)
- -approve user : in all user whenever I approve, an error message appear upon approving because of "all".
 
  
 Habiba:
-98
-99
-100
-101
-104
+98 ✅
+99 ✅
+100 ✅
+101✅
+104✅
+
 
 - all flights (tab3y m3 amy)(done)
 Sheel el shay be laban men kol haga
