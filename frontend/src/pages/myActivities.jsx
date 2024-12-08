@@ -616,6 +616,9 @@ export default function MyActivitiesComponent() {
     );
   };
 
+  
+  const backgroundImage = "url('./src/assets/images/allActivities.jpg')";
+
   const sortedActivities = useMemo(() => {
     const sorted = [...filteredActivities];
     if (sortBy === "price") {
@@ -628,9 +631,13 @@ export default function MyActivitiesComponent() {
 
   return (
     <div className="bg-gray-100">
-      <div className="relative h-[250px] bg-[#5D9297] overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 mt-8 h-full flex items-center">
-          <div className="flex-1">
+        <div
+    className="relative h-[330px] bg-cover bg-center"
+    style={{ backgroundImage }}
+  >
+    <div className="absolute inset-0"></div>
+    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+    <div className="flex-1">
             <h1 className="text-5xl font-bold text-white mb-4">
               My Activities
             </h1>
@@ -644,17 +651,8 @@ export default function MyActivitiesComponent() {
               / My Activities
             </p>
           </div>
-          <div className="hidden lg:block w-1/3">
-            <img
-              src={activityImage}
-              alt="Decorative"
-              height="200"
-              width="200"
-              className="ml-auto"
-            />
-          </div>
-        </div>
-      </div>
+    </div>
+  </div>
       <div className="container mx-auto px-4 py-8 lg:px-24">
         <div className="flex gap-8">
           <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">

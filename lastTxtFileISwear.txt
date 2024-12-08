@@ -1,14 +1,22 @@
 Priority List: 
-
+-CANT TEST CREATE ACTIVITY AASHAN COUNTRIES (had y testaha)
+-CANT TEST CREATE/UPDATE HISTORICAL PLACE AASHAN COUNTRIES (had y testaha)
 -notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
 -promo code activities, itineraries, hotels msh sha8al
+-admin by delete activity category aady hatta law fe activity mstkhdmaha
+-admin b y create activity category etnen b nafs elesm aady
+-admin by delete activity tags aady hatta law fe activity mstkhdmaha
+-lama bafoos ala activity mn el fl itinerary details el website bydrab
 -lama admin y delete product msh bta3o aw bta3o s3at mfish ay response w s3at by direct ala haga mfhash sidebar admin
 -cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
 -lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
 -Error updating product. Please try again later. lama ba update product f admin s3at
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
+-Upon searching, no skeleton loading in (itineraries,historical places, Products) like the one in Activities.
+-Select by preference for itineraries not working (Sam)
+-Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
 -pagination msh btl3 l awl elpage
 -mafish loading b3d ma ba search fe itineraries zy activities w HPs. 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
@@ -199,22 +207,22 @@ Jana:
 
 
 
-Zeina:
-59
-60
-62
-63
-64
-65
+Zeina: AY HAGA GMBAHA DONE BS MSHAKL KTEER KTBTHA FO2
+59 done✅
+60 done✅
+62 done✅
+63 done✅
+64 done✅
+65 done✅
 
-19
-20
+19 done✅
+20 done✅
 21
-22
-23
-24
+22 done✅
+23 done✅
+24 done✅
 25
-26
+26 done✅
 
 
 redeem points tbaa kol 100 maamlsh redeem decimal (done)
@@ -284,9 +292,9 @@ Hazem:
 38✅
 
 
-33
-37
-39
+33✅
+37✅
+39✅
 40
 41
 42
