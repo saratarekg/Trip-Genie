@@ -255,7 +255,7 @@ export function CreatePromoCode() {
                           <Button
                             variant={"outline"}
                             className={cn(
-                              "w-[240px] pl-3 text-left font-normal",
+                              "w-[272px] pl-3 text-left font-normal",
                               !field.value.start && "text-muted-foreground"
                             )}
                           >
@@ -285,7 +285,7 @@ export function CreatePromoCode() {
                           <Button
                             variant={"outline"}
                             className={cn(
-                              "w-[240px] pl-3 text-left font-normal",
+                              "w-[272px] pl-3 text-left font-normal",
                               !field.value.end && "text-muted-foreground"
                             )}
                           >
@@ -321,14 +321,15 @@ export function CreatePromoCode() {
           </form>
         </Form>
         <div className="flex justify-end mb-6 mr-6">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-8 py-4 text-xl"
-          >
-            <Plus className="mr-2 h-6 w-6" />
-            {isSubmitting ? "Creating..." : "Create Promo Code"}
-          </Button>
+        <Button
+  type="submit"
+  disabled={isSubmitting}
+  className="bg-[#1A3B47] hover:bg-[#1A3B47]/90 text-white px-8 py-4 text-xl -mt-20" // Reduce or remove `mt`
+>
+  <Plus className="mr-2 h-6 w-6" />
+  {isSubmitting ? "Creating..." : "Create Promo Code"}
+</Button>
+
         </div>
       </>
 
