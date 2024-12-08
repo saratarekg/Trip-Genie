@@ -225,9 +225,108 @@ export default function ProductArchive() {
     fetchProducts();
   };
 
+  const ActivityPageSkeleton = () => {
+    return (
+      <div className="bg-gray-100">
+        <div className="">
+          <div className="flex gap-8">
+            {/* Sidebar Skeleton */}
+            <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="h-6 w-24 bg-gray-300 rounded animate-pulse"></div>
+                <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-6">
+                {/* Price Range Skeleton */}
+                <div>
+                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="h-8 w-full bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                {/* Date Range Skeleton */}
+                <div>
+                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="h-8 w-full bg-gray-200 rounded animate-pulse mb-2"></div>
+                  <div className="h-8 w-full bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                {/* Star Rating Skeleton */}
+                <div>
+                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="space-y-2">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-8 w-full bg-gray-200 rounded animate-pulse"
+                      ></div>
+                    ))}
+                  </div>
+                </div>
+                {/* Category Skeleton */}
+                <div>
+                  <div className="h-4 w-32 bg-gray-300 rounded animate-pulse mb-2"></div>
+                  <div className="space-y-2">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={index} className="flex items-center">
+                        <div className="h-5 w-5 bg-gray-300 rounded animate-pulse mr-2"></div>
+                        <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Skeleton */}
+            <div className="flex-1">
+              {/* Search and Filters Skeleton */}
+              <div className="mb-4">
+                <div className="relative flex-grow mb-4 flex items-center gap-4">
+                  <div className="h-10 w-full bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="h-6 w-20 bg-gray-300 rounded animate-pulse"></div>
+                  <div className="h-10 w-40 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="h-10 w-40 bg-gray-200 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Cards Grid Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col bg-white shadow-lg rounded-lg overflow-hidden animate-pulse"
+                  >
+                    <div className="h-40 bg-gray-300"></div>
+                    <div className="p-4 space-y-4">
+                      <div className="h-8 w-3/4 bg-gray-300 rounded"></div>
+                      <div className="h-6 w-1/2 bg-gray-200 rounded"></div>
+                      <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="p-4 border-t space-y-3">
+                      <div className="h-5 w-1/3 bg-gray-300 rounded"></div>
+                      <div className="h-5 w-1/4 bg-gray-300 rounded"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Pagination Skeleton */}
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+
   return (
     <div className="bg-gray-100">
-      {selectedProductId ? (
+      {isLoading ? (
+        <ActivityPageSkeleton />
+      ) : selectedProductId ? (
         <div>
           <Button
             onClick={handleBackToAll}
@@ -244,9 +343,7 @@ export default function ProductArchive() {
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 h-100 bg-white rounded-lg shadow-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-[#1A3B47]">
-                  Filters
-                </h2>
+                <h2 className="text-xl font-semibold text-[#1A3B47]">Filters</h2>
                 <Button
                   onClick={clearFilters}
                   size="sm"
@@ -310,9 +407,7 @@ export default function ProductArchive() {
                             <h4 className="font-medium text-sm">
                               {product.name}
                             </h4>
-                            <div className="mt-1">
-                              {renderStars(product.rating)}
-                            </div>
+                            <div className="mt-1">{renderStars(product.rating)}</div>
                           </div>
                         </Link>
                       ))}
@@ -320,7 +415,7 @@ export default function ProductArchive() {
                 </ScrollArea>
               </div>
             </div>
-
+  
             {/* Main Content */}
             <div className="flex-1">
               <div className="mb-4">
@@ -378,65 +473,59 @@ export default function ProductArchive() {
                   </Button>
                 </div>
               </div>
-
+  
               {error && (
                 <div className="text-red-500 text-center mb-4">{error}</div>
               )}
-
-              {isLoading ? (
-                <Loader />
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {products.length > 0 &&
-                      products
-                        .slice(
-                          (currentPage - 1) * tripsPerPage,
-                          currentPage * tripsPerPage
-                        )
-                        .map((product) => (
-                          <ProductCard
-                            key={product._id}
-                            product={product}
-                            onSelect={handleProductSelectbyid}
-                          />
-                        ))}
-                  </div>
-
-                  <div className="mt-8 flex justify-center items-center space-x-4">
-                    <Button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      variant="outline"
-                      size="icon"
-                      className="text-[#1A3B47] border-[#1A3B47]"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm font-medium text-[#1A3B47]">
-                      Page {currentPage} of{" "}
-                      {Math.ceil(products.length / tripsPerPage)}
-                    </span>
-                    <Button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={
-                        currentPage ===
-                          Math.ceil(products.length / tripsPerPage) ||
-                        products.length === 0
-                      }
-                      variant="outline"
-                      size="icon"
-                      className="text-[#1A3B47] border-[#1A3B47]"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </>
-              )}
+  
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.length > 0 &&
+                  products
+                    .slice(
+                      (currentPage - 1) * tripsPerPage,
+                      currentPage * tripsPerPage
+                    )
+                    .map((product) => (
+                      <ProductCard
+                        key={product._id}
+                        product={product}
+                        onSelect={handleProductSelectbyid}
+                      />
+                    ))}
+              </div>
+  
+              <div className="mt-8 flex justify-center items-center space-x-4">
+                <Button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  variant="outline"
+                  size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm font-medium text-[#1A3B47]">
+                  Page {currentPage} of{" "}
+                  {Math.ceil(products.length / tripsPerPage)}
+                </span>
+                <Button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={
+                    currentPage === Math.ceil(products.length / tripsPerPage) ||
+                    products.length === 0
+                  }
+                  variant="outline"
+                  size="icon"
+                  className="text-[#1A3B47] border-[#1A3B47]"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       )}
     </div>
   );
+  
 }
