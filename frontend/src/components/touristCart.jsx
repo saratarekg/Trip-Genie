@@ -20,7 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Minus, Plus, Trash2, X, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
+import {
+  Minus,
+  Plus,
+  Trash2,
+  X,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Popup from "./popup";
@@ -48,7 +57,8 @@ const ShoppingCart = () => {
   const [locationType, setLocationType] = useState("");
   const [quantityError, setQuantityError] = useState(false);
   const [allPurchasesSuccessful, setAllPurchasesSuccessful] = useState(false);
-  const [allPurchasesSuccessfulPopup, setAllPurchasesSuccessfulPopup] = useState(false);
+  const [allPurchasesSuccessfulPopup, setAllPurchasesSuccessfulPopup] =
+    useState(false);
   const [actionError, setActionError] = useState(null);
   const [popupType, setPopupType] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
@@ -56,14 +66,12 @@ const ShoppingCart = () => {
   const [showOrderSummary, setShowOrderSummary] = useState(true);
   const [showProductList, setShowProductList] = useState(false);
 
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState("");
   const [promoDetails, setPromoDetails] = useState(null);
-  const [promoError, setPromoError] = useState('');
+  const [promoError, setPromoError] = useState("");
   const [discountedTotal, setDiscountedTotal] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [currentPromoCode, setCurrentPromoCode] = useState('');
-
-
+  const [currentPromoCode, setCurrentPromoCode] = useState("");
 
   const [userRole, setUserRole] = useState("guest");
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
@@ -133,7 +141,7 @@ const ShoppingCart = () => {
 
   const handlePromoSubmit = async (e) => {
     e.preventDefault();
-    setPromoError('');
+    setPromoError("");
     setPromoDetails(null);
     setDiscountAmount(0);
     setDiscountedTotal(totalAmount);
@@ -143,30 +151,33 @@ const ShoppingCart = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:4000/tourist/get/promo-code', {
-        method: 'POST',
-        headers: { 
-          Authorization: `Bearer ${Cookies.get('jwt')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code: promoCode }),
-      });
-      
+      const response = await fetch(
+        "http://localhost:4000/tourist/get/promo-code",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Cookies.get("jwt")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ code: promoCode }),
+        }
+      );
+
       if (response.status === 404) {
-        setPromoError('Promo Code Not Found.');
+        setPromoError("Promo Code Not Found.");
         return;
       }
 
       if (!response.ok) {
-        throw new Error('Failed to fetch promo code details');
+        throw new Error("Failed to fetch promo code details");
       }
 
       const data = await response.json();
       const promo = data.promoCode;
       console.log(promo);
       console.log(promo.status);
-      if (promo.status === 'inactive') {
-        setPromoError('This promo code is currently inactive.');
+      if (promo.status === "inactive") {
+        setPromoError("This promo code is currently inactive.");
         return;
       }
 
@@ -175,12 +186,12 @@ const ShoppingCart = () => {
       const endDate = new Date(promo?.dateRange?.end);
 
       if (currentDate < startDate || currentDate > endDate) {
-        setPromoError('This promo code is not valid for the current date.');
+        setPromoError("This promo code is not valid for the current date.");
         return;
       }
 
       if (promo.timesUsed >= promo.usage_limit) {
-        setPromoError('This promo code has reached its usage limit.');
+        setPromoError("This promo code has reached its usage limit.");
         return;
       }
 
@@ -190,29 +201,30 @@ const ShoppingCart = () => {
       setDiscountedTotal(totalAmount - discount);
     } catch (error) {
       console.log(error);
-      setPromoError('Failed to apply promo code. Please try again.');
+      setPromoError("Failed to apply promo code. Please try again.");
     }
   };
 
-
-
   const fetchExchangeRates = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:4000/rates');
+      const response = await axios.get("http://localhost:4000/rates");
       setExchangeRates(response.data.rates);
     } catch (error) {
-      console.error('Error fetching exchange rates:', error);
+      console.error("Error fetching exchange rates:", error);
     }
   }, []);
 
   const fetchCurrencies = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:4000/tourist/currencies', {
-        headers: { Authorization: `Bearer ${Cookies.get('jwt')}` }
-      });
+      const response = await axios.get(
+        "http://localhost:4000/tourist/currencies",
+        {
+          headers: { Authorization: `Bearer ${Cookies.get("jwt")}` },
+        }
+      );
       setCurrencies(response.data);
     } catch (error) {
-      console.error('Error fetching currencies:', error);
+      console.error("Error fetching currencies:", error);
     }
   }, []);
 
@@ -220,44 +232,43 @@ const ShoppingCart = () => {
     const role = Cookies.get("role") || "guest";
     setUserRole(role);
 
+    try {
+      const token = Cookies.get("jwt");
+      const response = await axios.get("http://localhost:4000/tourist/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const currencyId = response.data.preferredCurrency;
+      console.log("userperfeered", currencyId);
+      setCurrentPromoCode(response.data.currentPromoCode || "");
 
-      try {
-        const token = Cookies.get("jwt");
-        const response = await axios.get("http://localhost:4000/tourist/", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const currencyId = response.data.preferredCurrency;
-        console.log("userperfeered", currencyId);
-        setCurrentPromoCode(response.data.currentPromoCode || '');
-
-        const response2 = await axios.get(`http://localhost:4000/tourist/getCurrency/${currencyId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUserPreferredCurrency(response2.data);
-        console.log("hereeeeeeeeeeeeeeeeeeeeeeeee",response2.data)
-
-        if (response.data.currentPromoCode) {
-          setPromoCode(response.data.currentPromoCode.code);
-          handlePromoSubmit({ preventDefault: () => {} });
+      const response2 = await axios.get(
+        `http://localhost:4000/tourist/getCurrency/${currencyId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-      }
-    
-  }, []);
+      );
+      setUserPreferredCurrency(response2.data);
+      console.log("hereeeeeeeeeeeeeeeeeeeeeeeee", response2.data);
 
+      if (response.data.currentPromoCode) {
+        setPromoCode(response.data.currentPromoCode.code);
+        handlePromoSubmit({ preventDefault: () => {} });
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+    }
+  }, []);
 
   useEffect(() => {
     fetchUserInfo();
     fetchExchangeRates();
     fetchCurrencies();
     fetchCartItems();
-  }, [fetchUserInfo, fetchExchangeRates, fetchCurrencies]);
+  }, [cartItems, fetchUserInfo, fetchExchangeRates, fetchCurrencies]);
 
   useEffect(() => {
     calculateTotalAmount();
   }, [cartItems, exchangeRates, userPreferredCurrency]);
-
 
   const fetchCartItems = useCallback(async () => {
     try {
@@ -271,30 +282,36 @@ const ShoppingCart = () => {
         const data = await response.json();
         setCartItems(data);
       }
-      window.dispatchEvent(new Event('cartUpdated'));
+      window.dispatchEvent(new Event("cartUpdated"));
     } catch (error) {
       console.error("Error fetching cart items:", error);
     }
   }, []);
 
-  
-  const formatPrice = useCallback((price, productCurrency) => {
-    console.log(userPreferredCurrency);
-    if (userRole === 'tourist' && userPreferredCurrency) {
-      const baseRate = exchangeRates[productCurrency] || 1;
-      const targetRate = exchangeRates[userPreferredCurrency.code] || 1;
-      const exchangedPrice = (price / baseRate) * targetRate;
-      return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
-    }
-    const currency = currencies.find(c => c._id === productCurrency);
-    return `${currency ? currency.symbol : '$'}${price.toFixed(2)}`;
-  }, [userRole, userPreferredCurrency, exchangeRates, currencies]);
+  const formatPrice = useCallback(
+    (price, productCurrency) => {
+      console.log(userPreferredCurrency);
+      if (userRole === "tourist" && userPreferredCurrency) {
+        const baseRate = exchangeRates[productCurrency] || 1;
+        const targetRate = exchangeRates[userPreferredCurrency.code] || 1;
+        const exchangedPrice = (price / baseRate) * targetRate;
+        return `${userPreferredCurrency.symbol}${exchangedPrice.toFixed(2)}`;
+      }
+      const currency = currencies.find((c) => c._id === productCurrency);
+      return `${currency ? currency.symbol : "$"}${price.toFixed(2)}`;
+    },
+    [userRole, userPreferredCurrency, exchangeRates, currencies]
+  );
 
   const calculateTotalAmount = useCallback(() => {
     setTotalAmountLoading(true);
     let total = 0;
     for (const item of cartItems) {
-      if (userRole === 'tourist' && userPreferredCurrency && userPreferredCurrency.code !== item.product?.currency) {
+      if (
+        userRole === "tourist" &&
+        userPreferredCurrency &&
+        userPreferredCurrency.code !== item.product?.currency
+      ) {
         const baseRate = exchangeRates[item.product?.currency] || 1;
         const targetRate = exchangeRates[userPreferredCurrency.code] || 1;
         total += (item.product?.price / baseRate) * targetRate * item.quantity;
@@ -322,7 +339,7 @@ const ShoppingCart = () => {
 
       if (emptyCartResponse.ok) {
         console.log("Cart emptied successfully.");
-        window.dispatchEvent(new Event('cartUpdated'));
+        window.dispatchEvent(new Event("cartUpdated"));
       } else {
         console.error("Failed to empty the cart.");
         throw new Error("Failed to empty the cart");
@@ -347,12 +364,13 @@ const ShoppingCart = () => {
         }
       );
       if (response.ok) {
-        setCartItems(
-          cartItems.filter((item) => item.product._id !== productId)
+        setCartItems((prevItems) =>
+          prevItems.filter((item) => item.product._id !== productId)
         );
+        calculateTotalAmount();
         fetchCartItems();
         openSuccessPopup("Item removed successfully!");
-        window.dispatchEvent(new Event('cartUpdated'));
+        window.dispatchEvent(new Event("cartUpdated"));
       }
     } catch (error) {
       console.error("Error removing item:", error);
@@ -399,8 +417,7 @@ const ShoppingCart = () => {
             )
           );
         }, 500);
-        window.dispatchEvent(new Event('cartUpdated'));
-
+        window.dispatchEvent(new Event("cartUpdated"));
       }
     } catch (error) {
       console.error("Error updating quantity:", error);
@@ -470,227 +487,314 @@ const ShoppingCart = () => {
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
-   
-    <div className="flex h-screen ml-10 ">
-      <div className="flex-1 p-8">
-        <h1 className="text-5xl text-[#1A3B47] font-bold mb-6 flex justify-between items-center">
-          Shopping Cart
-          <span className="text-xl font-normal">({cartItems.length} items)</span>
-        </h1>
-        {cartItems?.length === 0 ? (
-          <p className="text-center text-gray-500 my-8">No items in cart</p>
-        ) : (
-          <div className="space-y-6">
-  {/* Cart Items Wrapper with Scrollable Area */}
-  <div className="max-h-[500px] overflow-y-auto">
-    {cartItems.length > 4 ? (
-      cartItems.map((item) => (
-        <div key={item.product?._id} className="flex items-center justify-between border-b py-4">
-          <div className="flex items-center">
-            <img
-              src={item.product?.pictures[0]?.url}
-              alt={item?.product?.name || "Product"}
-              className="w-20 h-20 object-cover mr-4 cursor-pointer"
-              onClick={() => handleProductClick(item.product._id)}
-            />
-            <div>
-              <h2 className="text-lg font-semibold cursor-pointer hover:underline" onClick={() => handleProductClick(item.product._id)}>
-                {item?.product?.name}
-              </h2>
-              <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
-                {item.product.description?.length > 50 ? `${item.product.description?.slice(0, 50)}...` : item.product.description}
+
+      <div className="flex h-screen ml-10 ">
+        <div className="flex-1 p-8">
+          <h1 className="text-5xl text-[#1A3B47] font-bold mb-6 flex justify-between items-center">
+            Shopping Cart
+            <span className="text-xl font-normal">
+              ({cartItems.length} items)
+            </span>
+          </h1>
+          {cartItems?.length === 0 ? (
+            <p className="text-center text-gray-500 my-8">No items in cart</p>
+          ) : (
+            <div className="space-y-6">
+              {/* Cart Items Wrapper with Scrollable Area */}
+              <div className="max-h-[500px] overflow-y-auto">
+                {cartItems.length > 4
+                  ? cartItems.map((item) => (
+                      <div
+                        key={item.product?._id}
+                        className="flex items-center justify-between border-b py-4"
+                      >
+                        <div className="flex items-center">
+                          <img
+                            src={item.product?.pictures[0]?.url}
+                            alt={item?.product?.name || "Product"}
+                            className="w-20 h-20 object-cover mr-4 cursor-pointer"
+                            onClick={() => handleProductClick(item.product._id)}
+                          />
+                          <div>
+                            <h2
+                              className="text-lg font-semibold cursor-pointer hover:underline"
+                              onClick={() =>
+                                handleProductClick(item.product._id)
+                              }
+                            >
+                              {item?.product?.name}
+                            </h2>
+                            <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
+                              {item.product.description?.length > 50
+                                ? `${item.product.description?.slice(0, 50)}...`
+                                : item.product.description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="flex items-center justify-between w-32 h-10 border border-gray-300 rounded-md">
+                            <Button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item?.product?._id,
+                                  Math.max(1, item?.quantity - 1)
+                                )
+                              }
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-black"
+                              disabled={
+                                item?.quantity <= 1 ||
+                                item?.product?.quantity === 0
+                              }
+                            >
+                              <Minus className="h-5 w-5 text-[#388A94] font-semibold" />
+                            </Button>
+                            <span className="text-center font-semibold text-xl text-black w-8">
+                              {item?.quantity}
+                            </span>
+                            <Button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item?.product?._id,
+                                  item?.quantity + 1
+                                )
+                              }
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-black"
+                              disabled={
+                                item?.quantity >= item?.product?.quantity
+                              }
+                            >
+                              <Plus className="h-5 w-5 text-[#388A94] font-semibold" />
+                            </Button>
+                          </div>
+                          <span className="ml-4 font-semibold w-24 text-right text-2xl">
+                            {item.priceLoading ? (
+                              <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
+                            ) : (
+                              formatPrice(
+                                item?.product?.price * item?.quantity,
+                                item?.product?.currency
+                              )
+                            )}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleRemoveItem(item?.product?._id)}
+                            className="p-2 w-8 h-8 ml-4 text-red-500 hover:text-red-700 transition duration-300 ease-in-out"
+                          >
+                            <Trash2 className="h-6 w-6 " />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  : // If less than 4 items, render normally without scroll
+                    cartItems.map((item) => (
+                      <div
+                        key={item.product?._id}
+                        className="flex items-center justify-between border-b py-4"
+                      >
+                        <div className="flex items-center">
+                          <img
+                            src={item.product?.pictures[0]?.url}
+                            alt={item?.product?.name || "Product"}
+                            className="w-20 h-20 object-cover mr-4 cursor-pointer"
+                            onClick={() => handleProductClick(item.product._id)}
+                          />
+                          <div>
+                            <h2
+                              className="text-lg font-semibold cursor-pointer hover:underline"
+                              onClick={() =>
+                                handleProductClick(item.product._id)
+                              }
+                            >
+                              {item?.product?.name}
+                            </h2>
+                            <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
+                              {item.product.description?.length > 50
+                                ? `${item.product.description?.slice(0, 50)}...`
+                                : item.product.description}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="flex items-center justify-between w-32 h-10 border border-gray-300 rounded-md">
+                            <Button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item?.product?._id,
+                                  Math.max(1, item?.quantity - 1)
+                                )
+                              }
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-black"
+                              disabled={
+                                item?.quantity <= 1 ||
+                                item?.product?.quantity === 0
+                              }
+                            >
+                              <Minus className="h-5 w-5 text-[#388A94] font-semibold" />
+                            </Button>
+                            <span className="text-center font-semibold text-xl text-black w-8">
+                              {item?.quantity}
+                            </span>
+                            <Button
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item?.product?._id,
+                                  item?.quantity + 1
+                                )
+                              }
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-black"
+                              disabled={
+                                item?.quantity >= item?.product?.quantity
+                              }
+                            >
+                              <Plus className="h-5 w-5 text-[#388A94] font-semibold" />
+                            </Button>
+                          </div>
+                          <span className="ml-4 font-semibold w-24 text-right text-2xl">
+                            {item.priceLoading ? (
+                              <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
+                            ) : (
+                              formatPrice(
+                                item?.product?.price * item?.quantity,
+                                item?.product?.currency
+                              )
+                            )}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleRemoveItem(item?.product?._id)}
+                            className="p-2 w-8 h-8 ml-4 text-red-500 hover:text-red-700 transition duration-300 ease-in-out"
+                          >
+                            <Trash2 className="h-6 w-6 " />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="w-1/3 bg-gray-100 p-8 overflow-y-auto">
+          <h2 className="text-2xl font-bold mb-6 text-[#1A3B47]">
+            Order Summary ({cartItems.length})
+          </h2>
+          <div className="space-y-4">
+            {cartItems.map((item, index) => (
+              <div
+                key={index}
+                className={`flex justify-between ${
+                  index === cartItems.length - 1 ? "pb-2" : ""
+                }`}
+              >
+                <div>
+                  <p className="font-medium text-[#1A3B47]">
+                    {item?.product?.name} x {item?.quantity}
+                  </p>
+                </div>
+                <span className="text-[#388A94] font-semibold">
+                  {formatPrice(item?.totalPrice)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <div className="flex justify-between  text-lg">
+              <span className="text-[#1A3B47]">Subtotal</span>
+              <span className="font-semibold text-[#388A94]">
+                {formatPrice(
+                  totalAmount,
+                  userPreferredCurrency ? userPreferredCurrency.code : "USD"
+                )}
+              </span>
+            </div>
+            {promoDetails && (
+              <div className="flex justify-between  mt-2">
+                <span className="text-[#1A3B47]">Discount:</span>
+                <span className="font-semibold text-green-600">
+                  -
+                  {formatPrice(
+                    discountAmount,
+                    userPreferredCurrency ? userPreferredCurrency.code : "USD"
+                  )}
+                </span>
+              </div>
+            )}
+            <div className="border-t  mt-4"></div>
+            <div className="flex justify-between text-[#1A3B47] font-bold text-xl mt-4">
+              <span>Total</span>
+              <span className="text-[#388A94]">
+                {formatPrice(
+                  promoDetails ? discountedTotal : totalAmount,
+                  userPreferredCurrency ? userPreferredCurrency.code : "USD"
+                )}
+              </span>
+            </div>
+          </div>
+          <form onSubmit={handlePromoSubmit} className="mt-4">
+            <div className="flex mt-1">
+              <Input
+                id="promo-code"
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                placeholder={"Enter promo code"}
+                className="flex-grow"
+              />
+              <Button
+                type="submit"
+                className="ml-2 bg-[#388A94] hover:bg-[#2e6b77]"
+                disabled={!promoCode.trim()}
+              >
+                Apply
+              </Button>
+            </div>
+          </form>
+          {promoError && <p className="text-red-500 mt-2">{promoError}</p>}
+          {promoDetails && (
+            <div className="mt-2">
+              <p className="text-green-600 mt-2">
+                Congratulations! You've saved {promoDetails.percentOff}% on this
+                purchase!
               </p>
             </div>
-          </div>
-          <div className="flex items-center">
-            <div className="flex items-center justify-between w-32 h-10 border border-gray-300 rounded-md">
-              <Button
-                onClick={() => handleQuantityChange(item?.product?._id, Math.max(1, item?.quantity - 1))}
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-black"
-                disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
-              >
-                <Minus className="h-5 w-5 text-[#388A94] font-semibold" />
-              </Button>
-              <span className="text-center font-semibold text-xl text-black w-8">{item?.quantity}</span>
-              <Button
-                onClick={() => handleQuantityChange(item?.product?._id, item?.quantity + 1)}
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-black"
-                disabled={item?.quantity >= item?.product?.quantity}
-              >
-                <Plus className="h-5 w-5 text-[#388A94] font-semibold" />
-              </Button>
-            </div>
-            <span className="ml-4 font-semibold w-24 text-right text-2xl">
-              {item.priceLoading ? (
-                <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
-              ) : (
-                formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
-              )}
-            </span>
-            <Button
-              variant="ghost"
-              onClick={() => handleRemoveItem(item?.product?._id)}
-              className="p-2 w-8 h-8 ml-4 text-red-500 hover:text-red-700 transition duration-300 ease-in-out"
-            >
-              <Trash2 className="h-6 w-6 " />
-            </Button>
-          </div>
+          )}
+          <Button
+            className="w-full mt-6 bg-[#1A3B47] text-white py-3 text-lg"
+            onClick={() => navigate("/checkout2")}
+            disabled={cartItems.length === 0}
+          >
+            Proceed to Checkout
+          </Button>
         </div>
-      ))
-    ) : (
-      // If less than 4 items, render normally without scroll
-      cartItems.map((item) => (
-        <div key={item.product?._id} className="flex items-center justify-between border-b py-4">
-          <div className="flex items-center">
-            <img
-              src={item.product?.pictures[0]?.url}
-              alt={item?.product?.name || "Product"}
-              className="w-20 h-20 object-cover mr-4 cursor-pointer"
-              onClick={() => handleProductClick(item.product._id)}
-            />
-            <div>
-              <h2 className="text-lg font-semibold cursor-pointer hover:underline" onClick={() => handleProductClick(item.product._id)}>
-                {item?.product?.name}
-              </h2>
-              <p className="text-sm text-gray-600 max-w-xs overflow-hidden text-ellipsis whitespace-normal break-words">
-                {item.product.description?.length > 50 ? `${item.product.description?.slice(0, 50)}...` : item.product.description}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center">
-            <div className="flex items-center justify-between w-32 h-10 border border-gray-300 rounded-md">
-              <Button
-                onClick={() => handleQuantityChange(item?.product?._id, Math.max(1, item?.quantity - 1))}
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-black"
-                disabled={item?.quantity <= 1 || item?.product?.quantity === 0}
-              >
-                <Minus className="h-5 w-5 text-[#388A94] font-semibold" />
-              </Button>
-              <span className="text-center font-semibold text-xl text-black w-8">{item?.quantity}</span>
-              <Button
-                onClick={() => handleQuantityChange(item?.product?._id, item?.quantity + 1)}
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-black"
-                disabled={item?.quantity >= item?.product?.quantity}
-              >
-                <Plus className="h-5 w-5 text-[#388A94] font-semibold" />
-              </Button>
-            </div>
-            <span className="ml-4 font-semibold w-24 text-right text-2xl">
-              {item.priceLoading ? (
-                <div className="animate-pulse bg-gray-200 h-6 w-full rounded-full"></div>
-              ) : (
-                formatPrice(item?.product?.price * item?.quantity, item?.product?.currency)
-              )}
-            </span>
-            <Button
-              variant="ghost"
-              onClick={() => handleRemoveItem(item?.product?._id)}
-              className="p-2 w-8 h-8 ml-4 text-red-500 hover:text-red-700 transition duration-300 ease-in-out"
-            >
-              <Trash2 className="h-6 w-6 " />
-            </Button>
-          </div>
-        </div>
-      ))
-    )}
-  </div>
-</div>
 
-        )}
+        <Dialog
+          open={actionError !== null}
+          onOpenChange={() => setActionError(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
+                Error
+              </DialogTitle>
+            </DialogHeader>
+            <p>{actionError}</p>
+            <DialogFooter>
+              <Button variant="default" onClick={() => setActionError(null)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
-      <div className="w-1/3 bg-gray-100 p-8 overflow-y-auto">
-  <h2 className="text-2xl font-bold mb-6 text-[#1A3B47]">Order Summary ({cartItems.length})</h2>
-  <div className="space-y-4">
-    {cartItems.map((item, index) => (
-      <div key={index} className={`flex justify-between ${index === cartItems.length - 1 ? 'pb-2' : ''}`}>
-        <div>
-          <p className="font-medium text-[#1A3B47]">
-            {item?.product?.name} x {item?.quantity}
-          </p>
-        </div>
-        <span className="text-[#388A94] font-semibold">
-          {formatPrice(item?.totalPrice)}
-        </span>
-      </div>
-    ))}
-  </div>
-  <div className="border-t border-gray-200 pt-4 mt-4">
-    <div className="flex justify-between  text-lg">
-    <span className="text-[#1A3B47]">Subtotal</span>
-    <span className="font-semibold text-[#388A94]">{formatPrice(totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
-    </div>
-    {promoDetails && (
-      <div className="flex justify-between  mt-2">
-        <span className="text-[#1A3B47]">Discount:</span>
-        <span className="font-semibold text-green-600">-{formatPrice(discountAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
-      </div>
-    )}
-    <div className="border-t  mt-4"></div>
-    <div className="flex justify-between text-[#1A3B47] font-bold text-xl mt-4">
-      <span>Total</span>
-      <span className="text-[#388A94]">{formatPrice(promoDetails ? discountedTotal : totalAmount, userPreferredCurrency ? userPreferredCurrency.code : "USD")}</span>
-    </div>
-  </div>
-  <form onSubmit={handlePromoSubmit} className="mt-4">
-    <div className="flex mt-1">
-      <Input
-        id="promo-code"
-        type="text"
-        value={promoCode}
-        onChange={(e) => setPromoCode(e.target.value)}
-        placeholder={"Enter promo code"}
-        className="flex-grow"
-      />
-      <Button type="submit" className="ml-2 bg-[#388A94] hover:bg-[#2e6b77]" disabled={!promoCode.trim()}>
-        Apply
-      </Button>
-    </div>
-  </form>
-  {promoError && (
-    <p className="text-red-500 mt-2">{promoError}</p>
-  )}
-  {promoDetails && (
-    <div className="mt-2">
-      <p className="text-green-600 mt-2">Congratulations! You've saved {promoDetails.percentOff}% on this purchase!</p>
-                 </div>
-  )}
-  <Button
-    className="w-full mt-6 bg-[#1A3B47] text-white py-3 text-lg"
-    onClick={() => navigate("/checkout2")}
-    disabled={cartItems.length === 0}
-  >
-    Proceed to Checkout
-  </Button>
-</div>
-
-      <Dialog
-        open={actionError !== null}
-        onOpenChange={() => setActionError(null)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              <XCircle className="w-6 h-6 text-red-500 inline-block mr-2" />
-              Error
-            </DialogTitle>
-          </DialogHeader>
-          <p>{actionError}</p>
-          <DialogFooter>
-            <Button variant="default" onClick={() => setActionError(null)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
     </div>
   );
 };
