@@ -14,6 +14,9 @@ Priority List:
 -Error updating product. Please try again later. lama ba update product f admin s3at
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
+-Upon searching, no skeleton loading in (itineraries,historical places, Products) like the one in Activities.
+-Select by preference for itineraries not working (Sam)
+-Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
 -pagination msh btl3 l awl elpage
 -mafish loading b3d ma ba search fe itineraries zy activities w HPs. 
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
@@ -289,9 +292,9 @@ Hazem:
 38✅
 
 
-33
-37
-39
+33✅
+37✅
+39✅
 40
 41
 42
