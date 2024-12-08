@@ -23,6 +23,14 @@ The project follows modern web development practices and conventions:
 - Role-based access control
 
 ## Screenshots
+![Homepage Screenshot](frontend/public/images/screenshot1.png)
+![Homepage Screenshot](frontend/public/images/screenshot2.png)
+![Homepage Screenshot](frontend/public/images/screenshot3.png)
+![Homepage Screenshot](frontend/public/images/screenshot4.png)
+![Homepage Screenshot](frontend/public/images/screenshot5.png)
+![Homepage Screenshot](frontend/public/images/screenshot7.png)
+![Homepage Screenshot](frontend/public/images/screenshot6.png)
+
 
 
 
@@ -103,7 +111,7 @@ VITE_STRIPE_PUBLISHABLE_KEY = ...
 
 4. Run the development server:
 ```bash
-cd TripGenie/frontend
+cd Trip-Genie/frontend
 npm run dev
 cd ../backend
 npm run dev 
@@ -120,6 +128,7 @@ https://developers.booking.com/metasearch/connect-api
 Run the test suite:
 
 ```bash
+cd backend
 npm run test
 ```
 
