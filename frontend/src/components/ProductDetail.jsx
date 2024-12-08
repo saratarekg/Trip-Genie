@@ -187,7 +187,7 @@ const ProductDetail = () => {
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
-  const [showArchiveSuccess, setShowArchiveSuccess] = useState(false);
+  //const [showArchiveSuccess, setShowArchiveSuccess] = useState(false);
   const [archiveError, setArchiveError] = useState(null);
   const [canModify, setCanModify] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -625,7 +625,7 @@ const ProductDetail = () => {
       setProduct(data.product);
       setError(null);
 
-      setShowArchiveSuccess(true);
+      //setShowArchiveSuccess(true);
     } catch (err) {
       setError("Error archiving product. Please try again later.");
       console.error("Error archiving product:", err);
@@ -894,7 +894,7 @@ const ProductDetail = () => {
       ]
       : []),
 
-        // Conditionally add the addToWishlist step based on userRole
+    // Conditionally add the addToWishlist step based on userRole
     ...(product?.seller
       ? [
         {
@@ -910,17 +910,6 @@ const ProductDetail = () => {
             </>
           ),
           placement: "left",
-        },
-      ]
-      : []),
-
-    // Conditionally add the addReview step based on userRole
-    ...(userRole === "tourist"
-      ? [
-        {
-          target: ".addReview",
-          content: "Click here to add/edit a review for this product.",
-          placement: "bottom",
         },
       ]
       : []),
@@ -965,8 +954,8 @@ const ProductDetail = () => {
             </div>
           </div>
         </nav>
-  
-       
+
+
         <div className="mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="lg:w-3/4">
@@ -976,19 +965,19 @@ const ProductDetail = () => {
                     <div className="h-10 w-1/2 bg-gray-300 rounded animate-pulse"></div>
                     <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
                   </div>
-  
+
                   <div className="w-full h-[400px] bg-gray-300 rounded animate-pulse mb-6"></div>
-  
-                 
-  
-                  
-                  
-  
-                 
+
+
+
+
+
+
+
                 </div>
               </div>
             </div>
-  
+
             <div className="lg:w-1/4">
               <Card>
                 <CardHeader>
@@ -996,40 +985,40 @@ const ProductDetail = () => {
                   <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse"></div>
                 </CardHeader>
                 <CardContent>
-                <div className="mt-4 text-4xl font-semibold text-center animate-pulse">
-  
-  <div className="text-sm text-gray-500 flex items-center justify-center mt-6">
-   
-   
-  </div>
-</div>
+                  <div className="mt-4 text-4xl font-semibold text-center animate-pulse">
 
-<div className="mt-4 animate-pulse">
-  <div className="h-12 w-1/2 bg-gray-300 rounded"></div>
-  <div className="h-4 w-2/3 bg-gray-300 rounded mt-40"></div>
-</div>
+                    <div className="text-sm text-gray-500 flex items-center justify-center mt-6">
 
 
+                    </div>
+                  </div>
+
+                  <div className="mt-4 animate-pulse">
+                    <div className="h-12 w-1/2 bg-gray-300 rounded"></div>
+                    <div className="h-4 w-2/3 bg-gray-300 rounded mt-40"></div>
+                  </div>
 
 
-<div className="mt-6 animate-pulse">
-  <div className="h-10  bg-gray-300 rounded"></div>
-  <div className="h-10 bg-gray-300 rounded mt-6"></div>
-</div>
 
-                  
+
+                  <div className="mt-6 animate-pulse">
+                    <div className="h-10  bg-gray-300 rounded"></div>
+                    <div className="h-10 bg-gray-300 rounded mt-6"></div>
+                  </div>
+
+
                 </CardContent>
               </Card>
             </div>
           </div>
-  
+
           <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <div className="h-8 w-1/4 bg-gray-300 rounded animate-pulse"></div>
                 <div className="h-8 w-20 bg-gray-300 rounded animate-pulse"></div>
               </div>
-  
+
               <div className="flex gap-8 mb-6">
                 <div className="text-center">
                   <div className="h-12 w-12 bg-gray-300 rounded animate-pulse mx-auto mb-2"></div>
@@ -1044,7 +1033,7 @@ const ProductDetail = () => {
                 </div>
               </div>
             </div>
-  
+
             <div className="border-t pt-6">
               <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-4"></div>
               <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse mb-4"></div>
@@ -1081,10 +1070,10 @@ const ProductDetail = () => {
       </div>
     );
   };
-  
-  
 
-  
+
+
+
   if (loading) return <ItineraryDetailSkeleton />;
 
 
@@ -1541,13 +1530,12 @@ const ProductDetail = () => {
                         product.seller)) && (
                         <Button
                           variant={product.isArchived ? "outline" : "default"}
-                          className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78]"
+                          className="w-full text-xl bg-[#388A94] hover:bg-[#2d6e78] text-white"
                           onClick={() => setShowArchiveConfirm(true)}
                         >
                           {product.isArchived ? (
                             <>
-                              <ArchiveX className="w-5 h-5 mr-2" /> Unarchive
-                              Product
+                              <ArchiveX className="w-5 h-5 mr-2" /> Unarchive Product
                             </>
                           ) : (
                             <>
@@ -1555,6 +1543,7 @@ const ProductDetail = () => {
                             </>
                           )}
                         </Button>
+
                       )}
 
                     {(userRole === "admin" ||
@@ -1832,7 +1821,7 @@ const ProductDetail = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showArchiveSuccess} onOpenChange={setShowArchiveSuccess}>
+      {/* <Dialog open={showArchiveSuccess} onOpenChange={setShowArchiveSuccess}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -1862,7 +1851,7 @@ const ProductDetail = () => {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <Dialog
         open={archiveError !== null}
@@ -1876,11 +1865,16 @@ const ProductDetail = () => {
             </DialogTitle>
             <DialogDescription>{archiveError}</DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="default" onClick={() => setArchiveError(null)}>
+          <DialogFooter className="flex justify-end mt-2">
+            <Button
+              variant="default"
+              onClick={() => setArchiveError(null)}
+              className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
+            >
               Close
             </Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
 

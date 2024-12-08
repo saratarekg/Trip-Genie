@@ -1433,7 +1433,7 @@ export default function CheckoutPage() {
                 navigate("/all-products");
                 emptyCart();
               }}
-              className="bg-[#1A3B47] text-white hover:bg-[#388A94]"
+              className="bg-[#1A3B47] text-white hover:bg-[#3E5963]"
             >
               Continue Shopping
             </Button>
