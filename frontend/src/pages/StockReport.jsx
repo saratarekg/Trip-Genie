@@ -286,7 +286,7 @@ const StockReport = () => {
         {/* <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
         </div> */}
-        <div className="max-w-7xl mt-4 mx-auto">
+        <div className="">
           {/* <div className="grid gap-4 md:grid-cols-12 mb-4">
             <Card className="md:col-span-3 flex flex-col justify-center items-center">
               <CardHeader className="p-3 w-full">
@@ -540,7 +540,7 @@ const StockReport = () => {
           </div> */}
 
           <Card>
-            <CardHeader className="p-4">
+            <CardHeader className="">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-xl font-bold text-[#1A3B47]">
                   Stock Report
@@ -554,7 +554,7 @@ const StockReport = () => {
               </div>
             </CardHeader>
             <CardContent className="">
-              <div className="flex flex-wrap gap-4 mb-4">
+              <div className="flex flex-wrap gap-4 mb-4 -mt-6">
                 <Select
                   value={filters.productId}
                   onValueChange={(value) =>

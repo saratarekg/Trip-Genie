@@ -112,7 +112,8 @@ const ItineraryReport = () => {
           calculatePeriodRevenue(monthlySalesData, "all")
         );
         setInitialTotalRevenue(totalAppRevenue);
-        setInitialTotalCommissionRevenue(totalAppRevenue);
+        setInitialTotalCommissionRevenue(calculateTotals().commissionRevenue);
+        console.log("totalAppRevenue", totalAppRevenue);
         setInitialFillPercentage(
           totalAppRevenue
             ? (calculatePeriodRevenue(monthlySalesData, "all") /
@@ -332,7 +333,7 @@ const ItineraryReport = () => {
       <div className="">
         <div className="grid gap-4 md:grid-cols-12 mb-4">
           {/* Total Revenue */}
-          <Card className="md:col-span-3 flex flex-col justify-center items-center">
+          <Card className="md:col-span-4 flex flex-col justify-center items-center">
             <CardHeader className="p-3 w-full">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
@@ -341,7 +342,7 @@ const ItineraryReport = () => {
               </div>
             </CardHeader>
             <CardContent className="p-3 flex flex-col justify-center items-center w-full">
-              <div className="relative flex items-center justify-center w-32 h-32">
+              <div className="relative flex items-center justify-center w-40 h-40">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                   <circle
                     cx="50"
@@ -360,11 +361,10 @@ const ItineraryReport = () => {
                     strokeWidth="10"
                     strokeLinecap="round"
                     strokeDasharray="283"
-                    strokeDashoffset="283"
-                    initial={{ strokeDashoffset: 283 }}
+                    strokeDashoffset="0"
+                    initial={{ strokeDashoffset: 0 }}
                     animate={{
-                      strokeDashoffset:
-                        283 - (283 * initialFillPercentage) / 100,
+                      strokeDashoffset: 283 - (283 * calculateTotals().commissionRevenue) / initialTotalCommissionRevenue,
                     }}
                     transition={{
                       duration: 1,
@@ -374,84 +374,21 @@ const ItineraryReport = () => {
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-lg font-bold text-[#1A3B47]">
-                    ${selectedPeriodRevenue?.toFixed(2)}
+                    ${calculateTotals().commissionRevenue.toFixed(2)}
                   </span>
-                  <span className="text-sm text-[#5D9297]">All Time</span>
+                  <span className="text-sm text-[#5D9297]">Filtered Total</span>
                 </div>
               </div>
               <div className="text-center mt-4">
-                {/* <p className="text-base text-[#5D9297]">
-                  {initialFillPercentage.toFixed(1)}% of total
-                </p> */}
-                <p className="text-base text-[#5D9297]">
-                  {initialTotalCommissionRevenue !== null &&
-                    `Total Commission Revenue: $${initialTotalCommissionRevenue?.toFixed(2)}`}
+                <p className="text-base font-semibold text-[#1A3B47]">
+                  Total Commission Revenue
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          <div className="md:col-span-3 flex flex-col gap-4">
-            {/* Monthly Sales - This Month */}
-            <Card>
-              <CardHeader className="flex justify-between">
-                <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                  This Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="">
-                <div className="flex flex-col items-start -mt-4">
-                  <p className="text-sm text-gray-500">Sales</p>
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center">
-                      <span className="text-lg font-bold text-[#5D9297]">
-                        ${thisMonthSales.toFixed(2)}
-                      </span>
-                      <motion.span
-                        className={`ml-12 flex items-center text-xs font-semibold px-2 py-1 rounded-full ${
-                          thisMonthChange >= 0
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        {thisMonthChange >= 0 ? (
-                          <TrendingUp className="mr-1" />
-                        ) : (
-                          <TrendingDown className="mr-1" />
-                        )}
-                        {thisMonthChange.toFixed(1)}%
-                      </motion.span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Monthly Sales - Last Month */}
-            <Card>
-              <CardHeader className="">
-                <CardTitle className="text-lg font-bold text-[#1A3B47]">
-                  Last Month
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="">
-                <div className="flex flex-col items-start -mt-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Sales</p>
-                    <span className="text-lg font-bold text-[#5D9297]">
-                      ${lastMonthSales.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Sales Analytics Card */}
-          <Card className="md:col-span-6">
+          <Card className="md:col-span-8">
             <CardHeader className="p-3 mb-2">
               <div className="flex justify-between items-center">
                 <CardTitle className="text-lg font-bold text-[#1A3B47]">
