@@ -81,6 +81,13 @@ const getAllItineraries = async (req, res) => {
     // If role is 'tour-guide', skip the 'appropriate' check for their own itineraries
     if (userRole !== "tour-guide") {
       query.push({ appropriate: true });
+    } else {
+      query.push({
+        $or: [
+          { tourGuide: userId }, // Tour guide's own itineraries
+          { appropriate: true }, // Appropriate itineraries for others
+        ],
+      });
     }
 
     if (myItineraries) {

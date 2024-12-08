@@ -144,8 +144,8 @@ const ImageGallery = ({ activities }) => {
             <button
               onClick={handleNext}
               className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-opacity-50 text-white p-1 rounded-full z-10 ${startIndex >= allPictures.length - 5
-                  ? "bg-gray-400"
-                  : "bg-black"
+                ? "bg-gray-400"
+                : "bg-black"
                 }`}
               disabled={startIndex >= allPictures.length - 5}
               aria-label="Next images"
@@ -462,12 +462,18 @@ const TourguideProfileCard = ({
               onClick={() => handleActivationToggle()}
               variant={isActivated ? "destructive" : "default"}
               className={`w-full flex items-center ${isActivated
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-green-500 hover:bg-green-600"
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-green-500 hover:bg-green-600"
                 }`}
             >
               {isActivated ? "Deactivate" : "Activate"}
             </Button>
+
+            {!itinerary.appropriate && (
+              <p className="mt-2 text-red-600 font-bold">
+                Flagged by admin as inappropriate
+              </p>
+            )}
           </div>
         )}
         {userRole === "tourist" && isItineraryAvailable() && (
@@ -487,8 +493,8 @@ const TourguideProfileCard = ({
                 handleSaveToggle();
               }}
               className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
-                  ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                  : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
                 }`}
             >
               <Bookmark
@@ -498,14 +504,14 @@ const TourguideProfileCard = ({
               {isSaved ? "Unsave" : "Save"}
             </Button>
 
-           
+
             <Button
               onClick={handleBookNowClick}
               className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${itinerary.isActivated
-                  ? itinerary.isBookingOpen
-                    ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                    : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                ? itinerary.isBookingOpen
+                  ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
                   : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                : "bg-gray-400 text-gray-700 cursor-not-allowed"
                 }`}
               disabled={!itinerary.isActivated || !itinerary.isBookingOpen}
             >
@@ -515,6 +521,7 @@ const TourguideProfileCard = ({
                   : "Booking Closed"
                 : "Currently Unavailable"}
             </Button>
+           
 
           </>
         )}
@@ -617,8 +624,8 @@ const TourguideProfileCard = ({
                   <Star
                     key={star}
                     className={`w-8 h-8 cursor-pointer ${tourGuideRating >= star
-                        ? "text-yellow-500 fill-current"
-                        : "text-gray-300"
+                      ? "text-yellow-500 fill-current"
+                      : "text-gray-300"
                       }`}
                     onClick={() => handleQuickTourGuideRating(star)}
                   />
@@ -643,8 +650,8 @@ const TourguideProfileCard = ({
             <div className="mt-6 border-t border-gray-300 pt-4"></div>
             <Button
               className={`w-full mx-auto text-white ${isAppropriate
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-green-500 hover:bg-green-600"
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-green-500 hover:bg-green-600"
                 }`}
               onClick={handleOpenDialog}
             >
@@ -2157,12 +2164,12 @@ const ItineraryDetail = () => {
                       <Star
                         key={star}
                         className={`w-8 h-8 cursor-pointer ${(
-                            isRatingHovered
-                              ? quickRating >= star
-                              : quickRating >= star
-                          )
-                            ? "text-[#F88C33] fill-current"
-                            : "text-gray-300"
+                          isRatingHovered
+                            ? quickRating >= star
+                            : quickRating >= star
+                        )
+                          ? "text-[#F88C33] fill-current"
+                          : "text-gray-300"
                           }`}
                         onMouseEnter={() => {
                           setIsRatingHovered(true);
@@ -2205,8 +2212,8 @@ const ItineraryDetail = () => {
                         <Card
                           key={index}
                           className={`w-[30%] ${comment.tourist === userId
-                              ? "bg-[#B5D3D1]"
-                              : "bg-gray-100"
+                            ? "bg-[#B5D3D1]"
+                            : "bg-gray-100"
                             } shadow-none border-none p-4 rounded-lg`}
                         >
                           <CardHeader className="flex items-start">
