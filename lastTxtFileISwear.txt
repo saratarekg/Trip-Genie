@@ -1,5 +1,6 @@
 Priority List: 
 
+-notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
 -reports bayza 
 -sa3at beyede error lama mark all as read
 consistency fe pages el all 
@@ -172,9 +173,9 @@ el reports columns t2ba consistent (total sales t2ba tickets sold we y2ba we nsh
 
 Hazem: 
 
-1
-3
-34 
+1 ✅
+3 ✅
+34
 35
 36
 38
