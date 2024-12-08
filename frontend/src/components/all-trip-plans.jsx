@@ -74,8 +74,6 @@ const DeleteConfirmationModal = ({
             Delete
           </button>
         </div>
-
-
       </div>
     </div>
   );
@@ -236,8 +234,11 @@ const ItineraryCard = ({
           }}
         >
           <Bookmark
-            className={`w-6 h-6 ${isSaved ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]" : "stroke-black"
-              }`}
+            className={`w-6 h-6 ${
+              isSaved
+                ? "fill-[#1A3B47] stroke-[#1A3B47] stroke-[1.5]"
+                : "stroke-black"
+            }`}
           />
         </Button>
       )}
@@ -258,6 +259,13 @@ const ItineraryCard = ({
           {!itinerary.isActivated && (
             <span className="bg-[#F88C33] text-white text-xs px-2 py-1 rounded-full">
               {role === "tour-guide" ? "Deactivated" : "Currently Unavailable"}
+            </span>
+          )}
+          {!itinerary.appropriate && (
+            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+              {role === "tour-guide"
+                ? "inappropriate"
+                : "Currently Unavailable"}
             </span>
           )}
         </div>
@@ -328,7 +336,6 @@ const ItineraryCard = ({
           >
             <Trash2 className="h-4 w-4" />
           </button>
-
         </div>
       )}
     </div>
@@ -503,7 +510,6 @@ export function AllItinerariesComponent() {
   };
 
   const handleSortByPreference = async () => {
-    
     try {
       setIsLoading(true);
       const newSortedByPreference = !isSortedByPreference;
@@ -830,7 +836,8 @@ export function AllItinerariesComponent() {
     try {
       const token = Cookies.get("jwt");
       const response = await fetch(
-        `http://localhost:4000/${getUserRole()}/itineraries/${itineraryToDelete.id
+        `http://localhost:4000/${getUserRole()}/itineraries/${
+          itineraryToDelete.id
         }`,
 
         {
@@ -869,11 +876,9 @@ export function AllItinerariesComponent() {
           <div className="flex gap-8">
             {/* Sidebar Skeleton */}
 
-
             {/* Main Content Skeleton */}
             <div className="flex-1">
               {/* Search and Filters Skeleton */}
-
 
               {/* Cards Grid Skeleton */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -895,43 +900,41 @@ export function AllItinerariesComponent() {
               </div>
 
               {/* Pagination Skeleton */}
-
             </div>
           </div>
         </div>
       </div>
     );
   };
-  
+
   const backgroundImage = "url('./src/assets/images/allItineraries.jpg')";
   return (
     <div className="min-h-screen bg-gray-100">
-<div
-    className="relative h-[330px] bg-cover bg-center"
-    style={{ backgroundImage }}
-  >
-    <div className="absolute inset-0"></div>
-    <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
-      <div className="flex-1">
-        <h1 className="text-5xl font-bold text-white mb-4">
-          All Itineraries
-        </h1>
-        <p className="text-gray-200">
-          <Link
-            to="/"
-            className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
-          >
-            Home
-          </Link>{" "}
-          / All Itineraries
-        </p>
+      <div
+        className="relative h-[330px] bg-cover bg-center"
+        style={{ backgroundImage }}
+      >
+        <div className="absolute inset-0"></div>
+        <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+          <div className="flex-1">
+            <h1 className="text-5xl font-bold text-white mb-4">
+              All Itineraries
+            </h1>
+            <p className="text-gray-200">
+              <Link
+                to="/"
+                className="font-bold text-gray-200 hover:text-gray-300 hover:underline"
+              >
+                Home
+              </Link>{" "}
+              / All Itineraries
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-      
-        <div className=" container py-8">
-          <div className=" mb-4">
 
+      <div className=" container py-8">
+        <div className=" mb-4">
           <div className="flex gap-8 mb-4">
             {/* Sidebar Filters */}
             <div className="hidden md:block w-80 bg-white rounded-lg shadow-lg p-6 filter">
@@ -950,9 +953,7 @@ export function AllItinerariesComponent() {
 
               {/* Price Range Filter */}
               <div className="mb-6">
-                <h3 className="font-medium text-[#1A3B47] mb-2">
-                  Price Range
-                </h3>
+                <h3 className="font-medium text-[#1A3B47] mb-2">Price Range</h3>
                 {isPriceInitialized && (
                   <DualHandleSliderComponent
                     min={0}
@@ -974,9 +975,7 @@ export function AllItinerariesComponent() {
               </div>
               {/* Date Range Input */}
               <div className="mb-6">
-                <h3 className="font-medium text-[#1A3B47] mb-2">
-                  Date Range
-                </h3>
+                <h3 className="font-medium text-[#1A3B47] mb-2">Date Range</h3>
                 <div className="flex flex-col space-y-2">
                   <div>
                     <label className="block text-sm font-medium text-[#1A3B47]">
@@ -1089,8 +1088,7 @@ export function AllItinerariesComponent() {
                     onClick={() => handleSort("price")}
                   >
                     <ArrowUpDown className="w-4 h-4 mr-2" />
-                    Price{" "}
-                    {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
+                    Price {sortBy === "price" && (sortOrder === 1 ? "↑" : "↓")}
                   </Button>
                   <Button
                     variant="outline"
@@ -1109,7 +1107,6 @@ export function AllItinerariesComponent() {
               )}
               {/* Itineraries Grid */}
 
-
               {isLoading ? (
                 <AllProductsSkeleton />
               ) : (
@@ -1125,7 +1122,7 @@ export function AllItinerariesComponent() {
                         key={itinerary._id}
                         itinerary={itinerary}
                         onSelect={handleItinerarySelect}
-                        role={userInfo.role}
+                        role={getUserRole()}
                         userInfo={userInfo}
                         canModify={canModify}
                         setShowDeleteConfirm={setShowDeleteConfirm}
@@ -1156,8 +1153,7 @@ export function AllItinerariesComponent() {
                 <Button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={
-                    currentPage ===
-                    Math.ceil(itineraries.length / tripsPerPage)
+                    currentPage === Math.ceil(itineraries.length / tripsPerPage)
                   }
                   variant="outline"
                   size="icon"
@@ -1165,13 +1161,8 @@ export function AllItinerariesComponent() {
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-
               </div>
-
             </div>
-
-
-
           </div>
         </div>
       </div>
@@ -1232,7 +1223,6 @@ export function AllItinerariesComponent() {
               Close
             </Button>
           </DialogFooter>
-
         </DialogContent>
       </Dialog>
       <Dialog
@@ -1262,8 +1252,9 @@ export function AllItinerariesComponent() {
       </Dialog>
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-            } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${
+            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+          } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
