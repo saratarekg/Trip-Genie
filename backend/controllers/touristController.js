@@ -451,6 +451,16 @@ const bookHotel = async (req, res) => {
   let walletBalance = 0;
   let usedPromoCode = null;
   let totalCost = price;
+   // Apply promo code if provided
+   if (promoCode) {
+    try {
+      usedPromoCode = await PromoCode.usePromoCode(promoCode);
+      const discount = (totalCost * usedPromoCode.percentOff) / 100;
+      totalCost -= discount;
+    } catch (error) {
+      console.error(`Promo code error: ${error.message}`);
+    }
+  }
 
   // Check if payment type is "Wallet"
   if (paymentType === "Wallet") {
@@ -463,16 +473,6 @@ const bookHotel = async (req, res) => {
     walletBalance = user.wallet - totalCost;
   }
 
-  // Apply promo code if provided
-  if (promoCode) {
-    try {
-      usedPromoCode = await PromoCode.usePromoCode(promoCode);
-      const discount = (totalCost * usedPromoCode.percentOff) / 100;
-      totalCost -= discount;
-    } catch (error) {
-      console.error(`Promo code error: ${error.message}`);
-    }
-  }
 
   try {
     const booking = new TouristHotel({
