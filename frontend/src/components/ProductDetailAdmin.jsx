@@ -549,7 +549,7 @@ const ProductDetail = ({ id, onBack }) => {
         setError("Error fetching product details. Please try again later.");
         console.error("Error fetching product details:", err);
       } finally {
-       // setLoading(false);
+       setLoading(false);
       }
     };
     fetchUserInfo();
