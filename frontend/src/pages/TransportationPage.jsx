@@ -120,9 +120,9 @@ export default function TransportationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [discountedTotal, setDiscountedTotal] = useState(0);
 
-    const handleDiscountedTotalChange = (newTotal) => {
-      setDiscountedTotal(newTotal);
-    };
+  const handleDiscountedTotalChange = (newTotal) => {
+    setDiscountedTotal(newTotal);
+  };
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -396,6 +396,8 @@ export default function TransportationPage() {
     searchParams.delete("session_id");
     searchParams.delete("selectedTransportID");
     searchParams.delete("promoCode");
+
+    bookingProcessedRef.current = false;
 
     const newUrl = `${window.location.pathname}`;
 
@@ -1185,7 +1187,6 @@ export default function TransportationPage() {
                 promoDetails={promoDetails}
                 setPromoDetails={setPromoDetails}
                 onDiscountedTotalChange={handleDiscountedTotalChange}
-
               />
             </>
           )}
@@ -1217,15 +1218,28 @@ export default function TransportationPage() {
                   </DialogTitle>
                   <div className="grid grid-cols-2 gap-4 mt-4">
                     <Label className="text-right">You Paid:</Label>
-                    <div>
-                      {displayPrice(
-                        showTransportationSuccessDialog?.seatsToBook *
-                          showTransportationSuccessDialog?.ticketCost *
-                          (1 -
-                            showTransportationSuccessDialog?.percentageOff /
-                              100)
-                      )}
-                    </div>
+                    {showTransportationSuccessDialog?.paymentMethod ===
+                      "Wallet" && (
+                      <div>
+                        {displayPrice(
+                          showTransportationSuccessDialog?.seatsToBook *
+                            showTransportationSuccessDialog?.ticketCost *
+                            (1 -
+                              showTransportationSuccessDialog?.percentageOff /
+                                100)
+                        )}
+                      </div>
+                    )}
+
+                    {showTransportationSuccessDialog?.paymentMethod !==
+                      "Wallet" && (
+                      <div>
+                        {displayPrice(
+                          showTransportationSuccessDialog?.seatsToBook *
+                            showTransportationSuccessDialog?.ticketCost
+                        )}
+                      </div>
+                    )}
                     {showTransportationSuccessDialog?.paymentMethod ===
                       "Wallet" && (
                       <>

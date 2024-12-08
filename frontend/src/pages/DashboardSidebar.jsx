@@ -1,17 +1,5 @@
 import React, { useState } from "react";
-import {
-  BarChart,
-  Users,
-  Gift,
-  Activity,
-  MessageSquare,
-  Map,
-  LogOut,
-  Home,
-  ChevronDown,
-  Bell,
-  Tag,
-} from "lucide-react";
+import { BarChart, Users, Gift, Activity, MessageSquare, Map, LogOut, Home, ChevronDown, Bell, Tag, X } from 'lucide-react';
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/TGlogo.svg";
@@ -107,6 +95,7 @@ export function DashboardSidebar({
 }) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [openMenu, setOpenMenu] = useState(null);
+  const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
   const navigate = useNavigate();
 
   const toggleMenu = (menuId) => {
@@ -117,7 +106,11 @@ export function DashboardSidebar({
     return `${index * 100}ms`;
   };
 
-  const logOut = async () => {
+  const handleLogoutClick = () => {
+    setIsLogoutConfirmationOpen(true);
+  };
+
+  const handleConfirmLogout = async () => {
     console.log("Logging out...");
     try {
       const response = await fetch("http://localhost:4000/auth/logout");
@@ -126,8 +119,8 @@ export function DashboardSidebar({
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
-        setActiveTab("dashboard"); // Set active tab to dashboard
-        localStorage.setItem("activeTab", "dashboard"); // Save active tab to localStorage
+        setActiveTab("dashboard");
+        localStorage.setItem("activeTab", "dashboard");
         navigate("/login");
         window.location.reload();
       } else {
@@ -159,10 +152,9 @@ export function DashboardSidebar({
 
   return (
     <div
-      className={`fixed left-0 top-0 h-screen flex flex-col bg-[#1A3B47] ${
-        isCollapsed ? "w-16" : "w-64" // Adjust width from w-72 to w-64
-      } transition-all duration-300 ease-in-out ${className}`}
-      style={{ zIndex: 1000 }} // Add this line to set a higher z-index
+      className={`fixed left-0 top-0 h-screen flex flex-col bg-[#1A3B47] ${isCollapsed ? "w-16" : "w-64"
+        } transition-all duration-300 ease-in-out ${className}`}
+      style={{ zIndex: 1000 }}
     >
       {/* Sidebar Header */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-[#1A3B47]/20">
@@ -170,9 +162,8 @@ export function DashboardSidebar({
           <img src={logo} alt="Logo" className="h-8 w-auto object-contain" />
         )}
         <button
-          className={`text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 ${
-            isCollapsed ? "w-full flex justify-center" : ""
-          }`}
+          className={`text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 ${isCollapsed ? "w-full flex justify-center" : ""
+            }`}
           onClick={handleToggleCollapse}
         >
           <div className="flex flex-col items-center justify-center w-6 h-6">
@@ -192,15 +183,13 @@ export function DashboardSidebar({
               {tab.subItems ? (
                 <div>
                   <button
-                    className={`flex items-center w-full p-2 rounded-md transition-all duration-200 text-white hover:bg-white/10 ${
-                      activeTab === tab.id ? "bg-white/20" : ""
-                    }`}
+                    className={`flex items-center w-full p-2 rounded-md transition-all duration-200 text-white hover:bg-white/10 ${activeTab === tab.id ? "bg-white/20" : ""
+                      }`}
                     onClick={() => toggleMenu(tab.id)}
                   >
                     <tab.icon
-                      className={`h-5 w-5 min-w-[1.25rem] ${
-                        isCollapsed ? "" : "mr-3"
-                      }`}
+                      className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"
+                        }`}
                     />
                     {!isCollapsed && (
                       <>
@@ -208,28 +197,25 @@ export function DashboardSidebar({
                           {tab.title}
                         </span>
                         <ChevronDown
-                          className={`h-4 w-4 transition-transform duration-200 ${
-                            openMenu === tab.id ? "transform rotate-180" : ""
-                          }`}
+                          className={`h-4 w-4 transition-transform duration-200 ${openMenu === tab.id ? "transform rotate-180" : ""
+                            }`}
                         />
                       </>
                     )}
                   </button>
                   <div
-                    className={`pl-7 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${
-                      openMenu === tab.id && !isCollapsed
-                        ? "max-h-96"
-                        : "max-h-0"
-                    }`}
+                    className={`pl-7 space-y-1 overflow-hidden transition-all duration-500 ease-in-out ${openMenu === tab.id && !isCollapsed
+                      ? "max-h-96"
+                      : "max-h-0"
+                      }`}
                   >
                     {tab.subItems.map((subItem, index) => (
                       <button
                         key={subItem.id}
-                        className={`flex items-center w-full p-2 rounded-md transition-all duration-500 ease-in-out text-white/70 hover:text-white hover:bg-white/10 ${
-                          activeTab === subItem.id
-                            ? "bg-white/20 text-white"
-                            : ""
-                        }`}
+                        className={`flex items-center w-full p-2 rounded-md transition-all duration-500 ease-in-out text-white/70 hover:text-white hover:bg-white/10 ${activeTab === subItem.id
+                          ? "bg-white/20 text-white"
+                          : ""
+                          }`}
                         style={{ transitionDelay: getTransitionDelay(index) }}
                         onClick={() => handleTabClick(subItem.id)}
                       >
@@ -240,15 +226,13 @@ export function DashboardSidebar({
                 </div>
               ) : (
                 <button
-                  className={`flex items-center w-full p-2 rounded-md transition-all duration-200 text-white hover:bg-white/10 ${
-                    activeTab === tab.id ? "bg-white/20" : ""
-                  }`}
+                  className={`flex items-center w-full p-2 rounded-md transition-all duration-200 text-white hover:bg-white/10 ${activeTab === tab.id ? "bg-white/20" : ""
+                    }`}
                   onClick={() => handleTabClick(tab.id)}
                 >
                   <tab.icon
-                    className={`h-5 w-5 min-w-[1.25rem] ${
-                      isCollapsed ? "" : "mr-3"
-                    }`}
+                    className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"
+                      }`}
                   />
                   {!isCollapsed && (
                     <span className="truncate">{tab.title}</span>
@@ -264,10 +248,9 @@ export function DashboardSidebar({
       <div className="border-t border-[#1A3B47]/20 p-2">
         <hr className="my-2 border-white" />
         <button
-          className={`w-full flex items-center justify-start text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 ${
-            isCollapsed ? "justify-center" : ""
-          }`}
-          onClick={logOut}
+          className={`w-full flex items-center justify-start text-white hover:bg-white/10 p-2 rounded-md transition-all duration-200 ${isCollapsed ? "justify-center" : ""
+            }`}
+          onClick={handleLogoutClick}
         >
           <LogOut
             className={`h-5 w-5 min-w-[1.25rem] ${isCollapsed ? "" : "mr-3"}`}
@@ -275,6 +258,41 @@ export function DashboardSidebar({
           {!isCollapsed && <span className="truncate">Logout</span>}
         </button>
       </div>
+
+      {/* Logout Confirmation Popup */}
+      {isLogoutConfirmationOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setIsLogoutConfirmationOpen(false)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 max-w-sm w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Are you sure you want to log out?
+            </h3>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setIsLogoutConfirmationOpen(false)}
+                type="button"
+                className="px-4 py-2 text-sm text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmLogout}
+                type="button"
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+
+      )}
     </div>
   );
 }
+

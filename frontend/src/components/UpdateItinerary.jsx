@@ -1014,36 +1014,44 @@ export default function UpdateItinerary() {
               </div>
 
               <div className="col-span-2 p-4 border rounded space-y-4">
-                <Label className="text-sm font-medium">Available Dates</Label>
+  <Label className="text-sm font-medium">Available Dates</Label>
 
-                {itinerary.availableDates.map((dateObj, dateIndex) => (
-                  <div
-                    key={dateIndex}
-                    className="flex items-center space-x-2 mb-2"
-                  >
-                    <Input
-                      type="date"
-                      value={dateObj.date.split("T")[0]}
-                      min={new Date().toISOString().split("T")[0]}
-                      onChange={(e) =>
-                        handleDateChange(e.target.value, dateIndex)
-                      }
-                      className={`w-40 ${!dateObj.date ? "border-red-500" : ""
-                        }`}
-                    />
-                    {itinerary.availableDates.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => removeDate(dateIndex)}
-                        className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
+  {itinerary.availableDates.map((dateObj, dateIndex) => {
+    const currentDate = new Date();
+    const selectedDate = new Date(dateObj.date);
+
+    return (
+      <div key={dateIndex} className="space-y-2">
+        <div className="flex items-center space-x-2">
+          <Input
+            type="date"
+            value={dateObj.date.split("T")[0]}
+            min={currentDate.toISOString().split("T")[0]}
+            onChange={(e) => handleDateChange(e.target.value, dateIndex)}
+            className={`w-40 ${
+              !dateObj.date || selectedDate < currentDate ? "border-red-500" : ""
+            }`}
+          />
+          {itinerary.availableDates.length > 1 && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              onClick={() => removeDate(dateIndex)}
+              className="p-2 rounded-full bg-red-100 hover:bg-red-200 transition duration-300 ease-in-out"
+            >
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
+          )}
+        </div>
+        {selectedDate < currentDate && (
+          <p className="text-sm text-red-500">Please choose a future date</p>
+        )}
+      </div>
+    );
+  })}
+
+
 
                 <Button
                   type="button"

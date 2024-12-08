@@ -12,7 +12,7 @@ import {
   ArcElement,
   BarElement,
 } from "chart.js";
-import { Bell, LogOut, Mail, CheckCircle } from "lucide-react"; // Import the Mail icon
+import { Bell, LogOut, Mail, CheckCircle, X } from 'lucide-react';
 import axios from "axios";
 import Cookies from "js-cookie";
 import { NotificationsDropdownAdmin } from "@/components/AdminNotificationsDropdown";
@@ -36,10 +36,9 @@ import {
 import { DashboardSidebar } from "./DashboardSidebar";
 import { DashboardContent } from "./DashboardContent";
 import logo from "@/assets/images/TGlogo.svg";
-import PasswordChanger from "@/components/Passwords"; // Import PasswordChanger component
-import "@/styles/Modal.css"; // Ensure the CSS file for the modal is imported
+import PasswordChanger from "@/components/Passwords";
+import "@/styles/Modal.css";
 
-// Register all the chart elements
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -52,7 +51,6 @@ ChartJS.register(
   BarElement
 );
 
-// Reusable DashboardCard component
 const DashboardCard = ({ title, value, subtitle, icon }) => (
   <Card className="bg-white border-[#B5D3D1] border">
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -160,6 +158,7 @@ export function Dashboard() {
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("");
+  const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
@@ -176,7 +175,6 @@ export function Dashboard() {
       setHasUnseenNotificationsAdmin(response.data.hasUnseen);
     } catch (error) {
       console.error("Error checking unseen notifications:", error);
-      // Silently fail but don't show the notification dot
       setHasUnseenNotificationsAdmin(false);
     }
   };
@@ -207,7 +205,12 @@ export function Dashboard() {
     setIsSidebarCollapsed(collapsed);
   };
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setIsLogoutConfirmationOpen(true);
+    setIsDropdownOpen(false);
+  };
+
+  const handleConfirmLogout = async () => {
     console.log("Logging out...");
     try {
       const response = await fetch("http://localhost:4000/auth/logout");
@@ -215,8 +218,8 @@ export function Dashboard() {
         Cookies.remove("jwt");
         Cookies.remove("role");
         console.log("Logged out successfully");
-        setActiveTab("dashboard"); // Set active tab to dashboard
-        localStorage.setItem("activeTab", "dashboard"); // Save active tab to localStorage
+        setActiveTab("dashboard");
+        localStorage.setItem("activeTab", "dashboard");
         window.location.href = "/login";
       } else {
         console.error("Logout failed.");
@@ -310,7 +313,7 @@ export function Dashboard() {
                   <Separator className="my-2" />
                   <DropdownMenuItem
                     className="w-full text-[#1A3B47] hover:bg-[#B5D3D1] transition-colors duration-200"
-                    onClick={handleLogout}
+                    onClick={handleLogoutClick}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
@@ -322,20 +325,15 @@ export function Dashboard() {
           </div>
         </div>
         <div className="flex bg-gray-100 relative">
-          {" "}
-          {/* Add relative class */}
           <DashboardSidebar
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             onToggleCollapse={handleToggleCollapse}
           />
           <div
-            className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${
-              isSidebarCollapsed ? "ml-16" : "ml-64"
-            }`}
+            className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? "ml-16" : "ml-64"
+              }`}
           >
-            {" "}
-            {/* Adjusted from ml-72 to ml-64 */}
             <main className="flex-1 overflow-y-auto transition-all duration-1000 ease-in-out transform">
               <DashboardContent
                 activeTab={activeTab}
@@ -379,7 +377,7 @@ export function Dashboard() {
               {toastType === "success" ? (
                 <CheckCircle className="text-green-500 mr-2" />
               ) : (
-                <XCircle className="text-red-500 mr-2" />
+                <X className="text-red-500 mr-2" />
               )}
               <div>
                 <ToastTitle>
@@ -391,7 +389,39 @@ export function Dashboard() {
             <ToastClose />
           </Toast>
         )}
+        {isLogoutConfirmationOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            onClick={() => setIsLogoutConfirmationOpen(false)}
+          >
+            <div
+              className="bg-white rounded-lg p-6 max-w-sm w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Are you sure you want to log out?
+              </h3>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => setIsLogoutConfirmationOpen(false)}
+                  type="button"
+                  className="px-4 py-2 text-sm text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmLogout}
+                  type="button"
+                  className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </ToastProvider>
     </div>
   );
 }
+
