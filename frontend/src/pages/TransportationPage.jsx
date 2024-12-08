@@ -118,6 +118,11 @@ export default function TransportationPage() {
   const [promoDetails, setPromoDetails] = useState(null);
   const bookingProcessedRef = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [discountedTotal, setDiscountedTotal] = useState(0);
+
+    const handleDiscountedTotalChange = (newTotal) => {
+      setDiscountedTotal(newTotal);
+    };
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -1179,6 +1184,8 @@ export default function TransportationPage() {
                 transportationSeats={selectedTransportation.remainingSeats}
                 promoDetails={promoDetails}
                 setPromoDetails={setPromoDetails}
+                onDiscountedTotalChange={handleDiscountedTotalChange}
+
               />
             </>
           )}
