@@ -469,6 +469,7 @@ export function AllProducts() {
   }, [fetchUserInfo]);
 
   useEffect(() => {
+    setIsLoading(true);
     const delayDebounceFn = setTimeout(() => {
       fetchProducts({
         searchBy: searchTerm,
@@ -482,6 +483,7 @@ export function AllProducts() {
       });
     }, 0.01);
     setCurrentPage(1);
+    setIsLoading(false);
 
     return () => clearTimeout(delayDebounceFn);
   }, [
@@ -504,8 +506,10 @@ export function AllProducts() {
   };
 
   const handleSort = (attribute) => {
+    setIsLoading(true);
     setSortOrder((prevOrder) => (prevOrder === 1 ? -1 : 1));
     setSortBy(attribute);
+    setIsLoading(false);
   };
 
   const handleMyProducts = (attribute) => {
@@ -513,6 +517,7 @@ export function AllProducts() {
   };
 
   const clearFilters = () => {
+    setIsLoading(true);
     setSearchTerm("");
     setSortBy("");
     setSortOrder(1);
@@ -521,6 +526,7 @@ export function AllProducts() {
     setSelectedRating(null);
     setSelectedCategories([]);
     fetchProducts();
+    setIsLoading(false);
   };
 
   const toggleFilters = () => {
@@ -528,6 +534,7 @@ export function AllProducts() {
   };
 
   const handleCategoryChange = (category) => {
+    
     setSelectedCategories((prev) =>
       prev.includes(category)
         ? prev.filter((c) => c !== category)

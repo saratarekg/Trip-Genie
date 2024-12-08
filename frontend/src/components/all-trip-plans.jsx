@@ -393,6 +393,7 @@ export function AllItinerariesComponent() {
   const navigate = useNavigate();
 
   const fetchUserInfo = useCallback(async () => {
+    setIsLoading(true);
     const role = Cookies.get("role") || "guest";
     const token = Cookies.get("jwt");
 
@@ -414,6 +415,7 @@ export function AllItinerariesComponent() {
           role,
           preferredCurrency: currencyResponse.data,
         });
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching user profile:", error);
         setUserInfo({ role });
@@ -443,6 +445,7 @@ export function AllItinerariesComponent() {
     }
   }, [userInfo]);
   const fetchSavedItineraries = useCallback(async () => {
+    setIsLoading(true);
     if (userInfo?.role === "tourist") {
       try {
         const token = Cookies.get("jwt");
@@ -453,6 +456,7 @@ export function AllItinerariesComponent() {
           }
         );
         setSavedItineraries(response.data);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching saved itineraries:", error);
       }
@@ -499,6 +503,7 @@ export function AllItinerariesComponent() {
   };
 
   const handleSortByPreference = async () => {
+    
     try {
       setIsLoading(true);
       const newSortedByPreference = !isSortedByPreference;
@@ -596,6 +601,7 @@ export function AllItinerariesComponent() {
       setError(null);
       setCurrentPage(1);
       setCanModify(true);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching itineraries:", error);
       setError("Error fetching itineraries");
@@ -616,6 +622,7 @@ export function AllItinerariesComponent() {
   }, [userInfo, fetchItineraries]);
 
   const searchItineraries = async () => {
+    setIsLoading(true);
     setIsSortedByPreference(false);
     try {
       const role = getUserRole();
@@ -676,6 +683,7 @@ export function AllItinerariesComponent() {
       setItineraries(data);
       setError(null);
       setCurrentPage(1);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");

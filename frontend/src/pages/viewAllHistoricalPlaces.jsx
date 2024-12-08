@@ -334,11 +334,13 @@ export default function AllHistoricalPlacesComponent() {
   };
 
   const fetchTypesAndPeriods = async () => {
+    setIsLoading(true);
     try {
       const [typesResponse] = await Promise.all([
         axios.get("http://localhost:4000/api/getAllHistoricalTypes"),
       ]);
       setTypesOptions(typesResponse.data);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching types :", error);
     }
@@ -401,6 +403,7 @@ export default function AllHistoricalPlacesComponent() {
   };
 
   const searchHistoricalPlaces = async () => {
+    setIsLoading(true);
     try {
       const role = getUserRole();
       const url = new URL(`http://localhost:4000/${role}/historical-places`);
@@ -422,6 +425,7 @@ export default function AllHistoricalPlacesComponent() {
       setHistoricalPlaces(data);
       setError(null);
       setCurrentPage(1);
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching filtered results:", error);
       setError("Error fetching filtered results");
@@ -449,6 +453,7 @@ export default function AllHistoricalPlacesComponent() {
   ];
 
   const handleSortByPreference = async () => {
+    setIsLoading(true);
     setIsSortedByPreference(!isSortedByPreference);
     if (!isSortedByPreference) {
       await fetchHistoricalPlaces(true);
@@ -457,6 +462,7 @@ export default function AllHistoricalPlacesComponent() {
     }
     setSearchTerm("");
     setSelectedTypes([]);
+    setIsLoading(false);
   };
 
   const SkeletonFeaturedPlace = () => (
