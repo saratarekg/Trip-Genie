@@ -392,6 +392,10 @@ const getSalesReport = async (req, res) => {
       return acc;
     }, []);
 
+    if(year){
+      sellerProductsSales = sellerProductsSales.filter(sale => sale.revenue > 0);
+    }
+
     const totalSellerSalesRevenue = sellerProductsSales.reduce(
       (total, sale) => total + sale.revenue,
       0
