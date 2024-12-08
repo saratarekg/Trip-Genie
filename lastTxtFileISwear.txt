@@ -20,6 +20,7 @@ sales report margins
 -updating activity popup btdos basraha 3adi w btfdl f update activity
 -(fen orders page ? ana 3mlt /orders 3ashan a3raf awsalha bas heyya etshalt men el site mahtota fen?)
 -create promo code msh sha8ala
+-out of stock notification msh sha8ala fe seller
 
 
 
