@@ -56,7 +56,6 @@ import { Label } from "@/components/ui/label";
 import { UserGuide } from "@/components/UserGuide";
 import { data } from "autoprefixer";
 
-
 const formSchema = z.object({
   from: z.string().min(1, "From location is required"),
   to: z.string().min(1, "To location is required"),
@@ -102,8 +101,10 @@ export default function TransportationPage() {
   const [selectedTransportation, setSelectedTransportation] = useState(null);
   const [seatsToBook, setSeatsToBook] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
-  const [showTransportationBookingDialog, setShowTransportationBookingDialog] = useState(false);
-  const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] = useState(false);
+  const [showTransportationBookingDialog, setShowTransportationBookingDialog] =
+    useState(false);
+  const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
+    useState(false);
   const [rates, setRates] = useState({});
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [isBooking, setIsBooking] = useState(false);
@@ -117,9 +118,6 @@ export default function TransportationPage() {
   const [promoDetails, setPromoDetails] = useState(null);
   const bookingProcessedRef = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
-
-
-
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -136,7 +134,6 @@ export default function TransportationPage() {
 
     fetchTouristData();
   }, []);
-
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -211,7 +208,6 @@ export default function TransportationPage() {
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching transportations:", error);
-
     }
   };
 
@@ -220,9 +216,7 @@ export default function TransportationPage() {
     setSelectedFrom("all");
     setSelectedTo("all");
     setSelectedDate(null);
-
   }, []);
-
 
   const handleSearch = useCallback(() => {
     const termsCar = "PREMIUM SEDAN";
@@ -237,9 +231,12 @@ export default function TransportationPage() {
         t.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.to.toLowerCase().includes(searchTerm.toLowerCase()) ||
         t.vehicleType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (t.vehicleType.toLowerCase() === 'car' && termsCar.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (t.vehicleType.toLowerCase() === 'bus' && termsBus.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (t.vehicleType.toLowerCase() === 'microbus' && termsMicrobus.toLowerCase().includes(searchTerm.toLowerCase()));
+        (t.vehicleType.toLowerCase() === "car" &&
+          termsCar.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (t.vehicleType.toLowerCase() === "bus" &&
+          termsBus.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (t.vehicleType.toLowerCase() === "microbus" &&
+          termsMicrobus.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesFrom = selectedFrom === "all" || t.from === selectedFrom;
       const matchesTo = selectedTo === "all" || t.to === selectedTo;
@@ -251,8 +248,7 @@ export default function TransportationPage() {
         !selectedDate ||
         (departureDate >= today &&
           format(departureDate, "yyyy-MM-dd") >=
-          format(selectedDate, "yyyy-MM-dd"));
-
+            format(selectedDate, "yyyy-MM-dd"));
 
       return matchesSearchTerm && matchesFrom && matchesTo && matchesDate;
     });
@@ -271,11 +267,15 @@ export default function TransportationPage() {
     return `${userPreferredCurrency.symbol}${(priceUSD * rate).toFixed(2)}`;
   };
 
-
-  const handleTransportationBooking = async (paymentMethod, seatsToBook, date, selectedTransportID, promoCode) => {
-
+  const handleTransportationBooking = async (
+    paymentMethod,
+    seatsToBook,
+    date,
+    selectedTransportID,
+    promoCode
+  ) => {
     if (bookingProcessedRef.current) {
-      console.log('Booking already processed');
+      console.log("Booking already processed");
       return;
     }
 
@@ -290,13 +290,12 @@ export default function TransportationPage() {
           transportationID: selectedTransportID,
           seatsToBook: seatsToBook,
           paymentMethod: paymentMethod,
-          promoCode
+          promoCode,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
 
       if (response.data.message === "Transportation booking successful") {
         const updatedTransportations = transportations.map((t) =>
@@ -305,13 +304,11 @@ export default function TransportationPage() {
             : t
         );
 
-
         setTransportations(updatedTransportations);
         setFilteredTransportations(updatedTransportations);
         const percentageOff = searchParams.get("discountPercentage") || 0;
         const total = response.data.booking.totalCost;
         console.log(total);
-
 
         console.log(percentageOff);
 
@@ -320,7 +317,6 @@ export default function TransportationPage() {
         setBookingError(
           response.data.message || "Transportation booking successful"
         );
-
 
         setShowTransportationSuccessDialog({
           open: true,
@@ -344,11 +340,8 @@ export default function TransportationPage() {
       );
     } finally {
       setIsBooking(false);
-
-
     }
   };
-
 
   useEffect(() => {
     const handleBookingSuccess = async () => {
@@ -359,7 +352,6 @@ export default function TransportationPage() {
       const selectedTransportID = searchParams.get("selectedTransportID");
       const promoCode = searchParams.get("promoCode");
 
-
       if (sessionId && success === "true") {
         try {
           const response = await axios.get(
@@ -369,10 +361,15 @@ export default function TransportationPage() {
           console.log("Payment status response:", response.data);
 
           if (response.data.status === "paid") {
-
             // Now call handleBooking with the formatted date
             try {
-              await handleTransportationBooking("creditCard", parseInt(quantity), selectedDateStr, selectedTransportID, promoCode);
+              await handleTransportationBooking(
+                "creditCard",
+                parseInt(quantity),
+                selectedDateStr,
+                selectedTransportID,
+                promoCode
+              );
             } catch (error) {
               console.error("Error handling booking success:", error);
             }
@@ -386,7 +383,6 @@ export default function TransportationPage() {
     handleBookingSuccess();
   }, [searchParams, selectedTransportation]);
 
-
   const handleFinalOK = () => {
     setShowTransportationSuccessDialog(false);
     searchParams.delete("success");
@@ -396,12 +392,10 @@ export default function TransportationPage() {
     searchParams.delete("selectedTransportID");
     searchParams.delete("promoCode");
 
-
     const newUrl = `${window.location.pathname}`;
 
-    window.history.replaceState(null, '', newUrl);
+    window.history.replaceState(null, "", newUrl);
     setBookingError("");
-
   };
 
   const handlePageChange = (pageNumber) => {
@@ -414,9 +408,13 @@ export default function TransportationPage() {
       const role = Cookies.get("role");
       data.isStandAlone = true;
 
-      const response = await axios.post(`http://localhost:4000/${role}/transportations`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        `http://localhost:4000/${role}/transportations`,
+        data,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       setTransportations([...transportations, response.data]);
       setFilteredTransportations([...filteredTransportations, response.data]);
@@ -450,7 +448,7 @@ export default function TransportationPage() {
         }
       );
 
-      const updatedTransportations = transportations.map(t =>
+      const updatedTransportations = transportations.map((t) =>
         t._id === editingTransportation._id ? response.data : t
       );
       setTransportations(updatedTransportations);
@@ -458,7 +456,7 @@ export default function TransportationPage() {
       form.reset({
         from: "",
         to: "",
-        vehicleType: "Bus",  // or other default values
+        vehicleType: "Bus", // or other default values
         ticketCost: 0,
         timeDeparture: new Date(),
         estimatedDuration: 0,
@@ -473,18 +471,19 @@ export default function TransportationPage() {
   const guideSteps = [
     {
       target: "body",
-      content: "Welcome to the Transportation Booking page! This page allows you to choose appropriate transportation trips.",
+      content:
+        "Welcome to the Transportation Booking page! This page allows you to choose appropriate transportation trips.",
       placement: "center",
     },
     {
       target: ".narrowing-down",
-      content: "Use this section to narrow down the trips according to diffent aspects such as departure location and arrival location.",
+      content:
+        "Use this section to narrow down the trips according to diffent aspects such as departure location and arrival location.",
       placement: "bottom",
     },
     {
       target: ".transportation-card",
-      content:
-        "Each card represents a unique trip with its details.",
+      content: "Each card represents a unique trip with its details.",
       placement: "bottom",
     },
     {
@@ -505,7 +504,9 @@ export default function TransportationPage() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      const updatedTransportations = transportations.filter(t => t._id !== id);
+      const updatedTransportations = transportations.filter(
+        (t) => t._id !== id
+      );
       setTransportations(updatedTransportations);
       setFilteredTransportations(updatedTransportations);
     } catch (error) {
@@ -520,7 +521,8 @@ export default function TransportationPage() {
   });
 
   const indexOfLastTransportation = currentPage * transportationsPerPage;
-  const indexOfFirstTransportation = indexOfLastTransportation - transportationsPerPage;
+  const indexOfFirstTransportation =
+    indexOfLastTransportation - transportationsPerPage;
   const currentTransportations = sortedTransportations.slice(
     indexOfFirstTransportation,
     indexOfLastTransportation
@@ -604,67 +606,64 @@ export default function TransportationPage() {
         <p className="text-sm text-gray-500 mb-2">Transportation / Attended</p> */}
 
         <div className="container mx-auto px-4 py-8">
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Array(4).fill().map((_, index) => (
-              <div
-                key={index}
-                className="bg-gray-200 rounded-lg shadow-sm border p-4 space-y-4 animate-pulse"
-              >
-                {/* Departure Section */}
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col items-start w-1/5">
-                    <div className="h-4 w-16 bg-gray-300 rounded"></div>
-                    <div className="h-6 w-24 bg-gray-300 rounded mt-2"></div>
-                    <div className="flex items-center mt-2">
-                      <div className="h-4 w-12 bg-gray-300 rounded"></div>
+            {Array(4)
+              .fill()
+              .map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-200 rounded-lg shadow-sm border p-4 space-y-4 animate-pulse"
+                >
+                  {/* Departure Section */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col items-start w-1/5">
+                      <div className="h-4 w-16 bg-gray-300 rounded"></div>
+                      <div className="h-6 w-24 bg-gray-300 rounded mt-2"></div>
+                      <div className="flex items-center mt-2">
+                        <div className="h-4 w-12 bg-gray-300 rounded"></div>
+                      </div>
+                    </div>
+
+                    {/* Center Section (Date and Duration) */}
+                    <div className="flex flex-col items-center justify-center w-3/5 relative">
+                      <div className="absolute h-4 w-24 bg-gray-300 rounded top-1"></div>
+                      <div className="absolute h-6 w-28 bg-gray-300 rounded -top-6"></div>
+                    </div>
+
+                    {/* Arrival Section */}
+                    <div className="flex flex-col items-end w-1/5">
+                      <div className="h-4 w-16 bg-gray-300 rounded"></div>
+                      <div className="h-6 w-24 bg-gray-300 rounded mt-2"></div>
+                      <div className="h-4 w-12 bg-gray-300 rounded mt-2"></div>
                     </div>
                   </div>
 
-                  {/* Center Section (Date and Duration) */}
-                  <div className="flex flex-col items-center justify-center w-3/5 relative">
-                    <div className="absolute h-4 w-24 bg-gray-300 rounded top-1"></div>
-                    <div className="absolute h-6 w-28 bg-gray-300 rounded -top-6"></div>
+                  {/* Vehicle Type and Price Section */}
+                  <div className="mt-4 flex justify-between items-center">
+                    <div className="h-4 w-32 bg-gray-300 rounded text-center"></div>
+                    <div className="flex items-center space-x-4">
+                      <div className="h-6 w-16 bg-gray-300 rounded"></div>
+                    </div>
                   </div>
 
-                  {/* Arrival Section */}
-                  <div className="flex flex-col items-end w-1/5">
-                    <div className="h-4 w-16 bg-gray-300 rounded"></div>
-                    <div className="h-6 w-24 bg-gray-300 rounded mt-2"></div>
-                    <div className="h-4 w-12 bg-gray-300 rounded mt-2"></div>
-                  </div>
+                  {/* Skeleton for Dialog (Popup) Content */}
                 </div>
-
-                {/* Vehicle Type and Price Section */}
-                <div className="mt-4 flex justify-between items-center">
-                  <div className="h-4 w-32 bg-gray-300 rounded text-center"></div>
-                  <div className="flex items-center space-x-4">
-                    <div className="h-6 w-16 bg-gray-300 rounded"></div>
-                  </div>
-                </div>
-
-                {/* Skeleton for Dialog (Popup) Content */}
-
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>
     );
   };
 
-
-
   return (
     <div className="bg-gray-100">
-
-
       <div className="w-full bg-[#1A3B47] py-8 top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"></div>
       </div>
       <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold mb-6 text-[#1A3B47]">Transportation Bookings</h1>
+        <h1 className="text-3xl font-bold mb-6 text-[#1A3B47]">
+          Transportation Bookings
+        </h1>
 
         <div className="mb-6 flex flex-wrap gap-4 narrowing-down">
           <Input
@@ -710,7 +709,11 @@ export default function TransportationPage() {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                {selectedDate ? (
+                  format(selectedDate, "PPP")
+                ) : (
+                  <span>Pick a date</span>
+                )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -732,7 +735,9 @@ export default function TransportationPage() {
           <Button
             onClick={handleClear}
             className="bg-white text-[#5D9297] hover:text-black !important"
-          >            Clear
+          >
+            {" "}
+            Clear
           </Button>
           {userRole === "advertiser" && (
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -746,7 +751,10 @@ export default function TransportationPage() {
                   <DialogTitle>Add New Transportation</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleAdd)} className="space-y-8 ">
+                  <form
+                    onSubmit={form.handleSubmit(handleAdd)}
+                    className="space-y-8 "
+                  >
                     <FormField
                       control={form.control}
                       name="from"
@@ -780,10 +788,15 @@ export default function TransportationPage() {
                           <Select
                             onValueChange={(value) => {
                               field.onChange(value);
-                              form.setValue("remainingSeats", getMaxSeats(value));
+                              form.setValue(
+                                "remainingSeats",
+                                getMaxSeats(value)
+                              );
                             }}
                             defaultValue={field.value}
-                          >                            <FormControl>
+                          >
+                            {" "}
+                            <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select vehicle type" />
                               </SelectTrigger>
@@ -823,7 +836,9 @@ export default function TransportationPage() {
                           <FormControl>
                             <DateTimePicker
                               field={field}
-                              disablePastminDate={new Date().setDate(new Date().getDate() + 1)} // Setting minimum date to tomorrow
+                              disablePastminDate={new Date().setDate(
+                                new Date().getDate() + 1
+                              )} // Setting minimum date to tomorrow
                             />
                           </FormControl>
                         </FormItem>
@@ -860,7 +875,9 @@ export default function TransportationPage() {
                               {...field}
                               onChange={(e) => {
                                 const value = +e.target.value;
-                                const maxSeats = getMaxSeats(form.getValues("vehicleType"));
+                                const maxSeats = getMaxSeats(
+                                  form.getValues("vehicleType")
+                                );
                                 field.onChange(Math.min(value, maxSeats));
                               }}
                               max={getMaxSeats(form.getValues("vehicleType"))}
@@ -884,10 +901,9 @@ export default function TransportationPage() {
           )}
         </div>
 
-
         {isLoading ? (
           <TransportationCardSkeleton />
-        ) :
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {currentTransportations.map((transportation) => (
               <div key={transportation._id}>
@@ -910,30 +926,43 @@ export default function TransportationPage() {
                     if (!open) handleEditClose();
                   }}
                 >
-
                   {editingTransportation === transportation && (
                     <DialogContent className="max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Edit Transportation</DialogTitle>
                       </DialogHeader>
                       <Form {...form}>
-                        <form onSubmit={form.handleSubmit(handleEdit)} className="space-y-8">
-                          <FormField control={form.control} name="from" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>From</FormLabel>
-                              <FormControl>
-                                <Input placeholder="From location" {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )} />
-                          <FormField control={form.control} name="to" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>To</FormLabel>
-                              <FormControl>
-                                <Input placeholder="To location" {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )} />
+                        <form
+                          onSubmit={form.handleSubmit(handleEdit)}
+                          className="space-y-8"
+                        >
+                          <FormField
+                            control={form.control}
+                            name="from"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>From</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="From location"
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="to"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>To</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="To location" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                           <FormField
                             control={form.control}
                             name="vehicleType"
@@ -943,7 +972,10 @@ export default function TransportationPage() {
                                 <Select
                                   onValueChange={(value) => {
                                     field.onChange(value);
-                                    form.setValue("remainingSeats", getMaxSeats(value));
+                                    form.setValue(
+                                      "remainingSeats",
+                                      getMaxSeats(value)
+                                    );
                                   }}
                                   defaultValue={field.value}
                                 >
@@ -955,46 +987,80 @@ export default function TransportationPage() {
                                   <SelectContent>
                                     <SelectItem value="Bus">Bus</SelectItem>
                                     <SelectItem value="Car">Car</SelectItem>
-                                    <SelectItem value="Microbus">Microbus</SelectItem>
+                                    <SelectItem value="Microbus">
+                                      Microbus
+                                    </SelectItem>
                                   </SelectContent>
                                 </Select>
                               </FormItem>
                             )}
                           />
-                          <FormField control={form.control} name="ticketCost" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Ticket Cost</FormLabel>
-                              <FormControl>
-                                <Input type="number" placeholder="Ticket cost" {...field} onChange={(e) => field.onChange(+e.target.value)} />
-                              </FormControl>
-                            </FormItem>
-                          )} />
-                          <FormField control={form.control} name="timeDeparture" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Departure Time</FormLabel>
-                              <FormControl>
-                                <DateTimePicker
-                                  field={field}
-                                  disablePast
-                                  minDate={new Date().setDate(new Date().getDate() + 1)} // Setting minimum date to tomorrow
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )} />
+                          <FormField
+                            control={form.control}
+                            name="ticketCost"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Ticket Cost</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="Ticket cost"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(+e.target.value)
+                                    }
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="timeDeparture"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Departure Time</FormLabel>
+                                <FormControl>
+                                  <DateTimePicker
+                                    field={field}
+                                    disablePast
+                                    minDate={new Date().setDate(
+                                      new Date().getDate() + 1
+                                    )} // Setting minimum date to tomorrow
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
 
-                          <FormField control={form.control} name="estimatedDuration" render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Estimated Duration (minutes)</FormLabel>
-                              <FormControl>
-                                <Input type="number" placeholder="Estimated duration" {...field} onChange={(e) => field.onChange(+e.target.value)} />
-                              </FormControl>
-                            </FormItem>
-                          )} />
+                          <FormField
+                            control={form.control}
+                            name="estimatedDuration"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Estimated Duration (minutes)
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="Estimated duration"
+                                    {...field}
+                                    onChange={(e) =>
+                                      field.onChange(+e.target.value)
+                                    }
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
                           <FormField
                             control={form.control}
                             name="remainingSeats"
                             render={({ field }) => {
-                              const maxSeats = getMaxSeats(form.getValues("vehicleType"));
+                              const maxSeats = getMaxSeats(
+                                form.getValues("vehicleType")
+                              );
                               const value = +field.value;
 
                               // Check if the value exceeds maxSeats
@@ -1010,8 +1076,11 @@ export default function TransportationPage() {
                                       {...field}
                                       onChange={(e) => {
                                         // Remove leading zeros and update the value
-                                        const inputValue = e.target.value.replace(/^0+/, ""); // Remove leading zeros
-                                        field.onChange(inputValue ? +inputValue : ""); // Handle empty input
+                                        const inputValue =
+                                          e.target.value.replace(/^0+/, ""); // Remove leading zeros
+                                        field.onChange(
+                                          inputValue ? +inputValue : ""
+                                        ); // Handle empty input
                                       }}
                                       onBlur={() => {
                                         // Adjust the value to maxSeats if it exceeds on blur
@@ -1032,21 +1101,18 @@ export default function TransportationPage() {
                             }}
                           />
 
-
-
-
-                          <Button type="submit" className="bg-[#1A3B47]">Update Transportation</Button>
+                          <Button type="submit" className="bg-[#1A3B47]">
+                            Update Transportation
+                          </Button>
                         </form>
                       </Form>
                     </DialogContent>
                   )}
                 </Dialog>
               </div>
-            ))})
-
+            ))}
           </div>
-        }
-
+        )}
 
         <div className="mt-6 flex justify-center items-center space-x-4">
           <Button
@@ -1059,7 +1125,8 @@ export default function TransportationPage() {
           </Button>
           {sortedTransportations.length > 0 ? (
             <span className="text-[#1A3B47]">
-              Page {currentPage} of {Math.ceil(sortedTransportations.length / transportationsPerPage)}
+              Page {currentPage} of{" "}
+              {Math.ceil(sortedTransportations.length / transportationsPerPage)}
             </span>
           ) : (
             <span className="text-[#1A3B47]">No transportations available</span>
@@ -1067,7 +1134,10 @@ export default function TransportationPage() {
 
           <Button
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === Math.ceil(sortedTransportations.length / transportationsPerPage)}
+            disabled={
+              currentPage ===
+              Math.ceil(sortedTransportations.length / transportationsPerPage)
+            }
             variant="outline"
             className="border-[#388A94] text-[#388A94] hover:bg-[#388A94] hover:text-white"
           >
@@ -1075,39 +1145,50 @@ export default function TransportationPage() {
           </Button>
         </div>
 
-        {userPreferredCurrency && userPreferredCurrency.code && rates && selectedTransportation && (
-          <>
-            <PaymentPopup
-              isOpen={showTransportationBookingDialog}
-              onClose={() => setShowTransportationBookingDialog(false)}
-              title={`Booking: ${selectedTransportation?.vehicleType} from ${selectedTransportation?.from} to ${selectedTransportation?.to}`}
-              items={[
-                {
-                  name: selectedTransportation?.vehicleType,
-                  price: selectedTransportation.ticketCost * (rates[userPreferredCurrency.code]) * 100,
-                },
-              ]} // Convert price to cents
-              onWalletPayment={handleTransportationBooking}
-              stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
-              onConfirm={handleTransportationBooking}
-              priceOne={(selectedTransportation.ticketCost * (rates[userPreferredCurrency.code])).toFixed(2)}
-              currency={userPreferredCurrency.code}
-              symbol={userPreferredCurrency.symbol}
-              returnLoc={"http://localhost:3000/transportation"}
-              error={bookingError}
-              setError={setBookingError}
-              selectedTransportID={selectedTransportation._id}
-              transportationSeats={selectedTransportation.remainingSeats}
-              promoDetails={promoDetails}
-              setPromoDetails={setPromoDetails}
-
-            />
-          </>
-        )}
+        {userPreferredCurrency &&
+          userPreferredCurrency.code &&
+          rates &&
+          selectedTransportation && (
+            <>
+              <PaymentPopup
+                isOpen={showTransportationBookingDialog}
+                onClose={() => setShowTransportationBookingDialog(false)}
+                title={`Booking: ${selectedTransportation?.vehicleType} from ${selectedTransportation?.from} to ${selectedTransportation?.to}`}
+                items={[
+                  {
+                    name: selectedTransportation?.vehicleType,
+                    price:
+                      selectedTransportation.ticketCost *
+                      rates[userPreferredCurrency.code] *
+                      100,
+                  },
+                ]} // Convert price to cents
+                onWalletPayment={handleTransportationBooking}
+                stripeKey={import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY}
+                onConfirm={handleTransportationBooking}
+                priceOne={(
+                  selectedTransportation.ticketCost *
+                  rates[userPreferredCurrency.code]
+                ).toFixed(2)}
+                currency={userPreferredCurrency.code}
+                symbol={userPreferredCurrency.symbol}
+                returnLoc={"http://localhost:3000/transportation"}
+                error={bookingError}
+                setError={setBookingError}
+                selectedTransportID={selectedTransportation._id}
+                transportationSeats={selectedTransportation.remainingSeats}
+                promoDetails={promoDetails}
+                setPromoDetails={setPromoDetails}
+              />
+            </>
+          )}
         <Dialog
           open={showTransportationSuccessDialog.open}
           onOpenChange={(isOpen) =>
-            setShowTransportationSuccessDialog({ ...showTransportationSuccessDialog, open: isOpen })
+            setShowTransportationSuccessDialog({
+              ...showTransportationSuccessDialog,
+              open: isOpen,
+            })
           }
         >
           <DialogContent>
@@ -1131,20 +1212,27 @@ export default function TransportationPage() {
                     <Label className="text-right">You Paid:</Label>
                     <div>
                       {displayPrice(
-                        (showTransportationSuccessDialog?.seatsToBook) *
-                        (showTransportationSuccessDialog?.ticketCost) *
-                        (1 - (showTransportationSuccessDialog?.percentageOff) / 100)
+                        showTransportationSuccessDialog?.seatsToBook *
+                          showTransportationSuccessDialog?.ticketCost *
+                          (1 -
+                            showTransportationSuccessDialog?.percentageOff /
+                              100)
                       )}
                     </div>
-                    {showTransportationSuccessDialog?.paymentMethod === "Wallet" && (
+                    {showTransportationSuccessDialog?.paymentMethod ===
+                      "Wallet" && (
                       <>
-                        <Label className="text-right">New Wallet Balance:</Label>
+                        <Label className="text-right">
+                          New Wallet Balance:
+                        </Label>
                         <div>
                           {displayPrice(
-                            (showTransportationSuccessDialog?.wallet) -
-                            (showTransportationSuccessDialog?.seatsToBook) *
-                            (showTransportationSuccessDialog?.ticketCost) *
-                            (1 - (showTransportationSuccessDialog?.percentageOff) / 100)
+                            showTransportationSuccessDialog?.wallet -
+                              showTransportationSuccessDialog?.seatsToBook *
+                                showTransportationSuccessDialog?.ticketCost *
+                                (1 -
+                                  showTransportationSuccessDialog?.percentageOff /
+                                    100)
                           )}
                         </div>
                       </>
@@ -1154,7 +1242,8 @@ export default function TransportationPage() {
                   <div className="py-4">
                     <p>
                       You have successfully booked{" "}
-                      {showTransportationSuccessDialog?.seatsToBook ?? 0} seat(s).
+                      {showTransportationSuccessDialog?.seatsToBook ?? 0}{" "}
+                      seat(s).
                     </p>
                   </div>
                   <DialogFooter className="flex justify-end mt-2">
@@ -1165,17 +1254,11 @@ export default function TransportationPage() {
                       Close
                     </Button>
                   </DialogFooter>
-
                 </>
-
               )}
             </DialogHeader>
           </DialogContent>
         </Dialog>
-
-
-
-
       </div>
       {(userRole === "guest" || userRole === "tourist") && (
         <UserGuide steps={guideSteps} pageName="itineraries" />
