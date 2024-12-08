@@ -166,9 +166,8 @@ const StarRating = ({ rating, setRating, readOnly = false }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${
-            star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
-          }`}
+          className={`w-6 h-6 ${readOnly ? "" : "cursor-pointer"} ${star <= rating ? "text-[#F88C33] fill-current" : "text-gray-300"
+            }`}
           onClick={() => !readOnly && setRating(star)}
           aria-label={`${star} star${star !== 1 ? "s" : ""}`}
         />
@@ -222,7 +221,7 @@ const ActivityDetail = () => {
   const [tourist, setTourist] = useState(null);
   const [userPreferredCurrency, setUserPreferredCurrency] = useState(null);
   const [currencies, setCurrencies] = useState(null);
- 
+
 
   const [showTransportationSuccessDialog, setShowTransportationSuccessDialog] =
     useState(false);
@@ -245,11 +244,11 @@ const ActivityDetail = () => {
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
   const [potentialLoyaltyPoints, setPotentialLoyaltyPoints] = useState(0);
   const [loyaltyPointsEarned, setLoyaltyPointsEarned] = useState(0);
-  const[badge,setbadge]= useState("Bronze");
-  const [point,setpoint]=useState(0);
-  const[loyaltyy,setloyalty]=useState(0);
-  const[totalloyaltyy,settotalloyalty]=useState(0);
-  
+  const [badge, setbadge] = useState("Bronze");
+  const [point, setpoint] = useState(0);
+  const [loyaltyy, setloyalty] = useState(0);
+  const [totalloyaltyy, settotalloyalty] = useState(0);
+
 
   useEffect(() => {
     const fetchTouristData = async () => {
@@ -261,11 +260,11 @@ const ActivityDetail = () => {
         setTourist(response.data);
         setPotentialLoyaltyPoints(response.data.loyaltyPoints);
 
-    
-      setbadge(response.data.loyaltyBadge);
 
-      //  console.error(" badge :", badge );
-      //  console.error(" tourist data loyalty points :", response.data.loyaltyPoints);
+        setbadge(response.data.loyaltyBadge);
+
+        //  console.error(" badge :", badge );
+        //  console.error(" tourist data loyalty points :", response.data.loyaltyPoints);
 
       } catch (error) {
         console.error("Error fetching tourist data:", error);
@@ -281,20 +280,20 @@ const ActivityDetail = () => {
       const quantity = searchParams.get("quantity");
       const sessionId = searchParams.get("session_id");
       const promoCode = searchParams.get("promoCode");
-       const loyaltyPoints= searchParams.get("loyaltyPoints");
-       setloyalty(loyaltyPoints);
-       
+      const loyaltyPoints = searchParams.get("loyaltyPoints");
+      setloyalty(loyaltyPoints);
+
 
       Promise.all([
         fetchUserInfo(),
         fetchExchangeRate(),
         fetchCurrencies(),
-        
+
       ]);
 
-      
 
-      if (sessionId && success === "true"&& activity) {
+
+      if (sessionId && success === "true" && activity) {
         console.log("we hate ehab1");
         try {
           const response = await axios.get(
@@ -306,7 +305,7 @@ const ActivityDetail = () => {
           if (response.data.status === "paid") {
             try {
               console.log("we hate ehab3");
-              await handlePaymentConfirm("CreditCard", parseInt(quantity), new Date(),new Date(), promoCode );
+              await handlePaymentConfirm("CreditCard", parseInt(quantity), new Date(), new Date(), promoCode);
             } catch (error) {
               console.error("Error handling booking success:", error);
             }
@@ -318,10 +317,10 @@ const ActivityDetail = () => {
     };
 
     handleBookingSuccess();
-  }, [searchParams,activity]);
+  }, [searchParams, activity]);
 
- 
-  
+
+
   const handleTransportationBooking = async () => {
     if (!selectedTransportation) return;
 
@@ -380,7 +379,7 @@ const ActivityDetail = () => {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center">
                   {transport.vehicleType === "Bus" ||
-                  transport.vehicleType === "Microbus" ? (
+                    transport.vehicleType === "Microbus" ? (
                     <Bus className="w-5 h-5 mr-2 text-blue-500" />
                   ) : (
                     <Car className="w-5 h-5 mr-2 text-green-500" />
@@ -390,7 +389,7 @@ const ActivityDetail = () => {
                   </h3>
                 </div>
                 <span className="text-sm font-medium text-green-600">
-                  {convertPrice(transport.ticketCost,"USD",userPreferredCurrency?.code)}
+                  {convertPrice(transport.ticketCost, "USD", userPreferredCurrency?.code)}
                 </span>
               </div>
               <div className="space-y-1 text-sm">
@@ -536,10 +535,10 @@ const ActivityDetail = () => {
             numberOfTickets,
           }),
         }
-        
+
       );
-     
-     
+
+
 
 
       if (!response.ok) {
@@ -578,7 +577,7 @@ const ActivityDetail = () => {
     isAnonymous: false,
   });
 
-  
+
   const fetchCurrencies = async () => {
     try {
       const token = Cookies.get("jwt");
@@ -601,22 +600,22 @@ const ActivityDetail = () => {
     if (!exchangeRates || !fromCurrency || !toCurrency) {
       return price;
     }
-    
+
     const fromRate = exchangeRates[fromCurrency];
     const toRate = exchangeRates[toCurrency];
-    
+
     // Use template literal to correctly insert the symbol
     return `${userPreferredCurrency?.symbol}${((price * toRate) / fromRate).toFixed(2)}`;
   };
-  
+
   const convertpoint = (price, fromCurrency, toCurrency) => {
     if (!exchangeRates || !fromCurrency || !toCurrency) {
       return price;
     }
-    
+
     const fromRate = exchangeRates[fromCurrency];
     const toRate = exchangeRates[toCurrency];
-    
+
     // Use template literal to correctly insert the symbol
     return ((price * toRate) / fromRate).toFixed(2);
   };
@@ -652,7 +651,7 @@ const ActivityDetail = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-      //  console.error("data:", response.data);
+        //  console.error("data:", response.data);
         setUserPreferredCurrency(response2.data);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -665,7 +664,7 @@ const ActivityDetail = () => {
       fetchUserInfo(),
       fetchExchangeRate(),
       fetchCurrencies(),
-      
+
     ]);
   }, []);
 
@@ -735,8 +734,8 @@ const ActivityDetail = () => {
             }
           }
         }
-      //  console.error("loyalty points:", tourist.loyaltyPoints);
-      
+        //  console.error("loyalty points:", tourist.loyaltyPoints);
+
       } catch (err) {
         setError("Error fetching activity details. Please try again later.");
         console.error("Error fetching activity details:", err);
@@ -828,7 +827,7 @@ const ActivityDetail = () => {
       const additionalPrice =
         userBooking.paymentAmount +
         calculateDiscountedPrice(activity.price, activity.specialDiscount) *
-          additionalTickets;
+        additionalTickets;
 
       const response = await axios.put(
         `http://localhost:4000/${userRole}/activityBooking/${userBooking._id}`,
@@ -849,7 +848,7 @@ const ActivityDetail = () => {
       console.error("Error updating booking:", error);
       setBookingError(
         error.response?.data?.message ||
-          "An error occurred while updating the booking."
+        "An error occurred while updating the booking."
       );
     } finally {
       setIsBooking(false);
@@ -896,10 +895,10 @@ const ActivityDetail = () => {
   };
 
   const handlePaymentConfirm = async (paymentType, numberOfTickets, date, filler, promoCode) => {
-        if (bookingProcessedRef.current) {
-          console.log('Booking already processed');
-          return;
-        }
+    if (bookingProcessedRef.current) {
+      console.log('Booking already processed');
+      return;
+    }
     setIsBooking(true);
     setBookingError("");
     try {
@@ -925,7 +924,7 @@ const ActivityDetail = () => {
           }),
         }
       );
-     
+
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.message === "Insufficient funds in wallet") {
@@ -941,13 +940,13 @@ const ActivityDetail = () => {
         const data = await response.json();
         setShowPaymentPopup(false);
         setNumberOfTickets(numberOfTickets);
-        setPaymentType(paymentType); 
+        setPaymentType(paymentType);
         setShowSuccessDialog(true);
-        setPricePaid(convertPrice(data?.pricePaid,"USD",userPreferredCurrency?.code));
-        setpoint(convertpoint(data?.pricePaid,"USD",userPreferredCurrency?.code));
-        setTouristWallet(convertPrice(data?.walletBalance,"USD",userPreferredCurrency?.code));
+        setPricePaid(convertPrice(data?.pricePaid, "USD", userPreferredCurrency?.code));
+        setpoint(convertpoint(data?.pricePaid, "USD", userPreferredCurrency?.code));
+        setTouristWallet(convertPrice(data?.walletBalance, "USD", userPreferredCurrency?.code));
         setloyalty(data?.loyaltyPoints);
-        
+
 
       }
     } catch (error) {
@@ -1135,33 +1134,33 @@ const ActivityDetail = () => {
     // Conditionally add the Save step based on user role
     ...(userRole !== "guest"
       ? [
-          {
-            target: ".Save",
-            content: (
-              <>
-                Click here to save this activity for later viewing or booking in your
-                saved activities list.
-                <br />
-                Tip:
-                <br />
-                You can view your saved activities anytime! Simply click the hamburger
-                menu on the top right corner → My Account → Activities → Saved
-              </>
-            ),
-            placement: "left",
-          },
-        ]
+        {
+          target: ".Save",
+          content: (
+            <>
+              Click here to save this activity for later viewing or booking in your
+              saved activities list.
+              <br />
+              Tip:
+              <br />
+              You can view your saved activities anytime! Simply click the hamburger
+              menu on the top right corner → My Account → Activities → Saved
+            </>
+          ),
+          placement: "left",
+        },
+      ]
       : []),
     // Conditionally add the bookNow step based on user role
     ...(userRole !== "guest"
       ? [
-          {
-            target: ".bookNow",
-            content:
-              "Click here to be able to book this activity and proceed to the payment process.",
-            placement: "left",
-          },
-        ]
+        {
+          target: ".bookNow",
+          content:
+            "Click here to be able to book this activity and proceed to the payment process.",
+          placement: "left",
+        },
+      ]
       : []),
     {
       target: ".AdvertiserDetail",
@@ -1173,7 +1172,7 @@ const ActivityDetail = () => {
 
   const calculateLoyaltyPoints = (paymentAmount, badgeLevel) => {
     let pointsMultiplier = 0;
-  
+
     // Determine points multiplier based on badge level
     switch (badgeLevel) {
       case "Bronze":
@@ -1189,7 +1188,7 @@ const ActivityDetail = () => {
         pointsMultiplier = 0; // No points if badge level is unrecognized
         break;
     }
-  
+
     // Calculate and return the loyalty points
     return paymentAmount * pointsMultiplier;
   };
@@ -1267,13 +1266,13 @@ const ActivityDetail = () => {
             </div>
           </div>
         </nav>
-  
+
         <div className="bg-[#1a202c] text-white py-20 px-4">
           <div className="container mx-auto text-center">
             <div className="h-12 w-3/4 bg-gray-600 rounded animate-pulse mx-auto"></div>
           </div>
         </div>
-  
+
         <div className="mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Section */}
@@ -1284,20 +1283,20 @@ const ActivityDetail = () => {
                     <div className="h-10 w-1/2 bg-gray-300 rounded animate-pulse"></div>
                     <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
                   </div>
-  
+
                   <div className="w-full h-[400px] bg-gray-300 rounded animate-pulse mb-6"></div>
-  
+
                   <div className="mb-6">
                     <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-2"></div>
                   </div>
-  
+
                   <div className="mt-8">
                     <div className="h-[200px] w-full bg-gray-300 rounded animate-pulse"></div>
                   </div>
                 </div>
               </div>
             </div>
-  
+
             {/* Right Section */}
             <div className="lg:w-1/4 flex-none">
               <Card>
@@ -1312,27 +1311,27 @@ const ActivityDetail = () => {
                       <div className="h-4 w-24 bg-gray-300 rounded"></div>
                     </div>
                   </div>
-  
+
                   <div className="mt-4 animate-pulse">
                     <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
                     <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
                   </div>
-  
+
                   <div className="mt-2 animate-pulse">
                     <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
                     <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
                   </div>
-  
+
                   <div className="mt-4 animate-pulse">
                     <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
                     <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
                   </div>
-  
+
                   <div className="mt-2 animate-pulse">
                     <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
                     <div className="h-4 w-2/3 bg-gray-300 rounded mt-6"></div>
                   </div>
-  
+
                   <div className="mt-6 animate-pulse">
                     <div className="h-10 bg-gray-300 rounded"></div>
                     <div className="h-10 bg-gray-300 rounded mt-6"></div>
@@ -1341,14 +1340,14 @@ const ActivityDetail = () => {
               </Card>
             </div>
           </div>
-  
+
           <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <div className="h-8 w-1/4 bg-gray-300 rounded animate-pulse"></div>
                 <div className="h-8 w-20 bg-gray-300 rounded animate-pulse"></div>
               </div>
-  
+
               <div className="flex gap-8 mb-6">
                 <div className="text-center">
                   <div className="h-12 w-12 bg-gray-300 rounded animate-pulse mx-auto mb-2"></div>
@@ -1363,7 +1362,7 @@ const ActivityDetail = () => {
                 </div>
               </div>
             </div>
-  
+
             <div className="border-t pt-6">
               <div className="h-6 w-1/4 bg-gray-300 rounded animate-pulse mb-4"></div>
               <div className="h-4 w-1/2 bg-gray-300 rounded animate-pulse mb-4"></div>
@@ -1400,7 +1399,7 @@ const ActivityDetail = () => {
       </div>
     );
   };
-  
+
 
   if (loading) {
     return <ActivityDetailSkeleton />;
@@ -1601,7 +1600,7 @@ const ActivityDetail = () => {
                                     calculateDiscountedPrice(
                                       activity.price,
                                       activity.specialDiscount
-                                    ),"USD",userPreferredCurrency?.code
+                                    ), "USD", userPreferredCurrency?.code
                                   )}
                                 </span>
                                 <span className="ml-3 text-xl font-semibold text-red-600">
@@ -1609,7 +1608,7 @@ const ActivityDetail = () => {
                                 </span>
                               </div>
                               <div className="text-2xl text-gray-500 line-through mt-2">
-                                {convertPrice(activity.price,"USD",userPreferredCurrency?.code)}
+                                {convertPrice(activity.price, "USD", userPreferredCurrency?.code)}
                               </div>
                             </div>
                           </div>
@@ -1640,9 +1639,8 @@ const ActivityDetail = () => {
                         <div className="text-lg text-gray-600 mt-4 mb-6 overflow-hidden w-[400px]">
                           {isExpanded
                             ? activity.description
-                            : `${activity.description.substring(0, 130)}${
-                                activity.description.length > 130 ? "..." : ""
-                              }`}
+                            : `${activity.description.substring(0, 130)}${activity.description.length > 130 ? "..." : ""
+                            }`}
                           {activity.description.length > 130 && (
                             <button
                               onClick={toggleExpanded}
@@ -1669,29 +1667,26 @@ const ActivityDetail = () => {
                               e.stopPropagation();
                               handleSaveToggle(activity._id);
                             }}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${
-                              isSaved
-                                ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
-                                : "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                            }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg flex items-center justify-center gap-2 Save ${isSaved
+                              ? "bg-[#1A3B47] hover:bg-[#1A3B47] text-white"
+                              : "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                              }`}
                           >
                             <Bookmark
-                              className={`w-5 h-5 ${
-                                isSaved
-                                  ? "stroke-white fill-[#1A3B47]"
-                                  : "stroke-white"
-                              }`}
+                              className={`w-5 h-5 ${isSaved
+                                ? "stroke-white fill-[#1A3B47]"
+                                : "stroke-white"
+                                }`}
                             />
                             {isSaved ? "Unsave" : "Save"}
                           </Button>
 
                           <Button
                             onClick={handleBookNowClick}
-                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${
-                              activity.isBookingOpen
-                                ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
-                                : "bg-gray-400 text-gray-700 cursor-not-allowed"
-                            }`}
+                            className={`w-full font-bold py-2 px-4 rounded mt-2 text-lg bookNow ${activity.isBookingOpen
+                              ? "bg-[#388A94] hover:bg-[#2B6870] text-white"
+                              : "bg-gray-400 text-gray-700 cursor-not-allowed"
+                              }`}
                             disabled={!activity.isBookingOpen}
                           >
                             {activity.isBookingOpen
@@ -1798,11 +1793,10 @@ const ActivityDetail = () => {
                         <>
                           <div className="mt-6 border-t border-gray-300 pt-4"></div>
                           <Button
-                            className={`w-full mx-auto text-white ${
-                              isAppropriate
-                                ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
-                                : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
-                            }`}
+                            className={`w-full mx-auto text-white ${isAppropriate
+                              ? "bg-red-500 hover:bg-red-600" // Appropriate: Red Button
+                              : "bg-green-500 hover:bg-green-600" // Inappropriate: Green Button
+                              }`}
                             onClick={handleOpenDialog}
                           >
                             {isAppropriate
@@ -1917,15 +1911,14 @@ const ActivityDetail = () => {
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
-                          className={`w-8 h-8 cursor-pointer ${
-                            (
-                              isRatingHovered
-                                ? quickRating >= star
-                                : quickRating >= star
-                            )
-                              ? "text-yellow-500 fill-current"
-                              : "text-gray-300"
-                          }`}
+                          className={`w-8 h-8 cursor-pointer ${(
+                            isRatingHovered
+                              ? quickRating >= star
+                              : quickRating >= star
+                          )
+                            ? "text-yellow-500 fill-current"
+                            : "text-gray-300"
+                            }`}
                           onMouseEnter={() => {
                             setIsRatingHovered(true);
                             setQuickRating(star);
@@ -2058,12 +2051,12 @@ const ActivityDetail = () => {
               items={[
                 {
                   name: activity.name,
-                  price:(
+                  price: (
                     calculateDiscountedPrice(
                       activity.price,
                       activity.specialDiscount
-                    ) *  (exchangeRates[userPreferredCurrency.code]/exchangeRates["USD"])
-                  )*100,
+                    ) * (exchangeRates[userPreferredCurrency.code] / exchangeRates["USD"])
+                  ) * 100,
                 },
               ]} // Convert price to cents
               onWalletPayment={handlePaymentConfirm}
@@ -2073,7 +2066,7 @@ const ActivityDetail = () => {
                 calculateDiscountedPrice(
                   activity.price,
                   activity.specialDiscount
-                ) *  (exchangeRates[userPreferredCurrency.code]/exchangeRates["USD"])
+                ) * (exchangeRates[userPreferredCurrency.code] / exchangeRates["USD"])
               ).toFixed(2)}
               currency={userPreferredCurrency.code}
               symbol={userPreferredCurrency.symbol}
@@ -2082,7 +2075,7 @@ const ActivityDetail = () => {
               setError={setBookingError}
               promoDetails={promoDetails}
               setPromoDetails={setPromoDetails}
-              loyaltyPoints={calculateLoyaltyPoints(activity.price,tourist.loyaltyBadge)}
+              loyaltyPoints={calculateLoyaltyPoints(activity.price, tourist.loyaltyBadge)}
             />
           )}
 
@@ -2186,13 +2179,13 @@ const ActivityDetail = () => {
                   {activity.name}.
                 </p>
                 <div className="grid gap-4 py-4">
-                  {userPreferredCurrency&&
-                  <div className="grid grid-cols-2 gap-4">
-                    <Label className="text-right">Amount Paid:</Label>
-                    <div>
-                      {convertPrice(pricePaid,"USD",userPreferredCurrency.code)}
-                    </div>
-                  </div>}
+                  {userPreferredCurrency &&
+                    <div className="grid grid-cols-2 gap-4">
+                      <Label className="text-right">Amount Paid:</Label>
+                      <div>
+                        {convertPrice(pricePaid, "USD", userPreferredCurrency.code)}
+                      </div>
+                    </div>}
                   {paymentType === "Wallet" && (
                     <div className="grid grid-cols-2 gap-4">
                       <Label className="text-right">New Wallet Balance:</Label>
@@ -2202,23 +2195,29 @@ const ActivityDetail = () => {
                     </div>
                   )}
 
-                  
 
-              
+
+
                   <div className="grid grid-cols-2 gap-4">
                     <Label className="text-right"> Points Earned:</Label>
-                    
-                      {loyaltyy}
-                   
+
+                    {loyaltyy}
+
                   </div>
-                
+
 
                 </div>
               </div>
 
-              <DialogFooter>
-                <Button onClick={() => handleFinalOK()}>OK</Button>
+              <DialogFooter className="flex justify-end mt-2">
+                <Button
+                  onClick={() => handleFinalOK()}
+                  className="bg-[#1A3B47] hover:bg-[#3E5963] text-white px-4 py-2 rounded-lg"
+                >
+                  OK
+                </Button>
               </DialogFooter>
+
             </DialogContent>
           </Dialog>
         </div>
@@ -2489,7 +2488,7 @@ const ActivityDetail = () => {
                 <div className="col-span-3">
                   {convertPrice((
                     (selectedTransportation?.ticketCost || 0) * seatsToBook
-                  ),"USD",userPreferredCurrency?.code)}
+                  ), "USD", userPreferredCurrency?.code)}
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -2510,11 +2509,11 @@ const ActivityDetail = () => {
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="Wallet" id="wallet" />
                     <Label htmlFor="wallet">Wallet</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                  </div>
+                </RadioGroup>
               </div>
-          
+            </div>
+
             <DialogFooter>
               <Button
                 onClick={() => setTransportationBookingDialog(false)}
@@ -2555,9 +2554,8 @@ const ActivityDetail = () => {
 
       {alertMessage && (
         <Alert
-          className={`fixed bottom-4 right-4 w-96 ${
-            alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
-          } text-white`}
+          className={`fixed bottom-4 right-4 w-96 ${alertMessage.type === "success" ? "bg-green-500" : "bg-red-500"
+            } text-white`}
         >
           <AlertTitle>
             {alertMessage.type === "success" ? "Success" : "Error"}
@@ -2568,9 +2566,9 @@ const ActivityDetail = () => {
       {(userRole === "guest" || userRole === "tourist") && (
         <UserGuide steps={guideSteps} pageName="singleActivity" />
       )}
-      </div>
-     
-    
+    </div>
+
+
   );
 };
 
