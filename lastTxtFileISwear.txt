@@ -1,22 +1,19 @@
 Priority List: 
 
--notification dropdown msh byzhar feha el notification ( tried with flagging activity and itineraries)
--lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
--cancel booking 48 hrs before (bycancel lw activity/itinerary bokra)
--lw activity/itinerary khelset msh btban lladmin (msh aarfa lw da sah)
--advertiser cannot delete/update his activity mn bara (all activities)
 -reports bayza 
 -sa3at beyede error lama mark all as read
 consistency fe pages el all 
 navigation notification fe admin
 - shay be laban 3amatan (create activity we create products we kol el create )
-sales report margins 
+- sales report margins
+- booking confirmation popouts mesh zy b3d
 -update itinerary leha popup(cant aw succesfully updated)
 -create promo code layout (stretch start and end date we geeb el button foo2 )
 -no popup l flag inappropriate itinerary
 - toasts ele fo2 aktr fa 5ali kol ele ta7t yemen yeb2o fo2 yemen
 -creating itinerary popup btdos basraha 3adi w btfdl f create itinerary
 -updating activity popup btdos basraha 3adi w btfdl f update activity
+-single ay haga el title el fo2 saye2
 
 
 
@@ -59,17 +56,14 @@ alwan profile w settings (done)
 
 
 Aby: 
-
-66
-67
-68
-69
+66 (done)
+68 (done)
 90
-91
+91 (done)
 
 - Seeb el 0 sales bas sort by revenue 3ashan yezharo ta7t (done)
-- Automated verify Otp
-- Black Friday use this promo code!!
+- Automated verify Otp (done)
+- Black Friday use this promo code!! (done)
 
 
 admin w seller y view zy table feha product w amount sold w quantity items in stock
@@ -100,11 +94,8 @@ Houba:
 97
 
 
--cant add reviews sometimes(add condition to guidesteps)
 -check hn3ml eh f update itinerary lw booked
 - make all popups consistent (success toast and delete popup zay el radwa 3amlha)
-
-
 - all products: sheel zorar el + el fo2 w khaly add to cart teadd to cart 3alatool men gheer ma tefta7 options(done✅)
 -zabat popup button color of add to cart in single product(done✅)
 - popup: - are you sure you want to accept el user dah (badal mal tick bet accept 3alatool we dah dangerous action lazem popup)(done✅)
@@ -163,7 +154,6 @@ Radwa:
 - admin add user : 
  Add user teb2a button kebeer w 3al yemeen (done✅)
  whitespace bottom right (geebi password verification 3al yemeen aw get creative) (done✅)
- -approve user : in all user whenever I approve, an error message appear upon approving because of "all".
 
  
 Habiba:
@@ -181,10 +171,10 @@ el reports columns t2ba consistent (total sales t2ba tickets sold we y2ba we nsh
 
 Hazem: 
 
-1 ✅
-3 ✅
-34🚨
-35✅
+1
+3
+34 
+35
 36
 38
 - single act has no loading until prices are displayed  (already ma3moola fe my account)
