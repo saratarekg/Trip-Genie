@@ -42,6 +42,11 @@ navigation notification fe admin
 -create promo code msh sha8ala
 -out of stock notification  elleh fel navbar msh sha8ala fe seller 
 
+-when i update a product lama bzwd sora by3la2 w mbyrdash y update (seller w admin)
+-graph in admin dashboard bytawl
+-logout popup 3and admin na2sa
+
+
 
 
 
@@ -239,18 +244,18 @@ Radwa:
 
 27-32 
 
-87
-88
-89
-102
-103
+87 done✅
+88 done✅
+89 done✅
+102 done✅
+103 done✅
 
 - sort by preference shklo w alwano mokhtlfa f kol page
 - alwan flag inappropriate fe admin activites different 3n itineraries
-- shakl view all 
+- shakl view all done✅
 - change pass fe admin (done✅)
-- khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done)
-- past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)(done)
+- khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done✅)
+- past w upcoming teb2a tabs mens nafs el component instead of it's own pages (accountTourist fel activities wel itineraries)(done✅)
 - complaints sort by date (done✅)
 - tabs fe review registration (done✅)
 - admin add user : 
