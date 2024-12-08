@@ -9,8 +9,8 @@ Priority List:
 -create promo code layout (stretch start and end date we geeb el button foo2 ) (radwa)
 -update itinerary betawel w fl akhr error lama bghyr sowar kteer f activities
 -leave a review navigation aal past lw deleted bydy error
-- no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review (zeina done✅)
--lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh
+-no way to navigate to the actual activity or itinerary that I booked from my history in order to rate and review (zeina done✅)
+-lw itinerary deactivated w user kan hagezha abl kda ynf3 ykhosh yhgzha tany brdo lehhhhh(zeina)
 -lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha
 -create promo code msh sha8ala
 -lama bafoos ala activity mn el fl itinerary details el website bydrab
