@@ -365,9 +365,10 @@ function BookingPage() {
       }
 
       setPromoDetails(promo);
-      const discount = (selectedFlight.price.total * numberOfSeats) * (promo.percentOff / 100);
+      const discount =
+        selectedFlight.price.total * numberOfSeats * (promo.percentOff / 100);
       setDiscountAmount(discount);
-      setDiscountedTotal((selectedFlight.price.total * numberOfSeats) - discount);
+      setDiscountedTotal(selectedFlight.price.total * numberOfSeats - discount);
     } catch (error) {
       console.error(error);
       setPromoError("Failed to apply promo code. Please try again.");
@@ -406,8 +407,6 @@ function BookingPage() {
         currencyCode,
         "USD"
       );
-
-
 
       // Prepare metadata and other necessary details
       const metadata = {
@@ -454,7 +453,7 @@ function BookingPage() {
             items,
             returnLocation: "http://localhost:3000/flights",
             currency: currencyCode,
-            promoCode,
+            discountPercentage: promoDetails ? promoDetails.percentOff : 0,
           }),
         }
       );
@@ -504,6 +503,7 @@ function BookingPage() {
         const seatType = searchParams.get("seatType");
         const flightType = searchParams.get("flightType");
         const flightTypeReturn = searchParams.get("flightTypeReturn");
+        const discountPercentage = searchParams.get("discountPercentage");
 
         console.log(flightID);
 
@@ -517,7 +517,11 @@ function BookingPage() {
             if (response.data.status === "paid") {
               const token = Cookies.get("jwt");
               const convertedPrice = convertPrice(
-                parseFloat(price),
+                parseFloat(
+                  discountPercentage === 0
+                    ? price * numberOfTickets
+                    : (price * numberOfTickets) * (1 - discountPercentage / 100)
+                ),
                 currencyCode,
                 "USD"
               );
@@ -603,7 +607,11 @@ function BookingPage() {
         const token = Cookies.get("jwt");
 
         const convertedPrice = convertPrice(
-          parseFloat(discountedTotal === 0? selectedFlight.price.total * numberOfSeats : discountedTotal),
+          parseFloat(
+            discountedTotal === 0
+              ? selectedFlight.price.total * numberOfSeats
+              : discountedTotal
+          ),
           currencyCode,
           "USD"
         );
@@ -1432,7 +1440,10 @@ function BookingPage() {
                 )}
                 <h4 className="font-semibold mt-4">Price Details</h4>
                 <p>
-                  Total: {discountedTotal === 0? selectedFlight.price.total * numberOfSeats : discountedTotal}{" "}
+                  Total:{" "}
+                  {discountedTotal === 0
+                    ? selectedFlight.price.total * numberOfSeats
+                    : discountedTotal}{" "}
                   {selectedFlight.price.currency}
                 </p>
                 <div className="space-y-4 mt-4">
@@ -1549,8 +1560,10 @@ function BookingPage() {
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <Label className="text-right">You Paid:</Label>
                   <div>
-                    {discountedTotal === 0? selectedFlight.price.total * numberOfSeats : discountedTotal}
                     {currencySymbol}
+                    {discountedTotal === 0
+                      ? selectedFlight.price.total * numberOfSeats
+                      : discountedTotal}
                   </div>
                   <Label className="text-right">New Wallet Balance:</Label>
                   <div>
@@ -1559,7 +1572,10 @@ function BookingPage() {
                       isBookingConfirmationOpen.wallet,
                       "USD",
                       currencyCode
-                    ) - (discountedTotal === 0? selectedFlight.price.total * numberOfSeats : discountedTotal)}
+                    ) -
+                      (discountedTotal === 0
+                        ? selectedFlight.price.total * numberOfSeats
+                        : discountedTotal)}
                   </div>
                 </div>
               )}

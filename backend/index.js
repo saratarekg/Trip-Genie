@@ -232,6 +232,7 @@ app.post("/create-flight-checkout-session", async (req, res) => {
       items,
       currency,
       returnLocation,
+      discountPercentage,
       metadata: {
         flightID,
         from,
@@ -267,7 +268,8 @@ app.post("/create-flight-checkout-session", async (req, res) => {
         `&returnArrivalDate=${encodeURIComponent(returnArrivalDate)}` +
         `&seatType=${encodeURIComponent(seatType)}` +
         `&flightType=${encodeURIComponent(flightType)}` +
-        `&flightTypeReturn=${encodeURIComponent(flightTypeReturn)}`;
+        `&flightTypeReturn=${encodeURIComponent(flightTypeReturn)}` +
+        `&discountPercentage=${encodeURIComponent(discountPercentage)}`;
     } else {
       successURL =
         `${returnLocation}/?success=true&session_id={CHECKOUT_SESSION_ID}` +
@@ -280,7 +282,8 @@ app.post("/create-flight-checkout-session", async (req, res) => {
         `&numberOfTickets=${encodeURIComponent(numberOfTickets)}` +
         `&type=${encodeURIComponent(type)}` +
         `&seatType=${encodeURIComponent(seatType)}` +
-        `&flightType=${encodeURIComponent(flightType)}`;
+        `&flightType=${encodeURIComponent(flightType)}` +
+        `&discountPercentage=${encodeURIComponent(discountPercentage)}`;
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -289,9 +292,9 @@ app.post("/create-flight-checkout-session", async (req, res) => {
         price_data: {
           currency: currency,
           product_data: {
-            name: item.product.name,
+            name: discountPercentage > 0? item.product.name + `(-${discountPercentage}%)` :item.product.name,
           },
-          unit_amount: Math.round(item.totalPrice * 100), // Stripe expects amount in cents
+          unit_amount: discountPercentage>0?  Math.round((item.totalPrice * (1 - (discountPercentage/100))) * 100) : Math.round((item.totalPrice) * 100),
         },
         quantity: item.quantity,
       })),
