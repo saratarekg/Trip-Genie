@@ -15,6 +15,8 @@ const PromoBanner = ({ setPromoMargin }) => {
       try {
         console.log("fetching promo code");
         const token = Cookies.get("jwt");
+        const role = Cookies.get("role");
+        if (role !== "tourist") return;
         const api = `http://localhost:4000/tourist/promo-codes`;
         const response = await axios.get(api, {
           headers: { Authorization: `Bearer ${token}` },
@@ -42,7 +44,7 @@ const PromoBanner = ({ setPromoMargin }) => {
     setPromoMargin(0);
     return null;
   } else {
-    setPromoMargin(55);
+    setPromoMargin(53);
   }
 
   return (

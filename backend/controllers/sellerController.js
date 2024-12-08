@@ -377,6 +377,21 @@ const getSalesReport = async (req, res) => {
         const pureSale = sale.toObject();
         return { ...pureSale, revenueAfterCommission: sale.revenue * 0.9 };
       });
+
+    sellerProductsSales = sellerProductsSales.reduce((acc, sale) => {
+      const existingProduct = acc.find(
+        (product) =>
+          product.product._id.toString() === sale.product._id.toString()
+      );
+      if (existingProduct) {
+        existingProduct.revenue += sale.revenue;
+        existingProduct.revenueAfterCommission += sale.revenueAfterCommission;
+      } else {
+        acc.push(sale);
+      }
+      return acc;
+    }, []);
+
     const totalSellerSalesRevenue = sellerProductsSales.reduce(
       (total, sale) => total + sale.revenue,
       0
@@ -447,8 +462,6 @@ const markNotificationsAsSeen = async (req, res) => {
         arrayFilters: [{ "elem.seen": false }], // Only update notifications where seen is false
       }
     );
-
-   
 
     // Set 'hasUnseenNotifications' to false after marking all notifications as seen
     await Seller.updateOne(

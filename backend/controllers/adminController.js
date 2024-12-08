@@ -463,6 +463,21 @@ const getSalesReport = async (req, res) => {
       (sale) =>
         sale.product.seller === null || sale.product.seller === undefined
     );
+
+    adminProductsSales = adminProductsSales.reduce((acc, sale) => {
+      const existingProduct = acc.find(
+        (product) =>
+          product.product._id.toString() === sale.product._id.toString()
+      );
+      if (existingProduct) {
+        existingProduct.revenue += sale.revenue;
+        existingProduct.revenueAfterCommission += sale.revenueAfterCommission;
+      } else {
+        acc.push(sale);
+      }
+      return acc;
+    }, []);
+
     const totalAdminSalesRevenue = adminProductsSales.reduce(
       (total, sale) => total + sale.revenue,
       0
@@ -481,6 +496,20 @@ const getSalesReport = async (req, res) => {
         const plainSale = sale.toObject();
         return { ...plainSale, appRevenue: plainSale.revenue * 0.1 };
       });
+
+    sellerProductsSales = sellerProductsSales.reduce((acc, sale) => {
+      const existingProduct = acc.find(
+        (product) =>
+          product.product._id.toString() === sale.product._id.toString()
+      );
+      if (existingProduct) {
+        existingProduct.revenue += sale.revenue;
+        existingProduct.revenueAfterCommission += sale.revenueAfterCommission;
+      } else {
+        acc.push(sale);
+      }
+      return acc;
+    }, []);
 
     sellerProductsSales = sellerProductsSales.sort(
       (a, b) => b.revenue - a.revenue

@@ -10,7 +10,8 @@ const emailService = require("../services/emailService");
 exports.createBooking = async (req, res) => {
   try {
     const userId = res.locals.user_id; // Get the user's ID from response locals
-    const { paymentType, paymentAmount, activity, numberOfTickets, promoCode } = req.body;
+    const { paymentType, paymentAmount, activity, numberOfTickets, promoCode } =
+      req.body;
 
     // Check if the activity exists
     const activityExists = await Activity.findById(activity);
@@ -434,14 +435,14 @@ exports.getBookingsReport = async (req, res) => {
     const { day, month, year } = req.query; // Get the month from the query string
     let selectedActivities = req.query.selectedActivities; // Get the selected activities from the query string
     const advertiserId = res.locals.user_id; // Get the user's ID from response locals
-    const activities = await Activity.find({ advertiser: advertiserId });
-    let activityIds = activities.map((activity) => activity._id);
+    let activities = await Activity.find({ advertiser: advertiserId });
     if (selectedActivities) {
       selectedActivities = selectedActivities.split(",");
-      activityIds = activityIds.filter((activityId) =>
-        selectedActivities.includes(activityId.toString())
+      activities = activities.filter((activity) =>
+        selectedActivities.includes(activity._id.toString())
       );
     }
+    const activityIds = activities.map((activity) => activity._id);
 
     const query = { activity: { $in: activityIds } };
     if (day && month && year) {

@@ -44,9 +44,9 @@ lw had by delete account tour guide msln w had 3aml book le haga ybaa hakhaly ko
 
 
 Alaa:
- sheel account info fe tourism governor we 7ot esmo foo2 zy admin 
- 5od change pass mn el admin
- change pass fe governor
+ sheel account info fe tourism governor we 7ot esmo foo2 zy admin (done)
+ 5od change pass mn el admin(done)
+ change pass fe governor(done)
 -Single ay haga white space 3al yemen (Single Activity bezat)
 -7ot aktar men soora bardo fel single 3ashan nemla white space el sowar
 -wehna benadaf el db zabat description el hp (make it longer)
