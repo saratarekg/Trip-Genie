@@ -5,7 +5,6 @@ Priority List:
 -Hotels booking popup should show meaningful message when I book with wallet with insuffucient funds. 
 -advertiser cannot delete/update his activity mn bara (all activities)
 -admin elmfrood eno ynf3 y delete ay itinerary azon msh m3mola
--lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated (zeina hateit toast done✅)
 -single pages el title mktoob 3 mrat leh f activity/itinerary/product
 -mafish loading baad ma badoos update product
 -sa3at beyede error lama mark all as read
@@ -31,6 +30,7 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
 
 
 ------------------------------------done-------------------------------------------
+-lama tourguide by deactivate itinerary msh bybanlo fl single enaha deactivated (zeina hateit toast done✅)
 
         - when updating itinerary and there dates that have passed error message displayed "please choose a future date" (done✅)
 		-logout popup 3and admin na2sa(ehab done✅)
