@@ -28,7 +28,7 @@ router.get("/currencies", currencyController.getSupportedCurrencies);
 // Routes for TourGuide Notifications
 router.get("/notifications", tourGuideController.getTourGuideNotifications);
 router.get("/unseen-notifications", tourGuideController.hasUnseenNotifications);
-router.post('/mark-notifications-seen"', tourGuideController.markNotificationsAsSeen);
+router.post("/mark-notifications-seen", tourGuideController.markNotificationsAsSeen);
 router.post('/notifications/markAsSeen/:id', tourGuideController.markNotificationAsSeenForTourGuide);
 router.post("/mark-dropdown-opened", tourGuideController.markDropdownAsOpened); // Mark dropdown opened route
 
