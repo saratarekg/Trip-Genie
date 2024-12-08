@@ -159,6 +159,7 @@ Radwa:
 - admin add user : 
  Add user teb2a button kebeer w 3al yemeen (done✅)
  whitespace bottom right (geebi password verification 3al yemeen aw get creative) (done✅)
+ -approve user : in all user whenever I approve, an error message appear upon approving because of "all".
 
  
 Habiba:
@@ -178,8 +179,8 @@ Hazem:
 
 1 ✅
 3 ✅
-34
-35
+34🚨
+35✅
 36
 38
 - single act has no loading until prices are displayed  (already ma3moola fe my account)
