@@ -1213,18 +1213,18 @@ export function AllItinerariesComponent() {
               The itinerary has been successfully deleted.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex justify-end">
             <Button
-              variant="default"
               onClick={() => {
                 setShowDeleteSuccess(false);
                 navigate("/all-itineraries");
               }}
-              className="bg-[#E6DCCF] hover:bg-[#F88C33]"
+              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
             >
               Close
             </Button>
           </DialogFooter>
+
         </DialogContent>
       </Dialog>
       <Dialog

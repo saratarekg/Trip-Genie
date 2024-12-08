@@ -45,6 +45,10 @@ navigation notification fe admin
 -(fen orders page ? ana 3mlt /orders 3ashan a3raf awsalha bas heyya etshalt men el site mahtota fen?)
 -create promo code msh sha8ala
 -out of stock notification  elleh fel navbar msh sha8ala fe seller 
+-lazem refresh when adding addres 3ashan tzhar f tourist profile
+-userole beyb2a all lama nb2a ben review registration to all users ka admin
+
+
 
 
 
@@ -147,14 +151,14 @@ Alaa:
 
 Houba:
 
-11
-12
-13
-14
-15
-16
-17
-18
+11(done✅)
+12(done✅)
+13(done✅)
+14(done✅)
+15(done✅)
+16(done✅)
+17(done✅ added to radwa's bomh)
+18(done✅ added to radwa's bomh)
 
 toasts ele 3ayza teb2a zai eleradwa 3mla:
 add to cart 
@@ -249,6 +253,8 @@ Radwa:
 102
 103
 
+
+-add user l governor w admin not functional
 - sort by preference shklo w alwano mokhtlfa f kol page
 - alwan flag inappropriate fe admin activites different 3n itineraries
 - shakl view all 
