@@ -251,7 +251,9 @@ itinerarySchema.statics.filter = async function (
   }
   if (types !== undefined && types !== null && types.length !== 0) {
     const typeArray = Array.isArray(types) ? types : types.split(",");
-    const typesIds = await Tag.find({ type: { $in: typeArray } }).select("_id");
+    let typesIds = await Tag.find({ type: { $in: typeArray } }).select("_id");
+
+    
     query.push({ "activities.tags": { $elemMatch: { $in: typesIds } } });
   }
   if (isBooked !== undefined && isBooked !== null) {
