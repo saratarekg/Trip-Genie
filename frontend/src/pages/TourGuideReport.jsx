@@ -65,6 +65,7 @@ const TourGuideItineraryReport = () => {
   const initialGraphDataRef = useRef(null);
 
   const fetchMyItineraries = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
 
@@ -82,12 +83,14 @@ const TourGuideItineraryReport = () => {
           title: itinerary.itinerary.title,
         }))
       );
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching itineraries:", error);
       setError("Failed to fetch itineraries. Please try again later.");
     }
   };
   const fetchItineraryReport = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       // const { itineraryId, startDate, endDate, month, year } = filters;
@@ -134,6 +137,7 @@ const TourGuideItineraryReport = () => {
           "Invalid data structure received from the server: itineraryReport missing"
         );
       }
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching itinerary report:", error);
       setError("Failed to fetch itinerary report. Please try again later.");
@@ -141,6 +145,7 @@ const TourGuideItineraryReport = () => {
   };
 
   const loadStatistics = async () => {
+    setIsLoading(true);
     try {
       const token = Cookies.get("jwt");
       const currentYear = new Date().getFullYear();
@@ -166,6 +171,7 @@ const TourGuideItineraryReport = () => {
       setInitialTotalRevenue(totalRevenue);
 
       updateGraphData(combinedData, "year");
+      setIsLoading(false);
     } catch (error) {
       console.error("Error loading statistics:", error);
       setError("Failed to load statistics. Please try again later.");
@@ -308,7 +314,7 @@ const TourGuideItineraryReport = () => {
   };
 
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
-  if (isLoading) return <div className="p-6 text-center">Loading...</div>;
+  //if (isLoading) return <div className="p-6 text-center">Loading...</div>;
 
   const fillPercentage = initialTotalRevenue
     ? (totalRevenue / initialTotalRevenue) * 100
@@ -393,9 +399,10 @@ const TourGuideItineraryReport = () => {
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  {isLoading ? (<div className="h-4 w-1/2 bg-gray-200 rounded mb-4 animate-pulse"></div>):(
                     <span className="text-lg font-bold text-[#1A3B47]">
                       ${totalRevenue?.toFixed(2)}
-                    </span>
+                    </span>)}
                     <span className="text-sm text-[#5D9297]">
                       {selectedPeriod.charAt(0).toUpperCase() +
                         selectedPeriod.slice(1)}
@@ -417,6 +424,17 @@ const TourGuideItineraryReport = () => {
                   </CardTitle>
                 </div>
               </CardHeader>
+              {isLoading ?(
+                      <div className="md:col-span-8 bg-transparent">
+                      <div className="p-3 mb-2"></div>
+                      <div className="pl-0">
+                        {/* Reduced width for the chart skeleton */}
+                        <div className="h-[160px] bg-gray-300 rounded animate-pulse mx-auto w-[90%] translate-y-[-30px]"></div>
+                      </div>
+                    </div>
+                    
+                    
+                    ):(
               <CardContent className="pl-0">
                 <div className="h-[210px]">
                   <ResponsiveContainer width="100%" height="100%">
@@ -471,7 +489,7 @@ const TourGuideItineraryReport = () => {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
-              </CardContent>
+              </CardContent>)}
             </Card>
           </div>
 
@@ -623,7 +641,22 @@ const TourGuideItineraryReport = () => {
                         Revenue
                       </th>
                     </tr>
-                  </thead>
+                  </thead>{isLoading ? (
+  <thead className="bg-gray-50">
+    
+
+    {/* 6 more rows of pulsing lines with more space and bigger size */}
+    {[...Array(6)].map((_, rowIndex) => (
+      <tr key={rowIndex}>
+        {[1, 2, 3].map((i) => (
+          <th key={i} className="px-6 py-3">
+            <div className="h-6 w-full bg-gray-300 rounded animate-pulse mb-4"></div>
+          </th>
+        ))}
+      </tr>
+    ))}
+  </thead>
+) : (
                   <AnimatePresence mode="wait">
                     {!isLoading && (
                       <motion.tbody
@@ -680,6 +713,7 @@ const TourGuideItineraryReport = () => {
                       </motion.tbody>
                     )}
                   </AnimatePresence>
+)}
                 </table>
               </div>
             </CardContent>
