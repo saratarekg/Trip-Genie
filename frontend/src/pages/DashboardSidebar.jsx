@@ -137,6 +137,7 @@ export function DashboardSidebar({
   };
 
   const handleTabClick = (tabId) => {
+    console.log(`Tab clicked: ${tabId}`);
     setActiveTab(tabId);
     if (
       tabId.startsWith("itinerary-sales-report") ||

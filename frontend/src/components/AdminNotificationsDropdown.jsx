@@ -198,7 +198,10 @@ export function NotificationsDropdownAdmin({
                     markNotificationAsSeen(notification._id); // Mark as seen
                   }
                   const productId = notification.link.split("/").pop();
-                  handleNotificationClick(productId); // Use handleNotificationClick
+                  console.log(`Notification clicked: ${part}`);
+                  console.log(`Product ID: ${productId}`);
+                  setActiveTabNav("single-product-admin");
+                  handleNotificationClick(productId); // Use handleNotificationClick to set selectedProductId
                 }}
               >
                 {part}

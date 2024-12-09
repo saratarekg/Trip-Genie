@@ -161,6 +161,7 @@ export function Dashboard() {
   const [isLogoutConfirmationOpen, setIsLogoutConfirmationOpen] = useState(false);
 
   useEffect(() => {
+    console.log(`Active tab changed: ${activeTab}`);
     localStorage.setItem("activeTab", activeTab);
   }, [activeTab]);
 

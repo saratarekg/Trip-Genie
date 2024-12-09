@@ -36,6 +36,7 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
   const [previousTab, setPreviousTab] = useState(null);
   const [selectedItineraryId, setSelectedItineraryId] = useState(null);
   const [updateProductId, setUpdateProductId] = useState(null);
+  const [notificationId, setNotificationId] = useState(null);
 
   useEffect(() => {
     const savedTab = localStorage.getItem("activeTab");
@@ -45,11 +46,14 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
   }, [setActiveTab]);
 
   useEffect(() => {
+    console.log(`Active tab changed: ${activeTab}`);
+    console.log(selectedProductId);
     localStorage.setItem("activeTab", activeTab);
     setSelectedComplaintId(null); // Reset selectedComplaintId when activeTab changes
     setSelectedProductId(null); // Reset selectedProductId when activeTab changes
     setSelectedItineraryId(null); // Reset selectedItineraryId when activeTab changes
     setUpdateProductId(null);
+    setNotificationId(null);
   }, [activeTab]);
 
   const handleReportClick = (reportId) => {
@@ -102,10 +106,15 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
                 setActiveTab(previousTab);
               }}
             />
-          ): selectedItineraryId ? (
+          ) : selectedItineraryId ? (
             <ItineraryDetail
               id={selectedItineraryId}
               onBack={() => setSelectedItineraryId(null)}
+            />
+          ) : activeTab === "single-product-admin" ? (
+            <ProductDetail
+              productId={selectedProductId}
+              onBack={() => setSelectedProductId(null)}
             />
           ) : activeTab === "all-trip-plans" ? (
             <AllTripPlansAdmin onSelectItinerary={setSelectedItineraryId} />
@@ -143,6 +152,7 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
             <AllPromoCodes />
           ) : activeTab === "manage-products" ? (
             <AllProducts
+              notificationId={notificationId}
               onSelectProduct={(id) => {
                 setPreviousTab(activeTab);
                 setSelectedProductId(id);
@@ -177,7 +187,9 @@ export function DashboardContent({ activeTab, tabs, setActiveTab }) {
           ) : activeTab === "dashboard" ? (
             <Dashboard setActiveTab={setActiveTab} />
           ) : activeTab === "notifications" ? (
-            <NotificationsPage />
+            <NotificationsPage 
+            setActiveTab={setActiveTab}
+            setSelectedProductId={setNotificationId}/>
           ) : (
             <div className="p-4 bg-gray-100 rounded">
               Content for {activeTabDetails.title} goes here.

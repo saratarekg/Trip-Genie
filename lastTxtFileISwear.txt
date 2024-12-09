@@ -27,7 +27,7 @@ Priority List:
 -mafish loading baad ma badoos update product
         - consistency fe pages el all  (done✅ radwa)
 -sa3at beyede error lama mark all as read
-- navigation notification fe admin (radwa)
+        - navigation notification fe admin (done ✅ radwa)
 - sales report margins
 - booking confirmation popouts mesh zy b3d
 -update itinerary leha popup(cant aw succesfully updated)
@@ -45,11 +45,11 @@ Priority List:
 - when i update a product lama bzwd sora by3la2 w mbyrdash y update (seller w admin) (radwa)
 flights we hotels we trans y2bo fe component wa7ed fel homepage
 - graph in admin dashboard bytawl w fel user stats report 
-		-logout popup 3and admin na2sa(ehab done✅)
+		- logout popup 3and admin na2sa(ehab done✅)
 - pagination msh btl3 l awl elpage
 - currently unavailable fl itineraray card mn bara shklaha wehesh(lama deactivated)
         - when updating itinerary and there dates that have passed error message displayed "please choose a future date" (done✅)
-
+- alwan flag inappropriate fe admin activites different 3n itineraries
 
 
 
@@ -177,7 +177,6 @@ Lw el popup rofaya3 khaly el button fel nos lw el pop up tekheen khaly el button
 
 
 
-
 Jana:
 105   
 106  
@@ -244,7 +243,6 @@ Radwa:
 
 - add user l governor w admin not functional (done✅)
 - sort by preference shklo w alwano mokhtlfa f kol page (done✅) (m3ada el sam hyrg3ha)
-- alwan flag inappropriate fe admin activites different 3n itineraries
 - shakl view all done✅
 - change pass fe admin (done✅)
 - khaly ba2y el bookings de zaher el past wel upcoming inside tabs (accountTourist fel hotels wel trans wel flights)(done✅)
