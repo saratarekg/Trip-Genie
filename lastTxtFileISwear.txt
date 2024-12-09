@@ -27,7 +27,6 @@ Priority List:
 flights we hotels we trans y2bo fe component wa7ed fel homepage
 - graph in admin dashboard bytawl w fel user stats report 
 - pagination msh btl3 l awl elpage
-- currently unavailable fl itineraray card mn bara shklaha wehesh(lama deactivated)
 
 
 ------------------------------------done-------------------------------------------
@@ -55,6 +54,8 @@ flights we hotels we trans y2bo fe component wa7ed fel homepage
 		-lw itinerary/activity flagged as inappropriate bttshal mn 3ndd el tourguide kman fa msh hy3rf yzbtha(zeina done✅ INSHALLAH)
 		-create promo code msh sha8ala (done ✅)
 		-admin b y create activity category etnen b nafs elesm aady (zeina done✅)
+		- currently unavailable fl itineraray card mn bara shklaha wehesh(lama deactivated)(done✅)
+
 
 
 -CANT TEST CREATE/UPDATE HISTORICAL PLACE AASHAN COUNTRIES (had y testaha)
@@ -149,10 +150,11 @@ Houba:
 18(done✅ added to radwa's bomh)
 
 toasts ele 3ayza teb2a zai eleradwa 3mla:
+
 add to cart 
 advertiser deleting activity
-save/unsave activity men all
-save/unsave activity men single 
+save/unsave activity men all(done✅)
+save/unsave activity men single(done✅)
 save/unsave itinerary men all
 save/unsave itinerary men single 
 archive w unarchive product men admin
