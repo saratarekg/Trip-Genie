@@ -224,6 +224,14 @@ export default function BookedItineraries() {
   const [tourist, setTourist] = useState(null);
   const navigate = useNavigate();
 
+  const isWithin48Hours = (bookingDate) => {
+    const now = new Date();
+    const bookingTime = new Date(bookingDate);
+    const hoursDifference =
+      (bookingTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    return hoursDifference <= 48;
+  };
+
   const fetchExchangeRates = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:4000/rates");
@@ -521,7 +529,7 @@ export default function BookedItineraries() {
 
             {/* Cancel Booking Button */}
             <div className="text-center">
-              <Button
+              {!isWithin48Hours(selectedBooking?.date) && <Button
                 size="sm"
                 variant="default"
                 className="bg-red-500 hover:bg-red-600 text-white"
@@ -531,7 +539,7 @@ export default function BookedItineraries() {
                 }}
               >
                 Cancel Booking
-              </Button>
+              </Button>}
             </div>
           </DialogContent>
         </Dialog>
